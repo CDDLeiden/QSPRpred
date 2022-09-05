@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python -m drugpk.$1 $2
