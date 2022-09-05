@@ -6,6 +6,7 @@ AdenosineReceptors_v3/data/*.tsv
 AdenosineReceptors_v4/
 AdenosineReceptors_v4/*
 AdenosineReceptors_v4/data/*.tsv
+Lombardo_set/
 tutorial
 *.out
 

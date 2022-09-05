@@ -24,8 +24,8 @@ from sklearn.svm import SVC, SVR
 
 from drugpk import DEFAULT_GPUS
 from drugpk.logs.utils import backUpFiles, enable_file_logger, commit_hash
-from drugpk.environment.data import QSARDataset
-from drugpk.environment.models import QSARModel, QSARDNN, QSARsklearn
+from drugpk.environment.data import QSKRDataset
+from drugpk.environment.models import QSKRModel, QSKRDNN, QSKRsklearn
 import pickle
 
 def EnvironmentArgParser(txt=None):
@@ -40,32 +40,30 @@ def EnvironmentArgParser(txt=None):
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-ran', '--random_state', type=int, default=1, help="Seed for the random state")
     parser.add_argument('-i', '--input', type=str, default='dataset.tsv',
-                        help="tsv file name that contains SMILES, target accession & corresponding data")
-    parser.add_argument('-m', '--model_types', type=str, nargs='*', default=['RF', 'XGB', 'DNN', 'SVM', 'PLS', 'NB', 'KNN', 'MT_DNN'],
+                        help="tsv file name that contains SMILES, property value column")
+    parser.add_argument('-m', '--model_types', type=str, nargs='*', default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN'],
                         help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM', 'PLS' (only with REG), 'NB' (only with CLS) 'KNN' or 'MT_DNN'") 
-    parser.add_argument('-t', '--targets', type=str, nargs='*', default=None,
-                        help="Target indentifiers, defaults to all in the dataset") 
+    parser.add_argument('-pr', '--properties', type=str, nargs='*', default=['CL'],
+                        help="property to be predicted identifier") 
     parser.add_argument('-r', '--regression', type=str, default=None,
                         help="If True, only regression model, if False, only classification, default both")
-    parser.add_argument('-a', '--activity_threshold', type=float, default=6.5,
-                        help="Activity threshold for classification")
+    parser.add_argument('-a', '--threshold', type=float, default=6.5,
+                        help="threshold on predicted property for classification")
     parser.add_argument('-n', '--test_size', type=str, default="0.1",
                         help="Random test split fraction if float is given and absolute size if int is given, used when no temporal split given.")
     parser.add_argument('-y', '--year', type=int, default=None,
-                        help="Temporal split limit, default to random split (see test_size)")  
-    parser.add_argument('-l', '--keep_low_quality', action='store_true',
-                        help="If included keeps low quality data")
+                        help="Temporal split limit, default to random split (see test_size)")
     parser.add_argument('-s', '--save_model', action='store_true',
                         help="If included then the model will be trained on all data and saved")   
     parser.add_argument('-p', '--parameters', type=str, default=None,
                         help="file name of json file with non-default parameter settings (base_dir/envs/[-p]_params.json). NB. If json file with name \
-                             {model_type}_{REG/CLS}_{target_id}_params.json) present in envs folder those settings will also be used, \
+                             {model_type}_{REG/CLS}_{valuecol}_params.json) present in envs folder those settings will also be used, \
                              but if the same parameter is present in both files the settings from (base_dir/[-p]_params.json) will be used.")
     parser.add_argument('-o', '--optimization', type=str, default=None,
                         help="Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, if 'bayes' bayesian optimization")
     parser.add_argument('-ss', '--search_space', type=str, default=None,
                         help="search_space hyperparameter optimization json file location (base_dir/[name].json), \
-                              if None default drugex.environment.search_space.json used")                  
+                              if None default drugpk.environment.search_space.json used")                  
     parser.add_argument('-nt', '--n_trials', type=int, default=20, help="number of trials for bayes optimization")
     parser.add_argument('-c', '--model_evaluation', action='store_true',
                         help='If on, model evaluation through cross validation and independent test set is performed.')
@@ -84,10 +82,6 @@ def EnvironmentArgParser(txt=None):
         args = parser.parse_args(txt)
     else:
         args = parser.parse_args()
-    
-    if args.targets is None:
-        df = pd.read_table('%s/data/%s' % (args.base_dir, args.input)).dropna(subset=['SMILES'])
-        args.targets = df.accession.unique().tolist()
 
     # If no regression argument, does both regression and classification
     if args.regression is None: 
@@ -128,28 +122,27 @@ def Environ(args):
 
     if args.optimization in ['grid', 'bayes']:
         if args.search_space:
-            grid_params = QSARModel.loadParamsGrid(f'{args.base_dir}/{args.search_space}.json', args.optimization, args.model_types)
+            grid_params = QSKRModel.loadParamsGrid(f'{args.base_dir}/{args.search_space}.json', args.optimization, args.model_types)
         else:
-            grid_params = QSARModel.loadParamsGrid(None, args.optimization, args.model_types)
+            grid_params = QSKRModel.loadParamsGrid(None, args.optimization, args.model_types)
 
     for reg in args.regression:
         reg_abbr = 'REG' if reg else 'CLS'
-        for target in args.targets:
+        for property in args.properties:
             try:
                 df = pd.read_csv(f'{args.base_dir}/data/{args.input}', sep='\t')
             except:
                 log.error(f'Dataset file ({args.base_dir}/data/{args.input}) not found')
                 sys.exit()
         
-            #prepare dataset for training QSAR model
-            mydataset = QSARDataset(df, target, reg = reg, timesplit=args.year,
-                                    test_size=args.test_size, th = args.activity_threshold,
-                                    keep_low_quality=args.keep_low_quality)
+            #prepare dataset for training QSKR model
+            mydataset = QSKRDataset(df, property, reg = reg, timesplit=args.year,
+                                    test_size=args.test_size, th = args.threshold)
             mydataset.splitDataset()
 
             # save dataset object
             mydataset.folds = None
-            pickle.dump(mydataset, open(f'{args.base_dir}/envs/{target}_{reg_abbr}_QSARdata.pkg', 'bw'))
+            pickle.dump(mydataset, open(f'{args.base_dir}/envs/{property}_{reg_abbr}_QSKRdata.pkg', 'bw'))
             mydataset.createFolds()
             
             for model_type in args.model_types:
@@ -189,19 +182,19 @@ def Environ(args):
                     'KNN': KNeighborsRegressor() if reg else KNeighborsClassifier()
                 }
 
-                # Create QSAR model object
+                # Create QSKR model object
                 if model_type == 'DNN':
-                    qsarmodel = QSARDNN(base_dir = args.base_dir, data=mydataset, parameters=parameters, gpus=args.gpus,
+                    qsKrmodel = QSKRDNN(base_dir = args.base_dir, data=mydataset, parameters=parameters, gpus=args.gpus,
                                         patience = args.patience, tol = args.tolerance)
                 else:
-                    qsarmodel = QSARsklearn(args.base_dir, data=mydataset, alg=alg_dict[model_type],
+                    qsKrmodel = QSKRsklearn(args.base_dir, data=mydataset, alg=alg_dict[model_type],
                                             alg_name=model_type, n_jobs=args.ncpu, parameters=parameters)
 
                 # if desired run parameter optimization
                 if args.optimization == 'grid':
                     search_space_gs = grid_params[grid_params[:,0] == model_type,1][0]
                     log.info(search_space_gs)
-                    qsarmodel.gridSearch(search_space_gs, args.save_model)
+                    qsKrmodel.gridSearch(search_space_gs, args.save_model)
                 elif args.optimization == 'bayes':
                     search_space_bs = grid_params[grid_params[:,0] == model_type,1][0]
                     log.info(search_space_bs)
@@ -209,15 +202,15 @@ def Environ(args):
                         search_space_bs.update({'criterion' : ['categorical', ['squared_error', 'poisson']]})
                     elif model_type == "RF":
                         search_space_bs.update({'criterion' : ['categorical', ['gini', 'entropy']]})
-                    qsarmodel.bayesOptimization(search_space_bs, args.n_trials, args.save_model)
+                    qsKrmodel.bayesOptimization(search_space_bs, args.n_trials, args.save_model)
                 
                 # initialize models from saved or default parameters
 
                 if args.optimization is None and args.save_model:
-                    qsarmodel.fit()
+                    qsKrmodel.fit()
                 
                 if args.model_evaluation:
-                    qsarmodel.evaluate()
+                    qsKrmodel.evaluate()
 
                
 if __name__ == '__main__':
@@ -231,7 +224,7 @@ if __name__ == '__main__':
 
     # Backup files
     tasks = [ 'REG' if reg == True else 'CLS' for reg in args.regression ]
-    file_prefixes = [ f'{alg}_{task}_{target}' for alg in args.model_types for task in tasks for target in args.targets]
+    file_prefixes = [ f'{alg}_{task}_{property}' for alg in args.model_types for task in tasks for property in args.properties]
     backup_msg = backUpFiles(args.base_dir, 'envs', tuple(file_prefixes), cp_suffix='_params')
 
     if not os.path.exists(f'{args.base_dir}/envs'):

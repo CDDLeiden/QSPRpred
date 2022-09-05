@@ -6,19 +6,15 @@ import numpy as np
 import json
 
 from drugpk.logs import logger
-from drugpk.environment.neural_network import STFullyConnected
-from sklearn.cross_decomposition import PLSRegression
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC, SVR
 
 
-class QSARModel(ABC):
+class QSKRModel(ABC):
     """ Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
         ...
 
         Attributes
         ----------
-        data: instance QSARDataset
+        data: instance QSKRDataset
         alg:  instance of estimator
         parameters (dict): dictionary of algorithm specific parameters
         njobs (int): the number of parallel jobs to run
@@ -42,7 +38,7 @@ class QSARModel(ABC):
         self.alg_name = alg_name
 
         d = '%s/envs' % base_dir
-        self.out = '%s/%s_%s_%s' % (d, alg_name, 'REG' if data.reg else 'CLS', data.target)
+        self.out = '%s/%s_%s_%s' % (d, alg_name, 'REG' if data.reg else 'CLS', data.valuecol)
         
         if os.path.isfile('%s_params.json' % self.out):    
             with open('%s_params.json' % self.out) as j:
@@ -109,7 +105,7 @@ class QSARModel(ABC):
                 logger.error("Search space file (%s) not found" % fname)
                 sys.exit()
         else:
-            with open('drugex/environment/search_space.json') as json_file:
+            with open('drugpk/environment/search_space.json') as json_file:
                 optim_params = np.array(json.load(json_file), dtype=object)
         
         # select either grid or bayes optimization parameters from param array

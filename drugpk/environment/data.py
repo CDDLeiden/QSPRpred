@@ -4,9 +4,9 @@ from sklearn.preprocessing import MinMaxScaler as Scaler
 from sklearn.model_selection import StratifiedKFold, KFold
 from drugpk.logs import logger
 
-class QSARDataset:
+class QSKRDataset:
     """
-        This class is used to prepare the dataset for QSAR model training. 
+        This class is used to prepare the dataset for QSKR model training. 
         It splits the data in train and test set, as well as creating cross-validation folds.
         Optionally low quality data is filtered out.
         For classification the dataset samples are labelled as active/inactive.
@@ -15,19 +15,17 @@ class QSARDataset:
         Attributes
         ----------
         input_df (pd dataframe)   : dataset
-        target (str)              : target identifier (accession in papyrus dataset)
+        valuecol (str)            : name of column in dataframe for to be predicted values, e.g. "Cl"
         reg (bool)                : if true, dataset for regression, if false dataset for classification
         timesplit (int), optional : Year to split test set on
         test_size (int or float), optional: Used when timesplit is None
                                             If float, should be between 0.0 and 1.0 and is proportion of dataset to
                                             include in test split. If int, represents absolute number of test samples.
         th (float)                : threshold for activity if classficiation model, ignored otherwise
-        keep_low_quality (bool)   : if true low quality data is included in the dataset
         n_folds(int)              : number of folds for crossvalidation
 
         targetcol (str)           : name of column in dataframe for the target identifier
         smilescol (str)           : name of column in dataframe for smiles
-        valuecol (str)            : name of column in dataframe for pX values
         qualitycol (str)          : name of column in dataframe for quality of measurements ("Low, Medium, High"),
                                     has no effect if keep_low_quality is True
         timecol (str)             : name of column in dataframe for timesplit has no effect if timesplit is None
@@ -48,22 +46,18 @@ class QSARDataset:
         createFolds: folds is an generator and needs to be reset after cross validation or hyperparameter optimization
         dataStandardization: Performs standardization by centering and scaling
     """
-    def __init__(self, input_df, target, reg=True, timesplit=None, test_size=0.1, th=6.5, keep_low_quality=False, n_folds=5,
-                 targetcol = 'accession', smilescol = 'SMILES', valuecol = 'pchembl_value_Mean', qualitycol = 'Quality',
-                 timecol = 'Year'):
+    def __init__(self, input_df, valuecol = 'CL', reg=True, timesplit=None, test_size=0.1, th=6.5, n_folds=5,
+                 targetcol = 'accession', smilescol = 'SMILES', timecol = 'Year of first disclosure'):
         self.input_df = input_df
-        self.target = target
         self.reg = reg
         self.timesplit = timesplit
         self.test_size = test_size
         self.th = th
-        self.keep_low_quality = keep_low_quality
         self.n_folds=n_folds
 
         self.targetcol = targetcol
         self.smilescol = smilescol
         self.valuecol = valuecol
-        self.qualitycol = qualitycol
         self.timecol = timecol
 
         self.X = None
@@ -78,21 +72,15 @@ class QSARDataset:
         Calculates the predictors for the QSAR models.
         """
         # read in the dataset
-        df = self.input_df.dropna(subset=[self.smilescol]) # drops if smiles is missing
-        df = df[df[self.targetcol] == self.target].set_index([self.smilescol])
-
-        # filter out low quality data if desired
-        try:
-            df = df if self.keep_low_quality else df[df[self.qualitycol] != 'Low']
-        except KeyError:
-            logger.warning("Quality column not in dataframe ('%s'), all data included in set." % self.qualitycol)
+        df = self.input_df.dropna(subset=[self.smilescol, self.valuecol]) # drops if smiles or value is missing
+        df = df.set_index([self.smilescol])
 
         # Get indexes of samples test set based on temporal split
         if self.timesplit:
             year = df[[self.timecol]].groupby([self.smilescol]).max().dropna()
             test_idx = year[year[self.timecol] > self.timesplit].index
 
-        # keep only pchembl values and make binary for classification
+        # keep only values to be predicted and make binary for classification
         df = df[self.valuecol]
 
         if not self.reg:
@@ -118,7 +106,7 @@ class QSARDataset:
         self.createFolds()
 
         #Write information about the trainingset to the logger
-        logger.info('Train and test set created for %s %s:' % (self.target, 'REG' if self.reg else 'CLS'))
+        logger.info('Train and test set created for %s %s:' % (self.valuecol, 'REG' if self.reg else 'CLS'))
         logger.info('    Total: train: %s test: %s' % (len(data), len(test)))
         if self.reg:
             logger.info('    Total: active: %s not active: %s' % (sum(df >= self.th), sum(df < self.th)))

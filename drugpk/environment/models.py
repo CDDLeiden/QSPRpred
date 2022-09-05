@@ -17,17 +17,17 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC, SVR
 from sklearn import metrics
 from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
-from drugpk.environment.interfaces import QSARModel
+from drugpk.environment.interfaces import QSKRModel
 from drugpk.environment.neural_network import STFullyConnected
 
 
-class QSARsklearn(QSARModel):
+class QSKRsklearn(QSKRModel):
     """ Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
         ...
 
         Attributes
         ----------
-        data: instance QSARDataset
+        data: instance QSKRDataset
         alg:  instance of estimator
         parameters (dict): dictionary of algorithm specific parameters
         njobs (int): the number of parallel jobs to run
@@ -243,15 +243,15 @@ class QSARsklearn(QSARModel):
 
         return score
 
-class QSARDNN(QSARModel):
+class QSKRDNN(QSKRModel):
     """ 
-        This class holds the methods for training and fitting a Deep Neural Net QSAR model initialization. 
+        This class holds the methods for training and fitting a Deep Neural Net QSKR model initialization. 
         Here the model instance is created and parameters  can be defined
         ...
 
         Attributes
         ----------
-        data: instance of QSARDataset
+        data: instance of QSKRDataset
         parameters (dict): dictionary of parameters to set for model fitting
         device (cuda device): cuda device
         gpus (int/ list of ints): gpu number(s) to use for model fitting
