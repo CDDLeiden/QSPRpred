@@ -11,7 +11,6 @@ from torch import nn, optim
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, TensorDataset
 
-
 class Base(nn.Module):
     """ This class is the base structure for all of classification/regression DNN models.
     Mainly, it provides the general methods for training, evaluating model and predicting the given data.
@@ -90,9 +89,9 @@ class Base(nn.Module):
                 print('[Epoch: %d/%d] %.1fs loss_train: %f loss_valid: %f' % (
                     epoch, self.n_epochs, time.time() - t0, loss.item(), loss_valid), file=log)
                 if loss_valid + tol < best_loss:
-                    torch.save(self.state_dict(), out + '.pkg')
+                    torch.save(self.state_dict(), out + '_weights.pkg')
                     print('[Performance] loss_valid is improved from %f to %f, Save model to %s' %
-                        (best_loss, loss_valid, out + '.pkg'), file=log)
+                        (best_loss, loss_valid, out + '_weights.pkg'), file=log)
                     best_loss = loss_valid
                     last_save = epoch
                 else:
@@ -101,10 +100,10 @@ class Base(nn.Module):
                     # The model training will stop in order to save time.
                     if epoch - last_save > patience: break
         if patience == -1:
-            torch.save(self.state_dict(), out + '.pkg')
+            torch.save(self.state_dict(), out + '_weights.pkg')
         print('Neural net fitting completed.', file=log)
         log.close()
-        self.load_state_dict(torch.load(out + '.pkg'))
+        self.load_state_dict(torch.load(out + '_weights.pkg'))
         return last_save
 
     def evaluate(self, loader):
@@ -144,16 +143,10 @@ class Base(nn.Module):
                 it is a m X l FloatTensor (m is the No. of sample, l is the No. of classes or tasks.)
         """
         score = []
-        try:
-            for Xb, _ in loader:
-                Xb = Xb.to(self.device)
-                y_ = self.forward(Xb)
-                score.append(y_.detach().cpu())
-        except:
-            for Xb in loader:
-                Xb = Xb.to(self.device)
-                y_ = self.forward(Xb)
-                score.append(y_.detach().cpu())
+        for Xb in loader:
+            Xb = Xb.to(self.device)
+            y_ = self.forward(Xb)
+            score.append(y_.detach().cpu())
         score = torch.cat(score, dim=0).numpy()
         return score
 
@@ -239,14 +232,17 @@ class Base(nn.Module):
 
         return self
 
-    def get_dataloader(self, X, y):
+    def get_dataloader(self, X, y=None):
         """
             Convert data to tensors and get iterable over dataset with dataloader
             arguments:
             X (numpy 2d array): input dataset
             y (numpy 1d column vector): output data
         """
-        tensordataset = TensorDataset(torch.Tensor(X), torch.Tensor(y))
+        if y is None:
+            tensordataset = torch.Tensor(X)
+        else:
+            tensordataset = TensorDataset(torch.Tensor(X), torch.Tensor(y))
         return DataLoader(tensordataset, batch_size=self.batch_size)
     
 class STFullyConnected(Base):
@@ -263,7 +259,7 @@ class STFullyConnected(Base):
         extra_layer (bool): add third hidden layer
     """
 
-    def __init__(self, n_dim, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, n_epochs = 100, lr = None, batch_size=32,
+    def __init__(self, n_dim, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, n_epochs = 1000, lr = None, batch_size=32,
                  is_reg=True, neurons_h1 = 4000, neurons_hx = 1000, extra_layer = False):
         if not lr:
             lr = 1e-4 if is_reg else 1e-5

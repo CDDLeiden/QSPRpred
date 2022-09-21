@@ -69,7 +69,7 @@ class QSKRDataset:
     def splitDataset(self):
         """
         Splits the dataset in a train and temporal test set.
-        Calculates the predictors for the QSAR models.
+        Calculates the predictors for the QSKR models.
         """
         # read in the dataset
         df = self.input_df.dropna(subset=[self.smilescol, self.valuecol]) # drops if smiles or value is missing
