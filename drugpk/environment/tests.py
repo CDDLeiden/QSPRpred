@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 import os
 from os.path import exists
+from drugpk.environment.dataprep_utils.datasplitters import scaffoldsplit, randomsplit, temporalsplit
 
 import pandas as pd
 import numpy as np
@@ -18,6 +19,34 @@ from sklearn.cross_decomposition import PLSRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC, SVR
 from xgboost import XGBRegressor, XGBClassifier
+
+class PathMixIn:
+    datapath = f'{os.path.dirname(__file__)}/test_files/data'
+    envspath = f'{os.path.dirname(__file__)}/test_files/envs'
+
+    @classmethod
+    def setUpClass(cls):
+        if not os.path.exists(cls.envspath):
+            os.mkdir(cls.envspath)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.envspath)
+
+class TestDataSplitters(PathMixIn, TestCase):
+    df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
+
+    def test_randomsplit(self):
+        split = randomsplit()
+        split(self.df, "SMILES", "CL")
+
+    def test_temporalsplit(self):
+        split = temporalsplit(timesplit=2015, timecol="Year of first disclosure")
+        split(self.df, "SMILES", "CL")
+
+    def test_scaffoldsplit(self):
+        split = scaffoldsplit()
+        split(self.df, "SMILES", "CL")
 
 class TestData(TestCase):
 
@@ -63,18 +92,6 @@ class TestData(TestCase):
         self.assertTrue(np.max(np.concatenate((dataset.y, dataset.y_ind))) == 1)
         self.assertEqual(np.sum(np.concatenate((dataset.y, dataset.y_ind)) < 1), 4) # only 4 value below threshold of 7
 
-class PathMixIn:
-    datapath = f'{os.path.dirname(__file__)}/test_files/data'
-    envspath = f'{os.path.dirname(__file__)}/test_files/envs'
-
-    @classmethod
-    def setUpClass(cls):
-        if not os.path.exists(cls.envspath):
-            os.mkdir(cls.envspath)
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.envspath)
 
 class NeuralNet(PathMixIn, TestCase):
 
@@ -236,7 +253,7 @@ class TestModels(PathMixIn, TestCase):
             grid_params = QSKRDNN.loadParamsGrid(fname, "grid", "DNN")
             search_space_gs = grid_params[grid_params[:,0] == "DNN",1][0]
             themodel.gridSearch(search_space_gs=search_space_gs)
-
+  
             # bayesian optimization
             bayes_params = QSKRDNN.loadParamsGrid(fname, "bayes", "DNN")
             search_space_bs = grid_params[bayes_params[:,0] == "DNN",1][0]

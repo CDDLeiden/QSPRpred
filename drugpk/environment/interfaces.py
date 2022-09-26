@@ -120,3 +120,24 @@ class QSKRModel(ABC):
         logger.info("search space loaded from file")
         
         return optim_params
+
+class datasplit(ABC):
+    """
+    Defines a function to modify a score value.
+
+    """
+    @abstractmethod
+    def __call__(self, df, Xcol, ycol):
+        """
+        Split dataframe df into train and test set.
+        Args:
+            df: pandas dataframe to split
+            Xcol: input column name, e.g. "SMILES"
+            ycol: output column name, e.g. "Cl"
+        Returns:
+            X: training set input
+            X_ind: test set input
+            y: training set output
+            y_ind: test set output
+        """
+

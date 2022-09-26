@@ -3,6 +3,9 @@ from rdkit import Chem
 from sklearn.preprocessing import MinMaxScaler as Scaler
 from sklearn.model_selection import StratifiedKFold, KFold
 from drugpk.logs import logger
+from drugpk.environment.dataprep_utils.datasplitters import randomsplit
+import pandas as pd
+import numpy as np
 
 class QSKRDataset:
     """
@@ -24,7 +27,7 @@ class QSKRDataset:
         th (float)                : threshold for activity if classficiation model, ignored otherwise
         n_folds(int)              : number of folds for crossvalidation
 
-        targetcol (str)           : name of column in dataframe for the target identifier
+        property (str)            : name of column in dataframe for the value to be predicted, eg. clearance
         smilescol (str)           : name of column in dataframe for smiles
         qualitycol (str)          : name of column in dataframe for quality of measurements ("Low, Medium, High"),
                                     has no effect if keep_low_quality is True
@@ -46,25 +49,38 @@ class QSKRDataset:
         createFolds: folds is an generator and needs to be reset after cross validation or hyperparameter optimization
         dataStandardization: Performs standardization by centering and scaling
     """
-    def __init__(self, input_df, valuecol = 'CL', reg=True, timesplit=None, test_size=0.1, th=6.5, n_folds=5,
-                 targetcol = 'accession', smilescol = 'SMILES', timecol = 'Year of first disclosure'):
-        self.input_df = input_df
-        self.reg = reg
-        self.timesplit = timesplit
-        self.test_size = test_size
-        self.th = th
-        self.n_folds=n_folds
 
-        self.targetcol = targetcol
+    def __init__(self, input_df, smilescol = 'SMILES', property = 'CL', reg=True, th=6.5):
+        self.input_df = input_df
         self.smilescol = smilescol
-        self.valuecol = valuecol
-        self.timecol = timecol
+        self.property = property
+        
+        self.reg = reg
+        self.th = th
 
         self.X = None
         self.y = None
         self.X_ind = None
         self.y_ind = None
         self.folds = None
+
+    @classmethod
+    def FromFile(cls, fname, smilescol = 'SMILES', property = 'CL', reg=True, th=6.5):
+        df = pd.read_csv(fname, sep="\t")
+        return QSKRDataset(df, smilescol, property, reg, th)
+
+    def prepareDataset(self, datafilters=[], split=randomsplit(), features=Predictor.calculateDescriptors, featurefilter=None):    
+        for filter in datafilters:
+            self.input_df = filter(self.input_df)
+
+        self.X, self.X_ind, self.y, self.y_ind = split(self.input_df)
+
+        self.X = features([Chem.MolFromSmiles(mol) for mol in self.X])
+        self.Xind = features([Chem.MolFromSmiles(mol) for mol in self.Xind])
+
+        if featurefilter:
+            alldata = np.concatenate([self.X, self.Xind], axis=0)
+            featurefilter(alldata)
 
     def splitDataset(self):
         """
@@ -75,16 +91,16 @@ class QSKRDataset:
         df = self.input_df.dropna(subset=[self.smilescol, self.valuecol]) # drops if smiles or value is missing
         df = df.set_index([self.smilescol])
 
-        # Get indexes of samples test set based on temporal split
-        if self.timesplit:
-            year = df[[self.timecol]].groupby([self.smilescol]).max().dropna()
-            test_idx = year[year[self.timecol] > self.timesplit].index
-
         # keep only values to be predicted and make binary for classification
         df = df[self.valuecol]
 
         if not self.reg:
             df = (df > self.th).astype(float)
+
+        # Get indexes of samples test set based on temporal split
+        if self.timesplit:
+            year = df[[self.timecol]].groupby([self.smilescol]).max().dropna()
+            test_idx = year[year[self.timecol] > self.timesplit].index
 
         # get test and train (data) set with set temporal split or random split
         df = df.sample(len(df)) 
@@ -145,3 +161,16 @@ class QSKRDataset:
         data_x = scaler.transform(data_x)
         logger.debug("Data standardized")
         return data_x, test_x
+
+
+    def SMILESpreprocessing():
+
+        pass
+
+
+
+
+class DataSplitter:
+    @staticmethod
+    def temporal_split(timecol):
+        pass
