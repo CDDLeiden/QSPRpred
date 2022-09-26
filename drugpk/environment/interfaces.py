@@ -123,7 +123,7 @@ class QSKRModel(ABC):
 
 class datasplit(ABC):
     """
-    Defines a function to modify a score value.
+    Defines a function split a dataframe into train and test set
 
     """
     @abstractmethod
@@ -140,4 +140,19 @@ class datasplit(ABC):
             y: training set output
             y_ind: test set output
         """
+        pass
 
+class datafilter(ABC):
+    """
+        filter out some rows from a dataframe
+    """
+    @abstractmethod
+    def __call__(self, df):
+        """
+        filter out some rows from a dataframe
+        Args:
+            df: pandas dataframe to filter
+        Returns:
+            df: filtered pandas dataframe
+        """
+        pass

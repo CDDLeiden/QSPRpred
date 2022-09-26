@@ -161,16 +161,3 @@ class QSKRDataset:
         data_x = scaler.transform(data_x)
         logger.debug("Data standardized")
         return data_x, test_x
-
-
-    def SMILESpreprocessing():
-
-        pass
-
-
-
-
-class DataSplitter:
-    @staticmethod
-    def temporal_split(timecol):
-        pass
