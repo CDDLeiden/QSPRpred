@@ -3,7 +3,8 @@ from unittest import TestCase
 import os
 from os.path import exists
 from drugpk.environment.dataprep_utils.datasplitters import scaffoldsplit, randomsplit, temporalsplit
-
+from drugpk.environment.dataprep_utils.datafilters import CategoryFilter, papyrusLowQualityFilter
+from drugpk.logs import logger
 import pandas as pd
 import numpy as np
 
@@ -47,6 +48,18 @@ class TestDataSplitters(PathMixIn, TestCase):
     def test_scaffoldsplit(self):
         split = scaffoldsplit()
         split(self.df, "SMILES", "CL")
+
+class TestDataFilters(PathMixIn, TestCase):
+    df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
+
+    def test_Categoryfilter(self):
+        remove_cation = CategoryFilter(name="moka_ionState7.4", values=["cationic"])
+        df_anion = remove_cation(self.df)
+        self.assertTrue((df_anion["moka_ionState7.4"] == "cationic").sum() == 0)
+
+        only_cation = CategoryFilter(name="moka_ionState7.4", values=["cationic"], keep=True)
+        df_cation = only_cation(self.df)
+        self.assertTrue((df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
 
 class TestData(TestCase):
 

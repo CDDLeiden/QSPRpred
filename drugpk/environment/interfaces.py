@@ -156,3 +156,19 @@ class datafilter(ABC):
             df: filtered pandas dataframe
         """
         pass
+
+class featurefilter(ABC):
+    """
+        filter out uninformative features from a dataframe
+    """
+    @abstractmethod
+    def __call__(self, df):
+        """
+        filter out uninformative features from a dataframe
+        Args:
+            df: pandas dataframe to filter
+        Returns:
+            df: filtered pandas dataframe
+        """
+        pass
+
