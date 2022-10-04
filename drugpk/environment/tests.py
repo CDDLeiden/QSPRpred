@@ -4,6 +4,7 @@ import os
 from os.path import exists
 from drugpk.environment.dataprep_utils.datasplitters import scaffoldsplit, randomsplit, temporalsplit
 from drugpk.environment.dataprep_utils.datafilters import CategoryFilter, papyrusLowQualityFilter
+from drugpk.environment.dataprep_utils.featurefilters import lowVarianceFilter, highCorrelationFilter, BorutaFilter
 from drugpk.logs import logger
 import pandas as pd
 import numpy as np
@@ -60,6 +61,39 @@ class TestDataFilters(PathMixIn, TestCase):
         only_cation = CategoryFilter(name="moka_ionState7.4", values=["cationic"], keep=True)
         df_cation = only_cation(self.df)
         self.assertTrue((df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
+
+class TestFeatureFilters(PathMixIn, TestCase):
+    df = pd.DataFrame(data = np.array([[1, 4, 2, 6, 2 ,1],
+                                       [1, 8, 4, 2, 4 ,2],
+                                       [1, 4, 3, 2, 5 ,3],
+                                       [1, 8, 4, 9, 8 ,4],
+                                       [1, 4, 2, 3, 9 ,5],
+                                       [1, 8, 4, 7, 12,6]]), columns=["F1", "F2", "F3", "F4", "F5", "y"])
+
+    def test_lowVarianceFilter(self):
+        filter = lowVarianceFilter(0.01)
+        X = filter(self.df[["F1", "F2", "F3", "F4", "F5"]])
+
+        # check if correct columns selected and values still original
+        self.assertListEqual(list(X.columns), ["F2", "F3", "F4", "F5"])
+        self.assertTrue(self.df[X.columns].equals(X))
+
+    def test_highCorrelationFilter(self):
+        filter = highCorrelationFilter(0.8)
+        X = filter(self.df[["F1", "F2", "F3", "F4", "F5"]])
+
+        # check if correct columns selected and values still original
+        self.assertListEqual(list(X.columns), ["F1", "F2", "F4", "F5"])
+        self.assertTrue(self.df[X.columns].equals(X))
+
+    def test_BorutaFilter(self):
+        filter = BorutaFilter()
+        X = filter(features = self.df[["F1", "F2", "F3", "F4", "F5"]], y=self.df["y"])
+
+        # check if correct columns selected and values still original
+        self.assertListEqual(list(X.columns), ["F5"])
+        self.assertTrue(self.df[X.columns].equals(X))
+
 
 class TestData(TestCase):
 
