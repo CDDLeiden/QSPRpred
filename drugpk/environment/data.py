@@ -1,11 +1,11 @@
-from drugpk.training.scorers.predictors import Predictor
-from rdkit import Chem
-from sklearn.preprocessing import MinMaxScaler as Scaler
-from sklearn.model_selection import StratifiedKFold, KFold
 from drugpk.logs import logger
+from drugpk.training.scorers.predictors import Predictor
 from drugpk.environment.dataprep_utils.datasplitters import randomsplit
 import pandas as pd
-import numpy as np
+from rdkit import Chem
+from sklearn.model_selection import KFold, StratifiedKFold
+from sklearn.preprocessing import StandardScaler as Scaler
+from functools import partial
 
 class QSKRDataset:
     """
@@ -21,7 +21,10 @@ class QSKRDataset:
         smilescol (str)                 : name of column containing the molecule smiles
         properties (list of str)        : name of column(s) in dataframe for to be predicted values, e.g. ["Cl"]
         reg (bool)                      : if true, dataset for regression, if false dataset for classification (uses th)
-        th (list of float)              : threshold for activity if classficiation model, ignored otherwise
+        th (list of float)              : threshold for activity if classification model, if len th larger than 1, 
+                                          these values will used for binning (in this case lower and upper boundary
+                                          need to be included)
+        bins (list of floats)           : Bin values into discrete intervals
 
         X (np.ndarray/pd.DataFrame)     : m x n feature matrix for cross validation, where m is the number of samples
                                           and n is the number of features.
@@ -36,42 +39,47 @@ class QSKRDataset:
 
         Methods
         -------
-        splitDataset : A train and test split is made.
+        FromFile : construct dataset from file
+        prepareDataset : preprocess the dataset for QSPR modelling
+        loadFeaturesFromFile: load features from file :)
         createFolds: folds is an generator and needs to be reset after cross validation or hyperparameter optimization
         dataStandardization: Performs standardization by centering and scaling
     """
 
-    def __init__(self, df: pd.DataFrame, smilescol = 'SMILES', properties = ['CL'], reg=True, th=[6.5]):
-        assert type(properties) == list, "properties should be a list"
+    def __init__(self, df: pd.DataFrame, smilescol = 'SMILES', property = 'CL', reg=True, th=[6.5]):
         
         self.smilescol = smilescol
-        self.properties = properties
-        self.df = df.dropna(subset=([smilescol] + properties))
+        self.property = property
+        self.df = df.dropna(subset=([smilescol, property]))
         
         self.reg = reg
-
+                
         if not reg:
             self.th = th
             assert type(th) == list, "thresholds should be a list"
             if len(th) > 1:
-                for prop in properties:
-                    df[prop] = pd.cut(df[prop], bins=th)
+
+                    df[property] = pd.cut(df[property], bins=th, include_lowest=True)
             else:
-                df[prop] = (df[prop] > self.th).astype(float)
+                df[property] = (df[property] > self.th).astype(float)
+                df[property]
 
         self.X = None
         self.y = None
         self.X_ind = None
         self.y_ind = None
+        
         self.n_folds = None
         self.folds = None
 
+        self.target_desc = None
+
     @classmethod
-    def FromFile(cls, fname, smilescol = 'SMILES', property = 'CL', reg=True, th=6.5):
+    def FromFile(cls, fname, smilescol = 'SMILES', property = 'CL', reg=True, th=[6.5]):
         df = pd.read_csv(fname, sep="\t")
         return QSKRDataset(df, smilescol, property, reg, th)
 
-    def prepareDataset(self, datafilters=[], split=randomsplit(), features=[Predictor.calculateDescriptors],
+    def prepareDataset(self, datafilters=[], split=randomsplit(), feature_calculators=[partial(Predictor.calculateDescriptors, as_df=True)],
                        featurefilters=[], n_folds=5):
         """
             prepare the dataset for use in QSKR model
@@ -85,38 +93,35 @@ class QSKRDataset:
 
         # apply filters on dataset    
         for filter in datafilters:
-            self.input_df = filter(self.input_df)
+            self.df = filter(self.df)
 
         # split dataset in train and test set
-        self.X, self.X_ind, self.y, self.y_ind = split(self.input_df)
+        self.X, self.X_ind, self.y, self.y_ind = split(df=self.df, Xcol=self.smilescol, ycol=self.property)
+        logger.info('Total: train: %s test: %s' % (len(self.y), len(self.y_ind)))
+        if not self.reg:
+            if len(self.th) == 1:
+                logger.info('    In train: active: %s not active: %s' % (sum(self.y), len(self.y)-sum(self.y)))
+                logger.info('    In test:  active: %s not active: %s\n' % (sum(self.y_ind), len(self.y_ind)-sum(self.y_ind)))
+            else:
+                logger.info('train: %s' % self.y.value_counts())
+                logger.info('test: %s\n' % self.y_ind.value_counts())
 
         # calculate features from smiles
-        self.X = features([Chem.MolFromSmiles(mol) for mol in self.X])
-        self.Xind = features([Chem.MolFromSmiles(mol) for mol in self.Xind])
+        for feature_calculator in feature_calculators:
+            self.X = feature_calculator([Chem.MolFromSmiles(mol) for mol in self.X])
+            self.X_ind = feature_calculator([Chem.MolFromSmiles(mol) for mol in self.X_ind])
 
         # apply filters to features
-        alldata = np.concatenate([self.X, self.Xind], axis=0)
+        alldata = pd.concat([self.X, self.X_ind], axis=0)
         for featurefilter in featurefilters:
-            selected_features = featurefilter(alldata)
-            logger.info(f"{alldata.shape[1] - len(selected_features)} dropped from calculated features by {type(featurefilter)}")
-            self.X = self.X[selected_features]
-            self.Xind = self.Xind
+            alldata = featurefilter(alldata)
+            
+        self.X = self.X[alldata.columns]
+        self.X_ind = self.X_ind[alldata.columns]
 
         # create folds for cross-validation
         self.n_folds = n_folds
         self.createFolds()
-
-        #Write information about the trainingset to the logger
-        logger.info('Train and test set created for %s %s:' % (self.valuecol, 'REG' if self.reg else 'CLS'))
-        logger.info('    Total: train: %s test: %s' % (len(data), len(test)))
-        if self.reg:
-            logger.info('    Total: active: %s not active: %s' % (sum(self.df >= self.th), sum(self.df < self.th)))
-            logger.info('    In train: active: %s not active: %s' % (sum(data >= self.th), sum(data < self.th)))
-            logger.info('    In test:  active: %s not active: %s\n' % (sum(test >= self.th), sum(test < self.th)))
-        else:
-            logger.info('    Total: active: %s not active: %s' % (self.df.sum().astype(int), (len(self.df)-self.df.sum()).astype(int)))
-            logger.info('    In train: active: %s not active: %s' % (data.sum().astype(int), (len(data)-data.sum()).astype(int)))
-            logger.info('    In test:  active: %s not active: %s\n' % (test.sum().astype(int), (len(test)-test.sum()).astype(int)))
     
     def loadFeaturesFromFile(fname: str) -> None:
         """

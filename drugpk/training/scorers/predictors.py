@@ -6,12 +6,14 @@ On: 06.06.22, 20:15
 """
 import joblib
 import numpy as np
+import pandas as pd
 from rdkit import DataStructs
 from rdkit.Chem import AllChem
 
 from drugpk.training.interfaces import Scorer
 from drugpk.training.scorers.properties import Property
 from torch.utils.data import DataLoader, TensorDataset
+from functools import partial
 import torch
 
 
@@ -39,11 +41,17 @@ class Predictor(Scorer):
         return scores
 
     @staticmethod
-    def calculateDescriptors(mols, radius=3, bit_len=2048):
+    def calculateDescriptors(mols, radius=3, bit_len=2048, as_df=False):
         ecfp = Predictor.calc_ecfp(mols, radius=radius, bit_len=bit_len)
-        phch = Predictor.calc_physchem(mols)
-        fps = np.concatenate([ecfp, phch], axis=1)
-        return fps
+        phch = Predictor.calc_physchem(mols, as_df=as_df)
+        if as_df:
+            ecfp = pd.DataFrame(data=ecfp)
+            ecfp = ecfp.add_prefix("ecfp_")
+            fps = pd.concat([ecfp, phch], axis=1)
+            return fps
+        else:
+            fps = np.concatenate([ecfp, phch], axis=1)
+            return fps
 
     @staticmethod
     def calc_ecfp(mols, radius=3, bit_len=2048):
@@ -67,7 +75,7 @@ class Predictor(Scorer):
         return fps
 
     @staticmethod
-    def calc_physchem(mols):
+    def calc_physchem(mols, as_df=False):
         prop_list = ['MW', 'logP', 'HBA', 'HBD', 'Rotable', 'Amide',
                      'Bridge', 'Hetero', 'Heavy', 'Spiro', 'FCSP3', 'Ring',
                      'Aliphatic', 'Aromatic', 'Saturated', 'HeteroR', 'TPSA', 'Valence', 'MR']
@@ -76,6 +84,8 @@ class Predictor(Scorer):
         for i, prop in enumerate(prop_list):
             props.prop = prop
             fps[:, i] = props(mols)
+        if as_df:
+            return pd.DataFrame(data=fps, columns=prop_list)
         return fps
 
     def getKey(self):

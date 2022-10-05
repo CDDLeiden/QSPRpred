@@ -26,8 +26,8 @@ class lowVarianceFilter(featurefilter):
 
         # drop from both the minmax scaled descriptors df and the original dataframe
         df = df.drop(list(colnames[low_var_cols]), axis=1)
-        logger.info("number of columns dropped low variance filter: ", len(low_var_cols))
-        logger.info("number of columns left: ", df.shape[1])
+        logger.info(f"number of columns dropped low variance filter: {len(low_var_cols)}")
+        logger.info(f"number of columns left: {df.shape[1]}")
 
         return df
 
