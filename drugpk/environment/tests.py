@@ -98,49 +98,13 @@ class TestFeatureFilters(PathMixIn, TestCase):
 class TestData(TestCase):
 
     def test_data(self):
-        df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv', sep='\t')
-        dataset = QSKRDataset(df=df, property="CL")
-        self.assertIsInstance(dataset, QSKRDataset)
+        for reg in [True, False]:
+            df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv', sep='\t')
+            dataset = QSKRDataset(df=df, property="CL", reg=reg)
+            self.assertIsInstance(dataset, QSKRDataset)
 
-        dataset.prepareDataset(datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
-                               featurefilters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])
-
-        # dataset.splitDataset()
-        # self.assertIsInstance(dataset.X, np.ndarray)
-        # self.assertIsInstance(dataset.X_ind, np.ndarray)
-        # self.assertIsInstance(dataset.y, np.ndarray)
-        # self.assertIsInstance(dataset.y_ind, np.ndarray)
-
-        # self.assertEqual(dataset.X.shape, (len(dataset.y), 19 + 2048)) # 19 (no. of physchem desc) +  2048 (fp bit len)
-        # self.assertEqual(dataset.X_ind.shape, (len(dataset.y_ind), 19 + 2048))
-
-        # # default case
-        # self.assertEqual(dataset.X.shape[0] + dataset.X_ind.shape[0], 9) # 1 of 10 datapoints removed, Nan
-        # self.assertEqual(dataset.X_ind.shape[0], 1) # test_size 0.1, should be 1 test sample
-        # self.assertEqual(dataset.X.shape[0], 8) # test_size 0.1, should be 1 test sample
-        
-        # # regression is true
-        # self.assertEqual(np.min(np.concatenate((dataset.y, dataset.y_ind))), 0.36)
-        # self.assertEqual(np.max(np.concatenate((dataset.y, dataset.y_ind))), 46.58)
-
-        # # with test size is 3
-        # dataset = QSKRDataset(input_df=df, valuecol="CL", test_size=3)
-        # dataset.splitDataset()
-        # self.assertEqual(dataset.X_ind.shape[0], 3) # test size of 3
-        # self.assertEqual(dataset.X.shape[0], 6) # 9 - 3 is 6
-
-        # # with timesplit on 2000
-        # dataset = QSKRDataset(input_df=df, valuecol="CL", test_size=3, timesplit=2000)
-        # dataset.splitDataset()
-        # self.assertEqual(dataset.X_ind.shape[0], 2) # two sample year > 2000
-        # self.assertEqual(dataset.X.shape[0], 7) # 9 - 2 is 7
-
-        # # with classification
-        # dataset = QSKRDataset(input_df=df, valuecol="CL", test_size=3, reg=False, th=7)
-        # dataset.splitDataset()
-        # self.assertTrue(np.min(np.concatenate((dataset.y, dataset.y_ind))) == 0)
-        # self.assertTrue(np.max(np.concatenate((dataset.y, dataset.y_ind))) == 1)
-        # self.assertEqual(np.sum(np.concatenate((dataset.y, dataset.y_ind)) < 1), 4) # only 4 value below threshold of 7
+            dataset.prepareDataset(datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
+                                featurefilters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])
 
 
 class NeuralNet(PathMixIn, TestCase):
@@ -155,8 +119,8 @@ class NeuralNet(PathMixIn, TestCase):
 
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
-        data = QSKRDataset(input_df=df, valuecol="CL", reg=reg)
-        data.splitDataset()
+        data = QSKRDataset(df=df, property="CL", reg=reg)
+        data.prepareDataset()
         data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
 
         # prepare data for torch DNN
@@ -197,8 +161,8 @@ class TestModels(PathMixIn, TestCase):
         
         # prepare test dataset
         df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
-        data = QSKRDataset(input_df=df, valuecol="CL", reg=reg)
-        data.splitDataset()
+        data = QSKRDataset(df=df, property="CL", reg=reg)
+        data.prepareDataset()
         data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
         
         return data
@@ -212,26 +176,26 @@ class TestModels(PathMixIn, TestCase):
         # train the model on all data
         themodel.fit()
         regid = 'REG' if reg else 'CLS'
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.valuecol}.pkg'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}.pkg'))
 
         # perform crossvalidation
         themodel.evaluate()
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.valuecol}.ind.tsv'))
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.valuecol}.cv.tsv'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}.ind.tsv'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}.cv.tsv'))
         
         # perform bayes optimization
         fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
         grid_params = QSKRsklearn.loadParamsGrid(fname, "bayes", alg_name)
         search_space_bs = grid_params[grid_params[:,0] == alg_name,1][0]
-        themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=1, save_m=False)
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.valuecol}_params.json'))
+        themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=1)
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}_params.json'))
 
         # perform grid search
-        os.remove(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.valuecol}_params.json')
+        os.remove(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}_params.json')
         grid_params = QSKRsklearn.loadParamsGrid(fname, "grid", alg_name)
         search_space_gs = grid_params[grid_params[:,0] == alg_name,1][0]
-        themodel.gridSearch(search_space_gs=search_space_gs, save_m=False)
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.valuecol}_params.json'))
+        themodel.gridSearch(search_space_gs=search_space_gs)
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}_params.json'))
 
 
     def testRF(self):

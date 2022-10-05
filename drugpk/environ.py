@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-from locale import D_FMT
 import os
 import os.path
-from pyexpat import model
 import sys
 import json
 import random
@@ -57,7 +55,7 @@ def EnvironmentArgParser(txt=None):
                         help="If included then the model will be trained on all data and saved")   
     parser.add_argument('-p', '--parameters', type=str, default=None,
                         help="file name of json file with non-default parameter settings (base_dir/envs/[-p]_params.json). NB. If json file with name \
-                             {model_type}_{REG/CLS}_{valuecol}_params.json) present in envs folder those settings will also be used, \
+                             {model_type}_{REG/CLS}_{property}_params.json) present in envs folder those settings will also be used, \
                              but if the same parameter is present in both files the settings from (base_dir/[-p]_params.json) will be used.")
     parser.add_argument('-o', '--optimization', type=str, default=None,
                         help="Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, if 'bayes' bayesian optimization")

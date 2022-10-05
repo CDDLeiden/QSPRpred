@@ -38,7 +38,7 @@ class QSKRModel(ABC):
         self.alg_name = alg_name
 
         d = '%s/envs' % base_dir
-        self.out = '%s/%s_%s_%s' % (d, alg_name, 'REG' if data.reg else 'CLS', data.valuecol)
+        self.out = '%s/%s_%s_%s' % (d, alg_name, 'REG' if data.reg else 'CLS', data.property)
 
         if os.path.isfile('%s_params.json' % self.out):    
             with open('%s_params.json' % self.out) as j:

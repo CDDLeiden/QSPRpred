@@ -2,6 +2,7 @@ from drugpk.logs import logger
 from drugpk.training.scorers.predictors import Predictor
 from drugpk.environment.dataprep_utils.datasplitters import randomsplit
 import pandas as pd
+import numpy as np
 from rdkit import Chem
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import StandardScaler as Scaler
@@ -58,11 +59,9 @@ class QSKRDataset:
             self.th = th
             assert type(th) == list, "thresholds should be a list"
             if len(th) > 1:
-
-                    df[property] = pd.cut(df[property], bins=th, include_lowest=True)
+                self.df[property] = pd.cut(self.df[property], bins=th, include_lowest=True)
             else:
-                df[property] = (df[property] > self.th).astype(float)
-                df[property]
+                self.df[property] = (self.df[property] > self.th[0]).astype(float)
 
         self.X = None
         self.y = None
@@ -72,6 +71,7 @@ class QSKRDataset:
         self.n_folds = None
         self.folds = None
 
+        self.features= None
         self.target_desc = None
 
     @classmethod
@@ -115,9 +115,12 @@ class QSKRDataset:
         alldata = pd.concat([self.X, self.X_ind], axis=0)
         for featurefilter in featurefilters:
             alldata = featurefilter(alldata)
-            
-        self.X = self.X[alldata.columns]
-        self.X_ind = self.X_ind[alldata.columns]
+        
+        self.features= alldata.columns
+        self.X = np.array(self.X[alldata.columns])
+        self.X_ind = np.array(self.X_ind[alldata.columns])
+        self.y = np.array(self.y)
+        self.y_ind = np.array(self.y_ind)
 
         # create folds for cross-validation
         self.n_folds = n_folds
