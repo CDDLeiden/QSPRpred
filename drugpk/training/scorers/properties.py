@@ -48,7 +48,7 @@ class Property(Scorer):
                           'SA': calculateScore,
                           'Bertz': BertzCT}
 
-    def getScores(self, mols, frags=None):
+    def getScores(self, mols):
         scores = np.zeros(len(mols))
         for i, mol in enumerate(mols):
             try:
@@ -186,7 +186,7 @@ class Scaffold(Scorer):
         self.frag = Chem.MolFromSmarts(smart)
         self.is_match = is_match
 
-    def getScores(self, mols, frags=None):
+    def getScores(self, mols):
         scores = np.zeros(len(mols))
         for i, mol in enumerate(tqdm.tqdm(mols)):
             try:

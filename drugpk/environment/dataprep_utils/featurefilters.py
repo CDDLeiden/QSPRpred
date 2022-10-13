@@ -75,8 +75,8 @@ class BorutaFilter(featurefilter):
             verbose (int): Controls verbosity of output.
             
     """
-    def __init__(self, estimator=RandomForestRegressor(n_jobs=5), n_estimators='auto', perc=100, alpha=0.05,
-                 max_iter=200, verbose=0):
+    def __init__(self, estimator=RandomForestRegressor(n_jobs=5), n_estimators='auto', perc=50, alpha=0.05,
+                 max_iter=200, verbose=2):
         self.estimator=estimator
         self.n_estimators=n_estimators
         self.perc = perc
@@ -90,5 +90,7 @@ class BorutaFilter(featurefilter):
         feat_selector.fit(features.values, y.values)
 
         selected_features = features.loc[:, feat_selector.support_]
+        logger.info(f"Number of columns dropped Boruta filter: {features.shape[1] - selected_features.shape[1]}")
+        logger.info(f"Number of columns left: {selected_features.shape[1]}")
         
         return selected_features

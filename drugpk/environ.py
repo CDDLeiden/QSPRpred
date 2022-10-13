@@ -24,6 +24,9 @@ from drugpk import DEFAULT_GPUS
 from drugpk.logs.utils import backUpFiles, enable_file_logger, commit_hash
 from drugpk.environment.data import QSKRDataset
 from drugpk.environment.models import QSKRModel, QSKRDNN, QSKRsklearn
+from drugpk.environment.dataprep_utils.datafilters import papyrusLowQualityFilter
+from drugpk.environment.dataprep_utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
+from drugpk.environment.dataprep_utils.featurefilters import lowVarianceFilter, highCorrelationFilter, BorutaFilter
 import pickle
 
 def EnvironmentArgParser(txt=None):
@@ -33,46 +36,86 @@ def EnvironmentArgParser(txt=None):
     
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
+    #base arguments
     parser.add_argument('-b', '--base_dir', type=str, default='.',
                         help="Base directory which contains a folder 'data' with input files")
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-ran', '--random_state', type=int, default=1, help="Seed for the random state")
     parser.add_argument('-i', '--input', type=str, default='dataset.tsv',
-                        help="tsv file name that contains SMILES, property value column")
+                        help="tsv file name that contains SMILES and property value column")
+    parser.add_argument('-ncpu', '--ncpu', type=int, default=8,
+                        help="Number of CPUs")
+    parser.add_argument('-gpus', '--gpus', nargs="*",  default=['0'],
+                        help="List of GPUs")
+    
+    # model target arguments
+    parser.add_argument('-sm', '--smilescol', type=str, default='SMILES', help="Name of the column in the dataset\
+                        containing the smiles.")
+    parser.add_argument('-pc', '--property_col', type=str, nargs='*', default=['property'],
+                        help="properties to be predicted identifier")
+    parser.add_argument('-vc', '--value_col', type=str, nargs='*', default=['value'],
+                        help="properties to be predicted identifier")
+    parser.add_argument('-pr', '--properties', type=str, nargs='+', action='append',
+                        help="properties to be predicted identifiers. Add this argument for each model to be trained \
+                              e.g. for one multi-task model for CL and Fu and one single task for CL do:\
+                              -pr CL Fu -pr CL")
+
+    # model type arguments
     parser.add_argument('-m', '--model_types', type=str, nargs='*', default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN'],
-                        help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM', 'PLS' (only with REG), 'NB' (only with CLS) 'KNN' or 'MT_DNN'") 
-    parser.add_argument('-pr', '--properties', type=str, nargs='*', default=['CL'],
-                        help="property to be predicted identifier") 
+                        help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
+                             'PLS' (only with REG), 'NB' (only with CLS) 'KNN'") 
     parser.add_argument('-r', '--regression', type=str, default=None,
                         help="If True, only regression model, if False, only classification, default both")
-    parser.add_argument('-a', '--threshold', type=float, default=6.5,
-                        help="threshold on predicted property for classification")
-    parser.add_argument('-n', '--test_size', type=str, default="0.1",
-                        help="Random test split fraction if float is given and absolute size if int is given, used when no temporal split given.")
-    parser.add_argument('-y', '--year', type=int, default=None,
-                        help="Temporal split limit, default to random split (see test_size)")
-    parser.add_argument('-s', '--save_model', action='store_true',
-                        help="If included then the model will be trained on all data and saved")   
+    parser.add_argument('-th', '--threshold', type=json.loads, default=[6.5],
+                        help='threshold on predicted property for classification. if len th larger than 1,\
+                              these values will used for multiclass classification (then lower and upper boundary \
+                              need to be included, e.g. for three classes [0,1],[1,2],[2,3]: 0 1 2 3)\
+                              This needs to be given for each property included in any of the models as follows, e.g.\
+                              -th {"CL": [6.5], "fu": [0 1 2 3 4]}')
+
+    # model settings
     parser.add_argument('-p', '--parameters', type=str, default=None,
                         help="file name of json file with non-default parameter settings (base_dir/envs/[-p]_params.json). NB. If json file with name \
                              {model_type}_{REG/CLS}_{property}_params.json) present in envs folder those settings will also be used, \
                              but if the same parameter is present in both files the settings from (base_dir/[-p]_params.json) will be used.")
+    parser.add_argument('-pat', '--patience', type=int, default=50,
+                        help="for DNN, number of epochs for early stopping")
+    parser.add_argument('-tol', '--tolerance', type=float, default=0.01,
+                        help="for DNN, minimum absolute change of loss to count as progress")       
+
+    # Data filter arguments
+    parser.add_argument('-lq', "--low_quality", action='store_true', help="If lq, than low quality data will be \
+                        should be a column 'Quality' where all 'Low' will be removed")
+
+    # Data set split arguments
+    parser.add_argument('-sp', '--split', type=str, choices=['random', 'time', 'scaffold'], default='random')
+    parser.add_argument('-sf', '--split_fraction', type=float, default=0.1,
+                        help="Fraction of the dataset used as test set. Used for randomsplit and scaffoldsplit")
+    parser.add_argument('-st', '--split_time', type=float, default=2015,
+                        help="Temporal split limit. Used for temporal split.")
+    parser.add_argument('-stc', '--split_timecolumn', type=str, default="Year",
+                        help="Temporal split time column. Used for temporal split.")
+
+    # feature filters
+    parser.add_argument('-lv', '--low_variability', type=float, default=None, help="low variability threshold\
+                        for feature removal.")
+    parser.add_argument('-hc', '--high_correlation', type=float, default=None, help="high correlation threshold\
+                        for feature removal.")
+    parser.add_argument('-bf', '--boruta_filter', action='store_true', help="boruta filter with random forest")
+
+    # model training procedure
+    parser.add_argument('-s', '--save_model', action='store_true',
+                        help="If included then the model will be trained on all data and saved")   
     parser.add_argument('-o', '--optimization', type=str, default=None,
                         help="Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, if 'bayes' bayesian optimization")
     parser.add_argument('-ss', '--search_space', type=str, default=None,
                         help="search_space hyperparameter optimization json file location (base_dir/[name].json), \
                               if None default drugpk.environment.search_space.json used")                  
     parser.add_argument('-nt', '--n_trials', type=int, default=20, help="number of trials for bayes optimization")
-    parser.add_argument('-c', '--model_evaluation', action='store_true',
+    parser.add_argument('-me', '--model_evaluation', action='store_true',
                         help='If on, model evaluation through cross validation and independent test set is performed.')
-    parser.add_argument('-ncpu', '--ncpu', type=int, default=8,
-                        help="Number of CPUs")
-    parser.add_argument('-gpus', '--gpus', nargs="*",  default=['0'],
-                        help="List of GPUs")
-    parser.add_argument('-pat', '--patience', type=int, default=50,
-                        help="for DNN, number of epochs for early stopping")
-    parser.add_argument('-tol', '--tolerance', type=float, default=0.01,
-                        help="for DNN, minimum absolute change of loss to count as progress")       
+    
+    # other
     parser.add_argument('-ng', '--no_git', action='store_true',
                         help="If on, git hash is not retrieved")
     
@@ -90,11 +133,6 @@ def EnvironmentArgParser(txt=None):
         args.regression = [False]
     else:
         sys.exit("invalid regression arg given")
-
-    if '.' in args.test_size:
-        args.test_size = float(args.test_size) 
-    else: 
-        args.test_size = int(args.test_size)
 
     return args
 
@@ -134,15 +172,38 @@ def Environ(args):
                 sys.exit()
         
             #prepare dataset for training QSKR model
-            mydataset = QSKRDataset(df, property, reg = reg, timesplit=args.year,
-                                    test_size=args.test_size, th = args.threshold)
-            mydataset.splitDataset()
+            mydataset = QSKRDataset(df, smilescol=args.smilescol, property=property,
+                                    reg=reg, th=args.threshold)
+            
+            # data filters
+            datafilters = []
+            if args.low_quality:
+                datafilters.append(papyrusLowQualityFilter())
+
+            # data splitter
+            if args.split=='random':
+                split=randomsplit(test_fraction=args.split_fraction)
+            elif args.split =='scaffold':
+                split=scaffoldsplit(test_fraction=args.split_fraction)
+            elif args.split == 'temporal':
+                split=temporalsplit(timesplit=args.split_time, timecol=args.split_timecolumn)
+
+            # feature filters
+            featurefilters=[]
+            if args.low_variability:
+                featurefilters.append(lowVarianceFilter(th=args.low_variability))
+            if args.high_correlation:
+                featurefilters.append(highCorrelationFilter(th=args.high_correlation))
+            if args.boruta_filter:
+                featurefilters.append(BorutaFilter())
+
+            mydataset.prepareDataset(datafilters=datafilters, split=split, featurefilters=featurefilters)
 
             # save dataset object
             mydataset.folds = None
             pickle.dump(mydataset, open(f'{args.base_dir}/envs/{property}_{reg_abbr}_QSKRdata.pkg', 'bw'))
             mydataset.createFolds()
-            
+
             for model_type in args.model_types:
                 print(model_type)
                 log.info(f'Model: {model_type} {reg_abbr}')
@@ -192,15 +253,15 @@ def Environ(args):
                 if args.optimization == 'grid':
                     search_space_gs = grid_params[grid_params[:,0] == model_type,1][0]
                     log.info(search_space_gs)
-                    qsKrmodel.gridSearch(search_space_gs, args.save_model)
+                    qsKrmodel.gridSearch(search_space_gs)
                 elif args.optimization == 'bayes':
                     search_space_bs = grid_params[grid_params[:,0] == model_type,1][0]
                     log.info(search_space_bs)
-                    if reg and model_type == "RF":
-                        search_space_bs.update({'criterion' : ['categorical', ['squared_error', 'poisson']]})
-                    elif model_type == "RF":
-                        search_space_bs.update({'criterion' : ['categorical', ['gini', 'entropy']]})
-                    qsKrmodel.bayesOptimization(search_space_bs, args.n_trials, args.save_model)
+                    # if reg and model_type == "RF":
+                    #     search_space_bs.update({'criterion' : ['categorical', ['squared_error', 'poisson']]})
+                    # elif model_type == "RF":
+                    #     search_space_bs.update({'criterion' : ['categorical', ['gini', 'entropy']]})
+                    qsKrmodel.bayesOptimization(search_space_bs, args.n_trials)
                 
                 # initialize models from saved or default parameters
 
@@ -209,8 +270,7 @@ def Environ(args):
                 
                 if args.model_evaluation:
                     qsKrmodel.evaluate()
-
-               
+         
 if __name__ == '__main__':
     args = EnvironmentArgParser()
 

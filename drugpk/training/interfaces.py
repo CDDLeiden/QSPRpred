@@ -85,7 +85,7 @@ class Scorer(ABC):
             scores (DataFrame): a data frame with columns name 'VALID' and 'DESIRE' indicating the validity of the SMILES and the degree of desirability
         """
 
-        return self.getModifiedScores(self.getScores(mols, frags))
+        return self.getModifiedScores(self.getScores(mols))
 
     def getModifiedScores(self, scores):
         """

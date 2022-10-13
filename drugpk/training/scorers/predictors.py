@@ -13,7 +13,6 @@ from rdkit.Chem import AllChem
 from drugpk.training.interfaces import Scorer
 from drugpk.training.scorers.properties import Property
 from torch.utils.data import DataLoader, TensorDataset
-from functools import partial
 import torch
 
 

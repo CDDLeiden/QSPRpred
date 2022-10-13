@@ -1,6 +1,7 @@
 from drugpk.logs import logger
 from drugpk.training.scorers.predictors import Predictor
 from drugpk.environment.dataprep_utils.datasplitters import randomsplit
+from drugpk.environment.dataprep_utils.featurefilters import BorutaFilter
 import pandas as pd
 import numpy as np
 from rdkit import Chem
@@ -47,11 +48,13 @@ class QSKRDataset:
         dataStandardization: Performs standardization by centering and scaling
     """
 
-    def __init__(self, df: pd.DataFrame, smilescol = 'SMILES', property = 'CL', reg=True, th=[6.5]):
-        
+    def __init__(self, df: pd.DataFrame, smilescol = 'SMILES', property = 'CL', reg=True, th=[6.5], log=True):
         self.smilescol = smilescol
         self.property = property
         self.df = df.dropna(subset=([smilescol, property]))
+        
+        if reg and log:
+            self.df[property] = np.log(self.df[property])
         
         self.reg = reg
                 
@@ -113,9 +116,14 @@ class QSKRDataset:
 
         # apply filters to features
         alldata = pd.concat([self.X, self.X_ind], axis=0)
+        ally = pd.concat([self.y, self.y_ind], axis=0)
         for featurefilter in featurefilters:
-            alldata = featurefilter(alldata)
+            if type(featurefilter) == BorutaFilter:
+                alldata = featurefilter(alldata, ally)
+            else:
+                alldata = featurefilter(alldata)
         
+        logger.info(f"Selected features: {alldata.columns}")
         self.features= alldata.columns
         self.X = np.array(self.X[alldata.columns])
         self.X_ind = np.array(self.X_ind[alldata.columns])

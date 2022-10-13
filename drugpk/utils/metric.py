@@ -91,7 +91,7 @@ def logP_mw(fnames, is_active=False):
 
 
 def dimension(fnames, fp='ECFP', alg='PCA', maximum=int(1e5)):
-    from drugex.training.scorers.predictors import Predictor
+    from drugpk.training.scorers.predictors import Predictor
     df = pd.DataFrame()
     for i, fname in enumerate(fnames):
         sub = pd.read_table(fname).dropna(subset=['Smiles'])
