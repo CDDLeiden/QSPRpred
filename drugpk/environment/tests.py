@@ -100,7 +100,7 @@ class TestData(TestCase):
     def test_data(self):
         for reg in [True, False]:
             df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv', sep='\t')
-            dataset = QSKRDataset(df=df, property="CL", reg=reg)
+            dataset = QSKRDataset(df=df, property="CL", reg=reg, th=[0,1,100,1000])
             self.assertIsInstance(dataset, QSKRDataset)
 
             dataset.prepareDataset(datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],

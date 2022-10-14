@@ -51,27 +51,24 @@ def EnvironmentArgParser(txt=None):
     # model target arguments
     parser.add_argument('-sm', '--smilescol', type=str, default='SMILES', help="Name of the column in the dataset\
                         containing the smiles.")
-    parser.add_argument('-pc', '--property_col', type=str, nargs='*', default=['property'],
-                        help="properties to be predicted identifier")
-    parser.add_argument('-vc', '--value_col', type=str, nargs='*', default=['value'],
-                        help="properties to be predicted identifier")
     parser.add_argument('-pr', '--properties', type=str, nargs='+', action='append',
                         help="properties to be predicted identifiers. Add this argument for each model to be trained \
                               e.g. for one multi-task model for CL and Fu and one single task for CL do:\
                               -pr CL Fu -pr CL")
 
     # model type arguments
-    parser.add_argument('-m', '--model_types', type=str, nargs='*', default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN'],
+    parser.add_argument('-m', '--model_types', type=str, nargs='*', choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN'],
+                        default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN'],
                         help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
                              'PLS' (only with REG), 'NB' (only with CLS) 'KNN'") 
     parser.add_argument('-r', '--regression', type=str, default=None,
                         help="If True, only regression model, if False, only classification, default both")
-    parser.add_argument('-th', '--threshold', type=json.loads, default=[6.5],
-                        help='threshold on predicted property for classification. if len th larger than 1,\
+    parser.add_argument('-th', '--threshold', type=json.loads,
+                        help='Threshold on predicted property for classification. if len th larger than 1,\
                               these values will used for multiclass classification (then lower and upper boundary \
-                              need to be included, e.g. for three classes [0,1],[1,2],[2,3]: 0 1 2 3)\
+                              need to be included, e.g. for three classes [0,1],[1,2],[2,3]: 0,1,2,3)\
                               This needs to be given for each property included in any of the models as follows, e.g.\
-                              -th {"CL": [6.5], "fu": [0 1 2 3 4]}')
+                              -th \'{"CL":[6.5],"fu":[0,1,2,3,4]}\'. Note. no spaces and surround by single quotes')
 
     # model settings
     parser.add_argument('-p', '--parameters', type=str, default=None,
@@ -83,9 +80,14 @@ def EnvironmentArgParser(txt=None):
     parser.add_argument('-tol', '--tolerance', type=float, default=0.01,
                         help="for DNN, minimum absolute change of loss to count as progress")       
 
-    # Data filter arguments
+    # Data pre-processing arguments
     parser.add_argument('-lq', "--low_quality", action='store_true', help="If lq, than low quality data will be \
                         should be a column 'Quality' where all 'Low' will be removed")
+    parser.add_argument('-lt', '--log_transform', type=json.loads,
+                        help='For each property if its values need to be log-tranformed. This arg only has an effect \
+                              when mode is regression, otherwise will be ignored!\
+                              This needs to be given for each property included in any of the models as follows, e.g.\
+                              -th \'{"CL":True,"fu":False}\'. Note. no spaces and surround by single quotes')
 
     # Data set split arguments
     parser.add_argument('-sp', '--split', type=str, choices=['random', 'time', 'scaffold'], default='random')
@@ -114,7 +116,7 @@ def EnvironmentArgParser(txt=None):
     parser.add_argument('-nt', '--n_trials', type=int, default=20, help="number of trials for bayes optimization")
     parser.add_argument('-me', '--model_evaluation', action='store_true',
                         help='If on, model evaluation through cross validation and independent test set is performed.')
-    
+
     # other
     parser.add_argument('-ng', '--no_git', action='store_true',
                         help="If on, git hash is not retrieved")
@@ -123,6 +125,10 @@ def EnvironmentArgParser(txt=None):
         args = parser.parse_args(txt)
     else:
         args = parser.parse_args()
+
+    for props in args.properties:
+        if len(props) > 1:
+            sys.exit("Multitask not yet implemented")
 
     # If no regression argument, does both regression and classification
     if args.regression is None: 
@@ -155,7 +161,6 @@ def Environ(args):
                 log.error("Parameter settings file (%s/%s.json) not found." % args.base_dir/args.parameters)
                 sys.exit()
 
-
     if args.optimization in ['grid', 'bayes']:
         if args.search_space:
             grid_params = QSKRModel.loadParamsGrid(f'{args.base_dir}/{args.search_space}.json', args.optimization, args.model_types)
@@ -172,8 +177,10 @@ def Environ(args):
                 sys.exit()
         
             #prepare dataset for training QSKR model
-            mydataset = QSKRDataset(df, smilescol=args.smilescol, property=property,
-                                    reg=reg, th=args.threshold)
+            th = args.threshold[property[0]] if args.threshold else {}
+            log_transform = args.log_transform[property[0]] if args.log_transform else {}
+            mydataset = QSKRDataset(df, smilescol=args.smilescol, property=property[0],
+                                    reg=reg, th=th, log=log_transform)
             
             # data filters
             datafilters = []
@@ -181,9 +188,9 @@ def Environ(args):
                 datafilters.append(papyrusLowQualityFilter())
 
             # data splitter
-            if args.split=='random':
+            if args.split == 'random':
                 split=randomsplit(test_fraction=args.split_fraction)
-            elif args.split =='scaffold':
+            elif args.split == 'scaffold':
                 split=scaffoldsplit(test_fraction=args.split_fraction)
             elif args.split == 'temporal':
                 split=temporalsplit(timesplit=args.split_time, timecol=args.split_timecolumn)
@@ -195,23 +202,23 @@ def Environ(args):
             if args.high_correlation:
                 featurefilters.append(highCorrelationFilter(th=args.high_correlation))
             if args.boruta_filter:
-                featurefilters.append(BorutaFilter())
+                if args.reg:
+                    featurefilters.append(BorutaFilter())
+                else:
+                     featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=5)))
 
             mydataset.prepareDataset(datafilters=datafilters, split=split, featurefilters=featurefilters)
 
             # save dataset object
             mydataset.folds = None
-            pickle.dump(mydataset, open(f'{args.base_dir}/envs/{property}_{reg_abbr}_QSKRdata.pkg', 'bw'))
+            pickle.dump(mydataset, open(f'{args.base_dir}/envs/{property[0]}_{reg_abbr}_QSKRdata.pkg', 'bw'))
             mydataset.createFolds()
 
             for model_type in args.model_types:
                 print(model_type)
                 log.info(f'Model: {model_type} {reg_abbr}')
 
-                if model_type == 'MT_DNN':
-                    log.warning('MT DNN is not implemented yet')
-                    continue
-                elif model_type not in ['RF', 'XGB', 'DNN', 'SVM', 'PLS', 'NB', 'KNN']: 
+                if model_type not in ['RF', 'XGB', 'DNN', 'SVM', 'PLS', 'NB', 'KNN']: 
                     log.warning(f'Model type {model_type} does not exist')
                     continue
                 if model_type == 'NB' and reg:
@@ -244,7 +251,7 @@ def Environ(args):
                 # Create QSKR model object
                 if model_type == 'DNN':
                     qsKrmodel = QSKRDNN(base_dir = args.base_dir, data=mydataset, parameters=parameters, gpus=args.gpus,
-                                        patience = args.patience, tol = args.tolerance)
+                                        patience = args.patience, tol=args.tolerance)
                 else:
                     qsKrmodel = QSKRsklearn(args.base_dir, data=mydataset, alg=alg_dict[model_type],
                                             alg_name=model_type, n_jobs=args.ncpu, parameters=parameters)

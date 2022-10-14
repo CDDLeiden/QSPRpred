@@ -21,13 +21,11 @@ class QSKRDataset:
         ----------
         df (pd dataframe)               : dataset
         smilescol (str)                 : name of column containing the molecule smiles
-        properties (list of str)        : name of column(s) in dataframe for to be predicted values, e.g. ["Cl"]
+        property (str)                  : name of column in dataframe for to be predicted values, e.g. ["Cl"]
         reg (bool)                      : if true, dataset for regression, if false dataset for classification (uses th)
         th (list of float)              : threshold for activity if classification model, if len th larger than 1, 
                                           these values will used for binning (in this case lower and upper boundary
                                           need to be included)
-        bins (list of floats)           : Bin values into discrete intervals
-
         X (np.ndarray/pd.DataFrame)     : m x n feature matrix for cross validation, where m is the number of samples
                                           and n is the number of features.
         y (np.ndarray/pd.DataFrame)     : m-d label array for cross validation, where m is the number of samples and
@@ -48,16 +46,16 @@ class QSKRDataset:
         dataStandardization: Performs standardization by centering and scaling
     """
 
-    def __init__(self, df: pd.DataFrame, smilescol = 'SMILES', property = 'CL', reg=True, th=[6.5], log=True):
+    def __init__(self, df: pd.DataFrame, property, smilescol = 'SMILES', reg=True, th=[], log=False):
         self.smilescol = smilescol
         self.property = property
         self.df = df.dropna(subset=([smilescol, property]))
         
+        self.reg = reg
+        
         if reg and log:
             self.df[property] = np.log(self.df[property])
-        
-        self.reg = reg
-                
+
         if not reg:
             self.th = th
             assert type(th) == list, "thresholds should be a list"
@@ -70,7 +68,7 @@ class QSKRDataset:
         self.y = None
         self.X_ind = None
         self.y_ind = None
-        
+
         self.n_folds = None
         self.folds = None
 
@@ -108,6 +106,10 @@ class QSKRDataset:
             else:
                 logger.info('train: %s' % self.y.value_counts())
                 logger.info('test: %s\n' % self.y_ind.value_counts())
+        
+        if self.y.dtype.name == 'category':
+            self.y = self.y.cat.codes
+            self.y_ind = self.y_ind.cat.codes
 
         # calculate features from smiles
         for feature_calculator in feature_calculators:

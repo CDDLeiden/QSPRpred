@@ -159,8 +159,11 @@ class QSKRsklearn(QSKRModel):
             optimization of hyperparameters using gridSearch
             arguments:
                 search_space_gs (dict): search space for the grid search
-        """          
-        scoring = 'explained_variance' if self.data.reg else 'roc_auc'    
+        """ 
+        if self.data.reg:        
+            scoring = 'explained_variance'
+        else:
+            scoring = 'roc_auc_ovo' if len(self.data.th) > 1 else 'roc_auc'
         grid = GridSearchCV(self.alg, search_space_gs, n_jobs=10, verbose=1, cv=self.data.folds,
                             scoring=scoring)
         
@@ -234,7 +237,7 @@ class QSKRsklearn(QSKRModel):
         if self.data.reg: 
             score = metrics.explained_variance_score(self.data.y, self.evaluate(save = False))
         else:
-            score = metrics.roc_auc_score(self.data.y, self.evaluate(save = False))
+            score = metrics.roc_auc_score(self.data.y, self.evaluate(save = False), multi_class='ovo')
 
         return score
 
@@ -446,7 +449,6 @@ class QSKRDNN(QSKRModel):
         if self.data.reg:
             score = metrics.explained_variance_score(self.data.y, self.evaluate(save = False))
         else:
-            score = metrics.roc_auc_score(self.data.y, self.evaluate(save = False))
-
+            score = metrics.roc_auc_score(self.data.y, self.evaluate(save = False), multi_class='ovo')
         return score
 

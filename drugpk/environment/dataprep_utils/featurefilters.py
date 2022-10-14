@@ -75,7 +75,7 @@ class BorutaFilter(featurefilter):
             verbose (int): Controls verbosity of output.
             
     """
-    def __init__(self, estimator=RandomForestRegressor(n_jobs=5), n_estimators='auto', perc=50, alpha=0.05,
+    def __init__(self, estimator=RandomForestRegressor(n_jobs=5), n_estimators='auto', perc=80, alpha=0.05,
                  max_iter=200, verbose=2):
         self.estimator=estimator
         self.n_estimators=n_estimators
