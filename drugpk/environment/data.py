@@ -60,6 +60,9 @@ class QSKRDataset:
             self.th = th
             assert type(th) == list, "thresholds should be a list"
             if len(th) > 1:
+                assert len(th) > 3, "For multi-class classification, set more than 3 values as threshold."
+                assert max(self.df[property]) <= max(self.th), "Make sure final threshold value is not smaller than largest value of property"
+                assert min(self.df[property]) >= min(self.th), "Make sure first threshold value is not larger than smallest value of property"
                 self.df[property] = pd.cut(self.df[property], bins=th, include_lowest=True)
             else:
                 self.df[property] = (self.df[property] > self.th[0]).astype(float)

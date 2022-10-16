@@ -30,7 +30,7 @@ class QSKRsklearn(QSKRModel):
         data: instance QSKRDataset
         alg:  instance of estimator
         parameters (dict): dictionary of algorithm specific parameters
-        njobs (int): the number of parallel jobs to run
+        n_jobs (int): the number of parallel jobs to run
         
         Methods
         -------
@@ -95,8 +95,7 @@ class QSKRsklearn(QSKRModel):
             arguments:
                 save (bool): don't save predictions when used in bayesian optimization
         """
-        cvs = np.zeros(self.data.y.shape)
-        inds = np.zeros(self.data.y_ind.shape)
+        cvs = np.zeros((self.data.y.shape[0], len(self.data.th)-1)) if (self.data.reg or len(self.data.th)) > 1 else np.zeros(self.data.y.shape)
 
         # cross validation
         for i, (trained, valided) in enumerate(self.data.folds):
@@ -117,13 +116,12 @@ class QSKRsklearn(QSKRModel):
             
             if type(self.alg).__name__ == 'PLSRegression':
                 cvs[valided] = self.model.predict(self.data.X[valided])[:, 0]
-                inds += self.model.predict(self.data.X_ind)[:, 0]
             elif self.data.reg:
                 cvs[valided] = self.model.predict(self.data.X[valided])
-                inds += self.model.predict(self.data.X_ind)
+            elif len(self.data.th) > 1:
+                cvs[valided] = self.model.predict_proba(self.data.X[valided])
             else:
                 cvs[valided] = self.model.predict_proba(self.data.X[valided])[:, 1]
-                inds += self.model.predict_proba(self.data.X_ind)[:, 1]
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
         
         # fitting on whole trainingset and predicting on test set
@@ -140,13 +138,20 @@ class QSKRsklearn(QSKRModel):
             inds = self.model.predict(self.data.X_ind)[:, 0]
         elif self.data.reg:
             inds = self.model.predict(self.data.X_ind)
+        elif len(self.data.th) > 1:
+            inds = self.model.predict_proba(self.data.X_ind)
         else:
             inds = self.model.predict_proba(self.data.X_ind)[:, 1]
 
         #save crossvalidation results
         if save:
             train, test = pd.Series(self.data.y).to_frame(name='Label'), pd.Series(self.data.y_ind).to_frame(name='Label')
-            train['Score'], test['Score'] = cvs, inds
+            if (not self.data.reg) and len(self.data.th) > 1:
+                train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
+                train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
+                test = pd.concat([test, pd.DataFrame(inds)], axis=1)
+            else:
+                train['Score'], test['Score'] = cvs, inds
             train.to_csv(self.out + '.cv.tsv', sep='\t')
             test.to_csv(self.out + '.ind.tsv', sep='\t')
 
@@ -163,8 +168,8 @@ class QSKRsklearn(QSKRModel):
         if self.data.reg:        
             scoring = 'explained_variance'
         else:
-            scoring = 'roc_auc_ovo' if len(self.data.th) > 1 else 'roc_auc'
-        grid = GridSearchCV(self.alg, search_space_gs, n_jobs=10, verbose=1, cv=self.data.folds,
+            scoring = 'roc_auc_ovr_weighted' if len(self.data.th) > 1 else 'roc_auc'
+        grid = GridSearchCV(self.alg, search_space_gs, n_jobs=self.n_jobs, verbose=1, cv=self.data.folds,
                             scoring=scoring)
         
         fit_set = {'X': self.data.X, 'y': self.data.y}
@@ -237,7 +242,7 @@ class QSKRsklearn(QSKRModel):
         if self.data.reg: 
             score = metrics.explained_variance_score(self.data.y, self.evaluate(save = False))
         else:
-            score = metrics.roc_auc_score(self.data.y, self.evaluate(save = False), multi_class='ovo')
+            score = metrics.roc_auc_score(self.data.y, self.evaluate(save = False), average="weighted", multi_class='ovr')
 
         return score
 

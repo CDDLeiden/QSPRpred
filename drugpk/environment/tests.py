@@ -115,11 +115,11 @@ class NeuralNet(PathMixIn, TestCase):
         os.remove(f'{cls.datapath}/testmodel.log')
         os.remove(f'{cls.datapath}/testmodel.pkg')
 
-    def prep_testdata(self, reg=True):
+    def prep_testdata(self, reg=True, th=[]):
 
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
-        data = QSKRDataset(df=df, property="CL", reg=reg)
+        data = QSKRDataset(df=df, property="CL", reg=reg, th=th)
         data.prepareDataset()
         data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
 
@@ -132,7 +132,7 @@ class NeuralNet(PathMixIn, TestCase):
         return data.X.shape[1], trainloader, testloader
 
     def test_STFullyConnected(self):
-        # prepare test dataset
+        ## prepare test regression dataset
         no_features, trainloader, testloader = self.prep_testdata(reg=True)
 
         # fit model with default settings
@@ -147,8 +147,15 @@ class NeuralNet(PathMixIn, TestCase):
         model = STFullyConnected(n_dim = no_features, neurons_h1=2000, neurons_hx=500, extra_layer=True)
         model.fit(trainloader, testloader, out=f'{self.datapath}/testmodel', patience = 3)
 
-        # prepare classification test dataset
+        ## prepare classification test dataset
         no_features, trainloader, testloader = self.prep_testdata(reg=False)
+
+        # fit model with regression is false
+        model = STFullyConnected(n_dim = no_features, is_reg=False, th=[6.5])
+        model.fit(trainloader, testloader, out=f'{self.datapath}/testmodel', patience = 3)
+
+        ## prepare multi-classification test dataset
+        no_features, trainloader, testloader = self.prep_testdata(reg=False, th=[0, 1, 100])
 
         # fit model with regression is false
         model = STFullyConnected(n_dim = no_features, is_reg=False)
@@ -157,19 +164,19 @@ class NeuralNet(PathMixIn, TestCase):
 
 class TestModels(PathMixIn, TestCase):
 
-    def prep_testdata(self, reg=True):
+    def prep_testdata(self, reg=True, th=[]):
         
         # prepare test dataset
         df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
-        data = QSKRDataset(df=df, property="CL", reg=reg)
+        data = QSKRDataset(df=df, property="CL", reg=reg, th=th)
         data.prepareDataset()
         data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
         
         return data
 
-    def QSKRsklearn_models_test(self, alg, alg_name, reg):
+    def QSKRsklearn_models_test(self, alg, alg_name, reg, th=[]):
         #intialize dataset and model
-        data = self.prep_testdata(reg=reg)
+        data = self.prep_testdata(reg=reg, th=th)
         themodel = QSKRsklearn(base_dir = f'{os.path.dirname(__file__)}/test_files/',
                                data=data, alg = alg, alg_name=alg_name)
         
@@ -206,17 +213,24 @@ class TestModels(PathMixIn, TestCase):
 
         #test classifier
         alg = RandomForestClassifier()
-        self.QSKRsklearn_models_test(alg, alg_name, reg=False)
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
+        
+        #test multi-classifier
+        alg = RandomForestClassifier()
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
     def testKNN(self):
         alg_name = "KNN"
-        #test regression
+        # test regression
         alg = KNeighborsRegressor()
         self.QSKRsklearn_models_test(alg, alg_name, reg=True)
 
-        #test classifier
+        # test classifier
         alg = KNeighborsClassifier()
-        self.QSKRsklearn_models_test(alg, alg_name, reg=False)
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
+
+        # test multiclass
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
     def testXGB(self):
         alg_name = "XGB"
@@ -226,7 +240,10 @@ class TestModels(PathMixIn, TestCase):
 
         #test classifier
         alg = XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss')
-        self.QSKRsklearn_models_test(alg, alg_name, reg=False)
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
+
+        #test multiclass
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
     def testSVM(self):
         alg_name = "SVM"
@@ -236,7 +253,10 @@ class TestModels(PathMixIn, TestCase):
 
         #test classifier
         alg = SVC(probability=True)
-        self.QSKRsklearn_models_test(alg, alg_name, reg=False)
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
+
+        #test multiclass
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
     def testPLS(self):
         alg_name = "PLS"
@@ -248,7 +268,10 @@ class TestModels(PathMixIn, TestCase):
         alg_name = "NB"
         #test classfier
         alg = GaussianNB()
-        self.QSKRsklearn_models_test(alg, alg_name, reg=False)
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
+
+        #test multiclass
+        self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
     def test_QSKRDNN(self):
         #intialize model
