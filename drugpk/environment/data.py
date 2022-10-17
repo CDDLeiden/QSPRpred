@@ -78,6 +78,8 @@ class QSKRDataset:
         self.features= None
         self.target_desc = None
 
+        logger.info(f"Dataset created for {property}")
+
     @classmethod
     def FromFile(cls, fname, smilescol = 'SMILES', property = 'CL', reg=True, th=[6.5]):
         df = pd.read_csv(fname, sep="\t")
@@ -109,6 +111,12 @@ class QSKRDataset:
             else:
                 logger.info('train: %s' % self.y.value_counts())
                 logger.info('test: %s\n' % self.y_ind.value_counts())
+                try:
+                    assert np.all([x > 0 for x in self.y.value_counts()])
+                    assert np.all([x > 0 for x in self.y_ind.value_counts()])
+                except AssertionError as err:
+                    logger.exception("All bins in multi-class classification should contain at least one sample")
+                    raise err
         
         if self.y.dtype.name == 'category':
             self.y = self.y.cat.codes

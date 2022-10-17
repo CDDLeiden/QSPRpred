@@ -99,8 +99,8 @@ class TestData(TestCase):
 
     def test_data(self):
         for reg in [True, False]:
-            df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv', sep='\t')
-            dataset = QSKRDataset(df=df, property="CL", reg=reg, th=[0,1,100,1000])
+            df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
+            dataset = QSKRDataset(df=df, property="CL", reg=reg, th=[0,1,10,1200])
             self.assertIsInstance(dataset, QSKRDataset)
 
             dataset.prepareDataset(datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
@@ -148,14 +148,14 @@ class NeuralNet(PathMixIn, TestCase):
         model.fit(trainloader, testloader, out=f'{self.datapath}/testmodel', patience = 3)
 
         ## prepare classification test dataset
-        no_features, trainloader, testloader = self.prep_testdata(reg=False)
+        no_features, trainloader, testloader = self.prep_testdata(reg=False, th=[6.5])
 
         # fit model with regression is false
         model = STFullyConnected(n_dim = no_features, is_reg=False, th=[6.5])
         model.fit(trainloader, testloader, out=f'{self.datapath}/testmodel', patience = 3)
 
         ## prepare multi-classification test dataset
-        no_features, trainloader, testloader = self.prep_testdata(reg=False, th=[0, 1, 100])
+        no_features, trainloader, testloader = self.prep_testdata(reg=False, th=[0, 1, 100, 1200])
 
         # fit model with regression is false
         model = STFullyConnected(n_dim = no_features, is_reg=False)

@@ -202,7 +202,7 @@ def Environ(args):
             if args.high_correlation:
                 featurefilters.append(highCorrelationFilter(th=args.high_correlation))
             if args.boruta_filter:
-                if args.reg:
+                if args.regression:
                     featurefilters.append(BorutaFilter())
                 else:
                      featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=5)))
