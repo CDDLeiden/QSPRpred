@@ -66,9 +66,13 @@ class Base(nn.Module):
                 optimizer.zero_grad()
                 # predicted probability tensor
                 y_ = self(Xb, istrain=True)
+                
                 # ignore all of the NaN values
                 ix = yb == yb
-                yb, y_ = yb[ix], y_[ix]
+                if self.n_class > 1: 
+                    yb, y_ = yb[ix], y_[ix[:,-1],:]
+                else:
+                    yb, y_ = yb[ix], y_[ix]
 
                 # weighting in original drugex v2 code, but was specific to data used there
                 # wb = torch.Tensor(yb.size()).to(utils.dev)
@@ -77,7 +81,11 @@ class Base(nn.Module):
                 # loss += self.criterion(y_ * wb, yb * wb).item()
 
                 # loss function calculation based on predicted tensor and label tensor
-                loss = self.criterion(y_, yb)
+                if self.n_class > 1:
+                    loss = self.criterion(y_, yb.long())
+                else:
+                    loss = self.criterion(y_, yb)
+
                 loss.backward()
                 optimizer.step()
             if patience == -1:
@@ -119,8 +127,13 @@ class Base(nn.Module):
         for Xb, yb in loader:
             Xb, yb = Xb.to(self.device), yb.to(self.device)
             y_ = self.forward(Xb)
+            
+            #remove NaN values
             ix = yb == yb
-            yb, y_ = yb[ix], y_[ix]
+            if self.n_class > 1: 
+                yb, y_ = yb[ix], y_[ix[:,-1],:]
+            else:
+                yb, y_ = yb[ix], y_[ix]
             
             # weighting in original drugex v2 code, but was specific to data used there
             # wb = torch.Tensor(yb.size()).to(utils.dev)
@@ -128,7 +141,10 @@ class Base(nn.Module):
             # wb[yb != 3.99] = 1
             # loss += self.criterion(y_ * wb, yb * wb).item()
 
-            loss += self.criterion(y_, yb).item()
+            if self.n_class > 1:
+                loss += self.criterion(y_, yb.long()).item()
+            else:
+                loss += self.criterion(y_, yb).item()
         loss = loss / len(loader)
         return loss
 
@@ -259,13 +275,13 @@ class STFullyConnected(Base):
         extra_layer (bool): add third hidden layer
     """
 
-    def __init__(self, n_dim, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, n_epochs = 1000, lr = None, batch_size=32,
+    def __init__(self, n_dim, n_class=1, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, n_epochs = 1000, lr = None, batch_size=32,
                  is_reg=True, neurons_h1 = 4000, neurons_hx = 1000, extra_layer = False):
         if not lr:
             lr = 1e-4 if is_reg else 1e-5
         super().__init__(device=device, gpus=gpus, n_epochs = n_epochs, lr = lr, batch_size=batch_size)
         self.n_dim = n_dim
-        self.n_class = 1
+        self.n_class = n_class
         self.is_reg = is_reg
         self.neurons_h1 = neurons_h1
         self.neurons_hx = neurons_hx
@@ -289,7 +305,7 @@ class STFullyConnected(Base):
         else:
             # loss function and activation function of output layer for multiple classification
             self.criterion = nn.CrossEntropyLoss()
-            self.activation = nn.Softmax()
+            self.activation = nn.Softmax(dim=1)
         self.to(self.device)
 
     def set_params(self, **params):
@@ -303,7 +319,7 @@ class STFullyConnected(Base):
             X (FloatTensor): m X n FloatTensor, m is the No. of samples, n is the No. of features.
             istrain (bool, optional): is it invoked during training process (True) or just for prediction (False)
         Return:
-            y (FloatTensor): m X l FloatTensor, m is the No. of samples, n is the No. of classes
+            y (FloatTensor): m X n FloatTensor, m is the No. of samples, n is the No. of classes
         """
         y = F.relu(self.fc0(X))
         if istrain:

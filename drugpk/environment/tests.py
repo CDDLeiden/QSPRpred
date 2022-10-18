@@ -126,6 +126,7 @@ class NeuralNet(PathMixIn, TestCase):
         # prepare data for torch DNN
         y = data.y.reshape(-1,1)
         y_ind = data.y_ind.reshape(-1,1)
+
         trainloader = DataLoader(TensorDataset(torch.Tensor(data.X), torch.Tensor(y)), batch_size=100)
         testloader = DataLoader(TensorDataset(torch.Tensor(data.X_ind), torch.Tensor(y_ind)), batch_size=100)
 
@@ -151,14 +152,14 @@ class NeuralNet(PathMixIn, TestCase):
         no_features, trainloader, testloader = self.prep_testdata(reg=False, th=[6.5])
 
         # fit model with regression is false
-        model = STFullyConnected(n_dim = no_features, is_reg=False, th=[6.5])
+        model = STFullyConnected(n_dim = no_features, is_reg=False)
         model.fit(trainloader, testloader, out=f'{self.datapath}/testmodel', patience = 3)
 
         ## prepare multi-classification test dataset
-        no_features, trainloader, testloader = self.prep_testdata(reg=False, th=[0, 1, 100, 1200])
+        no_features, trainloader, testloader = self.prep_testdata(reg=False, th=[0, 1, 10, 1200])
 
         # fit model with regression is false
-        model = STFullyConnected(n_dim = no_features, is_reg=False)
+        model = STFullyConnected(n_dim = no_features, n_class=3, is_reg=False)
         model.fit(trainloader, testloader, out=f'{self.datapath}/testmodel', patience = 3)
 
 
