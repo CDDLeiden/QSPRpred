@@ -175,11 +175,11 @@ class TestModels(PathMixIn, TestCase):
         
         return data
 
-    def QSKRsklearn_models_test(self, alg, alg_name, reg, th=[]):
+    def QSKRsklearn_models_test(self, alg, alg_name, reg, th=[], n_jobs=8):
         #intialize dataset and model
         data = self.prep_testdata(reg=reg, th=th)
         themodel = QSKRsklearn(base_dir = f'{os.path.dirname(__file__)}/test_files/',
-                               data=data, alg = alg, alg_name=alg_name)
+                               data=data, alg = alg, alg_name=alg_name, n_jobs=n_jobs)
         
         # train the model on all data
         themodel.fit()
@@ -275,9 +275,9 @@ class TestModels(PathMixIn, TestCase):
         self.QSKRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
     def test_QSKRDNN(self):
-        #intialize model
-        for reg in [True, False]:
-            data = self.prep_testdata(reg=reg)
+        #intialize model for single class, multi class and regression DNN's
+        for reg in [(False, [0, 1, 10, 1100]), (False, [6.5]), (True, [])]:
+            data = self.prep_testdata(reg=reg[0], th=reg[1])
             themodel = QSKRDNN(base_dir = f'{os.path.dirname(__file__)}/test_files/', data=data, gpus=[3,2], patience=3, tol=0.02)
             
             #fit and cross-validation
@@ -294,5 +294,5 @@ class TestModels(PathMixIn, TestCase):
   
             # bayesian optimization
             bayes_params = QSKRDNN.loadParamsGrid(fname, "bayes", "DNN")
-            search_space_bs = grid_params[bayes_params[:,0] == "DNN",1][0]
+            search_space_bs = bayes_params[bayes_params[:,0] == "DNN",1][0]
             themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=5)

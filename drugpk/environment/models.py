@@ -19,7 +19,7 @@ from sklearn import metrics
 from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
 from drugpk.environment.interfaces import QSKRModel
 from drugpk.environment.neural_network import STFullyConnected
-
+from functools import partial
 
 class QSKRsklearn(QSKRModel):
     """ Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
@@ -44,7 +44,7 @@ class QSKRsklearn(QSKRModel):
     def __init__(self, base_dir, data, alg, alg_name, parameters=None, n_jobs = 1):
 
         super().__init__(base_dir, data, alg, alg_name, parameters=parameters)
-        
+        self.n_jobs = n_jobs
         #initialize models with defined parameters
         if self.parameters:
             if type(self.alg) in [GaussianNB, PLSRegression, SVR, SVC]:
@@ -95,7 +95,7 @@ class QSKRsklearn(QSKRModel):
             arguments:
                 save (bool): don't save predictions when used in bayesian optimization
         """
-        cvs = np.zeros((self.data.y.shape[0], len(self.data.th)-1)) if (self.data.reg or len(self.data.th)) > 1 else np.zeros(self.data.y.shape)
+        cvs = np.zeros(self.data.y.shape) if (self.data.reg or (len(self.data.th) == 1)) else np.zeros((self.data.y.shape[0], len(self.data.th)-1)) 
 
         # cross validation
         for i, (trained, valided) in enumerate(self.data.folds):
@@ -264,9 +264,9 @@ class QSKRDNN(QSKRModel):
     """
     def __init__(self, base_dir, data, parameters = None, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, patience = 50, tol = 0):
 
-        
-        super().__init__(base_dir, data, STFullyConnected(n_dim=data.X.shape[1], device=device, gpus=gpus, is_reg=data.reg),
-                         "DNN", parameters=parameters)
+        self.n_class = max(1, len(data.th)-1)
+        super().__init__(base_dir, data, STFullyConnected(n_dim=data.X.shape[1], n_class=self.n_class, device=device,
+                         gpus=gpus, is_reg=data.reg), "DNN", parameters=parameters)
 
         self.patience = patience
         self.tol = tol
@@ -318,8 +318,8 @@ class QSKRDNN(QSKRModel):
         indep_loader = self.model.get_dataloader(self.data.X_ind)
         last_save_epoch = 0
 
-        cvs = np.zeros(self.y.shape)
-        inds = np.zeros(self.y_ind.shape)
+        cvs = np.zeros((self.data.y.shape[0], max(1, len(self.data.th)-1)))
+        #cvs = np.zeros(self.data.y.shape) if (self.data.reg or (len(self.data.th) == 1)) else np.zeros((self.data.y.shape[0], len(self.data.th)-1)) 
         for i, (trained, valided) in enumerate(self.data.folds):
             X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(self.data.X[trained], self.y[trained], test_size=ES_val_size)
             logger.info('cross validation fold ' +  str(i))
@@ -341,9 +341,13 @@ class QSKRDNN(QSKRModel):
             os.remove('%s_temp.log' % self.out)
             inds = self.model.predict(indep_loader)
 
-
             train, test = pd.Series(self.y.flatten()).to_frame(name='Label'), pd.Series(self.y_ind.flatten()).to_frame(name='Label')
-            train['Score'], test['Score'] = cvs, inds
+            if (not self.data.reg) and len(self.data.th) > 1:
+                train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
+                train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
+                test = pd.concat([test, pd.DataFrame(inds)], axis=1)
+            else:
+                train['Score'], test['Score'] = cvs, inds
             train.to_csv(self.out + '.cv.tsv', sep='\t')
             test.to_csv(self.out + '.ind.tsv', sep='\t')
         self.data.createFolds()
@@ -364,7 +368,10 @@ class QSKRDNN(QSKRModel):
                 save_m (bool): if true, after gs the model is refit on the entire data set
                 ES_val_size (float): validation set size for early stopping in CV
         """          
-        scoring = metrics.explained_variance_score if self.data.reg else metrics.roc_auc_score
+        if self.data.reg:        
+            scoring = metrics.explained_variance_score
+        else:
+            scoring = partial(metrics.roc_auc_score, multi_class='ovr', average='weighted') if len(self.data.th) > 1 else metrics.roc_auc_score
 
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         best_score = -np.inf

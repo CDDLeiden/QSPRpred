@@ -56,8 +56,8 @@ class QSKRDataset:
         if reg and log:
             self.df[property] = np.log(self.df[property])
 
+        self.th = th
         if not reg:
-            self.th = th
             assert type(th) == list, "thresholds should be a list"
             if len(th) > 1:
                 assert len(th) > 3, "For multi-class classification, set more than 3 values as threshold."

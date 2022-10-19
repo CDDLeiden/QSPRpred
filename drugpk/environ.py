@@ -57,8 +57,8 @@ def EnvironmentArgParser(txt=None):
                               -pr CL Fu -pr CL")
 
     # model type arguments
-    parser.add_argument('-m', '--model_types', type=str, nargs='*', choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN'],
-                        default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN'],
+    parser.add_argument('-m', '--model_types', type=str, nargs='*', choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
+                        default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
                         help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
                              'PLS' (only with REG), 'NB' (only with CLS) 'KNN'") 
     parser.add_argument('-r', '--regression', type=str, default=None,
@@ -264,10 +264,13 @@ def Environ(args):
                 elif args.optimization == 'bayes':
                     search_space_bs = grid_params[grid_params[:,0] == model_type,1][0]
                     log.info(search_space_bs)
-                    # if reg and model_type == "RF":
-                    #     search_space_bs.update({'criterion' : ['categorical', ['squared_error', 'poisson']]})
-                    # elif model_type == "RF":
-                    #     search_space_bs.update({'criterion' : ['categorical', ['gini', 'entropy']]})
+                    if reg and model_type == "RF":
+                        if log_transform:
+                            search_space_bs.update({'criterion' : ['categorical', ['squared_error']]})
+                        else:
+                            search_space_bs.update({'criterion' : ['categorical', ['squared_error', 'poisson']]})
+                    elif model_type == "RF":
+                        search_space_bs.update({'criterion' : ['categorical', ['gini', 'entropy']]})
                     qsKrmodel.bayesOptimization(search_space_bs, args.n_trials)
                 
                 # initialize models from saved or default parameters
