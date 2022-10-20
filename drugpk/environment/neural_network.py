@@ -281,8 +281,8 @@ class STFullyConnected(Base):
             lr = 1e-4 if is_reg else 1e-5
         super().__init__(device=device, gpus=gpus, n_epochs = n_epochs, lr = lr, batch_size=batch_size)
         self.n_dim = n_dim
-        self.n_class = n_class
         self.is_reg = is_reg
+        self.n_class = n_class if not self.is_reg else 1
         self.neurons_h1 = neurons_h1
         self.neurons_hx = neurons_hx
         self.extra_layer = extra_layer

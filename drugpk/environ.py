@@ -170,6 +170,7 @@ def Environ(args):
     for reg in args.regression:
         reg_abbr = 'REG' if reg else 'CLS'
         for property in args.properties:
+            log.info(f"Property: {property[0]}")
             try:
                 df = pd.read_csv(f'{args.base_dir}/data/{args.input}', sep='\t')
             except:
@@ -275,11 +276,15 @@ def Environ(args):
                 
                 # initialize models from saved or default parameters
 
-                if args.optimization is None and args.save_model:
-                    qsKrmodel.fit()
-                
                 if args.model_evaluation:
                     qsKrmodel.evaluate()
+
+                if args.save_model:
+                    if (model_type == 'DNN') and not (args.model_evaluation):
+                        log.warning("Fit skipped: DNN can only be fitted after cross-validation for determining \
+                                     optimal number of epochs to stop training")
+                    else:
+                        qsKrmodel.fit()
          
 if __name__ == '__main__':
     args = EnvironmentArgParser()

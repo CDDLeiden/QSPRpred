@@ -56,7 +56,7 @@ class QSKRDataset:
         if reg and log:
             self.df[property] = np.log(self.df[property])
 
-        self.th = th
+        self.th = [] if reg else th
         if not reg:
             assert type(th) == list, "thresholds should be a list"
             if len(th) > 1:

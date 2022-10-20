@@ -170,7 +170,7 @@ class QSKRsklearn(QSKRModel):
         else:
             scoring = 'roc_auc_ovr_weighted' if len(self.data.th) > 1 else 'roc_auc'
         grid = GridSearchCV(self.alg, search_space_gs, n_jobs=self.n_jobs, verbose=1, cv=self.data.folds,
-                            scoring=scoring)
+                            scoring=scoring, refit=False)
         
         fit_set = {'X': self.data.X, 'y': self.data.y}
         # if type(self.alg).__name__ not in ['KNeighborsRegressor', 'KNeighborsClassifier', 'PLSRegression']:
@@ -332,7 +332,7 @@ class QSKRDNN(QSKRModel):
         os.remove('%s_temp.log' % self.out)
 
         if save:
-            self.optimal_epochs = max(int(math.ceil(last_save_epoch / (self.data.n_folds))), 1)
+            self.optimal_epochs = int(math.ceil(last_save_epoch / self.data.n_folds)) + 1
             self.model = self.model.set_params(**{"n_epochs" : self.optimal_epochs})
 
             train_loader = self.model.get_dataloader(self.data.X, self.y)
