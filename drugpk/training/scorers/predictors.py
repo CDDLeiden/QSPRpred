@@ -15,7 +15,6 @@ from drugpk.training.scorers.properties import Property
 from torch.utils.data import DataLoader, TensorDataset
 import torch
 
-
 class Predictor(Scorer):
 
     def __init__(self, model, type='CLS', name=None, modifier=None):

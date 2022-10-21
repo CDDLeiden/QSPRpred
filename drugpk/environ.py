@@ -24,9 +24,9 @@ from drugpk import DEFAULT_GPUS
 from drugpk.logs.utils import backUpFiles, enable_file_logger, commit_hash
 from drugpk.environment.data import QSKRDataset
 from drugpk.environment.models import QSKRModel, QSKRDNN, QSKRsklearn
-from drugpk.environment.dataprep_utils.datafilters import papyrusLowQualityFilter
-from drugpk.environment.dataprep_utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from drugpk.environment.dataprep_utils.featurefilters import lowVarianceFilter, highCorrelationFilter, BorutaFilter
+from drugpk.environment.utils.datafilters import papyrusLowQualityFilter
+from drugpk.environment.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
+from drugpk.environment.utils.featurefilters import lowVarianceFilter, highCorrelationFilter, BorutaFilter
 import pickle
 
 def EnvironmentArgParser(txt=None):

@@ -2,9 +2,9 @@ import shutil
 from unittest import TestCase
 import os
 from os.path import exists
-from drugpk.environment.dataprep_utils.datasplitters import scaffoldsplit, randomsplit, temporalsplit
-from drugpk.environment.dataprep_utils.datafilters import CategoryFilter, papyrusLowQualityFilter
-from drugpk.environment.dataprep_utils.featurefilters import lowVarianceFilter, highCorrelationFilter, BorutaFilter
+from drugpk.environment.utils.datasplitters import scaffoldsplit, randomsplit, temporalsplit
+from drugpk.environment.utils.datafilters import CategoryFilter, papyrusLowQualityFilter
+from drugpk.environment.utils.featurefilters import lowVarianceFilter, highCorrelationFilter, BorutaFilter
 from drugpk.logs import logger
 import pandas as pd
 import numpy as np
