@@ -9,6 +9,11 @@ To add a new descriptor or fingerprint calculator:
 
 from abc import abstractmethod, ABC
 import numpy as np
+import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from rdkit import DataStructs
+from drugpk.environment.utils.properties import Property
 
 class Descriptor(ABC):
     """
@@ -45,9 +50,6 @@ class MorganFP(Descriptor):
             *args: `GetMorganFingerprintAsBitVect` arguments
             **kwargs: `GetMorganFingerprintAsBitVect` keyword arguments
         """
-        from rdkit import Chem
-        from rdkit.Chem import AllChem
-        from rdkit import DataStructs
         self._convertMol = Chem.MolFromSmiles
         self._convertFP = DataStructs.ConvertToNumpyArray
         self._morgan = AllChem.GetMorganFingerprintAsBitVect
@@ -61,12 +63,98 @@ class MorganFP(Descriptor):
         self.ln = len(fp)
         ret = np.zeros(self.ln)
         self._convertFP(fp, ret)
+        ret = pd.DataFrame(ret.reshape(1,-1), columns=[f"MorganFP_{idx}" for idx in range(ret.shape[0])])
         if self.keepindices:
             ret = ret[self.keepindices]
         return ret
 
     def __str__(self):
         return "MorganFP"
+
+class Mordred(Descriptor):
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the descriptor with the same arguments as you would pass to `Calculator` function of Mordred.
+        If no mordred descriptor object passed, the all descriptors will be calculated
+
+        Args:
+            *args: `Calculator` arguments
+            **kwargs: `Calculator` keyword arguments
+        """
+        from mordred import Calculator, descriptors
+        self._convertMol = Chem.MolFromSmiles
+        self._mordred = AllChem.GetMorganFingerprintAsBitVect
+        if args:
+            self._mordred = Calculator(*args, *kwargs)
+        else:
+            self._mordred = Calculator(descriptors, *kwargs)
+        self._args = args
+        self._kwargs = kwargs
+
+    def __call__(self, mol):
+        mol = self._convertMol(mol) if isinstance(mol, str) else mol
+        return self._mordred.pandas(mol)
+
+    def __str__(self):
+        return "Mordred"
+
+
+class physchem(Descriptor):
+    """
+        Initialize the descriptor with prop_list 
+        If no mordred descriptor object passed, the all descriptors will be calculated
+
+        Args:
+            *args: `Calculator` arguments
+            **kwargs: `Calculator` keyword arguments
+    """
+    def __init__(self, *args, **kwargs):
+        self._convertMol = Chem.MolFromSmiles
+        self._args = args
+        self._kwargs = kwargs
+
+    def __call__(self, mol):
+        mol = self._convertMol(mol) if isinstance(mol, str) else mol
+        physchem = self.calc_physchem([mol], *self._args, **self._kwargs)
+        return physchem
+    
+    def __str__(self):
+        return "physchem"
+
+    @staticmethod
+    def calc_physchem(mols, prop_list):
+        '''
+            Calculated physicochemical properties for a list of rdkit molecules using the Property class
+            arguments:
+                mols: list of rdkit molecules
+                prop_list: list of properties to calculate
+        '''
+        fps = np.zeros((len(mols), len(prop_list)))
+        props = Property()
+        for i, prop in enumerate(prop_list):
+            props.prop = prop
+            fps[:, i] = props(mols)
+        return pd.DataFrame(data=fps, columns=prop_list)
+
+
+class DrugExDescriptors(Descriptor):
+    """
+        Pysciochemical properties originally used in DrugEx for QSAR modelling
+    """
+    def __init__(self, *args, **kwargs):
+        self._convertMol = Chem.MolFromSmiles
+        self.prop_list = ['MW', 'logP', 'HBA', 'HBD', 'Rotable', 'Amide', 'Bridge', 'Hetero', 'Heavy', 'Spiro',
+                          'FCSP3', 'Ring', 'Aliphatic', 'Aromatic', 'Saturated', 'HeteroR', 'TPSA', 'Valence', 'MR']
+
+    def __call__(self, mol):
+        mol = self._convertMol(mol) if isinstance(mol, str) else mol
+        physchem = physchem.calc_physchem(mol)
+        return physchem
+    
+    def __str__(self):
+        return "DrugEx_physchem"
+
 
 class _DescriptorRetriever:
     """
@@ -84,5 +172,13 @@ class _DescriptorRetriever:
     def get_MorganFP(self, *args, **kwargs):
         return MorganFP(*args, **kwargs)
 
+    def get_physchem(self, *args, **kwargs):
+        return physchem(*args, **kwargs)
+    
+    def get_DrugExDescriptors(self, *args, **kwargs):
+        return DrugExDescriptors(*args, **kwargs)
+
 def get_descriptor(desc_type: str, *args, **kwargs):
     return _DescriptorRetriever().get_descriptor(desc_type, *args, **kwargs)
+
+

@@ -1,23 +1,17 @@
-"""
-descriptors
-
-Created by: Martin Sicho
-On: 05.10.22, 10:13
-"""
 from abc import abstractmethod, ABC
 
 from typing import List
 import pandas as pd
 import json
-from drugpk.environment.utils import descriptors
+from drugpk.environment.utils.descriptors import Descriptor, get_descriptor
 from rdkit.Chem.rdchem import Mol
 
-class FeaturesCalculator(ABC):
+class Calculator(ABC):
 
     @abstractmethod
-    def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
+    def __call__(self, mols: List[Mol]) -> pd.DataFrame:
         """
-        Calculate all specified descriptors for a pandas series of SMILES
+        Calculate all specified descriptors for a list of rdkit mols
 
         Args:
             df: dataframe containing a column with SMILES
@@ -32,7 +26,7 @@ class FeaturesCalculator(ABC):
     @abstractmethod
     def fromFile(cls, fname: str):
         """
-        Construct featurescalculator from json file
+        Construct calculator from json file
 
         Args:
             fname: file name to save featurecalculator to
@@ -42,7 +36,7 @@ class FeaturesCalculator(ABC):
     @abstractmethod
     def toFile(self, fname: str) -> None:
         """
-        Save featurescalculator to json file
+        Save calculator with settings to json file
 
         Args:
             fname: file name to save featurecalculator to
@@ -50,8 +44,8 @@ class FeaturesCalculator(ABC):
         pass
 
 
-class FeaturesCalculator():
-    def __init__(self, descriptors: List[descriptors.Descriptor]) -> None:
+class descriptorsCalculator(Calculator):
+    def __init__(self, descriptors: List[Descriptor]) -> None:
         self.descriptors = descriptors
 
     @classmethod
@@ -61,21 +55,24 @@ class FeaturesCalculator():
 
         descriptors = []
         for name, settings in descriptor_dict.items():
-            descriptor = descriptors.get_descriptor(name, *settings['_args'], **settings['_kwargs'])
+            descriptor = get_descriptor(name, *settings['_args'], **settings['_kwargs'])
             if 'keepindices' in settings.keys():
                 descriptor.keepindices = settings['keepindices']
             descriptors.append(descriptor)
-        return FeaturesCalculator(descriptors)
+        return descriptorsCalculator(descriptors)
     
     def __call__(self, mols: List[Mol]) -> pd.DataFrame:
+        df = pd.DataFrame()
         for descriptor in self.descriptors:
-            desc_calc = [descriptor(mol) for mol in mols] 
-        return desc_calc
-    
-    def toFile(self, fname):
+            values = pd.concat([descriptor(mol) for mol in mols])
+            df = pd.concat([df, values], axis=1)
+        return df
+
+    def toFile(self, fname: str) -> None:
         descriptor_dict = {}
         for descriptor in self.descriptors:
-            descriptor_dict[descriptor.__str__()] = {key:descriptor.__dict__[key] for key in ['_args', '_kwargs', 'keepindices']}
+            save_keys = [key for key in ['_args', '_kwargs', 'keepindices'] if key in descriptor.__dict__.keys()]
+            descriptor_dict[descriptor.__str__()] = {key:descriptor.__dict__[key] for key in save_keys}
         with open(fname, 'w') as outfile:
             json.dump(descriptor_dict, outfile)
 
