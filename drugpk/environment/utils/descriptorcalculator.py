@@ -65,7 +65,7 @@ class descriptorsCalculator(Calculator):
         df = pd.DataFrame()
         for descriptor in self.descriptors:
             values = pd.concat([descriptor(mol) for mol in mols])
-            df = pd.concat([df, values], axis=1)
+            df = pd.concat([df, values.add_prefix(f"{descriptor}_")], axis=1)
         return df
 
     def toFile(self, fname: str) -> None:

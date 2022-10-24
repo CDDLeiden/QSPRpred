@@ -1,3 +1,5 @@
+from drugpk.environment.utils.descriptors import MorganFP
+from drugpk.environment.utils.descriptorcalculator import descriptorsCalculator, get_descriptor
 from drugpk.logs import logger
 from drugpk.training.scorers.predictors import Predictor
 from drugpk.environment.utils.datasplitters import randomsplit
@@ -7,7 +9,6 @@ import numpy as np
 from rdkit import Chem
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import StandardScaler as Scaler
-from functools import partial
 
 class QSKRDataset:
     """
@@ -85,7 +86,8 @@ class QSKRDataset:
         df = pd.read_csv(fname, sep="\t")
         return QSKRDataset(df, smilescol, property, reg, th)
 
-    def prepareDataset(self, datafilters=[], split=randomsplit(), feature_calculators=[partial(Predictor.calculateDescriptors, as_df=True)],
+    def prepareDataset(self, datafilters=[], split=randomsplit(),
+                       feature_calculators=descriptorsCalculator([MorganFP(3, nBits=1000), get_descriptor("DrugExPhyschem")]),
                        featurefilters=[], n_folds=5):
         """
             prepare the dataset for use in QSKR model
@@ -123,9 +125,8 @@ class QSKRDataset:
             self.y_ind = self.y_ind.cat.codes
 
         # calculate features from smiles
-        for feature_calculator in feature_calculators:
-            self.X = feature_calculator([Chem.MolFromSmiles(mol) for mol in self.X])
-            self.X_ind = feature_calculator([Chem.MolFromSmiles(mol) for mol in self.X_ind])
+        self.X = feature_calculators([Chem.MolFromSmiles(mol) for mol in self.X if Chem.MolFromSmiles(mol)])
+        self.X_ind = feature_calculators([Chem.MolFromSmiles(mol) for mol in self.X_ind if Chem.MolFromSmiles(mol)])
 
         # apply filters to features
         alldata = pd.concat([self.X, self.X_ind], axis=0)

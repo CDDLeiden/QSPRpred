@@ -94,7 +94,7 @@ class Mordred(Descriptor):
 
     def __call__(self, mol):
         mol = self._convertMol(mol) if isinstance(mol, str) else mol
-        return self._mordred.pandas(mol)
+        return self._mordred.pandas([mol])
 
     def __str__(self):
         return "Mordred"
@@ -146,14 +146,16 @@ class DrugExDescriptors(Descriptor):
         self._convertMol = Chem.MolFromSmiles
         self.prop_list = ['MW', 'logP', 'HBA', 'HBD', 'Rotable', 'Amide', 'Bridge', 'Hetero', 'Heavy', 'Spiro',
                           'FCSP3', 'Ring', 'Aliphatic', 'Aromatic', 'Saturated', 'HeteroR', 'TPSA', 'Valence', 'MR']
+        self._args = args
+        self._kwargs = kwargs
 
     def __call__(self, mol):
         mol = self._convertMol(mol) if isinstance(mol, str) else mol
-        physchem = physchem.calc_physchem(mol)
-        return physchem
+        physchem_props = physchem.calc_physchem([mol], prop_list=self.prop_list)
+        return physchem_props
     
     def __str__(self):
-        return "DrugEx_physchem"
+        return "DrugExPhyschem"
 
 
 class _DescriptorRetriever:
@@ -175,8 +177,11 @@ class _DescriptorRetriever:
     def get_physchem(self, *args, **kwargs):
         return physchem(*args, **kwargs)
     
-    def get_DrugExDescriptors(self, *args, **kwargs):
+    def get_DrugExPhyschem(self, *args, **kwargs):
         return DrugExDescriptors(*args, **kwargs)
+    
+    def get_Mordred(self, *args, **kwargs):
+        return Mordred(*args, **kwargs)
 
 def get_descriptor(desc_type: str, *args, **kwargs):
     return _DescriptorRetriever().get_descriptor(desc_type, *args, **kwargs)
