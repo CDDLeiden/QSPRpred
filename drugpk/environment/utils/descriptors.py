@@ -14,8 +14,9 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
 from drugpk.environment.utils.properties import Property
+import mordred
 
-class Descriptor(ABC):
+class DescriptorSet(ABC):
     """
     Abstract base class for descriptors.
 
@@ -40,7 +41,7 @@ class Descriptor(ABC):
     def __str__(self):
         pass
 
-class MorganFP(Descriptor):
+class MorganFP(DescriptorSet):
 
     def __init__(self, *args, **kwargs):
         """
@@ -71,7 +72,7 @@ class MorganFP(Descriptor):
     def __str__(self):
         return "MorganFP"
 
-class Mordred(Descriptor):
+class Mordred(DescriptorSet):
 
     def __init__(self, *args, **kwargs):
         """
@@ -82,19 +83,41 @@ class Mordred(Descriptor):
             *args: `Calculator` arguments
             **kwargs: `Calculator` keyword arguments
         """
-        from mordred import Calculator, descriptors
-        self._convertMol = Chem.MolFromSmiles
-        self._mordred = AllChem.GetMorganFingerprintAsBitVect
-        if args:
-            self._mordred = Calculator(*args, *kwargs)
-        else:
-            self._mordred = Calculator(descriptors, *kwargs)
+
         self._args = args
         self._kwargs = kwargs
+        self._process_args()
+
+        self._is_fp = False
+        
+        self._mordred = None
+        self._descriptors = self._args
 
     def __call__(self, mol):
-        mol = self._convertMol(mol) if isinstance(mol, str) else mol
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
         return self._mordred.pandas([mol])
+
+    @property
+    def is_fp(self):
+        return self._is_fp()
+    
+    @property
+    def settings(self):
+        return self._args, self._kwargs
+
+    @property
+    def descriptors(self):
+        return self.descriptors
+
+    @descriptors.setter
+    def descriptors(self, names):
+            calc = mordred.Calculator(mordred.descriptors)
+            self._mordred = mordred.Calculator([d for d in calc.descriptors if str(d) in names], **self._kwargs)
+            self.descriptors = names
+
+    def _process_args(self, descs=None, version=None, ignore_3D=False, config=None):
+        self._args = mordred.Calculator(descs).descriptors if descs else mordred.Calculator(mordred.descriptors).descriptors
+        self._kwargs = {"version": version, "ignore_3D":ignore_3D, "config":config}
 
     def __str__(self):
         return "Mordred"

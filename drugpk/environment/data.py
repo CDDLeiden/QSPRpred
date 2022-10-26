@@ -138,7 +138,7 @@ class QSKRDataset:
                 alldata = featurefilter(alldata)
         
         logger.info(f"Selected features: {alldata.columns}")
-        self.features= alldata.columns
+        self.features = alldata.columns
         self.X = np.array(self.X[alldata.columns])
         self.X_ind = np.array(self.X_ind[alldata.columns])
         self.y = np.array(self.y)
