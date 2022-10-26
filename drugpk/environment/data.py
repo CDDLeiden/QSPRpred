@@ -138,7 +138,20 @@ class QSKRDataset:
                 alldata = featurefilter(alldata)
         
         logger.info(f"Selected features: {alldata.columns}")
+
+        # drop removed from feature_calulator object
         self.features = alldata.columns
+        for idx, descriptorset in enumerate(feature_calculators.descriptors):
+                descs_from_curr_set = [f.removeprefix(descriptorset) for f in self.features if f.startswith(descriptorset)]
+                if not descs_from_curr_set:
+                    feature_calculators.descriptors[idx].remove(descriptorset)
+                if descriptorset.is_fp:
+                    feature_calculators.descriptors[idx].keepindices = [int(f) for f in descs_from_curr_set]
+                else:
+                    feature_calculators.descriptors[idx].descriptors = descs_from_curr_set[idx]
+        
+        feature_calculators.toFile("test.json")
+
         self.X = np.array(self.X[alldata.columns])
         self.X_ind = np.array(self.X_ind[alldata.columns])
         self.y = np.array(self.y)

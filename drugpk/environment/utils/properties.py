@@ -22,9 +22,9 @@ from drugpk.training.scorers.modifiers import Gaussian
 
 class Property(Scorer):
 
-    def __init__(self, prop='MW', modifier=None):
+    def __init__(self, props=['MW'], modifier=None):
         super().__init__(modifier)
-        self.prop = prop
+        self.props = props
         self.prop_dict = {'MW': desc.MolWt,
                           'logP': Crippen.MolLogP,
                           'HBA': AllChem.CalcNumLipinskiHBA,
@@ -49,16 +49,17 @@ class Property(Scorer):
                           'Bertz': BertzCT}
 
     def getScores(self, mols):
-        scores = np.zeros(len(mols))
+        scores = np.zeros(len(mols), len(self.props))
         for i, mol in enumerate(mols):
-            try:
-                scores[i] = self.prop_dict[self.prop](mol)
-            except:
-                continue
+            for prop in self.props:
+                try:
+                    scores[i] = self.prop_dict[prop](mol)
+                except:
+                    continue
         return scores
 
     def getKey(self):
-        return self.prop
+        return self.props
 
 class AtomCounter(Scorer):
 

@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 from typing import List
 import pandas as pd
 import json
-from drugpk.environment.utils.descriptors import Descriptor, get_descriptor
+from drugpk.environment.utils.descriptors import DescriptorSet, get_descriptor
 from rdkit.Chem.rdchem import Mol
 
 class Calculator(ABC):
@@ -45,7 +45,7 @@ class Calculator(ABC):
 
 
 class descriptorsCalculator(Calculator):
-    def __init__(self, descriptors: List[Descriptor]) -> None:
+    def __init__(self, descriptors: List[DescriptorSet]) -> None:
         self.descriptors = descriptors
 
     @classmethod
@@ -71,7 +71,7 @@ class descriptorsCalculator(Calculator):
     def toFile(self, fname: str) -> None:
         descriptor_dict = {}
         for descriptor in self.descriptors:
-            save_keys = [key for key in ['_args', '_kwargs', 'keepindices'] if key in descriptor.__dict__.keys()]
+            save_keys = [key for key in ['_args', '_kwargs', 'keepindices', '_descriptors'] if key in descriptor.__dict__.keys()]
             descriptor_dict[descriptor.__str__()] = {key:descriptor.__dict__[key] for key in save_keys}
         with open(fname, 'w') as outfile:
             json.dump(descriptor_dict, outfile)
