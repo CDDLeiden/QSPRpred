@@ -76,14 +76,14 @@ class MorganFP(DescriptorSet):
         self.ln = len(fp)
         ret = np.zeros(self.ln)
         self._convertFP(fp, ret)
-        ret = pd.DataFrame(ret.reshape(1,-1), columns=[f"MorganFP_{idx}" for idx in range(ret.shape[0])])
+        ret = pd.DataFrame(ret.reshape(1,-1), columns=[f"{idx}" for idx in range(ret.shape[0])])
         if self.keepindices:
             ret = ret[self.keepindices]
         return ret
 
     @property
     def is_fp(self):
-        return self._is_fp()
+        return self._is_fp
     
     @property
     def settings(self):
@@ -119,7 +119,7 @@ class Mordred(DescriptorSet):
 
     @property
     def is_fp(self):
-        return self._is_fp()
+        return self._is_fp
     
     @property
     def settings(self):
@@ -166,7 +166,7 @@ class physchem(DescriptorSet):
 
     @property
     def is_fp(self):
-        return self._is_fp()
+        return self._is_fp
     
     @property
     def settings(self):

@@ -49,7 +49,7 @@ class Property(Scorer):
                           'Bertz': BertzCT}
 
     def getScores(self, mols):
-        scores = np.zeros(len(mols), len(self.props))
+        scores = np.zeros((len(mols), len(self.props)))
         for i, mol in enumerate(mols):
             for prop in self.props:
                 try:
