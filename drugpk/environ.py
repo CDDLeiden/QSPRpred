@@ -28,6 +28,8 @@ from drugpk.environment.utils.datafilters import papyrusLowQualityFilter
 from drugpk.environment.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
 from drugpk.environment.utils.featurefilters import lowVarianceFilter, highCorrelationFilter, BorutaFilter
 import pickle
+from drugpk.environment.utils.descriptorcalculator import descriptorsCalculator, get_descriptor
+from drugpk.environment.utils.descriptors import DrugExDescriptors, Mordred, physchem, MorganFP
 
 def EnvironmentArgParser(txt=None):
     """ 
@@ -208,7 +210,8 @@ def Environ(args):
                 else:
                      featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=5)))
 
-            mydataset.prepareDataset(datafilters=datafilters, split=split, featurefilters=featurefilters)
+            mydataset.prepareDataset(feature_calculators=descriptorsCalculator([MorganFP(3, nBits=1000), get_descriptor("DrugExPhyschem")]),
+                                     datafilters=datafilters, split=split, featurefilters=featurefilters)
 
             # save dataset object
             mydataset.folds = None

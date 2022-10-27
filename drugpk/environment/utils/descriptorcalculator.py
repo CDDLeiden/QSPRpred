@@ -45,34 +45,38 @@ class Calculator(ABC):
 
 
 class descriptorsCalculator(Calculator):
-    def __init__(self, descriptors: List[DescriptorSet]) -> None:
-        self.descriptors = descriptors
+    def __init__(self, descsets: List[DescriptorSet]) -> None:
+        self.descsets = descsets
 
     @classmethod
     def fromFile(cls, fname: str):
         with open(fname, 'r') as infile:
-            descriptor_dict = json.load(infile)
+            descset_dict = json.load(infile)
 
-        descriptors = []
-        for name, settings in descriptor_dict.items():
-            descriptor = get_descriptor(name, *settings['_args'], **settings['_kwargs'])
-            if 'keepindices' in settings.keys():
-                descriptor.keepindices = settings['keepindices']
-            descriptors.append(descriptor)
-        return descriptorsCalculator(descriptors)
+        descsets = []
+        for key, value in descset_dict.items():
+            descset = get_descriptor(key, *value['settings'][0], **value['settings'][1])
+            if descset.is_fp:
+                descset.keepindices = value['keepindices']
+            else:
+                descset.descriptors = value['descriptors']
+            descsets.append(descset)
+        return descriptorsCalculator(descsets)
     
     def __call__(self, mols: List[Mol]) -> pd.DataFrame:
         df = pd.DataFrame()
-        for descriptor in self.descriptors:
-            values = pd.concat([descriptor(mol) for mol in mols])
-            df = pd.concat([df, values.add_prefix(f"{descriptor}_")], axis=1)
+        for descset in self.descsets:
+            values = pd.concat([descset(mol) for mol in mols])
+            df = pd.concat([df, values.add_prefix(f"{descset}_")], axis=1)
         return df
 
     def toFile(self, fname: str) -> None:
-        descriptor_dict = {}
-        for descriptor in self.descriptors:
-            save_keys = [key for key in ['_args', '_kwargs', 'keepindices', '_descriptors'] if key in descriptor.__dict__.keys()]
-            descriptor_dict[descriptor.__str__()] = {key:descriptor.__dict__[key] for key in save_keys}
+        descset_dict = {}
+        for descset in self.descsets:
+            if descset.is_fp:
+                 descset_dict[descset.__str__()] = {'settings': descset.settings, 'keepindices':descset.keepindices}
+            else:
+                descset_dict[descset.__str__()] = {'settings': descset.settings, 'descriptors':descset.descriptors}
         with open(fname, 'w') as outfile:
-            json.dump(descriptor_dict, outfile)
+            json.dump(descset_dict, outfile)
 

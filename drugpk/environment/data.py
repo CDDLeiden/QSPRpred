@@ -9,6 +9,7 @@ import numpy as np
 from rdkit import Chem
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import StandardScaler as Scaler
+from rdkit.Chem import PandasTools
 
 class QSKRDataset:
     """
@@ -50,8 +51,13 @@ class QSKRDataset:
     def __init__(self, df: pd.DataFrame, property, smilescol = 'SMILES', reg=True, th=[], log=False):
         self.smilescol = smilescol
         self.property = property
-        self.df = df.dropna(subset=([smilescol, property]))
+        self.df = df.dropna(subset=([smilescol, property])).copy()
         
+        #drop invalid smiles
+        PandasTools.AddMoleculeColumnToFrame(self.df,smilescol,'Mol',includeFingerprints=False)
+        logger.info(f"Removed invalid Smiles: {self.df.iloc[np.where(self.df['Mol'].isnull())[0]][smilescol]}")
+        self.df = self.df.dropna(subset=(['Mol']))
+
         self.reg = reg
         
         if reg and log:
@@ -86,12 +92,12 @@ class QSKRDataset:
         df = pd.read_csv(fname, sep="\t")
         return QSKRDataset(df, smilescol, property, reg, th)
 
-    def prepareDataset(self, datafilters=[], split=randomsplit(),
-                       feature_calculators=descriptorsCalculator([MorganFP(3, nBits=1000), get_descriptor("DrugExPhyschem")]),
-                       featurefilters=[], n_folds=5):
+    def prepareDataset(self, fname, datafilters=[], split=randomsplit(), feature_calculators=None, featurefilters=[],
+                       n_folds=5):
         """
             prepare the dataset for use in QSKR model
             Arguments:
+                fname (str): feature_calculator with filtered features saved to this file
                 datafilters (list of datafilter obj): filters number of rows from dataset
                 split (datasplitter obj): splits the dataset into train and test set
                 features (list of feature calculation cls): calculates features from smiles
@@ -141,16 +147,16 @@ class QSKRDataset:
 
         # drop removed from feature_calulator object
         self.features = alldata.columns
-        for idx, descriptorset in enumerate(feature_calculators.descriptors):
+        for idx, descriptorset in enumerate(feature_calculators.descsets):
                 descs_from_curr_set = [f.removeprefix(f"{descriptorset}_") for f in self.features if f.startswith(str(descriptorset))]
                 if not descs_from_curr_set:
-                    feature_calculators.descriptors.remove(descriptorset)
+                    feature_calculators.descsets.remove(descriptorset)
                 elif descriptorset.is_fp:
-                    feature_calculators.descriptors[idx].keepindices = [f for f in descs_from_curr_set]
+                    feature_calculators.descsets[idx].keepindices = [f for f in descs_from_curr_set]
                 else:
-                    feature_calculators.descriptors[idx].descriptors = descs_from_curr_set
+                    feature_calculators.descsets[idx].descriptors = descs_from_curr_set
         
-        feature_calculators.toFile("test.json")
+        feature_calculators.toFile(fname)
 
         self.X = np.array(self.X[alldata.columns])
         self.X_ind = np.array(self.X_ind[alldata.columns])

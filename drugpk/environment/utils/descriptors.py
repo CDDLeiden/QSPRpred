@@ -106,7 +106,7 @@ class Mordred(DescriptorSet):
 
         self._args = args
         self._kwargs = kwargs
-        self._process_args()
+        self._process_args(*args, **kwargs)
 
         self._is_fp = False
         
@@ -178,7 +178,7 @@ class physchem(DescriptorSet):
 
     @descriptors.setter
     def descriptors(self, props):
-        #self._calculator.props = props
+        self._calculator.props = props
         self._descriptors = props
 
     def __str__(self):
@@ -200,7 +200,7 @@ class _DescriptorSetRetriever:
         method_name = 'get_' + desc_type
         method = getattr(self, method_name)
         if method is None:
-            raise Exception(f'{desc_type} is not a supported fingerprint type.')
+            raise Exception(f'{desc_type} is not a supported descriptor set type.')
         return method(*args, **kwargs)
 
     def get_MorganFP(self, *args, **kwargs):
