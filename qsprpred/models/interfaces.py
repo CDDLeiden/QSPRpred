@@ -7,7 +7,6 @@ import json
 
 from qsprpred.logs import logger
 
-
 class QSPRModel(ABC):
     """ Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
         ...

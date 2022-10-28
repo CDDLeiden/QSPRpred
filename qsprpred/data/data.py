@@ -6,9 +6,9 @@ from sklearn.preprocessing import StandardScaler as Scaler
 from rdkit import Chem
 from rdkit.Chem import PandasTools
 
-from drugpk.logs import logger
-from drugpk.data.utils.datasplitters import randomsplit
-from drugpk.data.utils.featurefilters import BorutaFilter
+from qsprpred.logs import logger
+from qsprpred.data.utils.datasplitters import randomsplit
+from qsprpred.data.utils.featurefilters import BorutaFilter
 
 class QSPRDataset:
     """
@@ -134,8 +134,6 @@ class QSPRDataset:
         self.X_ind = feature_calculators([Chem.MolFromSmiles(mol) for mol in self.X_ind if Chem.MolFromSmiles(mol)])
 
         # apply filters to features on trainingset
-        alldata = pd.concat([self.X, self.X_ind], axis=0)
-        ally = pd.concat([self.y, self.y_ind], axis=0)
         for featurefilter in featurefilters:
             if type(featurefilter) == BorutaFilter:
                 self.X = featurefilter(self.X, self.y)
@@ -144,7 +142,7 @@ class QSPRDataset:
         
         self.features = self.X.columns
         self.X_ind = self.X_ind[self.features]
-        logger.info(f"Selected features: {self.X.self.features}")
+        logger.info(f"Selected features: {self.features}")
 
         # drop removed from feature_calulator object
         for idx, descriptorset in enumerate(feature_calculators.descsets):
@@ -158,8 +156,8 @@ class QSPRDataset:
         
         feature_calculators.toFile(fname)
 
-        self.X = np.array(self.X[alldata.columns])
-        self.X_ind = np.array(self.X_ind[alldata.columns])
+        self.X = np.array(self.X)
+        self.X_ind = np.array(self.X_ind)
         self.y = np.array(self.y)
         self.y_ind = np.array(self.y_ind)
 

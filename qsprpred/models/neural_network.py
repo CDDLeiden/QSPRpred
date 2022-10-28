@@ -1,5 +1,5 @@
-from drugpk.logs import logger
-from drugpk import DEFAULT_DEVICE, DEFAULT_GPUS
+from qsprpred.logs import logger
+from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
 
 import time
 import inspect

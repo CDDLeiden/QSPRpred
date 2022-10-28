@@ -1,23 +1,25 @@
-from unittest import TestCase
-import shutil
 import os
+import shutil
 from os.path import exists
+from unittest import TestCase
+import random
 
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader, TensorDataset
-
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.cross_decomposition import PLSRegression
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC, SVR
-from xgboost import XGBRegressor, XGBClassifier
-
-from qsprpred.logs import logger
-from qsprpred.models.neural_network import STFullyConnected
+from QSPRpred.qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from QSPRpred.qsprpred.data.utils.descriptors import MorganFP
 from qsprpred.data.data import QSPRDataset
-from qsprpred.models.models import QSPRsklearn, QSPRDNN
+from qsprpred.logs import logger
+from qsprpred.models.models import QSPRDNN, QSPRsklearn
+from qsprpred.models.neural_network import STFullyConnected
+from sklearn.cross_decomposition import PLSRegression
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from sklearn.svm import SVC, SVR
+from torch.utils.data import DataLoader, TensorDataset
+from xgboost import XGBClassifier, XGBRegressor
+
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
@@ -41,11 +43,13 @@ class NeuralNet(PathMixIn, TestCase):
         os.remove(f'{cls.datapath}/testmodel.pkg')
 
     def prep_testdata(self, reg=True, th=[]):
-
+        reg_abbr = 'REG' if reg else 'CLS'
+        
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
-        data.prepareDataset()
+        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/envs/CL_{reg_abbr}.tsv',
+                                feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]))
         data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
 
         # prepare data for torch DNN
@@ -92,10 +96,14 @@ class TestModels(PathMixIn, TestCase):
 
     def prep_testdata(self, reg=True, th=[]):
         
+        reg_abbr = 'REG' if reg else 'CLS'
+        random.seed(42)
+
         # prepare test dataset
-        df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
+        df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
-        data.prepareDataset()
+        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/envs/CL_{reg_abbr}.tsv',
+                                feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]))
         data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
         
         return data

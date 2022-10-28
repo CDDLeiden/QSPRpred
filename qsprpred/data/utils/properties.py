@@ -4,19 +4,15 @@ properties
 Created by: Martin Sicho
 On: 06.06.22, 20:17
 """
-import re
-import tqdm
 
 import numpy as np
-from typing import List
 
-from rdkit import Chem, DataStructs
 from rdkit.Chem.QED import qed
 from rdkit.Chem.GraphDescriptors import BertzCT
 from rdkit.Chem import Descriptors as desc, Crippen, AllChem, Lipinski
 
-from drugpk.utils.fingerprints import get_fingerprint
 from qsprpred.data.interfaces import Scorer
+from qsprpred.data.utils.sascorer import calculateScore
 
 class Property(Scorer):
 

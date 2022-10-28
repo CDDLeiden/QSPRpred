@@ -1,12 +1,11 @@
 from unittest import TestCase
 import shutil
 import os
-from os.path import exists
 
 import pandas as pd
 import numpy as np
-import torch
-from torch.utils.data import DataLoader, TensorDataset
+from QSPRpred.qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from QSPRpred.qsprpred.data.utils.descriptors import MorganFP
 
 from qsprpred.logs import logger
 from qsprpred.data.data import QSPRDataset
@@ -87,15 +86,18 @@ class TestFeatureFilters(PathMixIn, TestCase):
         self.assertTrue(self.df[X.columns].equals(X))
 
 
-class TestData(TestCase):
+class TestData(PathMixIn, TestCase):
 
     def test_data(self):
         for reg in [True, False]:
+            reg_abbr = 'REG' if reg else 'CLS'
             df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
             dataset = QSPRDataset(df=df, property="CL", reg=reg, th=[0,1,10,1200])
             self.assertIsInstance(dataset, QSPRDataset)
 
-            dataset.prepareDataset(datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
+            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/envs/CL_{reg_abbr}.tsv',
+                                feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]),
+                                datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
                                 featurefilters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])
 
 

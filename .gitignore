@@ -1,13 +1,6 @@
 ### DrugEx Specific
 
-AdenosineReceptors_v3/
-AdenosineReceptors_v3/*
-AdenosineReceptors_v3/data/*.tsv
-AdenosineReceptors_v4/
-AdenosineReceptors_v4/*
-AdenosineReceptors_v4/data/*.tsv
 Lombardo_set/
-tutorial
 *.out
 
 .*
@@ -162,6 +155,3 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-
-MolsForReview_withprops.tsv
-MolsForReview.tsv

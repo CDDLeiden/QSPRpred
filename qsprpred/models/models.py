@@ -1,5 +1,5 @@
-from drugpk.logs import logger
-from drugpk import DEFAULT_DEVICE, DEFAULT_GPUS
+from qsprpred.logs import logger
+from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
 
 import sys
 import os
@@ -17,8 +17,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC, SVR
 from sklearn import metrics
 from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
-from drugpk.data.interfaces import QSPRModel
-from drugpk.models.neural_network import STFullyConnected
+from qsprpred.models.interfaces import QSPRModel
+from qsprpred.models.neural_network import STFullyConnected
 from functools import partial
 
 class QSPRsklearn(QSPRModel):
