@@ -39,7 +39,7 @@ class Property(Scorer):
                           'Valence': desc.NumValenceElectrons,
                           'MR': Crippen.MolMR,
                           'QED': qed,
-                          'SA': calculateScore,
+                        #   'SA': calculateScore,
                           'Bertz': BertzCT}
 
     def getScores(self, mols):

@@ -98,7 +98,7 @@ def QSPRArgParser(txt=None):
                         help="Temporal split time column. Used for temporal split.")
 
     # features to calculate
-    parser.add_argument('-fe', '-features', type='str', choices=['Morgan', 'Pyschem', 'Mordred'], nargs='*')
+    parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'Pyschem', 'Mordred'], nargs='*')
 
     # feature filters
     parser.add_argument('-lv', '--low_variability', type=float, default=None, help="low variability threshold\
@@ -191,12 +191,12 @@ def QSPR(args):
                 datafilters.append(papyrusLowQualityFilter())
 
             # data splitter
-            if args.split == 'random':
-                split=randomsplit(test_fraction=args.split_fraction)
-            elif args.split == 'scaffold':
+            if args.split == 'scaffold':
                 split=scaffoldsplit(test_fraction=args.split_fraction)
             elif args.split == 'temporal':
                 split=temporalsplit(timesplit=args.split_time, timecol=args.split_timecolumn)
+            else:
+                split=randomsplit(test_fraction=args.split_fraction)
 
             # feature calculator
             descriptorsets = []
@@ -205,7 +205,7 @@ def QSPR(args):
             if 'Pyschem' in args.features:
                 descriptorsets.append(get_descriptor("DrugExPhyschem"))
             if 'Mordred' in args.features:
-                descriptorsets.append()
+                descriptorsets.append(Mordred())
 
             # feature filters
             featurefilters=[]
