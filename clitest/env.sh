@@ -55,7 +55,7 @@ export DATASET_FRAGMENT_ARGS="-fm ${FRAG_METHOD} -nf ${N_COMBINATIONS} -nf ${N_F
 # ENVIRONMENT #
 ###############
 export ENVIRON_COMMON_ARGS="-b ${TEST_BASE} -d"
-python -m drugex.environ \
+python -m qsprpred.environ \
 ${ENVIRON_COMMON_ARGS} \
 -i ${TEST_DATA_ENVIRONMENT} \
 -l \

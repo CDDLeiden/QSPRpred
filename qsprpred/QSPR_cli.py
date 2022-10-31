@@ -114,7 +114,7 @@ def QSPRArgParser(txt=None):
                         help="Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, if 'bayes' bayesian optimization")
     parser.add_argument('-ss', '--search_space', type=str, default=None,
                         help="search_space hyperparameter optimization json file location (base_dir/[name].json), \
-                              if None default drugpk.models.search_space.json used")                  
+                              if None default qsprpred.models.search_space.json used")                  
     parser.add_argument('-nt', '--n_trials', type=int, default=20, help="number of trials for bayes optimization")
     parser.add_argument('-me', '--model_evaluation', action='store_true',
                         help='If on, model evaluation through cross validation and independent test set is performed.')

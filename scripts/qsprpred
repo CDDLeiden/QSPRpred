@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python -m qsprpred.$1 $2

@@ -104,7 +104,7 @@ class QSPRModel(ABC):
                 logger.error("Search space file (%s) not found" % fname)
                 sys.exit()
         else:
-            with open('drugpk/models/search_space.json') as json_file:
+            with open('qsprpred/models/search_space.json') as json_file:
                 optim_params = np.array(json.load(json_file), dtype=object)
         
         # select either grid or bayes optimization parameters from param array
