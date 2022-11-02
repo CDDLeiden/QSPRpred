@@ -15,16 +15,16 @@ from qsprpred.data.utils.featurefilters import lowVarianceFilter, highCorrelatio
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
-    envspath = f'{os.path.dirname(__file__)}/test_files/envs'
+    qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qsprmodels'
 
     @classmethod
     def setUpClass(cls):
-        if not os.path.exists(cls.envspath):
-            os.mkdir(cls.envspath)
+        if not os.path.exists(cls.qsprmodelspath):
+            os.mkdir(cls.qsprmodelspath)
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.envspath)
+        shutil.rmtree(cls.qsprmodelspath)
 
 class TestDataSplitters(PathMixIn, TestCase):
     df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
@@ -95,7 +95,7 @@ class TestData(PathMixIn, TestCase):
             dataset = QSPRDataset(df=df, property="CL", reg=reg, th=[0,1,10,1200])
             self.assertIsInstance(dataset, QSPRDataset)
 
-            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/envs/CL_{reg_abbr}.tsv',
+            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
                                 feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]),
                                 datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
                                 featurefilters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])

@@ -106,7 +106,7 @@ def backUpFiles(base_dir : str, folder : str, output_prefixes : tuple, cp_suffix
         backup_id = generate_backup_runID(dir)    
         if folder in 'data':
             message = backUpFilesInFolder(dir, backup_id, output_prefixes, output_extensions=('json', 'log'))
-        elif folder == 'envs':
+        elif folder == 'qsprmodels':
             message = backUpFilesInFolder(dir, backup_id, output_prefixes, output_extensions=('json', 'log'), cp_suffix=cp_suffix )
         elif folder == 'generators':
             message = backUpFilesInFolder(dir, backup_id, output_prefixes)

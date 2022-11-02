@@ -71,8 +71,8 @@ def QSPRArgParser(txt=None):
 
     # model settings
     parser.add_argument('-p', '--parameters', type=str, default=None,
-                        help="file name of json file with non-default parameter settings (base_dir/envs/[-p]_params.json). NB. If json file with name \
-                             {model_type}_{REG/CLS}_{property}_params.json) present in envs folder those settings will also be used, \
+                        help="file name of json file with non-default parameter settings (base_dir/qsprmodels/[-p]_params.json). NB. If json file with name \
+                             {model_type}_{REG/CLS}_{property}_params.json) present in qsprmodels folder those settings will also be used, \
                              but if the same parameter is present in both files the settings from (base_dir/[-p]_params.json) will be used.")
     parser.add_argument('-pat', '--patience', type=int, default=50,
                         help="for DNN, number of epochs for early stopping")
@@ -150,14 +150,14 @@ def QSPR(args):
         Optimize, evaluate and train estimators
     """
     
-    if not os.path.exists(args.base_dir + '/envs'):
-        os.makedirs(args.base_dir + '/envs') 
+    if not os.path.exists(args.base_dir + '/qsprmodels'):
+        os.makedirs(args.base_dir + '/qsprmodels') 
     
     # read in file with specified parameters for model fitting
     parameters=None
     if args.parameters:
             try:
-                with open(f'{args.base_dir}/envs/{args.parameters}_params.json') as json_file:
+                with open(f'{args.base_dir}/qsprmodels/{args.parameters}_params.json') as json_file:
                     par_dicts = np.array(json.load(json_file))
             except:
                 log.error("Parameter settings file (%s/%s.json) not found." % args.base_dir/args.parameters)
@@ -201,7 +201,7 @@ def QSPR(args):
             # feature calculator
             descriptorsets = []
             if 'Morgan' in args.features:
-                descriptorsets.append(MorganFP(3, nBits=1000))
+                descriptorsets.append(MorganFP(3, nBits=2048))
             if 'Pyschem' in args.features:
                 descriptorsets.append(get_descriptor("DrugExPhyschem"))
             if 'Mordred' in args.features:
@@ -220,13 +220,13 @@ def QSPR(args):
                      featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=5)))
 
 
-            mydataset.prepareDataset(fname=f"{args.base_dir}/envs/{property[0]}_{reg_abbr}_DescCalc.json", 
+            mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{property[0]}_{reg_abbr}_DescCalc.json", 
                                      feature_calculators=descriptorsCalculator([MorganFP(3, nBits=1000), get_descriptor("DrugExPhyschem")]),
                                      datafilters=datafilters, split=split, featurefilters=featurefilters)
 
             # save dataset object
             mydataset.folds = None
-            pickle.dump(mydataset, open(f'{args.base_dir}/envs/{property[0]}_{reg_abbr}_QSPRdata.pkg', 'bw'))
+            pickle.dump(mydataset, open(f'{args.base_dir}/qsprmodels/{property[0]}_{reg_abbr}_QSPRdata.pkg', 'bw'))
             mydataset.createFolds()
 
             for model_type in args.model_types:
@@ -312,13 +312,13 @@ if __name__ == '__main__':
     # Backup files
     tasks = [ 'REG' if reg == True else 'CLS' for reg in args.regression ]
     file_prefixes = [ f'{alg}_{task}_{property}' for alg in args.model_types for task in tasks for property in args.properties]
-    backup_msg = backUpFiles(args.base_dir, 'envs', tuple(file_prefixes), cp_suffix='_params')
+    backup_msg = backUpFiles(args.base_dir, 'qsprmodels', tuple(file_prefixes), cp_suffix='_params')
 
-    if not os.path.exists(f'{args.base_dir}/envs'):
-        os.mkdir(f'{args.base_dir}/envs')
+    if not os.path.exists(f'{args.base_dir}/qsprmodels'):
+        os.mkdir(f'{args.base_dir}/qsprmodels')
 
     logSettings = enable_file_logger(
-        os.path.join(args.base_dir, 'envs'),
+        os.path.join(args.base_dir, 'qsprmodels'),
         'QSPR.log',
         args.debug,
         __name__,
@@ -337,7 +337,7 @@ if __name__ == '__main__':
 
     # Create json log file with used commandline arguments 
     print(json.dumps(vars(args), sort_keys=False, indent=2))
-    with open(f'{args.base_dir}/envs/QSPR.json', 'w') as f:
+    with open(f'{args.base_dir}/qsprmodels/QSPR.json', 'w') as f:
         json.dump(vars(args), f)
     
     #Optimize, evaluate and train estimators according to QSPR arguments

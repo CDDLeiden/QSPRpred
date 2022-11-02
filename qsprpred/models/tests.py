@@ -23,16 +23,16 @@ from xgboost import XGBClassifier, XGBRegressor
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
-    envspath = f'{os.path.dirname(__file__)}/test_files/envs'
+    qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qsprmodels'
 
     @classmethod
     def setUpClass(cls):
-        if not os.path.exists(cls.envspath):
-            os.mkdir(cls.envspath)
+        if not os.path.exists(cls.qsprmodelspath):
+            os.mkdir(cls.qsprmodelspath)
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.envspath)
+        shutil.rmtree(cls.qsprmodelspath)
 
 class NeuralNet(PathMixIn, TestCase):
 
@@ -48,7 +48,7 @@ class NeuralNet(PathMixIn, TestCase):
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
-        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/envs/CL_{reg_abbr}.tsv',
+        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
                                 feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]))
         data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
 
@@ -102,7 +102,7 @@ class TestModels(PathMixIn, TestCase):
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
-        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/envs/CL_{reg_abbr}.tsv',
+        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
                                 feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]))
         data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
         
@@ -117,26 +117,26 @@ class TestModels(PathMixIn, TestCase):
         # train the model on all data
         themodel.fit()
         regid = 'REG' if reg else 'CLS'
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}.pkg'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.pkg'))
 
         # perform crossvalidation
         themodel.evaluate()
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}.ind.tsv'))
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}.cv.tsv'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.ind.tsv'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.cv.tsv'))
         
         # perform bayes optimization
         fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
         grid_params = QSPRsklearn.loadParamsGrid(fname, "bayes", alg_name)
         search_space_bs = grid_params[grid_params[:,0] == alg_name,1][0]
         themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=1)
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}_params.json'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}_params.json'))
 
         # perform grid search
-        os.remove(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}_params.json')
+        os.remove(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}_params.json')
         grid_params = QSPRsklearn.loadParamsGrid(fname, "grid", alg_name)
         search_space_gs = grid_params[grid_params[:,0] == alg_name,1][0]
         themodel.gridSearch(search_space_gs=search_space_gs)
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/envs/{alg_name}_{regid}_{data.property}_params.json'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}_params.json'))
 
 
     def testRF(self):
