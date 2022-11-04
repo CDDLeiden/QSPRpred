@@ -30,7 +30,7 @@ class temporalsplit(datasplit):
 
     def __call__(self, df, Xcol, ycol):
         test_idx = df[df[self.timecol] > self.timesplit].index
-        test = df.loc[list(test_idx)].dropna()
+        test = df.loc[list(test_idx)]
         train = df.drop(test.index)
         return train[Xcol], test[Xcol], train[ycol], test[ycol]
 
