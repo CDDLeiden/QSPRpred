@@ -220,7 +220,7 @@ def QSPR(args):
                      featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=5)))
 
 
-            mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{property[0]}_{reg_abbr}_DescCalc.json", 
+            mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_DescCalc.json", 
                                      feature_calculators=descriptorsCalculator([MorganFP(3, nBits=1000), get_descriptor("DrugExPhyschem")]),
                                      datafilters=datafilters, split=split, featurefilters=featurefilters)
 
