@@ -4,9 +4,13 @@ import os
 
 import pandas as pd
 import numpy as np
-from QSPRpred.qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
-from QSPRpred.qsprpred.data.utils.descriptors import MorganFP
+from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptorsets import MorganFP, Mordred, DrugExPhyschem, rdkit_descs
 
+from rdkit.Chem import MolFromSmiles
+from rdkit.Chem import Descriptors
+import mordred
+from mordred import descriptors as mordreddescriptors
 from qsprpred.logs import logger
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datasplitters import scaffoldsplit, randomsplit, temporalsplit
@@ -85,6 +89,72 @@ class TestFeatureFilters(PathMixIn, TestCase):
         self.assertListEqual(list(X.columns), ["F5"])
         self.assertTrue(self.df[X.columns].equals(X))
 
+class TestDescriptorsets(PathMixIn, TestCase):
+    def prep_testdata(self):
+        df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv', sep='\t')
+        mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
+        return mols
+
+    def test_MorganFP(self):
+        mols = self.prep_testdata()
+        desc_calc = MorganFP(3, nBits=1000)
+        descriptors = desc_calc(mols[2])
+        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertEqual(descriptors.shape, (1, 1000))
+        self.assertTrue(descriptors.any().any())
+        self.assertTrue(descriptors.any().sum() > 1)
+
+    def test_Mordred(self):
+        mols = self.prep_testdata()
+        desc_calc = Mordred()
+        descriptors = desc_calc(mols[1])
+        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertEqual(descriptors.shape, (1, len(mordred.Calculator(mordreddescriptors).descriptors)))
+        self.assertTrue(descriptors.any().any())
+        self.assertTrue(descriptors.any().sum() > 1)
+
+    def test_DrugExPhyschem(self):
+        mols = self.prep_testdata()
+        desc_calc = DrugExPhyschem()
+        descriptors = desc_calc(mols[1])
+        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertEqual(descriptors.shape, (1, 19))
+        self.assertTrue(descriptors.any().any())
+        self.assertTrue(descriptors.any().sum() > 1)
+
+    def test_rdkit_descs(self):
+        mols = self.prep_testdata()
+        desc_calc = rdkit_descs()
+        descriptors = desc_calc(mols[1])
+        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertEqual(descriptors.shape, (1, len(Descriptors._descList)))
+        self.assertTrue(descriptors.any().any())
+        self.assertTrue(descriptors.any().sum() > 1)
+
+        #with 3D
+        desc_calc = rdkit_descs(compute_3Drdkit=True)
+        descriptors = desc_calc(mols[1])
+        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertEqual(descriptors.shape, (1, (len(Descriptors._descList) + 10)))
+        self.assertTrue(descriptors.any().any())
+        self.assertTrue(descriptors.any().sum() > 1)
+
+
+class TestDescriptorCalculator(PathMixIn, TestCase):
+    def prep_testdata(self):
+        df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv', sep='\t')
+        mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
+        return mols
+    
+    def test_descriptorcalculator(self):
+        mols = self.prep_testdata()
+        desc_calc = descriptorsCalculator([MorganFP(3, 1000), DrugExPhyschem()])
+        descriptors = desc_calc(mols)
+        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertEqual(descriptors.shape, (10,1019))
+        self.assertEqual(descriptors.columns[0], 'MorganFP_0')
+        self.assertEqual(descriptors.columns[1018], 'DrugExPhyschem_MR')
+        self.assertTrue(descriptors.any().any())
 
 class TestData(PathMixIn, TestCase):
 

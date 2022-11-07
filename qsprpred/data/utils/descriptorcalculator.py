@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 from typing import List
 import pandas as pd
 import json
-from qsprpred.data.utils.descriptors import DescriptorSet, get_descriptor
+from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
 from rdkit.Chem.rdchem import Mol
 
 class Calculator(ABC):

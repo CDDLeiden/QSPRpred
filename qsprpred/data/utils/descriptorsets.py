@@ -13,10 +13,10 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
-from qsprpred.data.utils.properties import Property
+from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
+from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 import mordred
 from mordred import descriptors as mordreddescriptors
-from functools import partial
 
 class DescriptorSet(ABC):
     """
@@ -144,9 +144,10 @@ class Mordred(DescriptorSet):
         return "Mordred"
 
 
-class physchem(DescriptorSet):
+class DrugExPhyschem(DescriptorSet):
     """
-        Initialize the descriptor with Property arguments (a list of properties to calculate).
+        Pysciochemical properties originally used in DrugEx for QSAR modelling
+        Initialize the descriptor with Property arguments (a list of properties to calculate) to select a subset.
 
         Args:
             *args: `Property` arguments
@@ -182,12 +183,49 @@ class physchem(DescriptorSet):
         self._descriptors = props
 
     def __str__(self):
-        return "physchem"
+        return "DrugExPhyschem"
 
-# Pysciochemical properties originally used in DrugEx for QSAR modelling
-DrugExDescriptors = partial(physchem, props=['MW', 'logP', 'HBA', 'HBD', 'Rotable', 'Amide', 'Bridge', 'Hetero',
-                                             'Heavy', 'Spiro', 'FCSP3', 'Ring', 'Aliphatic', 'Aromatic', 'Saturated',
-                                             'HeteroR', 'TPSA', 'Valence', 'MR'])
+class rdkit_descs(DescriptorSet):
+    """
+        RDkit descriptors
+        Initialize the descriptor names (a list of properties to calculate) to select a subset of the rdkit descriptors.
+        Add compute_3Drdkit argument to indicate if 3D descriptors should also be calculated
+
+        Args:
+            *args: `Property` arguments
+            **kwargs: `Property` keyword arguments
+    """
+    def __init__(self, *args, **kwargs):
+        self._args = args
+        self._kwargs = kwargs
+        self._is_fp = False
+        self._calculator = RDKit_desc(*args, **kwargs)
+        self._descriptors = self._calculator.descriptors
+
+    def __call__(self, mol):
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        physchem = pd.DataFrame(self._calculator.getScores([mol]), columns=self._descriptors)
+        return physchem
+
+    @property
+    def is_fp(self):
+        return self._is_fp
+    
+    @property
+    def settings(self):
+        return self._args, self._kwargs
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, descriptors):
+        self._calculator.descriptors = descriptors
+        self._descriptors = descriptors
+
+    def __str__(self):
+        return "RDkit"
 
 
 class _DescriptorSetRetriever:
@@ -205,17 +243,12 @@ class _DescriptorSetRetriever:
 
     def get_MorganFP(self, *args, **kwargs):
         return MorganFP(*args, **kwargs)
-
-    def get_physchem(self, *args, **kwargs):
-        return physchem(*args, **kwargs)
     
     def get_DrugExPhyschem(self, *args, **kwargs):
-        return DrugExDescriptors(*args, **kwargs)
+        return DrugExPhyschem(*args, **kwargs)
     
     def get_Mordred(self, *args, **kwargs):
         return Mordred(*args, **kwargs)
 
 def get_descriptor(desc_type: str, *args, **kwargs):
     return _DescriptorSetRetriever().get_descriptor(desc_type, *args, **kwargs)
-
-

@@ -6,8 +6,8 @@ import random
 
 import pandas as pd
 import torch
-from QSPRpred.qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
-from QSPRpred.qsprpred.data.utils.descriptors import MorganFP
+from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptorsets import MorganFP
 from qsprpred.data.data import QSPRDataset
 from qsprpred.logs import logger
 from qsprpred.models.models import QSPRDNN, QSPRsklearn

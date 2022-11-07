@@ -7,18 +7,13 @@ On: 06.06.22, 20:17
 
 import numpy as np
 
-from rdkit.Chem.QED import qed
-from rdkit.Chem.GraphDescriptors import BertzCT
 from rdkit.Chem import Descriptors as desc, Crippen, AllChem, Lipinski
-
 from qsprpred.data.interfaces import Scorer
-from qsprpred.data.utils.sascorer import calculateScore
+
 
 class Property(Scorer):
 
-    def __init__(self, props=['MW'], modifier=None):
-        super().__init__(modifier)
-        self.props = props
+    def __init__(self, props=None):
         self.prop_dict = {'MW': desc.MolWt,
                           'logP': Crippen.MolLogP,
                           'HBA': AllChem.CalcNumLipinskiHBA,
@@ -37,17 +32,18 @@ class Property(Scorer):
                           'HeteroR': AllChem.CalcNumHeterocycles,
                           'TPSA': AllChem.CalcTPSA,
                           'Valence': desc.NumValenceElectrons,
-                          'MR': Crippen.MolMR,
-                          'QED': qed,
-                        #   'SA': calculateScore,
-                          'Bertz': BertzCT}
+                          'MR': Crippen.MolMR}
+        if props:
+            self.props = props
+        else:
+            self.props = self.prop_dict.keys()
 
     def getScores(self, mols):
         scores = np.zeros((len(mols), len(self.props)))
         for i, mol in enumerate(mols):
-            for prop in self.props:
+            for j, prop in enumerate(self.props):
                 try:
-                    scores[i] = self.prop_dict[prop](mol)
+                    scores[i,j] = self.prop_dict[prop](mol)
                 except:
                     continue
         return scores
