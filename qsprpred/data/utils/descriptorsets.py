@@ -7,16 +7,17 @@ To add a new descriptor or fingerprint calculator:
 
 """
 
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
+
+import mordred
 import numpy as np
 import pandas as pd
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit import DataStructs
+from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
-import mordred
-from mordred import descriptors as mordreddescriptors
+from rdkit import Chem, DataStructs
+from rdkit.Chem import AllChem
+
 
 class DescriptorSet(ABC):
     """
@@ -51,8 +52,8 @@ class DescriptorSet(ABC):
     def __str__(self):
         pass
 
-class MorganFP(DescriptorSet):
 
+class MorganFP(DescriptorSet):
     def __init__(self, *args, **kwargs):
         """
         Initialize the descriptor with the same arguments as you would pass to `GetMorganFingerprintAsBitVect` function of RDKit.
@@ -67,7 +68,7 @@ class MorganFP(DescriptorSet):
         self._args = args
         self._kwargs = kwargs
         self._is_fp = True
-        
+
         self.keepindices = None
 
     def __call__(self, mol):
@@ -76,7 +77,9 @@ class MorganFP(DescriptorSet):
         self.ln = len(fp)
         ret = np.zeros(self.ln)
         self._convertFP(fp, ret)
-        ret = pd.DataFrame(ret.reshape(1,-1), columns=[f"{idx}" for idx in range(ret.shape[0])])
+        ret = pd.DataFrame(
+            ret.reshape(1, -1), columns=[f"{idx}" for idx in range(ret.shape[0])]
+        )
         if self.keepindices:
             ret = ret[self.keepindices]
         return ret
@@ -84,16 +87,19 @@ class MorganFP(DescriptorSet):
     @property
     def is_fp(self):
         return self._is_fp
-    
+
     @property
     def settings(self):
         return self._args, self._kwargs
 
+    def get_len(self):
+        return((self.__call__("C")).shape[1])
+
     def __str__(self):
         return "MorganFP"
 
-class Mordred(DescriptorSet):
 
+class Mordred(DescriptorSet):
     def __init__(self, *args, **kwargs):
         """
         Initialize the descriptor with the same arguments as you would pass to `Calculator` function of Mordred.
@@ -109,7 +115,7 @@ class Mordred(DescriptorSet):
         self._process_args(*args, **kwargs)
 
         self._is_fp = False
-        
+
         self._mordred = None
         self.descriptors = self._args
 
@@ -120,7 +126,7 @@ class Mordred(DescriptorSet):
     @property
     def is_fp(self):
         return self._is_fp
-    
+
     @property
     def settings(self):
         return self._args, self._kwargs
@@ -131,14 +137,23 @@ class Mordred(DescriptorSet):
 
     @descriptors.setter
     def descriptors(self, names):
-            calc = mordred.Calculator(mordreddescriptors)
-            self._mordred = mordred.Calculator([d for d in calc.descriptors if str(d) in names], **self._kwargs)
-            self._descriptors = names
+        calc = mordred.Calculator(mordreddescriptors)
+        self._mordred = mordred.Calculator(
+            [d for d in calc.descriptors if str(d) in names], **self._kwargs
+        )
+        self._descriptors = names
 
     def _process_args(self, descs=None, version=None, ignore_3D=False, config=None):
-        descs = mordred.Calculator(descs).descriptors if descs else mordred.Calculator(mordreddescriptors).descriptors
+        descs = (
+            mordred.Calculator(descs).descriptors
+            if descs
+            else mordred.Calculator(mordreddescriptors).descriptors
+        )
         self._args = [str(d) for d in descs]
-        self._kwargs = {"version": version, "ignore_3D":ignore_3D, "config":config}
+        self._kwargs = {"version": version, "ignore_3D": ignore_3D, "config": config}
+
+    def get_len(self):
+        return(len(self.descriptors))
 
     def __str__(self):
         return "Mordred"
@@ -146,13 +161,14 @@ class Mordred(DescriptorSet):
 
 class DrugExPhyschem(DescriptorSet):
     """
-        Pysciochemical properties originally used in DrugEx for QSAR modelling
-        Initialize the descriptor with Property arguments (a list of properties to calculate) to select a subset.
+    Pysciochemical properties originally used in DrugEx for QSAR modelling
+    Initialize the descriptor with Property arguments (a list of properties to calculate) to select a subset.
 
-        Args:
-            *args: `Property` arguments
-            **kwargs: `Property` keyword arguments
+    Args:
+        *args: `Property` arguments
+        **kwargs: `Property` keyword arguments
     """
+
     def __init__(self, *args, **kwargs):
         self._args = args
         self._kwargs = kwargs
@@ -162,13 +178,15 @@ class DrugExPhyschem(DescriptorSet):
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        physchem = pd.DataFrame(self._calculator.getScores([mol]), columns=self._descriptors)
+        physchem = pd.DataFrame(
+            self._calculator.getScores([mol]), columns=self._descriptors
+        )
         return physchem
 
     @property
     def is_fp(self):
         return self._is_fp
-    
+
     @property
     def settings(self):
         return self._args, self._kwargs
@@ -182,19 +200,24 @@ class DrugExPhyschem(DescriptorSet):
         self._calculator.props = props
         self._descriptors = props
 
+    def get_len(self):
+        return(len(self.descriptors))
+
     def __str__(self):
         return "DrugExPhyschem"
 
+
 class rdkit_descs(DescriptorSet):
     """
-        RDkit descriptors
-        Initialize the descriptor names (a list of properties to calculate) to select a subset of the rdkit descriptors.
-        Add compute_3Drdkit argument to indicate if 3D descriptors should also be calculated
+    RDkit descriptors
+    Initialize the descriptor names (a list of properties to calculate) to select a subset of the rdkit descriptors.
+    Add compute_3Drdkit argument to indicate if 3D descriptors should also be calculated
 
-        Args:
-            *args: `Property` arguments
-            **kwargs: `Property` keyword arguments
+    Args:
+        *args: `Property` arguments
+        **kwargs: `Property` keyword arguments
     """
+
     def __init__(self, *args, **kwargs):
         self._args = args
         self._kwargs = kwargs
@@ -204,13 +227,15 @@ class rdkit_descs(DescriptorSet):
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        physchem = pd.DataFrame(self._calculator.getScores([mol]), columns=self._descriptors)
+        physchem = pd.DataFrame(
+            self._calculator.getScores([mol]), columns=self._descriptors
+        )
         return physchem
 
     @property
     def is_fp(self):
         return self._is_fp
-    
+
     @property
     def settings(self):
         return self._args, self._kwargs
@@ -224,6 +249,9 @@ class rdkit_descs(DescriptorSet):
         self._calculator.descriptors = descriptors
         self._descriptors = descriptors
 
+    def get_len(self):
+        return(len(self.descriptors))
+
     def __str__(self):
         return "RDkit"
 
@@ -235,20 +263,21 @@ class _DescriptorSetRetriever:
     """
 
     def get_descriptor(self, desc_type, *args, **kwargs):
-        method_name = 'get_' + desc_type
+        method_name = "get_" + desc_type
         method = getattr(self, method_name)
         if method is None:
-            raise Exception(f'{desc_type} is not a supported descriptor set type.')
+            raise Exception(f"{desc_type} is not a supported descriptor set type.")
         return method(*args, **kwargs)
 
     def get_MorganFP(self, *args, **kwargs):
         return MorganFP(*args, **kwargs)
-    
+
     def get_DrugExPhyschem(self, *args, **kwargs):
         return DrugExPhyschem(*args, **kwargs)
-    
+
     def get_Mordred(self, *args, **kwargs):
         return Mordred(*args, **kwargs)
+
 
 def get_descriptor(desc_type: str, *args, **kwargs):
     return _DescriptorSetRetriever().get_descriptor(desc_type, *args, **kwargs)

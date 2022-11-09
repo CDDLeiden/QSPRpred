@@ -160,10 +160,11 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
         mols.append(None)
         descriptors = desc_calc(mols)
         self.assertIsInstance(descriptors, pd.DataFrame)
-        self.assertEqual(descriptors.shape, (10,1019))
+        self.assertEqual(descriptors.shape, (11,1019))
         self.assertEqual(descriptors.columns[0], 'MorganFP_0')
         self.assertEqual(descriptors.columns[1018], 'DrugExPhyschem_MR')
         self.assertTrue(descriptors.any().any())
+        self.assertEqual(desc_calc.get_len(), 1019)
 
 class TestData(PathMixIn, TestCase):
 

@@ -3,6 +3,7 @@ import json
 from abc import ABC, abstractmethod
 from typing import List
 
+import numpy as np
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
 from rdkit.Chem.rdchem import Mol
@@ -77,11 +78,16 @@ class descriptorsCalculator(Calculator):
         Args:
             mols: list of rdkit mols
         """
-        mols = [mol for mol in mols if not mol is None]
-        df = pd.DataFrame()
+        valid_mols = [mol for mol in mols if not mol is None]
+        df_valid = pd.DataFrame()
         for descset in self.descsets:
-            values = pd.concat([descset(mol) for mol in mols])
-            df = pd.concat([df, values.add_prefix(f"{descset}_")], axis=1)
+            values = pd.concat([descset(mol) for mol in valid_mols])
+            df_valid = pd.concat([df_valid, values.add_prefix(f"{descset}_")], axis=1)
+
+        # Add invalid mols back as rows of zero
+        df = pd.DataFrame(np.zeros((len(mols), df_valid.shape[1])), columns=df_valid.columns)
+        df.iloc[pd.notnull(mols),:] = df_valid
+        
         return df
 
     def toFile(self, fname: str) -> None:
@@ -104,3 +110,9 @@ class descriptorsCalculator(Calculator):
                 }
         with open(fname, "w") as outfile:
             json.dump(descset_dict, outfile)
+    
+    def get_len(self):
+        length = 0
+        for descset in self.descsets:
+            length += descset.get_len()
+        return length
