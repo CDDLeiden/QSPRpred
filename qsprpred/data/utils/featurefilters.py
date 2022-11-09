@@ -9,8 +9,8 @@ from sklearn.preprocessing import MinMaxScaler
 
 class lowVarianceFilter(featurefilter):
     """
-    Filters out features that have a variance lower than a given threshold after
-    MinMax scaling
+    Remove features with a variance lower than a given threshold after MinMax scaling.
+    
     Attributes:
         th (float): threshold for removing features
     """
@@ -39,9 +39,8 @@ class lowVarianceFilter(featurefilter):
 
 class highCorrelationFilter(featurefilter):
     def __init__(self, th: float) -> None:
-        """
-        Filters out features that have correlation to another feature higher than a
-        given threshold
+        """Remove features with correlation higher than a given threshold.
+        
         Attributes:
             th (float): threshold for correlation
         """
@@ -63,12 +62,12 @@ class highCorrelationFilter(featurefilter):
 
 
 class BorutaFilter(featurefilter):
-    """
-    Boruta filter from BorutaPy: find all features carrying information for prediction
+    """Boruta filter from BorutaPy: find all features carrying information for prediction.
+    
     Attributes:
         estimator (object): A supervised learning estimator, with a 'fit' method that
-            returns the feature_importances_ attribute. Important features must
-            correspond to high absolute values in the feature_importances_.
+            returns the feature_importances attribute. Important features must
+            correspond to high absolute values in the feature_importances.
         n_estimators (int or string): If int sets the number of estimators in the chosen
             ensemble method. If 'auto' this is determined automatically based on the
             size of the dataset. The other parameters of the used estimators need to be
