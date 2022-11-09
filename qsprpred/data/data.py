@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 from qsprpred.data.utils.datasplitters import randomsplit
 from qsprpred.data.utils.featurefilters import BorutaFilter
+from qsprpred.data.utils.smiles_standardization import (
+    chembl_smi_standardizer,
+    sanitize_smiles,
+)
 from qsprpred.logs import logger
 from rdkit import Chem
 from rdkit.Chem import PandasTools
@@ -108,6 +112,8 @@ class QSPRDataset:
     def prepareDataset(
         self,
         fname,
+        standardize=True,
+        sanitize=True,
         datafilters=[],
         split=randomsplit(),
         feature_calculators=None,
@@ -118,12 +124,20 @@ class QSPRDataset:
         prepare the dataset for use in QSPR model
         Arguments:
             fname (str): feature_calculator with filtered features saved to this file
+            standarize (bool): Apply Chembl standardization pipeline to smiles
+            sanitize (bool): sanitize smiles
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             features (list of feature calculation cls): calculates features from smiles
             featurefilters (list of feature filter objs): filters features
             n_folds (n): number of folds to use in cross-validation
         """
+
+        # standardize and sanitize smiles
+        if standardize:
+            self.df[self.smilescol] = [chembl_smi_standardizer(smiles)[0] for smiles in self.df[self.smilescol]]
+        if sanitize:
+            self.df[self.smilescol] = [sanitize_smiles(smiles)[0] for smiles in self.df[self.smilescol]]
 
         # apply filters on dataset
         for filter in datafilters:
