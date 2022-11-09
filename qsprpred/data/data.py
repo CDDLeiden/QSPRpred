@@ -87,9 +87,9 @@ class QSPRDataset:
         logger.info(f"Dataset created for {property}")
 
     @classmethod
-    def FromFile(cls, fname, smilescol = 'SMILES', property = 'CL', reg=True, th=[6.5]):
+    def FromFile(cls, fname, *args, **kwargs):
         df = pd.read_csv(fname, sep="\t")
-        return QSPRDataset(df, smilescol, property, reg, th)
+        return QSPRDataset(df, *args, **kwargs)
 
     def prepareDataset(self, fname, datafilters=[], split=randomsplit(), feature_calculators=None, featurefilters=[],
                        n_folds=5):
