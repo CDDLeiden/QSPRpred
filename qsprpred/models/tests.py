@@ -1,14 +1,14 @@
 import os
+import random
 import shutil
 from os.path import exists
 from unittest import TestCase
-import random
 
 import pandas as pd
 import torch
+from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
 from qsprpred.data.utils.descriptorsets import MorganFP
-from qsprpred.data.data import QSPRDataset
 from qsprpred.logs import logger
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected

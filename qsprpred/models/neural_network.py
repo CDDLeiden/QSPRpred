@@ -1,80 +1,94 @@
-from qsprpred.logs import logger
-from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
-
-import time
 import inspect
-import numpy as np
+import time
 from collections import defaultdict
 
+import numpy as np
 import torch
+from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
+from qsprpred.logs import logger
 from torch import nn, optim
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, TensorDataset
 
+
 class Base(nn.Module):
-    """ This class is the base structure for all of classification/regression DNN models.
-    Mainly, it provides the general methods for training, evaluating model and predicting the given data.
+    """Base structure for all of classification/regression DNN models.
+    Mainly, it provides the general methods for training, evaluating model and
+    predicting the given data.
     """
 
-    def __init__(self, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, n_epochs=1000, lr=1e-4, batch_size=256):
+    def __init__(
+        self,
+        device=DEFAULT_DEVICE,
+        gpus=DEFAULT_GPUS,
+        n_epochs=1000,
+        lr=1e-4,
+        batch_size=256,
+    ):
         super().__init__()
         self.n_epochs = n_epochs
         self.lr = lr
-        self.batch_size=batch_size
-        if device.type == 'cuda':
-            self.device = torch.device(f'cuda:{gpus[0]}')
+        self.batch_size = batch_size
+        if device.type == "cuda":
+            self.device = torch.device(f"cuda:{gpus[0]}")
         else:
             self.device = device
         self.gpus = gpus
         if len(self.gpus) > 1:
-            logger.warning(f'At the moment multiple gpus is not possible: running DNN on gpu: {gpus[0]}.')
+            logger.warning(
+                f"At the moment multiple gpus is not possible: running DNN on gpu: {gpus[0]}."
+            )
 
     def fit(self, train_loader, valid_loader, out, patience=50, tol=0):
-        """Training the DNN model, similar to the scikit-learn or Keras style.
-        In the end, the optimal value of parameters will also be persisted on the hard drive.
+        """Training the DNN model, similar to the scikit-learn or Keras style,
+        Saves the optimal value of parameters.
         Arguments:
             train_loader (DataLoader): Data loader for training set,
                 including m X n target FloatTensor and m X l label FloatTensor
-                (m is the No. of sample, n is the No. of features, l is the No. of classes or tasks)
+                (m is the No. of sample, n is the No. of features, l is the
+                No. of classes or tasks)
             valid_loader (DataLoader): Data loader for validation set.
                 The data structure is as same as loader_train.
             out (str): the file path for the model file (suffix with '.pkg')
                 and log file (suffix with '.log').
-            patience (int): number of epochs to wait before early stop if no progress on validation set score,
-                            if patience = -1, always train to n_epochs
-            tol (float): minimum absolute improvement of loss necessary to count as progress on best validation score
+            patience (int): number of epochs to wait before early stop if no progress on
+                validation set score, if patience = -1,
+                always train to n_epochs
+            tol (float): minimum absolute improvement of loss necessary to count as
+                progress on best validation score
         """
 
-        if 'optim' in self.__dict__:
+        if "optim" in self.__dict__:
             optimizer = self.optim
         else:
             optimizer = optim.Adam(self.parameters(), lr=self.lr)
 
-        # record the minimum loss value based on the calculation of loss function by the current epoch
+        # record the minimum loss value based on the calculation of the
+        # loss function by the current epoch
         best_loss = np.inf
         # record the epoch when optimal model is saved.
         last_save = 0
-        log = open(out + '.log', 'a')
+        log = open(out + ".log", "a")
         for epoch in range(self.n_epochs):
             t0 = time.time()
             # decrease learning rate over the epochs
             for param_group in optimizer.param_groups:
-                param_group['lr'] = self.lr * (1 - 1 / self.n_epochs) ** (epoch * 10)
+                param_group["lr"] = self.lr * (1 - 1 / self.n_epochs) ** (epoch * 10)
             for i, (Xb, yb) in enumerate(train_loader):
                 # Batch of target tenor and label tensor
                 Xb, yb = Xb.to(self.device), yb.to(self.device)
                 optimizer.zero_grad()
                 # predicted probability tensor
                 y_ = self(Xb, istrain=True)
-                
+
                 # ignore all of the NaN values
                 ix = yb == yb
-                if self.n_class > 1: 
-                    yb, y_ = yb[ix], y_[ix[:,-1],:]
+                if self.n_class > 1:
+                    yb, y_ = yb[ix], y_[ix[:, -1], :]
                 else:
                     yb, y_ = yb[ix], y_[ix]
 
-                # weighting in original drugex v2 code, but was specific to data used there
+                # weighting in original drugex v2 code, but was specific to data there
                 # wb = torch.Tensor(yb.size()).to(utils.dev)
                 # wb[yb == 3.99] = 0.1
                 # wb[yb != 3.99] = 1
@@ -89,29 +103,39 @@ class Base(nn.Module):
                 loss.backward()
                 optimizer.step()
             if patience == -1:
-                print('[Epoch: %d/%d] %.1fs loss_train: %f'% (
-                    epoch, self.n_epochs, time.time() - t0, loss.item()), file=log)
+                print(
+                    "[Epoch: %d/%d] %.1fs loss_train: %f"
+                    % (epoch, self.n_epochs, time.time() - t0, loss.item()),
+                    file=log,
+                )
             else:
                 # loss value on validation set based on which optimal model is saved.
                 loss_valid = self.evaluate(valid_loader)
-                print('[Epoch: %d/%d] %.1fs loss_train: %f loss_valid: %f' % (
-                    epoch, self.n_epochs, time.time() - t0, loss.item(), loss_valid), file=log)
+                print(
+                    "[Epoch: %d/%d] %.1fs loss_train: %f loss_valid: %f"
+                    % (epoch, self.n_epochs, time.time() - t0, loss.item(), loss_valid),
+                    file=log,
+                )
                 if loss_valid + tol < best_loss:
-                    torch.save(self.state_dict(), out + '_weights.pkg')
-                    print('[Performance] loss_valid is improved from %f to %f, Save model to %s' %
-                        (best_loss, loss_valid, out + '_weights.pkg'), file=log)
+                    torch.save(self.state_dict(), out + "_weights.pkg")
+                    print(
+                        "[Performance] loss_valid is improved from %f to %f, Save model to %s"
+                        % (best_loss, loss_valid, out + "_weights.pkg"),
+                        file=log,
+                    )
                     best_loss = loss_valid
                     last_save = epoch
                 else:
-                    print('[Performance] loss_valid is not improved.', file=log)
-                    # early stopping, if the performance on validation is not improved in 100 epochs.
-                    # The model training will stop in order to save time.
-                    if epoch - last_save > patience: break
+                    print("[Performance] loss_valid is not improved.", file=log)
+                    # early stopping, if the performance on validation is not improved
+                    # in 100 epochs. The model training will stop in order to save time.
+                    if epoch - last_save > patience:
+                        break
         if patience == -1:
-            torch.save(self.state_dict(), out + '_weights.pkg')
-        print('Neural net fitting completed.', file=log)
+            torch.save(self.state_dict(), out + "_weights.pkg")
+        print("Neural net fitting completed.", file=log)
         log.close()
-        self.load_state_dict(torch.load(out + '_weights.pkg'))
+        self.load_state_dict(torch.load(out + "_weights.pkg"))
         return last_save
 
     def evaluate(self, loader):
@@ -119,22 +143,24 @@ class Base(nn.Module):
         Arguments:
             loader (torch.util.data.DataLoader): data loader for test set,
                 including m X n target FloatTensor and l X n label FloatTensor
-                (m is the No. of sample, n is the No. of features, l is the No. of classes or tasks)
+                (m is the No. of sample, n is the No. of features, l is the
+                No. of classes or tasks)
         Return:
-            loss (float): the average loss value based on the calculation of loss function with given test set.
+            loss (float): the average loss value based on the calculation of loss
+                function with given test set.
         """
         loss = 0
         for Xb, yb in loader:
             Xb, yb = Xb.to(self.device), yb.to(self.device)
             y_ = self.forward(Xb)
-            
-            #remove NaN values
+
+            # remove NaN values
             ix = yb == yb
-            if self.n_class > 1: 
-                yb, y_ = yb[ix], y_[ix[:,-1],:]
+            if self.n_class > 1:
+                yb, y_ = yb[ix], y_[ix[:, -1], :]
             else:
                 yb, y_ = yb[ix], y_[ix]
-            
+
             # weighting in original drugex v2 code, but was specific to data used there
             # wb = torch.Tensor(yb.size()).to(utils.dev)
             # wb[yb == 3.99] = 0.1
@@ -156,7 +182,8 @@ class Base(nn.Module):
                 (m is the No. of sample, n is the No. of features)
         Return:
             score (ndarray): probability of each sample in the given dataset,
-                it is a m X l FloatTensor (m is the No. of sample, l is the No. of classes or tasks.)
+                it is a m X l FloatTensor (m is the No. of sample, l is the
+                No. of classes or tasks.)
         """
         score = []
         for Xb in loader:
@@ -177,7 +204,7 @@ class Base(nn.Module):
             if p.name != "self" and p.kind != p.VAR_KEYWORD
         ]
         return sorted([p.name for p in parameters])
-    
+
     def get_params(self, deep=True):
         # function copy from sklearn.base_estimator
         """
@@ -202,7 +229,7 @@ class Base(nn.Module):
                 out.update((key + "__" + k, val) for k, val in deep_items)
             out[key] = value
         return out
-    
+
     def set_params(self, **params):
         # function copy from sklearn.base_estimator
         """Set the parameters of this estimator.
@@ -250,20 +277,21 @@ class Base(nn.Module):
 
     def get_dataloader(self, X, y=None):
         """
-            Convert data to tensors and get iterable over dataset with dataloader
-            arguments:
-            X (numpy 2d array): input dataset
-            y (numpy 1d column vector): output data
+        Convert data to tensors and get iterable over dataset with dataloader
+        arguments:
+        X (numpy 2d array): input dataset
+        y (numpy 1d column vector): output data
         """
         if y is None:
             tensordataset = torch.Tensor(X)
         else:
             tensordataset = TensorDataset(torch.Tensor(X), torch.Tensor(y))
         return DataLoader(tensordataset, batch_size=self.batch_size)
-    
+
+
 class STFullyConnected(Base):
-    """Single task DNN classification/regression model. It contains four fully connected layers between which
-        are dropout layer for robustness.
+    """Single task DNN classification/regression model. It contains four fully
+        connected layers between which are dropout layer for robustness.
     Arguments:
         n_dim (int): the No. of columns (features) for input tensor
         n_class (int): the No. of columns (classes) for output tensor.
@@ -275,11 +303,26 @@ class STFullyConnected(Base):
         extra_layer (bool): add third hidden layer
     """
 
-    def __init__(self, n_dim, n_class=1, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, n_epochs = 1000, lr = None, batch_size=256,
-                 is_reg=True, neurons_h1 = 4000, neurons_hx = 1000, extra_layer = False, dropout_frac = 0.25):
+    def __init__(
+        self,
+        n_dim,
+        n_class=1,
+        device=DEFAULT_DEVICE,
+        gpus=DEFAULT_GPUS,
+        n_epochs=1000,
+        lr=None,
+        batch_size=256,
+        is_reg=True,
+        neurons_h1=4000,
+        neurons_hx=1000,
+        extra_layer=False,
+        dropout_frac=0.25,
+    ):
         if not lr:
             lr = 1e-4 if is_reg else 1e-5
-        super().__init__(device=device, gpus=gpus, n_epochs = n_epochs, lr = lr, batch_size=batch_size)
+        super().__init__(
+            device=device, gpus=gpus, n_epochs=n_epochs, lr=lr, batch_size=batch_size
+        )
         self.n_dim = n_dim
         self.is_reg = is_reg
         self.n_class = n_class if not self.is_reg else 1
@@ -300,11 +343,11 @@ class STFullyConnected(Base):
             # loss function for regression
             self.criterion = nn.MSELoss()
         elif self.n_class == 1:
-            # loss function and activation function of output layer for binary classification
+            # loss and activation function of output layer for binary classification
             self.criterion = nn.BCELoss()
             self.activation = nn.Sigmoid()
         else:
-            # loss function and activation function of output layer for multiple classification
+            # loss and activation function of output layer for multiple classification
             self.criterion = nn.CrossEntropyLoss()
             self.activation = nn.Softmax(dim=1)
         self.to(self.device)
@@ -317,10 +360,13 @@ class STFullyConnected(Base):
     def forward(self, X, istrain=False):
         """Invoke the class directly as a function
         Arguments:
-            X (FloatTensor): m X n FloatTensor, m is the No. of samples, n is the No. of features.
-            istrain (bool, optional): is it invoked during training process (True) or just for prediction (False)
+            X (FloatTensor): m X n FloatTensor, m is the No. of samples, n is
+                the No. of features.
+            istrain (bool, optional): is it invoked during training process (True) or
+                just for prediction (False)
         Return:
-            y (FloatTensor): m X n FloatTensor, m is the No. of samples, n is the No. of classes
+            y (FloatTensor): m X n FloatTensor, m is the No. of samples,
+                n is the No. of classes
         """
         y = F.relu(self.fc0(X))
         if istrain:
@@ -337,6 +383,7 @@ class STFullyConnected(Base):
         else:
             y = self.activation(self.fc3(y))
         return y
+
 
 # TODO: implement multi-task DNN
 # class MTFullyConnected(Base):

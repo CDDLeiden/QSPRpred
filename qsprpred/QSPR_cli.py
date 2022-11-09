@@ -1,38 +1,47 @@
 #!/usr/bin/env python
 
+import argparse
+import json
 import os
 import os.path
-import sys
-import json
 import pickle
 import random
-import argparse
-import torch
+import sys
+
 import numpy as np
-import pandas as pd
 import optuna
-
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.cross_decomposition import PLSRegression
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC, SVR
-from xgboost import XGBRegressor, XGBClassifier
-
-from qsprpred.logs.utils import backUpFiles, enable_file_logger, commit_hash
+import pandas as pd
+import torch
 from qsprpred.data.data import QSPRDataset
-from qsprpred.models.models import QSPRModel, QSPRDNN, QSPRsklearn
 from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from qsprpred.data.utils.featurefilters import lowVarianceFilter, highCorrelationFilter, BorutaFilter
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator, get_descriptor
-from qsprpred.data.utils.descriptors import DrugExDescriptors, Mordred, physchem, MorganFP
+from qsprpred.data.utils.descriptorcalculator import (
+    descriptorsCalculator,
+    get_descriptor,
+)
+from qsprpred.data.utils.descriptorsets import (
+    DrugExDescriptors,
+    Mordred,
+    MorganFP,
+    physchem,
+)
+from qsprpred.data.utils.featurefilters import (
+    BorutaFilter,
+    highCorrelationFilter,
+    lowVarianceFilter,
+)
+from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
+from qsprpred.models.models import QSPRDNN, QSPRModel, QSPRsklearn
+from sklearn.cross_decomposition import PLSRegression
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from sklearn.svm import SVC, SVR
+from xgboost import XGBClassifier, XGBRegressor
+
 
 def QSPRArgParser(txt=None):
-    """ 
-        Define and read command line arguments
-    """
-    
+    """Define and read command line arguments"""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     #base arguments
@@ -146,10 +155,7 @@ def QSPRArgParser(txt=None):
 
 
 def QSPR(args):
-    """
-        Optimize, evaluate and train estimators
-    """
-    
+    """Optimize, evaluate and train estimators.""" 
     if not os.path.exists(args.base_dir + '/qsprmodels'):
         os.makedirs(args.base_dir + '/qsprmodels') 
     

@@ -1,29 +1,34 @@
-from qsprpred.data.interfaces import datasplit
-from sklearn.model_selection import train_test_split
 from collections import defaultdict
-from rdkit.Chem.Scaffolds.MurckoScaffold import MurckoScaffoldSmiles
-from qsprpred.logs import logger
+
 import numpy as np
+from qsprpred.data.interfaces import datasplit
+from qsprpred.logs import logger
+from rdkit.Chem.Scaffolds.MurckoScaffold import MurckoScaffoldSmiles
+from sklearn.model_selection import train_test_split
+
 
 class randomsplit(datasplit):
     """
-        Splits dataset in random train and test subsets
-        Attributes:
-            test_fraction (float): fraction of total dataset to testset
+    Splits dataset in random train and test subsets
+    Attributes:
+        test_fraction (float): fraction of total dataset to testset
     """
-    def __init__(self, test_fraction = 0.1) -> None:
+
+    def __init__(self, test_fraction=0.1) -> None:
         self.test_fraction = test_fraction
 
     def __call__(self, df, Xcol, ycol):
         return train_test_split(df[Xcol], df[ycol], test_size=self.test_fraction)
 
+
 class temporalsplit(datasplit):
     """
-        Splits dataset in random train and test subsets
-        Attributes:
-            timesplit(float): time point after which sample to test set
-            timecol (str): column name of column in df that contains the timepoints
+    Splits dataset in random train and test subsets
+    Attributes:
+        timesplit(float): time point after which sample to test set
+        timecol (str): column name of column in df that contains the timepoints
     """
+
     def __init__(self, timesplit: float, timecol: str) -> None:
         self.timesplit = timesplit
         self.timecol = timecol
@@ -36,7 +41,7 @@ class temporalsplit(datasplit):
 
 
 class scaffoldsplit(datasplit):
-    def __init__(self, test_fraction = 0.1) -> None:
+    def __init__(self, test_fraction=0.1) -> None:
         self.test_fraction = test_fraction
 
     def __call__(self, df, Xcol, ycol, shuffle=True):
@@ -62,9 +67,8 @@ class scaffoldsplit(datasplit):
                 test_idx.extend(scaffold_idx)
             else:
                 break
-        
+
         # Create train and test set
         test = df.loc[list(test_idx)]
         train = df.drop(test.index).drop(invalid_idx)
         return train[Xcol], test[Xcol], train[ycol], test[ycol]
-

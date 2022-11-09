@@ -1,25 +1,25 @@
-from qsprpred.logs import logger
-from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
-
-import sys
+import json
+import math
 import os
 import os.path
-import json
-import numpy as np
+import sys
 from datetime import datetime
-import joblib
-import pandas as pd
-import optuna
-import math
+from functools import partial
 
-from sklearn.cross_decomposition import PLSRegression
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC, SVR
-from sklearn import metrics
-from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
+import joblib
+import numpy as np
+import optuna
+import pandas as pd
+from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
+from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.neural_network import STFullyConnected
-from functools import partial
+from sklearn import metrics
+from sklearn.cross_decomposition import PLSRegression
+from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC, SVR
+
 
 class QSPRsklearn(QSPRModel):
     """ Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.

@@ -1,7 +1,9 @@
 from functools import partial
+
+import pandas as pd
 from qsprpred.data.interfaces import datafilter
 from qsprpred.logs import logger
-import pandas as pd
+
 
 class CategoryFilter(datafilter):
     """
