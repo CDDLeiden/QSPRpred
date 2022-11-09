@@ -1,11 +1,11 @@
+import json
 import os
 import sys
 from abc import ABC, abstractmethod
 
 import numpy as np
-import json
-
 from qsprpred.logs import logger
+
 
 class QSPRModel(ABC):
     """ Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
@@ -25,8 +25,8 @@ class QSPRModel(ABC):
         objective: objective used by bayesian optimization
         bayesOptimization: bayesian optimization of hyperparameters using optuna
         gridSearch: optimization of hyperparameters using gridSearch
-
     """
+    
     def __init__(self, base_dir, data, alg, alg_name, parameters={}):
         """
             initialize model from saved or default hyperparameters
@@ -76,8 +76,7 @@ class QSPRModel(ABC):
 
     @abstractmethod
     def bayesOptimization(self):
-        """
-            bayesian optimization of hyperparameters using optuna
+        """bayesian optimization of hyperparameters using optuna.
             arguments:
                 search_space_gs (dict): search space for the grid search
                 n_trials (int): number of trials for bayes optimization
@@ -87,8 +86,7 @@ class QSPRModel(ABC):
     
     @staticmethod
     def loadParamsGrid(fname, optim_type, model_types):
-        """
-            Load parameter grids for bayes or grid search parameter optimization from json file
+        """Load parameter grids for bayes or grid search parameter optimization from json file.
             arguments:
                 fname (str): file name of json file containing array with three columns containing modeltype,
                              optimization type (grid or bayes) and model type

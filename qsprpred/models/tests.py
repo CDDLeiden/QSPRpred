@@ -1,9 +1,9 @@
 import glob
 import os
+import random
 import shutil
 from os.path import exists
 from unittest import TestCase
-import random
 
 import pandas as pd
 import torch
