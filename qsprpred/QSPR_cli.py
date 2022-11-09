@@ -20,10 +20,10 @@ from qsprpred.data.utils.descriptorcalculator import (
     get_descriptor,
 )
 from qsprpred.data.utils.descriptorsets import (
-    DrugExDescriptors,
+    DrugExPhyschem,
     Mordred,
     MorganFP,
-    physchem,
+    rdkit_descs,
 )
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
@@ -107,7 +107,7 @@ def QSPRArgParser(txt=None):
                         help="Temporal split time column. Used for temporal split.")
 
     # features to calculate
-    parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'Pyschem', 'Mordred'], nargs='*')
+    parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'RDkit', 'Mordred', 'DrugEx'], nargs='*')
 
     # feature filters
     parser.add_argument('-lv', '--low_variability', type=float, default=None, help="low variability threshold\
@@ -208,10 +208,12 @@ def QSPR(args):
             descriptorsets = []
             if 'Morgan' in args.features:
                 descriptorsets.append(MorganFP(3, nBits=2048))
-            if 'Pyschem' in args.features:
-                descriptorsets.append(get_descriptor("DrugExPhyschem"))
+            if 'RDkit' in args.features:
+                descriptorsets.append(rdkit_descs())
             if 'Mordred' in args.features:
                 descriptorsets.append(Mordred())
+            if 'DrugEx' in args.features:
+                descriptorsets.append(DrugExPhyschem())
 
             # feature filters
             featurefilters=[]
