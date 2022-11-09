@@ -77,14 +77,10 @@ class descriptorsCalculator(Calculator):
         Args:
             mols: list of rdkit mols
         """
+        mols = [mol for mol in mols if not mol is None]
         df = pd.DataFrame()
         for descset in self.descsets:
-            descs = []
-            for mol in mols:
-                try:
-                    descs.append(descset(mol))
-                except: pass
-            values = pd.concat(descs)
+            values = pd.concat([descset(mol) for mol in mols])
             df = pd.concat([df, values.add_prefix(f"{descset}_")], axis=1)
         return df
 

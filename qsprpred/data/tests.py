@@ -1,21 +1,29 @@
-from unittest import TestCase
-import shutil
 import os
+import shutil
+from unittest import TestCase
 
-import pandas as pd
-import numpy as np
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
-from qsprpred.data.utils.descriptorsets import MorganFP, Mordred, DrugExPhyschem, rdkit_descs
-
-from rdkit.Chem import MolFromSmiles
-from rdkit.Chem import Descriptors
 import mordred
+import numpy as np
+import pandas as pd
 from mordred import descriptors as mordreddescriptors
-from qsprpred.logs import logger
 from qsprpred.data.data import QSPRDataset
-from qsprpred.data.utils.datasplitters import scaffoldsplit, randomsplit, temporalsplit
 from qsprpred.data.utils.datafilters import CategoryFilter, papyrusLowQualityFilter
-from qsprpred.data.utils.featurefilters import lowVarianceFilter, highCorrelationFilter, BorutaFilter
+from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
+from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptorsets import (
+    DrugExPhyschem,
+    Mordred,
+    MorganFP,
+    rdkit_descs,
+)
+from qsprpred.data.utils.featurefilters import (
+    BorutaFilter,
+    highCorrelationFilter,
+    lowVarianceFilter,
+)
+from qsprpred.logs import logger
+from rdkit.Chem import Descriptors, MolFromSmiles
+
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
@@ -149,6 +157,7 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
     def test_descriptorcalculator(self):
         mols = self.prep_testdata()
         desc_calc = descriptorsCalculator([MorganFP(3, 1000), DrugExPhyschem()])
+        mols.append(None)
         descriptors = desc_calc(mols)
         self.assertIsInstance(descriptors, pd.DataFrame)
         self.assertEqual(descriptors.shape, (10,1019))
