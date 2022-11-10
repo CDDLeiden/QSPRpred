@@ -176,10 +176,10 @@ class QSPRDataset:
 
         # calculate features from smiles
         self.X = feature_calculators(
-            [Chem.MolFromSmiles(mol) for mol in self.X if Chem.MolFromSmiles(mol)]
+            [Chem.MolFromSmiles(mol) for mol in self.X]
         )
         self.X_ind = feature_calculators(
-            [Chem.MolFromSmiles(mol) for mol in self.X_ind if Chem.MolFromSmiles(mol)]
+            [Chem.MolFromSmiles(mol) for mol in self.X_ind]
         )
 
         # apply filters to features on trainingset

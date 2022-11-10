@@ -309,11 +309,11 @@ class QSPRDNN(QSPRModel):
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
     def evaluate(self, save=True, ES_val_size=0.1):
-        """
-            Make predictions for crossvalidation and independent test set
-            arguments:
-                save (bool): wether to save the cross validation predictions
-                ES_val_size (float): validation set size for early stopping in CV
+        """Make predictions for crossvalidation and independent test set.
+
+        arguments:
+            save (bool): wether to save the cross validation predictions
+            ES_val_size (float): validation set size for early stopping in CV
         """
         indep_loader = self.model.get_dataloader(self.data.X_ind)
         last_save_epochs = 0
@@ -355,18 +355,18 @@ class QSPRDNN(QSPRModel):
         return cvs
 
     def gridSearch(self, search_space_gs, ES_val_size=0.1):
-        """
-            optimization of hyperparameters using gridSearch
-            arguments:
-                search_space_gs (dict): search space for the grid search, accepted parameters are:
-                                        lr (int) ~ learning rate for fitting
-                                        batch_size (int) ~ batch size for fitting
-                                        n_epochs (int) ~ max number of epochs
-                                        neurons_h1 (int) ~ number of neurons in first hidden layer
-                                        neurons_hx (int) ~ number of neurons in other hidden layers
-                                        extra_layer (bool) ~ whether to add extra (3rd) hidden layer
-                save_m (bool): if true, after gs the model is refit on the entire data set
-                ES_val_size (float): validation set size for early stopping in CV
+        """Optimization of hyperparameters using gridSearch.
+
+        Args:
+            search_space_gs (dict): search space for the grid search, accepted parameters are:
+                lr (int) ~ learning rate for fitting
+                batch_size (int) ~ batch size for fitting
+                n_epochs (int) ~ max number of epochs
+                neurons_h1 (int) ~ number of neurons in first hidden layer
+                neurons_hx (int) ~ number of neurons in other hidden layers
+                extra_layer (bool) ~ whether to add extra (3rd) hidden layer
+            save_m (bool): if true, after gs the model is refit on the entire data set
+            ES_val_size (float): validation set size for early stopping in CV
         """          
         if self.data.reg:        
             scoring = metrics.explained_variance_score
@@ -408,12 +408,12 @@ class QSPRDNN(QSPRModel):
         self.data.createFolds()
     
     def bayesOptimization(self, search_space_bs, n_trials):
-        """
-            bayesian optimization of hyperparameters using optuna
-            arguments:
-                search_space_gs (dict): search space for the grid search
-                n_trials (int): number of trials for bayes optimization
-                save_m (bool): if true, after bayes optimization the model is refit on the entire data set
+        """Bayesian optimization of hyperparameters using optuna.
+            
+        arguments:
+            search_space_gs (dict): search space for the grid search
+            n_trials (int): number of trials for bayes optimization
+            save_m (bool): if true, after bayes optimization the model is refit on the entire data set
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         #TODO add timeout function

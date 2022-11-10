@@ -6,7 +6,7 @@
 Welcome to QSPRpred's documentation!
 ====================================
 
-QSPRpred provides functionality to assist with building Quantitative Structure Property relationship models. Model built with QSPRpred can also be used as the enviroment reward function in DrugEx. Here you will find the installation guide (:ref:`installation`), usage examples (:ref:`usage`) and API documentation (:ref:`api-docs`).
+QSPRpred provides functionality to assist with building Quantitative Structure Property relationship models. Model built with QSPRpred can also be used as the enviroment reward function in DrugEx. Here you will find the installation guide (:ref:`installation`), usage examples (:ref:`usage`) and API documentation.
 
 .. toctree::
    :maxdepth: 2

@@ -87,11 +87,12 @@ class QSPRModel(ABC):
     @staticmethod
     def loadParamsGrid(fname, optim_type, model_types):
         """Load parameter grids for bayes or grid search parameter optimization from json file.
-            arguments:
-                fname (str): file name of json file containing array with three columns containing modeltype,
-                             optimization type (grid or bayes) and model type
-                optim_type (str): optimization type ('grid' or 'bayes')
-                model_types (list of str): model type for hyperparameter optimization (e.g. RF)
+
+        arguments:
+            fname (str): file name of json file containing array with three columns containing modeltype,
+                            optimization type (grid or bayes) and model type
+            optim_type (str): optimization type ('grid' or 'bayes')
+            model_types (list of str): model type for hyperparameter optimization (e.g. RF)
         """
 
         if fname:
