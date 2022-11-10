@@ -91,6 +91,7 @@ class NeuralNet(PathMixIn, TestCase):
 
 
 class TestModels(PathMixIn, TestCase):
+    GPUS = [idx for idx in range(torch.cuda.device_count())]
 
     def prep_testdata(self, reg=True, th=[]):
         
@@ -210,7 +211,7 @@ class TestModels(PathMixIn, TestCase):
         #intialize model for single class, multi class and regression DNN's
         for reg in [(False, [0, 1, 10, 1100]), (False, [6.5]), (True, [])]:
             data = self.prep_testdata(reg=reg[0], th=reg[1])
-            themodel = QSPRDNN(base_dir = f'{os.path.dirname(__file__)}/test_files/', data=data, gpus=[3,2], patience=3, tol=0.02)
+            themodel = QSPRDNN(base_dir = f'{os.path.dirname(__file__)}/test_files/', data=data, gpus=self.GPUS, patience=3, tol=0.02)
             
             #fit and cross-validation
             themodel.evaluate()
