@@ -44,7 +44,7 @@ python -m qsprpred.QSPR_cli \
 -stc 'Year of first disclosure' \
 -st 2000 \
 -fe Morgan \
--fe Pyschem \
+-fe RDkit \
 -lv 0.1 \
 -hc 0.9 \
 -s \
