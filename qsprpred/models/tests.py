@@ -165,19 +165,19 @@ class TestModels(PathMixIn, TestCase):
         # test multiclass
         self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
-    # def testXGB(self):
-    #     alg_name = "XGB"
-    #     #test regression
-    #     alg = XGBRegressor(objective='reg:squarederror')
-    #     self.QSPRsklearn_models_test(alg, alg_name, reg=True)
-    #
-    #     #test classifier
-    #     alg = XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss')
-    #     self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
-    #
-    #     #test multiclass
-    #     alg = XGBClassifier(objective='multi:softmax', use_label_encoder=False, eval_metric='logloss')
-    #     self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
+    def testXGB(self):
+        alg_name = "XGB"
+        #test regression
+        alg = XGBRegressor(objective='reg:squarederror')
+        self.QSPRsklearn_models_test(alg, alg_name, reg=True)
+
+        #test classifier
+        alg = XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss')
+        self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
+
+        #test multiclass
+        alg = XGBClassifier(objective='multi:softmax', use_label_encoder=False, eval_metric='logloss')
+        self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
     def testSVM(self):
         alg_name = "SVM"
