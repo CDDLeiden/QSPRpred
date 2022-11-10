@@ -50,7 +50,7 @@ class QSPRsklearn(QSPRModel):
             if type(self.alg) in [GaussianNB, PLSRegression, SVR, SVC]:
                 self.model = self.alg.set_params(**self.parameters)
             else:
-                self.model = self.alg.set_params(n_jobs=n_jobs, **self.parameters)
+                self.model = self.alg.set_params(**self.parameters)
         else:
             if type(self.alg) in [SVC, SVR]:
                 logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
@@ -58,8 +58,6 @@ class QSPRsklearn(QSPRModel):
                 self.model = self.alg.set_params(max_iter=10000)
             elif type(self.alg) in [GaussianNB, PLSRegression]:
                 self.model = self.alg
-            else:
-                self.model = self.alg.set_params(n_jobs=n_jobs)
     
         logger.info('parameters: %s' % self.parameters)
         logger.debug('Model intialized: %s' % self.out)
