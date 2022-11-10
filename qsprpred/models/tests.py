@@ -1,3 +1,4 @@
+import glob
 import os
 import random
 import shutil
@@ -6,10 +7,9 @@ from unittest import TestCase
 
 import pandas as pd
 import torch
-from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
 from qsprpred.data.utils.descriptorsets import MorganFP
-from qsprpred.logs import logger
+from qsprpred.data.data import QSPRDataset
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
 from sklearn.cross_decomposition import PLSRegression
@@ -33,14 +33,12 @@ class PathMixIn:
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.qsprmodelspath)
+        for extension in ['log', 'pkg']:
+            globs = glob.glob(f'{cls.datapath}/*.{extension}')
+            for path in globs:
+                os.remove(path)
 
 class NeuralNet(PathMixIn, TestCase):
-
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        os.remove(f'{cls.datapath}/testmodel.log')
-        os.remove(f'{cls.datapath}/testmodel.pkg')
 
     def prep_testdata(self, reg=True, th=[]):
         reg_abbr = 'REG' if reg else 'CLS'
