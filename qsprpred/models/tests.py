@@ -91,6 +91,7 @@ class NeuralNet(PathMixIn, TestCase):
 
 
 class TestModels(PathMixIn, TestCase):
+    GPUS = [idx for idx in range(torch.cuda.device_count())]
 
     def prep_testdata(self, reg=True, th=[]):
         
@@ -164,19 +165,19 @@ class TestModels(PathMixIn, TestCase):
         # test multiclass
         self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
-    def testXGB(self):
-        alg_name = "XGB"
-        #test regression
-        alg = XGBRegressor(objective='reg:squarederror')
-        self.QSPRsklearn_models_test(alg, alg_name, reg=True)
-
-        #test classifier
-        alg = XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss')
-        self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
-
-        #test multiclass
-        alg = XGBClassifier(objective='multi:softmax', use_label_encoder=False, eval_metric='logloss')
-        self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
+    # def testXGB(self):
+    #     alg_name = "XGB"
+    #     #test regression
+    #     alg = XGBRegressor(objective='reg:squarederror')
+    #     self.QSPRsklearn_models_test(alg, alg_name, reg=True)
+    #
+    #     #test classifier
+    #     alg = XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss')
+    #     self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
+    #
+    #     #test multiclass
+    #     alg = XGBClassifier(objective='multi:softmax', use_label_encoder=False, eval_metric='logloss')
+    #     self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[0, 1, 10, 1100])
 
     def testSVM(self):
         alg_name = "SVM"
@@ -210,7 +211,7 @@ class TestModels(PathMixIn, TestCase):
         #intialize model for single class, multi class and regression DNN's
         for reg in [(False, [0, 1, 10, 1100]), (False, [6.5]), (True, [])]:
             data = self.prep_testdata(reg=reg[0], th=reg[1])
-            themodel = QSPRDNN(base_dir = f'{os.path.dirname(__file__)}/test_files/', data=data, gpus=[3,2], patience=3, tol=0.02)
+            themodel = QSPRDNN(base_dir = f'{os.path.dirname(__file__)}/test_files/', data=data, gpus=self.GPUS, patience=3, tol=0.02)
             
             #fit and cross-validation
             themodel.evaluate()
