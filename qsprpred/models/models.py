@@ -67,6 +67,8 @@ class QSPRsklearn(QSPRModel):
         logger.info('parameters: %s' % self.parameters)
         logger.debug('Model intialized: %s' % self.out)
 
+        os.makedirs(os.path.dirname(self.out), exist_ok=True)
+
     def fit(self):
         """Build estimator model from entire data set."""
         X_all = np.concatenate([self.data.X, self.data.X_ind], axis=0)
