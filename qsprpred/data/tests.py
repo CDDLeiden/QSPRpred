@@ -1,3 +1,4 @@
+"""This module holds the test for functions regarding QSPR data preparation."""
 import os
 import shutil
 from unittest import TestCase

@@ -41,7 +41,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 
 def QSPRArgParser(txt=None):
-    """Define and read command line arguments"""
+    """Define and read command line arguments."""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     #base arguments

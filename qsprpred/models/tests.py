@@ -1,3 +1,4 @@
+"""This module holds the tests for functions regarding QSPR modelling."""
 import glob
 import os
 import random
@@ -7,9 +8,9 @@ from unittest import TestCase
 
 import pandas as pd
 import torch
+from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
 from qsprpred.data.utils.descriptorsets import MorganFP
-from qsprpred.data.data import QSPRDataset
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
 from sklearn.cross_decomposition import PLSRegression

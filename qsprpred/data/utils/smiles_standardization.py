@@ -1,3 +1,5 @@
+"""Functions to pre-process SMILES for QSPR modelling."""
+
 import re
 
 from chembl_structure_pipeline import standardizer
@@ -6,12 +8,15 @@ from rdkit.Chem.SaltRemover import SaltRemover
 
 
 def chembl_smi_standardizer(smi: str) -> tuple:
-    """
+    """Standardize a SMILES string.
+    
     Returns a tuple containing `parent smiles` and a `bool`,
     which defaults to if the standardizer failed and false when
     there were no errors.
-    Args:
+
+    Arguments:
         smi: smiles string to be standardized with the `chembl_structure_pipeline`.
+    
     Returns:
         Tuple containing the parent smiles and a bool indicating if the standardizer
         failed. If True -> standardizer failed..
@@ -34,6 +39,17 @@ def chembl_smi_standardizer(smi: str) -> tuple:
 
 
 def neutralize_atoms(mol):
+    """Neutralize charged molecules by atom.
+
+    From https://www.rdkit.org/docs/Cookbook.html, adapted from
+    https://baoilleach.blogspot.com/2019/12/no-charge-simple-approach-to.html
+    
+    Arguments:
+        mol: rdkit molecule to be neutralized
+    
+    Returns:
+        mol: neutralized rdkit mol
+    """
     pattern = Chem.MolFromSmarts("[+1!h0!$([*]~[-1,-2,-3,-4]),-1!$([*]~[+1,+2,+3,+4])]")
     at_matches = mol.GetSubstructMatches(pattern)
     at_matches_list = [y[0] for y in at_matches]
@@ -49,11 +65,14 @@ def neutralize_atoms(mol):
 
 
 def sanitize_smiles(smi: str) -> str:
-    """
+    """Sanitize a SMILES string.
+
     Removes sulfurs, extermal molecules and salts, neutralizes charges
     using the function `neutralize_atoms` and returns the resulting smiles.
-    Args:
+    
+    Arguments:
         smi: single SMILES string to be sanitized.
+
     Returns:
         sanitized SMILES string.
     """

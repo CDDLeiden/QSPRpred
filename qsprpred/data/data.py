@@ -1,3 +1,4 @@
+"""This module contains the QSPRDataset that holds and prepares data for modelling."""
 import numpy as np
 import pandas as pd
 from qsprpred.data.utils.datasplitters import randomsplit
@@ -14,15 +15,13 @@ from sklearn.preprocessing import StandardScaler as Scaler
 
 
 class QSPRDataset:
-    """
-    This class is used to prepare the dataset for QSPR model training.
+    """Prepare dataset for QSPR model training.
+    
     It splits the data in train and test set, as well as creating cross-validation folds.
     Optionally low quality data is filtered out.
     For classification the dataset samples are labelled as active/inactive.
-    ...
 
-    Attributes
-    ----------
+    Attributes:
     df (pd dataframe) : dataset
     smilescol (str) : name of column containing the molecule smiles
     property (str) : name of column in dataframe for to be predicted values, e.g. ["Cl"]
@@ -37,13 +36,12 @@ class QSPRDataset:
         number of samples and equals to row of X.
     X_ind (np.ndarray/pd.DataFrame) : m x n Feature matrix for independent set, where m
         is the number of samples and n is the number of features.
-    y_ind (np.ndarray/pd.DataFrame) : m-l label array for independent set, where m is the number of samples and
-                                      equals to row of X_ind, and l is the number of types.
-    folds (generator)               : scikit-learn n-fold generator object
-    n_folds (int)                   : number of folds for the generator
+    y_ind (np.ndarray/pd.DataFrame) : m-l label array for independent set, where m is 
+        the number of samples and equals to row of X_ind, and l is the number of types.
+    folds (generator) : scikit-learn n-fold generator object
+    n_folds (int) : number of folds for the generator
 
-    Methods
-    -------
+    Methods:
     FromFile : construct dataset from file
     prepareDataset : preprocess the dataset for QSPR modelling
     loadFeaturesFromFile: load features from file :)
@@ -120,8 +118,8 @@ class QSPRDataset:
         featurefilters=[],
         n_folds=5,
     ):
-        """
-        prepare the dataset for use in QSPR model
+        """Prepare the dataset for use in QSPR model.
+
         Arguments:
             fname (str): feature_calculator with filtered features saved to this file
             standarize (bool): Apply Chembl standardization pipeline to smiles
@@ -132,7 +130,6 @@ class QSPRDataset:
             featurefilters (list of feature filter objs): filters features
             n_folds (n): number of folds to use in cross-validation
         """
-
         # standardize and sanitize smiles
         if standardize:
             self.df[self.smilescol] = [chembl_smi_standardizer(smiles)[0] for smiles in self.df[self.smilescol]]
@@ -221,10 +218,11 @@ class QSPRDataset:
         self.createFolds()
 
     def loadFeaturesFromFile(fname: str) -> None:
-        """
-        Function to load in calculated features from file
+        """Load in calculated features from file.
+        
         Useful if features were calculated in other software, such as MOE.
         Features are added to X and X_ind
+        
         Arguments:
             fname (str): file name of feature file
         """
@@ -232,9 +230,7 @@ class QSPRDataset:
         pass
 
     def createFolds(self):
-        """
-        Create folds for crossvalidation
-        """
+        """Create folds for crossvalidation."""
         if self.reg:
             self.folds = KFold(self.n_folds).split(self.X)
         else:
@@ -243,16 +239,15 @@ class QSPRDataset:
 
     @staticmethod
     def dataStandardization(data_x, test_x):
-        """
-        Perform standardization by centering and scaling
+        """Perform standardization by centering and scaling.
 
         Arguments:
-                    data_x (list): descriptors of data set
-                    test_x (list): descriptors of test set
+            data_x (list): descriptors of data set
+            test_x (list): descriptors of test set
 
         Returns:
-                    data_x (list): descriptors of data set standardized
-                    test_x (list): descriptors of test set standardized
+            data_x (list): descriptors of data set standardized
+            test_x (list): descriptors of test set standardized
         """
         scaler = Scaler()
         scaler.fit(data_x)

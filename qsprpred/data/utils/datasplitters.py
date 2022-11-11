@@ -1,3 +1,8 @@
+"""Different splitters to create train and tests for evalutating QSPR model performance.
+
+To add a new data splitter:
+* Add a datasplit subclass for your new splitter
+"""
 from collections import defaultdict
 
 import numpy as np
@@ -8,8 +13,8 @@ from sklearn.model_selection import train_test_split
 
 
 class randomsplit(datasplit):
-    """
-    Splits dataset in random train and test subsets
+    """Splits dataset in random train and test subsets.
+
     Attributes:
         test_fraction (float): fraction of total dataset to testset
     """
@@ -22,8 +27,8 @@ class randomsplit(datasplit):
 
 
 class temporalsplit(datasplit):
-    """
-    Splits dataset in random train and test subsets
+    """Splits dataset in random train and test subsets.
+
     Attributes:
         timesplit(float): time point after which sample to test set
         timecol (str): column name of column in df that contains the timepoints
@@ -41,6 +46,12 @@ class temporalsplit(datasplit):
 
 
 class scaffoldsplit(datasplit):
+    """Splits dataset in train and test subsets based on their Murcko scaffold.
+
+    Attributes:
+        test_fraction (float): fraction of total dataset to testset
+    """
+    
     def __init__(self, test_fraction=0.1) -> None:
         self.test_fraction = test_fraction
 

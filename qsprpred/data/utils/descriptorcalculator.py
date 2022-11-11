@@ -112,6 +112,7 @@ class descriptorsCalculator(Calculator):
             json.dump(descset_dict, outfile)
     
     def get_len(self):
+        """Return number of descriptors calculated by all descriptorsets."""
         length = 0
         for descset in self.descsets:
             length += descset.get_len()
