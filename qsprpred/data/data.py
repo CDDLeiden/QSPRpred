@@ -134,7 +134,7 @@ class QSPRDataset:
         if standardize:
             self.df[self.smilescol] = [chembl_smi_standardizer(smiles)[0] for smiles in self.df[self.smilescol]]
         if sanitize:
-            self.df[self.smilescol] = [sanitize_smiles(smiles)[0] for smiles in self.df[self.smilescol]]
+            self.df[self.smilescol] = [sanitize_smiles(smiles) for smiles in self.df[self.smilescol]]
 
         # apply filters on dataset
         for filter in datafilters:
