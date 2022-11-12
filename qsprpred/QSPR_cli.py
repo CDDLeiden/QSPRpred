@@ -229,7 +229,7 @@ def QSPR(args):
 
 
             mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_DescCalc.json", 
-                                     feature_calculators=descriptorsCalculator([MorganFP(3, nBits=1000), get_descriptor("DrugExPhyschem")]),
+                                     feature_calculators=descriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, featurefilters=featurefilters)
 
             # save dataset object
