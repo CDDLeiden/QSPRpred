@@ -181,7 +181,7 @@ class QSPRDataset:
 
         # Replace any NaN values in features by 0
         self.X = self.X.fillna(0)
-        self.X_ind = self.X.fillna(0)
+        self.X_ind = self.X_ind.fillna(0)
         
         # apply filters to features on trainingset
         for featurefilter in featurefilters:

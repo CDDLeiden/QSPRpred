@@ -157,15 +157,17 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
     
     def test_descriptorcalculator(self):
         mols = self.prep_testdata()
-        desc_calc = descriptorsCalculator([MorganFP(3, 1000), DrugExPhyschem()])
+        desc_calc = descriptorsCalculator([MorganFP(3, 1000), DrugExPhyschem(), Mordred()])
         mols.append(None)
         descriptors = desc_calc(mols)
+        filter = highCorrelationFilter(0.9)
+        filter(descriptors)
         self.assertIsInstance(descriptors, pd.DataFrame)
-        self.assertEqual(descriptors.shape, (11,1019))
+        self.assertEqual(descriptors.shape, (11,2845))
         self.assertEqual(descriptors.columns[0], 'MorganFP_0')
         self.assertEqual(descriptors.columns[1018], 'DrugExPhyschem_MR')
         self.assertTrue(descriptors.any().any())
-        self.assertEqual(desc_calc.get_len(), 1019)
+        self.assertEqual(desc_calc.get_len(), 2845)
 
 class TestData(PathMixIn, TestCase):
 
