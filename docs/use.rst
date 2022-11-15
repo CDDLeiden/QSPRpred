@@ -15,7 +15,7 @@ A simple command-line workflow to prepare your dataset and train QSPR model is g
 
 If you want more control over the inputs and outputs or want to customize QSPRpred a bit more,
 you can also use the Python API directly (see :ref:`source code <https://github.com/CDDLeiden/QSPRpred/tree/master/tutorial>`_).
-You can find a tutorial with a Jupyter notebook illustrating some common use cases in the project source code.
+Here you can find a tutorial with a Jupyter notebook illustrating some common use cases in the project source code.
 
 ..  _cli-example:
 
@@ -36,17 +36,19 @@ Preparing Data
 ^^^^^^^^^^^^^^^
 
 QSPRpred assumes that all input data are saved in the data folder of the directory it is executed from.
-Therefore, we place our dataset in a folder 'data'. In the CLI we also need to indicate which property/ies we are interested in predicting (here CHEMBL226, CHEMBL251), this should be equal to the colum names containing
-the values to be predicted in. This column name should also not contain any spaces.
-Furthermore, we should indicate how we wish to split the data to create a train and test set,
-here we will use a random split with a test fraction of 15%. We need to calculate feature from the SMILES sequence, here we use morgan fingerprints and rdkit descriptors.
+Therefore, we place our dataset in a folder 'data'. In the CLI we also need to indicate which property/ies we are interested in predicting (here CHEMBL226, CHEMBL251, the columns with 
+bioactivity values for Adenosine receptor A1 and Adenosine receptor A2a, respectively), this should be equal to the column names containing the values to be predicted in. 
+These column names should also not contain any spaces.
+For regression models these columns should contain numerical datapoints. For categorical models either categorical data or numerical data can be used (the latter will be categorized based on the activity threshold).
+Furthermore, we should indicate how we wish to split the data to create a train and test set.
+Here we will use a random split with a test fraction of 15%. We need to calculate feature from the SMILES sequence, here we use morgan fingerprints and rdkit descriptors.
 
 Model Training
 ^^^^^^^^^^^^^^
 
 Finally, we need to indicate what models we want to train and which steps to take in the training.
 In this example, we will build classification random forest models and naive bayes models.
-We will also do model evalutation through cross-validation and finally train the model on al data and save.
+We will also do model evalutation through cross-validation and finally train the model on all data and save.
 
 ..  code-block::
 
