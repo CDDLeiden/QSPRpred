@@ -81,12 +81,15 @@ class descriptorsCalculator(Calculator):
         valid_mols = [mol for mol in mols if not mol is None]
         df_valid = pd.DataFrame()
         for descset in self.descsets:
-            values = pd.concat([descset(mol) for mol in valid_mols])
+            values = pd.concat([descset(mol) for mol in valid_mols], ignore_index=True)
             df_valid = pd.concat([df_valid, values.add_prefix(f"{descset}_")], axis=1)
 
         # Add invalid mols back as rows of zero
         df = pd.DataFrame(np.zeros((len(mols), df_valid.shape[1])), columns=df_valid.columns)
         df.iloc[pd.notnull(mols),:] = df_valid
+
+        # replace errors by nan values
+        df = df.apply(pd.to_numeric, errors='coerce')
         
         return df
 

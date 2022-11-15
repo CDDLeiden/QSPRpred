@@ -53,7 +53,7 @@ class highCorrelationFilter(featurefilter):
 
     def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
         # make absolute, because we also want to filter out large negative correlation
-        correlation = np.triu(np.abs(np.corrcoef(df.values.T)), k=1)
+        correlation = np.triu(np.abs(np.corrcoef(df.values.astype(float).T)), k=1)
         high_corr = np.where(np.any(correlation > self.th, axis=0))
 
         logger.info(
