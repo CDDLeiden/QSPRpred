@@ -21,11 +21,11 @@ class ModelPlot(ABC):
         self.cvPaths = dict()
         self.indPaths = dict()
         for model in self.models:
-            cvPath, indPath = self.checkModels(model)
+            cvPath, indPath = self.checkModel(model)
             self.cvPaths[model] = cvPath
             self.indPaths[model] = indPath
 
-    def checkModels(self, model):
+    def checkModel(self, model):
         cvPath = f"{self.modelOuts[model]}.cv.tsv"
         indPath = f"{self.modelOuts[model]}.ind.tsv"
         if model.type not in self.getSupportedTypes():
