@@ -27,7 +27,7 @@ class randomsplit(datasplit):
 
 
 class temporalsplit(datasplit):
-    """Splits dataset in random train and test subsets.
+    """Splits dataset train and test subsets based on a threshold in time.
 
     Attributes:
         timesplit(float): time point after which sample to test set
