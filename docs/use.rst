@@ -65,7 +65,7 @@ Here you can find a short overview.
 
 Base settings arguments
 ^^^^^^^^^^^^^^^^^^^^^^^
-Apart from the base directory and the input file, there are a few other base options then
+Apart from the base directory and the input file, there are a few other base options that
 can be set. Including the -d, will also print debug options to the log file. The random 
 seed can also be set manually (although identical results are not guaranteed with keeping
 the same random seed). Furthermore, the number of cpu's used for model training and the
@@ -93,7 +93,7 @@ Train test split
 """"""""""""""""
 In the base example we use a random split to create the train and test set. There are two
 more options, namely a scaffold split, where the data is split into a test and train set
-randomly but keeping molecules with the same Murcko scaffold together.
+randomly but keeping molecules with the same Murcko scaffold in the same set.
 
 ..  code-block::
 
@@ -113,7 +113,7 @@ Feature calculation
 """""""""""""""""""
 There are four different descriptor sets that can be calculated at the moment,
 namely Morgan fingerprints, rdkit descriptors, Mordred descriptors and the
-pysciochemical properties used in the QSAR models in the DrugEx papers. The can also
+physicochemical properties used in the QSAR models in the DrugEx papers. The can also
 be combined. For more control over the descriptorcalculator settings use the python API.
 
 ..  code-block::
@@ -124,7 +124,7 @@ be combined. For more control over the descriptorcalculator settings use the pyt
 Feature filtering
 """""""""""""""""
 The calculated features can also be filtered. Three different filters are implemented in
-QSPRpred, namely a high correlation filter, low variance filter and the boruta filter.
+QSPRpred, namely a high correlation filter, a low variance filter and the boruta filter.
 The high correlation filter and low variance filter need to be set with a threshold
 for filtering.
 
@@ -147,11 +147,11 @@ Classification models
 """""""""""""""""""""
 The model training can be customized with several CLI arguments.
 Firstly, you can set whether to use regression, classification or both.
-Default setting is to run both, but you can run either by setting the
+The default setting is to run both, but you can run either by setting the
 regression argument to true/REG for regression or false/CLS for classification.
-If classification then also the threshold(s) for each property needs to be included.
-This is set using a dictionary. If multi-class classification then the bounderies of
-the bins need to be given. If binary then only the threshold.
+When using classification, the threshold(s) for each property need to be included.
+This is set using a dictionary. In case of multi-class classification the bounderies of
+the bins need to be given. For binary only give 1 threshold per property.
 
 ..  code-block::
 
@@ -164,7 +164,7 @@ model types
 You also need to indicate which models you want to run, out of the following model types:
 'RF' (Random Forest), 'XGB' (XGboost), 'SVM' (Support Vector Machine), 'PLS' (partial least squares regression),
 'KNN' (k-nearest neighbours), NB' (Naive Bayes) and/or 'DNN' (pytorch fully connected neural net).
-Default is to run all the different model types.
+The default is to run all the different model types.
 
 ..  code-block::
 
@@ -173,7 +173,7 @@ Default is to run all the different model types.
 
 Defining model parameters
 """""""""""""""""""""""""
-Specific model parameters can be set with the parameters argument giving a json file.
+Specific model parameters can be set with the parameters argument by giving a json file.
 Specifically for the training of the DNN model, you can set the tolerance and the patience from the CLI.
 Tolerance gives the mimimum decrease in loss needed to count as an improvement and 
 patience is the number of training epochs without improvement in loss to stop the training.
@@ -194,7 +194,7 @@ In addition to setting model parameters manually, a hyperparameter search can be
 In QSPRpred, two methods of hyperparameter optimization are implemented: grid search and 
 bayesian optimization. For baysian optimization also give the number of trials.
 The search space needs to be set using a json file, if this is not given then the default
-search space defined in qsprpred/models/search_space.json can be found.
+search space defined in qsprpred/models/search_space.json is used.
 A simple search space file for a RF and KNN model should look as given below.
 Note the indication of the model type as first list item and type of optimization algorithm
 as third list item. The search space file should always include all models to be trained.
