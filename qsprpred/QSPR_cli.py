@@ -95,7 +95,7 @@ def QSPRArgParser(txt=None):
                         help='For each property if its values need to be log-tranformed. This arg only has an effect \
                               when mode is regression, otherwise will be ignored!\
                               This needs to be given for each property included in any of the models as follows, e.g.\
-                              -th \'{"CL":True,"fu":False}\'. Note. no spaces and surround by single quotes')
+                              -lt \'{"CL":True,"fu":False}\'. Note. no spaces and surround by single quotes')
 
     # Data set split arguments
     parser.add_argument('-sp', '--split', type=str, choices=['random', 'time', 'scaffold'], default='random')
