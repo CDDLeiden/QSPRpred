@@ -25,6 +25,7 @@ class QSPRDataset:
     df (pd dataframe) : dataset
     smilescol (str) : name of column containing the molecule smiles
     property (str) : name of column in dataframe for to be predicted values, e.g. ["Cl"]
+    precomputed (bool): if classification of property precomputed
     reg (bool) : if true, dataset for regression, if false dataset for classification
         (uses th)
     th (list of float) : threshold for activity if classification model, if len th
@@ -50,7 +51,7 @@ class QSPRDataset:
     """
 
     def __init__(
-        self, df: pd.DataFrame, property, smilescol="SMILES", reg=True, th=[], log=False
+        self, df: pd.DataFrame, property, smilescol="SMILES", precomputed=False, reg=True, th=[], log=False
     ):
         self.smilescol = smilescol
         self.property = property
@@ -72,22 +73,26 @@ class QSPRDataset:
 
         self.th = [] if reg else th
         if not reg:
-            assert type(th) == list, "thresholds should be a list"
-            if len(th) > 1:
-                assert (
-                    len(th) > 3
-                ), "For multi-class classification, set more than 3 values as threshold."
-                assert max(self.df[property]) <= max(
-                    self.th
-                ), "Make sure final threshold value is not smaller than largest value of property"
-                assert min(self.df[property]) >= min(
-                    self.th
-                ), "Make sure first threshold value is not larger than smallest value of property"
-                self.df[property] = pd.cut(
-                    self.df[property], bins=th, include_lowest=True
-                )
+            if precomputed:
+                assert self.df[property].apply(float.is_integer).all()
             else:
-                self.df[property] = (self.df[property] > self.th[0]).astype(float)
+                assert th, "If not precomputed, add a threshold for classification."
+                assert type(th) == list, "Thresholds should be a list."
+                if len(th) > 1:
+                    assert (
+                        len(th) > 3
+                    ), "For multi-class classification, set more than 3 values as threshold."
+                    assert max(self.df[property]) <= max(
+                        self.th
+                    ), "Make sure final threshold value is not smaller than largest value of property"
+                    assert min(self.df[property]) >= min(
+                        self.th
+                    ), "Make sure first threshold value is not larger than smallest value of property"
+                    self.df[property] = pd.cut(
+                        self.df[property], bins=th, include_lowest=True
+                    )
+                else:
+                    self.df[property] = (self.df[property] > self.th[0]).astype(float)
 
         self.X = None
         self.y = None
