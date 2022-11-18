@@ -6,8 +6,8 @@
 !.gitignore
 /build/
 /base_test/
-/tutorial/jupyter
-/tutorial/data
+/tutorial/qsprmodels
+/tutorial/figures
 /tutorial/CLI
 /docs/_build
 *.pkg

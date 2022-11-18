@@ -14,14 +14,35 @@ Quick Start
 
 ### Installation
 
-QSPRpred can be installed with pip like so:
+QSPRpred can be installed with pip like so (with python >= 3.9.0):
 
 ```bash
-pip install git+https://github.com/CDDLeiden/QSPRpred.git@master
+pip install git+https://gitlab.services.universiteitleiden.nl/cdd/QSPRpred.git@dev
+```
+
+Additionally sklearn_json needs to be installed as follows (see [sklearn-json](https://github.com/OlivierBeq/sklearn-json)):
+
+```bash
+pip install https://github.com/OlivierBeq/sklearn-json/tarball/master
+```
+
+```bash
+pip install -e git+https://github.com/OlivierBeq/sklearn-json.git#egg=sklearn-json[full]
+```
+
+Additional dependencies can be installed to allow:
+using jupyter notebooks
+```bash
+pip install jupyter
 ```
 
 ### Use
-After installation, you will have access to various command line features, but you can also use the Python API directly. Documentation for the current version of both is available [here](https://cddleiden.github.io/QSPRpred/docs/). For a quick start, you can also check out our [Jupyter notebook tutorial](./tutorial), which documents the use of the Python API to build different types of models. The tutorial as well as the documentation are still work in progress, and we will be happy for any contributions where it is still lacking.
+After installation, you will have access to various command line features, but you can also use the Python API directly. Documentation for the current version of both is available [here](https://cddleiden.github.io/QSPRpred/docs/). For a quick start, you can also check out the  [Jupyter notebook tutorials](./tutorial), which documents the use of the Python API to build different types of models. [This tutorial](./tutorial/tutorial_training.ipynb) shows how a QSAR model can be trained. [This tutorial](./tutorial/tutorial_usage.ipynb) shows how to use a QSAR model to predict the bioactivity of a set of molecules. The tutorials as well as the documentation are still work in progress, and we will be happy for any contributions where it is still lacking.
+
+To use the commandline to train the same QSAR model as in the tutorial use:
+```bash
+python -m qsprpred.QSPR_cli -i parkinsons_pivot.tsv -pr GABAAalpha -m XGB -r true -sf 0.15 -fe Morgan -s -o bayes -nt 10 -me
+```
 
 Current Development Team
 ========================

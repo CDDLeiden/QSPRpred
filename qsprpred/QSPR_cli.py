@@ -25,6 +25,7 @@ from qsprpred.data.utils.descriptorsets import (
     MorganFP,
     rdkit_descs,
 )
+from qsprpred.data.utils.feature_standardization import StandardStandardizer
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
     highCorrelationFilter,
@@ -227,7 +228,6 @@ def QSPR(args):
                 else:
                      featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=5)))
 
-
             mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_DescCalc.json", 
                                      feature_calculators=descriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, featurefilters=featurefilters)
@@ -252,8 +252,12 @@ def QSPR(args):
                     continue
 
                 if model_type != "RF":
-                    mydataset.X, mydataset.X_ind = mydataset.dataStandardization(mydataset.X, mydataset.X_ind)
-
+                    # scale features
+                    scaler = StandardStandardizer.fromFit(mydataset.X)
+                    mydataset.X = scaler(mydataset.X)
+                    mydataset.X_ind = scaler(mydataset.X_ind)
+                    scaler.toFile(f'{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_scaler.json')
+    
                 if args.parameters:
                     try:
                         parameters = par_dicts[par_dicts[:,0]==model_type,1][0]
