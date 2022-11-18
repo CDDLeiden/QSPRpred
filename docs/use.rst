@@ -87,7 +87,7 @@ To log transform data specific properties, indicate this in the CLI as follows:
 ..  code-block::
 
     # Log transform data for CHEMBL226
-    qsprpred QSPR_cli -i LIGAND_RAW_small.tsv -pr CHEMBL226 -pr CHEMBL251 -lt '{"CHEMBL226":True,"CHEMBL251":False}' -r REG -sp random -sf 0.15 -fe Morgan -m RF -me -s
+    qsprpred QSPR_cli -i LIGAND_RAW_small.tsv -pr CHEMBL226 -pr CHEMBL251 -lt '{"CHEMBL226":true,"CHEMBL251":false}' -r REG -sp random -sf 0.15 -fe Morgan -m RF -me -s
 
 Train test split
 """"""""""""""""
