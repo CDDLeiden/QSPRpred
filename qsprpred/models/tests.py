@@ -11,6 +11,7 @@ import torch
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
 from qsprpred.data.utils.descriptorsets import MorganFP
+from qsprpred.data.utils.feature_standardization import StandardStandardizer
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
 from sklearn.cross_decomposition import PLSRegression
@@ -49,7 +50,9 @@ class NeuralNet(PathMixIn, TestCase):
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
         data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
                                 feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]))
-        data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
+        scaler = StandardStandardizer.fromFit(data.X)
+        data.X = scaler(data.X)
+        data.X_ind = scaler(data.X_ind)
 
         # prepare data for torch DNN
         y = data.y.reshape(-1,1)
@@ -104,7 +107,9 @@ class TestModels(PathMixIn, TestCase):
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
         data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
                                 feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]))
-        data.X, data.X_ind = data.dataStandardization(data.X, data.X_ind)
+        scaler = StandardStandardizer.fromFit(data.X)
+        data.X = scaler(data.X)
+        data.X_ind = scaler(data.X_ind)
         
         return data
 

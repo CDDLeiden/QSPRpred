@@ -6,6 +6,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
+from qsprpred.logs import logger
 from rdkit.Chem.rdchem import Mol
 
 
@@ -94,11 +95,10 @@ class descriptorsCalculator(Calculator):
         return df
 
     def toFile(self, fname: str) -> None:
-        """Save descriptorset to json file.
+        """Save descriptorset to json file
         
         Args:
-            fname: file name of json file with descriptor names and settings
-        """
+            fname: file name of json file with descriptor names and settings"""
         descset_dict = {}
         for descset in self.descsets:
             if descset.is_fp:
@@ -111,7 +111,7 @@ class descriptorsCalculator(Calculator):
                     "settings": descset.settings,
                     "descriptors": descset.descriptors,
                 }
-        with open(fname, "w") as outfile:
+        with open('%s' % fname, "w") as outfile:
             json.dump(descset_dict, outfile)
     
     def get_len(self):
