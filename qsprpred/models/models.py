@@ -50,19 +50,14 @@ class QSPRsklearn(QSPRModel):
         self.n_jobs = n_jobs
         #initialize models with defined parameters
         if self.parameters:
-            if type(self.alg) in [GaussianNB, PLSRegression, SVR, SVC]:
                 self.model = self.alg.set_params(**self.parameters)
-            else:
-                self.model = self.alg.set_params(n_jobs=n_jobs, **self.parameters)
         else:
             if type(self.alg) in [SVC, SVR]:
                 logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
                                  Manually set this parameter if this is not desired.")
                 self.model = self.alg.set_params(max_iter=10000)
-            elif type(self.alg) in [GaussianNB, PLSRegression]:
-                self.model = self.alg
             else:
-                self.model = self.alg.set_params(n_jobs=n_jobs)
+                self.model = self.alg
     
         logger.info('parameters: %s' % self.parameters)
         logger.debug('Model intialized: %s' % self.out)
@@ -74,13 +69,7 @@ class QSPRsklearn(QSPRModel):
         X_all = np.concatenate([self.data.X, self.data.X_ind], axis=0)
         y_all = np.concatenate([self.data.y, self.data.y_ind], axis=0)
         
-        # KNN and PLS do not use sample_weight
         fit_set = {'X': X_all}
-
-        # weighting in original drugex v2 code, but was specific to data used there
-        # use sample weight to decrease the weight of low quality datapoints
-        # if type(self.alg).__name__ not in ['KNeighborsRegressor', 'KNeighborsClassifier', 'PLSRegression']:
-        #     fit_set['sample_weight'] = [1 if v >= 4 else 0.1 for v in self.data.y[trained]]
         
         if type(self.alg).__name__ == 'PLSRegression':
             fit_set['Y'] = y_all
@@ -105,11 +94,6 @@ class QSPRsklearn(QSPRModel):
             logger.info('cross validation fold %s started: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             
             fit_set = {'X':self.data.X[trained]}
-
-            # weighting in original drugex v2 code, but was specific to data used there
-            # use sample weight to decrease the weight of low quality datapoints
-            # if type(self.alg).__name__ not in ['KNeighborsRegressor', 'KNeighborsClassifier', 'PLSRegression']:
-            #     fit_set['sample_weight'] = [1 if v >= 4 else 0.1 for v in self.data.y[trained]]
             
             if type(self.alg).__name__ == 'PLSRegression':
                 fit_set['Y'] = self.data.y[trained]
@@ -176,8 +160,6 @@ class QSPRsklearn(QSPRModel):
                             scoring=scoring, refit=False)
         
         fit_set = {'X': self.data.X, 'y': self.data.y}
-        # if type(self.alg).__name__ not in ['KNeighborsRegressor', 'KNeighborsClassifier', 'PLSRegression']:
-        #     fit_set['sample_weight'] = [1 if v >= 4 else 0.1 for v in self.data.y]
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         grid.fit(**fit_set)
         logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
