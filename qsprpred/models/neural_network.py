@@ -1,3 +1,5 @@
+"""This module holds the base class for DNN models as well as fully connected NN subclass."""
+
 import inspect
 import time
 from collections import defaultdict
@@ -13,6 +15,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 class Base(nn.Module):
     """Base structure for all of classification/regression DNN models.
+    
     Mainly, it provides the general methods for training, evaluating model and
     predicting the given data.
     """
@@ -40,10 +43,13 @@ class Base(nn.Module):
             )
 
     def fit(self, train_loader, valid_loader, out, patience=50, tol=0):
-        """Training the DNN model, similar to the scikit-learn or Keras style,
-        Saves the optimal value of parameters.
+        """Training the DNN model.
+
+        Training is, similar to the scikit-learn or Keras style.
+        It saves the optimal value of parameters.
+
         Arguments:
-            train_loader (DataLoader): Data loader for training set,
+            train_loader (DataLoadesr): Data loader for training set,
                 including m X n target FloatTensor and m X l label FloatTensor
                 (m is the No. of sample, n is the No. of features, l is the
                 No. of classes or tasks)
@@ -57,7 +63,6 @@ class Base(nn.Module):
             tol (float): minimum absolute improvement of loss necessary to count as
                 progress on best validation score
         """
-
         if "optim" in self.__dict__:
             optimizer = self.optim
         else:
@@ -139,12 +144,14 @@ class Base(nn.Module):
         return last_save
 
     def evaluate(self, loader):
-        """Evaluating the performance of the DNN model.
+        """Evaluate the performance of the DNN model.
+
         Arguments:
             loader (torch.util.data.DataLoader): data loader for test set,
                 including m X n target FloatTensor and l X n label FloatTensor
                 (m is the No. of sample, n is the No. of features, l is the
                 No. of classes or tasks)
+        
         Return:
             loss (float): the average loss value based on the calculation of loss
                 function with given test set.
@@ -176,11 +183,13 @@ class Base(nn.Module):
 
     def predict(self, loader):
         """Predicting the probability of each sample in the given dataset.
+        
         Arguments:
             loader (torch.util.data.DataLoader): data loader for test set,
                 only including m X n target FloatTensor
                 (m is the No. of sample, n is the No. of features)
-        Return:
+        
+        Returns:
             score (ndarray): probability of each sample in the given dataset,
                 it is a m X l FloatTensor (m is the No. of sample, l is the
                 No. of classes or tasks.)
@@ -206,18 +215,16 @@ class Base(nn.Module):
         return sorted([p.name for p in parameters])
 
     def get_params(self, deep=True):
-        # function copy from sklearn.base_estimator
-        """
-        Get parameters for this estimator.
+        """Get parameters for this estimator.
 
-        Parameters
-        ----------
-        deep : bool, default=True
+        Function copied from sklearn.base_estimator!
+        
+        Parameters:
+        deep: bool, default=True
             If True, will return the parameters for this estimator and
             contained subobjects that are estimators.
 
-        Returns
-        -------
+        Returns:
         params : dict
             Parameter names mapped to their values.
         """
@@ -231,23 +238,19 @@ class Base(nn.Module):
         return out
 
     def set_params(self, **params):
-        # function copy from sklearn.base_estimator
         """Set the parameters of this estimator.
 
+        Function copied from sklearn.base_estimator!
         The method works on simple estimators as well as on nested objects
         (such as :class:`~sklearn.pipeline.Pipeline`). The latter have
         parameters of the form ``<component>__<parameter>`` so that it's
         possible to update each component of a nested object.
 
-        Parameters
-        ----------
-        **params : dict
-            Estimator parameters.
+        Arguments:
+            **params : dict Estimator parameters.
 
-        Returns
-        -------
-        self : estimator instance
-            Estimator instance.
+        Returns:
+            self : estimator instance
         """
         if not params:
             # Simple optimization to gain speed (inspect is slow)
@@ -276,9 +279,9 @@ class Base(nn.Module):
         return self
 
     def get_dataloader(self, X, y=None):
-        """
-        Convert data to tensors and get iterable over dataset with dataloader
-        arguments:
+        """Convert data to tensors and get iterable over dataset with dataloader.
+
+        Arguments:
         X (numpy 2d array): input dataset
         y (numpy 1d column vector): output data
         """
@@ -290,8 +293,10 @@ class Base(nn.Module):
 
 
 class STFullyConnected(Base):
-    """Single task DNN classification/regression model. It contains four fully
-        connected layers between which are dropout layer for robustness.
+    """Single task DNN classification/regression model.
+    
+    It contains four fully connected layers between which are dropout layer for robustness.
+    
     Arguments:
         n_dim (int): the No. of columns (features) for input tensor
         n_class (int): the No. of columns (classes) for output tensor.
@@ -353,18 +358,20 @@ class STFullyConnected(Base):
         self.to(self.device)
 
     def set_params(self, **params):
+        """Set parameters and re-initialize model."""
         super().set_params(**params)
         self.init_model()
         return self
 
     def forward(self, X, istrain=False):
-        """Invoke the class directly as a function
+        """Invoke the class directly as a function.
+
         Arguments:
             X (FloatTensor): m X n FloatTensor, m is the No. of samples, n is
                 the No. of features.
             istrain (bool, optional): is it invoked during training process (True) or
                 just for prediction (False)
-        Return:
+        Returns:
             y (FloatTensor): m X n FloatTensor, m is the No. of samples,
                 n is the No. of classes
         """

@@ -1,18 +1,19 @@
+"""Abstract base classes for data preparation classes."""
 from abc import ABC, abstractmethod
 
-class datasplit(ABC):
-    """
-    Defines a function split a dataframe into train and test set
 
-    """
+class datasplit(ABC):
+    """Defines a function split a dataframe into train and test set."""
+
     @abstractmethod
     def __call__(self, df, Xcol, ycol):
-        """
-        Split dataframe df into train and test set.
+        """Split dataframe df into train and test set.
+
         Args:
             df: pandas dataframe to split
             Xcol: input column name, e.g. "SMILES"
             ycol: output column name, e.g. "Cl"
+
         Returns:
             X: training set input
             X_ind: test set input
@@ -22,28 +23,27 @@ class datasplit(ABC):
         pass
 
 class datafilter(ABC):
-    """
-        filter out some rows from a dataframe
-    """
+    """Filter out some rows from a dataframe."""
+
     @abstractmethod
     def __call__(self, df):
-        """
-        filter out some rows from a dataframe
+        """Filter out some rows from a dataframe.
+
         Args:
             df: pandas dataframe to filter
+
         Returns:
             df: filtered pandas dataframe
         """
         pass
 
 class featurefilter(ABC):
-    """
-        filter out uninformative features from a dataframe
-    """
+    """Filter out uninformative features from a dataframe."""
+
     @abstractmethod
     def __call__(self, df):
-        """
-        filter out uninformative features from a dataframe
+        """Filter out uninformative features from a dataframe.
+        
         Args:
             df: pandas dataframe to filter
         Returns:
@@ -52,18 +52,14 @@ class featurefilter(ABC):
         pass
 
 class Scorer(ABC):
-    """
-    Used to calculate customized scores.
-
-    """
+    """Used to calculate customized scores."""
 
     def __init__(self, modifier=None):
         self.modifier = modifier
 
     @abstractmethod
     def getScores(self, mols, frags=None):
-        """
-        Returns scores for the input molecules.
+        """Return scores for the input molecules.
 
         Args:
             mols: molecules to score
@@ -72,34 +68,30 @@ class Scorer(ABC):
         Returns:
             scores (list): `list` of scores for "mols"
         """
-
         pass
 
     def __call__(self, mols, frags=None):
-        """
-        Actual call method. Modifies the scores before returning them.
+        """Actual call method. Modifies the scores before returning them.
 
         Args:
             mols: molecules to score
             frags: input fragments
 
         Returns:
-            scores (DataFrame): a data frame with columns name 'VALID' and 'DESIRE' indicating the validity of the SMILES and the degree of desirability
+            scores (DataFrame): a data frame with columns name 'VALID' and 'DESIRE' 
+                indicating the validity of the SMILES and the degree of desirability
         """
-
         return self.getModifiedScores(self.getScores(mols, frags))
 
     def getModifiedScores(self, scores):
-        """
-        Modify the scores with the given `ScoreModifier`.
+        """Modify the scores with the given ScoreModifier.
 
         Args:
             scores:
 
         Returns:
-
+            scores
         """
-
         if self.modifier:
             return self.modifier(scores)
         else:

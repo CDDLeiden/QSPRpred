@@ -1,10 +1,8 @@
-"""
-descriptors.py
+"""Descriptorssets.
 
 To add a new descriptor or fingerprint calculator:
 * Add a descriptor subclass for your descriptor calculator
 * Add a function to retrieve your descriptor by name to the descriptor retriever class
-
 """
 
 from abc import ABC, abstractmethod
@@ -20,10 +18,7 @@ from rdkit.Chem import AllChem
 
 
 class DescriptorSet(ABC):
-    """
-    Abstract base class for descriptors.
-
-    """
+    """Abstract base class for descriptorssets."""
 
     @abstractmethod
     def __call__(self, mol):
@@ -42,10 +37,12 @@ class DescriptorSet(ABC):
 
     @abstractmethod
     def is_fp(self):
+        """Return True if descriptorset is fingerprint."""
         pass
 
     @abstractmethod
     def settings(self):
+        """Return args and kwargs used to initialize the descriptorset."""
         pass
 
     @abstractmethod
@@ -100,16 +97,17 @@ class MorganFP(DescriptorSet):
 
 
 class Mordred(DescriptorSet):
+    """Descriptors from molecular descriptor calculation software Mordred.
+
+    From https://github.com/mordred-descriptor/mordred.
+    Initialize the descriptor with the same arguments as you would pass to `Calculator` function of Mordred.
+    If no mordred descriptor object passed, the all descriptors will be calculated.
+
+    Args:
+        *args: `Calculator` arguments
+        **kwargs: `Calculator` keyword arguments
+    """
     def __init__(self, *args, **kwargs):
-        """
-        Initialize the descriptor with the same arguments as you would pass to `Calculator` function of Mordred.
-        If no mordred descriptor object passed, the all descriptors will be calculated
-
-        Args:
-            *args: `Calculator` arguments
-            **kwargs: `Calculator` keyword arguments
-        """
-
         self._args = args
         self._kwargs = kwargs
         self._process_args(*args, **kwargs)
@@ -121,7 +119,7 @@ class Mordred(DescriptorSet):
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        return self._mordred.pandas([mol])
+        return self._mordred.pandas([mol], quiet=True)
 
     @property
     def is_fp(self):

@@ -1,3 +1,9 @@
+"""Here the QSPRmodel classes can be found.
+
+At the moment there is a class for sklearn type models
+and one for a keras DNN model. To add more types a model class should be added, which
+is a sublass of the QSPRModel type.
+"""
 import json
 import math
 import os
@@ -22,25 +28,22 @@ from sklearn.svm import SVC, SVR
 
 
 class QSPRsklearn(QSPRModel):
-    """ Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
-        ...
+    """Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
 
-        Attributes
-        ----------
-        data: instance QSPRDataset
-        alg:  instance of estimator
-        parameters (dict): dictionary of algorithm specific parameters
-        n_jobs (int): the number of parallel jobs to run
-        
-        Methods
-        -------
-        init_model: initialize model from saved hyperparameters
-        fit: build estimator model from entire data set
-        objective: objective used by bayesian optimization
-        bayesOptimization: bayesian optimization of hyperparameters using optuna
-        gridSearch: optimization of hyperparameters using gridSearch
-
+    Attributes:
+    data: instance QSPRDataset
+    alg:  instance of estimator
+    parameters (dict): dictionary of algorithm specific parameters
+    n_jobs (int): the number of parallel jobs to run
+    
+    Methods:
+    init_model: initialize model from saved hyperparameters
+    fit: build estimator model from entire data set
+    objective: objective used by bayesian optimization
+    bayesOptimization: bayesian optimization of hyperparameters using optuna
+    gridSearch: optimization of hyperparameters using gridSearch
     """
+
     def __init__(self, base_dir, data, alg, alg_name, parameters=None, n_jobs = 1):
 
         super().__init__(base_dir, data, alg, alg_name, parameters=parameters)
@@ -65,9 +68,7 @@ class QSPRsklearn(QSPRModel):
         os.makedirs(os.path.dirname(self.out), exist_ok=True)
 
     def fit(self):
-        """
-            build estimator model from entire data set
-        """
+        """Build estimator model from entire data set."""
         X_all = np.concatenate([self.data.X, self.data.X_ind], axis=0)
         y_all = np.concatenate([self.data.y, self.data.y_ind], axis=0)
         
@@ -90,10 +91,10 @@ class QSPRsklearn(QSPRModel):
         joblib.dump(self.model, '%s.pkg' % self.out, compress=3)
 
     def evaluate(self, save=True):
-        """
-            Make predictions for crossvalidation and independent test set
-            arguments:
-                save (bool): don't save predictions when used in bayesian optimization
+        """Make predictions for crossvalidation and independent test set.
+
+        arguments:
+            save (bool): don't save predictions when used in bayesian optimization
         """
         cvs = np.zeros(self.data.y.shape) if (self.data.reg or (len(self.data.th) == 1)) else np.zeros((self.data.y.shape[0], len(self.data.th)-1)) 
 
@@ -160,10 +161,10 @@ class QSPRsklearn(QSPRModel):
         return cvs
 
     def gridSearch(self, search_space_gs):
-        """
-            optimization of hyperparameters using gridSearch
-            arguments:
-                search_space_gs (dict): search space for the grid search
+        """Optimization of hyperparameters using gridSearch.
+        
+        Arguments:
+            search_space_gs (dict): search space for the grid search
         """ 
         if self.data.reg:        
             scoring = 'explained_variance'
@@ -188,12 +189,12 @@ class QSPRsklearn(QSPRModel):
         self.model = self.alg.set_params(**grid.best_params_)
 
     def bayesOptimization(self, search_space_bs, n_trials):
-        """
-            bayesian optimization of hyperparameters using optuna
-            arguments:
-                search_space_gs (dict): search space for the grid search
-                n_trials (int): number of trials for bayes optimization
-                save_m (bool): if true, after bayes optimization the model is refit on the entire data set
+        """Bayesian optimization of hyperparameters using optuna.
+
+        Arguments:
+            search_space_gs (dict): search space for the grid search
+            n_trials (int): number of trials for bayes optimization
+            save_m (bool): if true, after bayes optimization the model is refit on the entire data set
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         #TODO add timeout function
@@ -213,13 +214,12 @@ class QSPRsklearn(QSPRModel):
         self.model = self.alg.set_params(**trial.params)
 
     def objective(self, trial, search_space_bs):
-        """
-            objective for bayesian optimization
-            arguments:
-                trial (int): current trial number
-                search_space_bs (dict): search space for bayes optimization
-        """
+        """Objective for bayesian optimization.
 
+        Arguments:
+            trial (int): current trial number
+            search_space_bs (dict): search space for bayes optimization
+        """
         bayesian_params = {}
 
         for key, value in search_space_bs.items():
@@ -246,22 +246,20 @@ class QSPRsklearn(QSPRModel):
 
         return score
 
-class QSPRDNN(QSPRModel):
-    """ 
-        This class holds the methods for training and fitting a Deep Neural Net QSPR model initialization. 
-        Here the model instance is created and parameters  can be defined
-        ...
+class QSPRDNN(QSPRModel):  
+    """This class holds the methods for training and fitting a Deep Neural Net QSPR model initialization.
+    
+    Here the model instance is created and parameters can be defined.
 
-        Attributes
-        ----------
+    Attributes:
         data: instance of QSPRDataset
         parameters (dict): dictionary of parameters to set for model fitting
         device (cuda device): cuda device
         gpus (int/ list of ints): gpu number(s) to use for model fitting
         patience (int): number of epochs to wait before early stop if no progress on validiation set score
         tol (float): minimum absolute improvement of loss necessary to count as progress on best validation score
-
     """
+
     def __init__(self, base_dir, data, parameters = None, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, patience = 50, tol = 0):
 
         self.n_class = max(1, len(data.th)-1)
@@ -286,11 +284,10 @@ class QSPRDNN(QSPRModel):
         self.optimal_epochs = -1
 
     def fit(self):
-        """
-            train model on the trainings data, determine best model using test set, save best model
+        """Train model on the trainings data, determine best model using test set, save best model.
 
-            ** IMPORTANT: evaluate should be run first, so that the average number of epochs from the cross-validation
-                          with early stopping can be used for fitting the model.
+        ** IMPORTANT: evaluate should be run first, so that the average number of epochs from the cross-validation
+                        with early stopping can be used for fitting the model.
         """
         if self.optimal_epochs == -1:
             logger.error('Cannot fit final model without first determining the optimal number of epochs for fitting. \
@@ -357,7 +354,7 @@ class QSPRDNN(QSPRModel):
     def gridSearch(self, search_space_gs, ES_val_size=0.1):
         """Optimization of hyperparameters using gridSearch.
 
-        Args:
+        Arguments:
             search_space_gs (dict): search space for the grid search, accepted parameters are:
                 lr (int) ~ learning rate for fitting
                 batch_size (int) ~ batch size for fitting
@@ -433,13 +430,12 @@ class QSPRDNN(QSPRModel):
         self.model = self.alg.set_params(**trial.params)
 
     def objective(self, trial, search_space_bs):
-        """
-            objective for bayesian optimization
-            arguments:
-                trial (int): current trial number
-                search_space_bs (dict): search space for bayes optimization
-        """
+        """Objective for bayesian optimization.
 
+        arguments:
+            trial (int): current trial number
+            search_space_bs (dict): search space for bayes optimization
+        """
         bayesian_params = {}
 
         for key, value in search_space_bs.items():

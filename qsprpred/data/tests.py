@@ -1,3 +1,4 @@
+"""This module holds the test for functions regarding QSPR data preparation."""
 import os
 import shutil
 from unittest import TestCase
@@ -16,13 +17,14 @@ from qsprpred.data.utils.descriptorsets import (
     MorganFP,
     rdkit_descs,
 )
+from qsprpred.data.utils.feature_standardization import StandardStandardizer
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
     highCorrelationFilter,
     lowVarianceFilter,
 )
 from qsprpred.logs import logger
-from rdkit.Chem import Descriptors, MolFromSmiles
+from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
 
 
 class PathMixIn:
@@ -156,15 +158,37 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
     
     def test_descriptorcalculator(self):
         mols = self.prep_testdata()
-        desc_calc = descriptorsCalculator([MorganFP(3, 1000), DrugExPhyschem()])
+        desc_calc = descriptorsCalculator([MorganFP(3, 1000), DrugExPhyschem(), Mordred()])
         mols.append(None)
         descriptors = desc_calc(mols)
+        filter = highCorrelationFilter(0.9)
+        filter(descriptors)
         self.assertIsInstance(descriptors, pd.DataFrame)
-        self.assertEqual(descriptors.shape, (11,1019))
+        self.assertEqual(descriptors.shape, (11,2845))
         self.assertEqual(descriptors.columns[0], 'MorganFP_0')
         self.assertEqual(descriptors.columns[1018], 'DrugExPhyschem_MR')
         self.assertTrue(descriptors.any().any())
-        self.assertEqual(desc_calc.get_len(), 1019)
+        self.assertEqual(desc_calc.get_len(), 2845)
+
+
+class TestFeatureStandardizer(PathMixIn, TestCase):
+    def prep_testdata(self):
+        df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv', sep='\t')
+        mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
+        features = [AllChem.GetMorganFingerprintAsBitVect(x, 3, 1000) for x in mols]
+        return features
+    
+    def test_featurestandarizer(self):
+        features = self.prep_testdata()
+        scaler = StandardStandardizer.fromFit(features)
+        scaled_features = scaler(features)
+        scaler.toFile('qsprmodels/REG_GABAAalpha_scaler.json')
+        scaler_fromfile = StandardStandardizer.fromFile('qsprmodels/REG_GABAAalpha_scaler.json')
+        scaled_features_fromfile = scaler_fromfile(features)
+        self.assertIsInstance(scaled_features, np.ndarray)
+        self.assertEqual(scaled_features.shape, (10,1000))
+        self.assertEqual(np.array_equal(scaled_features, scaled_features_fromfile), True)
+
 
 class TestData(PathMixIn, TestCase):
 

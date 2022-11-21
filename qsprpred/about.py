@@ -1,8 +1,3 @@
-"""
-about
+"""Version of QSPRpred."""
 
-Created by: Martin Sicho
-On: 24.06.22, 10:36
-"""
-
-VERSION = "0.0.1"
+VERSION = "1.0.0"

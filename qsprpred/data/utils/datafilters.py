@@ -1,3 +1,8 @@
+"""Filters for QSPR Datasets.
+
+To add a new filter:
+* Add a datafilter subclass for your new filter
+"""
 from functools import partial
 
 import pandas as pd
@@ -6,12 +11,12 @@ from qsprpred.logs import logger
 
 
 class CategoryFilter(datafilter):
-    """
-        To filter out values from categorical column
-        Attributes:
-            name (str): column name
-            values (list of str): filter values
-            keep (bool): whether to keep or discard values
+    """To filter out values from categorical column
+
+    Attributes:
+        name (str): column name
+        values (list of str): filter values
+        keep (bool): whether to keep or discard values
     """
     def __init__(self, name: str, values: list, keep=False) -> None:
         self.name = name
@@ -19,11 +24,10 @@ class CategoryFilter(datafilter):
         self.keep = keep
 
     def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-            filter
-            Arguments:
-                df (pandas dataframe): dataframe to filter from
-
+        """Filter rows from dataframe.
+        
+        Arguments:
+            df (pandas dataframe): dataframe to filter
         """
         old_len = df.shape[0]
         try:

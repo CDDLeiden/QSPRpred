@@ -25,6 +25,7 @@ from qsprpred.data.utils.descriptorsets import (
     MorganFP,
     rdkit_descs,
 )
+from qsprpred.data.utils.feature_standardization import StandardStandardizer
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
     highCorrelationFilter,
@@ -41,7 +42,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 
 def QSPRArgParser(txt=None):
-    """Define and read command line arguments"""
+    """Define and read command line arguments."""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     #base arguments
@@ -95,7 +96,7 @@ def QSPRArgParser(txt=None):
                         help='For each property if its values need to be log-tranformed. This arg only has an effect \
                               when mode is regression, otherwise will be ignored!\
                               This needs to be given for each property included in any of the models as follows, e.g.\
-                              -th \'{"CL":True,"fu":False}\'. Note. no spaces and surround by single quotes')
+                              -lt \'{"CL":True,"fu":False}\'. Note. no spaces and surround by single quotes')
 
     # Data set split arguments
     parser.add_argument('-sp', '--split', type=str, choices=['random', 'time', 'scaffold'], default='random')
@@ -227,9 +228,8 @@ def QSPR(args):
                 else:
                      featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=5)))
 
-
             mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_DescCalc.json", 
-                                     feature_calculators=descriptorsCalculator([MorganFP(3, nBits=1000), get_descriptor("DrugExPhyschem")]),
+                                     feature_calculators=descriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, featurefilters=featurefilters)
 
             # save dataset object
@@ -252,8 +252,12 @@ def QSPR(args):
                     continue
 
                 if model_type != "RF":
-                    mydataset.X, mydataset.X_ind = mydataset.dataStandardization(mydataset.X, mydataset.X_ind)
-
+                    # scale features
+                    scaler = StandardStandardizer.fromFit(mydataset.X)
+                    mydataset.X = scaler(mydataset.X)
+                    mydataset.X_ind = scaler(mydataset.X_ind)
+                    scaler.toFile(f'{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_scaler.json')
+    
                 if args.parameters:
                     try:
                         parameters = par_dicts[par_dicts[:,0]==model_type,1][0]

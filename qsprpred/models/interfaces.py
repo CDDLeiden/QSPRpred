@@ -1,3 +1,4 @@
+"""This module holds the base class for QSPRmodels, model types should be a subclass."""
 import json
 import os
 import sys
@@ -8,18 +9,15 @@ from qsprpred.logs import logger
 
 
 class QSPRModel(ABC):
-    """ Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
-        ...
+    """Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
 
-        Attributes
-        ----------
+    Attributes:
         data: instance QSPRDataset
         alg:  instance of estimator
         parameters (dict): dictionary of algorithm specific parameters
         njobs (int): the number of parallel jobs to run
-        
-        Methods
-        -------
+    
+    Methods:
         init_model: initialize model from saved hyperparameters
         fit: build estimator model from entire data set
         objective: objective used by bayesian optimization
@@ -28,9 +26,7 @@ class QSPRModel(ABC):
     """
     
     def __init__(self, base_dir, data, alg, alg_name, parameters={}):
-        """
-            initialize model from saved or default hyperparameters
-        """
+        """Initialize model from saved or default hyperparameters."""
         self.data = data
         self.alg = alg
         self.parameters = parameters
@@ -50,37 +46,36 @@ class QSPRModel(ABC):
 
     @abstractmethod
     def fit(self):
-        """
-            build estimator model from entire data set
-        """
+        """Build estimator model from entire data set."""
         pass
 
     @abstractmethod
     def evaluate(self, save=True):
-        """
-            Make predictions for crossvalidation and independent test set
-            arguments:
-                save (bool): don't save predictions when used in bayesian optimization
+        """Make predictions for crossvalidation and independent test set.
+
+        Arguments:
+            save (bool): don't save predictions when used in bayesian optimization
         """
         pass
 
     @abstractmethod
     def gridSearch(self):
-        """
-            optimization of hyperparameters using gridSearch
-            arguments:
-                search_space_gs (dict): search space for the grid search
-                save_m (bool): if true, after gs the model is refit on the entire data set
+        """Optimization of hyperparameters using gridSearch.
+
+        Arguments:
+            search_space_gs (dict): search space for the grid search
+            save_m (bool): if true, after gs the model is refit on the entire data set
         """          
         pass
 
     @abstractmethod
     def bayesOptimization(self):
-        """bayesian optimization of hyperparameters using optuna.
-            arguments:
-                search_space_gs (dict): search space for the grid search
-                n_trials (int): number of trials for bayes optimization
-                save_m (bool): if true, after bayes optimization the model is refit on the entire data set
+        """Bayesian optimization of hyperparameters using optuna.
+            
+        Arguments:
+            search_space_gs (dict): search space for the grid search
+            n_trials (int): number of trials for bayes optimization
+            save_m (bool): if true, after bayes optimization the model is refit on the entire data set
         """
         pass
     
@@ -88,13 +83,12 @@ class QSPRModel(ABC):
     def loadParamsGrid(fname, optim_type, model_types):
         """Load parameter grids for bayes or grid search parameter optimization from json file.
 
-        arguments:
+        Arguments:
             fname (str): file name of json file containing array with three columns containing modeltype,
                             optimization type (grid or bayes) and model type
             optim_type (str): optimization type ('grid' or 'bayes')
             model_types (list of str): model type for hyperparameter optimization (e.g. RF)
         """
-
         if fname:
             try:
                 with open(fname) as json_file:

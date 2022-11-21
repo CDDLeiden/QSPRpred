@@ -6,6 +6,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
+from qsprpred.logs import logger
 from rdkit.Chem.rdchem import Mol
 
 
@@ -81,21 +82,23 @@ class descriptorsCalculator(Calculator):
         valid_mols = [mol for mol in mols if not mol is None]
         df_valid = pd.DataFrame()
         for descset in self.descsets:
-            values = pd.concat([descset(mol) for mol in valid_mols])
+            values = pd.concat([descset(mol) for mol in valid_mols], ignore_index=True)
             df_valid = pd.concat([df_valid, values.add_prefix(f"{descset}_")], axis=1)
 
         # Add invalid mols back as rows of zero
         df = pd.DataFrame(np.zeros((len(mols), df_valid.shape[1])), columns=df_valid.columns)
         df.iloc[pd.notnull(mols),:] = df_valid
+
+        # replace errors by nan values
+        df = df.apply(pd.to_numeric, errors='coerce')
         
         return df
 
     def toFile(self, fname: str) -> None:
-        """Save descriptorset to json file.
+        """Save descriptorset to json file
         
         Args:
-            fname: file name of json file with descriptor names and settings
-        """
+            fname: file name of json file with descriptor names and settings"""
         descset_dict = {}
         for descset in self.descsets:
             if descset.is_fp:
@@ -108,10 +111,11 @@ class descriptorsCalculator(Calculator):
                     "settings": descset.settings,
                     "descriptors": descset.descriptors,
                 }
-        with open(fname, "w") as outfile:
+        with open('%s' % fname, "w") as outfile:
             json.dump(descset_dict, outfile)
     
     def get_len(self):
+        """Return number of descriptors calculated by all descriptorsets."""
         length = 0
         for descset in self.descsets:
             length += descset.get_len()

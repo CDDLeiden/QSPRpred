@@ -1,3 +1,8 @@
+"""Different filters to select features from trainingset.
+
+To add a new feature filters:
+* Add a featurefilter subclass for your new filter
+"""
 import numpy as np
 import pandas as pd
 from boruta import BorutaPy
@@ -8,8 +13,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 class lowVarianceFilter(featurefilter):
-    """
-    Remove features with a variance lower than a given threshold after MinMax scaling.
+    """Remove features with a variance lower than a given threshold after MinMax scaling.
     
     Attributes:
         th (float): threshold for removing features
@@ -38,18 +42,18 @@ class lowVarianceFilter(featurefilter):
 
 
 class highCorrelationFilter(featurefilter):
+    """Remove features with correlation higher than a given threshold.
+    
+    Attributes:
+        th (float): threshold for correlation
+    """
+    
     def __init__(self, th: float) -> None:
-        """Remove features with correlation higher than a given threshold.
-        
-        Attributes:
-            th (float): threshold for correlation
-        """
         self.th = th
 
     def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
-
         # make absolute, because we also want to filter out large negative correlation
-        correlation = np.triu(np.abs(np.corrcoef(df.values.T)), k=1)
+        correlation = np.triu(np.abs(np.corrcoef(df.values.astype(float).T)), k=1)
         high_corr = np.where(np.any(correlation > self.th, axis=0))
 
         logger.info(
