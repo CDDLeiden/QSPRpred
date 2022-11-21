@@ -265,6 +265,12 @@ def QSPR(args):
                         log.warning(f'Model type {model_type} not in parameter file, default parameter settings used.')
                         parameters = None
 
+                if not model_type in ["NB", "PLS", "SVM"]:
+                    if parameters:
+                        parameters = parameters.update({"n_jobs":args.ncpu})
+                    else:
+                        parameters = {"n_jobs":args.ncpu}
+
                 alg_dict = {
                     'RF' : RandomForestRegressor() if reg else RandomForestClassifier(),
                     'XGB': XGBRegressor(objective='reg:squarederror') if reg else \
@@ -281,7 +287,7 @@ def QSPR(args):
                                         patience = args.patience, tol=args.tolerance)
                 else:
                     QSPRmodel = QSPRsklearn(args.base_dir, data=mydataset, alg=alg_dict[model_type],
-                                            alg_name=model_type, n_jobs=args.ncpu, parameters=parameters)
+                                            alg_name=model_type, parameters=parameters)
 
                 # if desired run parameter optimization
                 if args.optimization == 'grid':
