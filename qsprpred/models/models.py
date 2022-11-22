@@ -63,7 +63,7 @@ class QSPRsklearn(QSPRModel):
         logger.debug('Model intialized: %s' % self.out)
 
         os.makedirs(os.path.dirname(self.out), exist_ok=True)
-
+    
     def fit(self):
         """Build estimator model from entire data set."""
         X_all = np.concatenate([self.data.X, self.data.X_ind], axis=0)
@@ -334,7 +334,7 @@ class QSPRDNN(QSPRModel):
         self.data.createFolds()
 
         return cvs
-
+    
     def gridSearch(self, search_space_gs, ES_val_size=0.1):
         """Optimization of hyperparameters using gridSearch.
 
