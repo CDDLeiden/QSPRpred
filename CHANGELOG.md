@@ -14,3 +14,4 @@ From v1.0.0 to v1.1.0
 ## New Features
 
 - Tutorials for training and using the QSPR models
+- Depiction of results for classification models (see `qsprpred.plotting.classification`)
