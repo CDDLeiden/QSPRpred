@@ -24,7 +24,6 @@ from qsprpred.data.utils.descriptorsets import (
     MorganFP,
     rdkit_descs,
 )
-from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
     highCorrelationFilter,
