@@ -45,6 +45,15 @@ class Calculator(ABC):
         """
         pass
 
+    @abstractmethod
+    def keepDescriptors(self, descriptors: List[str]) -> None:
+        """Drop all descriptors/descriptorsets not in descriptor list.
+
+        Args:
+            descriptors: list of descriptornames to keep
+        """
+        pass
+
 
 class descriptorsCalculator(Calculator):
     """Calculator for molecule properties."""
@@ -113,6 +122,31 @@ class descriptorsCalculator(Calculator):
                 }
         with open('%s' % fname, "w") as outfile:
             json.dump(descset_dict, outfile)
+
+    def keepDescriptors(self, descriptors: List[str]) -> None:
+        """Drop all descriptors/descriptorsets not in descriptor list.
+
+        Args:
+            descriptors: list of descriptornames with descriptorset prefix to keep
+        """
+        for idx, descriptorset in enumerate(self.descsets):
+            # Find all descriptors in current descriptorset
+            descs_from_curr_set = [
+                f.removeprefix(f"{descriptorset}_")
+                for f in descriptors
+                if f.startswith(str(descriptorset))
+            ]
+            # if there are none to keep from current descriptors set, drop the whole set
+            if not descs_from_curr_set:
+                self.descsets.remove(descriptorset)
+            # if the set is a fingerprint, set indices to keep
+            elif descriptorset.is_fp:
+                self.descsets[idx].keepindices = [
+                    f for f in descs_from_curr_set
+                ]
+            # if the set is not a fingerprint, set descriptors to keep
+            else:
+                self.descsets[idx].descriptors = descs_from_curr_set
     
     def get_len(self):
         """Return number of descriptors calculated by all descriptorsets."""
