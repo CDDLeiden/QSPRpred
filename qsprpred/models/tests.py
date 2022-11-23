@@ -10,10 +10,12 @@ import pandas as pd
 import numpy as np
 import torch
 import joblib
+from sklearn.preprocessing import StandardScaler
+
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
 from qsprpred.data.utils.descriptorsets import MorganFP
-from qsprpred.data.utils.feature_standardization import StandardStandardizer
+from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
 from qsprpred.scorers.predictor import Predictor
@@ -53,10 +55,7 @@ class NeuralNet(PathMixIn, TestCase):
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
         data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
-                                feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]))
-        scaler = StandardStandardizer.fromFit(data.X)
-        data.X = scaler(data.X)
-        data.X_ind = scaler(data.X_ind)
+                                feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]), feature_standardizers=[StandardScaler()])
 
         # prepare data for torch DNN
         y = data.y.reshape(-1,1)
@@ -110,13 +109,11 @@ class TestModels(PathMixIn, TestCase):
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
         feature_calculators=descriptorsCalculator([MorganFP(3, 1000)])
+        scaler = StandardScaler()
         data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
-                                feature_calculators=feature_calculators)
-        scaler = StandardStandardizer.fromFit(data.X)
-        data.X = scaler(data.X)
-        data.X_ind = scaler(data.X_ind)
+                                feature_calculators=feature_calculators, feature_standardizers=[scaler])
         
-        return data, feature_calculators, scaler
+        return data, feature_calculators, SKLearnStandardizer(scaler)
 
     def QSPRsklearn_models_test(self, alg, alg_name, reg, th=[], n_jobs=8):
         #intialize dataset and model

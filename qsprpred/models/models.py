@@ -87,28 +87,28 @@ class QSPRsklearn(QSPRModel):
         arguments:
             save (bool): don't save predictions when used in bayesian optimization
         """
-        cvs = np.zeros(self.data.y.shape) if (self.data.reg or (len(self.data.th) == 1)) else np.zeros((self.data.y.shape[0], len(self.data.th)-1)) 
+        cvs = np.zeros(self.data.y.shape) if (self.data.reg or (len(self.data.th) == 1)) else np.zeros((self.data.y.shape[0], len(self.data.th)-1))
 
         # cross validation
-        for i, (trained, valided) in enumerate(self.data.folds):
+        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.folds):
             logger.info('cross validation fold %s started: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             
-            fit_set = {'X':self.data.X[trained]}
+            fit_set = {'X':X_train}
             
             if type(self.alg).__name__ == 'PLSRegression':
-                fit_set['Y'] = self.data.y[trained]
+                fit_set['Y'] = y_train
             else:
-                fit_set['y'] = self.data.y[trained]
+                fit_set['y'] = y_train
             self.model.fit(**fit_set)
             
             if type(self.alg).__name__ == 'PLSRegression':
-                cvs[valided] = self.model.predict(self.data.X[valided])[:, 0]
+                cvs[idx_test] = self.model.predict(X_test)[:, 0]
             elif self.data.reg:
-                cvs[valided] = self.model.predict(self.data.X[valided])
+                cvs[idx_test] = self.model.predict(X_test)
             elif len(self.data.th) > 1:
-                cvs[valided] = self.model.predict_proba(self.data.X[valided])
+                cvs[idx_test] = self.model.predict_proba(X_test)
             else:
-                cvs[valided] = self.model.predict_proba(self.data.X[valided])[:, 1]
+                cvs[idx_test] = self.model.predict_proba(X_test)[:, 1]
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
         
         # fitting on whole trainingset and predicting on test set
@@ -156,7 +156,7 @@ class QSPRsklearn(QSPRModel):
             scoring = 'explained_variance'
         else:
             scoring = 'roc_auc_ovr_weighted' if len(self.data.th) > 1 else 'roc_auc'
-        grid = GridSearchCV(self.alg, search_space_gs, n_jobs=self.n_jobs, verbose=1, cv=self.data.folds,
+        grid = GridSearchCV(self.alg, search_space_gs, n_jobs=self.n_jobs, verbose=1, cv=((x[4], x[5]) for x in self.data.folds),
                             scoring=scoring, refit=False)
         
         fit_set = {'X': self.data.X, 'y': self.data.y}
@@ -300,16 +300,17 @@ class QSPRDNN(QSPRModel):
         last_save_epochs = 0
 
         cvs = np.zeros((self.data.y.shape[0], max(1, len(self.data.th)-1)))
-        for i, (trained, valided) in enumerate(self.data.folds):
-            X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(self.data.X[trained], self.y[trained], test_size=ES_val_size)
+        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.folds):
+            y_train = y_train.reshape(-1,1)
+            X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(X_train, y_train, test_size=ES_val_size)
             train_loader = self.model.get_dataloader(X_train_fold, y_train_fold)
             ES_valid_loader = self.model.get_dataloader(X_val_fold, y_val_fold)
-            valid_loader = self.model.get_dataloader(self.data.X[valided])
+            valid_loader = self.model.get_dataloader(X_test)
             last_save_epoch = self.model.fit(train_loader, ES_valid_loader, '%s_temp' % self.out, self.patience, self.tol)
             last_save_epochs += last_save_epoch
             logger.info(f'cross validation fold {i}: last save epoch {last_save_epoch}')
             os.remove('%s_temp_weights.pkg' % self.out)
-            cvs[valided] = self.model.predict(valid_loader)
+            cvs[idx_test] = self.model.predict(valid_loader)
         os.remove('%s_temp.log' % self.out)
 
         if save:
@@ -361,17 +362,18 @@ class QSPRDNN(QSPRModel):
 
             #do 5 fold cross validation and take mean prediction on validation set as score of parameter settings
             fold_scores = np.zeros(self.data.n_folds)
-            for i, (trained, valided) in enumerate(self.data.folds):
+            for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.folds):
+                y_train = y_train.reshape(-1, 1)
                 logger.info('cross validation fold ' +  str(i))
-                X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(self.data.X[trained], self.y[trained], test_size=ES_val_size)
+                X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(X_train, y_train, test_size=ES_val_size)
                 train_loader = self.model.get_dataloader(X_train_fold, y_train_fold)
                 ES_valid_loader = self.model.get_dataloader(X_val_fold, y_val_fold)
-                valid_loader = self.model.get_dataloader(self.data.X[valided])
+                valid_loader = self.model.get_dataloader(X_test)
                 self.model.set_params(**params)
                 self.model.fit(train_loader, ES_valid_loader, '%s_temp' % self.out, self.patience, self.tol)
                 os.remove('%s_temp_weights.pkg' % self.out)
                 y_pred = self.model.predict(valid_loader)
-                fold_scores[i] = scoring(self.y[valided], y_pred)
+                fold_scores[i] = scoring(y_test, y_pred)
             os.remove('%s_temp.log' % self.out)
             param_score = np.mean(fold_scores)
             if param_score >= best_score:

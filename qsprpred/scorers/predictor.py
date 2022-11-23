@@ -4,21 +4,21 @@ predictors
 Created by: Martin Sicho
 On: 06.06.22, 20:15
 """
-from abc import ABC, abstractmethod
+from typing import List
+
 import joblib
 import numpy as np
-from rdkit import DataStructs
-from rdkit.Chem import AllChem
 from qsprpred.data.interfaces import Scorer
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
-from qsprpred.data.utils.feature_standardization import StandardStandardizer
 
 import torch
+
+from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 
 
 class Predictor(Scorer):
  
-    def __init__(self, model, feature_calculators, scaler, type='CLS', th=1, name=None, modifier=None):
+    def __init__(self, model, feature_calculators, scaler : SKLearnStandardizer, type='CLS', th=1, name=None, modifier=None):
         """Construct predictor model, feature calculator & scaler.
 
         Args:
@@ -61,7 +61,7 @@ class Predictor(Scorer):
         #TODO do not hardcode when to use scaler
         scaler = None
         if scale:
-            scaler = StandardStandardizer.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_scaler.json')
+            scaler = SKLearnStandardizer.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_scaler.json')
               
         if "DNN" in path:
             model = joblib.load(path)

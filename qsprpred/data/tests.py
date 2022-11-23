@@ -7,8 +7,10 @@ import mordred
 import numpy as np
 import pandas as pd
 from mordred import descriptors as mordreddescriptors
+from sklearn.preprocessing import StandardScaler
+
 from qsprpred.data.data import QSPRDataset
-from qsprpred.data.utils.datafilters import CategoryFilter, papyrusLowQualityFilter
+from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
@@ -17,13 +19,12 @@ from qsprpred.data.utils.descriptorsets import (
     MorganFP,
     rdkit_descs,
 )
-from qsprpred.data.utils.feature_standardization import StandardStandardizer
+from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
     highCorrelationFilter,
     lowVarianceFilter,
 )
-from qsprpred.logs import logger
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
 
 
@@ -180,10 +181,10 @@ class TestFeatureStandardizer(PathMixIn, TestCase):
     
     def test_featurestandarizer(self):
         features = self.prep_testdata()
-        scaler = StandardStandardizer.fromFit(features)
+        scaler = SKLearnStandardizer.fromFit(features, StandardScaler())
         scaled_features = scaler(features)
         scaler.toFile(f'{os.path.dirname(__file__)}/test_files/qsprmodels/test_scaler.json')
-        scaler_fromfile = StandardStandardizer.fromFile(f'{os.path.dirname(__file__)}/test_files/qsprmodels/test_scaler.json')
+        scaler_fromfile = SKLearnStandardizer.fromFile(f'{os.path.dirname(__file__)}/test_files/qsprmodels/test_scaler.json')
         scaled_features_fromfile = scaler_fromfile(features)
         self.assertIsInstance(scaled_features, np.ndarray)
         self.assertEqual(scaled_features.shape, (10,1000))
@@ -200,8 +201,8 @@ class TestData(PathMixIn, TestCase):
             self.assertIsInstance(dataset, QSPRDataset)
 
             dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
-                                feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]),
-                                datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
-                                featurefilters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])
+                                   feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]),
+                                   datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
+                                   feature_filters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])
 
 
