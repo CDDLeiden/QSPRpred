@@ -15,10 +15,7 @@ import torch
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from qsprpred.data.utils.descriptorcalculator import (
-    descriptorsCalculator,
-    get_descriptor,
-)
+from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
@@ -261,15 +258,13 @@ def QSPR(args):
                 if args.parameters:
                     try:
                         parameters = par_dicts[par_dicts[:,0]==model_type,1][0]
+                        if not model_type in ["NB", "PLS", "SVM"]:
+                            parameters = parameters.update({"n_jobs":args.ncpu})
                     except:
                         log.warning(f'Model type {model_type} not in parameter file, default parameter settings used.')
-                        parameters = None
-
-                if not model_type in ["NB", "PLS", "SVM"]:
-                    if parameters:
-                        parameters = parameters.update({"n_jobs":args.ncpu})
-                    else:
-                        parameters = {"n_jobs":args.ncpu}
+                        parameters = None if model_type in ["NB", "PLS", "SVM"] else {"n_jobs":args.ncpu}
+                else:
+                    parameters = None if model_type in ["NB", "PLS", "SVM"] else {"n_jobs":args.ncpu}
 
                 alg_dict = {
                     'RF' : RandomForestRegressor() if reg else RandomForestClassifier(),
