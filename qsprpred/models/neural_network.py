@@ -220,7 +220,7 @@ class Base(nn.Module):
         Function copied from sklearn.base_estimator!
         
         Parameters:
-        deep : bool, default=True
+        deep: bool, default=True
             If True, will return the parameters for this estimator and
             contained subobjects that are estimators.
 
