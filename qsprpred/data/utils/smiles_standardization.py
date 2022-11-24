@@ -10,12 +10,12 @@ from rdkit.Chem.SaltRemover import SaltRemover
 def chembl_smi_standardizer(smi: str) -> tuple:
     """Standardize a SMILES string.
     
-    Returns a tuple containing `parent smiles` and a `bool`,
+    Returns a tuple containing 'parent smiles' and a 'bool',
     which defaults to if the standardizer failed and false when
     there were no errors.
 
     Arguments:
-        smi: smiles string to be standardized with the `chembl_structure_pipeline`.
+        smi: smiles string to be standardized with the 'chembl_structure_pipeline'.
     
     Returns:
         Tuple containing the parent smiles and a bool indicating if the standardizer

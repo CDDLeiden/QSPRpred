@@ -36,8 +36,7 @@ python -m qsprpred.QSPR_cli \
 -sm  ${SMILES} \
 -pr  CL \
 -pr  fu \
--m PLS \
--r CLS \
+-m RF \
 -th '{"CL":[6.5],"fu":[0,0.2,0.5,4]}' \
 -lt '{"CL":true,"fu":false}' \
 -sp 'time' \
@@ -45,7 +44,7 @@ python -m qsprpred.QSPR_cli \
 -st 2000 \
 -fe Morgan \
 -fe RDkit \
--lv 0.1 \
+-lv 0.01 \
 -hc 0.9 \
 -s \
 -o ${OPTIMIZATION} \

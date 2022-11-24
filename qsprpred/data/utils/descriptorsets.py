@@ -119,7 +119,7 @@ class Mordred(DescriptorSet):
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        return self._mordred.pandas([mol])
+        return self._mordred.pandas([mol], quiet=True)
 
     @property
     def is_fp(self):

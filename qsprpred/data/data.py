@@ -11,7 +11,6 @@ from qsprpred.logs import logger
 from rdkit import Chem
 from rdkit.Chem import PandasTools
 from sklearn.model_selection import KFold, StratifiedKFold
-from sklearn.preprocessing import StandardScaler as Scaler
 
 
 class QSPRDataset:
@@ -179,6 +178,10 @@ class QSPRDataset:
             [Chem.MolFromSmiles(mol) for mol in self.X_ind]
         )
 
+        # Replace any NaN values in features by 0
+        self.X = self.X.fillna(0)
+        self.X_ind = self.X_ind.fillna(0)
+        
         # apply filters to features on trainingset
         for featurefilter in featurefilters:
             if type(featurefilter) == BorutaFilter:
@@ -237,21 +240,4 @@ class QSPRDataset:
             self.folds = StratifiedKFold(self.n_folds).split(self.X, self.y)
         logger.debug("Folds created for crossvalidation")
 
-    @staticmethod
-    def dataStandardization(data_x, test_x):
-        """Perform standardization by centering and scaling.
-
-        Arguments:
-            data_x (list): descriptors of data set
-            test_x (list): descriptors of test set
-
-        Returns:
-            data_x (list): descriptors of data set standardized
-            test_x (list): descriptors of test set standardized
-        """
-        scaler = Scaler()
-        scaler.fit(data_x)
-        test_x = scaler.transform(test_x)
-        data_x = scaler.transform(data_x)
-        logger.debug("Data standardized")
-        return data_x, test_x
+    
