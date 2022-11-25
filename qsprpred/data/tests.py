@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
@@ -160,7 +160,7 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
     def test_descriptorcalculator(self):
         from mordred import ABCIndex
         mols = self.prep_testdata()
-        desc_calc = descriptorsCalculator([MorganFP(2, 10), DrugExPhyschem(), Mordred(ABCIndex)])
+        desc_calc = DescriptorsCalculator([MorganFP(2, 10), DrugExPhyschem(), Mordred(ABCIndex)])
         mols.append(None)
         descriptors = desc_calc(mols)
         self.assertIsInstance(descriptors, pd.DataFrame)
@@ -172,7 +172,7 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
         descriptors = filter(descriptors)
         desc_calc.keepDescriptors(descriptors)
         desc_calc.toFile(f"{os.path.dirname(__file__)}/test_files/qsprmodels/test_calc.json")
-        descriptorsCalculator.fromFile(f"{os.path.dirname(__file__)}/test_files/qsprmodels/test_calc.json")
+        DescriptorsCalculator.fromFile(f"{os.path.dirname(__file__)}/test_files/qsprmodels/test_calc.json")
 
 class TestFeatureStandardizer(PathMixIn, TestCase):
     def prep_testdata(self):
@@ -211,7 +211,7 @@ class TestData(PathMixIn, TestCase):
             self.assertIsInstance(dataset, QSPRDataset)
 
             dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
-                                   feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]),
+                                   feature_calculators=DescriptorsCalculator([MorganFP(3, 1000)]),
                                    datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
                                    feature_filters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])
 

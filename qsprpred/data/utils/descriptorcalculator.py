@@ -6,7 +6,6 @@ from typing import List
 import numpy as np
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
-from qsprpred.logs import logger
 from rdkit.Chem.rdchem import Mol
 
 
@@ -55,7 +54,7 @@ class Calculator(ABC):
         pass
 
 
-class descriptorsCalculator(Calculator):
+class DescriptorsCalculator(Calculator):
     """Calculator for molecule properties."""
 
     def __init__(self, descsets: List[DescriptorSet]) -> None:
@@ -80,7 +79,7 @@ class descriptorsCalculator(Calculator):
             else:
                 descset.descriptors = value["descriptors"]
             descsets.append(descset)
-        return descriptorsCalculator(descsets)
+        return DescriptorsCalculator(descsets)
 
     def __call__(self, mols: List[Mol]) -> pd.DataFrame:
         """Calculate descriptors for list of mols.

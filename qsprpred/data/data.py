@@ -1,6 +1,4 @@
 """This module contains the QSPRDataset that holds and prepares data for modelling."""
-from typing import Any, Iterator, List, Optional, Union
-
 import numpy as np
 import pandas as pd
 from qsprpred.data.utils.datasplitters import randomsplit

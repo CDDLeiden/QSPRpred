@@ -13,7 +13,7 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 
 from qsprpred.data.data import QSPRDataset
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import MorganFP
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
@@ -55,7 +55,7 @@ class NeuralNet(PathMixIn, TestCase):
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
         data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
-                                feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]), feature_standardizers=[StandardScaler()])
+                            feature_calculators=DescriptorsCalculator([MorganFP(3, 1000)]), feature_standardizers=[StandardScaler()])
 
         # prepare data for torch DNN
         y = data.y.reshape(-1,1)
@@ -108,7 +108,7 @@ class TestModels(PathMixIn, TestCase):
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
-        feature_calculators=descriptorsCalculator([MorganFP(3, 1000)])
+        feature_calculators=DescriptorsCalculator([MorganFP(3, 1000)])
         scaler = StandardScaler()
         data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
                                 feature_calculators=feature_calculators, feature_standardizers=[scaler], n_folds=3)

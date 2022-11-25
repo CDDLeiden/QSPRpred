@@ -8,8 +8,8 @@ from typing import List
 
 import joblib
 import numpy as np
-from qsprpred.data.interfaces import Scorer
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptor_utils.interfaces import Scorer
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 
 import torch
 
@@ -23,7 +23,7 @@ class Predictor(Scorer):
 
         Args:
             model: fitted sklearn or toch model
-            feature_calculators: descriptorsCalculator object, calculates features from smiles
+            feature_calculators: DescriptorsCalculator object, calculates features from smiles
             scaler: StandardStandardizer, scales features
             type: regression or classification
             th: if classification give activity threshold
@@ -57,7 +57,7 @@ class Predictor(Scorer):
             
         """
         path = base_dir + '/qsprmodels/' + '_'.join([algorithm, type, target]) + '.pkg'
-        feature_calculators = descriptorsCalculator.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_DescCalc.json')
+        feature_calculators = DescriptorsCalculator.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_DescCalc.json')
         #TODO do not hardcode when to use scaler
         scaler = None
         if scale:
