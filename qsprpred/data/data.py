@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from qsprpred.data.utils.datasplitters import randomsplit
+from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import BorutaFilter
 from qsprpred.data.utils.smiles_standardization import (
     chembl_smi_standardizer,
@@ -114,19 +115,21 @@ class QSPRDataset:
         datafilters=[],
         split=randomsplit(),
         feature_calculators=None,
-        featurefilters=[],
+        feature_filters=[],
+        feature_standardizers=[],
         n_folds=5,
     ):
         """Prepare the dataset for use in QSPR model.
 
         Arguments:
             fname (str): feature_calculator with filtered features saved to this file
-            standarize (bool): Apply Chembl standardization pipeline to smiles
+            standardize (bool): Apply Chembl standardization pipeline to smiles
             sanitize (bool): sanitize smiles
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
-            features (list of feature calculation cls): calculates features from smiles
-            featurefilters (list of feature filter objs): filters features
+            feature_calculators (list of feature calculation cls): calculates features from smiles
+            feature_filters (list of feature filter objs): filters features
+            feature_standardizers (list of feature standardizer objs): standardizes and/or scales features
             n_folds (n): number of folds to use in cross-validation
         """
         # standardize and sanitize smiles
@@ -183,7 +186,7 @@ class QSPRDataset:
         self.X_ind = self.X_ind.fillna(0)
         
         # apply filters to features on trainingset
-        for featurefilter in featurefilters:
+        for featurefilter in feature_filters:
             if type(featurefilter) == BorutaFilter:
                 self.X = featurefilter(self.X, self.y)
             else:
@@ -217,10 +220,40 @@ class QSPRDataset:
         self.y_ind = np.array(self.y_ind)
 
         # create folds for cross-validation
+        self.feature_standardizers = feature_standardizers
         self.n_folds = n_folds
         self.createFolds()
 
-    def loadFeaturesFromFile(fname: str) -> None:
+        # standardize features in the main data set
+        if feature_standardizers:
+            self.X, standardizers = self.applyFeatureStandardizers(self.feature_standardizers, self.X,
+                                                                       save_to=f'{fname}_feature_standardizer',
+                                                                       fit=True)
+            self.X_ind, _ = self.applyFeatureStandardizers(standardizers, self.X_ind, fit=False)
+
+    @staticmethod
+    def applyFeatureStandardizers(feature_standardizers, X, save_to=None, fit=True):
+        """Apply and/or fit feature standardizers."""
+
+        fitted_standardizers = []
+        for idx, standardizer in enumerate(feature_standardizers):
+            if type(standardizer) == SKLearnStandardizer:
+                standardizer = standardizer.getInstance()
+
+            if fit:
+                standardizer = SKLearnStandardizer.fromFit(X, standardizer)
+            else:
+                standardizer = SKLearnStandardizer(standardizer)
+
+            X = standardizer(X)
+            fitted_standardizers.append(standardizer)
+
+            if save_to:
+                standardizer.toFile(f'{save_to}_{idx}.json')
+
+        return X, fitted_standardizers
+
+    def loadFeaturesFromFile(self, fname: str) -> None:
         """Load in calculated features from file.
         
         Useful if features were calculated in other software, such as MOE.
@@ -238,6 +271,15 @@ class QSPRDataset:
             self.folds = KFold(self.n_folds).split(self.X)
         else:
             self.folds = StratifiedKFold(self.n_folds).split(self.X, self.y)
+
+        def standardize_folds(folds):
+            for x in folds:
+                X, standardizers = self.applyFeatureStandardizers(self.feature_standardizers, self.X[x[0],:], fit=True)
+                X_test, _ = self.applyFeatureStandardizers(standardizers, self.X[x[1],:], fit=False)
+                yield X,X_test, self.y[x[0]], self.y[x[1]], x[0], x[1]
+
+        if hasattr(self, "feature_standardizers"):
+            self.folds = standardize_folds(self.folds)
         logger.debug("Folds created for crossvalidation")
 
     

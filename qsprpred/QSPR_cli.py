@@ -12,6 +12,8 @@ import numpy as np
 import optuna
 import pandas as pd
 import torch
+from sklearn.preprocessing import StandardScaler
+
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
@@ -22,7 +24,6 @@ from qsprpred.data.utils.descriptorsets import (
     MorganFP,
     rdkit_descs,
 )
-from qsprpred.data.utils.feature_standardization import StandardStandardizer
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
     highCorrelationFilter,
@@ -225,9 +226,9 @@ def QSPR(args):
                 else:
                      featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=5)))
 
-            mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_DescCalc.json", 
+            mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_DescCalc.json",
                                      feature_calculators=descriptorsCalculator(descriptorsets),
-                                     datafilters=datafilters, split=split, featurefilters=featurefilters)
+                                     datafilters=datafilters, split=split, feature_filters=featurefilters, feature_standardizers=[StandardScaler()])
 
             # save dataset object
             mydataset.folds = None
@@ -247,13 +248,6 @@ def QSPR(args):
                 if model_type == 'PLS' and not reg:
                     log.warning("PLS with classification invalid, skipped.")
                     continue
-
-                if model_type != "RF":
-                    # scale features
-                    scaler = StandardStandardizer.fromFit(mydataset.X)
-                    mydataset.X = scaler(mydataset.X)
-                    mydataset.X_ind = scaler(mydataset.X_ind)
-                    scaler.toFile(f'{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_scaler.json')
     
                 if args.parameters:
                     try:
