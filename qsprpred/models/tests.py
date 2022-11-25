@@ -111,7 +111,7 @@ class TestModels(PathMixIn, TestCase):
         feature_calculators=descriptorsCalculator([MorganFP(3, 1000)])
         scaler = StandardScaler()
         data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
-                                feature_calculators=feature_calculators, feature_standardizers=[scaler])
+                                feature_calculators=feature_calculators, feature_standardizers=[scaler], n_folds=3)
         
         return data, feature_calculators, SKLearnStandardizer(scaler)
 
