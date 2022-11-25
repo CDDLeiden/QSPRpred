@@ -158,19 +158,21 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
         return mols
     
     def test_descriptorcalculator(self):
+        from mordred import ABCIndex
         mols = self.prep_testdata()
-        desc_calc = descriptorsCalculator([MorganFP(3, 1000), DrugExPhyschem(), Mordred()])
+        desc_calc = descriptorsCalculator([MorganFP(2, 10), DrugExPhyschem(), Mordred(ABCIndex)])
         mols.append(None)
         descriptors = desc_calc(mols)
-        filter = highCorrelationFilter(0.9)
-        filter(descriptors)
         self.assertIsInstance(descriptors, pd.DataFrame)
-        self.assertEqual(descriptors.shape, (11,2845))
-        self.assertEqual(descriptors.columns[0], 'MorganFP_0')
-        self.assertEqual(descriptors.columns[1018], 'DrugExPhyschem_MR')
+        self.assertEqual(descriptors.shape, (11,31))
         self.assertTrue(descriptors.any().any())
-        self.assertEqual(desc_calc.get_len(), 2845)
+        self.assertEqual(desc_calc.get_len(), 31)
 
+        filter = highCorrelationFilter(0.99)
+        descriptors = filter(descriptors)
+        desc_calc.keepDescriptors(descriptors)
+        desc_calc.toFile(f"{os.path.dirname(__file__)}/test_files/qsprmodels/test_calc.json")
+        descriptorsCalculator.fromFile(f"{os.path.dirname(__file__)}/test_files/qsprmodels/test_calc.json")
 
 class TestFeatureStandardizer(PathMixIn, TestCase):
     def prep_testdata(self):

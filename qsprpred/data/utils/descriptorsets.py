@@ -115,7 +115,7 @@ class Mordred(DescriptorSet):
         self._is_fp = False
 
         self._mordred = None
-        self.descriptors = self._args
+        self.descriptors = self._args[0]
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
@@ -142,12 +142,12 @@ class Mordred(DescriptorSet):
         self._descriptors = names
 
     def _process_args(self, descs=None, version=None, ignore_3D=False, config=None):
-        descs = (
-            mordred.Calculator(descs).descriptors
-            if descs
-            else mordred.Calculator(mordreddescriptors).descriptors
-        )
-        self._args = [str(d) for d in descs]
+        if descs:
+            if not isinstance(descs, list):
+                descs = (mordred.Calculator(descs).descriptors)
+        else:
+            descs = mordred.Calculator(mordreddescriptors).descriptors
+        self._args = [[str(d) for d in descs]]
         self._kwargs = {"version": version, "ignore_3D": ignore_3D, "config": config}
 
     def get_len(self):

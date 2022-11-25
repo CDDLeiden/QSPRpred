@@ -1,4 +1,6 @@
 """This module contains the QSPRDataset that holds and prepares data for modelling."""
+from typing import Any, Iterator, List, Optional, Union
+
 import numpy as np
 import pandas as pd
 from qsprpred.data.utils.datasplitters import randomsplit
@@ -201,22 +203,8 @@ class QSPRDataset:
         self.X_ind = self.X_ind[self.features]
         logger.info(f"Selected features: {self.features}")
 
-        # drop removed from feature_calulator object
-        for idx, descriptorset in enumerate(feature_calculators.descsets):
-            descs_from_curr_set = [
-                f.removeprefix(f"{descriptorset}_")
-                for f in self.features
-                if f.startswith(str(descriptorset))
-            ]
-            if not descs_from_curr_set:
-                feature_calculators.descsets.remove(descriptorset)
-            elif descriptorset.is_fp:
-                feature_calculators.descsets[idx].keepindices = [
-                    f for f in descs_from_curr_set
-                ]
-            else:
-                feature_calculators.descsets[idx].descriptors = descs_from_curr_set
-
+        #drop removed features from descriptorsets and save calculator
+        feature_calculators.keepDescriptors(self.features)
         feature_calculators.toFile(fname)
 
         self.X = np.array(self.X)
@@ -286,5 +274,3 @@ class QSPRDataset:
         if hasattr(self, "feature_standardizers"):
             self.folds = standardize_folds(self.folds)
         logger.debug("Folds created for crossvalidation")
-
-    
