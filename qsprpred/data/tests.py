@@ -194,9 +194,17 @@ class TestFeatureStandardizer(PathMixIn, TestCase):
 class TestData(PathMixIn, TestCase):
 
     def test_data(self):
+        df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
+        with self.assertRaises(AssertionError):
+            QSPRDataset(df=df, property="CL", reg=False, th=[])
+        with self.assertRaises(AssertionError):
+            QSPRDataset(df=df, property="CL", reg=False, th=6.5)
+        with self.assertRaises(AssertionError):
+            QSPRDataset(df=df, property="CL", reg=False, th=[0,2,3])
+        with self.assertRaises(AssertionError):
+            QSPRDataset(df=df, property="CL", precomputed=True, reg=False)
         for reg in [True, False]:
             reg_abbr = 'REG' if reg else 'CLS'
-            df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
             dataset = QSPRDataset(df=df, property="CL", reg=reg, th=[0,1,10,1200])
             self.assertIsInstance(dataset, QSPRDataset)
 
