@@ -104,10 +104,11 @@ class descriptorsCalculator(Calculator):
         return df
 
     def toFile(self, fname: str) -> None:
-        """Save descriptorset to json file
+        """Save descriptorset to json file.
         
         Args:
-            fname: file name of json file with descriptor names and settings"""
+            fname: file name of json file with descriptor names and settings
+        """
         descset_dict = {}
         for descset in self.descsets:
             if descset.is_fp:
