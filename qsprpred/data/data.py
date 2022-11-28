@@ -51,11 +51,11 @@ class QSPRDataset:
     """
 
     def __init__(
-        self, df: pd.DataFrame, property, smilescol="SMILES", precomputed=False, reg=True, th=[], log=False
+        self, df: pd.DataFrame, prop, smilescol="SMILES", precomputed=False, reg=True, th=[], log=False
     ):
         self.smilescol = smilescol
-        self.property = property
-        self.df = df.dropna(subset=([smilescol, property])).copy()
+        self.property = prop
+        self.df = df.dropna(subset=([smilescol, self.property])).copy()
 
         # drop invalid smiles
         PandasTools.AddMoleculeColumnToFrame(
@@ -69,12 +69,12 @@ class QSPRDataset:
         self.reg = reg
 
         if reg and log:
-            self.df[property] = np.log(self.df[property])
+            self.df[self.property] = np.log(self.df[self.property])
 
         self.th = [] if reg else th
         if not reg:
             if precomputed:
-                assert self.df[property].apply(float.is_integer).all()
+                assert self.df[self.property].apply(float.is_integer).all()
             else:
                 assert th, "If not precomputed, add a threshold for classification."
                 assert type(th) == list, "Thresholds should be a list."
@@ -82,17 +82,17 @@ class QSPRDataset:
                     assert (
                         len(th) > 3
                     ), "For multi-class classification, set more than 3 values as threshold."
-                    assert max(self.df[property]) <= max(
+                    assert max(self.df[self.property]) <= max(
                         self.th
                     ), "Make sure final threshold value is not smaller than largest value of property"
-                    assert min(self.df[property]) >= min(
+                    assert min(self.df[self.property]) >= min(
                         self.th
                     ), "Make sure first threshold value is not larger than smallest value of property"
-                    self.df[property] = pd.cut(
-                        self.df[property], bins=th, include_lowest=True
+                    self.df[self.property] = pd.cut(
+                        self.df[self.property], bins=th, include_lowest=True
                     )
                 else:
-                    self.df[property] = (self.df[property] > self.th[0]).astype(float)
+                    self.df[self.property] = (self.df[self.property] > self.th[0]).astype(float)
 
         self.X = None
         self.y = None
@@ -105,7 +105,7 @@ class QSPRDataset:
         self.features = None
         self.target_desc = None
 
-        logger.info(f"Dataset created for {property}")
+        logger.info(f"Dataset created for {self.property}")
 
     @classmethod
     def FromFile(cls, fname, *args, **kwargs):
