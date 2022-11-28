@@ -10,8 +10,7 @@ function cleanup() {
   rm -rf ${TEST_BASE}/data/backup_*;
   rm -rf ${TEST_BASE}/data/*.log;
   rm -rf ${TEST_BASE}/data/*.json;
-  rm -rf ${TEST_BASE}/qspr/data;
-  rm -rf ${TEST_BASE}/qspr/models;
+  rm -rf ${TEST_BASE}/qspr;
   rm -rf ${TEST_BASE}/logs;
 }
 
@@ -61,5 +60,18 @@ python -m qsprpred.model_CLI \
 -ss ${SEARCH_SPACE} \
 -nt ${N_TRIALS} \
 -me
+
+###############
+# PREDICTING #
+###############
+python -m qsprpred.predict_CLI \
+-b ${TEST_BASE} \
+-d \
+-i ${TEST_DATA} \
+-ncpu ${N_CPUS} \
+-sm  ${SMILES} \
+-pr  CL \
+-pr Fu \
+-m RF \
 
 cleanup
