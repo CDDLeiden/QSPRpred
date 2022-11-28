@@ -118,10 +118,10 @@ def QSPRArgParser(txt=None):
     return args
 
 
-def QSPR(args):
+def QSPR_dataprep(args):
     """Optimize, evaluate and train estimators.""" 
-    if not os.path.exists(args.base_dir + '/qsprmodels'):
-        os.makedirs(args.base_dir + '/qsprmodels') 
+    if not os.path.exists(args.base_dir + '/qspr/data'):
+        os.makedirs(args.base_dir + '/qspr/data') 
 
     for reg in args.regression:
         reg_abbr = 'REG' if reg else 'CLS'
@@ -175,13 +175,13 @@ def QSPR(args):
                 else:
                      featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=args.ncpu)))
 
-            mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_DescCalc.json",
+            mydataset.prepareDataset(fname=f"{args.base_dir}/qspr/data/{reg_abbr}_{property[0]}_DescCalc.json",
                                      feature_calculators=descriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, feature_filters=featurefilters, feature_standardizers=[StandardScaler()])
 
             # save dataset object
             mydataset.folds = None
-            pickle.dump(mydataset, open(f'{args.base_dir}/qsprmodels/{property[0]}_{reg_abbr}_QSPRdata.pkg', 'bw'))
+            pickle.dump(mydataset, open(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata.pkg', 'bw'))
          
 if __name__ == '__main__':
     args = QSPRArgParser()
@@ -194,15 +194,15 @@ if __name__ == '__main__':
 
     # Backup files
     tasks = [ 'REG' if reg == True else 'CLS' for reg in args.regression ]
-    file_prefixes = [ f'{alg}_{task}_{property}' for alg in args.model_types for task in tasks for property in args.properties]
-    backup_msg = backUpFiles(args.base_dir, 'qsprmodels', tuple(file_prefixes), cp_suffix='_params')
+    file_prefixes = [ f'{property}_{task}' for task in tasks for property in args.properties]
+    backup_msg = backUpFiles(args.base_dir, 'qspr/data', tuple(file_prefixes), cp_suffix='_params')
 
-    if not os.path.exists(f'{args.base_dir}/qsprmodels'):
-        os.mkdir(f'{args.base_dir}/qsprmodels')
+    if not os.path.exists(f'{args.base_dir}/qspr/data'):
+        os.makedirs(f'{args.base_dir}/qspr/data')
 
     logSettings = enable_file_logger(
-        os.path.join(args.base_dir, 'qsprmodels'),
-        'QSPR.log',
+        os.path.join(args.base_dir, 'qspr/data'),
+        'QSPRdata.log',
         args.debug,
         __name__,
         commit_hash(os.path.dirname(os.path.realpath(__file__))) if not args.no_git else None,
@@ -220,8 +220,8 @@ if __name__ == '__main__':
 
     # Create json log file with used commandline arguments 
     print(json.dumps(vars(args), sort_keys=False, indent=2))
-    with open(f'{args.base_dir}/qsprmodels/QSPR.json', 'w') as f:
+    with open(f'{args.base_dir}/qspr/data/QSPRdata.json', 'w') as f:
         json.dump(vars(args), f)
     
     #Optimize, evaluate and train estimators according to QSPR arguments
-    QSPR(args)
+    QSPR_dataprep(args)

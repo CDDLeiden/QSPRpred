@@ -8,11 +8,9 @@ from typing import List
 
 import joblib
 import numpy as np
+import torch
 from qsprpred.data.interfaces import Scorer
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
-
-import torch
-
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 
 
@@ -43,7 +41,7 @@ class Predictor(Scorer):
         """Construct predictor from files with serialized model, feature calculator & scaler.
 
         Args:
-            base_dir: base directory with folder qsprmodels/ containing the serialized mode, feature_descriptor and optionally scaler
+            base_dir: base directory with folder qspr/models/ containing the serialized mode, feature_descriptor and optionally scaler
             algorithm: type of model
             target: name of property to predict
             type: regression or classification
@@ -56,12 +54,12 @@ class Predictor(Scorer):
             predictor
             
         """
-        path = base_dir + '/qsprmodels/' + '_'.join([algorithm, type, target]) + '.pkg'
-        feature_calculators = descriptorsCalculator.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_DescCalc.json')
+        path = base_dir + '/qspr/models/' + '_'.join([algorithm, type, target]) + '.pkg'
+        feature_calculators = descriptorsCalculator.fromFile(base_dir + '/qspr/data/' + '_'.join([type, target]) + '_DescCalc.json')
         #TODO do not hardcode when to use scaler
         scaler = None
         if scale:
-            scaler = SKLearnStandardizer.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_scaler.json')
+            scaler = SKLearnStandardizer.fromFile(base_dir + '/qspr/data/' + '_'.join([type, target]) + '_scaler.json')
               
         if "DNN" in path:
             model = joblib.load(path)
@@ -70,8 +68,7 @@ class Predictor(Scorer):
         return Predictor(joblib.load(path), feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
 
     def getScores(self, mols, frags=None):
-        """
-        Returns scores for the input molecules.
+        """Returns scores for the input molecules.
 
         Args:
             mols: molecules to score

@@ -6,12 +6,10 @@ import shutil
 from os.path import exists
 from unittest import TestCase
 
-import pandas as pd
-import numpy as np
-import torch
 import joblib
-from sklearn.preprocessing import StandardScaler
-
+import numpy as np
+import pandas as pd
+import torch
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
 from qsprpred.data.utils.descriptorsets import MorganFP
@@ -19,28 +17,33 @@ from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
 from qsprpred.scorers.predictor import Predictor
+from rdkit.Chem import MolFromSmiles
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC, SVR
 from torch.utils.data import DataLoader, TensorDataset
 from xgboost import XGBClassifier, XGBRegressor
-from rdkit.Chem import MolFromSmiles
 
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
-    qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qsprmodels'
+    qsprdatapath = f'{os.path.dirname(__file__)}/test_files/qspr/data'
+    qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
 
     @classmethod
     def setUpClass(cls):
         if not os.path.exists(cls.qsprmodelspath):
             os.mkdir(cls.qsprmodelspath)
+        if not os.path.exists(cls.qsprdatapath):
+            os.makedir(cls.qsprdatapath)
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.qsprmodelspath)
+        shutil.rmtree(cls.qsprdatapath)
         for extension in ['log', 'pkg']:
             globs = glob.glob(f'{cls.datapath}/*.{extension}')
             for path in globs:
@@ -54,7 +57,7 @@ class NeuralNet(PathMixIn, TestCase):
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
-        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
+        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qspr/data/CL_{reg_abbr}.tsv',
                                 feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]), feature_standardizers=[StandardScaler()])
 
         # prepare data for torch DNN
@@ -110,7 +113,7 @@ class TestModels(PathMixIn, TestCase):
         data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
         feature_calculators=descriptorsCalculator([MorganFP(3, 1000)])
         scaler = StandardScaler()
-        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
+        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qspr/models/CL_{reg_abbr}.tsv',
                                 feature_calculators=feature_calculators, feature_standardizers=[scaler])
         
         return data, feature_calculators, SKLearnStandardizer(scaler)
@@ -129,37 +132,37 @@ class TestModels(PathMixIn, TestCase):
         # train the model on all data
         themodel.fit()
         regid = 'REG' if reg else 'CLS'
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.pkg'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.pkg'))
 
         # perform crossvalidation
         themodel.evaluate()
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.ind.tsv'))
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.cv.tsv'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.ind.tsv'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.cv.tsv'))
         
         # perform bayes optimization
         fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
         grid_params = QSPRsklearn.loadParamsGrid(fname, "bayes", alg_name)
         search_space_bs = grid_params[grid_params[:,0] == alg_name,1][0]
         themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=1)
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}_params.json'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}_params.json'))
 
         # perform grid search
-        os.remove(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}_params.json')
+        os.remove(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}_params.json')
         grid_params = QSPRsklearn.loadParamsGrid(fname, "grid", alg_name)
         search_space_gs = grid_params[grid_params[:,0] == alg_name,1][0]
         themodel.gridSearch(search_space_gs=search_space_gs)
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}_params.json'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}_params.json'))
 
     def predictor_test(self, alg_name, reg, th=[], n_jobs=8):
         #intialize dataset and model
         data, feature_calculators, scaler = self.prep_testdata(reg=reg, th=th)
         regid = 'REG' if reg else 'CLS'
         if alg_name == 'DNN':
-            path = f'{os.path.dirname(__file__)}/test_files/qsprmodels/DNN_{regid}_{data.property}.pkg'
+            path = f'{os.path.dirname(__file__)}/test_files/qspr/models/DNN_{regid}_{data.property}.pkg'
             themodel = joblib.load(path)
             themodel.load_state_dict(torch.load(f"{path[:-4]}_weights.pkg"))
         else:
-            themodel = joblib.load(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.pkg')
+            themodel = joblib.load(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.pkg')
 
         #initialize predictor
         predictor = Predictor(themodel, feature_calculators, scaler, type=regid, th=th, name=None, modifier=None)

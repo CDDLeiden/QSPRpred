@@ -227,7 +227,6 @@ class QSPRDataset:
     @staticmethod
     def applyFeatureStandardizers(feature_standardizers, X, save_to=None, fit=True):
         """Apply and/or fit feature standardizers."""
-
         fitted_standardizers = []
         for idx, standardizer in enumerate(feature_standardizers):
             if type(standardizer) == SKLearnStandardizer:

@@ -4,18 +4,15 @@ utils
 Created by: Martin Sicho
 On: 17.05.22, 9:55
 """
+import datetime
+import json
+import logging
 import os
 import re
-
-import git
-import json
 import shutil
-import logging
-import datetime
 from turtle import back
 
 import git
-
 from qsprpred.logs import config, setLogger
 from qsprpred.logs.config import LogFileConfig
 
@@ -106,8 +103,8 @@ def backUpFiles(base_dir : str, folder : str, output_prefixes : tuple, cp_suffix
         backup_id = generate_backup_runID(dir)    
         if folder in 'data':
             message = backUpFilesInFolder(dir, backup_id, output_prefixes, output_extensions=('json', 'log'))
-        elif folder == 'qsprmodels':
-            message = backUpFilesInFolder(dir, backup_id, output_prefixes, output_extensions=('json', 'log'), cp_suffix=cp_suffix )
+        elif folder == 'qspr/models' or folder == 'qspr/data':
+            message = backUpFilesInFolder(dir, backup_id, output_prefixes, output_extensions=('json', 'log'), cp_suffix=cp_suffix)
         elif folder == 'generators':
             message = backUpFilesInFolder(dir, backup_id, output_prefixes)
         elif folder == 'new_molecules':

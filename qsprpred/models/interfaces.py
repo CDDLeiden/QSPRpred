@@ -32,7 +32,7 @@ class QSPRModel(ABC):
         self.parameters = parameters
         self.alg_name = alg_name
 
-        d = '%s/qsprmodels' % base_dir
+        d = '%s/qspr/models' % base_dir
         self.type = 'REG' if data.reg else 'CLS'
         self.out = '%s/%s_%s_%s' % (d, alg_name, self.type, data.property)
 

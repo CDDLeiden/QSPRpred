@@ -7,8 +7,6 @@ import mordred
 import numpy as np
 import pandas as pd
 from mordred import descriptors as mordreddescriptors
-from sklearn.preprocessing import StandardScaler
-
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
@@ -26,20 +24,25 @@ from qsprpred.data.utils.featurefilters import (
     lowVarianceFilter,
 )
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
+from sklearn.preprocessing import StandardScaler
 
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
-    qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qsprmodels'
+    qsprdatapath = f'{os.path.dirname(__file__)}/test_files/qspr/data'
+    qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
 
     @classmethod
     def setUpClass(cls):
         if not os.path.exists(cls.qsprmodelspath):
-            os.mkdir(cls.qsprmodelspath)
+            os.makedir(cls.qsprmodelspath)
+        if not os.path.exists(cls.qsprdatapath):
+            os.makedir(cls.qsprdatapath)
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.qsprmodelspath)
+        shutil.rmtree(cls.qsprdatapath)
 
 class TestDataSplitters(PathMixIn, TestCase):
     df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
@@ -171,8 +174,8 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
         filter = highCorrelationFilter(0.99)
         descriptors = filter(descriptors)
         desc_calc.keepDescriptors(descriptors)
-        desc_calc.toFile(f"{os.path.dirname(__file__)}/test_files/qsprmodels/test_calc.json")
-        descriptorsCalculator.fromFile(f"{os.path.dirname(__file__)}/test_files/qsprmodels/test_calc.json")
+        desc_calc.toFile(f"{os.path.dirname(__file__)}/test_files/qspr/data/test_calc.json")
+        descriptorsCalculator.fromFile(f"{os.path.dirname(__file__)}/test_files/qspr/data/test_calc.json")
 
 class TestFeatureStandardizer(PathMixIn, TestCase):
     def prep_testdata(self):
@@ -185,8 +188,8 @@ class TestFeatureStandardizer(PathMixIn, TestCase):
         features = self.prep_testdata()
         scaler = SKLearnStandardizer.fromFit(features, StandardScaler())
         scaled_features = scaler(features)
-        scaler.toFile(f'{os.path.dirname(__file__)}/test_files/qsprmodels/test_scaler.json')
-        scaler_fromfile = SKLearnStandardizer.fromFile(f'{os.path.dirname(__file__)}/test_files/qsprmodels/test_scaler.json')
+        scaler.toFile(f'{os.path.dirname(__file__)}/test_files/qspr/data/test_scaler.json')
+        scaler_fromfile = SKLearnStandardizer.fromFile(f'{os.path.dirname(__file__)}/test_files/qspr/data/test_scaler.json')
         scaled_features_fromfile = scaler_fromfile(features)
         self.assertIsInstance(scaled_features, np.ndarray)
         self.assertEqual(scaled_features.shape, (10,1000))
@@ -210,7 +213,7 @@ class TestData(PathMixIn, TestCase):
             dataset = QSPRDataset(df=df, property="CL", reg=reg, th=[0,1,10,1200])
             self.assertIsInstance(dataset, QSPRDataset)
 
-            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
+            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qspr/dat/CL_{reg_abbr}.tsv',
                                    feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]),
                                    datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
                                    feature_filters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])
