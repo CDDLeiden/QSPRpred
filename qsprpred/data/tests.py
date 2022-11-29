@@ -35,9 +35,9 @@ class PathMixIn:
     @classmethod
     def setUpClass(cls):
         if not os.path.exists(cls.qsprmodelspath):
-            os.makedir(cls.qsprmodelspath)
+            os.makedirs(cls.qsprmodelspath)
         if not os.path.exists(cls.qsprdatapath):
-            os.makedir(cls.qsprdatapath)
+            os.makedirs(cls.qsprdatapath)
 
     @classmethod
     def tearDownClass(cls):
@@ -213,7 +213,7 @@ class TestData(PathMixIn, TestCase):
             dataset = QSPRDataset(df=df, property="CL", reg=reg, th=[0,1,10,1200])
             self.assertIsInstance(dataset, QSPRDataset)
 
-            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qspr/dat/CL_{reg_abbr}.tsv',
+            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qspr/data/CL_{reg_abbr}.tsv',
                                    feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]),
                                    datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
                                    feature_filters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])
