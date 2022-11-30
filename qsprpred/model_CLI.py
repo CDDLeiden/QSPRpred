@@ -149,9 +149,9 @@ def QSPR_modelling(args):
                             parameters = parameters.update({"n_jobs":args.ncpu})
                     except:
                         log.warning(f'Model type {model_type} not in parameter file, default parameter settings used.')
-                        parameters = None if model_type in ["NB", "PLS", "SVM"] else {"n_jobs":args.ncpu}
+                        parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs":args.ncpu}
                 else:
-                    parameters = None if model_type in ["NB", "PLS", "SVM"] else {"n_jobs":args.ncpu}
+                    parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs":args.ncpu}
 
                 alg_dict = {
                     'RF' : RandomForestRegressor() if reg else RandomForestClassifier(),
