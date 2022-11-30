@@ -145,7 +145,7 @@ def QSPR_modelling(args):
                 if args.parameters:
                     try:
                         parameters = par_dicts[par_dicts[:,0]==model_type,1][0]
-                        if not model_type in ["NB", "PLS", "SVM"]:
+                        if not model_type in ["NB", "PLS", "SVM", "DNN"]:
                             parameters = parameters.update({"n_jobs":args.ncpu})
                     except:
                         log.warning(f'Model type {model_type} not in parameter file, default parameter settings used.')
