@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from qsprpred.logs import logger
+from qsprpred.models.tasks import ModelTasks
 
 
 class QSPRModel(ABC):
@@ -33,8 +34,8 @@ class QSPRModel(ABC):
         self.alg_name = alg_name
 
         d = '%s/qsprmodels' % base_dir
-        self.type = 'REG' if data.reg else 'CLS'
-        self.out = '%s/%s_%s_%s' % (d, alg_name, self.type, data.property)
+        self.type = 'REG' if data.task == ModelTasks.REGRESSION else 'CLS'
+        self.out = '%s/%s_%s_%s' % (d, alg_name, self.type, data.targetProperty)
 
         if os.path.isfile('%s_params.json' % self.out):    
             with open('%s_params.json' % self.out) as j:

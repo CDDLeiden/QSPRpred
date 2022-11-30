@@ -99,6 +99,7 @@ class DescriptorsCalculator(Calculator):
 
         # replace errors by nan values
         df = df.apply(pd.to_numeric, errors='coerce')
+        df.columns = [f"Descriptor_{x}" for x in df.columns]
         
         return df
 
@@ -132,9 +133,9 @@ class DescriptorsCalculator(Calculator):
         for idx, descriptorset in enumerate(self.descsets):
             # Find all descriptors in current descriptorset
             descs_from_curr_set = [
-                f.removeprefix(f"{descriptorset}_")
+                f.removeprefix(f"Descriptor_{descriptorset}_")
                 for f in descriptors
-                if f.startswith(str(descriptorset))
+                if f.startswith(f"Descriptor_{descriptorset}_")
             ]
             # if there are none to keep from current descriptors set, drop the whole set
             if not descs_from_curr_set:

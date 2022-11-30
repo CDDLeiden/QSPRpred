@@ -27,19 +27,88 @@ from qsprpred.data.utils.featurefilters import (
 )
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
 
+from qsprpred.models.tasks import ModelTasks
+
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
+    datapath_out = f'{os.path.dirname(__file__)}/test_files/data_out'
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qsprmodels'
 
     @classmethod
     def setUpClass(cls):
         if not os.path.exists(cls.qsprmodelspath):
             os.mkdir(cls.qsprmodelspath)
+        if not os.path.exists(cls.datapath_out):
+            os.mkdir(cls.datapath_out)
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.qsprmodelspath)
+        shutil.rmtree(cls.datapath_out)
+
+class DataSets:
+    df_large = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
+
+class TestData(PathMixIn, DataSets, TestCase):
+
+    def test_creation_preparation(self):
+        # regular creation
+        dataset = QSPRDataset("test_create", "CL", df=self.df_large, store_dir=self.datapath_out)
+        self.assertIn("Notes", dataset.getProperties())
+        dataset.removeProperty("Notes")
+        self.assertNotIn("Notes", dataset.getProperties())
+        dataset.save()
+
+        # from file creation
+        dataset_new = QSPRDataset.fromFile(dataset.storePath)
+        self.assertNotIn("Notes", dataset_new.getProperties())
+
+        # test default settings
+        self.assertEqual(dataset_new.task, ModelTasks.REGRESSION)
+        self.assertTrue(dataset_new.hasProperty("CL"))
+
+        # test switch to classification
+        with self.assertRaises(AssertionError):
+            dataset_new.makeClassification([])
+        with self.assertRaises(TypeError):
+            dataset_new.makeClassification(th=6.5)
+        with self.assertRaises(AssertionError):
+            dataset_new.makeClassification(th=[0,2,3])
+        with self.assertRaises(AssertionError):
+            dataset_new.makeClassification(th=[0,2,3])
+
+        dataset_new.makeClassification(th=[0,1,10,1200])
+        self.assertEqual(dataset_new.task, ModelTasks.CLASSIFICATION)
+
+        paths = []
+        tasks = [ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION]
+        for task in tasks:
+            dataset = QSPRDataset(f"test_create_{task.name}", "CL", df=self.df_large, store_dir=self.datapath_out, task=task, th=[0,1,10,1200] if task == ModelTasks.CLASSIFICATION else None)
+            dataset.prepareDataset(
+               feature_calculator=DescriptorsCalculator([MorganFP(3, 1000)]),
+               datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
+               feature_filters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)]
+            )
+
+            # test some basics
+            descriptors = dataset.getDescriptors()
+            descriptor_names = dataset.getDescriptorNames()
+            self.assertEqual(len(descriptor_names), 1000)
+            self.assertEqual(descriptors.shape[0], len(dataset))
+            self.assertEqual(descriptors.shape[1], 1000)
+
+            # save to file
+            dataset.save()
+            paths.append(dataset.storePath)
+
+        for path, task in zip(paths, tasks):
+            ds = QSPRDataset.fromFile(path)
+            if ds.task == ModelTasks.CLASSIFICATION:
+                self.assertEqual(ds.targetProperty, "CL_class")
+            self.assertTrue(ds.task == task)
+            self.assertTrue(ds.descriptorCalculator)
+            self.assertTrue(isinstance(ds.descriptorCalculator, DescriptorsCalculator))
 
 class TestDataSplitters(PathMixIn, TestCase):
     df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
@@ -94,7 +163,7 @@ class TestFeatureFilters(PathMixIn, TestCase):
 
     def test_BorutaFilter(self):
         filter = BorutaFilter()
-        X = filter(features = self.df[["F1", "F2", "F3", "F4", "F5"]], y=self.df["y"])
+        X = filter(features = self.df[["F1", "F2", "F3", "F4", "F5"]], y_col=self.df["y"])
 
         # check if correct columns selected and values still original
         self.assertListEqual(list(X.columns), ["F5"])
@@ -191,28 +260,5 @@ class TestFeatureStandardizer(PathMixIn, TestCase):
         self.assertIsInstance(scaled_features, np.ndarray)
         self.assertEqual(scaled_features.shape, (10,1000))
         self.assertEqual(np.array_equal(scaled_features, scaled_features_fromfile), True)
-
-
-class TestData(PathMixIn, TestCase):
-
-    def test_data(self):
-        df = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
-        with self.assertRaises(AssertionError):
-            QSPRDataset(df=df, property="CL", reg=False, th=[])
-        with self.assertRaises(AssertionError):
-            QSPRDataset(df=df, property="CL", reg=False, th=6.5)
-        with self.assertRaises(AssertionError):
-            QSPRDataset(df=df, property="CL", reg=False, th=[0,2,3])
-        with self.assertRaises(AssertionError):
-            QSPRDataset(df=df, property="CL", precomputed=True, reg=False)
-        for reg in [True, False]:
-            reg_abbr = 'REG' if reg else 'CLS'
-            dataset = QSPRDataset(df=df, property="CL", reg=reg, th=[0,1,10,1200])
-            self.assertIsInstance(dataset, QSPRDataset)
-
-            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
-                                   feature_calculators=DescriptorsCalculator([MorganFP(3, 1000)]),
-                                   datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
-                                   feature_filters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])
 
 

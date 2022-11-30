@@ -88,6 +88,8 @@ class Predictor(Scorer):
             fps_loader = self.model.get_dataloader(features)
             if len(self.th) > 1:
                 scores = np.argmax(self.model.predict(fps_loader), axis=1).astype(float)
+            elif len(self.th) == 1:
+                scores = self.model.predict(fps_loader)[:,1].astype(float)
             else:
                 scores = self.model.predict(fps_loader).flatten()
         elif (self.model.__class__.__name__ == 'PLSRegression'):
