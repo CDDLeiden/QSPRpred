@@ -126,7 +126,7 @@ def QSPR_dataprep(args):
     for reg in args.regression:
         reg_abbr = 'REG' if reg else 'CLS'
         for property in args.properties:
-            log.info(f"Property: {property[0]}")
+            log.info(f"Property: {property[0]} {reg_abbr}")
             try:
                 df = pd.read_csv(f'{args.base_dir}/data/{args.input}', sep='\t')
             except:

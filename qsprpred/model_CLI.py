@@ -59,16 +59,7 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-pat', '--patience', type=int, default=50,
                         help="for DNN, number of epochs for early stopping")
     parser.add_argument('-tol', '--tolerance', type=float, default=0.01,
-                        help="for DNN, minimum absolute change of loss to count as progress")       
-
-    # Data pre-processing arguments
-    parser.add_argument('-lq', "--low_quality", action='store_true', help="If lq, than low quality data will be \
-                        should be a column 'Quality' where all 'Low' will be removed")
-    parser.add_argument('-lt', '--log_transform', type=json.loads,
-                        help='For each property if its values need to be log-tranformed. This arg only has an effect \
-                              when mode is regression, otherwise will be ignored!\
-                              This needs to be given for each property included in any of the models as follows, e.g.\
-                              -lt \'{"CL":True,"fu":False}\'. Note. no spaces and surround by single quotes')
+                        help="for DNN, minimum absolute change of loss to count as progress")
 
     # model training procedure
     parser.add_argument('-s', '--save_model', action='store_true',
