@@ -7,6 +7,7 @@ On: 06.06.22, 20:15
 from typing import List
 
 import joblib
+import sklearn_json as skljson
 import numpy as np
 from qsprpred.data.interfaces import Scorer
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
@@ -67,7 +68,7 @@ class Predictor(Scorer):
             model = joblib.load(path)
             model.load_state_dict(torch.load(f"{path[:-4]}_weights.pkg"))
             return Predictor(model, feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
-        return Predictor(joblib.load(path), feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
+        return Predictor(skljson.from_json(path), feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
 
     def getScores(self, mols, frags=None):
         """

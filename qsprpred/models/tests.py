@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import torch
 import joblib
+import sklearn_json as skljson
 from sklearn.preprocessing import StandardScaler
 
 from qsprpred.data.data import QSPRDataset
@@ -159,7 +160,7 @@ class TestModels(PathMixIn, TestCase):
             themodel = joblib.load(path)
             themodel.load_state_dict(torch.load(f"{path[:-4]}_weights.pkg"))
         else:
-            themodel = joblib.load(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.pkg')
+            themodel = skljson.from_json(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.pkg')
 
         #initialize predictor
         predictor = Predictor(themodel, feature_calculators, scaler, type=regid, th=th, name=None, modifier=None)
