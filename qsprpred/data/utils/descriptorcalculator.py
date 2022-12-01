@@ -133,7 +133,7 @@ class DescriptorsCalculator(Calculator):
         for idx, descriptorset in enumerate(self.descsets):
             # Find all descriptors in current descriptorset
             descs_from_curr_set = [
-                f.removeprefix(f"Descriptor_{descriptorset}_")
+                f.replace(f"Descriptor_{descriptorset}_", "")
                 for f in descriptors
                 if f.startswith(f"Descriptor_{descriptorset}_")
             ]

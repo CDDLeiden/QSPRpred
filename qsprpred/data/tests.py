@@ -7,8 +7,6 @@ import mordred
 import numpy as np
 import pandas as pd
 from mordred import descriptors as mordreddescriptors
-from sklearn.preprocessing import StandardScaler
-
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
@@ -26,6 +24,7 @@ from qsprpred.data.utils.featurefilters import (
     lowVarianceFilter,
 )
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
+from sklearn.preprocessing import StandardScaler
 
 from qsprpred.models.tasks import ModelTasks
 
@@ -85,6 +84,7 @@ class TestData(PathMixIn, DataSets, TestCase):
         tasks = [ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION]
         for task in tasks:
             dataset = QSPRDataset(f"test_create_{task.name}", "CL", df=self.df_large, store_dir=self.datapath_out, task=task, th=[0,1,10,1200] if task == ModelTasks.CLASSIFICATION else None)
+            np.random.seed(42)
             dataset.prepareDataset(
                feature_calculator=DescriptorsCalculator([MorganFP(3, 1000)]),
                datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
@@ -260,5 +260,3 @@ class TestFeatureStandardizer(PathMixIn, TestCase):
         self.assertIsInstance(scaled_features, np.ndarray)
         self.assertEqual(scaled_features.shape, (10,1000))
         self.assertEqual(np.array_equal(scaled_features, scaled_features_fromfile), True)
-
-
