@@ -7,8 +7,6 @@ import mordred
 import numpy as np
 import pandas as pd
 from mordred import descriptors as mordreddescriptors
-from sklearn.preprocessing import StandardScaler
-
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
@@ -26,6 +24,7 @@ from qsprpred.data.utils.featurefilters import (
     lowVarianceFilter,
 )
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
+from sklearn.preprocessing import StandardScaler
 
 
 class PathMixIn:
@@ -209,7 +208,7 @@ class TestData(PathMixIn, TestCase):
             reg_abbr = 'REG' if reg else 'CLS'
             dataset = QSPRDataset(df=df, property="CL", reg=reg, th=[0,1,10,1200])
             self.assertIsInstance(dataset, QSPRDataset)
-
+            np.random.seed(42)
             dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
                                    feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]),
                                    datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
