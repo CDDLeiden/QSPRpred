@@ -170,6 +170,7 @@ class MoleculeTable(MoleculeDataSet):
         descriptors = self.apply(calculator, axis=0, subset=[self.smilescol], result_type='reduce', n_cpus=n_cpus, chunk_size=chunk_size)
         descriptors = descriptors.to_list()
         descriptors = pd.concat(descriptors, axis=0)
+        descriptors.index = self.df.index
         self.df = self.df.join(descriptors, how='left')
         self.descriptorCalculator = calculator
 
@@ -406,8 +407,10 @@ class QSPRDataset(MoleculeTable):
         self.y = self.df.loc[self.y.index, self.targetProperty].to_numpy()
         self.y_ind = self.df.loc[self.y_ind.index, self.targetProperty].to_numpy()
 
-    def fillMissing(self, fill_value : float):
-        self.df = self.df.fillna(fill_value)
+    def fillMissing(self, fill_value : float, columns : List[str] = None):
+        columns = columns if columns else self.getDescriptorNames()
+        self.df[columns] = self.df[columns].fillna(fill_value)
+        logger.warning('Missing values filled with %s' % fill_value)
 
     def filterFeatures(self, feature_filters):
         for featurefilter in feature_filters:
@@ -456,7 +459,7 @@ class QSPRDataset(MoleculeTable):
 
         # Replace any NaN values in features by 0
         # FIXME: this is not very good, we should probably add option to do data imputation here or drop rows with NaNs
-        self.fillMissing(0)
+        self.fillMissing(0, columns=self.getDescriptorNames())
 
         # split dataset
         self.split(split)
