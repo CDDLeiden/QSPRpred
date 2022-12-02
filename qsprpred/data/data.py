@@ -74,7 +74,7 @@ class MoleculeTable(MoleculeDataSet):
                 if self.includesRdkit:
                     PandasTools.AddMoleculeColumnToFrame(self.df, smilesCol=self.smilescol, molCol='RDMol', includeFingerprints=False)
         else:
-            if self._isInStore('df'):
+            if not self._isInStore('df'):
                 raise ValueError(f"No data frame found in store for '{self.name}'. Are you sure this is the correct dataset? If you are creating a new data set, make sure to supply a data frame.")
             self.reload()
 
