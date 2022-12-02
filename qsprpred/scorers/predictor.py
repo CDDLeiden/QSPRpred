@@ -59,7 +59,7 @@ class Predictor(Scorer):
             predictor
             
         """
-        path = base_dir + '/qsprmodels/' + '_'.join([algorithm, type, target]) + '.pkg'
+        path = base_dir + '/qsprmodels/' + '_'.join([algorithm, type, target]) + '.json'
         feature_calculators = descriptorsCalculator.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_DescCalc.json')
         #TODO do not hardcode when to use scaler
         scaler = None
@@ -67,10 +67,10 @@ class Predictor(Scorer):
             scaler = SKLearnStandardizer.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_scaler.json')
               
         if "DNN" in path:
-            with open('readme.txt') as f:
+            with open(path) as f:
                 model_params = json.load(f)
             model = STFullyConnected(**model_params)
-            model.load_state_dict(torch.load(f"{path[:-4]}_weights.pkg"))
+            model.load_state_dict(torch.load(f"{path[:-5]}_weights.pkg"))
             return Predictor(model, feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
         return Predictor(skljson.from_json(path), feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
 

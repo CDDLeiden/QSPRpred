@@ -80,7 +80,7 @@ class QSPRsklearn(QSPRModel):
         logger.info('Model fit started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))  
         self.model.fit(**fit_set)
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        skljson.to_json(self.model, '%s.pkg' % self.out)
+        skljson.to_json(self.model, '%s.json' % self.out)
 
     def evaluate(self, save=True):
         """Make predictions for crossvalidation and independent test set.
@@ -287,7 +287,7 @@ class QSPRDNN(QSPRModel):
 
         logger.info('Model fit started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         self.model.fit(train_loader, None, self.out, patience = -1)
-        with open('%s.pkg' % self.out, 'w') as fp:
+        with open('%s.json' % self.out, 'w') as fp:
             all_params = self.model.__dict__
             hyper_params = {k:all_params[k] for k in all_params if not k.startswith('_') and k not in ['training', 'device', 'gpus']}
             json.dump(hyper_params, fp)

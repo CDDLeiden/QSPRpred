@@ -42,7 +42,7 @@ class PathMixIn:
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.qsprmodelspath)
-        for extension in ['log', 'pkg']:
+        for extension in ['log', 'pkg', 'json']:
             globs = glob.glob(f'{cls.datapath}/*.{extension}')
             for path in globs:
                 os.remove(path)
@@ -130,7 +130,7 @@ class TestModels(PathMixIn, TestCase):
         # train the model on all data
         themodel.fit()
         regid = 'REG' if reg else 'CLS'
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.pkg'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.json'))
 
         # perform crossvalidation
         themodel.evaluate()
@@ -156,13 +156,13 @@ class TestModels(PathMixIn, TestCase):
         data, feature_calculators, scaler = self.prep_testdata(reg=reg, th=th)
         regid = 'REG' if reg else 'CLS'
         if alg_name == 'DNN':
-            path = f'{os.path.dirname(__file__)}/test_files/qsprmodels/DNN_{regid}_{data.property}.pkg'
+            path = f'{os.path.dirname(__file__)}/test_files/qsprmodels/DNN_{regid}_{data.property}.json'
             with open(path) as f:
                 themodel_params = json.load(f)
             themodel = STFullyConnected(**themodel_params)
-            themodel.load_state_dict(torch.load(f"{path[:-4]}_weights.pkg"))
+            themodel.load_state_dict(torch.load(f"{path[:-5]}_weights.pkg"))
         else:
-            themodel = skljson.from_json(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.pkg')
+            themodel = skljson.from_json(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.json')
 
         #initialize predictor
         predictor = Predictor(themodel, feature_calculators, scaler, type=regid, th=th, name=None, modifier=None)
