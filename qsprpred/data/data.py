@@ -115,9 +115,13 @@ class MoleculeTable(MoleculeDataSet):
         if self.df.columns.str.startswith(prefix).any():
             return self.df[self.df.columns[self.df.columns.str.startswith(prefix)]]
 
-    def apply(self, func, func_args=None, func_kwargs=None, axis=0, raw=False, result_type='expand', subset=None):
-        subset = self.df.columns if subset is None else subset
-        return self.df[subset].apply(func, raw=raw, axis=axis, result_type=result_type, args=func_args, **func_kwargs if func_kwargs else {})
+    def apply(self, func, func_args=None, func_kwargs=None, axis=0, raw=False, result_type='expand', subset=None, n_cpus=None, chunk_size=1000):
+        n_cpus = n_cpus if n_cpus else os.cpu_count()
+        if n_cpus and n_cpus > 1:
+            return self.papply(func, func_args, func_kwargs, axis, raw, result_type, subset, n_cpus, chunk_size)
+        else:
+            df_sub = self.df[subset if subset else self.df.columns]
+            return df_sub.apply(func, raw=raw, axis=axis, result_type=result_type, args=func_args, **func_kwargs if func_kwargs else {})
 
     def papply(self, func, func_args=None, func_kwargs=None, axis=0, raw=False, result_type='expand', subset=None, n_cpus=None, chunk_size=1000):
         n_cpus = n_cpus if n_cpus else os.cpu_count()
@@ -139,7 +143,8 @@ class MoleculeTable(MoleculeDataSet):
                 )
                 for result in executor.map(wrapped, batch):
                     results.append(result)
-        return results
+
+        return pd.concat(results, axis=0)
 
     def transform(self, targets, transformers, addAs=None):
         ret = self.df[targets]
@@ -162,11 +167,9 @@ class MoleculeTable(MoleculeDataSet):
             # TODO: check if descriptors in the calculator are the same as the ones in the data frame and act accordingly, now we just do nothing
             return
 
-        if n_cpus and n_cpus > 1:
-            descriptors = self.papply(calculator, axis=0, subset=[self.smilescol], result_type='reduce', chunk_size=chunk_size, n_cpus=n_cpus)
-        else:
-            descriptors = self.apply(calculator, axis=0, subset=[self.smilescol], result_type='reduce')
-        descriptors = pd.concat([x for x in descriptors], axis=0)
+        descriptors = self.apply(calculator, axis=0, subset=[self.smilescol], result_type='reduce', n_cpus=n_cpus, chunk_size=chunk_size)
+        descriptors = descriptors.to_list()
+        descriptors = pd.concat(descriptors, axis=0)
         self.df = self.df.join(descriptors, how='left')
         self.descriptorCalculator = calculator
 
