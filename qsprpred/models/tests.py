@@ -61,11 +61,8 @@ class NeuralNet(PathMixIn, TestCase):
         data.save()
 
         # prepare data for torch DNN
-        y = data.y.reshape(-1,1)
-        y_ind = data.y_ind.reshape(-1,1)
-
-        trainloader = DataLoader(TensorDataset(torch.Tensor(data.X), torch.Tensor(y)), batch_size=100)
-        testloader = DataLoader(TensorDataset(torch.Tensor(data.X_ind), torch.Tensor(y_ind)), batch_size=100)
+        trainloader = DataLoader(TensorDataset(torch.Tensor(data.X.values), torch.Tensor(data.y.values)), batch_size=100)
+        testloader = DataLoader(TensorDataset(torch.Tensor(data.X_ind.values), torch.Tensor(data.y_ind.values)), batch_size=100)
 
         return data.X.shape[1], trainloader, testloader
 

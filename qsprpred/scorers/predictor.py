@@ -101,6 +101,8 @@ class Predictor(Scorer):
         elif (self.type == 'CLS'):
             scores = self.model.predict_proba(features)[:, 1]
         
+        if len(scores.shape) > 1 and scores.shape[1] == 1:
+            scores = scores[:,0]
         return scores
 
     def getKey(self):

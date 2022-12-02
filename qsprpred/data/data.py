@@ -392,9 +392,9 @@ class QSPRDataset(MoleculeTable):
                     )
                     raise err
 
-        if self.y.dtype.name == "category":
-            self.y = self.y.cat.codes
-            self.y_ind = self.y_ind.cat.codes
+            if self.y.dtype.name == "category":
+                self.y = self.y.cat.codes
+                self.y_ind = self.y_ind.cat.codes
 
     def featurizeSplits(self):
         """
@@ -402,10 +402,11 @@ class QSPRDataset(MoleculeTable):
 
         """
 
-        self.X = self.getDescriptors().loc[self.X.index, :]
-        self.X_ind = self.getDescriptors().loc[self.X_ind.index, :]
-        self.y = self.df.loc[self.y.index, self.targetProperty].to_numpy()
-        self.y_ind = self.df.loc[self.y_ind.index, self.targetProperty].to_numpy()
+        descriptors = self.getDescriptors()
+        self.X = descriptors.loc[self.X.index, :]
+        self.X_ind = descriptors.loc[self.X_ind.index, :]
+        self.y = self.df.loc[self.y.index, [self.targetProperty]]
+        self.y_ind = self.df.loc[self.y_ind.index, [self.targetProperty]]
 
     def fillMissing(self, fill_value : float, columns : List[str] = None):
         columns = columns if columns else self.getDescriptorNames()
@@ -510,9 +511,11 @@ class QSPRDataset(MoleculeTable):
 
         def standardize_folds(folds):
             for x in folds:
-                X, standardizers = self.applyFeatureStandardizers(feature_standardizers, self.X[x[0],:], fit=True)
-                X_test, _ = self.applyFeatureStandardizers(standardizers, self.X[x[1],:], fit=False)
-                yield X,X_test, self.y[x[0]], self.y[x[1]], x[0], x[1]
+                X, standardizers = self.applyFeatureStandardizers(feature_standardizers, self.X.values[x[0],:], fit=True)
+                X_test, _ = self.applyFeatureStandardizers(standardizers, self.X.values[x[1],:], fit=False)
+                y = self.y.values[x[0]]
+                y_test = self.y.values[x[1]]
+                yield X, X_test, y[:,0], y_test[:,0], x[0], x[1]
 
         if hasattr(self, "feature_standardizers"):
             self.folds = standardize_folds(self.folds)
@@ -522,13 +525,16 @@ class QSPRDataset(MoleculeTable):
         self.feature_standardizers = feature_standardizers if feature_standardizers else self.feature_standardizers
         if not self.feature_standardizers:
             raise ValueError("No feature standardizers specified in class or in argument.")
-        self.X, standardizers = self.applyFeatureStandardizers(
+        X, standardizers = self.applyFeatureStandardizers(
             self.feature_standardizers,
-            self.X,
+            self.X.values,
             fit=True
         )
-        self.X_ind, _ = self.applyFeatureStandardizers(
+        X_ind, _ = self.applyFeatureStandardizers(
             self.feature_standardizers,
-            self.X_ind,
+            self.X_ind.values,
             fit=False
         )
+
+        self.X = pd.DataFrame(X, index=self.X.index, columns=self.X.columns)
+        self.X_ind = pd.DataFrame(X_ind, index=self.X_ind.index, columns=self.X_ind.columns)

@@ -70,6 +70,7 @@ class QSPRsklearn(QSPRModel):
         """Build estimator model from entire data set."""
         X_all = np.concatenate([self.data.X, self.data.X_ind], axis=0)
         y_all = np.concatenate([self.data.y, self.data.y_ind], axis=0)
+        y_all = y_all.reshape(-1)
         
         fit_set = {'X': X_all}
         
@@ -89,12 +90,10 @@ class QSPRsklearn(QSPRModel):
         arguments:
             save (bool): don't save predictions when used in bayesian optimization
         """
-        cvs = np.zeros(self.data.y.shape) if (self.data.task == ModelTasks.REGRESSION or not self.data.isMultiClass()) else np.zeros((self.data.y.shape[0], self.data.nClasses))
+        cvs = np.zeros(len(self.data.y)) if (self.data.task == ModelTasks.REGRESSION or not self.data.isMultiClass()) else np.zeros((self.data.y.shape[0], self.data.nClasses))
 
         # cross validation
-        n_folds = None
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.folds):
-            n_folds = i + 1
             logger.info('cross validation fold %s started: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             
             fit_set = {'X':X_train}
@@ -119,9 +118,9 @@ class QSPRsklearn(QSPRModel):
         fit_set = {'X': self.data.X}
             
         if type(self.alg).__name__ == 'PLSRegression':
-            fit_set['Y'] = self.data.y
+            fit_set['Y'] = self.data.y.iloc[:, 0]
         else:
-            fit_set['y'] = self.data.y
+            fit_set['y'] = self.data.y.iloc[:, 0]
 
         self.model.fit(**fit_set)
         
@@ -136,7 +135,7 @@ class QSPRsklearn(QSPRModel):
 
         #save crossvalidation results
         if save:
-            train, test = pd.Series(self.data.y).to_frame(name='Label'), pd.Series(self.data.y_ind).to_frame(name='Label')
+            train, test = pd.DataFrame(self.data.y.values, columns=['Label']), pd.DataFrame(self.data.y_ind.values, columns=['Label'])
             if self.data.task == ModelTasks.CLASSIFICATION and self.data.nClasses > 2:
                 train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
                 train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
@@ -163,7 +162,7 @@ class QSPRsklearn(QSPRModel):
         grid = GridSearchCV(self.alg, search_space_gs, n_jobs=self.n_jobs, verbose=1, cv=((x[4], x[5]) for x in self.data.folds),
                             scoring=scoring, refit=False)
         
-        fit_set = {'X': self.data.X, 'y': self.data.y}
+        fit_set = {'X': self.data.X, 'y': self.data.y.iloc[:, 0]}
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         grid.fit(**fit_set)
         logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -228,9 +227,9 @@ class QSPRsklearn(QSPRModel):
         self.model = self.alg.set_params(**bayesian_params)
 
         if self.data.task == ModelTasks.REGRESSION:
-            score = metrics.explained_variance_score(self.data.y, self.evaluate(save = False))
+            score = metrics.explained_variance_score(self.data.y.iloc[:,0], self.evaluate(save = False))
         else:
-            score = metrics.roc_auc_score(self.data.y, self.evaluate(save = False), average="weighted", multi_class='ovr')
+            score = metrics.roc_auc_score(self.data.y.iloc[:,0], self.evaluate(save = False), average="weighted", multi_class='ovr')
 
         return score
 
@@ -265,9 +264,8 @@ class QSPRDNN(QSPRModel):
         logger.info('parameters: %s' % self.parameters)
         logger.debug('Model intialized: %s' % self.out)
 
-        #transpose y data to column vector
-        self.y = self.data.y.reshape(-1,1)
-        self.y_ind = self.data.y_ind.reshape(-1,1)
+        self.y = self.data.y.values
+        self.y_ind = self.data.y_ind.values
 
         self.optimal_epochs = -1
 
@@ -300,7 +298,7 @@ class QSPRDNN(QSPRModel):
             save (bool): wether to save the cross validation predictions
             ES_val_size (float): validation set size for early stopping in CV
         """
-        indep_loader = self.model.get_dataloader(self.data.X_ind)
+        indep_loader = self.model.get_dataloader(self.data.X_ind.values)
         last_save_epochs = 0
 
         cvs = np.zeros((self.data.y.shape[0], max(1, self.data.nClasses)))
@@ -321,7 +319,7 @@ class QSPRDNN(QSPRModel):
             self.optimal_epochs = int(math.ceil(last_save_epochs / self.data.n_folds)) + 1
             self.model = self.model.set_params(**{"n_epochs" : self.optimal_epochs})
 
-            train_loader = self.model.get_dataloader(self.data.X, self.y)
+            train_loader = self.model.get_dataloader(self.data.X.values, self.y)
             self.model.fit(train_loader, None, '%s_temp' % self.out, patience = -1)
             os.remove('%s_temp_weights.pkg' % self.out)
             os.remove('%s_temp.log' % self.out)
@@ -452,6 +450,7 @@ class QSPRDNN(QSPRModel):
         if self.data.task == ModelTasks.REGRESSION:
             score = metrics.explained_variance_score(self.data.y, self.evaluate(save = False))
         else:
-            score = metrics.roc_auc_score(self.data.y, self.evaluate(save = False), multi_class='ovo')
+            y = self.data.y.iloc[:,0]
+            score = metrics.roc_auc_score(y, self.evaluate(save = False), multi_class='ovo')
         return score
 
