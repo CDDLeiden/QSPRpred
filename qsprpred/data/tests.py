@@ -212,8 +212,8 @@ class TestData(PathMixIn, TestCase):
             reg_abbr = 'REG' if reg else 'CLS'
             dataset = QSPRDataset(df=df, property="CL", reg=reg, th=[0,1,10,1200])
             self.assertIsInstance(dataset, QSPRDataset)
-
-            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qspr/data/CL_{reg_abbr}.tsv',
+            np.random.seed(42)
+            dataset.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
                                    feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]),
                                    datafilters=[CategoryFilter(name="moka_ionState7.4", values=["cationic"])],
                                    feature_filters=[lowVarianceFilter(0.05), highCorrelationFilter(0.8)])

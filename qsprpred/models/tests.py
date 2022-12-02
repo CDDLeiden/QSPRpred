@@ -10,6 +10,9 @@ import joblib
 import numpy as np
 import pandas as pd
 import torch
+import json
+import sklearn_json as skljson
+from sklearn.preprocessing import StandardScaler
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
 from qsprpred.data.utils.descriptorsets import MorganFP
@@ -44,7 +47,7 @@ class PathMixIn:
     def tearDownClass(cls):
         shutil.rmtree(cls.qsprmodelspath)
         shutil.rmtree(cls.qsprdatapath)
-        for extension in ['log', 'pkg']:
+        for extension in ['log', 'pkg', 'json']:
             globs = glob.glob(f'{cls.datapath}/*.{extension}')
             for path in globs:
                 os.remove(path)
@@ -132,7 +135,7 @@ class TestModels(PathMixIn, TestCase):
         # train the model on all data
         themodel.fit()
         regid = 'REG' if reg else 'CLS'
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.pkg'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.json'))
 
         # perform crossvalidation
         themodel.evaluate()
@@ -158,11 +161,13 @@ class TestModels(PathMixIn, TestCase):
         data, feature_calculators, scaler = self.prep_testdata(reg=reg, th=th)
         regid = 'REG' if reg else 'CLS'
         if alg_name == 'DNN':
-            path = f'{os.path.dirname(__file__)}/test_files/qspr/models/DNN_{regid}_{data.property}.pkg'
-            themodel = joblib.load(path)
-            themodel.load_state_dict(torch.load(f"{path[:-4]}_weights.pkg"))
+            path = f'{os.path.dirname(__file__)}/test_files/qspr/models/DNN_{regid}_{data.property}.json'
+            with open(path) as f:
+                themodel_params = json.load(f)
+            themodel = STFullyConnected(**themodel_params)
+            themodel.load_state_dict(torch.load(f"{path[:-5]}_weights.pkg"))
         else:
-            themodel = joblib.load(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.pkg')
+            themodel = skljson.from_json(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.json')
 
         #initialize predictor
         predictor = Predictor(themodel, feature_calculators, scaler, type=regid, th=th, name=None, modifier=None)
