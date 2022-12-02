@@ -88,11 +88,11 @@ class MoleculeTable(MoleculeDataSet):
         if not os.path.exists(self.storePath):
             return False
         with pd.HDFStore(self.storePath, mode='r') as store:
-            return name in store.keys()
+            return name in [x.strip('/') for x in store.keys()]
 
     def save(self):
         # save data frame
-        with pd.HDFStore(self.storePath, mode='a') as store:
+        with pd.HDFStore(self.storePath, mode='w') as store:
             store['df'] = self.df
 
         # save descriptor calculator
