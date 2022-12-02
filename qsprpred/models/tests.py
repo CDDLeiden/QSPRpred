@@ -9,7 +9,7 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 import torch
-import joblib
+import json
 import sklearn_json as skljson
 from sklearn.preprocessing import StandardScaler
 
@@ -157,7 +157,9 @@ class TestModels(PathMixIn, TestCase):
         regid = 'REG' if reg else 'CLS'
         if alg_name == 'DNN':
             path = f'{os.path.dirname(__file__)}/test_files/qsprmodels/DNN_{regid}_{data.property}.pkg'
-            themodel = joblib.load(path)
+            with open(path) as f:
+                themodel_params = json.load(f)
+            themodel = STFullyConnected(**themodel_params)
             themodel.load_state_dict(torch.load(f"{path[:-4]}_weights.pkg"))
         else:
             themodel = skljson.from_json(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.pkg')

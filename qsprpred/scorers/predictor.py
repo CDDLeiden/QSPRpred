@@ -6,11 +6,13 @@ On: 06.06.22, 20:15
 """
 from typing import List
 
-import joblib
+
+import json
 import sklearn_json as skljson
 import numpy as np
 from qsprpred.data.interfaces import Scorer
 from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.models.neural_network import STFullyConnected
 
 import torch
 
@@ -65,7 +67,9 @@ class Predictor(Scorer):
             scaler = SKLearnStandardizer.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_scaler.json')
               
         if "DNN" in path:
-            model = joblib.load(path)
+            with open('readme.txt') as f:
+                model_params = json.load(f)
+            model = STFullyConnected(**model_params)
             model.load_state_dict(torch.load(f"{path[:-4]}_weights.pkg"))
             return Predictor(model, feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
         return Predictor(skljson.from_json(path), feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
