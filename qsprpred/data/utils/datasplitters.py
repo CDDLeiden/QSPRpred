@@ -58,17 +58,18 @@ class scaffoldsplit(datasplit):
     def __call__(self, df, Xcol, ycol, shuffle=True):
         # make sure dataframe is shuffled
         if shuffle:
-            df = df.sample(frac=1).reset_index(drop=True)
+            df = df.sample(frac=1)
 
         # Find the scaffold of each smiles
         scaffolds = defaultdict(list)
         invalid_idx = []
-        for i, smiles in enumerate(df[Xcol]):
+        for row in df[[Xcol]].itertuples():
+            idx, smiles = row
             try:
-                scaffolds[MurckoScaffoldSmiles(smiles)].append(i)
+                scaffolds[MurckoScaffoldSmiles(smiles)].append(idx)
             except:
                 logger.warning(f"Invalid smiles skipped: {smiles}")
-                invalid_idx.append(i)
+                invalid_idx.append(idx)
 
         # Fill test set with groups of smiles with the same scaffold
         max_in_test = np.ceil(len(df[Xcol]) * self.test_fraction)
@@ -80,6 +81,6 @@ class scaffoldsplit(datasplit):
                 break
 
         # Create train and test set
-        test = df.loc[list(test_idx)]
+        test = df.loc[test_idx]
         train = df.drop(test.index).drop(invalid_idx)
         return train[Xcol], test[Xcol], train[ycol], test[ycol]
