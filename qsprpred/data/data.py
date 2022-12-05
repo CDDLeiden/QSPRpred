@@ -259,7 +259,7 @@ class QSPRDataset(MoleculeTable):
                 # if a precomputed target is expected, just check it
                 assert self.df[self.targetProperty].apply(lambda x: type(x) == int).all()
         elif self.task == ModelTasks.REGRESSION and th:
-            raise ValueError(f"Got regression task with 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
+            raise ValueError(f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
 
         self.X = None
         self.y = None
