@@ -520,7 +520,7 @@ class QSPRDataset(MoleculeTable):
         self.feature_standardizers = feature_standardizers if feature_standardizers else self.feature_standardizers
         if not self.feature_standardizers:
             raise ValueError("No feature standardizers specified in class or in argument.")
-        X, standardizers = self.applyFeatureStandardizers(
+        X, self.feature_standardizers = self.applyFeatureStandardizers(
             self.feature_standardizers,
             self.X.values,
             fit=True
