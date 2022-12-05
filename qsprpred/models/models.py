@@ -102,7 +102,7 @@ class QSPRsklearn(QSPRModel):
             else:
                 fit_set['y'] = y_train
             self.model.fit(**fit_set)
-            
+
             if type(self.alg).__name__ == 'PLSRegression':
                 cvs[idx_test] = self.model.predict(X_test)[:, 0]
             elif self.data.task == ModelTasks.REGRESSION:
@@ -110,7 +110,7 @@ class QSPRsklearn(QSPRModel):
             elif self.data.nClasses > 2:
                 cvs[idx_test] = self.model.predict_proba(X_test)
             else:
-                cvs[idx_test] = self.model.predict_proba(X_test)[:, 1]
+                cvs[idx_test] = self.model.predict_proba(X_test)[:, -1]
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
         
         # fitting on whole trainingset and predicting on test set
@@ -228,7 +228,7 @@ class QSPRsklearn(QSPRModel):
         if self.data.task == ModelTasks.REGRESSION:
             score = metrics.explained_variance_score(self.data.y.iloc[:,0], self.evaluate(save = False))
         else:
-            score = metrics.roc_auc_score(self.data.y.iloc[:,0], self.evaluate(save = False), average="weighted", multi_class='ovr')
+            score = metrics.roc_auc_score(self.data.y, self.evaluate(save = False), average="weighted", multi_class='ovr')
 
         return score
 
