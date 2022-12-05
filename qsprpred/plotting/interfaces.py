@@ -30,7 +30,7 @@ class ModelPlot(ABC):
         indPath = f"{self.modelOuts[model]}.ind.tsv"
         if model.type not in self.getSupportedTypes():
             raise ValueError("Unsupported model type: %s" % model.type)
-        if not os.path.exists(f"{model.out}.pkg"):
+        if not os.path.exists(f"{model.out}.json"):
             raise ValueError("Model output file does not exist: %s. Have you fitted the model, yet?" % model.out)
         if not os.path.exists(cvPath):
             raise ValueError("Model output file does not exist: %s. Have you fitted the model, yet?" % cvPath)
