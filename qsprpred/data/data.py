@@ -62,7 +62,7 @@ class MoleculeTable(MoleculeDataSet):
         self.descriptorCalculatorPath = f"{self.storePrefix}_feature_calculators.json"
         if not os.path.exists(self.storeDir):
             raise FileNotFoundError(f"Directory '{self.storeDir}' does not exist.")
-        self.storePath = f'{self.storePrefix}.h5'
+        self.storePath = f'{self.storePrefix}.df.pkl'
 
         # data frame initialization
         if df is not None:
@@ -85,25 +85,20 @@ class MoleculeTable(MoleculeDataSet):
         return self.df
 
     def _isInStore(self, name):
-        if not os.path.exists(self.storePath):
-            return False
-        with pd.HDFStore(self.storePath, mode='r') as store:
-            return name in [x.strip('/') for x in store.keys()]
+        return os.path.exists(self.storePath) and self.storePath.endswith(f'.{name}.pkl')
 
     def save(self):
         # save data frame
-        with pd.HDFStore(self.storePath, mode='w') as store:
-            store['df'] = self.df
+        self.df.to_pickle(self.storePath)
 
         # save descriptor calculator
         if self.descriptorCalculator:
             self.descriptorCalculator.toFile(self.descriptorCalculatorPath)
 
     def reload(self):
-        with pd.HDFStore(self.storePath, mode='r') as store:
-            self.df = store['df']
-            if os.path.exists(self.descriptorCalculatorPath):
-                self.descriptorCalculator = DescriptorsCalculator.fromFile(self.descriptorCalculatorPath)
+        self.df = pd.read_pickle(self.storePath)
+        if os.path.exists(self.descriptorCalculatorPath):
+            self.descriptorCalculator = DescriptorsCalculator.fromFile(self.descriptorCalculatorPath)
 
     @staticmethod
     def fromFile(filename, *args, **kwargs) -> 'MoleculeTable':

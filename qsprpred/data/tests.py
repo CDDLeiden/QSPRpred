@@ -1,6 +1,7 @@
 """This module holds the test for functions regarding QSPR data preparation."""
 import os
 import shutil
+import time
 from unittest import TestCase
 
 import mordred
@@ -48,6 +49,21 @@ class PathMixIn:
 
 class DataSets:
     df_large = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv', sep='\t')
+    df_small = pd.read_csv(f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv', sep='\t')
+
+class StopWatch:
+
+    def __init__(self):
+        self.start = time.perf_counter()
+
+    def reset(self):
+        self.start = time.perf_counter()
+
+    def stop(self, msg='Time it took: '):
+        ret = time.perf_counter() - self.start
+        print(msg + str(ret))
+        self.reset()
+        return ret
 
 class TestData(PathMixIn, DataSets, TestCase):
 
@@ -57,10 +73,14 @@ class TestData(PathMixIn, DataSets, TestCase):
         self.assertIn("Notes", dataset.getProperties())
         dataset.removeProperty("Notes")
         self.assertNotIn("Notes", dataset.getProperties())
+        stopwatch = StopWatch()
         dataset.save()
+        stopwatch.stop('Saving took: ')
 
         # from file creation
+        stopwatch.reset()
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
+        stopwatch.stop('Loading took: ')
         self.assertNotIn("Notes", dataset_new.getProperties())
 
         # test default settings
