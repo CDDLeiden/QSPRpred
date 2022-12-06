@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
@@ -37,6 +37,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
+
+from qsprpred.models.tasks import ModelTasks
 
 
 def QSPRArgParser(txt=None):
@@ -175,6 +177,7 @@ def QSPR(args):
             grid_params = QSPRModel.loadParamsGrid(None, args.optimization, args.model_types)
 
     for reg in args.regression:
+        task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
         reg_abbr = 'REG' if reg else 'CLS'
         for property in args.properties:
             log.info(f"Property: {property[0]}")
@@ -185,10 +188,13 @@ def QSPR(args):
                 sys.exit()
         
             #prepare dataset for training QSPR model
-            th = args.threshold[property[0]] if args.threshold else {}
-            log_transform = args.log_transform[property[0]] if args.log_transform else {}
-            mydataset = QSPRDataset(df, smilescol=args.smilescol, property=property[0],
-                                    reg=reg, th=th, log=log_transform)
+            th = args.threshold[property[0]] if args.threshold else None
+            if task == ModelTasks.REGRESSION and th:
+                log.warning("Threshold argument specified with regression. Threshold will be ignored.")
+                th = None
+            log_transform = np.log if args.log_transform and args.log_transform[property[0]] else None
+            mydataset = QSPRDataset(f"{reg_abbr}_{property[0]}", target_prop=property[0], df=df, smilescol=args.smilescol,
+                                    task=task, th=th, target_transformer=log_transform, store_dir=f"{args.base_dir}/data/")
             
             # data filters
             datafilters = []
@@ -226,14 +232,11 @@ def QSPR(args):
                 else:
                      featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=5)))
 
-            mydataset.prepareDataset(fname=f"{args.base_dir}/qsprmodels/{reg_abbr}_{property[0]}_DescCalc.json",
-                                     feature_calculators=descriptorsCalculator(descriptorsets),
+            mydataset.prepareDataset(feature_calculator=DescriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, feature_filters=featurefilters, feature_standardizers=[StandardScaler()])
 
-            # save dataset object
-            mydataset.folds = None
-            pickle.dump(mydataset, open(f'{args.base_dir}/qsprmodels/{property[0]}_{reg_abbr}_QSPRdata.pkg', 'bw'))
-            mydataset.createFolds()
+            # save dataset files and fingerprints
+            mydataset.save()
 
             for model_type in args.model_types:
                 print(model_type)

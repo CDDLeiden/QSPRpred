@@ -14,11 +14,12 @@ import sklearn_json as skljson
 from sklearn.preprocessing import StandardScaler
 
 from qsprpred.data.data import QSPRDataset
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import MorganFP
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.models.tasks import ModelTasks
 from qsprpred.scorers.predictor import Predictor
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -49,27 +50,26 @@ class PathMixIn:
 
 class NeuralNet(PathMixIn, TestCase):
 
-    def prep_testdata(self, reg=True, th=[]):
-        reg_abbr = 'REG' if reg else 'CLS'
+    def prep_testdata(self, task=ModelTasks.REGRESSION, th=None):
         
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
-        data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
-        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
-                                feature_calculators=descriptorsCalculator([MorganFP(3, 1000)]), feature_standardizers=[StandardScaler()])
+        data = QSPRDataset(name="test_data_large",df=df, target_prop="CL", task=task, th=th, store_dir=self.qsprmodelspath)
+        data.prepareDataset(
+            feature_calculator=DescriptorsCalculator([MorganFP(3, 1000)]),
+            feature_standardizers=[StandardScaler()]
+        )
+        data.save()
 
         # prepare data for torch DNN
-        y = data.y.reshape(-1,1)
-        y_ind = data.y_ind.reshape(-1,1)
-
-        trainloader = DataLoader(TensorDataset(torch.Tensor(data.X), torch.Tensor(y)), batch_size=100)
-        testloader = DataLoader(TensorDataset(torch.Tensor(data.X_ind), torch.Tensor(y_ind)), batch_size=100)
+        trainloader = DataLoader(TensorDataset(torch.Tensor(data.X.values), torch.Tensor(data.y.values)), batch_size=100)
+        testloader = DataLoader(TensorDataset(torch.Tensor(data.X_ind.values), torch.Tensor(data.y_ind.values)), batch_size=100)
 
         return data.X.shape[1], trainloader, testloader
 
     def test_STFullyConnected(self):
         ## prepare test regression dataset
-        no_features, trainloader, testloader = self.prep_testdata(reg=True)
+        no_features, trainloader, testloader = self.prep_testdata()
 
         # fit model with default settings
         model = STFullyConnected(n_dim = no_features)
@@ -84,14 +84,14 @@ class NeuralNet(PathMixIn, TestCase):
         model.fit(trainloader, testloader, out=f'{self.datapath}/testmodel', patience = 3)
 
         ## prepare classification test dataset
-        no_features, trainloader, testloader = self.prep_testdata(reg=False, th=[6.5])
+        no_features, trainloader, testloader = self.prep_testdata(task=ModelTasks.CLASSIFICATION, th=[6.5])
 
         # fit model with regression is false
         model = STFullyConnected(n_dim = no_features, is_reg=False)
         model.fit(trainloader, testloader, out=f'{self.datapath}/testmodel', patience = 3)
 
         ## prepare multi-classification test dataset
-        no_features, trainloader, testloader = self.prep_testdata(reg=False, th=[0, 1, 10, 1200])
+        no_features, trainloader, testloader = self.prep_testdata(task=ModelTasks.CLASSIFICATION, th=[0, 1, 10, 1200])
 
         # fit model with regression is false
         model = STFullyConnected(n_dim = no_features, n_class=3, is_reg=False)
@@ -101,22 +101,26 @@ class NeuralNet(PathMixIn, TestCase):
 class TestModels(PathMixIn, TestCase):
     GPUS = [idx for idx in range(torch.cuda.device_count())]
 
-    def prep_testdata(self, reg=True, th=[]):
+    def prep_testdata(self, reg=True, th=None):
+        task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
         
         reg_abbr = 'REG' if reg else 'CLS'
         random.seed(42)
 
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
-        data = QSPRDataset(df=df, property="CL", reg=reg, th=th)
-        feature_calculators=descriptorsCalculator([MorganFP(3, 1000)])
+        data = QSPRDataset(name=f"test_data_large_{task.name}", df=df, target_prop="CL", task=task, th=th, store_dir=self.qsprmodelspath)
+        feature_calculators=DescriptorsCalculator([MorganFP(3, 1000)])
         scaler = StandardScaler()
-        data.prepareDataset(f'{os.path.dirname(__file__)}/test_files/qsprmodels/CL_{reg_abbr}.tsv',
-                                feature_calculators=feature_calculators, feature_standardizers=[scaler])
+        data.prepareDataset(
+            feature_calculator=feature_calculators,
+            feature_standardizers=[scaler], n_folds=3
+        )
+        data.save()
         
         return data, feature_calculators, SKLearnStandardizer(scaler)
 
-    def QSPRsklearn_models_test(self, alg, alg_name, reg, th=[], n_jobs=8):
+    def QSPRsklearn_models_test(self, alg, alg_name, reg, th=None, n_jobs=8):
         #intialize dataset and model
         data, _, _ = self.prep_testdata(reg=reg, th=th)
 
@@ -130,39 +134,39 @@ class TestModels(PathMixIn, TestCase):
         # train the model on all data
         themodel.fit()
         regid = 'REG' if reg else 'CLS'
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.json'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.targetProperty}.json'))
 
         # perform crossvalidation
         themodel.evaluate()
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.ind.tsv'))
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.cv.tsv'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.targetProperty}.ind.tsv'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.targetProperty}.cv.tsv'))
         
         # perform bayes optimization
         fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
         grid_params = QSPRsklearn.loadParamsGrid(fname, "bayes", alg_name)
         search_space_bs = grid_params[grid_params[:,0] == alg_name,1][0]
         themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=1)
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}_params.json'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.targetProperty}_params.json'))
 
         # perform grid search
-        os.remove(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}_params.json')
+        os.remove(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.targetProperty}_params.json')
         grid_params = QSPRsklearn.loadParamsGrid(fname, "grid", alg_name)
         search_space_gs = grid_params[grid_params[:,0] == alg_name,1][0]
         themodel.gridSearch(search_space_gs=search_space_gs)
-        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}_params.json'))
+        self.assertTrue(exists(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.targetProperty}_params.json'))
 
-    def predictor_test(self, alg_name, reg, th=[], n_jobs=8):
+    def predictor_test(self, alg_name, reg, th=None):
         #intialize dataset and model
         data, feature_calculators, scaler = self.prep_testdata(reg=reg, th=th)
         regid = 'REG' if reg else 'CLS'
         if alg_name == 'DNN':
-            path = f'{os.path.dirname(__file__)}/test_files/qsprmodels/DNN_{regid}_{data.property}.json'
+            path = f'{os.path.dirname(__file__)}/test_files/qsprmodels/DNN_{regid}_{data.targetProperty}.json'
             with open(path) as f:
                 themodel_params = json.load(f)
             themodel = STFullyConnected(**themodel_params)
             themodel.load_state_dict(torch.load(f"{path[:-5]}_weights.pkg"))
         else:
-            themodel = skljson.from_json(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.property}.json')
+            themodel = skljson.from_json(f'{os.path.dirname(__file__)}/test_files/qsprmodels/{alg_name}_{regid}_{data.targetProperty}.json')
 
         #initialize predictor
         predictor = Predictor(themodel, feature_calculators, scaler, type=regid, th=th, name=None, modifier=None)
@@ -266,7 +270,7 @@ class TestModels(PathMixIn, TestCase):
 
     def test_QSPRDNN(self):
         #intialize model for single class, multi class and regression DNN's
-        for reg in [(False, [0, 1, 10, 1100]), (False, [6.5]), (True, [])]:
+        for reg in [(False, [6.5]), (False, [0, 1, 10, 1100]), (True, [])]:
             data, feature_calculators, scaler = self.prep_testdata(reg=reg[0], th=reg[1])
             themodel = QSPRDNN(base_dir = f'{os.path.dirname(__file__)}/test_files', data=data, gpus=self.GPUS, patience=3, tol=0.02)
             

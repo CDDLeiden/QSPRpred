@@ -59,9 +59,6 @@ class MorganFP(DescriptorSet):
             *args: `GetMorganFingerprintAsBitVect` arguments
             **kwargs: `GetMorganFingerprintAsBitVect` keyword arguments
         """
-        self._convertMol = Chem.MolFromSmiles
-        self._convertFP = DataStructs.ConvertToNumpyArray
-        self._morgan = AllChem.GetMorganFingerprintAsBitVect
         self._args = args
         self._kwargs = kwargs
         self._is_fp = True
@@ -69,11 +66,15 @@ class MorganFP(DescriptorSet):
         self.keepindices = None
 
     def __call__(self, mol):
-        mol = self._convertMol(mol) if isinstance(mol, str) else mol
-        fp = self._morgan(mol, *self._args, **self._kwargs)
+        convertMol = Chem.MolFromSmiles
+        convertFP = DataStructs.ConvertToNumpyArray
+        morgan = AllChem.GetMorganFingerprintAsBitVect
+
+        mol = convertMol(mol) if isinstance(mol, str) else mol
+        fp = morgan(mol, *self._args, **self._kwargs)
         self.ln = len(fp)
         ret = np.zeros(self.ln)
-        self._convertFP(fp, ret)
+        convertFP(fp, ret)
         ret = pd.DataFrame(
             ret.reshape(1, -1), columns=[f"{idx}" for idx in range(ret.shape[0])]
         )

@@ -10,8 +10,9 @@ from typing import List
 import json
 import sklearn_json as skljson
 import numpy as np
-from qsprpred.data.interfaces import Scorer
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+
+from qsprpred.data.utils.descriptor_utils.interfaces import Scorer
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.models.neural_network import STFullyConnected
 
 import torch
@@ -26,7 +27,7 @@ class Predictor(Scorer):
 
         Args:
             model: fitted sklearn or toch model
-            feature_calculators: descriptorsCalculator object, calculates features from smiles
+            feature_calculators: DescriptorsCalculator object, calculates features from smiles
             scaler: StandardStandardizer, scales features
             type: regression or classification
             th: if classification give activity threshold
@@ -60,7 +61,7 @@ class Predictor(Scorer):
             
         """
         path = base_dir + '/qsprmodels/' + '_'.join([algorithm, type, target]) + '.json'
-        feature_calculators = descriptorsCalculator.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_DescCalc.json')
+        feature_calculators = DescriptorsCalculator.fromFile(base_dir + '/qsprmodels/' + '_'.join([type, target]) + '_DescCalc.json')
         #TODO do not hardcode when to use scaler
         scaler = None
         if scale:
@@ -93,6 +94,8 @@ class Predictor(Scorer):
             fps_loader = self.model.get_dataloader(features)
             if len(self.th) > 1:
                 scores = np.argmax(self.model.predict(fps_loader), axis=1).astype(float)
+            elif len(self.th) == 1:
+                scores = self.model.predict(fps_loader)[:,1].astype(float)
             else:
                 scores = self.model.predict(fps_loader).flatten()
         elif (self.model.__class__.__name__ == 'PLSRegression'):
@@ -104,6 +107,8 @@ class Predictor(Scorer):
         elif (self.type == 'CLS'):
             scores = self.model.predict_proba(features)[:, 1]
         
+        if len(scores.shape) > 1 and scores.shape[1] == 1:
+            scores = scores[:,0]
         return scores
 
     def getKey(self):

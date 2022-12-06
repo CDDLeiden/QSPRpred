@@ -204,9 +204,9 @@ class MetricsPlot(ClassifierPlot):
         figures = []
         for metric in df_summary.Metric.unique():
             df_metric = df_summary[df_summary.Metric == metric]
-            cv_avg = df_metric[df_metric.TestSet != 'IND'].groupby('Model').aggregate(np.mean)
-            cv_std = df_metric[df_metric.TestSet != 'IND'].groupby('Model').aggregate(np.std)
-            ind_vals = df_metric[df_metric.TestSet == 'IND'].groupby('Model').aggregate(np.sum)
+            cv_avg = df_metric[df_metric.TestSet != 'IND'][['Model', 'Value']].groupby('Model').aggregate(np.mean)
+            cv_std = df_metric[df_metric.TestSet != 'IND'][['Model', 'Value']].groupby('Model').aggregate(np.std)
+            ind_vals = df_metric[df_metric.TestSet == 'IND'][['Model', 'Value']].groupby('Model').aggregate(np.sum)
 
             models = cv_avg.index
 
