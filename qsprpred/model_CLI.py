@@ -4,28 +4,14 @@ import argparse
 import json
 import os
 import os.path
-import pickle
 import random
 import sys
+from datetime import datetime
 
 import numpy as np
 import optuna
 import torch
 from qsprpred.data.data import QSPRDataset
-from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
-from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
-from qsprpred.data.utils.descriptorsets import (
-    DrugExPhyschem,
-    Mordred,
-    MorganFP,
-    rdkit_descs,
-)
-from qsprpred.data.utils.featurefilters import (
-    BorutaFilter,
-    highCorrelationFilter,
-    lowVarianceFilter,
-)
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.models import QSPRDNN, QSPRModel, QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
@@ -33,90 +19,64 @@ from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 
 def QSPRArgParser(txt=None):
     """Define and read command line arguments."""
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # base arguments
-    parser.add_argument(
-        '-b', '--base_dir', type=str, default='.',
-        help="Base directory which contains a folder 'data' with input files")
+    parser.add_argument('-b', '--base_dir', type=str, default='.',
+                        help="Base directory which contains a folder 'data' with input files")
     parser.add_argument('-d', '--debug', action='store_true')
-    parser.add_argument(
-        '-ran',
-        '--random_state',
-        type=int,
-        default=1,
-        help="Seed for the random state")
-    parser.add_argument('-ncpu', '--ncpu', type=int, default=8,
-                        help="Number of CPUs")
-    parser.add_argument('-gpus', '--gpus', nargs="*", default=['0'],
-                        help="List of GPUs")
+    parser.add_argument('-ran', '--random_state', type=int, default=1, help="Seed for the random state")
+    parser.add_argument('-ncpu', '--ncpu', type=int, default=8, help="Number of CPUs")
+    parser.add_argument('-gpus', '--gpus', nargs="*", default=['0'], help="List of GPUs")
 
     # model target arguments
-    parser.add_argument(
-        '-sm', '--smilescol', type=str, default='SMILES',
-        help="Name of the column in the dataset\
+    parser.add_argument('-sm', '--smilescol', type=str, default='SMILES', help="Name of the column in the dataset \
                         containing the smiles.")
-    parser.add_argument(
-        '-pr', '--properties', type=str, nargs='+', action='append',
-        help="properties to be predicted identifiers. Add this argument for each model to be trained \
+    parser.add_argument('-pr', '--properties', type=str, nargs='+', action='append',
+                        help="properties to be predicted identifiers. Add this argument for each model to be trained \
                               e.g. for one multi-task model for CL and Fu and one single task for CL do:\
                               -pr CL Fu -pr CL")
 
     # model type arguments
-    parser.add_argument(
-        '-m', '--model_types', type=str, nargs='*',
-        choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
-        default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
-        help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
+    parser.add_argument('-m', '--model_types', type=str, nargs='*',
+                        choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
+                        default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
+                        help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
                              'PLS' (only with REG), 'NB' (only with CLS) 'KNN'")
-    parser.add_argument(
-        '-r', '--regression', type=str, default=None,
-        help="If True, only regression model, if False, only classification, default both")
+    parser.add_argument('-r', '--regression', type=str, default=None,
+                        help="If True, only regression model, if False, only classification, default both")
 
     # model settings
-    parser.add_argument(
-        '-p', '--parameters', type=str, default=None,
-        help="file name of json file with non-default parameter settings (base_dir/qspr/models/[-p]_params.json). NB. If json file with name \
+    parser.add_argument('-p', '--parameters', type=str, default=None,
+                        help="file name of json file with non-default parameter settings \
+                             (base_dir/qspr/models/[-p]_params.json). NB. If json file with name \
                              {model_type}_{REG/CLS}_{property}_params.json) present in qspr/models folder those settings will also be used, \
                              but if the same parameter is present in both files the settings from (base_dir/[-p]_params.json) will be used.")
-    parser.add_argument('-pat', '--patience', type=int, default=50,
-                        help="for DNN, number of epochs for early stopping")
-    parser.add_argument(
-        '-tol', '--tolerance', type=float, default=0.01,
-        help="for DNN, minimum absolute change of loss to count as progress")
+    parser.add_argument('-pat', '--patience', type=int, default=50, help="for DNN, number of epochs for early stopping")
+    parser.add_argument('-tol', '--tolerance', type=float, default=0.01,
+                        help="for DNN, minimum absolute change of loss to count as progress")
 
     # model training procedure
-    parser.add_argument(
-        '-s', '--save_model', action='store_true',
-        help="If included then the model will be trained on all data and saved")
-    parser.add_argument(
-        '-o',
-        '--optimization',
-        type=str,
-        default=None,
-        help="Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, if 'bayes' bayesian optimization")
-    parser.add_argument(
-        '-ss', '--search_space', type=str, default=None,
-        help="search_space hyperparameter optimization json file location (base_dir/[name].json), \
+    parser.add_argument('-s', '--save_model', action='store_true',
+                        help="If included then the model will be trained on all data and saved")
+    parser.add_argument('-o', '--optimization', type=str, default=None,
+                        help="Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, \
+                            if 'bayes' bayesian optimization")
+    parser.add_argument('-ss', '--search_space', type=str, default=None,
+                        help="search_space hyperparameter optimization json file location (base_dir/[name].json), \
                               if None default qsprpred.models.search_space.json used")
-    parser.add_argument(
-        '-nt', '--n_trials', type=int, default=20,
-        help="number of trials for bayes optimization")
-    parser.add_argument(
-        '-me', '--model_evaluation', action='store_true',
-        help='If on, model evaluation through cross validation and independent test set is performed.')
+    parser.add_argument('-nt', '--n_trials', type=int, default=20, help="number of trials for bayes optimization")
+    parser.add_argument('-me', '--model_evaluation', action='store_true',
+                        help='If on, model evaluation through cross validation and independent test set is performed.')
 
     # other
-    parser.add_argument('-ng', '--no_git', action='store_true',
-                        help="If on, git hash is not retrieved")
+    parser.add_argument('-ng', '--no_git', action='store_true', help="If on, git hash is not retrieved")
 
     if txt:
         args = parser.parse_args(txt)
@@ -172,88 +132,16 @@ def QSPR_modelling(args):
         reg_abbr = 'REG' if reg else 'CLS'
         for property in args.properties:
             log.info(f"Property: {property[0]}")
-            try:
-                df = pd.read_csv(
-                    f'{args.base_dir}/data/{args.input}', sep='\t')
-            except BaseException:
-                log.error(
-                    f'Dataset file ({args.base_dir}/data/{args.input}) not found')
-                sys.exit()
 
-            # prepare dataset for training QSPR model
-            th = args.threshold[property[0]] if args.threshold else None
-            if task == ModelTasks.REGRESSION and th:
-                log.warning(
-                    "Threshold argument specified with regression. Threshold will be ignored.")
-                th = None
-            log_transform = np.log if args.log_transform and args.log_transform[
-                property[0]] else None
-            mydataset = QSPRDataset(
-                f"{reg_abbr}_{property[0]}", target_prop=property[0],
-                df=df, smilescol=args.smilescol, task=task, th=th,
-                target_transformer=log_transform,
-                store_dir=f"{args.base_dir}/data/")
-
-            # data filters
-            datafilters = []
-            if args.low_quality:
-                datafilters.append(papyrusLowQualityFilter())
-
-            # data splitter
-            if args.split == 'scaffold':
-                split = scaffoldsplit(test_fraction=args.split_fraction)
-            elif args.split == 'temporal':
-                split = temporalsplit(
-                    timesplit=args.split_time,
-                    timecol=args.split_timecolumn)
-            else:
-                split = randomsplit(test_fraction=args.split_fraction)
-
-            # feature calculator
-            descriptorsets = []
-            if 'Morgan' in args.features:
-                descriptorsets.append(MorganFP(3, nBits=2048))
-            if 'RDkit' in args.features:
-                descriptorsets.append(rdkit_descs())
-            if 'Mordred' in args.features:
-                descriptorsets.append(Mordred())
-            if 'DrugEx' in args.features:
-                descriptorsets.append(DrugExPhyschem())
-
-            # feature filters
-            featurefilters = []
-            if args.low_variability:
-                featurefilters.append(
-                    lowVarianceFilter(
-                        th=args.low_variability))
-            if args.high_correlation:
-                featurefilters.append(
-                    highCorrelationFilter(
-                        th=args.high_correlation))
-            if args.boruta_filter:
-                if args.regression:
-                    featurefilters.append(BorutaFilter())
-                else:
-                    featurefilters.append(
-                        BorutaFilter(
-                            estimator=RandomForestClassifier(
-                                n_jobs=5)))
-
-            mydataset.prepareDataset(
-                feature_calculator=DescriptorsCalculator(descriptorsets),
-                datafilters=datafilters, split=split,
-                feature_filters=featurefilters,
-                feature_standardizers=[StandardScaler()])
-
-            # save dataset files and fingerprints
-            mydataset.save()
+            mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata.pkl')
+            mydataset.reload()
+            mydataset.createFolds(n_folds=mydataset.n_folds)
 
             for model_type in args.model_types:
                 print(model_type)
                 log.info(f'Model: {model_type} {reg_abbr}')
 
-                if model_type not in ['RF', 'XGB',
-                                      'DNN', 'SVM', 'PLS', 'NB', 'KNN']:
+                if model_type not in ['RF', 'XGB', 'DNN', 'SVM', 'PLS', 'NB', 'KNN']:
                     log.warning(f'Model type {model_type} does not exist')
                     continue
                 if model_type == 'NB' and reg:
@@ -265,31 +153,20 @@ def QSPR_modelling(args):
 
                 if args.parameters:
                     try:
-                        parameters = par_dicts[par_dicts[:, 0]
-                                               == model_type, 1][0]
+                        parameters = par_dicts[par_dicts[:, 0] == model_type, 1][0]
                         if not model_type in ["NB", "PLS", "SVM", "DNN"]:
-                            parameters = parameters.update(
-                                {"n_jobs": args.ncpu})
+                            parameters = parameters.update({"n_jobs": args.ncpu})
                     except BaseException:
-                        log.warning(
-                            f'Model type {model_type} not in parameter file, default parameter settings used.')
-                        parameters = None if model_type in [
-                            "NB", "PLS", "SVM", "DNN"] else {
-                            "n_jobs": args.ncpu}
+                        log.warning(f'Model type {model_type} not in parameter file, default parameter settings used.')
+                        parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs": args.ncpu}
                 else:
-                    parameters = None if model_type in [
-                        "NB", "PLS", "SVM", "DNN"] else {
-                        "n_jobs": args.ncpu}
+                    parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs": args.ncpu}
 
                 alg_dict = {
                     'RF': RandomForestRegressor() if reg else RandomForestClassifier(),
-                    'XGB': XGBRegressor(
-                        objective='reg:squarederror') if reg else XGBClassifier(
-                        objective='binary:logistic',
-                        use_label_encoder=False,
-                        eval_metric='logloss'),
-                    'SVM': SVR() if reg else SVC(
-                        probability=True),
+                    'XGB': XGBRegressor(objective='reg:squarederror') if reg else
+                    XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss'),
+                    'SVM': SVR() if reg else SVC(probability=True),
                     'PLS': PLSRegression(),
                     'NB': GaussianNB(),
                     'KNN': KNeighborsRegressor() if reg else KNeighborsClassifier()}
@@ -322,7 +199,7 @@ def QSPR_modelling(args):
                                                   model_type, 1][0]
                     log.info(search_space_bs)
                     if reg and model_type == "RF":
-                        if min(mydataset.y) < 0 or min(mydataset.y_ind) < 0:
+                        if mydataset.y.min()[0] < 0 or mydataset.y_ind.min()[0] < 0:
                             search_space_bs.update(
                                 {'criterion': ['categorical', ['squared_error']]})
                         else:
@@ -393,4 +270,8 @@ if __name__ == '__main__':
         json.dump(vars(args), f)
 
     # Optimize, evaluate and train estimators according to QSPR arguments
+    log.info('QSPR modelling started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
     QSPR_modelling(args)
+
+    log.info('QSPR modelling completed: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

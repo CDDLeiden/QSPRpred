@@ -5,12 +5,8 @@ import os
 import warnings
 from typing import Callable, List, Literal
 
-from sklearn.preprocessing import LabelEncoder
-from tqdm.auto import tqdm
-
 import numpy as np
 import pandas as pd
-
 from qsprpred.data.interfaces import MoleculeDataSet, datasplit
 from qsprpred.data.utils.datasplitters import randomsplit
 from qsprpred.data.utils.descriptorcalculator import Calculator, DescriptorsCalculator
@@ -20,16 +16,17 @@ from qsprpred.data.utils.smiles_standardization import (
     sanitize_smiles,
 )
 from qsprpred.logs import logger
+from qsprpred.models.tasks import ModelTasks
 from rdkit import Chem
 from rdkit.Chem import PandasTools
 from sklearn.model_selection import KFold, StratifiedKFold
-
-from qsprpred.models.tasks import ModelTasks
+from sklearn.preprocessing import LabelEncoder
+from tqdm.auto import tqdm
 
 
 class MoleculeTable(MoleculeDataSet):
 
-    class  ParallelApplyWrapper:
+    class ParallelApplyWrapper:
         def __init__(self, func, func_args=None, func_kwargs=None, axis=0, raw=False, result_type='expand'):
             self.args = func_args
             self.kwargs = func_kwargs
@@ -38,8 +35,9 @@ class MoleculeTable(MoleculeDataSet):
             self.raw = raw
             self.result_type = result_type
 
-        def __call__(self, data : pd.DataFrame):
-            return data.apply(self.func, raw=self.raw, axis=self.axis, result_type=self.result_type, args=self.args, **self.kwargs if self.kwargs else {})
+        def __call__(self, data: pd.DataFrame):
+            return data.apply(self.func, raw=self.raw, axis=self.axis, result_type=self.result_type,
+                              args=self.args, **self.kwargs if self.kwargs else {})
 
     def __init__(
             self,
@@ -67,15 +65,18 @@ class MoleculeTable(MoleculeDataSet):
         # data frame initialization
         if df is not None:
             if self._isInStore('df') and not overwrite:
-                warnings.warn('Existing data set found, but also found a data frame in store. Refusing to overwrite data. If you want to overwrite data in store, set overwrite=True.')
+                warnings.warn(
+                    'Existing data set found, but also found a data frame in store. Refusing to overwrite data. If you want to overwrite data in store, set overwrite=True.')
                 self.reload()
             else:
                 self.df = df
                 if self.includesRdkit:
-                    PandasTools.AddMoleculeColumnToFrame(self.df, smilesCol=self.smilescol, molCol='RDMol', includeFingerprints=False)
+                    PandasTools.AddMoleculeColumnToFrame(
+                        self.df, smilesCol=self.smilescol, molCol='RDMol', includeFingerprints=False)
         else:
             if not self._isInStore('df'):
-                raise ValueError(f"No data frame found in store for '{self.name}'. Are you sure this is the correct dataset? If you are creating a new data set, make sure to supply a data frame.")
+                raise ValueError(
+                    f"No data frame found in store for '{self.name}'. Are you sure this is the correct dataset? If you are creating a new data set, make sure to supply a data frame.")
             self.reload()
 
     def __len__(self):
@@ -110,19 +111,22 @@ class MoleculeTable(MoleculeDataSet):
         if self.df.columns.str.startswith(prefix).any():
             return self.df[self.df.columns[self.df.columns.str.startswith(prefix)]]
 
-    def apply(self, func, func_args=None, func_kwargs=None, axis=0, raw=False, result_type='expand', subset=None, n_cpus=None, chunk_size=1000):
+    def apply(self, func, func_args=None, func_kwargs=None, axis=0, raw=False,
+              result_type='expand', subset=None, n_cpus=None, chunk_size=1000):
         n_cpus = n_cpus if n_cpus else os.cpu_count()
         if n_cpus and n_cpus > 1:
             return self.papply(func, func_args, func_kwargs, axis, raw, result_type, subset, n_cpus, chunk_size)
         else:
             df_sub = self.df[subset if subset else self.df.columns]
-            return df_sub.apply(func, raw=raw, axis=axis, result_type=result_type, args=func_args, **func_kwargs if func_kwargs else {})
+            return df_sub.apply(func, raw=raw, axis=axis, result_type=result_type,
+                                args=func_args, **func_kwargs if func_kwargs else {})
 
-    def papply(self, func, func_args=None, func_kwargs=None, axis=0, raw=False, result_type='expand', subset=None, n_cpus=None, chunk_size=1000):
+    def papply(self, func, func_args=None, func_kwargs=None, axis=0, raw=False,
+               result_type='expand', subset=None, n_cpus=None, chunk_size=1000):
         n_cpus = n_cpus if n_cpus else os.cpu_count()
         df_sub = self.df[subset if subset else self.df.columns]
         data = [df_sub[i: i + chunk_size] for i in range(0, len(df_sub), chunk_size)]
-        batch_size = n_cpus # how many batches to prefetch into the process (more is faster, but uses more memory)
+        batch_size = n_cpus  # how many batches to prefetch into the process (more is faster, but uses more memory)
         results = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=n_cpus) as executor:
             batches = [data[i: i + batch_size] for i in range(0, len(data), batch_size)]
@@ -159,10 +163,18 @@ class MoleculeTable(MoleculeDataSet):
         if recalculate:
             self.df.drop(self.getDescriptorNames(), axis=1, inplace=True)
         elif self.hasDescriptors:
-            # TODO: check if descriptors in the calculator are the same as the ones in the data frame and act accordingly, now we just do nothing
+            # TODO: check if descriptors in the calculator are the same as the ones in
+            # the data frame and act accordingly, now we just do nothing
             return
 
-        descriptors = self.apply(calculator, axis=0, subset=[self.smilescol], result_type='reduce', n_cpus=n_cpus, chunk_size=chunk_size)
+        descriptors = self.apply(
+            calculator,
+            axis=0,
+            subset=[
+                self.smilescol],
+            result_type='reduce',
+            n_cpus=n_cpus,
+            chunk_size=chunk_size)
         descriptors = descriptors.to_list()
         descriptors = pd.concat(descriptors, axis=0)
         descriptors.index = self.df.index
@@ -194,21 +206,15 @@ class MoleculeTable(MoleculeDataSet):
 
 class QSPRDataset(MoleculeTable):
     """Prepare dataset for QSPR model training.
-    
+
     It splits the data in train and test set, as well as creating cross-validation folds.
     Optionally low quality data is filtered out.
     For classification the dataset samples are labelled as active/inactive.
 
     Attributes:
-        df (pd dataframe) : dataset
-        smilescol (str) : name of column containing the molecule smiles
-        property (str) : name of column in dataframe for to be predicted values, e.g. ["Cl"]
-        precomputed (bool): if classification of targetProperty precomputed
-        reg (bool) : if true, dataset for regression, if false dataset for classification
-            (uses th)
-        th (list of float) : threshold for activity if classification model, if len th
-            larger than 1, these values will used for binning (in this case lower and upper
-            boundary need to be included)
+        targetProperty (str) : property to be predicted with QSPRmodel
+        task (ModelTask) : regression or classification
+        df (pd.dataframe) : dataset
         X (np.ndarray/pd.DataFrame) : m x n feature matrix for cross validation, where m is
             the number of samplesand n is the number of features.
         y (np.ndarray/pd.DataFrame) : m-d label array for cross validation, where m is the
@@ -219,28 +225,44 @@ class QSPRDataset(MoleculeTable):
             the number of samples and equals to row of X_ind, and l is the number of types.
         folds (generator) : scikit-learn n-fold generator object
         n_folds (int) : number of folds for the generator
-
-    Methods:
-        FromFile : construct dataset from file
-        prepareDataset : preprocess the dataset for QSPR modelling
-        loadFeaturesFromFile: load features from file :)
-        createFolds: folds is an generator and needs to be reset after cross validation or hyperparameter optimization
-        dataStandardization: Performs standardization by centering and scaling
+        features (list of str) : feature names
+        feature_standardizers (list of FeatureStandardizers): methods used to standardize the data features.
     """
 
     def __init__(
         self,
-        name : str,
-        target_prop : str,
+        name: str,
+        target_prop: str,
         df: pd.DataFrame = None,
-        smilescol : str = "SMILES",
-        add_rdkit : bool = False,
-        store_dir : str = '.',
-        overwrite : bool = False,
-        task : Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION] = ModelTasks.REGRESSION,
-        target_transformer : Callable = None,
-        th : List[float] = None,
+        smilescol: str = "SMILES",
+        add_rdkit: bool = False,
+        store_dir: str = '.',
+        overwrite: bool = False,
+        task: Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION] = ModelTasks.REGRESSION,
+        target_transformer: Callable = None,
+        th: List[float] = None,
+        n_folds=None
     ):
+        """Construct QSPRdata, also apply transformations of output property if specified.
+
+        Args:
+            name (str): data name, used in saving the data
+            target_prop (str): target property, should correspond with target columnname in df
+            df (pd.DataFrame, optional): input dataframe containing smiles and target property. Defaults to None.
+            smilescol (str, optional): name of column in df containing SMILES. Defaults to "SMILES".
+            add_rdkit (bool, optional): if true, column with rdkit molecules will be added to df. Defaults to False.
+            store_dir (str, optional): directory for saving the output data. Defaults to '.'.
+            overwrite (bool, optional): if already saved data at output dir if should be overwritten. Defaults to False.
+            task (Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION], optional): Defaults to ModelTasks.REGRESSION.
+            target_transformer (Callable, optional): Transformation(s) of target propery. Defaults to None.
+            th (List[float], optional): threshold for activity if classification model, if len th
+                larger than 1, these values will used for binning (in this case lower and upper
+                boundary need to be included). Defaults to None.
+            n_folds (str): Overwritten in prepare_dataset. This is here for re-loading the model.
+
+        Raises:
+            ValueError: Raised if thershold given with non-classification task.
+        """
         super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite)
         self.targetProperty = target_prop
         self.task = task
@@ -257,16 +279,17 @@ class QSPRDataset(MoleculeTable):
                 self.makeClassification(th, as_new=True)
             else:
                 # if a precomputed target is expected, just check it
-                assert self.df[self.targetProperty].apply(lambda x: type(x) == int).all()
+                assert self.df[self.targetProperty].apply(lambda x: isinstance(x, int)).all()
         elif self.task == ModelTasks.REGRESSION and th:
-            raise ValueError(f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
+            raise ValueError(
+                f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
 
         self.X = None
         self.y = None
         self.X_ind = None
         self.y_ind = None
 
-        self.n_folds = None
+        self.n_folds = n_folds
         self.folds = None
 
         self.features = None
@@ -275,38 +298,43 @@ class QSPRDataset(MoleculeTable):
         logger.info(f"Dataset '{self.name}' created for target targetProperty: '{self.targetProperty}'.")
 
     def isMultiClass(self):
+        """Return if model task is multi class classification."""
         return self.task == ModelTasks.CLASSIFICATION and self.nClasses > 2
 
     @property
     def nClasses(self):
+        """Return number of output classes for classification."""
         if self.task == ModelTasks.CLASSIFICATION:
             return len(self.df[self.targetProperty].unique())
         else:
             return 0
 
     def dropInvalids(self):
+        """Drop Invalid SMILES and missing target property values"""
         # drop rows with empty targetProperty values
         self.df = self.df.dropna(subset=([self.smilescol, self.targetProperty])).copy()
 
         # drop invalid smiles
-        invalid_mask  = self.df[self.smilescol].apply(lambda smile : Chem.MolFromSmiles(smile) is not None)
+        invalid_mask = self.df[self.smilescol].apply(lambda smile: Chem.MolFromSmiles(smile) is not None)
         logger.info(
             f"Removing invalid SMILES: {self.df[self.smilescol][invalid_mask]}"
         )
         self.df = self.df[invalid_mask].copy()
 
-    def cleanMolecules(self, standardize : bool = True, sanitize : bool = True):
+    def cleanMolecules(self, standardize: bool = True, sanitize: bool = True):
+        """Standardize and or sanitize SMILES sequences"""
         if standardize:
             self.df[self.smilescol] = [chembl_smi_standardizer(smiles)[0] for smiles in self.df[self.smilescol]]
         if sanitize:
             self.df[self.smilescol] = [sanitize_smiles(smiles) for smiles in self.df[self.smilescol]]
 
-    def makeClassification(self, th : List[float] = tuple(), as_new : bool = False):
+    def makeClassification(self, th: List[float] = tuple(), as_new: bool = False):
+        """Convert model output to classification using the given threshold(s)"""
         new_prop = self.targetProperty if not as_new else f"{self.targetProperty}_class"
         assert len(th) > 0, "Threshold list must contain at least one value."
         if len(th) > 1:
             assert (
-                    len(th) > 3
+                len(th) > 3
             ), "For multi-class classification, set more than 3 values as threshold."
             assert max(self.df[self.targetProperty]) <= max(
                 th
@@ -330,7 +358,8 @@ class QSPRDataset(MoleculeTable):
         with open(os.path.join(store_dir, f"{name}_meta.json")) as f:
             meta = json.load(f)
             meta['task'] = ModelTasks(meta['task'])
-        return QSPRDataset(*args, name=name, store_dir = store_dir, **meta, **kwargs)
+
+        return QSPRDataset(*args, name=name, store_dir=store_dir, **meta, **kwargs)
 
     def save(self):
         super().save()
@@ -345,22 +374,34 @@ class QSPRDataset(MoleculeTable):
                 standardizer.toFile(path)
             stds.append(path)
 
+        # save X and y
+        self.X.to_pickle(f'{self.storePrefix}_X.pkl')
+        self.X_ind.to_pickle(f'{self.storePrefix}_X_ind.pkl')
+        self.y.to_pickle(f'{self.storePrefix}_y.pkl')
+        self.y_ind.to_pickle(f'{self.storePrefix}_y_ind.pkl')
+
         # save metadata
         meta = {
             'target_prop': self.targetProperty,
             'task': self.task.name,
+            'n_folds': self.n_folds
         }
         with open(f"{self.storePrefix}_meta.json", 'w') as f:
             json.dump(meta, f)
 
-    def split(self, split : datasplit):
-        """
-        Split dataset into train and test set.
+    def reload(self):
+        super().reload()
+        self.X = pd.read_pickle(f"{self.storePrefix}_X.pkl")
+        self.X_ind = pd.read_pickle(f"{self.storePrefix}_X_ind.pkl")
+        self.y = pd.read_pickle(f"{self.storePrefix}_y.pkl")
+        self.y_ind = pd.read_pickle(f"{self.storePrefix}_y_ind.pkl")
+
+    def split(self, split: datasplit):
+        """Split dataset into train and test set.
 
         Args:
             split (datasplit) : split instance orchestrating the split
         """
-
         self.X, self.X_ind, self.y, self.y_ind = split(
             df=self.df, Xcol=self.smilescol, ycol=self.targetProperty
         )
@@ -392,18 +433,14 @@ class QSPRDataset(MoleculeTable):
                 self.y_ind = self.y_ind.cat.codes
 
     def featurizeSplits(self):
-        """
-        Keep only features that will be used by the model. In our case, descriptors.
-
-        """
-
+        """Keep only features that will be used by the model. In our case, descriptors."""
         descriptors = self.getDescriptors()
         self.X = descriptors.loc[self.X.index, :]
         self.X_ind = descriptors.loc[self.X_ind.index, :]
         self.y = self.df.loc[self.y.index, [self.targetProperty]]
         self.y_ind = self.df.loc[self.y_ind.index, [self.targetProperty]]
 
-    def fillMissing(self, fill_value : float, columns : List[str] = None):
+    def fillMissing(self, fill_value: float, columns: List[str] = None):
         columns = columns if columns else self.getDescriptorNames()
         self.df[columns] = self.df[columns].fillna(fill_value)
         logger.warning('Missing values filled with %s' % fill_value)
@@ -462,7 +499,7 @@ class QSPRDataset(MoleculeTable):
 
         # featurize splits
         self.featurizeSplits()
-        
+
         # apply feature filters on training set
         self.filterFeatures(feature_filters)
 
@@ -479,7 +516,7 @@ class QSPRDataset(MoleculeTable):
         """Apply and/or fit feature standardizers."""
         fitted_standardizers = []
         for idx, standardizer in enumerate(feature_standardizers):
-            if type(standardizer) == SKLearnStandardizer:
+            if isinstance(standardizer, SKLearnStandardizer):
                 standardizer = standardizer.getInstance()
 
             if fit:
@@ -505,11 +542,12 @@ class QSPRDataset(MoleculeTable):
 
         def standardize_folds(folds):
             for x in folds:
-                X, standardizers = self.applyFeatureStandardizers(feature_standardizers, self.X.values[x[0],:], fit=True)
-                X_test, _ = self.applyFeatureStandardizers(standardizers, self.X.values[x[1],:], fit=False)
+                X, standardizers = self.applyFeatureStandardizers(
+                    feature_standardizers, self.X.values[x[0], :], fit=True)
+                X_test, _ = self.applyFeatureStandardizers(standardizers, self.X.values[x[1], :], fit=False)
                 y = self.y.values[x[0]]
                 y_test = self.y.values[x[1]]
-                yield X, X_test, y[:,0], y_test[:,0], x[0], x[1]
+                yield X, X_test, y[:, 0], y_test[:, 0], x[0], x[1]
 
         if hasattr(self, "feature_standardizers"):
             self.folds = standardize_folds(self.folds)

@@ -4,9 +4,9 @@ import argparse
 import json
 import os
 import os.path
-import pickle
 import random
 import sys
+from datetime import datetime
 
 import numpy as np
 import optuna
@@ -15,7 +15,7 @@ import torch
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
@@ -28,6 +28,7 @@ from qsprpred.data.utils.featurefilters import (
     lowVarianceFilter,
 )
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
+from qsprpred.models.tasks import ModelTasks
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
@@ -35,8 +36,8 @@ from sklearn.preprocessing import StandardScaler
 def QSPRArgParser(txt=None):
     """Define and read command line arguments."""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
-    #base arguments
+
+    # base arguments
     parser.add_argument('-b', '--base_dir', type=str, default='.',
                         help="Base directory which contains a folder 'data' with input files")
     parser.add_argument('-d', '--debug', action='store_true')
@@ -45,7 +46,7 @@ def QSPRArgParser(txt=None):
                         help="tsv file name that contains SMILES and property value column")
     parser.add_argument('-ncpu', '--ncpu', type=int, default=8,
                         help="Number of CPUs")
-    
+
     # model target arguments
     parser.add_argument('-sm', '--smilescol', type=str, default='SMILES', help="Name of the column in the dataset\
                         containing the smiles.")
@@ -95,7 +96,7 @@ def QSPRArgParser(txt=None):
     # other
     parser.add_argument('-ng', '--no_git', action='store_true',
                         help="If on, git hash is not retrieved")
-    
+
     if txt:
         args = parser.parse_args(txt)
     else:
@@ -106,7 +107,7 @@ def QSPRArgParser(txt=None):
             sys.exit("Multitask not yet implemented")
 
     # If no regression argument, does both regression and classification
-    if args.regression is None: 
+    if args.regression is None:
         args.regression = [True, False]
     elif args.regression.lower() in ['true', 'reg', 'regression']:
         args.regression = [True]
@@ -119,26 +120,38 @@ def QSPRArgParser(txt=None):
 
 
 def QSPR_dataprep(args):
-    """Optimize, evaluate and train estimators.""" 
+    """Optimize, evaluate and train estimators."""
     if not os.path.exists(args.base_dir + '/qspr/data'):
-        os.makedirs(args.base_dir + '/qspr/data') 
+        os.makedirs(args.base_dir + '/qspr/data')
 
     for reg in args.regression:
+        task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
         reg_abbr = 'REG' if reg else 'CLS'
         for property in args.properties:
             log.info(f"Property: {property[0]} {reg_abbr}")
             try:
                 df = pd.read_csv(f'{args.base_dir}/data/{args.input}', sep='\t')
-            except:
+            except BaseException:
                 log.error(f'Dataset file ({args.base_dir}/data/{args.input}) not found')
                 sys.exit()
-        
-            #prepare dataset for training QSPR model
-            th = args.threshold[property[0]] if args.threshold else {}
-            log_transform = args.log_transform[property[0]] if args.log_transform else {}
-            mydataset = QSPRDataset(df, smilescol=args.smilescol, property=property[0],
-                                    reg=reg, th=th, log=log_transform)
-            
+
+            # prepare dataset for training QSPR model
+            th = args.threshold[property[0]] if args.threshold else None
+            if task == ModelTasks.REGRESSION and th:
+                log.warning("Threshold argument specified with regression. Threshold will be ignored.")
+                th = None
+            log_transform = np.log if args.log_transform and args.log_transform[property[0]] else None
+            mydataset = QSPRDataset(
+                f"{property[0]}_{reg_abbr}_QSPRdata",
+                target_prop=property[0],
+                df=df,
+                smilescol=args.smilescol,
+                task=task,
+                th=th,
+                target_transformer=log_transform,
+                store_dir=f"{args.base_dir}/qspr/data/",
+                overwrite=False)
+
             # data filters
             datafilters = []
             if args.low_quality:
@@ -146,11 +159,11 @@ def QSPR_dataprep(args):
 
             # data splitter
             if args.split == 'scaffold':
-                split=scaffoldsplit(test_fraction=args.split_fraction)
+                split = scaffoldsplit(test_fraction=args.split_fraction)
             elif args.split == 'temporal':
-                split=temporalsplit(timesplit=args.split_time, timecol=args.split_timecolumn)
+                split = temporalsplit(timesplit=args.split_time, timecol=args.split_timecolumn)
             else:
-                split=randomsplit(test_fraction=args.split_fraction)
+                split = randomsplit(test_fraction=args.split_fraction)
 
             # feature calculator
             descriptorsets = []
@@ -164,7 +177,7 @@ def QSPR_dataprep(args):
                 descriptorsets.append(DrugExPhyschem())
 
             # feature filters
-            featurefilters=[]
+            featurefilters = []
             if args.low_variability:
                 featurefilters.append(lowVarianceFilter(th=args.low_variability))
             if args.high_correlation:
@@ -173,29 +186,37 @@ def QSPR_dataprep(args):
                 if args.regression:
                     featurefilters.append(BorutaFilter())
                 else:
-                     featurefilters.append(BorutaFilter(estimator = RandomForestClassifier(n_jobs=args.ncpu)))
+                    featurefilters.append(BorutaFilter(estimator=RandomForestClassifier(n_jobs=args.ncpu)))
 
-            mydataset.prepareDataset(fname=f"{args.base_dir}/qspr/data/{reg_abbr}_{property[0]}_DescCalc.json",
-                                     feature_calculators=descriptorsCalculator(descriptorsets),
-                                     datafilters=datafilters, split=split, feature_filters=featurefilters, feature_standardizers=[StandardScaler()])
+            # prepare dataset for modelling
+            mydataset.prepareDataset(feature_calculator=DescriptorsCalculator(descriptorsets),
+                                     datafilters=datafilters, split=split, feature_filters=featurefilters,
+                                     feature_standardizers=[StandardScaler()])
 
-            # save dataset object
-            mydataset.folds = None
-            pickle.dump(mydataset, open(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata.pkg', 'bw'))
-         
+            # save dataset files and fingerprints
+            mydataset.save()
+
+
 if __name__ == '__main__':
     args = QSPRArgParser()
 
-    #Set random seeds
+    # Set random seeds
     random.seed(args.random_state)
     np.random.seed(args.random_state)
     torch.manual_seed(args.random_state)
     os.environ['TF_DETERMINISTIC_OPS'] = str(args.random_state)
 
     # Backup files
-    tasks = [ 'REG' if reg == True else 'CLS' for reg in args.regression ]
-    file_prefixes = [ f'{property}_{task}' for task in tasks for property in args.properties]
-    backup_msg = backUpFiles(args.base_dir, 'qspr/data', tuple(file_prefixes), cp_suffix='_params')
+    tasks = ['REG' if reg == True else 'CLS' for reg in args.regression]
+    file_prefixes = [f'{property}_{task}' for task in tasks for property in args.properties]
+    backup_msg = backUpFiles(
+        args.base_dir,
+        'qspr/data',
+        tuple(file_prefixes),
+        cp_suffix=[
+            'calculators',
+            'standardizer_0',
+            'meta'])
 
     if not os.path.exists(f'{args.base_dir}/qspr/data'):
         os.makedirs(f'{args.base_dir}/qspr/data')
@@ -208,20 +229,24 @@ if __name__ == '__main__':
         commit_hash(os.path.dirname(os.path.realpath(__file__))) if not args.no_git else None,
         vars(args),
         disable_existing_loggers=False
-    )   
+    )
 
     log = logSettings.log
     log.info(backup_msg)
 
-    #Add optuna logging
+    # Add optuna logging
     optuna.logging.enable_propagation()  # Propagate logs to the root logger.
     optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
     optuna.logging.set_verbosity(optuna.logging.DEBUG)
 
-    # Create json log file with used commandline arguments 
+    # Create json log file with used commandline arguments
     print(json.dumps(vars(args), sort_keys=False, indent=2))
     with open(f'{args.base_dir}/qspr/data/QSPRdata.json', 'w') as f:
         json.dump(vars(args), f)
-    
-    #Optimize, evaluate and train estimators according to QSPR arguments
+
+    # Optimize, evaluate and train estimators according to QSPR arguments
+    log.info('Data preparation started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
     QSPR_dataprep(args)
+
+    log.info('Data preparation completed: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
