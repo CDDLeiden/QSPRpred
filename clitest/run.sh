@@ -10,6 +10,7 @@ function cleanup() {
   rm -rf ${TEST_BASE}/data/backup_*;
   rm -rf ${TEST_BASE}/data/*.log;
   rm -rf ${TEST_BASE}/data/*.json;
+  rm -rf ${TEST_BASE}/data/*.pkl;
   rm -rf ${TEST_BASE}/qspr;
   rm -rf ${TEST_BASE}/logs;
 }

@@ -4,30 +4,28 @@ predictors
 Created by: Martin Sicho
 On: 06.06.22, 20:15
 """
+import json
 from typing import List
 
-
-import json
-import sklearn_json as skljson
 import numpy as np
+import sklearn_json as skljson
 import torch
-from qsprpred.data.interfaces import Scorer
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
-from qsprpred.models.neural_network import STFullyConnected
-
-import torch
-
+from qsprpred.data.utils.descriptor_utils.interfaces import Scorer
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
+from qsprpred.models.neural_network import STFullyConnected
 
 
 class Predictor(Scorer):
- 
-    def __init__(self, model, feature_calculators, scaler : SKLearnStandardizer, type='CLS', th=1, name=None, modifier=None):
+
+    def __init__(
+            self, model, feature_calculators, scaler: SKLearnStandardizer,
+            type='CLS', th=1, name=None, modifier=None):
         """Construct predictor model, feature calculator & scaler.
 
         Args:
             model: fitted sklearn or toch model
-            feature_calculators: descriptorsCalculator object, calculates features from smiles
+            feature_calculators: DescriptorsCalculator object, calculates features from smiles
             scaler: StandardStandardizer, scales features
             type: regression or classification
             th: if classification give activity threshold
@@ -37,13 +35,14 @@ class Predictor(Scorer):
         super().__init__(modifier)
         self.model = model
         self.feature_calculators = feature_calculators
-        self.scaler = scaler 
+        self.scaler = scaler
         self.type = type
         self.th = th
         self.key = f"{self.model.__class__.__name__}" if not name else name
 
     @staticmethod
-    def fromFile(base_dir, algorithm, target, type='CLS', th=1, scale = True, name="Predictor", modifier=None):
+    def fromFile(base_dir, algorithm, target, type='CLS', th=1,
+                 scale=True, name="Predictor", modifier=None):
         """Construct predictor from files with serialized model, feature calculator & scaler.
 
         Args:
@@ -58,22 +57,31 @@ class Predictor(Scorer):
 
         Returns:
             predictor
-            
+
         """
-        path = base_dir + '/qspr/models/' + '_'.join([algorithm, type, target]) + '.json'
-        feature_calculators = descriptorsCalculator.fromFile(base_dir + '/qspr/data/' + '_'.join([type, target]) + '_DescCalc.json')
-        #TODO do not hardcode when to use scaler
+        path = base_dir + '/qspr/models/' + '_'.join(
+            [algorithm, type, target]) + '.json'
+        feature_calculators = DescriptorsCalculator.fromFile(
+            base_dir + '/qspr/data/' + '_'.join([type, target]) + '_DescCalc.json')
+        # TODO do not hardcode when to use scaler
         scaler = None
         if scale:
-            scaler = SKLearnStandardizer.fromFile(base_dir + '/qspr/data/' + '_'.join([type, target]) + '_scaler.json')
-              
+            scaler = SKLearnStandardizer.fromFile(
+                base_dir + '/qspr/data/' + '_'.join([type, target]) +
+                '_scaler.json')
+
         if "DNN" in path:
             with open(path) as f:
                 model_params = json.load(f)
             model = STFullyConnected(**model_params)
             model.load_state_dict(torch.load(f"{path[:-5]}_weights.pkg"))
-            return Predictor(model, feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
-        return Predictor(skljson.from_json(path), feature_calculators=feature_calculators, scaler=scaler, type=type, th=th, name=name, modifier=modifier)
+            return Predictor(
+                model, feature_calculators=feature_calculators, scaler=scaler,
+                type=type, th=th, name=name, modifier=modifier)
+        return Predictor(
+            skljson.from_json(path),
+            feature_calculators=feature_calculators, scaler=scaler, type=type,
+            th=th, name=name, modifier=modifier)
 
     def getScores(self, mols, frags=None):
         """Returns scores for the input molecules.
@@ -92,7 +100,11 @@ class Predictor(Scorer):
         if (self.model.__class__.__name__ == "STFullyConnected"):
             fps_loader = self.model.get_dataloader(features)
             if len(self.th) > 1:
-                scores = np.argmax(self.model.predict(fps_loader), axis=1).astype(float)
+                scores = np.argmax(
+                    self.model.predict(fps_loader),
+                    axis=1).astype(float)
+            elif len(self.th) == 1:
+                scores = self.model.predict(fps_loader)[:, 1].astype(float)
             else:
                 scores = self.model.predict(fps_loader).flatten()
         elif (self.model.__class__.__name__ == 'PLSRegression'):
@@ -100,12 +112,15 @@ class Predictor(Scorer):
         elif (self.type == 'REG'):
             scores = self.model.predict(features)
         elif len(self.th) > 1:
-            scores = np.argmax(self.model.predict_proba(features), axis=1).astype(float)
+            scores = np.argmax(
+                self.model.predict_proba(features),
+                axis=1).astype(float)
         elif (self.type == 'CLS'):
             scores = self.model.predict_proba(features)[:, 1]
-        
+
+        if len(scores.shape) > 1 and scores.shape[1] == 1:
+            scores = scores[:, 0]
         return scores
 
     def getKey(self):
         return self.key
-

@@ -6,7 +6,6 @@ from typing import List
 import numpy as np
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
-from qsprpred.logs import logger
 from rdkit.Chem.rdchem import Mol
 
 
@@ -55,7 +54,7 @@ class Calculator(ABC):
         pass
 
 
-class descriptorsCalculator(Calculator):
+class DescriptorsCalculator(Calculator):
     """Calculator for molecule properties."""
 
     def __init__(self, descsets: List[DescriptorSet]) -> None:
@@ -80,7 +79,7 @@ class descriptorsCalculator(Calculator):
             else:
                 descset.descriptors = value["descriptors"]
             descsets.append(descset)
-        return descriptorsCalculator(descsets)
+        return DescriptorsCalculator(descsets)
 
     def __call__(self, mols: List[Mol]) -> pd.DataFrame:
         """Calculate descriptors for list of mols.
@@ -100,6 +99,7 @@ class descriptorsCalculator(Calculator):
 
         # replace errors by nan values
         df = df.apply(pd.to_numeric, errors='coerce')
+        df.columns = [f"Descriptor_{x}" for x in df.columns]
         
         return df
 
@@ -133,9 +133,9 @@ class descriptorsCalculator(Calculator):
         for idx, descriptorset in enumerate(self.descsets):
             # Find all descriptors in current descriptorset
             descs_from_curr_set = [
-                f.replace(f"{descriptorset}_", "")
+                f.replace(f"Descriptor_{descriptorset}_", "")
                 for f in descriptors
-                if f.startswith(str(descriptorset))
+                if f.startswith(f"Descriptor_{descriptorset}_")
             ]
             # if there are none to keep from current descriptors set, drop the whole set
             if not descs_from_curr_set:
