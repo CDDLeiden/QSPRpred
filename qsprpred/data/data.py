@@ -362,7 +362,7 @@ class QSPRDataset(MoleculeTable):
 
         return QSPRDataset(*args, name=name, store_dir=store_dir, **meta, **kwargs)
 
-    def save(self):
+    def save(self, save_split=True):
         super().save()
 
         # save feature standardizers
@@ -376,14 +376,15 @@ class QSPRDataset(MoleculeTable):
             stds.append(path)
 
         # save X and y
-        if self.X is not None:
-            self.X.to_pickle(f'{self.storePrefix}_X.pkl')
-        if self.X_ind is not None:
-            self.X_ind.to_pickle(f'{self.storePrefix}_X_ind.pkl')
-        if self.y is not None:
-            self.y.to_pickle(f'{self.storePrefix}_y.pkl')
-        if self.y_ind is not None:
-            self.y_ind.to_pickle(f'{self.storePrefix}_y_ind.pkl')
+        if save_split:
+            if self.X is not None:
+                self.X.to_pickle(f'{self.storePrefix}_X.pkl')
+            if self.X_ind is not None:
+                self.X_ind.to_pickle(f'{self.storePrefix}_X_ind.pkl')
+            if self.y is not None:
+                self.y.to_pickle(f'{self.storePrefix}_y.pkl')
+            if self.y_ind is not None:
+                self.y_ind.to_pickle(f'{self.storePrefix}_y_ind.pkl')
 
         # save metadata
         meta = {
@@ -394,15 +395,16 @@ class QSPRDataset(MoleculeTable):
         with open(f"{self.storePrefix}_meta.json", 'w') as f:
             json.dump(meta, f)
 
-    def reload(self):
+    def reload(self, load_split=True):
         super().reload()
-        try:
-            self.X = pd.read_pickle(f"{self.storePrefix}_X.pkl")
-            self.X_ind = pd.read_pickle(f"{self.storePrefix}_X_ind.pkl")
-            self.y = pd.read_pickle(f"{self.storePrefix}_y.pkl")
-            self.y_ind = pd.read_pickle(f"{self.storePrefix}_y_ind.pkl")
-        except BaseException:
-            logger.warning("No input or output train/test dataframes saved")
+        if load_split:
+            try:
+                self.X = pd.read_pickle(f"{self.storePrefix}_X.pkl")
+                self.X_ind = pd.read_pickle(f"{self.storePrefix}_X_ind.pkl")
+                self.y = pd.read_pickle(f"{self.storePrefix}_y.pkl")
+                self.y_ind = pd.read_pickle(f"{self.storePrefix}_y_ind.pkl")
+            except FileNotFoundError:
+                logger.warning("No input or output train/test dataframes saved.")
 
     def split(self, split: datasplit):
         """Split dataset into train and test set.
