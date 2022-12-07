@@ -130,33 +130,33 @@ def QSPR_predict(args):
                 print(model_type)
                 log.info(f'Model: {model_type} {reg_abbr} {property[0]}')
 
-            # give path to saved model
-            try:
-                path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property_name}.json'
-                model = skljson.from_json(path)
-            except FileNotFoundError:
-                log.warning(
-                    f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property_name}.json does not exist. Model skipped.')
-                continue
+                # give path to saved model
+                try:
+                    path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property_name}.json'
+                    model = skljson.from_json(path)
+                except FileNotFoundError:
+                    log.warning(
+                        f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property_name}.json does not exist. Model skipped.')
+                    continue
 
-            # calculate molecule features (return np.array with fingerprint of molecules)
-            feature_calculator = DescriptorsCalculator.fromFile(
-                f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_feature_calculators.json')
+                # calculate molecule features (return np.array with fingerprint of molecules)
+                feature_calculator = DescriptorsCalculator.fromFile(
+                    f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_feature_calculators.json')
 
-            scaler = SKLearnStandardizer.fromFile(
-                f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_feature_standardizer_0.json')
+                scaler = SKLearnStandardizer.fromFile(
+                    f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_feature_standardizer_0.json')
 
-            if not reg:
-                th = meta['th']
-            else:
-                th = None
+                if not reg:
+                    th = meta['th']
+                else:
+                    th = None
 
-            predictor = Predictor(model, feature_calculator, scaler, type=reg_abbr, th=th, name=None, modifier=None)
-            predictions = predictor.getScores(mols)
-            results.update({f"preds_{model_type}_{reg_abbr}_{property[0]}": predictions})
+                predictor = Predictor(model, feature_calculator, scaler, type=reg_abbr, th=th, name=None, modifier=None)
+                predictions = predictor.getScores(mols)
+                results.update({f"preds_{model_type}_{reg_abbr}_{property[0]}": predictions})
 
     pred_path = f"{args.base_dir}/qspr/predictions/{args.output}.tsv"
-    pd.DataFrame(results).to_csv(pred_path, sep="\t")
+    pd.DataFrame(results).to_csv(pred_path, sep="\t", index=False)
     log.info(f"Predictions saved to {pred_path}")
 
 
