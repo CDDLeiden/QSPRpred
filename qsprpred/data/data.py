@@ -279,7 +279,7 @@ class QSPRDataset(MoleculeTable):
                 self.makeClassification(th, as_new=True)
             else:
                 # if a precomputed target is expected, just check it
-                assert self.df[self.targetProperty].apply(lambda x: isinstance(x, int)).all()
+                assert all(x.is_integer() for x in self.df[self.targetProperty])
         elif self.task == ModelTasks.REGRESSION and th:
             raise ValueError(
                 f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
@@ -329,7 +329,7 @@ class QSPRDataset(MoleculeTable):
             self.df[self.smilescol] = [sanitize_smiles(smiles) for smiles in self.df[self.smilescol]]
 
     def makeClassification(self, th: List[float] = tuple(), as_new: bool = False):
-        """Convert model output to classification using the given threshold(s)"""
+        """Convert model output to classification using the given threshold(s)."""
         new_prop = self.targetProperty if not as_new else f"{self.targetProperty}_class"
         assert len(th) > 0, "Threshold list must contain at least one value."
         if len(th) > 1:
@@ -350,6 +350,7 @@ class QSPRDataset(MoleculeTable):
             self.df[new_prop] = (self.df[self.targetProperty] > th[0]).astype(float)
         self.task = ModelTasks.CLASSIFICATION
         self.targetProperty = new_prop
+        logger.info("Target property converted to classification.")
 
     @staticmethod
     def fromFile(filename, *args, **kwargs) -> 'QSPRDataset':
