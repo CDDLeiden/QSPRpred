@@ -39,9 +39,9 @@ class PathMixIn:
     @classmethod
     def setUpClass(cls):
         if not os.path.exists(cls.qsprmodelspath):
-            os.mkdir(cls.qsprmodelspath)
+            os.makedirs(cls.qsprmodelspath)
         if not os.path.exists(cls.qsprdatapath):
-            os.makedir(cls.qsprdatapath)
+            os.mkdir(cls.qsprdatapath)
 
     @classmethod
     def tearDownClass(cls):
@@ -60,6 +60,7 @@ class NeuralNet(PathMixIn, TestCase):
         # prepare test dataset
         df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
         data = QSPRDataset(
+            name="testmodel",
             df=df,
             target_prop="CL",
             task=task,
@@ -190,16 +191,16 @@ class TestModels(PathMixIn, TestCase):
         regid = 'REG' if reg else 'CLS'
         self.assertTrue(
             exists(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.json'))
+                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.json'))
 
         # perform crossvalidation
         themodel.evaluate()
         self.assertTrue(
             exists(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.ind.tsv'))
+                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.ind.tsv'))
         self.assertTrue(
             exists(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.cv.tsv'))
+                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.cv.tsv'))
 
         # perform bayes optimization
         fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
@@ -207,32 +208,30 @@ class TestModels(PathMixIn, TestCase):
         search_space_bs = grid_params[grid_params[:, 0] == alg_name, 1][0]
         themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=1)
         self.assertTrue(
-            exists(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}_params.json'))
+            exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}_params.json'))
 
         # perform grid search
         os.remove(
-            f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}_params.json')
+            f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}_params.json')
         grid_params = QSPRsklearn.loadParamsGrid(fname, "grid", alg_name)
         search_space_gs = grid_params[grid_params[:, 0] == alg_name, 1][0]
         themodel.gridSearch(search_space_gs=search_space_gs)
         self.assertTrue(
-            exists(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}_params.json'))
+            exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}_params.json'))
 
     def predictor_test(self, alg_name, reg, th=None):
         # intialize dataset and model
         data, feature_calculators, scaler = self.prep_testdata(reg=reg, th=th)
         regid = 'REG' if reg else 'CLS'
         if alg_name == 'DNN':
-            path = f'{os.path.dirname(__file__)}/test_files/qspr/models/DNN_{regid}_{data.property}.json'
+            path = f'{os.path.dirname(__file__)}/test_files/qspr/models/DNN_{regid}_{data.targetProperty}.json'
             with open(path) as f:
                 themodel_params = json.load(f)
             themodel = STFullyConnected(**themodel_params)
             themodel.load_state_dict(torch.load(f"{path[:-5]}_weights.pkg"))
         else:
             themodel = skljson.from_json(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.property}.json')
+                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.json')
 
         # initialize predictor
         predictor = Predictor(
