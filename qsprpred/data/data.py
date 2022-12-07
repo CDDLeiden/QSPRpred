@@ -279,7 +279,7 @@ class QSPRDataset(MoleculeTable):
                 self.makeClassification(th, as_new=True)
             else:
                 # if a precomputed target is expected, just check it
-                assert all(x.is_integer() for x in self.df[self.targetProperty])
+                assert all(float(x).is_integer() for x in self.df[self.targetProperty])
         elif self.task == ModelTasks.REGRESSION and th:
             raise ValueError(
                 f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
@@ -310,7 +310,7 @@ class QSPRDataset(MoleculeTable):
             return 0
 
     def dropInvalids(self):
-        """Drop Invalid SMILES and missing target property values"""
+        """Drop Invalid SMILES and missing target property values."""
         # drop rows with empty targetProperty values
         self.df = self.df.dropna(subset=([self.smilescol, self.targetProperty])).copy()
 
@@ -376,10 +376,14 @@ class QSPRDataset(MoleculeTable):
             stds.append(path)
 
         # save X and y
-        self.X.to_pickle(f'{self.storePrefix}_X.pkl')
-        self.X_ind.to_pickle(f'{self.storePrefix}_X_ind.pkl')
-        self.y.to_pickle(f'{self.storePrefix}_y.pkl')
-        self.y_ind.to_pickle(f'{self.storePrefix}_y_ind.pkl')
+        if self.X is not None:
+            self.X.to_pickle(f'{self.storePrefix}_X.pkl')
+        if self.X_ind is not None:
+            self.X_ind.to_pickle(f'{self.storePrefix}_X_ind.pkl')
+        if self.y is not None:
+            self.y.to_pickle(f'{self.storePrefix}_y.pkl')
+        if self.y_ind is not None:
+            self.y_ind.to_pickle(f'{self.storePrefix}_y_ind.pkl')
 
         # save metadata
         meta = {
@@ -392,10 +396,13 @@ class QSPRDataset(MoleculeTable):
 
     def reload(self):
         super().reload()
-        self.X = pd.read_pickle(f"{self.storePrefix}_X.pkl")
-        self.X_ind = pd.read_pickle(f"{self.storePrefix}_X_ind.pkl")
-        self.y = pd.read_pickle(f"{self.storePrefix}_y.pkl")
-        self.y_ind = pd.read_pickle(f"{self.storePrefix}_y_ind.pkl")
+        try:
+            self.X = pd.read_pickle(f"{self.storePrefix}_X.pkl")
+            self.X_ind = pd.read_pickle(f"{self.storePrefix}_X_ind.pkl")
+            self.y = pd.read_pickle(f"{self.storePrefix}_y.pkl")
+            self.y_ind = pd.read_pickle(f"{self.storePrefix}_y_ind.pkl")
+        except BaseException:
+            logger.warning("No input or output train/test dataframes saved")
 
     def split(self, split: datasplit):
         """Split dataset into train and test set.

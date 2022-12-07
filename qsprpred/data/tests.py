@@ -32,18 +32,19 @@ from sklearn.preprocessing import StandardScaler
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
+    qsprdatapath = f'{os.path.dirname(__file__)}/test_files/qspr/data'
 
     @classmethod
     def setUpClass(cls):
         if not os.path.exists(cls.qsprmodelspath):
             os.mkdir(cls.qsprmodelspath)
-        if not os.path.exists(cls.datapath_out):
-            os.mkdir(cls.datapath_out)
+        if not os.path.exists(cls.qsprdatapath):
+            os.mkdir(cls.qsprdatapath)
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.qsprmodelspath)
-        shutil.rmtree(cls.datapath_out)
+        shutil.rmtree(cls.qsprdatapath)
 
 
 class DataSets:
@@ -78,7 +79,7 @@ class TestData(PathMixIn, DataSets, TestCase):
             "test_create",
             "CL",
             df=self.df_large,
-            store_dir=self.datapath_out)
+            store_dir=self.qsprdatapath)
         self.assertIn("Notes", dataset.getProperties())
         dataset.removeProperty("Notes")
         self.assertNotIn("Notes", dataset.getProperties())
@@ -114,7 +115,7 @@ class TestData(PathMixIn, DataSets, TestCase):
         for task in tasks:
             dataset = QSPRDataset(
                 f"test_create_{task.name}", "CL", df=self.df_large,
-                store_dir=self.datapath_out, task=task, th=[0, 1, 10, 1200]
+                store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
                 if task == ModelTasks.CLASSIFICATION else None)
             np.random.seed(42)
             dataset.prepareDataset(
@@ -310,7 +311,7 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
         desc_calc.keepDescriptors(descriptors)
         desc_calc.toFile(
             f"{os.path.dirname(__file__)}/test_files/qspr/data/test_calc.json")
-        descriptorsCalculator.fromFile(
+        DescriptorsCalculator.fromFile(
             f"{os.path.dirname(__file__)}/test_files/qspr/data/test_calc.json")
 
 
