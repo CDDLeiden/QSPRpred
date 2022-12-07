@@ -37,9 +37,9 @@ class PathMixIn:
     @classmethod
     def setUpClass(cls):
         if not os.path.exists(cls.qsprmodelspath):
-            os.mkdir(cls.qsprmodelspath)
+            os.makedirs(cls.qsprmodelspath)
         if not os.path.exists(cls.qsprdatapath):
-            os.mkdir(cls.qsprdatapath)
+            os.makedirs(cls.qsprdatapath)
 
     @classmethod
     def tearDownClass(cls):
