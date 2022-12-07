@@ -20,7 +20,7 @@ class Predictor(Scorer):
 
     def __init__(
             self, model, feature_calculators, scaler: SKLearnStandardizer,
-            type='CLS', th=1, name=None, modifier=None):
+            type: str, th=1, name=None, modifier=None):
         """Construct predictor model, feature calculator & scaler.
 
         Args:
@@ -67,8 +67,7 @@ class Predictor(Scorer):
         scaler = None
         if scale:
             scaler = SKLearnStandardizer.fromFile(
-                base_dir + '/qspr/data/' + '_'.join([type, target]) +
-                '_scaler.json')
+                base_dir + '/qspr/data/' + '_'.join([type, target]) + '_scaler.json')
 
         if "DNN" in path:
             with open(path) as f:
@@ -84,7 +83,7 @@ class Predictor(Scorer):
             th=th, name=name, modifier=modifier)
 
     def getScores(self, mols, frags=None):
-        """Returns scores for the input molecules.
+        """Return scores for the input molecules.
 
         Args:
             mols: molecules to score
@@ -93,28 +92,35 @@ class Predictor(Scorer):
         Returns:
             scores (numpy.ndarray): 'np.array' of scores for "mols"
         """
-
+        # Calculate and scale the features
         features = self.feature_calculators(mols)
         if self.scaler:
             features = self.scaler(features)
+
+        # Special case DNN
         if (self.model.__class__.__name__ == "STFullyConnected"):
             fps_loader = self.model.get_dataloader(features)
-            if len(self.th) > 1:
-                scores = np.argmax(
-                    self.model.predict(fps_loader),
-                    axis=1).astype(float)
-            elif len(self.th) == 1:
-                scores = self.model.predict(fps_loader)[:, 1].astype(float)
+            if self.type == 'CLS':
+                if len(self.th) > 1:
+                    scores = np.argmax(
+                        self.model.predict(fps_loader),
+                        axis=1).astype(float)
+                elif len(self.th) == 1:
+                    scores = self.model.predict(fps_loader)[:, 1].astype(float)
             else:
                 scores = self.model.predict(fps_loader).flatten()
-        elif (self.model.__class__.__name__ == 'PLSRegression'):
+        # Special case PLS
+        elif self.model.__class__.__name__ == 'PLSRegression':
             scores = self.model.predict(features)[:, 0]
-        elif (self.type == 'REG'):
+        # Regression
+        elif self.type == 'REG':
             scores = self.model.predict(features)
+        # Multi-class classification
         elif len(self.th) > 1:
             scores = np.argmax(
                 self.model.predict_proba(features),
                 axis=1).astype(float)
+        # Single-class classification
         elif (self.type == 'CLS'):
             scores = self.model.predict_proba(features)[:, 1]
 
@@ -123,4 +129,5 @@ class Predictor(Scorer):
         return scores
 
     def getKey(self):
+        """Return model identifier."""
         return self.key

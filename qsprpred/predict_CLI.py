@@ -8,12 +8,12 @@ import pickle
 import random
 import sys
 
-import joblib
 import numpy as np
 import optuna
 import pandas as pd
+import sklearn_json as skljson
 import torch
-from qsprpred.data.utils.descriptorcalculator import descriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.smiles_standardization import (
     chembl_smi_standardizer,
@@ -27,8 +27,8 @@ from rdkit import Chem
 def QSPRArgParser(txt=None):
     """Define and read command line arguments."""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
-    #base arguments
+
+    # base arguments
     parser.add_argument('-b', '--base_dir', type=str, default='.',
                         help="Base directory which contains a folder 'data' with input file")
     parser.add_argument('-d', '--debug', action='store_true')
@@ -39,7 +39,7 @@ def QSPRArgParser(txt=None):
                         help="tsv output file name that contains SMILES and predictions")
     parser.add_argument('-ncpu', '--ncpu', type=int, default=8,
                         help="Number of CPUs")
-    parser.add_argument('-gpus', '--gpus', nargs="*",  default=['0'],
+    parser.add_argument('-gpus', '--gpus', nargs="*", default=['0'],
                         help="List of GPUs")
 
     # model predictions arguments
@@ -53,7 +53,8 @@ def QSPRArgParser(txt=None):
                               -pr CL Fu -pr CL")
     parser.add_argument('-r', '--regression', type=str, default=None,
                         help="If True, only regression model, if False, only classification, default both")
-    parser.add_argument('-m', '--model_types', type=str, nargs='*', choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
+    parser.add_argument('-m', '--model_types', type=str, nargs='*',
+                        choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
                         default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
                         help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
                              'PLS' (only with REG), 'NB' (only with CLS) 'KNN'")
@@ -63,7 +64,7 @@ def QSPRArgParser(txt=None):
     # other
     parser.add_argument('-ng', '--no_git', action='store_true',
                         help="If on, git hash is not retrieved")
-    
+
     if txt:
         args = parser.parse_args(txt)
     else:
@@ -74,7 +75,7 @@ def QSPRArgParser(txt=None):
             sys.exit("Multitask not yet implemented")
 
     # If no regression argument, does both regression and classification
-    if args.regression is None: 
+    if args.regression is None:
         args.regression = [True, False]
     elif args.regression.lower() in ['true', 'reg', 'regression']:
         args.regression = [True]
@@ -90,18 +91,18 @@ def QSPR_predict(args):
     """Make predictions with pre-trained QSPR models for a set of smiles."""
     try:
         df = pd.read_csv(f'{args.base_dir}/data/{args.input}', sep='\t')
-    except:
+    except BaseException:
         log.error(f'Dataset file ({args.base_dir}/data/{args.input}) not found')
         sys.exit()
 
     # standardize and sanitize smiles
     smiles_list = df[args.smilescol]
-    
+
     # drop invalid smiles
     smiles_list = []
     mols = []
     for smiles in df[args.smilescol]:
-        try: 
+        try:
             if not args.no_preprocessing:
                 smiles = sanitize_smiles(chembl_smi_standardizer(smiles)[0])
             mol = Chem.MolFromSmiles(smiles)
@@ -110,44 +111,49 @@ def QSPR_predict(args):
                 mols.append(mol)
             else:
                 raise Exception
-        except:
+        except BaseException:
             log.info(
                 f"Dropped invalid Smiles: {smiles}"
             )
 
-    results = {"SMILES":smiles_list}
+    results = {"SMILES": smiles_list}
     mols = [Chem.MolFromSmiles(smiles) for smiles in smiles_list]
-            
+
     for reg in args.regression:
         reg_abbr = 'REG' if reg else 'CLS'
         for property in args.properties:
+            with open(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_meta.json') as f:
+                meta = json.load(f)
+            property_name = meta["target_prop"]
             log.info(f"Property: {property[0]}")
             for model_type in args.model_types:
                 print(model_type)
                 log.info(f'Model: {model_type} {reg_abbr} {property[0]}')
 
-            # give path to saved model parameters
+            # give path to saved model
             try:
-                path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property[0]}.pkg'
-                model = joblib.load(path)
-            except:
-                log.warning(f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property[0]}.pkg does not exist. Model skipped.')
+                path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property_name}.json'
+                model = skljson.from_json(path)
+            except FileNotFoundError:
+                log.warning(
+                    f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property_name}.json does not exist. Model skipped.')
                 continue
-        
-            # calculate molecule features (return np.array with fingerprint of molecules)
-            feature_calculator = descriptorsCalculator.fromFile(f'{args.base_dir}/qspr/data/{reg_abbr}_{property[0]}_DescCalc.json')
 
-            scaler = SKLearnStandardizer.fromFile(f'{args.base_dir}/qspr/data/{reg_abbr}_{property[0]}_DescCalc.json_feature_standardizer_0.json')
+            # calculate molecule features (return np.array with fingerprint of molecules)
+            feature_calculator = DescriptorsCalculator.fromFile(
+                f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_feature_calculators.json')
+
+            scaler = SKLearnStandardizer.fromFile(
+                f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_feature_standardizer_0.json')
 
             if not reg:
-                mydataset = pickle.load(open(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata.pkg', 'rb'))
-                th = mydataset.th
+                th = meta['th']
             else:
                 th = None
 
             predictor = Predictor(model, feature_calculator, scaler, type=reg_abbr, th=th, name=None, modifier=None)
             predictions = predictor.getScores(mols)
-            results.update({f"preds_{model_type}_{reg_abbr}_{property[0]}":predictions})
+            results.update({f"preds_{model_type}_{reg_abbr}_{property[0]}": predictions})
 
     pred_path = f"{args.base_dir}/qspr/predictions/{args.output}.tsv"
     pd.DataFrame(results).to_csv(pred_path, sep="\t")
@@ -157,15 +163,16 @@ def QSPR_predict(args):
 if __name__ == '__main__':
     args = QSPRArgParser()
 
-    #Set random seeds
+    # Set random seeds
     random.seed(args.random_state)
     np.random.seed(args.random_state)
     torch.manual_seed(args.random_state)
     os.environ['TF_DETERMINISTIC_OPS'] = str(args.random_state)
 
     # Backup files
-    tasks = [ 'REG' if reg == True else 'CLS' for reg in args.regression ]
-    file_prefixes = [ f'{alg}_{task}_{property}' for alg in args.model_types for task in tasks for property in args.properties]
+    tasks = ['REG' if reg == True else 'CLS' for reg in args.regression]
+    file_prefixes = [f'{alg}_{task}_{property}' for alg in args.model_types for task in tasks
+                     for property in args.properties]
     #backup_msg = backUpFiles(args.base_dir, 'qspr/predictions', tuple(file_prefixes), cp_suffix='_params')
 
     if not os.path.exists(f'{args.base_dir}/qspr/predictions'):
@@ -179,21 +186,20 @@ if __name__ == '__main__':
         commit_hash(os.path.dirname(os.path.realpath(__file__))) if not args.no_git else None,
         vars(args),
         disable_existing_loggers=False
-    )   
+    )
 
     log = logSettings.log
-    #log.info(backup_msg)
+    # log.info(backup_msg)
 
-    #Add optuna logging
+    # Add optuna logging
     optuna.logging.enable_propagation()  # Propagate logs to the root logger.
     optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
     optuna.logging.set_verbosity(optuna.logging.DEBUG)
 
-    # Create json log file with used commandline arguments 
+    # Create json log file with used commandline arguments
     print(json.dumps(vars(args), sort_keys=False, indent=2))
     with open(f'{args.base_dir}/qspr/predictions/QSPRpredict.json', 'w') as f:
         json.dump(vars(args), f)
-    
-    #Optimize, evaluate and train estimators according to QSPR arguments
+
+    # Optimize, evaluate and train estimators according to QSPR arguments
     QSPR_predict(args)
-    

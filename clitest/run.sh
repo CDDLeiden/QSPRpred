@@ -54,7 +54,7 @@ python -m qsprpred.model_CLI \
 -d \
 -ncpu ${N_CPUS} \
 -sm  ${SMILES} \
--pr  CL \
+-pr CL \
 -m RF \
 -s \
 -o ${OPTIMIZATION} \
@@ -71,8 +71,7 @@ python -m qsprpred.predict_CLI \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
 -sm  ${SMILES} \
--pr  CL \
--pr Fu \
+-pr CL \
 -m RF \
 
 cleanup

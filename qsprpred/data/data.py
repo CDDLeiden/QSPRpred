@@ -241,7 +241,8 @@ class QSPRDataset(MoleculeTable):
         task: Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION] = ModelTasks.REGRESSION,
         target_transformer: Callable = None,
         th: List[float] = None,
-        n_folds=None
+        n_folds=None,
+        precomputed: bool = False
     ):
         """Construct QSPRdata, also apply transformations of output property if specified.
 
@@ -259,6 +260,7 @@ class QSPRDataset(MoleculeTable):
                 larger than 1, these values will used for binning (in this case lower and upper
                 boundary need to be included). Defaults to None.
             n_folds (str): Overwritten in prepare_dataset. This is here for re-loading the model.
+            precomputed (bool): If true and task is classification, assumes target property has already been classified
 
         Raises:
             ValueError: Raised if thershold given with non-classification task.
@@ -275,7 +277,7 @@ class QSPRDataset(MoleculeTable):
             self.targetProperty = f'{self.targetProperty}_transformed'
 
         if self.task == ModelTasks.CLASSIFICATION:
-            if th:
+            if not precomputed:
                 self.makeClassification(th, as_new=True)
             else:
                 # if a precomputed target is expected, just check it
@@ -322,7 +324,7 @@ class QSPRDataset(MoleculeTable):
         self.df = self.df[invalid_mask].copy()
 
     def cleanMolecules(self, standardize: bool = True, sanitize: bool = True):
-        """Standardize and or sanitize SMILES sequences"""
+        """Standardize and or sanitize SMILES sequences."""
         if standardize:
             self.df[self.smilescol] = [chembl_smi_standardizer(smiles)[0] for smiles in self.df[self.smilescol]]
         if sanitize:
@@ -350,6 +352,7 @@ class QSPRDataset(MoleculeTable):
             self.df[new_prop] = (self.df[self.targetProperty] > th[0]).astype(float)
         self.task = ModelTasks.CLASSIFICATION
         self.targetProperty = new_prop
+        self.th = th
         logger.info("Target property converted to classification.")
 
     @staticmethod
@@ -360,7 +363,7 @@ class QSPRDataset(MoleculeTable):
             meta = json.load(f)
             meta['task'] = ModelTasks(meta['task'])
 
-        return QSPRDataset(*args, name=name, store_dir=store_dir, **meta, **kwargs)
+        return QSPRDataset(*args, name=name, store_dir=store_dir, precomputed=True, **meta, **kwargs)
 
     def save(self, save_split=True):
         super().save()
@@ -392,6 +395,8 @@ class QSPRDataset(MoleculeTable):
             'task': self.task.name,
             'n_folds': self.n_folds
         }
+        if self.task == ModelTasks.CLASSIFICATION:
+            meta.update({'th': self.th})
         with open(f"{self.storePrefix}_meta.json", 'w') as f:
             json.dump(meta, f)
 
