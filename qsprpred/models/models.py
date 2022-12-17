@@ -222,9 +222,9 @@ class QSPRsklearn(QSPRModel):
             elif value[0] == 'int':
                 bayesian_params[key] = trial.suggest_int(key, value[1], value[2])
             elif value[0] == 'loguniform':
-                bayesian_params[key] = trial.suggest_loguniform(key, value[1], value[2])
+                bayesian_params[key] = trial.suggest_float(key, value[1], value[2], log=True)
             elif value[0] == 'uniform':
-                bayesian_params[key] = trial.suggest_uniform(key, value[1], value[2])
+                bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
 
         print(bayesian_params)
         self.model = self.alg.set_params(**bayesian_params)
@@ -466,9 +466,9 @@ class QSPRDNN(QSPRModel):
             elif value[0] == 'int':
                 bayesian_params[key] = trial.suggest_int(key, value[1], value[2])
             elif value[0] == 'loguniform':
-                bayesian_params[key] = trial.suggest_loguniform(key, value[1], value[2])
+                bayesian_params[key] = trial.suggest_float(key, value[1], value[2], log=True)
             elif value[0] == 'uniform':
-                bayesian_params[key] = trial.suggest_uniform(key, value[1], value[2])
+                bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
 
         self.model = self.alg.set_params(**bayesian_params)
 
