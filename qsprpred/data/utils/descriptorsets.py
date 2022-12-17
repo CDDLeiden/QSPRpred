@@ -256,8 +256,8 @@ class rdkit_descs(DescriptorSet):
 
 
 class _DescriptorSetRetriever:
-    """
-    Based on recipe 8.21 of the book "Python Cookbook".
+    """Based on recipe 8.21 of the book "Python Cookbook".
+    
     To support a new type of descriptor, just add a function "get_descname(self, *args, **kwargs)".
     """
 
@@ -276,6 +276,9 @@ class _DescriptorSetRetriever:
 
     def get_Mordred(self, *args, **kwargs):
         return Mordred(*args, **kwargs)
+    
+    def get_RDkit(self, *args, **kwargs):
+        return rdkit_descs(*args, **kwargs)
 
 
 def get_descriptor(desc_type: str, *args, **kwargs):

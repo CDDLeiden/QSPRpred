@@ -6,7 +6,7 @@
 !.gitignore
 /build/
 /base_test/
-/tutorial/qsprmodels
+/tutorial/qspr/
 /tutorial/figures
 /tutorial/CLI
 /docs/_build

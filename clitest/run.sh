@@ -11,7 +11,7 @@ function cleanup() {
   rm -rf ${TEST_BASE}/data/*.log;
   rm -rf ${TEST_BASE}/data/*.json;
   rm -rf ${TEST_BASE}/data/*.pkl;
-  rm -rf ${TEST_BASE}/qsprmodels;
+  rm -rf ${TEST_BASE}/qspr;
   rm -rf ${TEST_BASE}/logs;
 }
 
@@ -27,17 +27,15 @@ export SEARCH_SPACE='data/search_space/search_space_test'
 export N_TRIALS=2
 
 ###############
-# ENVIRONMENT #
+# DATA #
 ###############
-python -m qsprpred.QSPR_cli \
+python -m qsprpred.data_CLI \
 -b ${TEST_BASE} \
 -d \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
 -sm  ${SMILES} \
 -pr  CL \
--pr  fu \
--m RF \
 -th '{"CL":[6.5],"fu":[0,0.2,0.5,4]}' \
 -lt '{"CL":true,"fu":false}' \
 -sp 'time' \
@@ -46,11 +44,34 @@ python -m qsprpred.QSPR_cli \
 -fe Morgan \
 -fe RDkit \
 -lv 0.01 \
--hc 0.9 \
+-hc 0.9
+
+###############
+# MODELLING #
+###############
+python -m qsprpred.model_CLI \
+-b ${TEST_BASE} \
+-d \
+-ncpu ${N_CPUS} \
+-sm  ${SMILES} \
+-pr CL \
+-m RF \
 -s \
 -o ${OPTIMIZATION} \
 -ss ${SEARCH_SPACE} \
 -nt ${N_TRIALS} \
 -me
+
+###############
+# PREDICTING #
+###############
+python -m qsprpred.predict_CLI \
+-b ${TEST_BASE} \
+-d \
+-i ${TEST_DATA} \
+-ncpu ${N_CPUS} \
+-sm  ${SMILES} \
+-pr CL \
+-m RF \
 
 cleanup
