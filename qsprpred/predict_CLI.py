@@ -124,7 +124,7 @@ def QSPR_predict(args):
         for property in args.properties:
             with open(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_meta.json') as f:
                 meta = json.load(f)
-            property_name = meta["target_prop"]
+            property_name = meta["init"]["target_prop"]
             log.info(f"Property: {property[0]}")
             for model_type in args.model_types:
                 print(model_type)
@@ -147,7 +147,7 @@ def QSPR_predict(args):
                 f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_feature_standardizer_0.json')
 
             if not reg:
-                th = meta['th']
+                th = meta["data"]['th']
             else:
                 th = None
 
