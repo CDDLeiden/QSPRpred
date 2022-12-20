@@ -294,6 +294,7 @@ class QSPRDataset(MoleculeTable):
 
         self.features = None
         self.feature_standardizers = []
+        self.feature_filters = []
 
         logger.info(f"Dataset '{self.name}' created for target targetProperty: '{self.targetProperty}'.")
 
@@ -324,9 +325,14 @@ class QSPRDataset(MoleculeTable):
     def cleanMolecules(self, standardize: bool = True, sanitize: bool = True):
         """Standardize and or sanitize SMILES sequences."""
         if standardize:
-            self.df[self.smilescol] = [chembl_smi_standardizer(smiles)[0] for smiles in self.df[self.smilescol]]
+            self.standardize()
         if sanitize:
-            self.df[self.smilescol] = [sanitize_smiles(smiles) for smiles in self.df[self.smilescol]]
+            self.sanitize()
+    def standardize(self):
+        self.df[self.smilescol] = [chembl_smi_standardizer(smiles)[0] for smiles in self.df[self.smilescol]]
+
+    def sanitize(self):
+        self.df[self.smilescol] = [sanitize_smiles(smiles) for smiles in self.df[self.smilescol]]
 
     def makeClassification(self, th: List[float] = tuple(), as_new: bool = False):
         """Convert model output to classification using the given threshold(s)."""
@@ -464,8 +470,10 @@ class QSPRDataset(MoleculeTable):
         self.df[columns] = self.df[columns].fillna(fill_value)
         logger.warning('Missing values filled with %s' % fill_value)
 
-    def filterFeatures(self, feature_filters):
-        for featurefilter in feature_filters:
+    def filterFeatures(self, feature_filters = None):
+        if feature_filters is not None:
+            self.feature_filters = feature_filters
+        for featurefilter in self.feature_filters:
             self.X = featurefilter(self.X, self.y)
 
         self.features = self.X.columns
@@ -479,13 +487,14 @@ class QSPRDataset(MoleculeTable):
         self,
         standardize=True,
         sanitize=True,
-        datafilters=[],
+        datafilters=None,
         split=randomsplit(),
         feature_calculator=None,
-        feature_filters=[],
-        feature_standardizers=[],
+        feature_filters=None,
+        feature_standardizers=None,
         n_folds=5,
         recalculate_features=False,
+        fill_value=0,
     ):
         """Prepare the dataset for use in QSPR model.
 
@@ -501,31 +510,45 @@ class QSPRDataset(MoleculeTable):
             recalculate_features (bool): recalculate features even if they are already present in the file
         """
         # apply sanitization and standardization
-        self.cleanMolecules(standardize, sanitize)
+        if standardize:
+            self.cleanMolecules(standardize, sanitize)
 
         # calculate features
-        self.addDescriptors(feature_calculator, recalculate=recalculate_features)
+        if feature_calculator is not None:
+            self.addDescriptors(feature_calculator, recalculate=recalculate_features)
 
         # apply data filters
-        self.filter(datafilters)
+        if datafilters is not None:
+            self.filter(datafilters)
 
         # Replace any NaN values in features by 0
         # FIXME: this is not very good, we should probably add option to do data imputation here or drop rows with NaNs
-        self.fillMissing(0, columns=self.getDescriptorNames())
+        if fill_value is not None:
+            self.fillMissing(fill_value)
 
         # split dataset
-        self.split(split)
+        if split is not None:
+            self.split(split)
 
         # featurize splits
-        self.featurizeSplits()
+        if self.hasDescriptors:
+            self.featurizeSplits()
 
         # apply feature filters on training set
-        self.filterFeatures(feature_filters)
+        if feature_filters is not None:
+            if not self.hasDescriptors:
+                logger.warning(
+                    "No descriptors present, feature filters will be applied, but might have no effect."
+                )
+            self.filterFeatures(feature_filters)
 
         # standardize features in the main data set
-        if feature_standardizers:
-            self.feature_standardizers = feature_standardizers
-            self.standardize()
+        if feature_standardizers is not None:
+            if not self.hasDescriptors:
+                logger.warning(
+                    "No descriptors present, feature standardizers will be applied, but might have no effect."
+                )
+            self.standardizeFeatures(feature_standardizers)
 
         # create folds for cross-validation
         self.createFolds(n_folds=n_folds)
@@ -572,8 +595,9 @@ class QSPRDataset(MoleculeTable):
             self.folds = standardize_folds(self.folds)
         logger.debug("Folds created for crossvalidation")
 
-    def standardize(self, feature_standardizers=None):
-        self.feature_standardizers = feature_standardizers if feature_standardizers else self.feature_standardizers
+    def standardizeFeatures(self, feature_standardizers=None):
+        if feature_standardizers is not None:
+            self.feature_standardizers = feature_standardizers
         if not self.feature_standardizers:
             raise ValueError("No feature standardizers specified in class or in argument.")
         X, self.feature_standardizers = self.applyFeatureStandardizers(
