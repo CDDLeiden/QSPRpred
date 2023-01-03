@@ -91,7 +91,7 @@ class MorganFP(DescriptorSet):
         return self._args, self._kwargs
 
     def get_len(self):
-        return((self.__call__("C")).shape[1])
+        return ((self.__call__("C")).shape[1])
 
     def __str__(self):
         return "MorganFP"
@@ -108,6 +108,7 @@ class Mordred(DescriptorSet):
         *args: `Calculator` arguments
         **kwargs: `Calculator` keyword arguments
     """
+
     def __init__(self, *args, **kwargs):
         self._args = args
         self._kwargs = kwargs
@@ -152,7 +153,7 @@ class Mordred(DescriptorSet):
         self._kwargs = {"version": version, "ignore_3D": ignore_3D, "config": config}
 
     def get_len(self):
-        return(len(self.descriptors))
+        return (len(self.descriptors))
 
     def __str__(self):
         return "Mordred"
@@ -200,7 +201,7 @@ class DrugExPhyschem(DescriptorSet):
         self._descriptors = props
 
     def get_len(self):
-        return(len(self.descriptors))
+        return (len(self.descriptors))
 
     def __str__(self):
         return "DrugExPhyschem"
@@ -249,15 +250,53 @@ class rdkit_descs(DescriptorSet):
         self._descriptors = descriptors
 
     def get_len(self):
-        return(len(self.descriptors))
+        return (len(self.descriptors))
 
     def __str__(self):
         return "RDkit"
 
 
+class PredictorDescriptorSet(DescriptorSet):
+    """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
+
+    def __init__(self, predictor):
+        """
+        Initialize the descriptorset with a Predictor object.
+
+        Args:
+            predictor: Predictor object to use for calculating the descriptor
+        """
+        self.predictor = predictor
+
+    def __call__(self, mol):
+        """
+        Calculate the descriptor for a molecule.
+
+        Args:
+            mol: smiles or rdkit molecule
+
+        Returns:
+            a `list` of descriptor values
+        """
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        return pd.DataFrame(self.predictor.getScores([mol]), columns=[self.predictor.getKey()])
+
+    @property
+    def is_fp(self):
+        return False
+
+    @property
+    def settings(self):
+        """Return args and kwargs used to initialize the descriptorset."""
+        return self.predictor.key
+
+    def __str__(self):
+        return f"PredictorDescriptorSet({self.predictor.key})"
+
+
 class _DescriptorSetRetriever:
     """Based on recipe 8.21 of the book "Python Cookbook".
-    
+
     To support a new type of descriptor, just add a function "get_descname(self, *args, **kwargs)".
     """
 
@@ -276,7 +315,7 @@ class _DescriptorSetRetriever:
 
     def get_Mordred(self, *args, **kwargs):
         return Mordred(*args, **kwargs)
-    
+
     def get_RDkit(self, *args, **kwargs):
         return rdkit_descs(*args, **kwargs)
 
