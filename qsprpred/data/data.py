@@ -279,7 +279,8 @@ class QSPRDataset(MoleculeTable):
                 self.makeClassification(th, as_new=True)
             else:
                 # if a precomputed target is expected, just check it
-                assert all(float(x).is_integer() for x in self.df[self.targetProperty])
+                assert all(float(x).is_integer() for x in self.df[self.targetProperty]), \
+                    "For classification without given threshold, the dataframe may only contain integers. First preprocess your dataframe or pass a classification threshold."
         elif self.task == ModelTasks.REGRESSION and th:
             raise ValueError(
                 f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
