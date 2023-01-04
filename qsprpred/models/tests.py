@@ -7,7 +7,6 @@ import shutil
 from os.path import exists
 from unittest import TestCase
 
-import joblib
 import numpy as np
 import pandas as pd
 import sklearn_json as skljson
