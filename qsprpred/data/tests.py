@@ -7,7 +7,6 @@ from unittest import TestCase
 import mordred
 import numpy as np
 import pandas as pd
-import sklearn_json as skljson
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
@@ -17,7 +16,6 @@ from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
     MorganFP,
-    PredictorDescriptorSet,
     rdkit_descs,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
@@ -27,7 +25,6 @@ from qsprpred.data.utils.featurefilters import (
     lowVarianceFilter,
 )
 from qsprpred.models.tasks import ModelTasks
-from qsprpred.scorers.predictor import Predictor
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
 from sklearn.preprocessing import StandardScaler
 
@@ -240,26 +237,6 @@ class TestDescriptorsets(PathMixIn, TestCase):
             sep='\t')
         mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
         return mols
-
-    def test_PredictorDescriptorSet(self):
-        mols = self.prep_testdata()
-
-        # give path to saved model parameters
-        path = f'{os.path.dirname(__file__)}/test_files/test_predictor/models/PLS_REG_GABAAalpha.json'
-        model = skljson.from_json(path)
-
-        # calculate molecule features (return np.array with fingerprint of molecules)
-        feature_calculator = DescriptorsCalculator.fromFile(
-            f'{os.path.dirname(__file__)}/test_files/test_predictor/data/tutorial_data_feature_calculators.json')
-        scaler = SKLearnStandardizer.fromFile(
-            f'{os.path.dirname(__file__)}/test_files/test_predictor/data/tutorial_data_feature_standardizer_0.json')
-
-        predictor = Predictor(model, feature_calculator, scaler, type='REG', th=None, name=None, modifier=None)
-        predictor.getScores(mols)
-
-        desc_calc = PredictorDescriptorSet(predictor)
-        descriptors = desc_calc(mols[2])
-        self.assertIsInstance(descriptors, pd.DataFrame)
 
     def test_MorganFP(self):
         mols = self.prep_testdata()
