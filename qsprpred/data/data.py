@@ -60,7 +60,7 @@ class MoleculeTable(MoleculeDataSet):
         self.descriptorCalculatorPath = f"{self.storePrefix}_feature_calculators.json"
         if not os.path.exists(self.storeDir):
             raise FileNotFoundError(f"Directory '{self.storeDir}' does not exist.")
-        self.storePath = f'{self.storePrefix}.df.pkl'
+        self.storePath = f'{self.storePrefix}_df.pkl'
 
         # data frame initialization
         if df is not None:
@@ -86,7 +86,7 @@ class MoleculeTable(MoleculeDataSet):
         return self.df
 
     def _isInStore(self, name):
-        return os.path.exists(self.storePath) and self.storePath.endswith(f'.{name}.pkl')
+        return os.path.exists(self.storePath) and self.storePath.endswith(f'_{name}.pkl')
 
     def save(self):
         # save data frame
@@ -279,7 +279,8 @@ class QSPRDataset(MoleculeTable):
                 self.makeClassification(th, as_new=True)
             else:
                 # if a precomputed target is expected, just check it
-                assert all(float(x).is_integer() for x in self.df[self.targetProperty])
+                assert all(float(x).is_integer() for x in self.df[self.targetProperty]), \
+                    "For classification without given threshold, the dataframe may only contain integers. First preprocess your dataframe or pass a classification threshold."
         elif self.task == ModelTasks.REGRESSION and th:
             raise ValueError(
                 f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
@@ -328,6 +329,7 @@ class QSPRDataset(MoleculeTable):
             self.standardize()
         if sanitize:
             self.sanitize()
+
     def standardize(self):
         self.df[self.smilescol] = [chembl_smi_standardizer(smiles)[0] for smiles in self.df[self.smilescol]]
 
@@ -398,7 +400,8 @@ class QSPRDataset(MoleculeTable):
         meta_init = {
             'target_prop': self.targetProperty,
             'task': self.task.name,
-            'n_folds': self.n_folds
+            'n_folds': self.n_folds,
+            'smilescol': self.smilescol
         }
         meta_data = {}
         if self.task == ModelTasks.CLASSIFICATION:
@@ -470,7 +473,7 @@ class QSPRDataset(MoleculeTable):
         self.df[columns] = self.df[columns].fillna(fill_value)
         logger.warning('Missing values filled with %s' % fill_value)
 
-    def filterFeatures(self, feature_filters = None):
+    def filterFeatures(self, feature_filters=None):
         if feature_filters is not None:
             self.feature_filters = feature_filters
         for featurefilter in self.feature_filters:

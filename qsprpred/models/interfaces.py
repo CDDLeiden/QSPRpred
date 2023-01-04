@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from qsprpred.logs import logger
+from qsprpred.models import SSPACE
 from qsprpred.models.tasks import ModelTasks
 
 
@@ -99,11 +100,11 @@ class QSPRModel(ABC):
             try:
                 with open(fname) as json_file:
                     optim_params = np.array(json.load(json_file), dtype=object)
-            except BaseException:
+            except FileNotFoundError:
                 logger.error("Search space file (%s) not found" % fname)
                 sys.exit()
         else:
-            with open('qsprpred/models/search_space.json') as json_file:
+            with open(SSPACE) as json_file:
                 optim_params = np.array(json.load(json_file), dtype=object)
 
         # select either grid or bayes optimization parameters from param array

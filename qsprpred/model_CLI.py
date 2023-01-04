@@ -36,8 +36,6 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-gpus', '--gpus', nargs="*", default=['0'], help="List of GPUs")
 
     # model target arguments
-    parser.add_argument('-sm', '--smilescol', type=str, default='SMILES', help="Name of the column in the dataset \
-                        containing the smiles.")
     parser.add_argument('-pr', '--properties', type=str, nargs='+', action='append',
                         help="properties to be predicted identifiers. Add this argument for each model to be trained \
                               e.g. for one multi-task model for CL and Fu and one single task for CL do:\
@@ -109,12 +107,11 @@ def QSPR_modelling(args):
     parameters = None
     if args.parameters:
         try:
-            with open(f'{args.base_dir}/qspr/models/{args.parameters}_params.json') as json_file:
+            with open(f'{args.base_dir}/{args.parameters}.json') as json_file:
                 par_dicts = np.array(json.load(json_file))
-        except BaseException:
+        except FileNotFoundError:
             log.error(
-                "Parameter settings file (%s/%s.json) not found." %
-                args.base_dir / args.parameters)
+                "Parameter settings file (%s/%s.json) not found." % (args.base_dir, args.parameters))
             sys.exit()
 
     if args.optimization in ['grid', 'bayes']:

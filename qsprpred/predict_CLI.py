@@ -4,7 +4,6 @@ import argparse
 import json
 import os
 import os.path
-import pickle
 import random
 import sys
 
@@ -19,7 +18,7 @@ from qsprpred.data.utils.smiles_standardization import (
     chembl_smi_standardizer,
     sanitize_smiles,
 )
-from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
+from qsprpred.logs.utils import commit_hash, enable_file_logger
 from qsprpred.scorers.predictor import Predictor
 from rdkit import Chem
 
@@ -91,7 +90,7 @@ def QSPR_predict(args):
     """Make predictions with pre-trained QSPR models for a set of smiles."""
     try:
         df = pd.read_csv(f'{args.base_dir}/data/{args.input}', sep='\t')
-    except BaseException:
+    except FileNotFoundError:
         log.error(f'Dataset file ({args.base_dir}/data/{args.input}) not found')
         sys.exit()
 
