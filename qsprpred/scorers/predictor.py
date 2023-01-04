@@ -42,7 +42,7 @@ class Predictor(Scorer):
 
     @staticmethod
     def fromFile(base_dir, algorithm, target, type='CLS', th=1,
-                 scale=True, name="Predictor", modifier=None):
+                 scale=True, name=None, modifier=None):
         """Construct predictor from files with serialized model, feature calculator & scaler.
 
         Args:
@@ -52,13 +52,16 @@ class Predictor(Scorer):
             type: regression or classification
             scale: bool if true, apply feature scaling
             th: if classification give activity threshold
-            name: name for predictor
+            name: name for predictor, by default combination of algorithm, target and type
             modifier: score modifier
 
         Returns:
             predictor
 
         """
+        if not name:
+            name = f'{target}_{algorithm}_{type}'
+
         path = base_dir + '/qspr/models/' + '_'.join(
             [algorithm, type, target]) + '.json'
         feature_calculators = DescriptorsCalculator.fromFile(
