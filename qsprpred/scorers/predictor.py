@@ -24,7 +24,7 @@ class Predictor(Scorer):
         """Construct predictor model, feature calculator & scaler.
 
         Args:
-            model: fitted sklearn or toch model
+            model: fitted sklearn or pytorch model
             feature_calculators: DescriptorsCalculator object, calculates features from smiles
             scaler: StandardStandardizer, scales features
             type: regression or classification

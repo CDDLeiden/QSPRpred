@@ -43,6 +43,7 @@ python -m qsprpred.data_CLI \
 -st 2000 \
 -fe Morgan \
 -fe RDkit \
+-fp ../qsprpred/data/test_files/test_predictor/PLS_REG_GABAAalpha.json \
 -lv 0.01 \
 -hc 0.9
 
@@ -53,7 +54,6 @@ python -m qsprpred.model_CLI \
 -b ${TEST_BASE} \
 -d \
 -ncpu ${N_CPUS} \
--sm  ${SMILES} \
 -pr CL \
 -m RF \
 -s \

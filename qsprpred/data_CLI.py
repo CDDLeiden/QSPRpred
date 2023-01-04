@@ -20,6 +20,7 @@ from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
     MorganFP,
+    PredictorDesc,
     RDkitDescs,
 )
 from qsprpred.data.utils.featurefilters import (
@@ -85,6 +86,9 @@ def QSPRArgParser(txt=None):
 
     # features to calculate
     parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'RDkit', 'Mordred', 'DrugEx'], nargs='*')
+    parser.add_argument('-fp', '--feature_predictor', type=str, nargs='+',
+                        help="It is also possible to use a QSPRpred model(s) as molecular feature(s). Give\
+                        the path(s) to the model(s) relative to the base_directory.")
 
     # feature filters
     parser.add_argument('-lv', '--low_variability', type=float, default=None, help="low variability threshold\
@@ -175,6 +179,23 @@ def QSPR_dataprep(args):
                 descriptorsets.append(Mordred())
             if 'DrugEx' in args.features:
                 descriptorsets.append(DrugExPhyschem())
+            for predictor_path in args.feature_predictor:
+                # load in predictor from files
+                model_info = os.path.basename(predictor_path).split('.')[0].split('_')  # type_task_prop.json
+                model_basedir = f'{os.path.dirname(predictor_path)}'
+                with open(f'{model_basedir}/qspr/data/{model_info[2]}_{model_info[1]}_QSPRdata_meta.json') as f:
+                    meta = json.load(f)
+                if 'th' in meta["data"]:
+                    th = meta["data"]['th']
+                else:
+                    th = None
+                descriptorsets.append(
+                    PredictorDesc(
+                        model_basedir,
+                        model_info[0],
+                        model_info[2],
+                        type=model_info[1],
+                        th=th))
 
             # feature filters
             featurefilters = []
