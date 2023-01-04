@@ -62,12 +62,12 @@ class Predictor(Scorer):
         path = base_dir + '/qspr/models/' + '_'.join(
             [algorithm, type, target]) + '.json'
         feature_calculators = DescriptorsCalculator.fromFile(
-            base_dir + '/qspr/data/' + '_'.join([target, type]) + '_QSPRdata_feature_calculators.json')
+            base_dir + '/qspr/data/' + '_'.join([type, target]) + '_DescCalc.json')
         # TODO do not hardcode when to use scaler
         scaler = None
         if scale:
             scaler = SKLearnStandardizer.fromFile(
-                base_dir + '/qspr/data/' + '_'.join([target, type]) + '_QSPRdata_feature_standardizer_0.json')
+                base_dir + '/qspr/data/' + '_'.join([type, target]) + '_scaler.json')
 
         if "DNN" in path:
             with open(path) as f:
