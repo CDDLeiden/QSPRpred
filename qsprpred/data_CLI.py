@@ -20,7 +20,7 @@ from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
     MorganFP,
-    rdkit_descs,
+    RDkitDescs,
 )
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
@@ -170,7 +170,7 @@ def QSPR_dataprep(args):
             if 'Morgan' in args.features:
                 descriptorsets.append(MorganFP(3, nBits=2048))
             if 'RDkit' in args.features:
-                descriptorsets.append(rdkit_descs())
+                descriptorsets.append(RDkitDescs())
             if 'Mordred' in args.features:
                 descriptorsets.append(Mordred())
             if 'DrugEx' in args.features:

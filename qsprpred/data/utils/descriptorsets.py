@@ -46,6 +46,11 @@ class DescriptorSet(ABC):
         pass
 
     @abstractmethod
+    def get_len(self):
+        """Return the the number of descriptors/fingerprint bits."""
+        pass
+
+    @abstractmethod
     def __str__(self):
         pass
 
@@ -207,7 +212,7 @@ class DrugExPhyschem(DescriptorSet):
         return "DrugExPhyschem"
 
 
-class rdkit_descs(DescriptorSet):
+class RDkitDescs(DescriptorSet):
     """
     RDkit descriptors
     Initialize the descriptor names (a list of properties to calculate) to select a subset of the rdkit descriptors.
@@ -256,17 +261,22 @@ class rdkit_descs(DescriptorSet):
         return "RDkit"
 
 
-class PredictorDescriptorSet(DescriptorSet):
+class PredictorDesc(DescriptorSet):
     """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
 
-    def __init__(self, predictor):
+    def __init__(self, *args, **kwargs):
         """
         Initialize the descriptorset with a Predictor object.
 
         Args:
             predictor: Predictor object to use for calculating the descriptor
         """
-        self.predictor = predictor
+        self._args = args
+        self._kwargs = kwargs
+        self._is_fp = False
+        from qsprpred.scorers.predictor import Predictor
+        self._predictor = Predictor.fromFile(*args, **kwargs)
+        self._descriptors = self._predictor.getKey()
 
     def __call__(self, mol):
         """
@@ -279,19 +289,22 @@ class PredictorDescriptorSet(DescriptorSet):
             a `list` of descriptor values
         """
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        return pd.DataFrame(self.predictor.getScores([mol]), columns=[self.predictor.getKey()])
+        return pd.DataFrame(self._predictor.getScores([mol]), columns=[self._predictor.getKey()])
 
     @property
     def is_fp(self):
-        return False
+        return self._is_fp
 
     @property
     def settings(self):
         """Return args and kwargs used to initialize the descriptorset."""
-        return self.predictor.key
+        return self._args, self._kwargs
+
+    def get_len(self):
+        return 1
 
     def __str__(self):
-        return f"PredictorDescriptorSet({self.predictor.key})"
+        return "PredictorDesc"
 
 
 class _DescriptorSetRetriever:
@@ -317,7 +330,10 @@ class _DescriptorSetRetriever:
         return Mordred(*args, **kwargs)
 
     def get_RDkit(self, *args, **kwargs):
-        return rdkit_descs(*args, **kwargs)
+        return RDkitDescs(*args, **kwargs)
+
+    def get_PredictorDesc(self, *args, **kwargs):
+        return PredictorDesc(*args, **kwargs)
 
 
 def get_descriptor(desc_type: str, *args, **kwargs):
