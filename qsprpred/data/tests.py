@@ -17,8 +17,8 @@ from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
     MorganFP,
-    PredictorDescriptorSet,
-    rdkit_descs,
+    PredictorDesc,
+    RDkitDescs,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (
@@ -241,23 +241,12 @@ class TestDescriptorsets(PathMixIn, TestCase):
         mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
         return mols
 
-    def test_PredictorDescriptorSet(self):
+    def test_PredictorDesc(self):
         mols = self.prep_testdata()
 
-        # give path to saved model parameters
-        path = f'{os.path.dirname(__file__)}/test_files/test_predictor/models/PLS_REG_GABAAalpha.json'
-        model = skljson.from_json(path)
-
-        # calculate molecule features (return np.array with fingerprint of molecules)
-        feature_calculator = DescriptorsCalculator.fromFile(
-            f'{os.path.dirname(__file__)}/test_files/test_predictor/data/tutorial_data_feature_calculators.json')
-        scaler = SKLearnStandardizer.fromFile(
-            f'{os.path.dirname(__file__)}/test_files/test_predictor/data/tutorial_data_feature_standardizer_0.json')
-
-        predictor = Predictor(model, feature_calculator, scaler, type='REG', th=None, name=None, modifier=None)
-        predictor.getScores(mols)
-
-        desc_calc = PredictorDescriptorSet(predictor)
+        # # give path to saved model parameters
+        path = f'{os.path.dirname(__file__)}/test_files/test_predictor'
+        desc_calc = PredictorDesc(path, 'PLS', 'GABAAalpha', type='REG')
         descriptors = desc_calc(mols[2])
         self.assertIsInstance(descriptors, pd.DataFrame)
 
@@ -292,7 +281,7 @@ class TestDescriptorsets(PathMixIn, TestCase):
 
     def test_rdkit_descs(self):
         mols = self.prep_testdata()
-        desc_calc = rdkit_descs()
+        desc_calc = RDkitDescs()
         descriptors = desc_calc(mols[1])
         self.assertIsInstance(descriptors, pd.DataFrame)
         self.assertEqual(descriptors.shape, (1, len(Descriptors._descList)))
@@ -300,7 +289,7 @@ class TestDescriptorsets(PathMixIn, TestCase):
         self.assertTrue(descriptors.any().sum() > 1)
 
         # with 3D
-        desc_calc = rdkit_descs(compute_3Drdkit=True)
+        desc_calc = RDkitDescs(compute_3Drdkit=True)
         descriptors = desc_calc(mols[1])
         self.assertIsInstance(descriptors, pd.DataFrame)
         self.assertEqual(descriptors.shape,
@@ -320,14 +309,15 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
     def test_descriptorcalculator(self):
         from mordred import ABCIndex
         mols = self.prep_testdata()
-        desc_calc = DescriptorsCalculator(
-            [MorganFP(2, 10), DrugExPhyschem(), Mordred(ABCIndex)])
+        path = f'{os.path.dirname(__file__)}/test_files/test_predictor'
+        desc_calc = DescriptorsCalculator([MorganFP(2, 10), DrugExPhyschem(), Mordred(
+            ABCIndex), PredictorDesc(path, 'PLS', 'GABAAalpha', type='REG')])
         mols.append(None)
         descriptors = desc_calc(mols)
         self.assertIsInstance(descriptors, pd.DataFrame)
-        self.assertEqual(descriptors.shape, (11, 31))
+        self.assertEqual(descriptors.shape, (11, 32))
         self.assertTrue(descriptors.any().any())
-        self.assertEqual(desc_calc.get_len(), 31)
+        self.assertEqual(desc_calc.get_len(), 32)
 
         filter = highCorrelationFilter(0.99)
         descriptors = filter(descriptors)
