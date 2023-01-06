@@ -27,6 +27,7 @@ Adenosine A2 Receptor on data from the CHEMBL 27 database.
 We use the same data from `the DrugEx tutorial <https://drive.google.com/file/d/1lYOmQBnAawnDR2Kwcy8yVARQTVzYDelw/view>` here, but you first need to make sure
 that the data is in the right format. See :ref:`source code <https://github.com/CDDLeiden/QSPRpred/tree/master/tutorial>` for an example on how to do this.
 QSPRpred assumes that all input data are saved in the data folder of the directory it is executed from.
+Input data should contain a column with molecules (represented by SMILES) and at least one column with a propery for modelling.
 Therefore, our example dataset is located in a subfolder 'data' of the tutorial directory.
 
 Preparing Data
@@ -40,7 +41,7 @@ bioactivity values for Adenosine receptor A1 and Adenosine receptor A3, respecti
 These column names should also not contain any spaces.
 For regression models these columns should contain numerical datapoints. For categorical models either categorical data or numerical data can be used (the latter will be categorized based on the activity threshold).
 Furthermore, we should indicate how we wish to split the data to create a train and test set.
-Here we will use a random split with a test fraction of 15%. We need to calculate feature from the SMILES sequence, here we use morgan fingerprints.
+Here we will use a random split with a test fraction of 15%. We need to calculate features that describe the molecules, here we use morgan fingerprints.
 
 ..  code-block::
 
@@ -73,19 +74,19 @@ Run settings arguments
 ^^^^^^^^^^^^^^^^^^^^^^^
 Apart from the base directory and the input file, there are a few other base options that
 can be set. Including `-d`, will print debug information to the log file. The random 
-seed can also be set manually (although identical results are not guaranteed while keeping
-the same random seed). Furthermore, the number of cpu's used for model training. Finally, the name of the smilescolumn
-in your dataset can be indicated.
+seed (-ran) can also be set manually (although identical results are not guaranteed while keeping
+the same random seed). Furthermore, the number of cpu's (-ncpu) used for model training. Finally, the name of the smilescolumn
+in your dataset can be indicated with -sm.
 
 ..  code-block::
 
     # Setting debug flag, smiles column, random seed, number of cpu's
-        python -m qsprpred.data_CLI -i LIGAND_RAW_small_pivot.tsv -d -ran 42 -ncpu 5 -gpus [3] -sm Smiles -pr CHEMBL318 -pr CHEMBL256 -r REG -sp random -sf 0.15 -fe Morgan
+        python -m qsprpred.data_CLI -i LIGAND_RAW_small_pivot.tsv -d -ran 42 -ncpu 5 -sm Smiles -pr CHEMBL318 -pr CHEMBL256 -r REG -sp random -sf 0.15 -fe Morgan
 
 
 Log-transform data
 """"""""""""""""""
-To log transform data specific properties, indicate this in the CLI as follows:
+To log (-lt) transform data specific properties, indicate this in the CLI as follows:
 
 ..  code-block::
 
@@ -101,7 +102,7 @@ randomly but keeping molecules with the same Murcko scaffold in the same set.
 ..  code-block::
 
     # Scaffold split
-        python -m qsprpred.data_CLI -i LIGAND_RAW_small_pivot.tsv -sm Smiles -pr CHEMBL318 -pr CHEMBL256 -sp scaffold -sf 0.15 -fe Morgan
+        python -m qsprpred.data_CLI -i LIGAND_RAW_small_pivot.tsv -sm Smiles -pr CHEMBL318 -pr CHEMBL256 -r REG -sp scaffold -sf 0.15 -fe Morgan
 
 The third option is a temporal split, where a column needs to be indicated which holds
 information on the time each sample was observed and split based on threshold in a column.
@@ -110,7 +111,7 @@ In this example, all samples after 2015 (in column 'year') make up the test set.
 ..  code-block::
 
     # Time split
-        python -m qsprpred.data_CLI -i LIGAND_RAW_small_pivot.tsv -sm Smiles -pr CHEMBL318 -pr CHEMBL256 -sp time -st 2015 -stc year 0.15 -fe Morgan
+        python -m qsprpred.data_CLI -i LIGAND_RAW_small_pivot.tsv -sm Smiles -pr CHEMBL318 -pr CHEMBL256 -r REG  -sp time -st 2015 -stc year -fe Morgan
 
 
 Data for classification models
@@ -118,9 +119,9 @@ Data for classification models
 You can set whether to prepare data for regression, classification or both.
 The default setting is to run both, but you can run either by setting the
 regression argument to true/REG for regression or false/CLS for classification.
-When using classification, the threshold(s) for each property need to be included.
+When using classification, the threshold(s) for each property (that has not been preclassified) need to be included.
 This is set using a dictionary. In case of multi-class classification the bounderies of
-the bins need to be given. For binary only give 1 threshold per property.
+the bins need to be given. For binary classification only give 1 threshold per property.
 
 ..  code-block::
 
@@ -131,7 +132,7 @@ Feature calculation
 """""""""""""""""""
 There are four different descriptor sets that can be calculated at the moment,
 namely Morgan fingerprints, rdkit descriptors, Mordred descriptors and the
-physicochemical properties used in the QSAR models in the DrugEx papers. The can also
+physicochemical properties used in the QSAR models in the DrugEx papers. They can also
 be combined. For more control over the descriptorcalculator settings use the python API.
 
 ..  code-block::
