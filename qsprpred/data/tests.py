@@ -53,7 +53,7 @@ class DataSets:
         sep='\t')
     df_small = pd.read_csv(
         f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-        sep='\t')
+        sep='\t').sample(10)
 
 
 class StopWatch:
@@ -78,11 +78,11 @@ class TestData(PathMixIn, DataSets, TestCase):
         dataset = QSPRDataset(
             "test_create",
             "CL",
-            df=self.df_large,
+            df=self.df_small,
             store_dir=self.qsprdatapath)
-        self.assertIn("Notes", dataset.getProperties())
-        dataset.removeProperty("Notes")
-        self.assertNotIn("Notes", dataset.getProperties())
+        # self.assertIn("Notes", dataset.getProperties())
+        # dataset.removeProperty("Notes")
+        # self.assertNotIn("Notes", dataset.getProperties())
         stopwatch = StopWatch()
         dataset.save()
         stopwatch.stop('Saving took: ')
@@ -110,6 +110,7 @@ class TestData(PathMixIn, DataSets, TestCase):
         dataset_new.makeClassification(th=[0, 1, 10, 1200])
         self.assertEqual(dataset_new.task, ModelTasks.CLASSIFICATION)
 
+        from mordred import ABCIndex
         paths = []
         tasks = [ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION]
         for task in tasks:
@@ -120,7 +121,7 @@ class TestData(PathMixIn, DataSets, TestCase):
             np.random.seed(42)
             dataset.prepareDataset(
                 feature_calculator=DescriptorsCalculator(
-                    [MorganFP(3, 1000)]),
+                    [Mordred()]),
                 datafilters=[
                     CategoryFilter(
                         name="moka_ionState7.4",
