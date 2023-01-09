@@ -166,7 +166,7 @@ Basics
 
 Finally, we need to indicate what models we want to train and which steps to take in the training.
 In this example, we will build regression random forest models.
-We will also evaluate the model through cross-validation and train the model on all data to save for further use.
+We will also evaluate the model through cross-validation (-me) and train the model on all data to save for further use (-s).
 
 ..  code-block::
 
