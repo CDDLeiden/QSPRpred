@@ -3,7 +3,6 @@ import json
 from abc import ABC, abstractmethod
 from typing import List
 
-import numpy as np
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
 from rdkit.Chem.rdchem import Mol
@@ -87,19 +86,14 @@ class DescriptorsCalculator(Calculator):
         Args:
             mols: list of rdkit mols
         """
-        valid_mols = [mol for mol in mols if not mol is None]
-        df_valid = pd.DataFrame()
+        df = pd.DataFrame()
         for descset in self.descsets:
-            values = pd.concat([descset(mol) for mol in valid_mols], ignore_index=True)
-            df_valid = pd.concat([df_valid, values.add_prefix(f"{descset}_")], axis=1)
-
-        # Add invalid mols back as rows of zero
-        df = pd.DataFrame(np.zeros((len(mols), df_valid.shape[1])), columns=df_valid.columns)
-        df.iloc[pd.notnull(mols),:] = df_valid
+            values = [descset(mol) if mol else [0] * len(descset.descriptors) for mol in mols]
+            values = pd.DataFrame(values, columns=descset.descriptors)
+            df = pd.concat([df, values.add_prefix(f"Descriptor_{descset}_")], axis=1)
 
         # replace errors by nan values
         df = df.apply(pd.to_numeric, errors='coerce')
-        df.columns = [f"Descriptor_{x}" for x in df.columns]
         
         return df
 

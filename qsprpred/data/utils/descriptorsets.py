@@ -9,7 +9,6 @@ from abc import ABC, abstractmethod
 
 import mordred
 import numpy as np
-import pandas as pd
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
@@ -35,6 +34,21 @@ class DescriptorSet(ABC):
         """
         pass
 
+    @property
+    @abstractmethod
+    def descriptors(self):
+        """Return a list of descriptor names."""
+        pass
+
+    @descriptors.setter
+    @abstractmethod
+    def descriptors(self, value):
+        """Set the descriptor names."""
+        pass
+
+    def get_len(self):
+        return len(self.descriptors)
+
     @abstractmethod
     def is_fp(self):
         """Return True if descriptorset is fingerprint."""
@@ -51,6 +65,7 @@ class DescriptorSet(ABC):
 
 
 class MorganFP(DescriptorSet):
+
     def __init__(self, *args, **kwargs):
         """
         Initialize the descriptor with the same arguments as you would pass to `GetMorganFingerprintAsBitVect` function of RDKit.
@@ -72,14 +87,9 @@ class MorganFP(DescriptorSet):
 
         mol = convertMol(mol) if isinstance(mol, str) else mol
         fp = morgan(mol, *self._args, **self._kwargs)
-        self.ln = len(fp)
-        ret = np.zeros(self.ln)
+        ret = np.zeros(len(fp))
         convertFP(fp, ret)
-        ret = pd.DataFrame(
-            ret.reshape(1, -1), columns=[f"{idx}" for idx in range(ret.shape[0])]
-        )
-        if self.keepindices:
-            ret = ret[self.keepindices]
+        ret = list(ret)
         return ret
 
     @property
@@ -91,10 +101,21 @@ class MorganFP(DescriptorSet):
         return self._args, self._kwargs
 
     def get_len(self):
-        return((self.__call__("C")).shape[1])
+        return len(self.__call__("C"))
 
     def __str__(self):
         return "MorganFP"
+
+    @property
+    def descriptors(self):
+        return [f"{idx}" for idx in range(self.get_len())]
+
+    @descriptors.setter
+    def descriptors(self, value):
+        """
+        Sets the number of bits to a given value.
+        """
+        self._kwargs["nBits"] = value
 
 
 class Mordred(DescriptorSet):
@@ -120,7 +141,7 @@ class Mordred(DescriptorSet):
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        return self._mordred.pandas([mol], quiet=True, nproc=1)
+        return self._mordred.pandas([mol], quiet=True, nproc=1).iloc[0].to_list()
 
     @property
     def is_fp(self):
@@ -151,9 +172,6 @@ class Mordred(DescriptorSet):
         self._args = [[str(d) for d in descs]]
         self._kwargs = {"version": version, "ignore_3D": ignore_3D, "config": config}
 
-    def get_len(self):
-        return(len(self.descriptors))
-
     def __str__(self):
         return "Mordred"
 
@@ -172,15 +190,12 @@ class DrugExPhyschem(DescriptorSet):
         self._args = args
         self._kwargs = kwargs
         self._is_fp = False
-        self._calculator = Property(*args, **kwargs)
-        self._descriptors = self._calculator.props
+        self.props = [x for x in Property(*args, **kwargs).props]
 
     def __call__(self, mol):
+        calculator = Property(*self._args, **self._kwargs)
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        physchem = pd.DataFrame(
-            self._calculator.getScores([mol]), columns=self._descriptors
-        )
-        return physchem
+        return list(calculator.getScores([mol])[0])
 
     @property
     def is_fp(self):
@@ -192,15 +207,12 @@ class DrugExPhyschem(DescriptorSet):
 
     @property
     def descriptors(self):
-        return self._descriptors
+        return self.props
 
     @descriptors.setter
     def descriptors(self, props):
-        self._calculator.props = props
-        self._descriptors = props
-
-    def get_len(self):
-        return(len(self.descriptors))
+        """Set new props as a list of names."""
+        self.props = [x for x in Property(props).props]
 
     def __str__(self):
         return "DrugExPhyschem"
@@ -226,10 +238,7 @@ class rdkit_descs(DescriptorSet):
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        physchem = pd.DataFrame(
-            self._calculator.getScores([mol]), columns=self._descriptors
-        )
-        return physchem
+        return list(self._calculator.getScores([mol])[0])
 
     @property
     def is_fp(self):
@@ -247,9 +256,6 @@ class rdkit_descs(DescriptorSet):
     def descriptors(self, descriptors):
         self._calculator.descriptors = descriptors
         self._descriptors = descriptors
-
-    def get_len(self):
-        return(len(self.descriptors))
 
     def __str__(self):
         return "RDkit"
