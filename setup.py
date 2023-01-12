@@ -5,8 +5,9 @@ Created by: Martin Sicho
 On: 24.06.22, 10:33
 """
 
-from setuptools import setup
 from distutils.util import convert_path
+
+from setuptools import setup
 
 main_ns = {}
 ver_path = convert_path('qsprpred/about.py')
