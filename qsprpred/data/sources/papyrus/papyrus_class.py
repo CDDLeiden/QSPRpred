@@ -93,7 +93,7 @@ class Papyrus:
             acc_key=acc_keys,
             quality=quality,
             outdir=output_dir,
-            prefix=name,
+            prefix=name or os.path.basename(output_dir),
             drop_duplicates=drop_duplicates,
             chunk_size=chunk_size,
             use_existing=use_existing,

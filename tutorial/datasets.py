@@ -36,7 +36,7 @@ def A2AR(data_dir='data'):
     dataset = papyrus.getData(
         acc_keys,
         quality,
-        dataset_name,
+        name=dataset_name,
         use_existing=True
     )
 
