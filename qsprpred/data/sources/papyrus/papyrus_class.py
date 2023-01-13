@@ -64,10 +64,11 @@ class Papyrus:
             self,
             acc_keys: List[str],
             quality: str,
+            output_dir: str = None,
             name : str = None,
             drop_duplicates: bool = False,
             chunk_size : int = 1e5,
-            use_existing : bool = True
+            use_existing : bool = True,
     ):
         """
         Get the data from the Papyrus database as a `DataSetTSV` instance.
@@ -75,20 +76,23 @@ class Papyrus:
         Args:
             acc_keys: protein accession keys
             quality: desired minimum quality of the dataset
+            output_dir: path to the directory where the data set will be stored
             name: name of the dataset (this is the prefix of the generated .tsv file)
             drop_duplicates: remove duplicates after filtering
             chunk_size: data is read in chunks of this size (see `papyrus_filter`)
             use_existing: if the data is already present, use it instead of extracting it again
-
         Returns:
 
         """
 
         self.download()
+        output_dir = output_dir or self.data_dir
+        if not os.path.exists(output_dir):
+            raise ValueError(f"Output directory '{output_dir}' does not exist.")
         data, path =  papyrus_filter(
             acc_key=acc_keys,
             quality=quality,
-            outdir=self.data_dir,
+            outdir=output_dir,
             prefix=name,
             drop_duplicates=drop_duplicates,
             chunk_size=chunk_size,
