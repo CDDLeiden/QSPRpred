@@ -15,7 +15,6 @@ from qsprpred.data.sources.papyrus.papyrus_filter import papyrus_filter
 
 class Papyrus:
     DEFAULT_DIR = os.path.join(Path.home(), '.Papyrus')
-    os.makedirs(DEFAULT_DIR, exist_ok=True)
 
     def __init__(
             self,
@@ -51,6 +50,7 @@ class Papyrus:
             `None`
         """
 
+        os.makedirs(self.data_dir, exist_ok=True)
         download_papyrus(
             outdir=self.data_dir,
             version=self.version,
