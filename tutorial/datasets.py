@@ -13,7 +13,7 @@ from qsprpred.data.sources.papyrus import Papyrus
 from qsprpred.data.data import QSPRDataset
 from qsprpred.models.tasks import ModelTasks
 
-def A2AR():
+def A2AR(data_dir='data'):
     """
     A classification dataset that contains activity data on the adenosine A2A receptor loaded from the Papyrus database
     using the built-in Papyrus wrapper.
@@ -28,7 +28,7 @@ def A2AR():
     papyrus_version = '05.6' # Papyrus database version
 
     papyrus = Papyrus(
-        data_dir="data",
+        data_dir=data_dir,
         stereo=False,
         version=papyrus_version
     )
