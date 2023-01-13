@@ -99,5 +99,6 @@ class Papyrus:
             use_existing=use_existing,
             stereo=self.stereo,
             plusplus=self.plusplus,
+            papyrus_dir=self.data_dir,
         )
         return MoleculeTable.fromFile(path, df=data)
