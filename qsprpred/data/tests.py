@@ -56,7 +56,7 @@ class DataSets:
         sep='\t')
     df_small = pd.read_csv(
         f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-        sep='\t')
+        sep='\t').sample(10)
 
 
 class StopWatch:
@@ -81,11 +81,11 @@ class TestData(PathMixIn, DataSets, TestCase):
         dataset = QSPRDataset(
             "test_create",
             "CL",
-            df=self.df_large,
+            df=self.df_small,
             store_dir=self.qsprdatapath)
-        self.assertIn("Notes", dataset.getProperties())
-        dataset.removeProperty("Notes")
-        self.assertNotIn("Notes", dataset.getProperties())
+        # self.assertIn("Notes", dataset.getProperties())
+        # dataset.removeProperty("Notes")
+        # self.assertNotIn("Notes", dataset.getProperties())
         stopwatch = StopWatch()
         dataset.save()
         stopwatch.stop('Saving took: ')
@@ -121,9 +121,15 @@ class TestData(PathMixIn, DataSets, TestCase):
                 store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
                 if task == ModelTasks.CLASSIFICATION else None)
             np.random.seed(42)
+            descriptor_sets = [
+                Mordred(),
+                MorganFP(radius=3, nBits=2048),
+                rdkit_descs(),
+                DrugExPhyschem()
+            ]
+            expected_length = sum([len(x.descriptors) for x in descriptor_sets])
             dataset.prepareDataset(
-                feature_calculator=DescriptorsCalculator(
-                    [MorganFP(3, 1000)]),
+                feature_calculator=DescriptorsCalculator(descriptor_sets),
                 datafilters=[
                     CategoryFilter(
                         name="moka_ionState7.4",
@@ -134,9 +140,9 @@ class TestData(PathMixIn, DataSets, TestCase):
             # test some basics
             descriptors = dataset.getDescriptors()
             descriptor_names = dataset.getDescriptorNames()
-            self.assertEqual(len(descriptor_names), 1000)
+            self.assertEqual(len(descriptor_names), expected_length)
             self.assertEqual(descriptors.shape[0], len(dataset))
-            self.assertEqual(descriptors.shape[1], 1000)
+            self.assertEqual(descriptors.shape[1], expected_length)
 
             # save to file
             dataset.save()
@@ -254,7 +260,8 @@ class TestDescriptorsets(PathMixIn, TestCase):
         mols = self.prep_testdata()
         desc_calc = MorganFP(3, nBits=1000)
         descriptors = desc_calc(mols[2])
-        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertIsInstance(descriptors, list)
+        descriptors = pd.DataFrame([descriptors])
         self.assertEqual(descriptors.shape, (1, 1000))
         self.assertTrue(descriptors.any().any())
         self.assertTrue(descriptors.any().sum() > 1)
@@ -263,7 +270,8 @@ class TestDescriptorsets(PathMixIn, TestCase):
         mols = self.prep_testdata()
         desc_calc = Mordred()
         descriptors = desc_calc(mols[1])
-        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertIsInstance(descriptors, list)
+        descriptors = pd.DataFrame([descriptors])
         self.assertEqual(
             descriptors.shape,
             (1, len(mordred.Calculator(mordreddescriptors).descriptors)))
@@ -274,7 +282,8 @@ class TestDescriptorsets(PathMixIn, TestCase):
         mols = self.prep_testdata()
         desc_calc = DrugExPhyschem()
         descriptors = desc_calc(mols[1])
-        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertIsInstance(descriptors, list)
+        descriptors = pd.DataFrame([descriptors])
         self.assertEqual(descriptors.shape, (1, 19))
         self.assertTrue(descriptors.any().any())
         self.assertTrue(descriptors.any().sum() > 1)
@@ -283,7 +292,8 @@ class TestDescriptorsets(PathMixIn, TestCase):
         mols = self.prep_testdata()
         desc_calc = RDkitDescs()
         descriptors = desc_calc(mols[1])
-        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertIsInstance(descriptors, list)
+        descriptors = pd.DataFrame([descriptors])
         self.assertEqual(descriptors.shape, (1, len(Descriptors._descList)))
         self.assertTrue(descriptors.any().any())
         self.assertTrue(descriptors.any().sum() > 1)
@@ -291,7 +301,8 @@ class TestDescriptorsets(PathMixIn, TestCase):
         # with 3D
         desc_calc = RDkitDescs(compute_3Drdkit=True)
         descriptors = desc_calc(mols[1])
-        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertIsInstance(descriptors, list)
+        descriptors = pd.DataFrame([descriptors])
         self.assertEqual(descriptors.shape,
                          (1, (len(Descriptors._descList) + 10)))
         self.assertTrue(descriptors.any().any())

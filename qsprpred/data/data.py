@@ -159,7 +159,7 @@ class MoleculeTable(MoleculeDataSet):
         for table_filter in table_filters:
             self.df = table_filter(self.df)
 
-    def addDescriptors(self, calculator: Calculator, recalculate=False, n_cpus=None, chunk_size=1000):
+    def addDescriptors(self, calculator: Calculator, recalculate=False, n_cpus=None, chunk_size=50):
         if recalculate:
             self.df.drop(self.getDescriptorNames(), axis=1, inplace=True)
         elif self.hasDescriptors:
