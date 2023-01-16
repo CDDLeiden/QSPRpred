@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.scorers.predictor &mdash; QSPRpred 1.2.0.dev0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> QSPRpred
+          </a>
+              <div class="version">
+                v1.2.0.dev0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">qsprpred</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.scorers.predictor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.scorers.predictor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">predictors</span>
+
+<span class="sd">Created by: Martin Sicho</span>
+<span class="sd">On: 06.06.22, 20:15</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sklearn_json</span> <span class="k">as</span> <span class="nn">skljson</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.utils.descriptor_utils.interfaces</span> <span class="kn">import</span> <span class="n">Scorer</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.utils.descriptorcalculator</span> <span class="kn">import</span> <span class="n">DescriptorsCalculator</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.utils.feature_standardization</span> <span class="kn">import</span> <span class="n">SKLearnStandardizer</span>
+<span class="kn">from</span> <span class="nn">qsprpred.models.neural_network</span> <span class="kn">import</span> <span class="n">STFullyConnected</span>
+
+
+<div class="viewcode-block" id="Predictor"><a class="viewcode-back" href="../../../api/qsprpred.scorers.html#qsprpred.scorers.predictor.Predictor">[docs]</a><span class="k">class</span> <span class="nc">Predictor</span><span class="p">(</span><span class="n">Scorer</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">feature_calculators</span><span class="p">,</span> <span class="n">scaler</span><span class="p">:</span> <span class="n">SKLearnStandardizer</span><span class="p">,</span>
+            <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modifier</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct predictor model, feature calculator &amp; scaler.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model: fitted sklearn or toch model</span>
+<span class="sd">            feature_calculators: DescriptorsCalculator object, calculates features from smiles</span>
+<span class="sd">            scaler: StandardStandardizer, scales features</span>
+<span class="sd">            type: regression or classification</span>
+<span class="sd">            th: if classification give activity threshold</span>
+<span class="sd">            name: name for predictor</span>
+<span class="sd">            modifier: score modifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">modifier</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_calculators</span> <span class="o">=</span> <span class="n">feature_calculators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">scaler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">th</span> <span class="o">=</span> <span class="n">th</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="k">else</span> <span class="n">name</span>
+
+<div class="viewcode-block" id="Predictor.fromFile"><a class="viewcode-back" href="../../../api/qsprpred.scorers.html#qsprpred.scorers.predictor.Predictor.fromFile">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;CLS&#39;</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Predictor&quot;</span><span class="p">,</span> <span class="n">modifier</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct predictor from files with serialized model, feature calculator &amp; scaler.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base_dir: base directory with folder qspr/models/ containing the serialized mode, feature_descriptor and optionally scaler</span>
+<span class="sd">            algorithm: type of model</span>
+<span class="sd">            target: name of property to predict</span>
+<span class="sd">            type: regression or classification</span>
+<span class="sd">            scale: bool if true, apply feature scaling</span>
+<span class="sd">            th: if classification give activity threshold</span>
+<span class="sd">            name: name for predictor</span>
+<span class="sd">            modifier: score modifier</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            predictor</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">base_dir</span> <span class="o">+</span> <span class="s1">&#39;/qspr/models/&#39;</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">algorithm</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">target</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span>
+        <span class="n">feature_calculators</span> <span class="o">=</span> <span class="n">DescriptorsCalculator</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span>
+            <span class="n">base_dir</span> <span class="o">+</span> <span class="s1">&#39;/qspr/data/&#39;</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">type</span><span class="p">,</span> <span class="n">target</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;_DescCalc.json&#39;</span><span class="p">)</span>
+        <span class="c1"># TODO do not hardcode when to use scaler</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+            <span class="n">scaler</span> <span class="o">=</span> <span class="n">SKLearnStandardizer</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span>
+                <span class="n">base_dir</span> <span class="o">+</span> <span class="s1">&#39;/qspr/data/&#39;</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">type</span><span class="p">,</span> <span class="n">target</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;_scaler.json&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;DNN&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">model_params</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">STFullyConnected</span><span class="p">(</span><span class="o">**</span><span class="n">model_params</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2">_weights.pkg&quot;</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">Predictor</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">feature_calculators</span><span class="o">=</span><span class="n">feature_calculators</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="n">scaler</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="n">th</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">modifier</span><span class="o">=</span><span class="n">modifier</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Predictor</span><span class="p">(</span>
+            <span class="n">skljson</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+            <span class="n">feature_calculators</span><span class="o">=</span><span class="n">feature_calculators</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="n">scaler</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">th</span><span class="o">=</span><span class="n">th</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">modifier</span><span class="o">=</span><span class="n">modifier</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Predictor.getScores"><a class="viewcode-back" href="../../../api/qsprpred.scorers.html#qsprpred.scorers.predictor.Predictor.getScores">[docs]</a>    <span class="k">def</span> <span class="nf">getScores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">frags</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return scores for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols: molecules to score</span>
+<span class="sd">            frags: input fragments</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            scores (numpy.ndarray): &#39;np.array&#39; of scores for &quot;mols&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate and scale the features</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_calculators</span><span class="p">(</span><span class="n">mols</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">:</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="c1"># Special case DNN</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">):</span>
+            <span class="n">fps_loader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_dataloader</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CLS&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">th</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">fps_loader</span><span class="p">),</span>
+                        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">th</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">fps_loader</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">fps_loader</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="c1"># Special case PLS</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;PLSRegression&#39;</span><span class="p">:</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">features</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Regression</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;REG&#39;</span><span class="p">:</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+        <span class="c1"># Multi-class classification</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">th</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">features</span><span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="c1"># Single-class classification</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CLS&#39;</span><span class="p">):</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">features</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">scores</span></div>
+
+<div class="viewcode-block" id="Predictor.getKey"><a class="viewcode-back" href="../../../api/qsprpred.scorers.html#qsprpred.scorers.predictor.Predictor.getKey">[docs]</a>    <span class="k">def</span> <span class="nf">getKey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return model identifier.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

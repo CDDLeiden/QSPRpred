@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data package &mdash; QSPRpred 1.2.0.dev0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.data.utils package" href="qsprpred.data.utils.html" />
+    <link rel="prev" title="qsprpred package" href="qsprpred.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> QSPRpred
+          </a>
+              <div class="version">
+                v1.2.0.dev0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">qsprpred</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">qsprpred.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#qsprpred-qspr-cli-module">qsprpred.QSPR_cli module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.about">qsprpred.about module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">qsprpred</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+      <li class="breadcrumb-item active">qsprpred.data package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-data-package">
+<h1>qsprpred.data package<a class="headerlink" href="#qsprpred-data-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.data.utils.html">qsprpred.data.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.descriptor_utils.html">qsprpred.data.utils.descriptor_utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.descriptor_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.descriptor_utils.html#module-qsprpred.data.utils.descriptor_utils.drugexproperties">qsprpred.data.utils.descriptor_utils.drugexproperties module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.descriptor_utils.html#module-qsprpred.data.utils.descriptor_utils.rdkitdescriptors">qsprpred.data.utils.descriptor_utils.rdkitdescriptors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.descriptor_utils.html#module-qsprpred.data.utils.descriptor_utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.datafilters">qsprpred.data.utils.datafilters module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.datafilters.CategoryFilter"><code class="docutils literal notranslate"><span class="pre">CategoryFilter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.dataimputers">qsprpred.data.utils.dataimputers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.datasplitters">qsprpred.data.utils.datasplitters module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.datasplitters.randomsplit"><code class="docutils literal notranslate"><span class="pre">randomsplit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.datasplitters.scaffoldsplit"><code class="docutils literal notranslate"><span class="pre">scaffoldsplit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.datasplitters.temporalsplit"><code class="docutils literal notranslate"><span class="pre">temporalsplit</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.descriptorcalculator">qsprpred.data.utils.descriptorcalculator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.Calculator"><code class="docutils literal notranslate"><span class="pre">Calculator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.Calculator.fromFile"><code class="docutils literal notranslate"><span class="pre">Calculator.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.Calculator.keepDescriptors"><code class="docutils literal notranslate"><span class="pre">Calculator.keepDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.Calculator.toFile"><code class="docutils literal notranslate"><span class="pre">Calculator.toFile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator"><code class="docutils literal notranslate"><span class="pre">DescriptorsCalculator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator.fromFile"><code class="docutils literal notranslate"><span class="pre">DescriptorsCalculator.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator.get_len"><code class="docutils literal notranslate"><span class="pre">DescriptorsCalculator.get_len()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator.keepDescriptors"><code class="docutils literal notranslate"><span class="pre">DescriptorsCalculator.keepDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator.toFile"><code class="docutils literal notranslate"><span class="pre">DescriptorsCalculator.toFile()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.descriptorsets">qsprpred.data.utils.descriptorsets module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DescriptorSet"><code class="docutils literal notranslate"><span class="pre">DescriptorSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DescriptorSet.descriptors"><code class="docutils literal notranslate"><span class="pre">DescriptorSet.descriptors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DescriptorSet.get_len"><code class="docutils literal notranslate"><span class="pre">DescriptorSet.get_len()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DescriptorSet.is_fp"><code class="docutils literal notranslate"><span class="pre">DescriptorSet.is_fp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DescriptorSet.settings"><code class="docutils literal notranslate"><span class="pre">DescriptorSet.settings()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DrugExPhyschem"><code class="docutils literal notranslate"><span class="pre">DrugExPhyschem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DrugExPhyschem.descriptors"><code class="docutils literal notranslate"><span class="pre">DrugExPhyschem.descriptors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DrugExPhyschem.is_fp"><code class="docutils literal notranslate"><span class="pre">DrugExPhyschem.is_fp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DrugExPhyschem.settings"><code class="docutils literal notranslate"><span class="pre">DrugExPhyschem.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.Mordred"><code class="docutils literal notranslate"><span class="pre">Mordred</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.Mordred.descriptors"><code class="docutils literal notranslate"><span class="pre">Mordred.descriptors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.Mordred.is_fp"><code class="docutils literal notranslate"><span class="pre">Mordred.is_fp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.Mordred.settings"><code class="docutils literal notranslate"><span class="pre">Mordred.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.MorganFP"><code class="docutils literal notranslate"><span class="pre">MorganFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.MorganFP.descriptors"><code class="docutils literal notranslate"><span class="pre">MorganFP.descriptors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.MorganFP.get_len"><code class="docutils literal notranslate"><span class="pre">MorganFP.get_len()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.MorganFP.is_fp"><code class="docutils literal notranslate"><span class="pre">MorganFP.is_fp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.MorganFP.settings"><code class="docutils literal notranslate"><span class="pre">MorganFP.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.get_descriptor"><code class="docutils literal notranslate"><span class="pre">get_descriptor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.rdkit_descs"><code class="docutils literal notranslate"><span class="pre">rdkit_descs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.rdkit_descs.descriptors"><code class="docutils literal notranslate"><span class="pre">rdkit_descs.descriptors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.rdkit_descs.is_fp"><code class="docutils literal notranslate"><span class="pre">rdkit_descs.is_fp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.rdkit_descs.settings"><code class="docutils literal notranslate"><span class="pre">rdkit_descs.settings</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.featurefilters">qsprpred.data.utils.featurefilters module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.featurefilters.BorutaFilter"><code class="docutils literal notranslate"><span class="pre">BorutaFilter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.featurefilters.highCorrelationFilter"><code class="docutils literal notranslate"><span class="pre">highCorrelationFilter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.featurefilters.lowVarianceFilter"><code class="docutils literal notranslate"><span class="pre">lowVarianceFilter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.smiles_standardization">qsprpred.data.utils.smiles_standardization module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.smiles_standardization.chembl_smi_standardizer"><code class="docutils literal notranslate"><span class="pre">chembl_smi_standardizer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.smiles_standardization.neutralize_atoms"><code class="docutils literal notranslate"><span class="pre">neutralize_atoms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.smiles_standardization.sanitize_smiles"><code class="docutils literal notranslate"><span class="pre">sanitize_smiles()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.data.data">
+<span id="qsprpred-data-data-module"></span><h2>qsprpred.data.data module<a class="headerlink" href="#module-qsprpred.data.data" title="Permalink to this heading"></a></h2>
+<p>This module contains the QSPRDataset that holds and prepares data for modelling.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.data.</span></span><span class="sig-name descname"><span class="pre">MoleculeTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Optional" title="(in Python v3.9)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smilescol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SMILES'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_rdkit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.interfaces.MoleculeDataSet" title="qsprpred.data.interfaces.MoleculeDataSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MoleculeDataSet</span></code></a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.ParallelApplyWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParallelApplyWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'expand'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.ParallelApplyWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.ParallelApplyWrapper" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.addDescriptors">
+<span class="sig-name descname"><span class="pre">addDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calculator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.Calculator" title="qsprpred.data.utils.descriptorcalculator.Calculator"><span class="pre">Calculator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.addDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.addDescriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Add descriptors to the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>calculator</strong> – The descriptor calculator class wrapping the descriptors to calculate.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.addProperty">
+<span class="sig-name descname"><span class="pre">addProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.addProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.addProperty" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'expand'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_filters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.List" title="(in Python v3.9)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Callable" title="(in Python v3.9)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.filter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.fromFile">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.data.MoleculeTable" title="qsprpred.data.data.MoleculeTable"><span class="pre">MoleculeTable</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.fromFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.fromFile" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.getDF">
+<span class="sig-name descname"><span class="pre">getDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.getDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.getDF" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.getDescriptorNames">
+<span class="sig-name descname"><span class="pre">getDescriptorNames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.getDescriptorNames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.getDescriptorNames" title="Permalink to this definition"></a></dt>
+<dd><p>Get the names of the descriptors that are currently in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of descriptor names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.getDescriptors">
+<span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.getDescriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Get the table of descriptors that are currently in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">DataFrame</span></code> with the descriptors</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.getProperties">
+<span class="sig-name descname"><span class="pre">getProperties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.getProperties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.getProperties" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.getSubset">
+<span class="sig-name descname"><span class="pre">getSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.getSubset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.getSubset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.hasDescriptors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasDescriptors</span></span><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.hasDescriptors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.hasProperty">
+<span class="sig-name descname"><span class="pre">hasProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.hasProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.hasProperty" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.papply">
+<span class="sig-name descname"><span class="pre">papply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'expand'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.papply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.papply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.reload">
+<span class="sig-name descname"><span class="pre">reload</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.reload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.reload" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.removeProperty">
+<span class="sig-name descname"><span class="pre">removeProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.removeProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.removeProperty" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.save" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.MoleculeTable.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addAs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#MoleculeTable.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.MoleculeTable.transform" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.data.</span></span><span class="sig-name descname"><span class="pre">QSPRDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_prop:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df:</span> <span class="pre">~typing.Optional[~pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smilescol:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'SMILES'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_rdkit:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_dir:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task:</span> <span class="pre">~typing.Literal[&lt;ModelTasks.REGRESSION:</span> <span class="pre">'REGRESSION'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;ModelTasks.CLASSIFICATION:</span> <span class="pre">'CLASSIFICATION'&gt;]</span> <span class="pre">=</span> <span class="pre">ModelTasks.REGRESSION</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_transformer:</span> <span class="pre">~typing.Optional[~typing.Callable]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th:</span> <span class="pre">~typing.Optional[~typing.List[float]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.data.MoleculeTable" title="qsprpred.data.data.MoleculeTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">MoleculeTable</span></code></a></p>
+<p>Prepare dataset for QSPR model training.</p>
+<p>It splits the data in train and test set, as well as creating cross-validation folds.
+Optionally low quality data is filtered out.
+For classification the dataset samples are labelled as active/inactive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targetProperty</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – property to be predicted with QSPRmodel</p></li>
+<li><p><strong>task</strong> (<em>ModelTask</em>) – regression or classification</p></li>
+<li><p><strong>df</strong> (<em>pd.dataframe</em>) – dataset</p></li>
+<li><p><strong>X</strong> (<em>np.ndarray/pd.DataFrame</em>) – m x n feature matrix for cross validation, where m is
+the number of samplesand n is the number of features.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray/pd.DataFrame</em>) – m-d label array for cross validation, where m is the
+number of samples and equals to row of X.</p></li>
+<li><p><strong>X_ind</strong> (<em>np.ndarray/pd.DataFrame</em>) – m x n Feature matrix for independent set, where m
+is the number of samples and n is the number of features.</p></li>
+<li><p><strong>y_ind</strong> (<em>np.ndarray/pd.DataFrame</em>) – m-l label array for independent set, where m is
+the number of samples and equals to row of X_ind, and l is the number of types.</p></li>
+<li><p><strong>folds</strong> (<em>generator</em>) – scikit-learn n-fold generator object</p></li>
+<li><p><strong>n_folds</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of folds for the generator</p></li>
+<li><p><strong>features</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – feature names</p></li>
+<li><p><strong>feature_standardizers</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em> of </em><em>FeatureStandardizers</em>) – methods used to standardize the data features.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.applyFeatureStandardizers">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">applyFeatureStandardizers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_standardizers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.applyFeatureStandardizers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.applyFeatureStandardizers" title="Permalink to this definition"></a></dt>
+<dd><p>Apply and/or fit feature standardizers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.cleanMolecules">
+<span class="sig-name descname"><span class="pre">cleanMolecules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.cleanMolecules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.cleanMolecules" title="Permalink to this definition"></a></dt>
+<dd><p>Standardize and or sanitize SMILES sequences.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.createFolds">
+<span class="sig-name descname"><span class="pre">createFolds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_standardizers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.createFolds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.createFolds" title="Permalink to this definition"></a></dt>
+<dd><p>Create folds for crossvalidation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.dropInvalids">
+<span class="sig-name descname"><span class="pre">dropInvalids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.dropInvalids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.dropInvalids" title="Permalink to this definition"></a></dt>
+<dd><p>Drop Invalid SMILES and missing target property values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.featurizeSplits">
+<span class="sig-name descname"><span class="pre">featurizeSplits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.featurizeSplits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.featurizeSplits" title="Permalink to this definition"></a></dt>
+<dd><p>Keep only features that will be used by the model. In our case, descriptors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.fillMissing">
+<span class="sig-name descname"><span class="pre">fillMissing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Optional" title="(in Python v3.9)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.List" title="(in Python v3.9)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.fillMissing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.fillMissing" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.filterFeatures">
+<span class="sig-name descname"><span class="pre">filterFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.filterFeatures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.filterFeatures" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.fromFile">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.fromFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.fromFile" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.isMultiClass">
+<span class="sig-name descname"><span class="pre">isMultiClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.isMultiClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.isMultiClass" title="Permalink to this definition"></a></dt>
+<dd><p>Return if model task is multi class classification.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.makeClassification">
+<span class="sig-name descname"><span class="pre">makeClassification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">th</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.List" title="(in Python v3.9)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_new</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.makeClassification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.makeClassification" title="Permalink to this definition"></a></dt>
+<dd><p>Convert model output to classification using the given threshold(s).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.nClasses">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nClasses</span></span><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.nClasses" title="Permalink to this definition"></a></dt>
+<dd><p>Return number of output classes for classification.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.prepareDataset">
+<span class="sig-name descname"><span class="pre">prepareDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">standardize=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafilters=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split=&lt;qsprpred.data.utils.datasplitters.randomsplit</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_calculator=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_filters=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_standardizers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds=5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate_features=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value=0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.prepareDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.prepareDataset" title="Permalink to this definition"></a></dt>
+<dd><p>Prepare the dataset for use in QSPR model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>standardize</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Apply Chembl standardization pipeline to smiles</p></li>
+<li><p><strong>sanitize</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – sanitize smiles</p></li>
+<li><p><strong>datafilters</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em> of </em><em>datafilter obj</em>) – filters number of rows from dataset</p></li>
+<li><p><strong>split</strong> (<em>datasplitter obj</em>) – splits the dataset into train and test set</p></li>
+<li><p><strong>feature_calculator</strong> (<a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator" title="qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator"><em>DescriptorsCalculator</em></a>) – calculates features from smiles</p></li>
+<li><p><strong>feature_filters</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em> of </em><em>feature filter objs</em>) – filters features</p></li>
+<li><p><strong>feature_standardizers</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em> of </em><em>feature standardizer objs</em>) – standardizes and/or scales features</p></li>
+<li><p><strong>n_folds</strong> (<em>n</em>) – number of folds to use in cross-validation</p></li>
+<li><p><strong>recalculate_features</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – recalculate features even if they are already present in the file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.reload">
+<span class="sig-name descname"><span class="pre">reload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.reload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.reload" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.sanitize">
+<span class="sig-name descname"><span class="pre">sanitize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.sanitize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.sanitize" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.save" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qsprpred.data.interfaces.datasplit" title="qsprpred.data.interfaces.datasplit"><span class="pre">datasplit</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.split" title="Permalink to this definition"></a></dt>
+<dd><p>Split dataset into train and test set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>split</strong> (<a class="reference internal" href="#qsprpred.data.interfaces.datasplit" title="qsprpred.data.interfaces.datasplit"><em>datasplit</em></a>) – split instance orchestrating the split</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.standardize">
+<span class="sig-name descname"><span class="pre">standardize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.standardize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.standardize" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.data.QSPRDataset.standardizeFeatures">
+<span class="sig-name descname"><span class="pre">standardizeFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_standardizers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/data.html#QSPRDataset.standardizeFeatures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.data.QSPRDataset.standardizeFeatures" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.interfaces">
+<span id="qsprpred-data-interfaces-module"></span><h2>qsprpred.data.interfaces module<a class="headerlink" href="#module-qsprpred.data.interfaces" title="Permalink to this heading"></a></h2>
+<p>Abstract base classes for data preparation classes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.DataSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.interfaces.</span></span><span class="sig-name descname"><span class="pre">DataSet</span></span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#DataSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.DataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.DataSet.addProperty">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#DataSet.addProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.DataSet.addProperty" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.DataSet.apply">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#DataSet.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.DataSet.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.DataSet.getProperties">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getProperties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#DataSet.getProperties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.DataSet.getProperties" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.DataSet.getSubset">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#DataSet.getSubset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.DataSet.getSubset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.DataSet.removeProperty">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">removeProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#DataSet.removeProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.DataSet.removeProperty" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.DataSet.transform">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#DataSet.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.DataSet.transform" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.MoleculeDataSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.interfaces.</span></span><span class="sig-name descname"><span class="pre">MoleculeDataSet</span></span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#MoleculeDataSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.MoleculeDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.interfaces.DataSet" title="qsprpred.data.interfaces.DataSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSet</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.MoleculeDataSet.addDescriptors">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calculator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.Calculator" title="qsprpred.data.utils.descriptorcalculator.Calculator"><span class="pre">Calculator</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#MoleculeDataSet.addDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.MoleculeDataSet.addDescriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Add descriptors to the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>calculator</strong> – The descriptor calculator class wrapping the descriptors to calculate.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.MoleculeDataSet.fromFile">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.interfaces.MoleculeDataSet" title="qsprpred.data.interfaces.MoleculeDataSet"><span class="pre">MoleculeDataSet</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#MoleculeDataSet.fromFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.MoleculeDataSet.fromFile" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.MoleculeDataSet.getDescriptorNames">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDescriptorNames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#MoleculeDataSet.getDescriptorNames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.MoleculeDataSet.getDescriptorNames" title="Permalink to this definition"></a></dt>
+<dd><p>Get the names of the descriptors that are currently in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of descriptor names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.MoleculeDataSet.getDescriptors">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#MoleculeDataSet.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.MoleculeDataSet.getDescriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Get the table of descriptors that are currently in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">DataFrame</span></code> with the descriptors</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.MoleculeDataSet.hasDescriptors">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasDescriptors</span></span><a class="headerlink" href="#qsprpred.data.interfaces.MoleculeDataSet.hasDescriptors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.datafilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.interfaces.</span></span><span class="sig-name descname"><span class="pre">datafilter</span></span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#datafilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.datafilter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Filter out some rows from a dataframe.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.datasplit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.interfaces.</span></span><span class="sig-name descname"><span class="pre">datasplit</span></span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#datasplit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.datasplit" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Defines a function split a dataframe into train and test set.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.interfaces.featurefilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.interfaces.</span></span><span class="sig-name descname"><span class="pre">featurefilter</span></span><a class="reference internal" href="../_modules/qsprpred/data/interfaces.html#featurefilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.interfaces.featurefilter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Filter out uninformative features from a dataframe.</p>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.tests">
+<span id="qsprpred-data-tests-module"></span><h2>qsprpred.data.tests module<a class="headerlink" href="#module-qsprpred.data.tests" title="Permalink to this heading"></a></h2>
+<p>This module holds the test for functions regarding QSPR data preparation.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.DataSets">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">DataSets</span></span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#DataSets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.DataSets" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.tests.DataSets.df_large">
+<span class="sig-name descname"><span class="pre">df_large</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Name</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CAS</span> <span class="pre">#</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">SMILES</span>&#160; <span class="pre">VDss</span>&#160; <span class="pre">...</span>&#160; <span class="pre">RotBondCount</span>&#160; <span class="pre">moka_ionState7.4</span>&#160; <span class="pre">MoKa.LogP</span>&#160; <span class="pre">MoKa.LogD7.4</span> <span class="pre">0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Dopamine</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">51-61-6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">c1(cc(c(O)cc1)O)CCN</span>&#160; <span class="pre">0.74</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.56</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-2.00</span> <span class="pre">1</span>&#160;&#160;&#160; <span class="pre">Dihydroergosine</span>&#160;&#160;&#160;&#160; <span class="pre">7288-61-1</span>&#160; <span class="pre">CC(C)C[C&#64;H]1C(=O)N2CCC[C&#64;H]2[C&#64;]3(N1C(=O)[C&#64;](...</span>&#160; <span class="pre">4.02</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3.70</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3.20</span> <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">Avarofloxacin</span>&#160;&#160; <span class="pre">878592-87-1</span>&#160; <span class="pre">COc1c2c(cc(c1N3CCC/C(=C(/CN)\F)/C3)F)c(=O)c(cn...</span>&#160; <span class="pre">1.13</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">5</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">zwitterionic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.80</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.44</span> <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">SNS-032</span>&#160;&#160; <span class="pre">345627-80-7</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">N1CCC(CC1)C(=O)Nc1sc(cn1)SCc1oc(cn1)C(C)(C)C</span>&#160; <span class="pre">5.14</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">5</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.00</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.64</span> <span class="pre">4</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Felodipine</span>&#160;&#160;&#160; <span class="pre">72509-76-3</span>&#160;&#160;&#160; <span class="pre">CCOC(=O)C1=C(C)NC(=C(C1c2cccc(Cl)c2Cl)C(=O)OC)C</span>&#160; <span class="pre">4.40</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4.20</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4.20</span> <span class="pre">..</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160; <span class="pre">...</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span> <span class="pre">195</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CB</span> <span class="pre">10-277</span>&#160;&#160;&#160;&#160; <span class="pre">7203-91-0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CN(C)N=Nc1ccc(cc1)C(=O)O</span>&#160; <span class="pre">0.25</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">anionic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.50</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-0.32</span> <span class="pre">196</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">BB</span> <span class="pre">83698</span>&#160;&#160; <span class="pre">325795-25-3</span>&#160; <span class="pre">CC(C)(C)[C&#64;H](NC(=O)[C&#64;H](CC1CCCC1)CN(O)C=O)C(...</span>&#160; <span class="pre">1.10</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">9</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.10</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.10</span> <span class="pre">197</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Nifedipine</span>&#160;&#160;&#160; <span class="pre">21829-25-4</span>&#160;&#160;&#160; <span class="pre">COC(=O)C1=C(C)NC(=C(C1c2ccccc2N(=O)=O)C(=O)OC)C</span>&#160; <span class="pre">0.79</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.40</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.40</span> <span class="pre">198</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Foscarnet</span>&#160;&#160;&#160;&#160; <span class="pre">4428-95-9</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">OC(=O)P(=O)(O)O</span>&#160; <span class="pre">0.50</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">anionic</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">-1.20</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-7.60</span> <span class="pre">199</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Lefamulin</span>&#160; <span class="pre">1061337-51-6</span>&#160; <span class="pre">C[C&#64;&#64;H]1CC[C&#64;&#64;]23CCC(=O)[C&#64;H]2[C&#64;]1(C)[C&#64;&#64;H](C...</span>&#160; <span class="pre">1.32</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3.40</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.75</span>&#160; <span class="pre">[200</span> <span class="pre">rows</span> <span class="pre">x</span> <span class="pre">20</span> <span class="pre">columns]</span></em><a class="headerlink" href="#qsprpred.data.tests.DataSets.df_large" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.tests.DataSets.df_small">
+<span class="sig-name descname"><span class="pre">df_small</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Unnamed:</span> <span class="pre">0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Name</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">SMILES</span>&#160;&#160; <span class="pre">VDss</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">MW</span>&#160; <span class="pre">HBA</span>&#160; <span class="pre">HBD</span>&#160; <span class="pre">moka_ionState7.4</span> <span class="pre">5</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">5</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Nomifensine</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CN1CC(c2ccccc2)c3cccc(N)c3C1</span>&#160;&#160; <span class="pre">6.00</span>&#160; <span class="pre">...</span>&#160; <span class="pre">238.33</span>&#160;&#160;&#160; <span class="pre">2</span>&#160;&#160;&#160; <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span> <span class="pre">7</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">7</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">Voriconazole</span>&#160;&#160;&#160; <span class="pre">C[C&#64;&#64;H](c1ncncc1F)[C&#64;](O)(Cn2cncn2)c3ccc(F)cc3F</span>&#160;&#160; <span class="pre">2.20</span>&#160; <span class="pre">...</span>&#160; <span class="pre">349.31</span>&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160; <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span> <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Cefixime</span>&#160; <span class="pre">Nc1nc(cs1)\C(=N\OCC(=O)O)\C(=O)N[C&#64;H]2[C&#64;H]3SC...</span>&#160;&#160; <span class="pre">0.24</span>&#160; <span class="pre">...</span>&#160; <span class="pre">453.45</span>&#160;&#160; <span class="pre">12</span>&#160;&#160;&#160; <span class="pre">4</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">anionic</span> <span class="pre">0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Belinostat</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">c1c(cccc1\C=C\C(NO)=O)S(=O)(=O)Nc1ccccc1</span>&#160;&#160; <span class="pre">0.80</span>&#160; <span class="pre">...</span>&#160; <span class="pre">318.35</span>&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160; <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span> <span class="pre">9</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">9</span>&#160; <span class="pre">Sulfamethoxazole</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Cc1onc(NS(=O)(=O)c2ccc(N)cc2)c1</span>&#160;&#160; <span class="pre">0.30</span>&#160; <span class="pre">...</span>&#160; <span class="pre">253.28</span>&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160; <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">anionic</span> <span class="pre">8</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">8</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Sipatrigine</span>&#160;&#160;&#160;&#160; <span class="pre">c1(c2c(nc(N3CCN(C)CC3)nc2)N)c(c(cc(c1)Cl)Cl)Cl</span>&#160; <span class="pre">15.31</span>&#160; <span class="pre">...</span>&#160; <span class="pre">372.68</span>&#160;&#160;&#160; <span class="pre">5</span>&#160;&#160;&#160; <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span> <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Scutellarin</span>&#160; <span class="pre">c1cc(ccc1c2cc(=O)c3c(o2)cc(c(c3O)O)O[C&#64;H]4[C&#64;&#64;...</span>&#160;&#160; <span class="pre">0.88</span>&#160; <span class="pre">...</span>&#160; <span class="pre">462.36</span>&#160;&#160; <span class="pre">12</span>&#160;&#160;&#160; <span class="pre">7</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">anionic</span> <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160; <span class="pre">Caderofloxacin</span>&#160; <span class="pre">n1(cc(c(c2cc(c(c(c12)OC(F)F)N1C[C&#64;&#64;H](NCC1)C)F...</span>&#160;&#160; <span class="pre">1.10</span>&#160; <span class="pre">...</span>&#160; <span class="pre">411.38</span>&#160;&#160;&#160; <span class="pre">7</span>&#160;&#160;&#160; <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">zwitterionic</span> <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">RGB-286638</span>&#160; <span class="pre">N(C(=O)NN1CCOCC1)c1c2C(=O)c3c([nH]nc3c3ccc(cc3...</span>&#160;&#160; <span class="pre">5.90</span>&#160; <span class="pre">...</span>&#160; <span class="pre">545.63</span>&#160;&#160; <span class="pre">11</span>&#160;&#160;&#160; <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span> <span class="pre">4</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">BB</span> <span class="pre">83698</span>&#160; <span class="pre">CC(C)(C)[C&#64;H](NC(=O)[C&#64;H](CC1CCCC1)CN(O)C=O)C(...</span>&#160;&#160; <span class="pre">1.10</span>&#160; <span class="pre">...</span>&#160; <span class="pre">530.66</span>&#160;&#160; <span class="pre">10</span>&#160;&#160;&#160; <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160; <span class="pre">[10</span> <span class="pre">rows</span> <span class="pre">x</span> <span class="pre">12</span> <span class="pre">columns]</span></em><a class="headerlink" href="#qsprpred.data.tests.DataSets.df_small" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.PathMixIn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">PathMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#PathMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.PathMixIn" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.tests.PathMixIn.datapath">
+<span class="sig-name descname"><span class="pre">datapath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/zfsdata/data/helle/01_MainProjects/01_A2AR_in_cancer/Scripts/QSPRpred/qsprpred/data/test_files/data'</span></em><a class="headerlink" href="#qsprpred.data.tests.PathMixIn.datapath" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.tests.PathMixIn.qsprdatapath">
+<span class="sig-name descname"><span class="pre">qsprdatapath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/zfsdata/data/helle/01_MainProjects/01_A2AR_in_cancer/Scripts/QSPRpred/qsprpred/data/test_files/qspr/data'</span></em><a class="headerlink" href="#qsprpred.data.tests.PathMixIn.qsprdatapath" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.tests.PathMixIn.qsprmodelspath">
+<span class="sig-name descname"><span class="pre">qsprmodelspath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/zfsdata/data/helle/01_MainProjects/01_A2AR_in_cancer/Scripts/QSPRpred/qsprpred/data/test_files/qspr/models'</span></em><a class="headerlink" href="#qsprpred.data.tests.PathMixIn.qsprmodelspath" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.PathMixIn.setUpClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#PathMixIn.setUpClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.PathMixIn.setUpClass" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.PathMixIn.tearDownClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#PathMixIn.tearDownClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.PathMixIn.tearDownClass" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.StopWatch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">StopWatch</span></span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#StopWatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.StopWatch" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.StopWatch.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#StopWatch.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.StopWatch.reset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.StopWatch.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Time</span> <span class="pre">it</span> <span class="pre">took:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#StopWatch.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.StopWatch.stop" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">TestData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.tests.PathMixIn" title="qsprpred.data.tests.PathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathMixIn</span></code></a>, <a class="reference internal" href="#qsprpred.data.tests.DataSets" title="qsprpred.data.tests.DataSets"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSets</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestData.test_creation_preparation">
+<span class="sig-name descname"><span class="pre">test_creation_preparation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestData.test_creation_preparation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestData.test_creation_preparation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDataFilters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">TestDataFilters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDataFilters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDataFilters" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.tests.PathMixIn" title="qsprpred.data.tests.PathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathMixIn</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDataFilters.df">
+<span class="sig-name descname"><span class="pre">df</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Name</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CAS</span> <span class="pre">#</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">SMILES</span>&#160; <span class="pre">VDss</span>&#160; <span class="pre">...</span>&#160; <span class="pre">RotBondCount</span>&#160; <span class="pre">moka_ionState7.4</span>&#160; <span class="pre">MoKa.LogP</span>&#160; <span class="pre">MoKa.LogD7.4</span> <span class="pre">0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Dopamine</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">51-61-6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">c1(cc(c(O)cc1)O)CCN</span>&#160; <span class="pre">0.74</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.56</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-2.00</span> <span class="pre">1</span>&#160;&#160;&#160; <span class="pre">Dihydroergosine</span>&#160;&#160;&#160;&#160; <span class="pre">7288-61-1</span>&#160; <span class="pre">CC(C)C[C&#64;H]1C(=O)N2CCC[C&#64;H]2[C&#64;]3(N1C(=O)[C&#64;](...</span>&#160; <span class="pre">4.02</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3.70</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3.20</span> <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">Avarofloxacin</span>&#160;&#160; <span class="pre">878592-87-1</span>&#160; <span class="pre">COc1c2c(cc(c1N3CCC/C(=C(/CN)\F)/C3)F)c(=O)c(cn...</span>&#160; <span class="pre">1.13</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">5</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">zwitterionic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.80</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.44</span> <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">SNS-032</span>&#160;&#160; <span class="pre">345627-80-7</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">N1CCC(CC1)C(=O)Nc1sc(cn1)SCc1oc(cn1)C(C)(C)C</span>&#160; <span class="pre">5.14</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">5</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.00</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.64</span> <span class="pre">4</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Felodipine</span>&#160;&#160;&#160; <span class="pre">72509-76-3</span>&#160;&#160;&#160; <span class="pre">CCOC(=O)C1=C(C)NC(=C(C1c2cccc(Cl)c2Cl)C(=O)OC)C</span>&#160; <span class="pre">4.40</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4.20</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4.20</span> <span class="pre">..</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160; <span class="pre">...</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span> <span class="pre">195</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CB</span> <span class="pre">10-277</span>&#160;&#160;&#160;&#160; <span class="pre">7203-91-0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CN(C)N=Nc1ccc(cc1)C(=O)O</span>&#160; <span class="pre">0.25</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">anionic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.50</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-0.32</span> <span class="pre">196</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">BB</span> <span class="pre">83698</span>&#160;&#160; <span class="pre">325795-25-3</span>&#160; <span class="pre">CC(C)(C)[C&#64;H](NC(=O)[C&#64;H](CC1CCCC1)CN(O)C=O)C(...</span>&#160; <span class="pre">1.10</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">9</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.10</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.10</span> <span class="pre">197</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Nifedipine</span>&#160;&#160;&#160; <span class="pre">21829-25-4</span>&#160;&#160;&#160; <span class="pre">COC(=O)C1=C(C)NC(=C(C1c2ccccc2N(=O)=O)C(=O)OC)C</span>&#160; <span class="pre">0.79</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.40</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.40</span> <span class="pre">198</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Foscarnet</span>&#160;&#160;&#160;&#160; <span class="pre">4428-95-9</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">OC(=O)P(=O)(O)O</span>&#160; <span class="pre">0.50</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">anionic</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">-1.20</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-7.60</span> <span class="pre">199</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Lefamulin</span>&#160; <span class="pre">1061337-51-6</span>&#160; <span class="pre">C[C&#64;&#64;H]1CC[C&#64;&#64;]23CCC(=O)[C&#64;H]2[C&#64;]1(C)[C&#64;&#64;H](C...</span>&#160; <span class="pre">1.32</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3.40</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.75</span>&#160; <span class="pre">[200</span> <span class="pre">rows</span> <span class="pre">x</span> <span class="pre">20</span> <span class="pre">columns]</span></em><a class="headerlink" href="#qsprpred.data.tests.TestDataFilters.df" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDataFilters.test_Categoryfilter">
+<span class="sig-name descname"><span class="pre">test_Categoryfilter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDataFilters.test_Categoryfilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDataFilters.test_Categoryfilter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDataSplitters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">TestDataSplitters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDataSplitters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDataSplitters" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.tests.PathMixIn" title="qsprpred.data.tests.PathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathMixIn</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDataSplitters.df">
+<span class="sig-name descname"><span class="pre">df</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Name</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CAS</span> <span class="pre">#</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">SMILES</span>&#160; <span class="pre">VDss</span>&#160; <span class="pre">...</span>&#160; <span class="pre">RotBondCount</span>&#160; <span class="pre">moka_ionState7.4</span>&#160; <span class="pre">MoKa.LogP</span>&#160; <span class="pre">MoKa.LogD7.4</span> <span class="pre">0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Dopamine</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">51-61-6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">c1(cc(c(O)cc1)O)CCN</span>&#160; <span class="pre">0.74</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.56</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-2.00</span> <span class="pre">1</span>&#160;&#160;&#160; <span class="pre">Dihydroergosine</span>&#160;&#160;&#160;&#160; <span class="pre">7288-61-1</span>&#160; <span class="pre">CC(C)C[C&#64;H]1C(=O)N2CCC[C&#64;H]2[C&#64;]3(N1C(=O)[C&#64;](...</span>&#160; <span class="pre">4.02</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3.70</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3.20</span> <span class="pre">2</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">Avarofloxacin</span>&#160;&#160; <span class="pre">878592-87-1</span>&#160; <span class="pre">COc1c2c(cc(c1N3CCC/C(=C(/CN)\F)/C3)F)c(=O)c(cn...</span>&#160; <span class="pre">1.13</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">5</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">zwitterionic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.80</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.44</span> <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">SNS-032</span>&#160;&#160; <span class="pre">345627-80-7</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">N1CCC(CC1)C(=O)Nc1sc(cn1)SCc1oc(cn1)C(C)(C)C</span>&#160; <span class="pre">5.14</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">5</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.00</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.64</span> <span class="pre">4</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Felodipine</span>&#160;&#160;&#160; <span class="pre">72509-76-3</span>&#160;&#160;&#160; <span class="pre">CCOC(=O)C1=C(C)NC(=C(C1c2cccc(Cl)c2Cl)C(=O)OC)C</span>&#160; <span class="pre">4.40</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4.20</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">4.20</span> <span class="pre">..</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160; <span class="pre">...</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span> <span class="pre">195</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CB</span> <span class="pre">10-277</span>&#160;&#160;&#160;&#160; <span class="pre">7203-91-0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CN(C)N=Nc1ccc(cc1)C(=O)O</span>&#160; <span class="pre">0.25</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">anionic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.50</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-0.32</span> <span class="pre">196</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">BB</span> <span class="pre">83698</span>&#160;&#160; <span class="pre">325795-25-3</span>&#160; <span class="pre">CC(C)(C)[C&#64;H](NC(=O)[C&#64;H](CC1CCCC1)CN(O)C=O)C(...</span>&#160; <span class="pre">1.10</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">9</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.10</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.10</span> <span class="pre">197</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Nifedipine</span>&#160;&#160;&#160; <span class="pre">21829-25-4</span>&#160;&#160;&#160; <span class="pre">COC(=O)C1=C(C)NC(=C(C1c2ccccc2N(=O)=O)C(=O)OC)C</span>&#160; <span class="pre">0.79</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">neutral</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.40</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.40</span> <span class="pre">198</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Foscarnet</span>&#160;&#160;&#160;&#160; <span class="pre">4428-95-9</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">OC(=O)P(=O)(O)O</span>&#160; <span class="pre">0.50</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">anionic</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">-1.20</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-7.60</span> <span class="pre">199</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Lefamulin</span>&#160; <span class="pre">1061337-51-6</span>&#160; <span class="pre">C[C&#64;&#64;H]1CC[C&#64;&#64;]23CCC(=O)[C&#64;H]2[C&#64;]1(C)[C&#64;&#64;H](C...</span>&#160; <span class="pre">1.32</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">cationic</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3.40</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.75</span>&#160; <span class="pre">[200</span> <span class="pre">rows</span> <span class="pre">x</span> <span class="pre">20</span> <span class="pre">columns]</span></em><a class="headerlink" href="#qsprpred.data.tests.TestDataSplitters.df" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDataSplitters.test_randomsplit">
+<span class="sig-name descname"><span class="pre">test_randomsplit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDataSplitters.test_randomsplit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDataSplitters.test_randomsplit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDataSplitters.test_scaffoldsplit">
+<span class="sig-name descname"><span class="pre">test_scaffoldsplit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDataSplitters.test_scaffoldsplit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDataSplitters.test_scaffoldsplit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDataSplitters.test_temporalsplit">
+<span class="sig-name descname"><span class="pre">test_temporalsplit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDataSplitters.test_temporalsplit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDataSplitters.test_temporalsplit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDescriptorCalculator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">TestDescriptorCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDescriptorCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDescriptorCalculator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.tests.PathMixIn" title="qsprpred.data.tests.PathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathMixIn</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDescriptorCalculator.prep_testdata">
+<span class="sig-name descname"><span class="pre">prep_testdata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDescriptorCalculator.prep_testdata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDescriptorCalculator.prep_testdata" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDescriptorCalculator.test_descriptorcalculator">
+<span class="sig-name descname"><span class="pre">test_descriptorcalculator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDescriptorCalculator.test_descriptorcalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDescriptorCalculator.test_descriptorcalculator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDescriptorsets">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">TestDescriptorsets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDescriptorsets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDescriptorsets" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.tests.PathMixIn" title="qsprpred.data.tests.PathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathMixIn</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDescriptorsets.prep_testdata">
+<span class="sig-name descname"><span class="pre">prep_testdata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDescriptorsets.prep_testdata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDescriptorsets.prep_testdata" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDescriptorsets.test_DrugExPhyschem">
+<span class="sig-name descname"><span class="pre">test_DrugExPhyschem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDescriptorsets.test_DrugExPhyschem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDescriptorsets.test_DrugExPhyschem" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDescriptorsets.test_Mordred">
+<span class="sig-name descname"><span class="pre">test_Mordred</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDescriptorsets.test_Mordred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDescriptorsets.test_Mordred" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDescriptorsets.test_MorganFP">
+<span class="sig-name descname"><span class="pre">test_MorganFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDescriptorsets.test_MorganFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDescriptorsets.test_MorganFP" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestDescriptorsets.test_rdkit_descs">
+<span class="sig-name descname"><span class="pre">test_rdkit_descs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestDescriptorsets.test_rdkit_descs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestDescriptorsets.test_rdkit_descs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestFeatureFilters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">TestFeatureFilters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestFeatureFilters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestFeatureFilters" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.tests.PathMixIn" title="qsprpred.data.tests.PathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathMixIn</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestFeatureFilters.df">
+<span class="sig-name descname"><span class="pre">df</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">F1</span>&#160; <span class="pre">F2</span>&#160; <span class="pre">F3</span>&#160; <span class="pre">F4</span>&#160; <span class="pre">F5</span>&#160; <span class="pre">y</span> <span class="pre">0</span>&#160;&#160; <span class="pre">1</span>&#160;&#160; <span class="pre">4</span>&#160;&#160; <span class="pre">2</span>&#160;&#160; <span class="pre">6</span>&#160;&#160; <span class="pre">2</span>&#160; <span class="pre">1</span> <span class="pre">1</span>&#160;&#160; <span class="pre">1</span>&#160;&#160; <span class="pre">8</span>&#160;&#160; <span class="pre">4</span>&#160;&#160; <span class="pre">2</span>&#160;&#160; <span class="pre">4</span>&#160; <span class="pre">2</span> <span class="pre">2</span>&#160;&#160; <span class="pre">1</span>&#160;&#160; <span class="pre">4</span>&#160;&#160; <span class="pre">3</span>&#160;&#160; <span class="pre">2</span>&#160;&#160; <span class="pre">5</span>&#160; <span class="pre">3</span> <span class="pre">3</span>&#160;&#160; <span class="pre">1</span>&#160;&#160; <span class="pre">8</span>&#160;&#160; <span class="pre">4</span>&#160;&#160; <span class="pre">9</span>&#160;&#160; <span class="pre">8</span>&#160; <span class="pre">4</span> <span class="pre">4</span>&#160;&#160; <span class="pre">1</span>&#160;&#160; <span class="pre">4</span>&#160;&#160; <span class="pre">2</span>&#160;&#160; <span class="pre">3</span>&#160;&#160; <span class="pre">9</span>&#160; <span class="pre">5</span> <span class="pre">5</span>&#160;&#160; <span class="pre">1</span>&#160;&#160; <span class="pre">8</span>&#160;&#160; <span class="pre">4</span>&#160;&#160; <span class="pre">7</span>&#160; <span class="pre">12</span>&#160; <span class="pre">6</span></em><a class="headerlink" href="#qsprpred.data.tests.TestFeatureFilters.df" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestFeatureFilters.test_BorutaFilter">
+<span class="sig-name descname"><span class="pre">test_BorutaFilter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestFeatureFilters.test_BorutaFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestFeatureFilters.test_BorutaFilter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestFeatureFilters.test_highCorrelationFilter">
+<span class="sig-name descname"><span class="pre">test_highCorrelationFilter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestFeatureFilters.test_highCorrelationFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestFeatureFilters.test_highCorrelationFilter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestFeatureFilters.test_lowVarianceFilter">
+<span class="sig-name descname"><span class="pre">test_lowVarianceFilter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestFeatureFilters.test_lowVarianceFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestFeatureFilters.test_lowVarianceFilter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestFeatureStandardizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.tests.</span></span><span class="sig-name descname"><span class="pre">TestFeatureStandardizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestFeatureStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestFeatureStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.tests.PathMixIn" title="qsprpred.data.tests.PathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathMixIn</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestFeatureStandardizer.prep_testdata">
+<span class="sig-name descname"><span class="pre">prep_testdata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestFeatureStandardizer.prep_testdata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestFeatureStandardizer.prep_testdata" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.tests.TestFeatureStandardizer.test_featurestandarizer">
+<span class="sig-name descname"><span class="pre">test_featurestandarizer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/tests.html#TestFeatureStandardizer.test_featurestandarizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.tests.TestFeatureStandardizer.test_featurestandarizer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.data" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.html" class="btn btn-neutral float-left" title="qsprpred package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.data.utils.html" class="btn btn-neutral float-right" title="qsprpred.data.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
