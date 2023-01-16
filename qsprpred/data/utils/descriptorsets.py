@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 
 import mordred
 import numpy as np
+import pandas as pd
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
@@ -60,11 +61,6 @@ class DescriptorSet(ABC):
         pass
 
     @abstractmethod
-    def get_len(self):
-        """Return the the number of descriptors/fingerprint bits."""
-        pass
-
-    @abstractmethod
     def __str__(self):
         pass
 
@@ -94,7 +90,12 @@ class MorganFP(DescriptorSet):
         fp = morgan(mol, *self._args, **self._kwargs)
         ret = np.zeros(len(fp))
         convertFP(fp, ret)
+
+        if self.keepindices:
+            ret = ret[list(map(int, self.keepindices))]
+
         ret = list(ret)
+
         return ret
 
     @property
@@ -224,7 +225,7 @@ class DrugExPhyschem(DescriptorSet):
         return "DrugExPhyschem"
 
 
-class RDkitDescs(DescriptorSet):
+class rdkit_descs(DescriptorSet):
     """
     RDkit descriptors
     Initialize the descriptor names (a list of properties to calculate) to select a subset of the rdkit descriptors.
@@ -282,7 +283,7 @@ class PredictorDesc(DescriptorSet):
         self._is_fp = False
         from qsprpred.scorers.predictor import Predictor
         self._predictor = Predictor.fromFile(*args, **kwargs)
-        self._descriptors = self._predictor.getKey()
+        self._descriptors = [self._predictor.getKey()]
 
     def __call__(self, mol):
         """
@@ -295,7 +296,7 @@ class PredictorDesc(DescriptorSet):
             a `list` of descriptor values
         """
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        return pd.DataFrame(self._predictor.getScores([mol]), columns=[self._predictor.getKey()])
+        return list(self._predictor.getScores([mol]))
 
     @property
     def is_fp(self):
@@ -305,6 +306,14 @@ class PredictorDesc(DescriptorSet):
     def settings(self):
         """Return args and kwargs used to initialize the descriptorset."""
         return self._args, self._kwargs
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, descriptors):
+        self._descriptors = descriptors
 
     def get_len(self):
         return 1
@@ -336,7 +345,7 @@ class _DescriptorSetRetriever:
         return Mordred(*args, **kwargs)
 
     def get_RDkit(self, *args, **kwargs):
-        return RDkitDescs(*args, **kwargs)
+        return rdkit_descs(*args, **kwargs)
 
     def get_PredictorDesc(self, *args, **kwargs):
         return PredictorDesc(*args, **kwargs)

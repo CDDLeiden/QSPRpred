@@ -65,12 +65,12 @@ class Predictor(Scorer):
         path = base_dir + '/qspr/models/' + '_'.join(
             [algorithm, type, target]) + '.json'
         feature_calculators = DescriptorsCalculator.fromFile(
-            base_dir + '/qspr/data/' + '_'.join([type, target]) + '_DescCalc.json')
+            base_dir + '/qspr/data/' + '_'.join([target, type]) + '_QSPRdata_feature_calculators.json')
         # TODO do not hardcode when to use scaler
         scaler = None
         if scale:
             scaler = SKLearnStandardizer.fromFile(
-                base_dir + '/qspr/data/' + '_'.join([type, target]) + '_scaler.json')
+                base_dir + '/qspr/data/' + '_'.join([target, type]) + '_QSPRdata_feature_standardizer_0.json')
 
         if "DNN" in path:
             with open(path) as f:
@@ -104,12 +104,12 @@ class Predictor(Scorer):
         if (self.model.__class__.__name__ == "STFullyConnected"):
             fps_loader = self.model.get_dataloader(features)
             if self.type == 'CLS':
-                if len(self.th) > 1:
+                if self.th is None or len(self.th) == 1:
+                    scores = self.model.predict(fps_loader)[:, 1].astype(float)
+                elif len(self.th) > 1:
                     scores = np.argmax(
                         self.model.predict(fps_loader),
                         axis=1).astype(float)
-                elif len(self.th) == 1:
-                    scores = self.model.predict(fps_loader)[:, 1].astype(float)
             else:
                 scores = self.model.predict(fps_loader).flatten()
         # Special case PLS
@@ -118,14 +118,14 @@ class Predictor(Scorer):
         # Regression
         elif self.type == 'REG':
             scores = self.model.predict(features)
+        # Single-class classification
+        elif (self.type == 'CLS') and (self.th is None or len(self.th) == 1):
+            scores = self.model.predict_proba(features)[:, 1]
         # Multi-class classification
         elif len(self.th) > 1:
             scores = np.argmax(
                 self.model.predict_proba(features),
                 axis=1).astype(float)
-        # Single-class classification
-        elif (self.type == 'CLS'):
-            scores = self.model.predict_proba(features)[:, 1]
 
         if len(scores.shape) > 1 and scores.shape[1] == 1:
             scores = scores[:, 0]

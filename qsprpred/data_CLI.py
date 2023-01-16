@@ -21,7 +21,7 @@ from qsprpred.data.utils.descriptorsets import (
     Mordred,
     MorganFP,
     PredictorDesc,
-    RDkitDescs,
+    rdkit_descs,
 )
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
@@ -154,7 +154,7 @@ def QSPR_dataprep(args):
                 th=th,
                 target_transformer=log_transform,
                 store_dir=f"{args.base_dir}/qspr/data/",
-                overwrite=False)
+                overwrite=True)
 
             # data filters
             datafilters = []
@@ -174,7 +174,7 @@ def QSPR_dataprep(args):
             if 'Morgan' in args.features:
                 descriptorsets.append(MorganFP(3, nBits=2048))
             if 'RDkit' in args.features:
-                descriptorsets.append(RDkitDescs())
+                descriptorsets.append(rdkit_descs())
             if 'Mordred' in args.features:
                 descriptorsets.append(Mordred())
             if 'DrugEx' in args.features:
@@ -182,7 +182,7 @@ def QSPR_dataprep(args):
             for predictor_path in args.feature_predictor:
                 # load in predictor from files
                 model_info = os.path.basename(predictor_path).split('.')[0].split('_')  # type_task_prop.json
-                model_basedir = f'{os.path.dirname(predictor_path)}'
+                model_basedir = f'{os.path.dirname(predictor_path)}/../..'
                 with open(f'{model_basedir}/qspr/data/{model_info[2]}_{model_info[1]}_QSPRdata_meta.json') as f:
                     meta = json.load(f)
                 if 'th' in meta["data"]:
