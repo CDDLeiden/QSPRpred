@@ -279,7 +279,7 @@ class QSPRDataset(MoleculeTable):
                 self.makeClassification(th, as_new=True)
             else:
                 # if a precomputed target is expected, just check it
-                assert all(float(x).is_integer() for x in self.df[self.targetProperty])
+                assert all(float(x).is_integer() for x in self.df[self.targetProperty]), f"Target property ({self.targetProperty}) should be integer if used for classification. Or specify threshold for binning."
         elif self.task == ModelTasks.REGRESSION and th:
             raise ValueError(
                 f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
@@ -370,6 +370,13 @@ class QSPRDataset(MoleculeTable):
             meta_init['task'] = ModelTasks(meta_init['task'])
 
         return QSPRDataset(*args, name=name, store_dir=store_dir, **meta_init, **kwargs)
+
+    @staticmethod
+    def fromMolTable(mol_table: MoleculeTable, target_prop : str, name=None, **kwargs) -> 'QSPRDataset':
+        """Create QSPRDataset from a MoleculeTable."""
+        kwargs['store_dir'] = mol_table.storeDir if 'store_dir' not in kwargs else kwargs['store_dir']
+        name = mol_table.name if name is None else name
+        return QSPRDataset(name, target_prop, mol_table.getDF(), **kwargs)
 
     def save(self, save_split=True):
         super().save()
