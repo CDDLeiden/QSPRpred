@@ -69,6 +69,8 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-ss', '--search_space', type=str, default=None,
                         help="search_space hyperparameter optimization json file location (base_dir/[name].json), \
                               if None default qsprpred.models.search_space.json used")
+    parser.add_argument('-nj', '--n_jobs', type=int, default=1, help="number of parallel trials for hyperparameter optimization,\
+                        warning this increase the number of CPU's used (ncpu x n_jobs)")          
     parser.add_argument('-nt', '--n_trials', type=int, default=20, help="number of trials for bayes optimization")
     parser.add_argument('-me', '--model_evaluation', action='store_true',
                         help='If on, model evaluation through cross validation and independent test set is performed.')
@@ -190,7 +192,7 @@ def QSPR_modelling(args):
                     search_space_gs = grid_params[grid_params[:, 0] ==
                                                   model_type, 1][0]
                     log.info(search_space_gs)
-                    QSPRmodel.gridSearch(search_space_gs)
+                    QSPRmodel.gridSearch(search_space_gs, n_jobs=args.n_jobs)
                 elif args.optimization == 'bayes':
                     search_space_bs = grid_params[grid_params[:, 0] ==
                                                   model_type, 1][0]
@@ -205,7 +207,7 @@ def QSPR_modelling(args):
                     elif model_type == "RF":
                         search_space_bs.update(
                             {'criterion': ['categorical', ['gini', 'entropy']]})
-                    QSPRmodel.bayesOptimization(search_space_bs, args.n_trials)
+                    QSPRmodel.bayesOptimization(search_space_bs, args.n_trials, n_jobs=args.n_jobs)
 
                 # initialize models from saved or default parameters
 
