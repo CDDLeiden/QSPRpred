@@ -28,3 +28,4 @@ From v1.0.0 to v1.1.0
 - Tutorials for training and using the QSPR models
 - Depiction of results for classification models (see `qsprpred.plotting.classification`)
 - The `precomputed` flag was added to `QSPRDataset`
+- Added an option to directly fetch `QSPRDataset` from Papyrus with accession IDs (see `qsprpred.data.sources.papyrus`)
