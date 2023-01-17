@@ -363,7 +363,7 @@ class QSPRDataset(MoleculeTable):
     @staticmethod
     def fromFile(filename, *args, **kwargs) -> 'QSPRDataset':
         store_dir = os.path.dirname(filename)
-        name = os.path.basename(filename).split('.')[0]
+        name = os.path.basename(filename).rsplit('_',1)[0]
         with open(os.path.join(store_dir, f"{name}_meta.json")) as f:
             meta = json.load(f)
             meta_init = meta['init']
