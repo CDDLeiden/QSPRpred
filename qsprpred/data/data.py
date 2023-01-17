@@ -11,6 +11,7 @@ from qsprpred.data.interfaces import MoleculeDataSet, datasplit
 from qsprpred.data.utils.datasplitters import randomsplit
 from qsprpred.data.utils.descriptorcalculator import Calculator, DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
+from qsprpred.data.utils.scaffolds import Scaffold
 from qsprpred.data.utils.smiles_standardization import (
     chembl_smi_standardizer,
     sanitize_smiles,
@@ -107,6 +108,12 @@ class MoleculeTable(MoleculeDataSet):
         name = os.path.basename(filename).split('.')[0]
         return MoleculeTable(name=name, store_dir=store_dir, *args, **kwargs)
 
+    @staticmethod
+    def fromSMILES(name, smiles, *args, **kwargs):
+        smilescol = "SMILES"
+        df = pd.DataFrame({smilescol : smiles})
+        return MoleculeTable(name, df, *args, smilescol=smilescol, **kwargs)
+
     def getSubset(self, prefix: str):
         if self.df.columns.str.startswith(prefix).any():
             return self.df[self.df.columns[self.df.columns.str.startswith(prefix)]]
@@ -202,6 +209,48 @@ class MoleculeTable(MoleculeDataSet):
 
     def removeProperty(self, name):
         del self.df[name]
+
+    def addScaffolds(self, scaffolds: List[Scaffold], add_rdkit_scaffold=False):
+        for scaffold in scaffolds:
+            if f"Scaffold_{scaffold}" in self.df.columns:
+                continue
+
+            self.df[f"Scaffold_{scaffold}"] = self.apply([self.smilescol], axis=1)
+            if add_rdkit_scaffold:
+                PandasTools.AddMoleculeColumnToFrame(self.df, smilesCol=f"Scaffold_{scaffold}",
+                                                 molCol=f"Scaffold_{scaffold}_RDMol")
+
+    def getScaffoldNames(self, include_mols=False):
+        return [col for col in self.df.columns if
+                col.startswith("Scaffold_") and (include_mols or not col.endswith("_RDMol"))]
+
+    def getScaffolds(self, includeMols=False):
+        if includeMols:
+            return self.df[[col for col in self.df.columns if col.startswith("Scaffold_")]]
+        else:
+            return self.df[self.getScaffoldNames()]
+
+    @property
+    def hasScaffolds(self):
+        return len(self.getScaffoldNames()) > 0
+
+    def createScaffoldGroups(self, mols_per_group=10):
+        scaffolds = self.getScaffolds(includeMols=False)
+        for scaffold in scaffolds.columns:
+            counts = pd.value_counts(self.df[scaffold])
+            mask = counts.lt(mols_per_group)
+            name = f'ScaffoldGroup_{scaffold}_{mols_per_group}'
+            if name not in self.df.columns:
+                self.df[name] = np.where(self.df[scaffold].isin(counts[mask].index), 'Other',
+                                            self.df[scaffold])
+
+    def getScaffoldGroups(self, scaffold_name: str, mol_per_group: int = 10):
+        return self.df[
+            self.df.columns[self.df.columns.str.startswith(f"ScaffoldGroup_{scaffold_name}_{mol_per_group}")][0]]
+
+    @property
+    def hasScaffoldGroups(self):
+        return len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
 
 
 class QSPRDataset(MoleculeTable):
