@@ -114,6 +114,14 @@ class MoleculeTable(MoleculeDataSet):
         df = pd.DataFrame({smilescol : smiles})
         return MoleculeTable(name, df, *args, smilescol=smilescol, **kwargs)
 
+    @staticmethod
+    def fromTableFile(name, filename, sep="\t", *args, **kwargs):
+        return MoleculeTable(name, pd.read_table(filename, sep=sep), *args, **kwargs)
+
+    @staticmethod
+    def fromSDF(name, filename, smiles_prop, *args, **kwargs):
+        return MoleculeTable(name, PandasTools.LoadSDF(filename, molColName="RDMol"), smilescol=smiles_prop, *args, **kwargs)
+
     def getSubset(self, prefix: str):
         if self.df.columns.str.startswith(prefix).any():
             return self.df[self.df.columns[self.df.columns.str.startswith(prefix)]]
