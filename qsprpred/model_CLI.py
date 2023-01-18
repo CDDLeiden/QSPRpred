@@ -69,8 +69,9 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-ss', '--search_space', type=str, default=None,
                         help="search_space hyperparameter optimization json file location (base_dir/[name].json), \
                               if None default qsprpred.models.search_space.json used")
-    parser.add_argument('-nj', '--n_jobs', type=int, default=1, help="number of parallel trials for hyperparameter optimization,\
-                        warning this increase the number of CPU's used (ncpu x n_jobs)")          
+    parser.add_argument('-nj', '--n_jobs', type=int, default=1,
+                        help="number of parallel trials for hyperparameter optimization,\
+                        warning this increase the number of CPU's used (ncpu x n_jobs)")
     parser.add_argument('-nt', '--n_trials', type=int, default=20, help="number of trials for bayes optimization")
     parser.add_argument('-me', '--model_evaluation', action='store_true',
                         help='If on, model evaluation through cross validation and independent test set is performed.')
@@ -132,7 +133,7 @@ def QSPR_modelling(args):
         for property in args.properties:
             log.info(f"Property: {property[0]}")
 
-            mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata.pkl')
+            mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_df.pkl')
             mydataset.reload()
             mydataset.createFolds(n_folds=mydataset.n_folds)
 
