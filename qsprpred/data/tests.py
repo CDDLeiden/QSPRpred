@@ -18,7 +18,7 @@ from qsprpred.data.utils.descriptorsets import (
     Mordred,
     MorganFP,
     PredictorDesc,
-    RDkitDescs,
+    rdkit_descs,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (

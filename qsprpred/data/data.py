@@ -57,10 +57,10 @@ class MoleculeTable(MoleculeDataSet):
         # paths
         self.storeDir = store_dir.rstrip("/")
         self.storePrefix = f"{self.storeDir}/{self.name}"
-        self.descriptorCalculatorPath = f"{self.storePrefix}_QSPRdata_feature_calculators.json"
+        self.descriptorCalculatorPath = f"{self.storePrefix}_feature_calculators.json"
         if not os.path.exists(self.storeDir):
             raise FileNotFoundError(f"Directory '{self.storeDir}' does not exist.")
-        self.storePath = f'{self.storePrefix}_QSPRdata_df.pkl'
+        self.storePath = f'{self.storePrefix}_df.pkl'
 
         # data frame initialization
         if df is not None:
@@ -422,10 +422,10 @@ class QSPRDataset(MoleculeTable):
         super().reload()
         if load_split:
             try:
-                self.X = pd.read_pickle(f"{self.storePrefix}_QSPRdata_X.pkl")
-                self.X_ind = pd.read_pickle(f"{self.storePrefix}_QSPRdata_X_ind.pkl")
-                self.y = pd.read_pickle(f"{self.storePrefix}_QSPRdata_y.pkl")
-                self.y_ind = pd.read_pickle(f"{self.storePrefix}_QSPRdata_y_ind.pkl")
+                self.X = pd.read_pickle(f"{self.storePrefix}_X.pkl")
+                self.X_ind = pd.read_pickle(f"{self.storePrefix}_X_ind.pkl")
+                self.y = pd.read_pickle(f"{self.storePrefix}_y.pkl")
+                self.y_ind = pd.read_pickle(f"{self.storePrefix}_y_ind.pkl")
             except FileNotFoundError:
                 logger.warning("No input or output train/test dataframes saved.")
 
