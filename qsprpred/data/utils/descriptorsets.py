@@ -78,7 +78,7 @@ class MorganFP(DescriptorSet):
         self._kwargs = kwargs
         self._is_fp = True
 
-        self.keepindices = None
+        self._keepindices = None
 
     def __call__(self, mol):
         convertMol = Chem.MolFromSmiles
@@ -89,8 +89,17 @@ class MorganFP(DescriptorSet):
         fp = morgan(mol, *self._args, **self._kwargs)
         ret = np.zeros(len(fp))
         convertFP(fp, ret)
-        ret = list(ret)
-        return ret
+        if self.keepindices:
+            ret = ret[self.keepindices]
+        return list(ret)
+
+    @property
+    def keepindices(self):
+        return self._keepindices
+
+    @keepindices.setter
+    def keepindices(self, val):
+        self._keepindices = [int(x) for x in val]
 
     @property
     def is_fp(self):
@@ -193,7 +202,7 @@ class DrugExPhyschem(DescriptorSet):
         self.props = [x for x in Property(*args, **kwargs).props]
 
     def __call__(self, mol):
-        calculator = Property(*self._args, **self._kwargs)
+        calculator = Property(self.props)
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
         return list(calculator.getScores([mol])[0])
 
