@@ -99,7 +99,7 @@ class MorganFP(DescriptorSet):
 
     @keepindices.setter
     def keepindices(self, val):
-        self._keepindices = [int(x) for x in val]
+        self._keepindices = [int(x) for x in val] if val else None
 
     @property
     def is_fp(self):
@@ -138,6 +138,7 @@ class Mordred(DescriptorSet):
         *args: `Calculator` arguments
         **kwargs: `Calculator` keyword arguments
     """
+
     def __init__(self, *args, **kwargs):
         self._args = args
         self._kwargs = kwargs
@@ -272,7 +273,7 @@ class rdkit_descs(DescriptorSet):
 
 class _DescriptorSetRetriever:
     """Based on recipe 8.21 of the book "Python Cookbook".
-    
+
     To support a new type of descriptor, just add a function "get_descname(self, *args, **kwargs)".
     """
 
@@ -291,7 +292,7 @@ class _DescriptorSetRetriever:
 
     def get_Mordred(self, *args, **kwargs):
         return Mordred(*args, **kwargs)
-    
+
     def get_RDkit(self, *args, **kwargs):
         return rdkit_descs(*args, **kwargs)
 

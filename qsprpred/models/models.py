@@ -92,7 +92,7 @@ class QSPRsklearn(QSPRModel):
             self.data.task == ModelTasks.REGRESSION or not self.data.isMultiClass()) else np.zeros(
             (self.data.y.shape[0],
              self.data.nClasses))
-        
+
         fold_counter = np.zeros(self.data.y.shape[0])
 
         # cross validation
@@ -100,7 +100,7 @@ class QSPRsklearn(QSPRModel):
             logger.info('cross validation fold %s started: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
             fold_counter[idx_test] = i
-            
+
             fit_set = {'X': X_train}
 
             if type(self.alg).__name__ == 'PLSRegression':
@@ -108,7 +108,7 @@ class QSPRsklearn(QSPRModel):
             else:
                 fit_set['y'] = y_train
             self.model.fit(**fit_set)
-            
+
             if type(self.alg).__name__ == 'PLSRegression':
                 cvs[idx_test] = self.model.predict(X_test)[:, 0]
             elif self.data.task == ModelTasks.REGRESSION:
@@ -242,8 +242,8 @@ class QSPRsklearn(QSPRModel):
                     self.data.y, self.evaluate(save=False),
                     average="weighted", multi_class='ovr',)
             except ValueError:
-                logger.exception("Only one class present in y_true. ROC AUC score is not defined in that case. \
-                                  Score set to -1.")
+                logger.exception(
+                    "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
                 score = -1
         return score
 
@@ -424,7 +424,6 @@ class QSPRDNN(QSPRModel):
 
         self.model = self.alg.set_params(**best_params)
 
-
     def bayesOptimization(self, search_space_bs, n_trials, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
@@ -436,7 +435,7 @@ class QSPRDNN(QSPRModel):
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         # TODO add timeout function
-        
+
         if n_jobs > 1:
             logger.warning("At the moment n_jobs>1 not available for bayesoptimization. n_jobs set to 1")
             n_jobs = 1
