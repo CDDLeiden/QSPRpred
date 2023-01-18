@@ -119,7 +119,7 @@ class MoleculeTable(MoleculeDataSet):
             return self.df[self.df.columns[self.df.columns.str.startswith(prefix)]]
 
     def apply(self, func, func_args=None, func_kwargs=None, axis=0, raw=False,
-              result_type='expand', subset=None, n_cpus=None, chunk_size=1000):
+              result_type='expand', subset=None, n_cpus=1, chunk_size=1000):
         n_cpus = n_cpus if n_cpus else os.cpu_count()
         if n_cpus and n_cpus > 1:
             return self.papply(func, func_args, func_kwargs, axis, raw, result_type, subset, n_cpus, chunk_size)
@@ -129,7 +129,7 @@ class MoleculeTable(MoleculeDataSet):
                                 args=func_args, **func_kwargs if func_kwargs else {})
 
     def papply(self, func, func_args=None, func_kwargs=None, axis=0, raw=False,
-               result_type='expand', subset=None, n_cpus=None, chunk_size=1000):
+               result_type='expand', subset=None, n_cpus=1, chunk_size=1000):
         n_cpus = n_cpus if n_cpus else os.cpu_count()
         df_sub = self.df[subset if subset else self.df.columns]
         data = [df_sub[i: i + chunk_size] for i in range(0, len(df_sub), chunk_size)]
@@ -166,7 +166,7 @@ class MoleculeTable(MoleculeDataSet):
         for table_filter in table_filters:
             self.df = table_filter(self.df)
 
-    def addDescriptors(self, calculator: Calculator, recalculate=False, n_cpus=None, chunk_size=50):
+    def addDescriptors(self, calculator: Calculator, recalculate=False, n_cpus=1, chunk_size=50):
         if recalculate:
             self.df.drop(self.getDescriptorNames(), axis=1, inplace=True)
         elif self.hasDescriptors:
@@ -339,7 +339,6 @@ class QSPRDataset(MoleculeTable):
         self.y_ind = None
 
         self.n_folds = n_folds
-        self.folds = None
 
         self.features = None
         self.feature_standardizers = []
@@ -412,7 +411,7 @@ class QSPRDataset(MoleculeTable):
     @staticmethod
     def fromFile(filename, *args, **kwargs) -> 'QSPRDataset':
         store_dir = os.path.dirname(filename)
-        name = os.path.basename(filename).split('.')[0]
+        name = os.path.basename(filename).rsplit('_',1)[0]
         with open(os.path.join(store_dir, f"{name}_meta.json")) as f:
             meta = json.load(f)
             meta_init = meta['init']
@@ -553,6 +552,7 @@ class QSPRDataset(MoleculeTable):
         n_folds=5,
         recalculate_features=False,
         fill_value=0,
+        n_cpus=1
     ):
         """Prepare the dataset for use in QSPR model.
 
@@ -564,8 +564,9 @@ class QSPRDataset(MoleculeTable):
             feature_calculator (DescriptorsCalculator): calculates features from smiles
             feature_filters (list of feature filter objs): filters features
             feature_standardizers (list of feature standardizer objs): standardizes and/or scales features
-            n_folds (n): number of folds to use in cross-validation
+            n_folds (int): number of folds to use in cross-validation
             recalculate_features (bool): recalculate features even if they are already present in the file
+            n_cpus (int): number of cpus used for calculating descriptors
         """
         # apply sanitization and standardization
         if standardize:
@@ -573,7 +574,7 @@ class QSPRDataset(MoleculeTable):
 
         # calculate features
         if feature_calculator is not None:
-            self.addDescriptors(feature_calculator, recalculate=recalculate_features)
+            self.addDescriptors(feature_calculator, recalculate=recalculate_features, n_cpus=n_cpus)
 
         # apply data filters
         if datafilters is not None:
@@ -636,9 +637,9 @@ class QSPRDataset(MoleculeTable):
             raise ValueError("Number of folds not specified nor in class property or as an argument.")
         feature_standardizers = feature_standardizers if feature_standardizers else self.feature_standardizers if self.feature_standardizers else tuple()
         if self.task != ModelTasks.CLASSIFICATION:
-            self.folds = KFold(self.n_folds).split(self.X)
+            folds = KFold(self.n_folds).split(self.X)
         else:
-            self.folds = StratifiedKFold(self.n_folds).split(self.X, self.y)
+            folds = StratifiedKFold(self.n_folds).split(self.X, self.y)
 
         def standardize_folds(folds):
             for x in folds:
@@ -650,8 +651,10 @@ class QSPRDataset(MoleculeTable):
                 yield X, X_test, y[:, 0], y_test[:, 0], x[0], x[1]
 
         if hasattr(self, "feature_standardizers"):
-            self.folds = standardize_folds(self.folds)
+            folds = standardize_folds(folds)
         logger.debug("Folds created for crossvalidation")
+
+        return folds
 
     def standardizeFeatures(self, feature_standardizers=None):
         if feature_standardizers is not None:

@@ -53,7 +53,6 @@ python -m qsprpred.model_CLI \
 -b ${TEST_BASE} \
 -d \
 -ncpu ${N_CPUS} \
--sm  ${SMILES} \
 -pr CL \
 -m RF \
 -s \

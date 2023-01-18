@@ -33,7 +33,6 @@ class QSPRsklearn(QSPRModel):
     data: instance QSPRDataset
     alg:  instance of estimator
     parameters (dict): dictionary of algorithm specific parameters
-    n_jobs (int): the number of parallel jobs to run
 
     Methods:
     init_model: initialize model from saved hyperparameters
@@ -43,10 +42,9 @@ class QSPRsklearn(QSPRModel):
     gridSearch: optimization of hyperparameters using gridSearch
     """
 
-    def __init__(self, base_dir, data, alg, alg_name, parameters=None, n_jobs=1):
+    def __init__(self, base_dir, data, alg, alg_name, parameters=None):
 
         super().__init__(base_dir, data, alg, alg_name, parameters=parameters)
-        self.n_jobs = n_jobs
         # initialize models with defined parameters
         if self.parameters:
             self.model = self.alg.set_params(**self.parameters)
@@ -87,15 +85,21 @@ class QSPRsklearn(QSPRModel):
         arguments:
             save (bool): don't save predictions when used in bayesian optimization
         """
+        folds = self.data.createFolds()
+
         cvs = np.zeros(
             len(self.data.y)) if (
             self.data.task == ModelTasks.REGRESSION or not self.data.isMultiClass()) else np.zeros(
             (self.data.y.shape[0],
              self.data.nClasses))
 
+        fold_counter = np.zeros(self.data.y.shape[0])
+
         # cross validation
-        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.folds):
+        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(folds):
             logger.info('cross validation fold %s started: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+
+            fold_counter[idx_test] = i
 
             fit_set = {'X': X_train}
 
@@ -113,6 +117,7 @@ class QSPRsklearn(QSPRModel):
                 cvs[idx_test] = self.model.predict_proba(X_test)
             else:
                 cvs[idx_test] = self.model.predict_proba(X_test)[:, -1]
+
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
         # fitting on whole trainingset and predicting on test set
@@ -145,32 +150,30 @@ class QSPRsklearn(QSPRModel):
                 test = pd.concat([test, pd.DataFrame(inds)], axis=1)
             else:
                 train['Score'], test['Score'] = cvs, inds
+            train['Fold'] = fold_counter
             train.to_csv(self.out + '.cv.tsv', sep='\t')
             test.to_csv(self.out + '.ind.tsv', sep='\t')
 
-        self.data.createFolds()
-
         return cvs
 
-    def gridSearch(self, search_space_gs):
+    def gridSearch(self, search_space_gs, n_jobs=1):
         """Optimization of hyperparameters using gridSearch.
 
         Arguments:
             search_space_gs (dict): search space for the grid search
+            n_jobs (int): number of jobs for hyperparameter optimization
         """
         if self.data.task == ModelTasks.REGRESSION:
             scoring = 'explained_variance'
         else:
             scoring = 'roc_auc_ovr_weighted' if self.data.nClasses > 2 else 'roc_auc'
-        grid = GridSearchCV(self.alg, search_space_gs, n_jobs=self.n_jobs, verbose=1, cv=(
-            (x[4], x[5]) for x in self.data.folds), scoring=scoring, refit=False)
+        grid = GridSearchCV(self.alg, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
+            (x[4], x[5]) for x in self.data.createFolds()), scoring=scoring, refit=False)
 
         fit_set = {'X': self.data.X, 'y': self.data.y.iloc[:, 0]}
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         grid.fit(**fit_set)
         logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-        self.data.createFolds()
 
         logger.info('Grid search best parameters: %s' % grid.best_params_)
         with open('%s_params.json' % self.out, 'w') as f:
@@ -178,24 +181,26 @@ class QSPRsklearn(QSPRModel):
 
         self.model = self.alg.set_params(**grid.best_params_)
 
-    def bayesOptimization(self, search_space_bs, n_trials):
+    def bayesOptimization(self, search_space_bs, n_trials, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
         Arguments:
             search_space_gs (dict): search space for the grid search
             n_trials (int): number of trials for bayes optimization
             save_m (bool): if true, after bayes optimization the model is refit on the entire data set
+            n_jobs (int): the number of parallel trials
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
-        # TODO add timeout function
+        if n_jobs > 1:
+            logger.warning("At the moment n_jobs>1 not available for bayesoptimization. n_jobs set to 1")
+            n_jobs = 1
+
         study = optuna.create_study(direction='maximize')
         logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, search_space_bs), n_trials)
+        study.optimize(lambda trial: self.objective(trial, search_space_bs), n_trials, n_jobs=n_jobs)
         logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         trial = study.best_trial
-
-        self.data.createFolds()
 
         logger.info('Bayesian optimization best params: %s' % trial.params)
         with open('%s_params.json' % self.out, 'w') as f:
@@ -237,8 +242,8 @@ class QSPRsklearn(QSPRModel):
                     self.data.y, self.evaluate(save=False),
                     average="weighted", multi_class='ovr',)
             except ValueError:
-                logger.exception("Only one class present in y_true. ROC AUC score is not defined in that case. \
-                                  Score set to -1.")
+                logger.exception(
+                    "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
                 score = -1
         return score
 
@@ -316,7 +321,7 @@ class QSPRDNN(QSPRModel):
         last_save_epochs = 0
 
         cvs = np.zeros((self.data.y.shape[0], max(1, self.data.nClasses)))
-        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.folds):
+        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
             y_train = y_train.reshape(-1, 1)
             X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
                 X_train, y_train, test_size=ES_val_size)
@@ -391,7 +396,7 @@ class QSPRDNN(QSPRModel):
 
             # do 5 fold cross validation and take mean prediction on validation set as score of parameter settings
             fold_scores = np.zeros(self.data.n_folds)
-            for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.folds):
+            for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
                 y_train = y_train.reshape(-1, 1)
                 logger.info('cross validation fold ' + str(i))
                 X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
@@ -411,7 +416,6 @@ class QSPRDNN(QSPRModel):
             if param_score >= best_score:
                 best_params = params
                 best_score = param_score
-            self.data.createFolds()
 
         logger.info('Grid search best parameters: %s' % best_params)
         with open('%s_params.json' % self.out, 'w') as f:
@@ -420,26 +424,28 @@ class QSPRDNN(QSPRModel):
 
         self.model = self.alg.set_params(**best_params)
 
-        self.data.createFolds()
-
-    def bayesOptimization(self, search_space_bs, n_trials):
+    def bayesOptimization(self, search_space_bs, n_trials, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
         arguments:
             search_space_gs (dict): search space for the grid search
             n_trials (int): number of trials for bayes optimization
             save_m (bool): if true, after bayes optimization the model is refit on the entire data set
+            n_jobs (int): the number of parallel trials
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         # TODO add timeout function
+
+        if n_jobs > 1:
+            logger.warning("At the moment n_jobs>1 not available for bayesoptimization. n_jobs set to 1")
+            n_jobs = 1
+
         study = optuna.create_study(direction='maximize')
         logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, search_space_bs), n_trials)
+        study.optimize(lambda trial: self.objective(trial, search_space_bs), n_trials, n_jobs=n_jobs)
         logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         trial = study.best_trial
-
-        self.data.createFolds()
 
         logger.info('Bayesian optimization best params: %s' % trial.params)
         with open('%s_params.json' % self.out, 'w') as f:
