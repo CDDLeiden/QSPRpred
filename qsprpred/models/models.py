@@ -88,15 +88,19 @@ class QSPRsklearn(QSPRModel):
         folds = self.data.createFolds()
 
         cvs = np.zeros(
-            (len(self.data.y),2)) if (
+            len(self.data.y)) if (
             self.data.task == ModelTasks.REGRESSION or not self.data.isMultiClass()) else np.zeros(
             (self.data.y.shape[0],
-             self.data.nClasses+1))
+             self.data.nClasses))
+        
+        fold_counter = np.zeros(self.data.y.shape[0])
 
         # cross validation
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(folds):
             logger.info('cross validation fold %s started: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
+            fold_counter[idx_test] = i
+            
             fit_set = {'X': X_train}
 
             if type(self.alg).__name__ == 'PLSRegression':
@@ -105,17 +109,15 @@ class QSPRsklearn(QSPRModel):
                 fit_set['y'] = y_train
             self.model.fit(**fit_set)
             
-            print(cvs[idx_test,:-1].shape)
             if type(self.alg).__name__ == 'PLSRegression':
-                cvs[idx_test,:-1] = self.model.predict(X_test)
+                cvs[idx_test] = self.model.predict(X_test)[:, 0]
             elif self.data.task == ModelTasks.REGRESSION:
-                cvs[idx_test,:-1] = self.model.predict(X_test)[:, np.newaxis]
+                cvs[idx_test] = self.model.predict(X_test)
             elif self.data.nClasses > 2:
-                cvs[idx_test,:-1] = self.model.predict_proba(X_test)
+                cvs[idx_test] = self.model.predict_proba(X_test)
             else:
-                cvs[idx_test,:-1] = self.model.predict_proba(X_test)[:, np.newaxis]
-            
-            cvs[idx_test,-1] = i
+                cvs[idx_test] = self.model.predict_proba(X_test)[:, -1]
+
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
         # fitting on whole trainingset and predicting on test set
@@ -143,12 +145,12 @@ class QSPRsklearn(QSPRModel):
                 self.data.y.values, columns=['Label']), pd.DataFrame(
                 self.data.y_ind.values, columns=['Label'])
             if self.data.task == ModelTasks.CLASSIFICATION and self.data.nClasses > 2:
-                train['Score'], test['Score'] = np.argmax(cvs[:,:-1], axis=1), np.argmax(inds, axis=1)
-                train = pd.concat([train, pd.DataFrame(cvs[:,:-1])], axis=1)
+                train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
+                train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
                 test = pd.concat([test, pd.DataFrame(inds)], axis=1)
             else:
-                train['Score'], test['Score'] = cvs[:,:-1], inds
-            train['Fold'] = cvs[:,-1]
+                train['Score'], test['Score'] = cvs, inds
+            train['Fold'] = fold_counter
             train.to_csv(self.out + '.cv.tsv', sep='\t')
             test.to_csv(self.out + '.ind.tsv', sep='\t')
 
@@ -423,7 +425,7 @@ class QSPRDNN(QSPRModel):
         self.model = self.alg.set_params(**best_params)
 
 
-    def bayesOptimization(self, search_space_bs, n_trials, n_jobs):
+    def bayesOptimization(self, search_space_bs, n_trials, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
         arguments:
