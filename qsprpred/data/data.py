@@ -215,7 +215,7 @@ class MoleculeTable(MoleculeDataSet):
             if f"Scaffold_{scaffold}" in self.df.columns:
                 continue
 
-            self.df[f"Scaffold_{scaffold}"] = self.apply([self.smilescol], axis=1)
+            self.df[f"Scaffold_{scaffold}"] = self.apply(lambda x : scaffold(x[0]), subset=[self.smilescol], axis=1, raw=True)
             if add_rdkit_scaffold:
                 PandasTools.AddMoleculeColumnToFrame(self.df, smilesCol=f"Scaffold_{scaffold}",
                                                  molCol=f"Scaffold_{scaffold}_RDMol")
