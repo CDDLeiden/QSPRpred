@@ -83,9 +83,9 @@ class TestData(PathMixIn, DataSets, TestCase):
             "CL",
             df=self.df_small,
             store_dir=self.qsprdatapath)
-        # self.assertIn("Notes", dataset.getProperties())
-        # dataset.removeProperty("Notes")
-        # self.assertNotIn("Notes", dataset.getProperties())
+        self.assertIn("HBD", dataset.getProperties())
+        dataset.removeProperty("HBD")
+        self.assertNotIn("HBD", dataset.getProperties())
         stopwatch = StopWatch()
         dataset.save()
         stopwatch.stop('Saving took: ')

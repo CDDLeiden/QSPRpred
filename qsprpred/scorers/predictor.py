@@ -20,7 +20,7 @@ class Predictor(Scorer):
 
     def __init__(
             self, model, feature_calculators, scaler: SKLearnStandardizer,
-            type: str, th=1, name=None, modifier=None):
+            type: str, th=(1,), name=None, modifier=None):
         """Construct predictor model, feature calculator & scaler.
 
         Args:
@@ -41,7 +41,7 @@ class Predictor(Scorer):
         self.key = f"{self.model.__class__.__name__}" if not name else name
 
     @staticmethod
-    def fromFile(base_dir, algorithm, target, type='CLS', th=1,
+    def fromFile(base_dir, algorithm, target, type='CLS', th=(1,),
                  scale=True, name=None, modifier=None):
         """Construct predictor from files with serialized model, feature calculator & scaler.
 

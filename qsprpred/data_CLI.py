@@ -30,7 +30,7 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.tasks import ModelTasks
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 
 
@@ -205,14 +205,14 @@ def QSPR_dataprep(args):
                 featurefilters.append(highCorrelationFilter(th=args.high_correlation))
             if args.boruta_filter:
                 if args.regression:
-                    featurefilters.append(BorutaFilter())
+                    featurefilters.append(BorutaFilter(estimator=RandomForestRegressor(n_jobs=args.ncpu)))
                 else:
                     featurefilters.append(BorutaFilter(estimator=RandomForestClassifier(n_jobs=args.ncpu)))
 
             # prepare dataset for modelling
             mydataset.prepareDataset(feature_calculator=DescriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, feature_filters=featurefilters,
-                                     feature_standardizers=[StandardScaler()])
+                                     feature_standardizers=[StandardScaler()], n_cpus=args.ncpu)
 
             # save dataset files and fingerprints
             mydataset.save()
