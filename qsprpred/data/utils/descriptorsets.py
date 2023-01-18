@@ -78,7 +78,7 @@ class MorganFP(DescriptorSet):
         self._kwargs = kwargs
         self._is_fp = True
 
-        self.keepindices = None
+        self._keepindices = None
 
     def __call__(self, mol):
         convertMol = Chem.MolFromSmiles
@@ -89,8 +89,17 @@ class MorganFP(DescriptorSet):
         fp = morgan(mol, *self._args, **self._kwargs)
         ret = np.zeros(len(fp))
         convertFP(fp, ret)
-        ret = list(ret)
-        return ret
+        if self.keepindices:
+            ret = ret[self.keepindices]
+        return list(ret)
+
+    @property
+    def keepindices(self):
+        return self._keepindices
+
+    @keepindices.setter
+    def keepindices(self, val):
+        self._keepindices = [int(x) for x in val] if val else None
 
     @property
     def is_fp(self):
@@ -129,6 +138,7 @@ class Mordred(DescriptorSet):
         *args: `Calculator` arguments
         **kwargs: `Calculator` keyword arguments
     """
+
     def __init__(self, *args, **kwargs):
         self._args = args
         self._kwargs = kwargs
@@ -193,7 +203,7 @@ class DrugExPhyschem(DescriptorSet):
         self.props = [x for x in Property(*args, **kwargs).props]
 
     def __call__(self, mol):
-        calculator = Property(*self._args, **self._kwargs)
+        calculator = Property(self.props)
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
         return list(calculator.getScores([mol])[0])
 
@@ -263,7 +273,7 @@ class rdkit_descs(DescriptorSet):
 
 class _DescriptorSetRetriever:
     """Based on recipe 8.21 of the book "Python Cookbook".
-    
+
     To support a new type of descriptor, just add a function "get_descname(self, *args, **kwargs)".
     """
 
@@ -282,7 +292,7 @@ class _DescriptorSetRetriever:
 
     def get_Mordred(self, *args, **kwargs):
         return Mordred(*args, **kwargs)
-    
+
     def get_RDkit(self, *args, **kwargs):
         return rdkit_descs(*args, **kwargs)
 

@@ -91,7 +91,7 @@ class BorutaFilter(featurefilter):
 
     def __init__(
         self,
-        estimator=RandomForestRegressor(n_jobs=5),
+        estimator=RandomForestRegressor(),
         n_estimators="auto",
         perc=80,
         alpha=0.05,
