@@ -459,6 +459,10 @@ class MoleculeTable(MoleculeDataSet):
         """
         del self.df[name]
 
+    @staticmethod
+    def _scaffold_calculator(mol, scaffold : Scaffold):
+        return scaffold(mol[0])
+
     def addScaffolds(self, scaffolds: List[Scaffold], add_rdkit_scaffold=False):
         """
         Add scaffolds to the data frame. A new column is created that contains the SMILES of the corresponding scaffold.
@@ -474,7 +478,7 @@ class MoleculeTable(MoleculeDataSet):
             if f"Scaffold_{scaffold}" in self.df.columns:
                 continue
 
-            self.df[f"Scaffold_{scaffold}"] = self.apply(lambda x : scaffold(x[0]), subset=[self.smilescol], axis=1, raw=True)
+            self.df[f"Scaffold_{scaffold}"] = self.apply(self._scaffold_calculator, func_args=(scaffold,), subset=[self.smilescol], axis=1, raw=True)
             if add_rdkit_scaffold:
                 PandasTools.AddMoleculeColumnToFrame(self.df, smilesCol=f"Scaffold_{scaffold}",
                                                  molCol=f"Scaffold_{scaffold}_RDMol")
