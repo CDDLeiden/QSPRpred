@@ -83,19 +83,17 @@ class datasplit(ABC):
     """Defines a function split a dataframe into train and test set."""
 
     @abstractmethod
-    def __call__(self, df, Xcol, ycol):
-        """Split dataframe df into train and test set.
+    def split(self, X, y):
+        """
+        Split the given data into multiple subsets.
 
         Args:
-            df: pandas dataframe to split
-            Xcol: input column name, e.g. "SMILES"
-            ycol: output column name, e.g. "Cl"
+            X (DataFrame): the input data matrix
+            y (Series): the target variable
 
         Returns:
-            X: training set input
-            X_ind: test set input
-            y: training set output
-            y_ind: test set output
+            an iterator over the generated subsets represented as a tuple of (train_indices, test_indices) where
+            the indices are the row indices of the input data matrix X
         """
         pass
 

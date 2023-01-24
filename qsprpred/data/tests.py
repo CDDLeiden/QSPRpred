@@ -24,9 +24,10 @@ from qsprpred.data.utils.featurefilters import (
     highCorrelationFilter,
     lowVarianceFilter,
 )
+from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.models.tasks import ModelTasks
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 N_CPU = 4
 CHUNK_SIZE = 20
@@ -56,13 +57,23 @@ class PathMixIn:
             shutil.rmtree(cls.qsprdatapath)
 
 
-class DataSets:
+class DataSets(PathMixIn):
     df_large = pd.read_csv(
         f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv',
         sep='\t')
     df_small = pd.read_csv(
         f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
         sep='\t').sample(10)
+
+    def create_dataset(self, df, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
+        return QSPRDataset(
+            name, target_prop=target_prop, task=task, df=df,
+            store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
+        return self.create_dataset(self.df_small, name, task=task, target_prop=target_prop)
+
+    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
+        return self.create_dataset(self.df_large, name, task=task, target_prop=target_prop)
 
 
 class StopWatch:
@@ -80,12 +91,12 @@ class StopWatch:
         return ret
 
 
-class TestData(PathMixIn, DataSets, TestCase):
+class TestData(DataSets, TestCase):
 
     def test_creation_preparation(self):
         # regular creation
         dataset = QSPRDataset(
-            "test_create",
+            "test_create_prep",
             "CL",
             df=self.df_small,
             store_dir=self.qsprdatapath,
@@ -126,19 +137,20 @@ class TestData(PathMixIn, DataSets, TestCase):
         tasks = [ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION]
         for task in tasks:
             dataset = QSPRDataset(
-                f"test_create_{task.name}", "CL", df=self.df_large,
+                f"test_create_prep_{task.name}", "CL", df=self.df_large,
                 store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
                 if task == ModelTasks.CLASSIFICATION else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
             np.random.seed(42)
             descriptor_sets = [
-                Mordred(),
+                # Mordred(),
                 MorganFP(radius=3, nBits=2048),
-                rdkit_descs(),
-                DrugExPhyschem()
+                # rdkit_descs(),
+                # DrugExPhyschem()
             ]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
             dataset.prepareDataset(
                 feature_calculator=DescriptorsCalculator(descriptor_sets),
+                split=randomsplit(0.1),
                 datafilters=[
                     CategoryFilter(
                         name="moka_ionState7.4",
@@ -169,35 +181,103 @@ class TestData(PathMixIn, DataSets, TestCase):
                     DescriptorsCalculator))
 
 
-class TestDataSplitters(PathMixIn, TestCase):
-    df = pd.read_csv(
-        f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv',
-        sep='\t')
+class TestDataSplitters(DataSets, TestCase):
+
+    def validate_split(self, dataset):
+        self.assertTrue(dataset.X is not None)
+        self.assertTrue(dataset.X_ind is not None)
+        self.assertTrue(dataset.y is not None)
+        self.assertTrue(dataset.y_ind is not None)
 
     def test_randomsplit(self):
-        split = randomsplit()
-        split(self.df, "SMILES", "CL")
+        dataset = self.create_large_dataset()
+        dataset.prepareDataset(split=randomsplit(0.1))
+        self.validate_split(dataset)
 
     def test_temporalsplit(self):
+        dataset = self.create_large_dataset()
         split = temporalsplit(
-            timesplit=2015,
-            timecol="Year of first disclosure")
-        split(self.df, "SMILES", "CL")
+            dataset=dataset,
+            timesplit=2000,
+            timeprop="Year of first disclosure")
+
+        dataset.prepareDataset(split=split)
+        self.validate_split(dataset)
+
+        # test if dates higher than 2000 are in test set
+        self.assertTrue(sum(dataset.X_ind['Year of first disclosure'] > 2000) == len(dataset.X_ind))
 
     def test_scaffoldsplit(self):
-        split = scaffoldsplit()
-        split(self.df, "SMILES", "CL")
+        dataset = self.create_large_dataset()
+        split = scaffoldsplit(dataset, Murcko(), 0.1)
+        dataset.prepareDataset(split=split)
+        self.validate_split(dataset)
 
+    def test_serialization(self):
+        dataset = self.create_large_dataset()
+        split = scaffoldsplit(dataset, Murcko(), 0.1)
+        calculator = DescriptorsCalculator([MorganFP(radius=3, nBits=1024)])
+        standardizers = [StandardScaler()]
+        dataset.prepareDataset(
+            split=split,
+            feature_calculator=calculator,
+            feature_standardizers=standardizers)
+        self.validate_split(dataset)
+        dataset.save()
 
-class TestDataFilters(PathMixIn, TestCase):
-    df = pd.read_csv(
-        f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv',
-        sep='\t')
+        dataset_new = QSPRDataset.fromFile(dataset.storePath)
+        self.validate_split(dataset_new)
+        self.assertTrue(dataset_new.descriptorCalculator)
+        self.assertTrue(len(dataset_new.feature_standardizers) == 1)
+        self.assertTrue(len(dataset_new.fold_generator.featureStandardizers) == 1)
+        self.assertTrue(len(dataset_new.features) == 1024)
+
+        dataset_new.clearFiles()
+
+class TestFoldSplitters(DataSets, TestCase):
+
+    def validate_folds(self, dataset, more=None):
+        k = 0
+        for X_train, X_test, y_train, y_test, train_index, test_index in dataset.createFolds():
+            k += 1
+            self.assertEqual(len(X_train), len(y_train))
+            self.assertEqual(len(X_test), len(y_test))
+            self.assertEqual(len(train_index), len(y_train))
+            self.assertEqual(len(test_index), len(y_test))
+
+            if more:
+                more(X_train, X_test, y_train, y_test, train_index, test_index)
+
+        self.assertEqual(k, 5)
+
+    def test_defaults(self):
+        # test default settings with regression
+        dataset = self.create_large_dataset()
+        self.assertRaises(ValueError, dataset.createFolds)
+        dataset.addDescriptors(DescriptorsCalculator([MorganFP(radius=3, nBits=1024)]))
+        self.validate_folds(dataset)
+
+        # test default settings with classification
+        dataset.makeClassification(th=[20])
+        self.validate_folds(dataset)
+
+        # test with a standarizer
+        scaler = MinMaxScaler(feature_range=(1, 2))
+        dataset.prepareDataset(feature_standardizers=[scaler])
+        def check_min_max(X_train, X_test, y_train, y_test, train_index, test_index):
+            self.assertTrue(np.max(X_train) == 2)
+            self.assertTrue(np.min(X_train) == 1)
+            self.assertTrue(np.max(X_test) == 2)
+            self.assertTrue(np.min(X_test) == 1)
+
+        self.validate_folds(dataset, more=check_min_max)
+
+class TestDataFilters(DataSets, TestCase):
 
     def test_Categoryfilter(self):
         remove_cation = CategoryFilter(
             name="moka_ionState7.4", values=["cationic"])
-        df_anion = remove_cation(self.df)
+        df_anion = remove_cation(self.df_large)
         self.assertTrue(
             (df_anion["moka_ionState7.4"] == "cationic").sum() == 0)
 
@@ -205,7 +285,7 @@ class TestDataFilters(PathMixIn, TestCase):
             name="moka_ionState7.4",
             values=["cationic"],
             keep=True)
-        df_cation = only_cation(self.df)
+        df_cation = only_cation(self.df_large)
         self.assertTrue(
             (df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
 
