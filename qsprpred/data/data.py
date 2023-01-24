@@ -662,13 +662,29 @@ class QSPRDataset(MoleculeTable):
         self.y_ind = None
         self.restoreTrainingData()
 
-        self.features = None if not self.hasDescriptors else self.getDescriptorNames()
+        self.features = self.getFeatureNames()
+
         self.feature_standardizers = self.loadFeatureStandardizers()
         if not self.feature_standardizers:
             self.feature_standardizers = None
         self.fold_generator = self.getDefaultFoldGenerator()
 
         logger.info(f"Dataset '{self.name}' created for target targetProperty: '{self.targetProperty}'.")
+
+    def getFeatureNames(self) -> List[str]:
+        """Get feature names for this data set.
+
+        Returns:
+            List[str]: list of feature names
+        """
+        features = None if not self.hasDescriptors else self.getDescriptorNames()
+        if self.descriptorCalculator:
+            features = []
+            for descset in self.descriptorCalculator.descsets:
+                features.extend([f"{descset}_{x}" for x in descset.descriptors])
+            features = [f"Descriptor_{f}" for f in features]
+
+        return features
 
     def clearTrainingData(self):
         self.X = None
@@ -757,7 +773,7 @@ class QSPRDataset(MoleculeTable):
 
     def addDescriptors(self, calculator: Calculator, recalculate=False):
         super().addDescriptors(calculator, recalculate)
-        self.features = self.getDescriptorNames()
+        self.features = self.getFeatureNames()
 
     def save(self, save_split=True):
         # save X and y
@@ -944,16 +960,18 @@ class QSPRDataset(MoleculeTable):
 
     def fitFeatureStandardizers(self):
         if self.hasDescriptors:
-            for standardizer in self.feature_standardizers:
-                standardizer.fit(self.getDescriptors())
+            X = self.getDescriptors()
+            if self.features is not None:
+                X = X[self.features]
+            return apply_feature_standardizers(self.feature_standardizers, X, fit=True)
 
     def getFeatures(self, inplace=False, concat=False):
         if concat:
-            df_X = pd.concat([self.X, self.X_ind])
+            df_X = pd.concat([self.X[self.features], self.X_ind[self.features]], axis=0)
             df_X_ind = None
         else:
-            df_X = self.X
-            df_X_ind = self.X_ind
+            df_X = self.X[self.features]
+            df_X_ind = self.X_ind[self.features]
 
 
         X = df_X.values

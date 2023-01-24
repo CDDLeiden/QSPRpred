@@ -144,7 +144,7 @@ class TestData(DataSets, TestCase):
             descriptor_sets = [
                 # Mordred(),
                 MorganFP(radius=3, nBits=2048),
-                # rdkit_descs(),
+                rdkit_descs(),
                 # DrugExPhyschem()
             ]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
