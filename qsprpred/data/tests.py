@@ -28,6 +28,8 @@ from qsprpred.models.tasks import ModelTasks
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
 from sklearn.preprocessing import StandardScaler
 
+N_CPU = 4
+CHUNK_SIZE = 20
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
@@ -36,6 +38,7 @@ class PathMixIn:
 
     @classmethod
     def setUpClass(cls):
+        cls.clean_directories()
         if not os.path.exists(cls.qsprmodelspath):
             os.makedirs(cls.qsprmodelspath)
         if not os.path.exists(cls.qsprdatapath):
@@ -43,8 +46,14 @@ class PathMixIn:
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.qsprmodelspath)
-        shutil.rmtree(cls.qsprdatapath)
+        cls.clean_directories()
+
+    @classmethod
+    def clean_directories(cls):
+        if os.path.exists(cls.qsprmodelspath):
+            shutil.rmtree(cls.qsprmodelspath)
+        if os.path.exists(cls.qsprdatapath):
+            shutil.rmtree(cls.qsprdatapath)
 
 
 class DataSets:
@@ -79,7 +88,10 @@ class TestData(PathMixIn, DataSets, TestCase):
             "test_create",
             "CL",
             df=self.df_small,
-            store_dir=self.qsprdatapath)
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+        )
         self.assertIn("HBD", dataset.getProperties())
         dataset.removeProperty("HBD")
         self.assertNotIn("HBD", dataset.getProperties())
@@ -116,7 +128,7 @@ class TestData(PathMixIn, DataSets, TestCase):
             dataset = QSPRDataset(
                 f"test_create_{task.name}", "CL", df=self.df_large,
                 store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
-                if task == ModelTasks.CLASSIFICATION else None)
+                if task == ModelTasks.CLASSIFICATION else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
             np.random.seed(42)
             descriptor_sets = [
                 Mordred(),
@@ -146,7 +158,7 @@ class TestData(PathMixIn, DataSets, TestCase):
             paths.append(dataset.storePath)
 
         for path, task in zip(paths, tasks):
-            ds = QSPRDataset.fromFile(path)
+            ds = QSPRDataset.fromFile(path, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
             if ds.task == ModelTasks.CLASSIFICATION:
                 self.assertEqual(ds.targetProperty, "CL_class")
             self.assertTrue(ds.task == task)

@@ -21,7 +21,8 @@ From v1.0.0 to v1.1.0
   - The presence of `descriptors` property getter and setter is now enforced.
   - When called the `DescriptorSet` implementations now strictly return lists.
   - Conversion to descriptor data frame is now handled exclusively in `DescriptorsCalculator`
-- Default `chunk_size` for `MoleculeTable.addDescriptors` was set to 50 so that smaller data sets can take advantage of more CPUs as well.
+- Default `chunk_size` for `MoleculeTable` was set to 50 so that smaller data sets can take advantage of more CPUs as well.
+- The number of CPUs to use for parallel operations  by `MoleculeTable` is now set in the `__init__` of the class
 
 ## New Features
 
@@ -29,3 +30,4 @@ From v1.0.0 to v1.1.0
 - Depiction of results for classification models (see `qsprpred.plotting.classification`)
 - The `precomputed` flag was added to `QSPRDataset`
 - Added an option to directly fetch `QSPRDataset` from Papyrus with accession IDs (see `qsprpred.data.sources.papyrus`)
+- `MoleculeTable` was updated with new features to generate scaffolds of molecules
