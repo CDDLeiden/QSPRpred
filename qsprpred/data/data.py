@@ -596,7 +596,7 @@ class QSPRDataset(MoleculeTable):
             is the number of samples and n is the number of features.
         y_ind (np.ndarray/pd.DataFrame) : m-l label array for independent set, where m is
             the number of samples and equals to row of X_ind, and l is the number of types.
-        features (list of str) : feature names
+        featureNames (list of str) : feature names
         feature_standardizers (list of FeatureStandardizers): methods used to standardize the data features.
     """
 
@@ -662,7 +662,7 @@ class QSPRDataset(MoleculeTable):
         self.y_ind = None
         self.restoreTrainingData()
 
-        self.features = self.getFeatureNames()
+        self.featureNames = self.getFeatureNames()
 
         self.feature_standardizers = self.loadFeatureStandardizers()
         if not self.feature_standardizers:
@@ -672,7 +672,7 @@ class QSPRDataset(MoleculeTable):
         logger.info(f"Dataset '{self.name}' created for target targetProperty: '{self.targetProperty}'.")
 
     def getFeatureNames(self) -> List[str]:
-        """Get feature names for this data set.
+        """Get current feature names for this data set.
 
         Returns:
             List[str]: list of feature names
@@ -773,7 +773,7 @@ class QSPRDataset(MoleculeTable):
 
     def addDescriptors(self, calculator: Calculator, recalculate=False):
         super().addDescriptors(calculator, recalculate)
-        self.features = self.getFeatureNames()
+        self.featureNames = self.getFeatureNames()
 
     def save(self, save_split=True):
         # save X and y
@@ -847,13 +847,13 @@ class QSPRDataset(MoleculeTable):
         for featurefilter in feature_filters:
             self.X = featurefilter(self.X, self.y)
 
-        self.features = self.X.columns
+        self.featureNames = self.X.columns
         if self.X_ind is not None:
-            self.X_ind = self.X_ind[self.features]
-        logger.info(f"Selected features: {self.features}")
+            self.X_ind = self.X_ind[self.featureNames]
+        logger.info(f"Selected features: {self.featureNames}")
 
         # update descriptor calculator
-        self.descriptorCalculator.keepDescriptors(self.features)
+        self.descriptorCalculator.keepDescriptors(self.featureNames)
 
     def prepareDataset(
         self,
@@ -886,7 +886,7 @@ class QSPRDataset(MoleculeTable):
         if standardize:
             self.cleanMolecules(standardize, sanitize)
 
-        # calculate features
+        # calculate featureNames
         if feature_calculator is not None:
             self.addDescriptors(feature_calculator, recalculate=recalculate_features)
 
@@ -894,7 +894,7 @@ class QSPRDataset(MoleculeTable):
         if datafilters is not None:
             self.filter(datafilters)
 
-        # Replace any NaN values in features by 0
+        # Replace any NaN values in featureNames by 0
         # FIXME: this is not very good, we should probably add option to do custom data imputation here or drop rows with NaNs
         if fill_value is not None:
             self.fillMissing(fill_value)
@@ -961,8 +961,8 @@ class QSPRDataset(MoleculeTable):
     def fitFeatureStandardizers(self):
         if self.hasDescriptors:
             X = self.getDescriptors()
-            if self.features is not None:
-                X = X[self.features]
+            if self.featureNames is not None:
+                X = X[self.featureNames]
             return apply_feature_standardizers(self.feature_standardizers, X, fit=True)
 
     def getFeatures(self, inplace=False, concat=False):
@@ -977,11 +977,11 @@ class QSPRDataset(MoleculeTable):
         """
 
         if concat:
-            df_X = pd.concat([self.X[self.features], self.X_ind[self.features]], axis=0)
+            df_X = pd.concat([self.X[self.featureNames], self.X_ind[self.featureNames]], axis=0)
             df_X_ind = None
         else:
-            df_X = self.X[self.features]
-            df_X_ind = self.X_ind[self.features]
+            df_X = self.X[self.featureNames]
+            df_X_ind = self.X_ind[self.featureNames]
 
 
         X = df_X.values

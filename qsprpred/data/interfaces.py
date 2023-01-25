@@ -113,7 +113,7 @@ class datafilter(ABC):
         pass
 
 class featurefilter(ABC):
-    """Filter out uninformative features from a dataframe."""
+    """Filter out uninformative featureNames from a dataframe."""
 
     @abstractmethod
     def __call__(self, df, y_col : pd.DataFrame = None):

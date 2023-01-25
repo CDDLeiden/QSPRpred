@@ -142,10 +142,10 @@ class TestData(DataSets, TestCase):
                 if task == ModelTasks.CLASSIFICATION else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
             np.random.seed(42)
             descriptor_sets = [
-                # Mordred(),
+                Mordred(),
                 MorganFP(radius=3, nBits=2048),
                 rdkit_descs(),
-                # DrugExPhyschem()
+                DrugExPhyschem()
             ]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
             dataset.prepareDataset(
@@ -230,7 +230,7 @@ class TestDataSplitters(DataSets, TestCase):
         self.assertTrue(dataset_new.descriptorCalculator)
         self.assertTrue(len(dataset_new.feature_standardizers) == 1)
         self.assertTrue(len(dataset_new.fold_generator.featureStandardizers) == 1)
-        self.assertTrue(len(dataset_new.features) == 1024)
+        self.assertTrue(len(dataset_new.featureNames) == 1024)
 
         dataset_new.clearFiles()
 
