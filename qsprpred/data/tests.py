@@ -91,12 +91,12 @@ class StopWatch:
         return ret
 
 
-class TestData(DataSets, TestCase):
+class TestDataSetCreationSerialization(DataSets, TestCase):
 
-    def test_creation_preparation(self):
-        # regular creation
+    def test_defaults(self):
+        # creation from data frame
         dataset = QSPRDataset(
-            "test_create_prep",
+            "test_defaults",
             "CL",
             df=self.df_small,
             store_dir=self.qsprdatapath,
@@ -109,30 +109,97 @@ class TestData(DataSets, TestCase):
         stopwatch = StopWatch()
         dataset.save()
         stopwatch.stop('Saving took: ')
+        self.assertTrue(os.path.exists(dataset.storePath))
 
-        # from file creation
+        def check_consistency(dataset_to_check):
+            self.assertNotIn("Notes", dataset_to_check.getProperties())
+            self.assertNotIn("HBD", dataset_to_check.getProperties())
+            self.assertTrue(len(self.df_small) - 1 == len(dataset_to_check))
+            self.assertEqual(dataset_to_check.task, ModelTasks.REGRESSION)
+            self.assertTrue(dataset_to_check.hasProperty("CL"))
+            self.assertEqual(dataset_to_check.targetProperty, "CL")
+            self.assertEqual(dataset_to_check.originalTargetProperty, "CL")
+            self.assertEqual(len(dataset_to_check.X), len(dataset_to_check))
+            self.assertEqual(len(dataset_to_check.X_ind), 0)
+            self.assertEqual(len(dataset_to_check.y), len(dataset_to_check))
+            self.assertEqual(len(dataset_to_check.y_ind), 0)
+
+        # creation from file
         stopwatch.reset()
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
-        stopwatch.stop('Loading took: ')
-        self.assertNotIn("Notes", dataset_new.getProperties())
+        stopwatch.stop('Loading from file took: ')
+        check_consistency(dataset_new)
 
-        # test default settings
-        self.assertEqual(dataset_new.task, ModelTasks.REGRESSION)
-        self.assertTrue(dataset_new.hasProperty("CL"))
+        # creation by reinitialization
+        stopwatch.reset()
+        dataset_new = QSPRDataset(
+            "test_defaults",
+            "CL",
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+        )
+        stopwatch.stop('Reinitialization took: ')
+        check_consistency(dataset_new)
 
-        # test switch to classification
-        with self.assertRaises(AssertionError):
-            dataset_new.makeClassification([])
-        with self.assertRaises(TypeError):
-            dataset_new.makeClassification(th=6.5)
-        with self.assertRaises(AssertionError):
-            dataset_new.makeClassification(th=[0, 2, 3])
-        with self.assertRaises(AssertionError):
-            dataset_new.makeClassification(th=[0, 2, 3])
+    def test_target_property(self):
+        dataset = QSPRDataset(
+            "test_target_property",
+            "CL",
+            df=self.df_small,
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+        )
 
-        dataset_new.makeClassification(th=[0, 1, 10, 1200])
-        self.assertEqual(dataset_new.task, ModelTasks.CLASSIFICATION)
+        def test_bad_init(dataset_to_test):
+            with self.assertRaises(AssertionError):
+                dataset_to_test.makeClassification([])
+            with self.assertRaises(TypeError):
+                dataset_to_test.makeClassification(th=6.5)
+            with self.assertRaises(AssertionError):
+                dataset_to_test.makeClassification(th=[0, 2, 3])
+            with self.assertRaises(AssertionError):
+                dataset_to_test.makeClassification(th=[0, 2, 3])
+        th = [0, 20, 40, 60]
+        def test_classification(dataset_to_test):
+            self.assertEqual(dataset_to_test.task, ModelTasks.CLASSIFICATION)
+            self.assertEqual(dataset_to_test.targetProperty, "CL_class")
+            self.assertEqual(dataset_to_test.originalTargetProperty, "CL")
+            y = dataset_to_test.getTargetProperties(concat=True)
+            self.assertTrue(y.columns[0] == dataset_to_test.targetProperty)
+            self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], (len(th) - 1))
+            self.assertEqual(dataset_to_test.th, th)
 
+        test_bad_init(dataset)
+        dataset.makeClassification(th=th)
+        test_classification(dataset)
+        th = [0, 15, 30, 60]
+        dataset.makeClassification(th=th)
+        test_classification(dataset)
+        dataset.save()
+
+        dataset_new = QSPRDataset.fromFile(dataset.storePath)
+        test_bad_init(dataset)
+        test_classification(dataset_new)
+
+        dataset_new.makeRegression(target_property="CL")
+        def check_regression(dataset_to_check):
+            self.assertEqual(dataset_to_check.task, ModelTasks.REGRESSION)
+            self.assertTrue(dataset_to_check.hasProperty("CL"))
+            self.assertEqual(dataset_to_check.targetProperty, "CL")
+            self.assertEqual(dataset_to_check.originalTargetProperty, "CL")
+            y = dataset_to_check.getTargetProperties(concat=True)
+            self.assertNotEqual(y[dataset_to_check.targetProperty].unique().shape[0], (len(th) - 1))
+
+        check_regression(dataset_new)
+        dataset_new.save()
+        dataset_new = QSPRDataset.fromFile(dataset.storePath)
+        check_regression(dataset_new)
+
+class TestDataSetPreparation(DataSets, TestCase):
+
+    def test_preparation(self):
         paths = []
         tasks = [ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION]
         for task in tasks:
@@ -253,7 +320,6 @@ class TestFoldSplitters(DataSets, TestCase):
     def test_defaults(self):
         # test default settings with regression
         dataset = self.create_large_dataset()
-        self.assertRaises(ValueError, dataset.createFolds)
         dataset.addDescriptors(DescriptorsCalculator([MorganFP(radius=3, nBits=1024)]))
         self.validate_folds(dataset)
 

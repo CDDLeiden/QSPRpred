@@ -648,17 +648,35 @@ class QSPRDataset(MoleculeTable):
         """
         super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size)
         self.targetProperty = target_prop
+        self.originalTargetProperty = target_prop
         self.task = task
+        self.metaInfo =  None
+        try:
+            self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
+        except FileNotFoundError:
+            pass
 
         if target_transformer:
             transformed_prop = f'{self.targetProperty}_transformed'
             self.transform([self.targetProperty], target_transformer, addAs=[transformed_prop])
             self.targetProperty = f'{self.targetProperty}_transformed'
 
+        # load names of descriptors to use as training features
+        self.featureNames = self.getFeatureNames()
+
+        # load standardizers for features
+        self.feature_standardizers = self.loadFeatureStandardizers()
+        if not self.feature_standardizers:
+            self.feature_standardizers = None
+        self.fold_generator = self.getDefaultFoldGenerator()
+
+        # drop rows with empty target property value
+        self.dropEmpty()
+
         self.th = None
         if self.task == ModelTasks.CLASSIFICATION:
             if th:
-                self.makeClassification(th, as_new=True)
+                self.makeClassification(th)
             else:
                 # if a precomputed target is expected, just check it
                 assert all(float(x).is_integer() for x in self.df[self.targetProperty]), f"Target property ({self.targetProperty}) should be integer if used for classification. Or specify threshold for binning."
@@ -666,20 +684,12 @@ class QSPRDataset(MoleculeTable):
             raise ValueError(
                 f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
 
+        # populate feature matrix and target property array
         self.X = None
         self.y = None
         self.X_ind = None
         self.y_ind = None
         self.restoreTrainingData()
-
-        self.featureNames = self.getFeatureNames()
-
-        self.feature_standardizers = self.loadFeatureStandardizers()
-        if not self.feature_standardizers:
-            self.feature_standardizers = None
-        self.fold_generator = self.getDefaultFoldGenerator()
-
-        self.dropEmpty()
 
         logger.info(f"Dataset '{self.name}' created for target targetProperty: '{self.targetProperty}'.")
 
@@ -709,15 +719,19 @@ class QSPRDataset(MoleculeTable):
         self.y_ind = None
 
     def restoreTrainingData(self):
+        self.X = self.df
+        self.y = self.df[[self.targetProperty]]
+
         if "Split_IsTrain" in self.df.columns:
             self.X = self.df[self.df["Split_IsTrain"] == True]
             self.X_ind = self.df[self.df["Split_IsTrain"] == False]
-            self.y = self.X[self.targetProperty]
-            self.y_ind = self.X_ind[self.targetProperty]
+            self.y = self.X[[self.targetProperty]]
+            self.y_ind = self.X_ind[[self.targetProperty]]
             if self.hasDescriptors:
                 self.featurizeSplits()
-        else:
-            logger.debug("No split found in the data set. Nothing to restore.")
+
+        if self.featureNames:
+            self.X = self.X[self.featureNames]
 
     def isMultiClass(self):
         """Return if model task is multi class classification."""
@@ -731,42 +745,54 @@ class QSPRDataset(MoleculeTable):
         else:
             return 0
 
-    def makeClassification(self, th: List[float] = tuple(), as_new: bool = False):
+    def makeRegression(self, target_property : str):
+        self.th = None
+        self.task = ModelTasks.REGRESSION
+        self.targetProperty = target_property
+        self.originalTargetProperty = target_property
+        self.clearTrainingData()
+        self.restoreTrainingData()
+
+    def makeClassification(self, th: List[float] = tuple()):
         """Convert model output to classification using the given threshold(s)."""
-        new_prop = self.targetProperty if not as_new else f"{self.targetProperty}_class"
+        new_prop = f"{self.originalTargetProperty}_class"
         assert len(th) > 0, "Threshold list must contain at least one value."
         if len(th) > 1:
             assert (
                 len(th) > 3
             ), "For multi-class classification, set more than 3 values as threshold."
-            assert max(self.df[self.targetProperty]) <= max(
+            assert max(self.df[self.originalTargetProperty]) <= max(
                 th
             ), "Make sure final threshold value is not smaller than largest value of property"
-            assert min(self.df[self.targetProperty]) >= min(
+            assert min(self.df[self.originalTargetProperty]) >= min(
                 th
             ), "Make sure first threshold value is not larger than smallest value of property"
             self.df[f"{new_prop}_intervals"] = pd.cut(
-                self.df[self.targetProperty], bins=th, include_lowest=True
+                self.df[self.originalTargetProperty], bins=th, include_lowest=True
             ).astype(str)
             self.df[new_prop] = LabelEncoder().fit_transform(self.df[f"{new_prop}_intervals"])
         else:
-            self.df[new_prop] = self.df[self.targetProperty] > th[0]
+            self.df[new_prop] = self.df[self.originalTargetProperty] > th[0]
         self.task = ModelTasks.CLASSIFICATION
         self.targetProperty = new_prop
         self.th = th
         self.clearTrainingData()
+        self.restoreTrainingData()
         logger.info("Target property converted to classification.")
+
+    @staticmethod
+    def loadMetadata(name, store_dir):
+        with open(os.path.join(store_dir, f"{name}_meta.json")) as f:
+            meta = json.load(f)
+            meta['init']['task'] = ModelTasks(meta['init']['task'])
+            return meta
 
     @staticmethod
     def fromFile(filename, *args, **kwargs) -> 'QSPRDataset':
         store_dir = os.path.dirname(filename)
         name = os.path.basename(filename).rsplit('_',1)[0]
-        with open(os.path.join(store_dir, f"{name}_meta.json")) as f:
-            meta = json.load(f)
-            meta_init = meta['init']
-            meta_init['task'] = ModelTasks(meta_init['task'])
-
-        return QSPRDataset(*args, name=name, store_dir=store_dir, **meta_init, **kwargs)
+        meta = QSPRDataset.loadMetadata(name, store_dir)
+        return QSPRDataset(*args, name=name, store_dir=store_dir, **meta['init'], **kwargs)
 
     @staticmethod
     def fromMolTable(mol_table: MoleculeTable, target_prop : str, name=None, **kwargs) -> 'QSPRDataset':
@@ -779,14 +805,16 @@ class QSPRDataset(MoleculeTable):
         super().addDescriptors(calculator, recalculate)
         self.featureNames = self.getFeatureNames()
 
-    def save(self, save_split=True):
-        # save X and y
-        if self.X is not None and save_split:
+    def saveSplit(self):
+        if self.X is not None:
             self.df["Split_IsTrain"] = self.df.index.isin(self.X.index)
-        super().save()
+        else:
+            logger.debug("No split data available. Skipping split data save.")
 
-        # save feature standardizers
-        self.saveFeatureStandardizers()
+    def save(self, save_split=True):
+        if save_split:
+            self.saveSplit()
+        super().save()
 
         # save metadata
         self.saveMetadata()
@@ -952,8 +980,7 @@ class QSPRDataset(MoleculeTable):
             if not self.hasDescriptors:
                 raise ValueError("No training data and descriptors present. Cannot create folds.")
             else:
-                self.X = self.getDescriptors()
-                self.y = self.df[self.targetProperty]
+                self.restoreTrainingData()
 
         if split is None and not self.fold_generator:
             self.fold_generator = self.getDefaultFoldGenerator()
@@ -1025,49 +1052,51 @@ class QSPRDataset(MoleculeTable):
         """
 
         if concat:
-            return pd.concat([self.y, self.y_ind])
+            return pd.concat([self.y, self.y_ind] if self.y_ind is not None else [self.y])
         else:
-            return self.y, self.y_ind
+            return self.y, self.y_ind if self.y_ind is not None else self.y
 
     def loadFeatureStandardizers(self):
         """
-        Load feature standardizers from files in directory.
+        Load feature standardizers from the metadata.
 
         Returns:
             `list` of `SKLearnStandardizer`
         """
 
-        paths = [os.path.join(self.storeDir, x) for x in os.listdir(self.storeDir)]
-        paths = [x for x in paths if x.startswith(f"{self.storePrefix}_feature_standardizer")]
-        standardizers = []
-        for path in paths:
-            standardizers.append(SKLearnStandardizer.fromFile(path))
-        return standardizers
+        if self.metaInfo:
+            standardizers = []
+            for path in self.metaInfo['feature_standardizers']:
+                standardizers.append(SKLearnStandardizer.fromFile(path))
+            return standardizers
+        else:
+            return None
 
     def saveFeatureStandardizers(self):
+        paths = []
         if self.feature_standardizers:
             self.fitFeatureStandardizers()  # make sure feature standardizers are fitted before serialization
-            stds = []
             for idx, standardizer in enumerate(self.feature_standardizers):
                 path = f'{self.storePrefix}_feature_standardizer_{idx}.json'
                 if not hasattr(standardizer, 'toFile'):
                     SKLearnStandardizer(standardizer).toFile(path)
                 else:
                     standardizer.toFile(path)
-                stds.append(path)
+                paths.append(path)
+        return paths
 
     def saveMetadata(self):
+        paths = self.saveFeatureStandardizers()
+
         meta_init = {
-            'target_prop': self.targetProperty,
+            'target_prop': self.originalTargetProperty,
             'task': self.task.name,
-            'smilescol': self.smilescol
+            'smilescol': self.smilescol,
+            'th': self.th,
         }
-        meta_data = {}
-        if self.task == ModelTasks.CLASSIFICATION:
-            meta_data.update({'th': self.th})
-        meta = {
+        ret = {
             'init': meta_init,
-            'data': meta_data
+            'feature_standardizers': paths
         }
         with open(f"{self.storePrefix}_meta.json", 'w') as f:
-            json.dump(meta, f)
+            json.dump(ret, f)
