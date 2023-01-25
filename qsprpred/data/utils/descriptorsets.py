@@ -271,6 +271,54 @@ class rdkit_descs(DescriptorSet):
         return "RDkit"
 
 
+class TanimotoDistances(DescriptorSet):
+    """
+    RDkit descriptors
+    Initialize the descriptor names (a list of properties to calculate) to select a subset of the rdkit descriptors.
+    Add compute_3Drdkit argument to indicate if 3D descriptors should also be calculated
+
+    Args:
+        list_of_smiles (list of strings): list of SMILES sequences to calculate distance to
+        *args: `Property` arguments
+        **kwargs: `Property` keyword arguments
+    """
+
+    def __init__(self, list_of_smiles, *args, **kwargs):
+        self._args = args
+        kwargs.update({'list_of_smiles': list_of_smiles})
+        self._kwargs = kwargs
+        self._is_fp = False
+        self._descriptors = list_of_smiles
+        mols = [Chem.MolFromSmiles(smiles) for smiles in list_of_smiles]
+        self.fps = [AllChem.GetMorganFingerprintAsBitVect(mol, 3, nBits=1024) for mol in mols]
+
+    def __call__(self, mol):
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        fp = AllChem.GetMorganFingerprintAsBitVect(mol, 3, nBits=1024)
+
+        return list(1 - np.array(DataStructs.BulkTanimotoSimilarity(fp, self.fps)))
+
+    @property
+    def is_fp(self):
+        return self._is_fp
+
+    @property
+    def settings(self):
+        return self._args, self._kwargs
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, descriptors):
+        self._calculator.descriptors = descriptors
+        self._descriptors = descriptors
+
+    def __str__(self):
+        return "TanimotoDistances"
+
+
 class _DescriptorSetRetriever:
     """Based on recipe 8.21 of the book "Python Cookbook".
 
@@ -295,6 +343,9 @@ class _DescriptorSetRetriever:
 
     def get_RDkit(self, *args, **kwargs):
         return rdkit_descs(*args, **kwargs)
+
+    def get_TanimotoDistances(self, *args, **kwargs):
+        return TanimotoDistances(*args, **kwargs)
 
 
 def get_descriptor(desc_type: str, *args, **kwargs):
