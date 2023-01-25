@@ -134,6 +134,9 @@ class MoleculeTable(MoleculeDataSet):
                     f"No data frame found in store for '{self.name}'. Are you sure this is the correct dataset? If you are creating a new data set, make sure to supply a data frame.")
             self.reload()
 
+        # drop invalid columns
+        self.dropInvalids()
+
     def __len__(self):
         """
         Returns:
@@ -327,7 +330,7 @@ class MoleculeTable(MoleculeDataSet):
 
         return pd.concat(results, axis=0)
 
-    def transform(self, targets, transformers, addAs=None):
+    def transform(self, targets, transformer, addAs=None):
         """
         Transform the data frame (or its part) using a list of transformers. Each transformer is a function that takes the data frame
         (or a subset of it as defined by the `targets` argument) and returns a transformed data frame. The transformed
@@ -337,17 +340,17 @@ class MoleculeTable(MoleculeDataSet):
 
         Args:
             targets (list): List of column names to transform.
-            transformers (list): List of transformers to apply to the columns.
+            transformer (callable): Function that transforms the data in target columns to a new representation.
+            addAs (list): If `True`, the transformed data is added to the original data frame and the
+            names in this list are used as column names for the new data.
         """
 
         ret = self.df[targets]
-        for transformer in transformers:
-            ret = transformer(ret)
+        ret = transformer(ret)
 
-        if not addAs:
-            return ret
-        else:
+        if addAs:
             self.df[addAs] = ret
+        return ret
 
     def filter(self, table_filters: List[Callable]):
         """
@@ -577,6 +580,15 @@ class MoleculeTable(MoleculeDataSet):
     def shuffle(self, random_state=None):
         self.df = self.df.sample(frac=1, random_state=random_state).reset_index(drop=True)
 
+    def dropInvalids(self):
+        """Drop Invalid SMILES."""
+
+        invalid_mask = self.df[self.smilescol].apply(lambda smile: Chem.MolFromSmiles(smile) is not None)
+        logger.info(
+            f"Removing invalid SMILES: {self.df[self.smilescol][invalid_mask]}"
+        )
+        self.df = self.df[invalid_mask].copy()
+
 class QSPRDataset(MoleculeTable):
     """Prepare dataset for QSPR model training.
 
@@ -638,11 +650,9 @@ class QSPRDataset(MoleculeTable):
         self.targetProperty = target_prop
         self.task = task
 
-        self.dropInvalids()
-
         if target_transformer:
             transformed_prop = f'{self.targetProperty}_transformed'
-            self.transform([self.targetProperty], [target_transformer], addAs=[transformed_prop])
+            self.transform([self.targetProperty], target_transformer, addAs=[transformed_prop])
             self.targetProperty = f'{self.targetProperty}_transformed'
 
         self.th = None
@@ -669,7 +679,13 @@ class QSPRDataset(MoleculeTable):
             self.feature_standardizers = None
         self.fold_generator = self.getDefaultFoldGenerator()
 
+        self.dropEmpty()
+
         logger.info(f"Dataset '{self.name}' created for target targetProperty: '{self.targetProperty}'.")
+
+    def dropEmpty(self):
+        """Drop rows with empty target property value from the data set."""
+        self.df.dropna(subset=([self.smilescol, self.targetProperty]), inplace=True)
 
     def getFeatureNames(self) -> List[str]:
         """Get current feature names for this data set.
@@ -714,18 +730,6 @@ class QSPRDataset(MoleculeTable):
             return len(self.df[self.targetProperty].unique())
         else:
             return 0
-
-    def dropInvalids(self):
-        """Drop Invalid SMILES and missing target property values."""
-        # drop rows with empty targetProperty values
-        self.df = self.df.dropna(subset=([self.smilescol, self.targetProperty])).copy()
-
-        # drop invalid smiles
-        invalid_mask = self.df[self.smilescol].apply(lambda smile: Chem.MolFromSmiles(smile) is not None)
-        logger.info(
-            f"Removing invalid SMILES: {self.df[self.smilescol][invalid_mask]}"
-        )
-        self.df = self.df[invalid_mask].copy()
 
     def makeClassification(self, th: List[float] = tuple(), as_new: bool = False):
         """Convert model output to classification using the given threshold(s)."""
