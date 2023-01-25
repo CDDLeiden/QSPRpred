@@ -64,7 +64,7 @@ class QSPRsklearn(QSPRModel):
     def fit(self):
         """Build estimator model from entire data set."""
         X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargets(concat=True).values
+        y_all = self.data.getTargetProperties(concat=True).values
         y_all = y_all.reshape(-1)
 
         fit_set = {'X': X_all}
@@ -87,7 +87,7 @@ class QSPRsklearn(QSPRModel):
         """
         folds = self.data.createFolds()
         X, X_ind = self.data.getFeatures()
-        y, y_ind = self.data.getTargets()
+        y, y_ind = self.data.getTargetProperties()
 
         cvs = np.zeros(
             len(y)) if (
@@ -175,7 +175,7 @@ class QSPRsklearn(QSPRModel):
             (x[4], x[5]) for x in self.data.createFolds()), scoring=scoring, refit=False)
 
         X, X_ind = self.data.getFeatures()
-        y, y_ind = self.data.getTargets()
+        y, y_ind = self.data.getTargetProperties()
         fit_set = {'X': X, 'y': y.iloc[:, 0]}
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         grid.fit(**fit_set)
@@ -240,7 +240,7 @@ class QSPRsklearn(QSPRModel):
         print(bayesian_params)
         self.model = self.alg.set_params(**bayesian_params)
 
-        y, y_ind = self.data.getTargets()
+        y, y_ind = self.data.getTargetProperties()
         if self.data.task == ModelTasks.REGRESSION:
             score = metrics.explained_variance_score(y.iloc[:, 0], self.evaluate(save=False))
         else:
@@ -300,7 +300,7 @@ class QSPRDNN(QSPRModel):
             sys.exit()
 
         X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargets(concat=True).values
+        y_all = self.data.getTargetProperties(concat=True).values
 
         self.model = self.model.set_params(**{"n_epochs": self.optimal_epochs})
         train_loader = self.model.get_dataloader(X_all, y_all)
@@ -322,7 +322,7 @@ class QSPRDNN(QSPRModel):
             ES_val_size (float): validation set size for early stopping in CV
         """
         X, X_ind = self.data.getFeatures()
-        y, y_ind = self.data.getTargets()
+        y, y_ind = self.data.getTargetProperties()
         indep_loader = self.model.get_dataloader(X_ind.values)
         last_save_epochs = 0
 
@@ -487,7 +487,7 @@ class QSPRDNN(QSPRModel):
 
         self.model = self.alg.set_params(**bayesian_params)
 
-        y, y_ind = self.data.getTargets()
+        y, y_ind = self.data.getTargetProperties()
         if self.data.task == ModelTasks.REGRESSION:
             score = metrics.explained_variance_score(y, self.evaluate(save=False))
         else:

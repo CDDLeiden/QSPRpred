@@ -966,6 +966,16 @@ class QSPRDataset(MoleculeTable):
             return apply_feature_standardizers(self.feature_standardizers, X, fit=True)
 
     def getFeatures(self, inplace=False, concat=False):
+        """
+        Get the current feature sets (training and test) from the dataset.
+        This method also applies any feature standardizers that have been set on the dataset during preparation.
+
+        Arguments:
+            inplace (bool): If `True`, the created feature matrices will be saved to the dataset object itself as 'X' and 'X_ind' attributes. Note that this will overwrite any existing feature matrices and if the data preparation workflow changes, these are not kept up to date. Therefore, it is recommended to generate new feature sets after any data set changes.
+            concat (bool): If `True`, the training and test feature matrices will be concatenated into a single matrix. This is useful for
+                training models that do not require separate training and test sets (i.e. the final optimized models).
+        """
+
         if concat:
             df_X = pd.concat([self.X[self.features], self.X_ind[self.features]], axis=0)
             df_X_ind = None
@@ -999,7 +1009,17 @@ class QSPRDataset(MoleculeTable):
 
         return (X, X_ind) if not concat else X
 
-    def getTargets(self, concat=False):
+    def getTargetProperties(self, concat=False):
+        """
+        Get the response values (training and test) for the set target property.
+
+        Args:
+            concat (bool): if `True`, return concatenated training and validation set target properties
+
+        Returns:
+            `tuple` of (train_responses, test_responses) or `pandas.DataFrame` of all target property values
+        """
+
         if concat:
             return pd.concat([self.y, self.y_ind])
         else:

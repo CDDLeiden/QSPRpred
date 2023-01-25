@@ -5,7 +5,6 @@ Created by: Martin Sicho
 On: 06.06.22, 20:15
 """
 import json
-from typing import List
 
 import numpy as np
 import sklearn_json as skljson
