@@ -9,7 +9,10 @@ import numpy as np
 import pandas as pd
 from qsprpred.data.interfaces import MoleculeDataSet, datasplit
 from qsprpred.data.utils.descriptorcalculator import Calculator, DescriptorsCalculator
-from qsprpred.data.utils.feature_standardization import SKLearnStandardizer, apply_feature_standardizers
+from qsprpred.data.utils.feature_standardization import (
+    SKLearnStandardizer,
+    apply_feature_standardizers,
+)
 from qsprpred.data.utils.folds import Folds
 from qsprpred.data.utils.scaffolds import Scaffold
 from qsprpred.data.utils.smiles_standardization import (
@@ -35,6 +38,7 @@ class MoleculeTable(MoleculeDataSet):
         A wrapper class for parallelizing pandas apply functions.
 
         """
+
         def __init__(self, func, func_args=None, func_kwargs=None, axis=0, raw=False, result_type='expand'):
             """
 
@@ -74,14 +78,14 @@ class MoleculeTable(MoleculeDataSet):
 
     def __init__(
             self,
-            name : str,
-            df : pd.DataFrame = None,
-            smilescol : str = "SMILES",
-            add_rdkit : bool = False,
-            store_dir : str = '.',
-            overwrite : bool = False,
-            n_jobs : int = 0,
-            chunk_size : int = 50,
+            name: str,
+            df: pd.DataFrame = None,
+            smilescol: str = "SMILES",
+            add_rdkit: bool = False,
+            store_dir: str = '.',
+            overwrite: bool = False,
+            n_jobs: int = 0,
+            chunk_size: int = 50,
     ):
         """
 
@@ -223,7 +227,7 @@ class MoleculeTable(MoleculeDataSet):
         """
 
         smilescol = "SMILES"
-        df = pd.DataFrame({smilescol : smiles})
+        df = pd.DataFrame({smilescol: smiles})
         return MoleculeTable(name, df, *args, smilescol=smilescol, **kwargs)
 
     @staticmethod
@@ -252,7 +256,8 @@ class MoleculeTable(MoleculeDataSet):
             *args: Additional arguments to pass to the `MoleculeTable` constructor.
             **kwargs: Additional keyword arguments to pass to the `MoleculeTable` constructor.
         """
-        return MoleculeTable(name, PandasTools.LoadSDF(filename, molColName="RDMol"), smilescol=smiles_prop, *args, **kwargs) # FIXME: in this case the RDKit molecule is always added, which can in most cases is an unnecessary overhead
+        return MoleculeTable(name, PandasTools.LoadSDF(filename, molColName="RDMol"), smilescol=smiles_prop, *args, **
+                             kwargs)  # FIXME: in this case the RDKit molecule is always added, which can in most cases is an unnecessary overhead
 
     def getSubset(self, prefix: str):
         """
@@ -463,7 +468,7 @@ class MoleculeTable(MoleculeDataSet):
         del self.df[name]
 
     @staticmethod
-    def _scaffold_calculator(mol, scaffold : Scaffold):
+    def _scaffold_calculator(mol, scaffold: Scaffold):
         return scaffold(mol[0])
 
     def addScaffolds(self, scaffolds: List[Scaffold], add_rdkit_scaffold=False):
@@ -481,10 +486,13 @@ class MoleculeTable(MoleculeDataSet):
             if f"Scaffold_{scaffold}" in self.df.columns:
                 continue
 
-            self.df[f"Scaffold_{scaffold}"] = self.apply(self._scaffold_calculator, func_args=(scaffold,), subset=[self.smilescol], axis=1, raw=True)
+            self.df[f"Scaffold_{scaffold}"] = self.apply(
+                self._scaffold_calculator, func_args=(
+                    scaffold,), subset=[
+                    self.smilescol], axis=1, raw=True)
             if add_rdkit_scaffold:
                 PandasTools.AddMoleculeColumnToFrame(self.df, smilesCol=f"Scaffold_{scaffold}",
-                                                 molCol=f"Scaffold_{scaffold}_RDMol")
+                                                     molCol=f"Scaffold_{scaffold}_RDMol")
 
     def getScaffoldNames(self, include_mols=False):
         """
@@ -537,7 +545,7 @@ class MoleculeTable(MoleculeDataSet):
             name = f'ScaffoldGroup_{scaffold}_{mols_per_group}'
             if name not in self.df.columns:
                 self.df[name] = np.where(self.df[scaffold].isin(counts[mask].index), 'Other',
-                                            self.df[scaffold])
+                                         self.df[scaffold])
 
     def getScaffoldGroups(self, scaffold_name: str, mol_per_group: int = 10):
         """
@@ -588,6 +596,7 @@ class MoleculeTable(MoleculeDataSet):
             f"Removing invalid SMILES: {self.df[self.smilescol][invalid_mask]}"
         )
         self.df = self.df[invalid_mask].copy()
+
 
 class QSPRDataset(MoleculeTable):
     """Prepare dataset for QSPR model training.
@@ -650,7 +659,7 @@ class QSPRDataset(MoleculeTable):
         self.targetProperty = target_prop
         self.originalTargetProperty = target_prop
         self.task = task
-        self.metaInfo =  None
+        self.metaInfo = None
         try:
             self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
         except FileNotFoundError:
@@ -679,7 +688,8 @@ class QSPRDataset(MoleculeTable):
                 self.makeClassification(th)
             else:
                 # if a precomputed target is expected, just check it
-                assert all(float(x).is_integer() for x in self.df[self.targetProperty]), f"Target property ({self.targetProperty}) should be integer if used for classification. Or specify threshold for binning."
+                assert all(float(x).is_integer(
+                ) for x in self.df[self.targetProperty]), f"Target property ({self.targetProperty}) should be integer if used for classification. Or specify threshold for binning."
         elif self.task == ModelTasks.REGRESSION and th:
             raise ValueError(
                 f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
@@ -745,7 +755,7 @@ class QSPRDataset(MoleculeTable):
         else:
             return 0
 
-    def makeRegression(self, target_property : str):
+    def makeRegression(self, target_property: str):
         self.th = None
         self.task = ModelTasks.REGRESSION
         self.targetProperty = target_property
@@ -790,12 +800,12 @@ class QSPRDataset(MoleculeTable):
     @staticmethod
     def fromFile(filename, *args, **kwargs) -> 'QSPRDataset':
         store_dir = os.path.dirname(filename)
-        name = os.path.basename(filename).rsplit('_',1)[0]
+        name = os.path.basename(filename).rsplit('_', 1)[0]
         meta = QSPRDataset.loadMetadata(name, store_dir)
         return QSPRDataset(*args, name=name, store_dir=store_dir, **meta['init'], **kwargs)
 
     @staticmethod
-    def fromMolTable(mol_table: MoleculeTable, target_prop : str, name=None, **kwargs) -> 'QSPRDataset':
+    def fromMolTable(mol_table: MoleculeTable, target_prop: str, name=None, **kwargs) -> 'QSPRDataset':
         """Create QSPRDataset from a MoleculeTable."""
         kwargs['store_dir'] = mol_table.storeDir if 'store_dir' not in kwargs else kwargs['store_dir']
         name = mol_table.name if name is None else name
@@ -927,7 +937,8 @@ class QSPRDataset(MoleculeTable):
             self.filter(datafilters)
 
         # Replace any NaN values in featureNames by 0
-        # FIXME: this is not very good, we should probably add option to do custom data imputation here or drop rows with NaNs
+        # FIXME: this is not very good, we should probably add option to do custom
+        # data imputation here or drop rows with NaNs
         if fill_value is not None:
             self.fillMissing(fill_value)
 
@@ -1014,7 +1025,6 @@ class QSPRDataset(MoleculeTable):
             df_X = self.X[self.featureNames]
             df_X_ind = self.X_ind[self.featureNames]
 
-
         X = df_X.values
         X_ind = df_X_ind.values if df_X_ind is not None else None
         if self.feature_standardizers:
@@ -1096,7 +1106,8 @@ class QSPRDataset(MoleculeTable):
         }
         ret = {
             'init': meta_init,
-            'feature_standardizers': paths
+            'standardizer_paths': paths,
+            'descriptorcalculator_path': self.descriptorCalculatorPath
         }
         with open(f"{self.storePrefix}_meta.json", 'w') as f:
             json.dump(ret, f)

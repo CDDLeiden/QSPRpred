@@ -5,17 +5,20 @@ Created by: Martin Sicho
 On: 06.06.22, 20:15
 """
 import json
+import os
 
 import numpy as np
 import sklearn_json as skljson
 import torch
+from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.descriptor_utils.interfaces import Scorer
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
-from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
-from qsprpred.data.data import QSPRDataset
-from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.data.utils.feature_standardization import (
+    SKLearnStandardizer,
+    apply_feature_standardizers,
+)
 from qsprpred.logs import logger
-import os
+from qsprpred.models.neural_network import STFullyConnected
 
 
 class Predictor(Scorer):
@@ -43,7 +46,7 @@ class Predictor(Scorer):
         self.key = f"{self.model.__class__.__name__}" if not name else name
 
     @staticmethod
-    def fromFile(model_path: str, metadata_path: str, scale: bool=True, modifier=None):
+    def fromFile(model_path: str, metadata_path: str, scale: bool = True, modifier=None):
         """Construct predictor from files with serialized model, feature calculator & standardizer.
 
         Args:
@@ -56,18 +59,17 @@ class Predictor(Scorer):
 
         """
         with open(metadata_path) as f:
-                meta = json.load(f)
-        
-        feature_calculators = DescriptorsCalculator.fromFile(meta["data"]["descriptorcalculator_path"])
-        # TODO do not hardcode when to use standardizer
-        standardizers=[]
-        if meta['data']['standardizer_paths'] is not None and scale:
-            for standardizer_path in meta['data']['standardizer_paths']:
+            meta = json.load(f)
+
+        feature_calculators = DescriptorsCalculator.fromFile(meta["descriptorcalculator_path"])
+        standardizers = []
+        if meta['standardizer_paths'] is not None and scale:
+            for standardizer_path in meta['standardizer_paths']:
                 standardizers.append(SKLearnStandardizer.fromFile(standardizer_path))
-        
-        th = meta['data']['th'] if 'th' in meta['data'].keys() else None
-        type = 'REG' if meta['init']['task']=="REGRESSION" else 'CLS'
-        
+
+        th = meta['th'] if 'th' in meta.keys() else None
+        type = 'REG' if meta['init']['task'] == "REGRESSION" else 'CLS'
+
         # load model
         name = os.path.basename(model_path)[:-5]
 
@@ -97,7 +99,7 @@ class Predictor(Scorer):
         # Calculate and scale the features
         features = self.feature_calculators(mols)
         if self.standardizers is not None:
-            features, _ = QSPRDataset.applyFeatureStandardizers(self.standardizers, features, fit=False)
+            features, _ = apply_feature_standardizers(self.standardizers, features, fit=False)
 
         # Special case DNN
         if (self.model.__class__.__name__ == "STFullyConnected"):
