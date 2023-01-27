@@ -130,14 +130,11 @@ def QSPR_modelling(args):
                 None, args.optimization, args.model_types)
 
     for reg in args.regression:
-        task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
         reg_abbr = 'REG' if reg else 'CLS'
         for property in args.properties:
             log.info(f"Property: {property[0]}")
 
             mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_df.pkl')
-            mydataset.reload()
-            mydataset.createFolds(n_folds=mydataset.n_folds)
 
             for model_type in args.model_types:
                 print(model_type)
