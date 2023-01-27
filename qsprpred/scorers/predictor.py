@@ -67,7 +67,7 @@ class Predictor(Scorer):
             for standardizer_path in meta['standardizer_paths']:
                 standardizers.append(SKLearnStandardizer.fromFile(standardizer_path))
 
-        th = meta['th'] if 'th' in meta.keys() else None
+        th = meta['init']['th'] if 'th' in meta['init'].keys() else None
         type = 'REG' if meta['init']['task'] == "REGRESSION" else 'CLS'
 
         # load model

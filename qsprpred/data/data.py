@@ -1076,7 +1076,7 @@ class QSPRDataset(MoleculeTable):
 
         if self.metaInfo:
             standardizers = []
-            for path in self.metaInfo['feature_standardizers']:
+            for path in self.metaInfo['standardizer_paths']:
                 standardizers.append(SKLearnStandardizer.fromFile(path))
             return standardizers
         else:
@@ -1107,7 +1107,8 @@ class QSPRDataset(MoleculeTable):
         ret = {
             'init': meta_init,
             'standardizer_paths': paths,
-            'descriptorcalculator_path': self.descriptorCalculatorPath
+            'descriptorcalculator_path': self.descriptorCalculatorPath,
+            'new_target_prop': self.targetProperty
         }
         with open(f"{self.storePrefix}_meta.json", 'w') as f:
             json.dump(ret, f)

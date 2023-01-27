@@ -118,18 +118,20 @@ def QSPR_predict(args):
     for reg in args.regression:
         reg_abbr = 'REG' if reg else 'CLS'
         for property in args.properties:
-            metadata_path =  f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_meta.json'
-
+            metadata_path = f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_meta.json'
+            with open(metadata_path, 'r') as f:
+                metadata = json.load(f)
+                current_propertyname = metadata['new_target_prop']
             log.info(f"Property: {property[0]}")
             for model_type in args.model_types:
                 print(model_type)
                 log.info(f'Model: {model_type} {reg_abbr} {property[0]}')
 
                 # give path to saved model
-                model_path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property[0]}.json'
+                model_path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{current_propertyname}.json'
                 if not os.path.exists(model_path):
                     log.warning(
-                        f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property[0]}.json does not exist. Model skipped.')
+                        f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{current_propertyname}.json does not exist. Model skipped.')
                     continue
 
                 predictor = Predictor.fromFile(model_path, metadata_path)
