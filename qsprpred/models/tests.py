@@ -242,7 +242,7 @@ class TestModels(PathMixIn, TestCase):
         predictor = Predictor(
             themodel,
             feature_calculators,
-            scaler,
+            [scaler],
             type=regid,
             th=th,
             name=None,
