@@ -30,10 +30,11 @@ from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.models.tasks import ModelTasks
 from qsprpred.scorers.predictor import Predictor
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 N_CPU = 4
 CHUNK_SIZE = 20
+
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
@@ -72,6 +73,7 @@ class DataSets(PathMixIn):
         return QSPRDataset(
             name, target_prop=target_prop, task=task, df=df,
             store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+
     def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
         return self.create_dataset(self.df_small, name, task=task, target_prop=target_prop)
 
@@ -165,6 +167,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
             with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
         th = [0, 20, 40, 60]
+
         def test_classification(dataset_to_test):
             self.assertEqual(dataset_to_test.task, ModelTasks.CLASSIFICATION)
             self.assertEqual(dataset_to_test.targetProperty, "CL_class")
@@ -187,6 +190,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         test_classification(dataset_new)
 
         dataset_new.makeRegression(target_property="CL")
+
         def check_regression(dataset_to_check):
             self.assertEqual(dataset_to_check.task, ModelTasks.REGRESSION)
             self.assertTrue(dataset_to_check.hasProperty("CL"))
@@ -199,6 +203,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         dataset_new.save()
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         check_regression(dataset_new)
+
 
 class TestDataSetPreparation(DataSets, TestCase):
 
@@ -215,8 +220,10 @@ class TestDataSetPreparation(DataSets, TestCase):
                 Mordred(),
                 MorganFP(radius=3, nBits=2048),
                 rdkit_descs(),
-                DrugExPhyschem()
-            ]
+                DrugExPhyschem(),
+                PredictorDesc(
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json')]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
             dataset.prepareDataset(
                 feature_calculator=DescriptorsCalculator(descriptor_sets),
@@ -304,6 +311,7 @@ class TestDataSplitters(DataSets, TestCase):
 
         dataset_new.clearFiles()
 
+
 class TestFoldSplitters(DataSets, TestCase):
 
     def validate_folds(self, dataset, more=None):
@@ -333,6 +341,7 @@ class TestFoldSplitters(DataSets, TestCase):
         # test with a standarizer
         scaler = MinMaxScaler(feature_range=(1, 2))
         dataset.prepareDataset(feature_standardizers=[scaler])
+
         def check_min_max(X_train, X_test, y_train, y_test, train_index, test_index):
             self.assertTrue(np.max(X_train) == 2)
             self.assertTrue(np.min(X_train) == 1)
@@ -340,6 +349,7 @@ class TestFoldSplitters(DataSets, TestCase):
             self.assertTrue(np.min(X_test) == 1)
 
         self.validate_folds(dataset, more=check_min_max)
+
 
 class TestDataFilters(DataSets, TestCase):
 
@@ -409,10 +419,11 @@ class TestDescriptorsets(PathMixIn, TestCase):
         mols = self.prep_testdata()
 
         # # give path to saved model parameters
-        path = f'{os.path.dirname(__file__)}/test_files/test_predictor'
-        desc_calc = PredictorDesc(path, 'PLS', 'GABAAalpha', type='REG')
+        model_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json'
+        meta_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'
+        desc_calc = PredictorDesc(model_path, meta_path)
         descriptors = desc_calc(mols[2])
-        self.assertIsInstance(descriptors, pd.DataFrame)
+        self.assertIsInstance(descriptors, list)
 
     def test_MorganFP(self):
         mols = self.prep_testdata()
@@ -478,9 +489,10 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
     def test_descriptorcalculator(self):
         from mordred import ABCIndex
         mols = self.prep_testdata()
-        path = f'{os.path.dirname(__file__)}/test_files/test_predictor'
         desc_calc = DescriptorsCalculator([MorganFP(2, 10), DrugExPhyschem(), Mordred(
-            ABCIndex), PredictorDesc(path, 'PLS', 'GABAAalpha', type='REG')])
+            ABCIndex), PredictorDesc(
+            f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
+            f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json')])
         mols.append(None)
         descriptors = desc_calc(mols)
         self.assertIsInstance(descriptors, pd.DataFrame)
