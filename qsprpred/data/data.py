@@ -704,6 +704,27 @@ class QSPRDataset(MoleculeTable):
 
         logger.info(f"Dataset '{self.name}' created for target targetProperty: '{self.targetProperty}'.")
 
+    @staticmethod
+    def fromTableFile(name, filename, sep="\t", *args, **kwargs):
+        """Create QSPRDataset from table file (i.e. CSV or TSV).
+
+        Args:
+            name (str): name of the data set
+            filename (str): path to the table file
+            sep (str, optional): separator in the table file. Defaults to "\t".
+            *args: additional arguments for QSPRDataset constructor
+            **kwargs: additional keyword arguments for QSPRDataset constructor
+        Returns:
+            QSPRDataset: `QSPRDataset` object
+        """
+
+        return QSPRDataset(name, df=pd.read_table(filename, sep=sep), *args, **kwargs)
+
+    @staticmethod
+    def fromSDF(name, filename, smiles_prop, *args, **kwargs):
+        raise NotImplementedError(f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can convert from 'MoleculeTable' with 'fromMolTable'.")
+
+
     def dropEmpty(self):
         """Drop rows with empty target property value from the data set."""
         self.df.dropna(subset=([self.smilescol, self.targetProperty]), inplace=True)
