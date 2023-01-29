@@ -833,9 +833,11 @@ class QSPRDataset(MoleculeTable):
         name = mol_table.name if name is None else name
         return QSPRDataset(name, target_prop, mol_table.getDF(), **kwargs)
 
-    def addDescriptors(self, calculator: Calculator, recalculate=False):
+    def addDescriptors(self, calculator: Calculator, recalculate=False, featurize=True):
         super().addDescriptors(calculator, recalculate)
         self.featureNames = self.getFeatureNames()
+        if featurize:
+            self.featurizeSplits()
 
     def saveSplit(self):
         if self.X is not None:
