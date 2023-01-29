@@ -919,7 +919,8 @@ class QSPRDataset(MoleculeTable):
         logger.info(f"Selected features: {self.featureNames}")
 
         # update descriptor calculator
-        self.descriptorCalculator.keepDescriptors(self.featureNames)
+        if self.descriptorCalculator is not None:
+            self.descriptorCalculator.keepDescriptors(self.featureNames)
 
     def prepareDataset(
         self,
