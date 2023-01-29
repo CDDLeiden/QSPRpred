@@ -744,12 +744,6 @@ class QSPRDataset(MoleculeTable):
 
         return features
 
-    def clearTrainingData(self):
-        self.X = None
-        self.y = None
-        self.X_ind = None
-        self.y_ind = None
-
     def restoreTrainingData(self):
         self.X = self.df
         self.y = self.df[[self.targetProperty]]
@@ -790,7 +784,6 @@ class QSPRDataset(MoleculeTable):
         self.task = ModelTasks.REGRESSION
         self.targetProperty = target_property
         self.originalTargetProperty = target_property
-        self.clearTrainingData()
         self.restoreTrainingData()
 
     def makeClassification(self, th: List[float] = tuple()):
@@ -816,7 +809,6 @@ class QSPRDataset(MoleculeTable):
         self.task = ModelTasks.CLASSIFICATION
         self.targetProperty = new_prop
         self.th = th
-        self.clearTrainingData()
         self.restoreTrainingData()
         logger.info("Target property converted to classification.")
 
