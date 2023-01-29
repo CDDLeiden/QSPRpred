@@ -754,16 +754,24 @@ class QSPRDataset(MoleculeTable):
         self.X = self.df
         self.y = self.df[[self.targetProperty]]
 
+        # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.X = self.df[self.df["Split_IsTrain"] == True]
             self.X_ind = self.df[self.df["Split_IsTrain"] == False]
             self.y = self.X[[self.targetProperty]]
             self.y_ind = self.X_ind[[self.targetProperty]]
-            if self.hasDescriptors:
-                self.featurizeSplits()
+        else:
+            self.X_ind = self.X.drop(self.X.index)
+            self.y_ind = self.y.drop(self.y.index)
 
+        # featurize data if descriptors are available
+        if self.hasDescriptors:
+            self.featurizeSplits()
+
+        # filter for only selected features if present
         if self.featureNames:
             self.X = self.X[self.featureNames]
+            self.X_ind = self.X_ind[self.featureNames]
 
     def isMultiClass(self):
         """Return if model task is multi class classification."""
