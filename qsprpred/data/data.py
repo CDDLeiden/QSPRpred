@@ -742,6 +742,9 @@ class QSPRDataset(MoleculeTable):
                 features.extend([f"{descset}_{x}" for x in descset.descriptors])
             features = [f"Descriptor_{f}" for f in features]
 
+        if self.metaInfo and ('feature_names' in self.metaInfo) and (self.metaInfo['feature_names'] is not None):
+            features.extend([x for x in self.metaInfo['feature_names'] if x not in features])
+
         return features
 
     def restoreTrainingData(self):
@@ -909,7 +912,7 @@ class QSPRDataset(MoleculeTable):
         self.df[columns] = self.df[columns].fillna(fill_value)
         logger.warning('Missing values filled with %s' % fill_value)
 
-    def filterFeatures(self, feature_filters=None):
+    def filterFeatures(self, feature_filters):
         for featurefilter in feature_filters:
             self.X = featurefilter(self.X, self.y)
 
@@ -955,7 +958,7 @@ class QSPRDataset(MoleculeTable):
 
         # calculate featureNames
         if feature_calculator is not None:
-            self.addDescriptors(feature_calculator, recalculate=recalculate_features)
+            self.addDescriptors(feature_calculator, recalculate=recalculate_features, featurize=False)
 
         # apply data filters
         if datafilters is not None:
@@ -1133,7 +1136,8 @@ class QSPRDataset(MoleculeTable):
             'init': meta_init,
             'standardizer_paths': paths,
             'descriptorcalculator_path': self.descriptorCalculatorPath,
-            'new_target_prop': self.targetProperty
+            'new_target_prop': self.targetProperty,
+            'feature_names': list(self.featureNames) if self.featureNames is not None else None,
         }
         with open(f"{self.storePrefix}_meta.json", 'w') as f:
             json.dump(ret, f)
