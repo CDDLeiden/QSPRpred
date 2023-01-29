@@ -471,7 +471,7 @@ class MoleculeTable(MoleculeDataSet):
     def _scaffold_calculator(mol, scaffold: Scaffold):
         return scaffold(mol[0])
 
-    def addScaffolds(self, scaffolds: List[Scaffold], add_rdkit_scaffold=False):
+    def addScaffolds(self, scaffolds: List[Scaffold], add_rdkit_scaffold=False, recalculate=False):
         """
         Add scaffolds to the data frame. A new column is created that contains the SMILES of the corresponding scaffold.
         If `add_rdkit_scaffold` is set to `True`, a new column is created that contains the RDKit scaffold of the
@@ -480,10 +480,11 @@ class MoleculeTable(MoleculeDataSet):
         Args:
             scaffolds (list): List of `Scaffold` calculators.
             add_rdkit_scaffold (bool): Whether to add the RDKit scaffold of the molecule as a new column.
+            recalculate (bool): Whether to recalculate scaffolds even if they are already present in the data frame.
         """
 
         for scaffold in scaffolds:
-            if f"Scaffold_{scaffold}" in self.df.columns:
+            if not recalculate and f"Scaffold_{scaffold}" in self.df.columns:
                 continue
 
             self.df[f"Scaffold_{scaffold}"] = self.apply(
