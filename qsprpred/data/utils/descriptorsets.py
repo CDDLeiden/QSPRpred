@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 import mordred
 import numpy as np
 from mordred import descriptors as mordreddescriptors
+from qsprpred.data.utils import fingerprints
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
@@ -64,29 +65,29 @@ class DescriptorSet(ABC):
         pass
 
 
-class MorganFP(DescriptorSet):
+class FingerprintSet(DescriptorSet):
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize the descriptor with the same arguments as you would pass to `GetMorganFingerprintAsBitVect` function of RDKit.
+        Initialize the descriptor with the same arguments as you would pass to your fingerprint type of choice.
 
         Args:
-            *args: `GetMorganFingerprintAsBitVect` arguments
-            **kwargs: `GetMorganFingerprintAsBitVect` keyword arguments
+            *args: fingerprint type arguments
+            **kwargs: fingerprint type keyword arguments, make sure to include also "fingerprint_type" as a keyword argument.
         """
         self._args = args
         self._kwargs = kwargs
         self._is_fp = True
+        self.get_fingerprint = fingerprints.get_fingerprint(self._kwargs["fingerprint_type"], *args, **kwargs)
 
         self._keepindices = None
 
     def __call__(self, mol):
         convertMol = Chem.MolFromSmiles
         convertFP = DataStructs.ConvertToNumpyArray
-        morgan = AllChem.GetMorganFingerprintAsBitVect
 
         mol = convertMol(mol) if isinstance(mol, str) else mol
-        fp = morgan(mol, *self._args, **self._kwargs)
+        fp = self.get_fingerprint(mol)
         ret = np.zeros(len(fp))
         convertFP(fp, ret)
         if self.keepindices:
@@ -113,7 +114,7 @@ class MorganFP(DescriptorSet):
         return len(self.__call__("C"))
 
     def __str__(self):
-        return "MorganFP"
+        return f"FingerprintSet_{self.get_fingerprint.getKey()}"
 
     @property
     def descriptors(self):
@@ -332,8 +333,8 @@ class _DescriptorSetRetriever:
             raise Exception(f"{desc_type} is not a supported descriptor set type.")
         return method(*args, **kwargs)
 
-    def get_MorganFP(self, *args, **kwargs):
-        return MorganFP(*args, **kwargs)
+    def get_FingerprintSet(self, *args, **kwargs):
+        return FingerprintSet(*args, **kwargs)
 
     def get_DrugExPhyschem(self, *args, **kwargs):
         return DrugExPhyschem(*args, **kwargs)
