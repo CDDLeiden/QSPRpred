@@ -78,6 +78,7 @@ def sanitize_smiles(smi: str) -> str:
     """
     salts = re.compile(r"\..?Cl|\..?Br|\..?Ca|\..?K|\..?Na|\..?Li|\..?Zn|/\..?Gd")
     s_acid_remover = re.compile(r"\.OS\(\=O\)\(\=O\)O")
+    boron_pattern = re.compile(r"B")
     remover = SaltRemover(defnData="[Cl,Br,Ca,K,Na,Zn]")
     pattern = Chem.MolFromSmarts("[+1!h0!$([*]~[-1,-2,-3,-4]),-1!$([*]~[+1,+2,+3,+4])]")
     mol = Chem.MolFromSmiles(smi)
@@ -100,7 +101,8 @@ def sanitize_smiles(smi: str) -> str:
     # Trying to remove the salts
     if salts.findall(smi):
         res, deleted = remover.StripMolWithDeleted(mol)
-        if res is not None:
+        # avoid neutralizing smiles with boron atoms
+        if all([res is not None, not boron_pattern.findall(smi)]):
             neutralize_atoms(res)
             # If it didn't remove, let's continue
             if salts.findall(Chem.MolToSmiles(res)):
@@ -112,7 +114,8 @@ def sanitize_smiles(smi: str) -> str:
     # Are the molecules charged according to the "pattern" variable?
     if mol.GetSubstructMatches(pattern):
         res, deleted = remover.StripMolWithDeleted(mol)
-        if res is not None:
+        # avoid neutralizing smiles with boron atoms
+        if all([res is not None, not boron_pattern.findall(smi)]):
             neutralize_atoms(res)
         if salts.findall(Chem.MolToSmiles(res)):
             print(f"Unable to remove salts from compound {smi} after neutralizing")
