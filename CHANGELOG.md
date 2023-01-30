@@ -21,6 +21,8 @@ From v1.0.0 to v1.1.0
   - The presence of `descriptors` property getter and setter is now enforced.
   - When called the `DescriptorSet` implementations now strictly return lists.
   - Conversion to descriptor data frame is now handled exclusively in `DescriptorsCalculator`
+- Default `chunk_size` for `MoleculeTable.addDescriptors` was set to 50 so that smaller data sets can take advantage of more CPUs as well.
+- The `datasplit` interface was changed to mimic the `sklearn.model_selection.BaseCrossValidator` interface so all `sklearn` cross-validation methods can be used with QSPRPred out of the box to either generate train/test split or cross-validation splits (see the new features below)
 - Default `chunk_size` for `MoleculeTable` was set to 50 so that smaller data sets can take advantage of more CPUs as well.
 - The number of CPUs to use for parallel operations  by `MoleculeTable` is now set in the `__init__` of the class
 
@@ -30,4 +32,6 @@ From v1.0.0 to v1.1.0
 - Depiction of results for classification models (see `qsprpred.plotting.classification`)
 - The `precomputed` flag was added to `QSPRDataset`
 - Added an option to directly fetch `QSPRDataset` from Papyrus with accession IDs (see `qsprpred.data.sources.papyrus`)
+- The `datasplit` interface is now used to both generate train/test split and also the cross-validation splits
+- Train/test split of the data set is now saved in the matrix itself and is reloaded upon deserialization
 - `MoleculeTable` was updated with new features to generate scaffolds of molecules
