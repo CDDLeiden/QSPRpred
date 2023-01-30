@@ -16,6 +16,7 @@ from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
     Mordred,
+    TanimotoDistances,
     rdkit_descs,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
@@ -264,6 +265,17 @@ class TestDescriptorsets(PathMixIn, TestCase):
         self.assertIsInstance(descriptors, list)
         descriptors = pd.DataFrame([descriptors])
         self.assertEqual(descriptors.shape, (1, 1000))
+        self.assertTrue(descriptors.any().any())
+        self.assertTrue(descriptors.any().sum() > 1)
+
+    def test_TanimotoDistances(self):
+        mols = self.prep_testdata()
+        list_of_smiles = ["C", "CC", "CCC", "CCCC", "CCCCC", "CCCCCC", "CCCCCCC"]
+        desc_calc = TanimotoDistances(list_of_smiles=list_of_smiles, fingerprint_type="MorganFP", radius=3, nBits=1000)
+        descriptors = desc_calc(mols[2])
+        self.assertIsInstance(descriptors, list)
+        descriptors = pd.DataFrame([descriptors])
+        self.assertEqual(descriptors.shape, (1, 7))
         self.assertTrue(descriptors.any().any())
         self.assertTrue(descriptors.any().sum() > 1)
 

@@ -284,24 +284,25 @@ class TanimotoDistances(DescriptorSet):
 
     Args:
         list_of_smiles (list of strings): list of SMILES sequences to calculate distance to
-        *args: `Property` arguments
-        **kwargs: `Property` keyword arguments
+        *args: `fingerprint` arguments
+        **kwargs: `fingerprint` keyword arguments, should contain fingerprint_type
     """
 
     def __init__(self, list_of_smiles, *args, **kwargs):
         self._args = args
-        kwargs.update({'list_of_smiles': list_of_smiles})
+        self.list_of_smiles = list_of_smiles
         self._kwargs = kwargs
         self._is_fp = False
         self._descriptors = list_of_smiles
+        self.fingerprint_type = kwargs["fingerprint_type"]
+        self._kwargs.pop("fingerprint_type")
+        self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *args, **kwargs)
         mols = [Chem.MolFromSmiles(smiles) for smiles in list_of_smiles]
-        self.fps = [AllChem.GetMorganFingerprintAsBitVect(mol, 3, nBits=1024) for mol in mols]
+        self.fps = [self.get_fingerprint(mol) for mol in mols]
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        fp = AllChem.GetMorganFingerprintAsBitVect(mol, 3, nBits=1024)
-
-        return list(1 - np.array(DataStructs.BulkTanimotoSimilarity(fp, self.fps)))
+        return list(1 - np.array(DataStructs.BulkTanimotoSimilarity(self.get_fingerprint(mol), self.fps)))
 
     @property
     def is_fp(self):
@@ -309,6 +310,7 @@ class TanimotoDistances(DescriptorSet):
 
     @property
     def settings(self):
+        self._kwargs.update({"fingerprint_type": self.fingerprint_type, "list_of_smiles": self.list_of_smiles})
         return self._args, self._kwargs
 
     @property
