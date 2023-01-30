@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 import mordred
 import numpy as np
 from mordred import descriptors as mordreddescriptors
-from qsprpred.data.utils import fingerprints
+from qsprpred.data.utils.descriptor_utils import fingerprints
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
@@ -78,7 +78,9 @@ class FingerprintSet(DescriptorSet):
         self._args = args
         self._kwargs = kwargs
         self._is_fp = True
-        self.get_fingerprint = fingerprints.get_fingerprint(self._kwargs["fingerprint_type"], *args, **kwargs)
+        self.fingerprint_type = kwargs["fingerprint_type"]
+        self._kwargs.pop("fingerprint_type")
+        self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *args, **kwargs)
 
         self._keepindices = None
 
@@ -108,13 +110,15 @@ class FingerprintSet(DescriptorSet):
 
     @property
     def settings(self):
+        # add fingerprint type to kwargs
+        self._kwargs["fingerprint_type"] = self.fingerprint_type
         return self._args, self._kwargs
 
     def get_len(self):
         return len(self.__call__("C"))
 
     def __str__(self):
-        return f"FingerprintSet_{self.get_fingerprint.getKey()}"
+        return f"FingerprintSet"
 
     @property
     def descriptors(self):

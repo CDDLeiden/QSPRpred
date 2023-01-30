@@ -2,8 +2,6 @@
 
 from abc import ABC, abstractmethod
 
-import numpy as np
-from rdkit import Chem
 from rdkit.Chem import AllChem
 
 
@@ -22,7 +20,7 @@ class fingerprint(ABC):
         return self.getFingerprint(mol)
 
     @abstractmethod
-    def getlen(self):
+    def __len__(self):
         pass
 
     @abstractmethod
@@ -48,11 +46,12 @@ class MorganFP(fingerprint):
         """
         return AllChem.GetMorganFingerprintAsBitVect(mol, self.radius, nBits=self.nBits)
 
-    def getLen(self):
+    def __len__(self):
         return self.nBits
 
     def getKey(self):
         return "MorganFP"
+
 
 class _FingerprintRetriever:
     """Based on recipe 8.21 of the book "Python Cookbook".
@@ -72,4 +71,4 @@ class _FingerprintRetriever:
 
 
 def get_fingerprint(fp_type: str, *args, **kwargs):
-    return _FingerprintRetriever().get_descriptor(fp_type, *args, **kwargs)
+    return _FingerprintRetriever().get_fingerprint(fp_type, *args, **kwargs)

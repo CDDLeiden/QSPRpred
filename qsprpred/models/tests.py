@@ -14,7 +14,7 @@ import sklearn_json as skljson
 import torch
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
-from qsprpred.data.utils.descriptorsets import MorganFP
+from qsprpred.data.utils.descriptorsets import FingerprintSet
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
@@ -67,9 +67,9 @@ class NeuralNet(PathMixIn, TestCase):
             th=th,
             store_dir=self.qsprmodelspath)
         data.prepareDataset(
-            feature_calculator=DescriptorsCalculator([MorganFP(3, 1000)]),
-            feature_standardizers=[StandardScaler()]
-        )
+            feature_calculator=DescriptorsCalculator(
+                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]),
+            feature_standardizers=[StandardScaler()])
         data.save()
         # prepare data for torch DNN
         trainloader = DataLoader(
@@ -161,7 +161,7 @@ class TestModels(PathMixIn, TestCase):
             task=task,
             th=th,
             store_dir=self.qsprmodelspath)
-        feature_calculators = DescriptorsCalculator([MorganFP(3, 1000)])
+        feature_calculators = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)])
         scaler = StandardScaler()
         data.prepareDataset(
             feature_calculator=feature_calculators,

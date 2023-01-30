@@ -14,8 +14,8 @@ from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, tempor
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
+    FingerprintSet,
     Mordred,
-    MorganFP,
     rdkit_descs,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
@@ -30,6 +30,7 @@ from sklearn.preprocessing import StandardScaler
 
 N_CPU = 4
 CHUNK_SIZE = 20
+
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
@@ -132,7 +133,7 @@ class TestData(PathMixIn, DataSets, TestCase):
             np.random.seed(42)
             descriptor_sets = [
                 Mordred(),
-                MorganFP(radius=3, nBits=2048),
+                FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
                 rdkit_descs(),
                 DrugExPhyschem()
             ]
@@ -256,9 +257,9 @@ class TestDescriptorsets(PathMixIn, TestCase):
         mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
         return mols
 
-    def test_MorganFP(self):
+    def test_fingerprintSet(self):
         mols = self.prep_testdata()
-        desc_calc = MorganFP(3, nBits=1000)
+        desc_calc = FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)
         descriptors = desc_calc(mols[2])
         self.assertIsInstance(descriptors, list)
         descriptors = pd.DataFrame([descriptors])
@@ -321,7 +322,7 @@ class TestDescriptorCalculator(PathMixIn, TestCase):
         from mordred import ABCIndex
         mols = self.prep_testdata()
         desc_calc = DescriptorsCalculator(
-            [MorganFP(2, 10), DrugExPhyschem(), Mordred(ABCIndex)])
+            [FingerprintSet(fingerprint_type="MorganFP", radius=2, nBits=10), DrugExPhyschem(), Mordred(ABCIndex)])
         mols.append(None)
         descriptors = desc_calc(mols)
         self.assertIsInstance(descriptors, pd.DataFrame)
