@@ -18,6 +18,8 @@ from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
     MorganFP,
+    Mold2,
+    PaDEL,
     rdkit_descs,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
@@ -241,6 +243,8 @@ class TestDataSetPreparation(DataSets, TestCase):
                 Mordred(),
                 MorganFP(radius=3, nBits=2048),
                 rdkit_descs(),
+                Mold2(),
+                PaDEL(),
                 DrugExPhyschem()
             ]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
@@ -446,6 +450,26 @@ class TestDescriptorsets(DataSets, TestCase):
         self.assertEqual(
             self.dataset.X.shape,
             (len(self.dataset), len(mordred.Calculator(mordreddescriptors).descriptors)))
+        self.assertTrue(self.dataset.X.any().any())
+        self.assertTrue(self.dataset.X.any().sum() > 1)
+
+    def test_Mold2(self):
+        desc_calc = DescriptorsCalculator([Mold2()])
+        self.dataset.addDescriptors(desc_calc)
+
+        self.assertEqual(
+            self.dataset.X.shape,
+            (len(self.dataset), 777))
+        self.assertTrue(self.dataset.X.any().any())
+        self.assertTrue(self.dataset.X.any().sum() > 1)
+
+    def test_PaDEL(self):
+        desc_calc = DescriptorsCalculator([PaDEL()])
+        self.dataset.addDescriptors(desc_calc)
+
+        self.assertEqual(
+            self.dataset.X.shape,
+            (len(self.dataset), 1444))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 

@@ -654,7 +654,7 @@ class QSPRDataset(MoleculeTable):
             store_dir (str, optional): directory for saving the output data. Defaults to '.'.
             overwrite (bool, optional): if already saved data at output dir if should be overwritten. Defaults to False.
             task (Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION], optional): Defaults to ModelTasks.REGRESSION.
-            target_transformer (Callable, optional): Transformation(s) of target propery. Defaults to None.
+            target_transformer (Callable, optional): Transformation(s) of target property. Defaults to None.
             th (List[float], optional): threshold for activity if classification model, if len th
                 larger than 1, these values will used for binning (in this case lower and upper
                 boundary need to be included). Defaults to None.

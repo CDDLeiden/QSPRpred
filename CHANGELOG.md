@@ -35,3 +35,4 @@ From v1.0.0 to v1.1.0
 - The `datasplit` interface is now used to both generate train/test split and also the cross-validation splits
 - Train/test split of the data set is now saved in the matrix itself and is reloaded upon deserialization
 - `MoleculeTable` was updated with new features to generate scaffolds of molecules
+- Added the [Mold2](https://pubs.acs.org/doi/10.1021/ci800038f) and [PaDEL](https://onlinelibrary.wiley.com/doi/10.1002/jcc.21707) molecular descriptors
