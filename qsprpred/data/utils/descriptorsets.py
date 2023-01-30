@@ -6,7 +6,6 @@ To add a new descriptor or fingerprint calculator:
 """
 
 from abc import ABC, abstractmethod
-from typing import Union, List
 
 import mordred
 import numpy as np
@@ -14,40 +13,26 @@ from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
-from rdkit.Chem import AllChem, Mol
+from rdkit.Chem import AllChem
 
 
 class DescriptorSet(ABC):
     """Abstract base class for descriptorssets."""
 
     @abstractmethod
-    def __call__(self, mols : List[Union[str, Mol]]):
+    def __call__(self, mol):
         """
         Calculate the descriptor for a molecule.
 
         Args:
-            mols: list of molecules (SMILES `str` or RDKit Mol)
+            mol: smiles or rdkit molecule
+            *args: optional arguments
+            **kwargs: optional keyword arguments
 
         Returns:
-            an array or data frame of descriptor values of shape (n_mols, n_descriptors)
+            a `list` of descriptor values
         """
         pass
-
-    def iterMols(self, mols : List[Union[str, Mol]], to_list=False):
-        """
-        Calculate the descriptor for a molecule.
-
-        Args:
-            mols: list of molecules (SMILES `str` or RDKit Mol)
-
-        Returns:
-            an array or data frame of descriptor values of shape (n_mols, n_descriptors)
-        """
-
-        ret = (Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol for mol in mols)
-        if to_list:
-            ret = list(ret)
-        return ret
 
     @property
     @abstractmethod
@@ -95,20 +80,18 @@ class MorganFP(DescriptorSet):
 
         self._keepindices = None
 
-    def __call__(self, mols):
+    def __call__(self, mol):
+        convertMol = Chem.MolFromSmiles
         convertFP = DataStructs.ConvertToNumpyArray
         morgan = AllChem.GetMorganFingerprintAsBitVect
 
-        ret = np.zeros((len(mols), self.get_len()))
-        for idx,mol in enumerate(self.iterMols(mols)):
-            fp = morgan(mol, *self._args, **self._kwargs)
-            np_fp = np.zeros(len(fp))
-            convertFP(fp, np_fp)
-            if self.keepindices:
-                np_fp = np_fp[self.keepindices]
-            ret[idx] = np_fp
-
-        return ret
+        mol = convertMol(mol) if isinstance(mol, str) else mol
+        fp = morgan(mol, *self._args, **self._kwargs)
+        ret = np.zeros(len(fp))
+        convertFP(fp, ret)
+        if self.keepindices:
+            ret = ret[self.keepindices]
+        return list(ret)
 
     @property
     def keepindices(self):
@@ -127,7 +110,7 @@ class MorganFP(DescriptorSet):
         return self._args, self._kwargs
 
     def get_len(self):
-        return len(AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles("C"), *self._args, **self._kwargs))
+        return len(self.__call__("C"))
 
     def __str__(self):
         return "MorganFP"
@@ -167,8 +150,9 @@ class Mordred(DescriptorSet):
         self._mordred = None
         self.descriptors = self._args[0]
 
-    def __call__(self, mols):
-        return self._mordred.pandas(self.iterMols(mols), quiet=True, nproc=1).values
+    def __call__(self, mol):
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        return self._mordred.pandas([mol], quiet=True, nproc=1).iloc[0].to_list()
 
     @property
     def is_fp(self):
@@ -219,9 +203,10 @@ class DrugExPhyschem(DescriptorSet):
         self._is_fp = False
         self.props = [x for x in Property(*args, **kwargs).props]
 
-    def __call__(self, mols):
+    def __call__(self, mol):
         calculator = Property(self.props)
-        return calculator.getScores(self.iterMols(mols, to_list=True))
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        return list(calculator.getScores([mol])[0])
 
     @property
     def is_fp(self):
@@ -262,8 +247,9 @@ class rdkit_descs(DescriptorSet):
         self._calculator = RDKit_desc(*args, **kwargs)
         self._descriptors = self._calculator.descriptors
 
-    def __call__(self, mols):
-        return self._calculator.getScores(self.iterMols(mols, to_list=True))
+    def __call__(self, mol):
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        return list(self._calculator.getScores([mol])[0])
 
     @property
     def is_fp(self):
