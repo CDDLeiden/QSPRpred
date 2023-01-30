@@ -1,4 +1,4 @@
-"""Descriptorssets.
+"""Descriptorssets. A descriptorset is a collection of descriptors that can be calculated for a molecule.
 
 To add a new descriptor or fingerprint calculator:
 * Add a descriptor subclass for your descriptor calculator
@@ -14,11 +14,13 @@ from qsprpred.data.utils.descriptor_utils import fingerprints
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
-from rdkit.Chem import AllChem
 
 
 class DescriptorSet(ABC):
-    """Abstract base class for descriptorssets."""
+    """Abstract base class for descriptorsets.
+
+    A descriptorset is a collection of descriptors that can be calculated for a molecule.
+    """
 
     @abstractmethod
     def __call__(self, mol):
@@ -27,8 +29,6 @@ class DescriptorSet(ABC):
 
         Args:
             mol: smiles or rdkit molecule
-            *args: optional arguments
-            **kwargs: optional keyword arguments
 
         Returns:
             a `list` of descriptor values
@@ -48,6 +48,7 @@ class DescriptorSet(ABC):
         pass
 
     def get_len(self):
+        """Return the number of descriptors."""
         return len(self.descriptors)
 
     @abstractmethod
@@ -57,34 +58,37 @@ class DescriptorSet(ABC):
 
     @abstractmethod
     def settings(self):
-        """Return args and kwargs used to initialize the descriptorset."""
+        """Return dictionary with arguments used to initialize the descriptorset."""
         pass
 
     @abstractmethod
     def __str__(self):
+        """Return string representation of the descriptorset."""
         pass
 
 
 class FingerprintSet(DescriptorSet):
+    """Generic fingerprint descriptorset can be used to calculate any fingerprint type defined in descriptorutils.fingerprints."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, fingerprint_type, *args, **kwargs):
         """
         Initialize the descriptor with the same arguments as you would pass to your fingerprint type of choice.
 
         Args:
-            *args: fingerprint type arguments
-            **kwargs: fingerprint type keyword arguments, make sure to include also "fingerprint_type" as a keyword argument.
+            fingerprint_type: fingerprint type
+            *args: fingerprint specific arguments
+            **kwargs: fingerprint specific arguments keyword arguments
         """
         self._args = args
         self._kwargs = kwargs
         self._is_fp = True
-        self.fingerprint_type = kwargs["fingerprint_type"]
-        self._kwargs.pop("fingerprint_type")
+        self.fingerprint_type = fingerprint_type
         self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *args, **kwargs)
 
         self._keepindices = None
 
     def __call__(self, mol):
+        """Calculate the fingerprint for a molecule."""
         convertMol = Chem.MolFromSmiles
         convertFP = DataStructs.ConvertToNumpyArray
 
@@ -98,23 +102,26 @@ class FingerprintSet(DescriptorSet):
 
     @property
     def keepindices(self):
+        """Return the indices of the fingerprint to keep."""
         return self._keepindices
 
     @keepindices.setter
     def keepindices(self, val):
+        """Set the indices of the fingerprint to keep."""
         self._keepindices = [int(x) for x in val] if val else None
 
     @property
     def is_fp(self):
+        """Return True if descriptorset is fingerprint."""
         return self._is_fp
 
     @property
     def settings(self):
-        # add fingerprint type to kwargs
-        self._kwargs["fingerprint_type"] = self.fingerprint_type
-        return self._args, self._kwargs
+        """Return dictionary with arguments used to initialize the descriptorset."""
+        return {"fingerprint_type": self.fingerprint_type, "args": self._args, "kwargs": self._kwargs}
 
     def get_len(self):
+        """Return the length of the fingerprint."""
         return len(self.__call__("C"))
 
     def __str__(self):
@@ -122,37 +129,58 @@ class FingerprintSet(DescriptorSet):
 
     @property
     def descriptors(self):
+        """Return the indices of the fingerprint that are kept."""
         return [f"{idx}" for idx in range(self.get_len())]
 
     @descriptors.setter
     def descriptors(self, value):
-        """
-        Sets the number of bits to a given value.
-        """
-        self._kwargs["nBits"] = value
+        """Set the indices of the fingerprint to keep."""
+        self.keepindices(value)
 
 
 class Mordred(DescriptorSet):
     """Descriptors from molecular descriptor calculation software Mordred.
 
     From https://github.com/mordred-descriptor/mordred.
-    Initialize the descriptor with the same arguments as you would pass to `Calculator` function of Mordred.
-    If no mordred descriptor object passed, the all descriptors will be calculated.
 
     Args:
-        *args: `Calculator` arguments
-        **kwargs: `Calculator` keyword arguments
+        descs (list): list of mordred descriptor names
+        version (str): version of mordred
+        ignore_3D (bool): ignore 3D information
+        config (str): path to config file
     """
 
-    def __init__(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
-        self._process_args(*args, **kwargs)
+    def __init__(self, descs=None, version=None, ignore_3D=False, config=None):
+        """
+        Initialize the descriptor with the same arguments as you would pass to `Calculator` function of Mordred.
+
+        With the exception of the `descs` argument which can also be a list of mordred descriptor names instead
+        of a mordred descriptor module.
+
+        Args:
+            descs: List of Mordred descriptor names, a Mordred descriptor module or None for all mordred descriptors
+            version (str): version of mordred
+            ignore_3D (bool): ignore 3D information
+            config (str): path to config file?
+        """
+        if descs:
+            # if mordred descriptor module is passed, convert to list of descriptor instances
+            if not isinstance(descs, list):
+                descs = (mordred.Calculator(descs).descriptors)
+        else:
+            # use all mordred descriptors if no descriptors are specified
+            descs = mordred.Calculator(mordreddescriptors).descriptors
+
+        self.version = version
+        self.ignore_3D = ignore_3D
+        self.config = config
 
         self._is_fp = False
 
         self._mordred = None
-        self.descriptors = self._args[0]
+
+        # convert to list of descriptor names if descriptor instances are passed and initiate mordred calulator
+        self.descriptors = [[str(d) for d in descs]]
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
@@ -164,7 +192,7 @@ class Mordred(DescriptorSet):
 
     @property
     def settings(self):
-        return self._args, self._kwargs
+        return {"descs": self.descriptors, "version": self.version, "ignore_3D": self.ignore_3D, "config": self.config}
 
     @property
     def descriptors(self):
@@ -172,20 +200,19 @@ class Mordred(DescriptorSet):
 
     @descriptors.setter
     def descriptors(self, names):
+        """Set the descriptors to calculate.
+
+        Converts a list of Mordred descriptor names to Mordred descriptor instances which is used to initialize the
+        a Mordred calculator with the specified descriptors.
+
+        Args:
+            names: List of Mordred descriptor names.
+        """
         calc = mordred.Calculator(mordreddescriptors)
         self._mordred = mordred.Calculator(
-            [d for d in calc.descriptors if str(d) in names], **self._kwargs
-        )
+            [d for d in calc.descriptors if str(d) in names],
+            version=self.version, ignore_3D=self.ignore_3D, config=self.config)
         self._descriptors = names
-
-    def _process_args(self, descs=None, version=None, ignore_3D=False, config=None):
-        if descs:
-            if not isinstance(descs, list):
-                descs = (mordred.Calculator(descs).descriptors)
-        else:
-            descs = mordred.Calculator(mordreddescriptors).descriptors
-        self._args = [[str(d) for d in descs]]
-        self._kwargs = {"version": version, "ignore_3D": ignore_3D, "config": config}
 
     def __str__(self):
         return "Mordred"
@@ -193,21 +220,23 @@ class Mordred(DescriptorSet):
 
 class DrugExPhyschem(DescriptorSet):
     """
-    Pysciochemical properties originally used in DrugEx for QSAR modelling
-    Initialize the descriptor with Property arguments (a list of properties to calculate) to select a subset.
+    Pysciochemical properties originally used in DrugEx for QSAR modelling.
 
     Args:
-        *args: `Property` arguments
-        **kwargs: `Property` keyword arguments
+        props: list of properties to calculate
     """
 
-    def __init__(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
+    def __init__(self, physchem_props=None):
+        """Initialize the descriptorset with Property arguments (a list of properties to calculate) to select a subset.
+
+        Args:
+            physchem_props: list of properties to calculate
+        """
         self._is_fp = False
-        self.props = [x for x in Property(*args, **kwargs).props]
+        self.props = [x for x in Property(physchem_props).props]
 
     def __call__(self, mol):
+        """Calculate the DrugEx properties for a molecule."""
         calculator = Property(self.props)
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
         return list(calculator.getScores([mol])[0])
@@ -218,7 +247,7 @@ class DrugExPhyschem(DescriptorSet):
 
     @property
     def settings(self):
-        return self._args, self._kwargs
+        return {"physchem_props": self.props}
 
     @property
     def descriptors(self):
@@ -235,20 +264,16 @@ class DrugExPhyschem(DescriptorSet):
 
 class rdkit_descs(DescriptorSet):
     """
-    RDkit descriptors
-    Initialize the descriptor names (a list of properties to calculate) to select a subset of the rdkit descriptors.
-    Add compute_3Drdkit argument to indicate if 3D descriptors should also be calculated
+    Calculate RDkit descriptors.
 
     Args:
-        *args: `Property` arguments
-        **kwargs: `Property` keyword arguments
+        rdkit_descriptors: list of descriptors to calculate, if none, all 2D rdkit descriptors will be calculated
+        compute_3Drdkit: if True, 3D descriptors will be calculated
     """
 
-    def __init__(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
+    def __init__(self, rdkit_descriptors=None, compute_3Drdkit=False):
         self._is_fp = False
-        self._calculator = RDKit_desc(*args, **kwargs)
+        self._calculator = RDKit_desc(rdkit_descriptors, compute_3Drdkit)
         self._descriptors = self._calculator.descriptors
 
     def __call__(self, mol):
@@ -261,7 +286,7 @@ class rdkit_descs(DescriptorSet):
 
     @property
     def settings(self):
-        return self._args, self._kwargs
+        return {"rdkit_descriptors": self._descriptors, "compute_3Drdkit": self._calculator.compute_3Drdkit}
 
     @property
     def descriptors(self):
@@ -278,31 +303,44 @@ class rdkit_descs(DescriptorSet):
 
 class TanimotoDistances(DescriptorSet):
     """
-    RDkit descriptors
-    Initialize the descriptor names (a list of properties to calculate) to select a subset of the rdkit descriptors.
-    Add compute_3Drdkit argument to indicate if 3D descriptors should also be calculated
+    Calculate Tanimoto distances to a list of SMILES sequences.
 
     Args:
         list_of_smiles (list of strings): list of SMILES sequences to calculate distance to
+        fingerprint_type (str): fingerprint type to use
         *args: `fingerprint` arguments
         **kwargs: `fingerprint` keyword arguments, should contain fingerprint_type
     """
 
-    def __init__(self, list_of_smiles, *args, **kwargs):
+    def __init__(self, list_of_smiles, fingerprint_type, *args, **kwargs):
+        """Initialize the descriptorset with a list of SMILES sequences and a fingerprint type.
+
+        Args:
+            list_of_smiles (list of strings): list of SMILES sequences to calculate distance to
+            fingerprint_type (str): fingerprint type to use
+        """
+        self._descriptors = list_of_smiles
+        self.fingerprint_type = fingerprint_type
         self._args = args
-        self.list_of_smiles = list_of_smiles
         self._kwargs = kwargs
         self._is_fp = False
-        self._descriptors = list_of_smiles
-        self.fingerprint_type = kwargs["fingerprint_type"]
-        self._kwargs.pop("fingerprint_type")
-        self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *args, **kwargs)
-        mols = [Chem.MolFromSmiles(smiles) for smiles in list_of_smiles]
-        self.fps = [self.get_fingerprint(mol) for mol in mols]
+
+        # intialize fingerprint calculator
+        self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *self._args, **self._kwargs)
+        self.fps = self.calculate_fingerprints(self.list_of_smiles)
 
     def __call__(self, mol):
+        """Calculate the Tanimoto distances to the list of SMILES sequences.
+
+        Args:
+            mol (str or rdkit.Chem.rdchem.Mol): SMILES sequence or RDKit molecule to calculate distances to
+        """
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
         return list(1 - np.array(DataStructs.BulkTanimotoSimilarity(self.get_fingerprint(mol), self.fps)))
+
+    def calculate_fingerprints(self, list_of_smiles):
+        """Calculate the fingerprints for the list of SMILES sequences."""
+        self.fps = [self.get_fingerprint(Chem.MolFromSmiles(smiles)) for smiles in list_of_smiles]
 
     @property
     def is_fp(self):
@@ -310,17 +348,19 @@ class TanimotoDistances(DescriptorSet):
 
     @property
     def settings(self):
-        self._kwargs.update({"fingerprint_type": self.fingerprint_type, "list_of_smiles": self.list_of_smiles})
-        return self._args, self._kwargs
+        return {"fingerprint_type": self.fingerprint_type,
+                "list_of_smiles": self.list_of_smiles, "args": self._args, "kwargs": self._kwargs}
 
     @property
     def descriptors(self):
         return self._descriptors
 
     @descriptors.setter
-    def descriptors(self, descriptors):
-        self._calculator.descriptors = descriptors
-        self._descriptors = descriptors
+    def descriptors(self, list_of_smiles):
+        """Set new list of SMILES sequences to calculate distance to."""
+        self._descriptors = list_of_smiles
+        self.list_of_smiles = list_of_smiles
+        self.fps = self.calculate_fingerprints(self.list_of_smiles)
 
     def __str__(self):
         return "TanimotoDistances"
