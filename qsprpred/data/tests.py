@@ -355,7 +355,8 @@ class TestFoldSplitters(DataSets, TestCase):
     def test_defaults(self):
         # test default settings with regression
         dataset = self.create_large_dataset()
-        dataset.addDescriptors(DescriptorsCalculator([MorganFP(radius=3, nBits=1024)]))
+        dataset.addDescriptors(DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]))
         self.validate_folds(dataset)
 
         # test default settings with classification
@@ -521,7 +522,8 @@ class TestFeatureStandardizer(DataSets, TestCase):
     def setUp(self):
         super().setUp()
         self.dataset = self.create_small_dataset(self.__class__.__name__)
-        self.dataset.addDescriptors(DescriptorsCalculator([MorganFP(3, nBits=1000)]))
+        self.dataset.addDescriptors(DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]))
 
     def test_featurestandarizer(self):
         scaler = SKLearnStandardizer.fromFit(self.dataset.X, StandardScaler())

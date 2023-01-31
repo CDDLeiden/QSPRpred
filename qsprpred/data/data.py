@@ -195,10 +195,7 @@ class MoleculeTable(MoleculeDataSet):
                 os.remove(f'{self.storeDir}/{file}')
 
     def reload(self):
-        """
-        Reload the data table from disk.
-
-        """
+        """Reload the data table from disk."""
 
         self.df = pd.read_pickle(self.storePath)
         if os.path.exists(self.descriptorCalculatorPath):

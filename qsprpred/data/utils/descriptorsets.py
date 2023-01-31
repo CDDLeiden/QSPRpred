@@ -79,8 +79,6 @@ class FingerprintSet(DescriptorSet):
             *args: fingerprint specific arguments
             **kwargs: fingerprint specific arguments keyword arguments
         """
-        self._args = args
-        self._kwargs = kwargs
         self._is_fp = True
         self.fingerprint_type = fingerprint_type
         self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *args, **kwargs)
@@ -118,7 +116,7 @@ class FingerprintSet(DescriptorSet):
     @property
     def settings(self):
         """Return dictionary with arguments used to initialize the descriptorset."""
-        return {"fingerprint_type": self.fingerprint_type, "args": self._args, "kwargs": self._kwargs}
+        return {"fingerprint_type": self.fingerprint_type, **self.get_fingerprint.settings}
 
     def get_len(self):
         """Return the length of the fingerprint."""
@@ -181,7 +179,7 @@ class Mordred(DescriptorSet):
         self._mordred = None
 
         # convert to list of descriptor names if descriptor instances are passed and initiate mordred calulator
-        self.descriptors = [[str(d) for d in descs]]
+        self.descriptors = [str(d) for d in descs]
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
@@ -276,6 +274,7 @@ class rdkit_descs(DescriptorSet):
         self._is_fp = False
         self._calculator = RDKit_desc(rdkit_descriptors, compute_3Drdkit)
         self._descriptors = self._calculator.descriptors
+        self.compute_3Drdkit = compute_3Drdkit
 
     def __call__(self, mol):
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
@@ -287,7 +286,7 @@ class rdkit_descs(DescriptorSet):
 
     @property
     def settings(self):
-        return {"rdkit_descriptors": self._descriptors, "compute_3Drdkit": self._calculator.compute_3Drdkit}
+        return {"rdkit_descriptors": self.descriptors, "compute_3Drdkit": self.compute_3Drdkit}
 
     @property
     def descriptors(self):

@@ -72,7 +72,7 @@ class DescriptorsCalculator(Calculator):
 
         descsets = []
         for key, value in descset_dict.items():
-            descset = get_descriptor(key, *value["settings"][0], **value["settings"][1])
+            descset = get_descriptor(key, **value["settings"])
             if descset.is_fp:
                 descset.keepindices = value["keepindices"]
             else:

@@ -20,11 +20,18 @@ class fingerprint(ABC):
         return self.getFingerprint(mol)
 
     @abstractmethod
+    def settings(self):
+        """Return settings of fingerprint."""
+        pass
+
+    @abstractmethod
     def __len__(self):
+        """Return length of fingerprint."""
         pass
 
     @abstractmethod
     def getKey(self):
+        """Return identifier of fingerprint."""
         pass
 
 
@@ -45,6 +52,10 @@ class MorganFP(fingerprint):
             fingerprint (list): `list` of fingerprint for "mol"
         """
         return AllChem.GetMorganFingerprintAsBitVect(mol, self.radius, nBits=self.nBits)
+
+    @property
+    def settings(self):
+        return {"radius": self.radius, "nBits": self.nBits}
 
     def __len__(self):
         return self.nBits
