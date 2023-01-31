@@ -27,6 +27,7 @@ from qsprpred.data.utils.featurefilters import (
     highCorrelationFilter,
     lowVarianceFilter,
 )
+from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.tasks import ModelTasks
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -148,6 +149,7 @@ def QSPR_dataprep(args):
                 smilescol=args.smilescol,
                 task=task,
                 th=th,
+                n_jobs=args.ncpu,
                 target_transformer=log_transform,
                 store_dir=f"{args.base_dir}/qspr/data/",
                 overwrite=False)
@@ -159,9 +161,9 @@ def QSPR_dataprep(args):
 
             # data splitter
             if args.split == 'scaffold':
-                split = scaffoldsplit(test_fraction=args.split_fraction)
+                split = scaffoldsplit(mydataset, test_fraction=args.split_fraction, scaffold=Murcko())
             elif args.split == 'temporal':
-                split = temporalsplit(timesplit=args.split_time, timecol=args.split_timecolumn)
+                split = temporalsplit(mydataset, timesplit=args.split_time, timeprop=args.split_timecolumn)
             else:
                 split = randomsplit(test_fraction=args.split_fraction)
 
@@ -191,7 +193,7 @@ def QSPR_dataprep(args):
             # prepare dataset for modelling
             mydataset.prepareDataset(feature_calculator=DescriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, feature_filters=featurefilters,
-                                     feature_standardizers=[StandardScaler()], n_cpus=args.ncpu)
+                                     feature_standardizers=[StandardScaler()])
 
             # save dataset files and fingerprints
             mydataset.save()

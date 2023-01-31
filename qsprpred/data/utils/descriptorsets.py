@@ -130,7 +130,8 @@ class FingerprintSet(DescriptorSet):
     @property
     def descriptors(self):
         """Return the indices of the fingerprint that are kept."""
-        return [f"{idx}" for idx in range(self.get_len())]
+        indices = self.keepindices if self.keepindices else range(self.get_len())
+        return [f"{idx}" for idx in indices]
 
     @descriptors.setter
     def descriptors(self, value):

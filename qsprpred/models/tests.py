@@ -5,14 +5,14 @@ import os
 import random
 import shutil
 from os.path import exists
-from unittest import TestCase
+from unittest import TestCase, skip
 
-import joblib
 import numpy as np
 import pandas as pd
 import sklearn_json as skljson
 import torch
 from qsprpred.data.data import QSPRDataset
+from qsprpred.data.utils.datasplitters import randomsplit
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import FingerprintSet
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
@@ -38,6 +38,7 @@ class PathMixIn:
 
     @classmethod
     def setUpClass(cls):
+        cls.tearDownClass()
         if not os.path.exists(cls.qsprmodelspath):
             os.makedirs(cls.qsprmodelspath)
         if not os.path.exists(cls.qsprdatapath):
@@ -45,8 +46,10 @@ class PathMixIn:
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.qsprmodelspath)
-        shutil.rmtree(cls.qsprdatapath)
+        if os.path.exists(cls.qsprmodelspath):
+            shutil.rmtree(cls.qsprmodelspath)
+        if os.path.exists(cls.qsprdatapath):
+            shutil.rmtree(cls.qsprdatapath)
         for extension in ['log', 'pkg', 'json']:
             globs = glob.glob(f'{cls.datapath}/*.{extension}')
             for path in globs:
@@ -69,6 +72,7 @@ class NeuralNet(PathMixIn, TestCase):
         data.prepareDataset(
             feature_calculator=DescriptorsCalculator(
                 [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]),
+            split=randomsplit(0.1),
             feature_standardizers=[StandardScaler()])
         data.save()
         # prepare data for torch DNN
@@ -165,7 +169,8 @@ class TestModels(PathMixIn, TestCase):
         scaler = StandardScaler()
         data.prepareDataset(
             feature_calculator=feature_calculators,
-            feature_standardizers=[scaler], n_folds=3
+            split=randomsplit(0.1),
+            feature_standardizers=[scaler]
         )
         data.save()
 
@@ -237,7 +242,7 @@ class TestModels(PathMixIn, TestCase):
         predictor = Predictor(
             themodel,
             feature_calculators,
-            scaler,
+            [scaler],
             type=regid,
             th=th,
             name=None,
