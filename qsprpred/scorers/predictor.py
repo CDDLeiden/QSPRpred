@@ -19,6 +19,7 @@ from qsprpred.data.utils.feature_standardization import (
 )
 from qsprpred.logs import logger
 from qsprpred.models.neural_network import STFullyConnected
+from rdkit import Chem
 
 
 class Predictor(Scorer):
@@ -96,8 +97,17 @@ class Predictor(Scorer):
         Returns:
             scores (numpy.ndarray): 'np.array' of scores for "mols"
         """
+
+        scores = np.zeros(len(mols))
+
+        # create mask for valid molecules
+        valids = [Chem.MolFromSmiles(mol) is not None if isinstance(mol, str) else True for mol in mols]
+
+        # get all valid mols
+        valid_mols = [mol for is_valid, mol in zip(valids, mols) if is_valid]
+
         # Calculate and scale the features
-        features = self.feature_calculators(mols)
+        features = self.feature_calculators(valid_mols)
         if self.standardizers is not None:
             features, _ = apply_feature_standardizers(self.standardizers, features, fit=False)
 
@@ -105,22 +115,27 @@ class Predictor(Scorer):
         if (self.model.__class__.__name__ == "STFullyConnected"):
             fps_loader = self.model.get_dataloader(features)
             if self.type == 'CLS':
-                if len(self.th) > 1:
-                    scores = np.argmax(
+                if self.th is None or len(self.th) == 1:
+                    scores[valids] = self.model.predict(fps_loader)[:, 1].astype(float)
+                elif len(self.th) > 1:
+                    scores[valids] = np.argmax(
                         self.model.predict(fps_loader), axis=1).astype(float)
                 elif len(self.th) == 1:
-                    scores = self.model.predict(fps_loader)[:, 1].astype(float)
+                    scores[valids] = self.model.predict(fps_loader)[:, 1].astype(float)
             else:
-                scores = self.model.predict(fps_loader).flatten()
+                scores[valids] = self.model.predict(fps_loader).flatten()
         # Special case PLS
         elif self.model.__class__.__name__ == 'PLSRegression':
-            scores = self.model.predict(features)[:, 0]
+            scores[valids] = self.model.predict(features)[:, 0]
         # Regression
         elif self.type == 'REG':
-            scores = self.model.predict(features)
+            scores[valids] = self.model.predict(features)
+        # Single-class classification
+        elif (self.type == 'CLS') and (self.th is None or len(self.th) == 1):
+            scores[valids] = self.model.predict_proba(features)[:, 1]
         # Multi-class classification
         elif len(self.th) > 1:
-            scores = np.argmax(
+            scores[valids] = np.argmax(
                 self.model.predict_proba(features),
                 axis=1).astype(float)
         # Single-class classification

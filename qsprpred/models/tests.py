@@ -260,6 +260,13 @@ class TestModels(PathMixIn, TestCase):
         self.assertIsInstance(predictions, np.ndarray)
         self.assertIsInstance(predictions[0], np.floating)
 
+        # test with an invalid smiles
+        invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
+        predictions = predictor.getScores(invalid_smiles)
+        self.assertEqual(predictions.shape, (len(invalid_smiles),))
+        self.assertEqual(predictions[1], 0)
+        self.assertNotEqual(predictions[0], 0)
+
         return predictions
 
     def testRF(self):
