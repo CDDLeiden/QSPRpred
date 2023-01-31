@@ -450,14 +450,14 @@ class TestDescriptorsets(DataSets, TestCase):
         self.dataset = self.create_small_dataset(self.__class__.__name__)
 
     def test_PredictorDesc(self):
-        mols = self.prep_testdata()
-
-        # # give path to saved model parameters
+        # give path to saved model parameters
         model_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json'
         meta_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'
-        desc_calc = PredictorDesc(model_path, meta_path)
-        descriptors = desc_calc(mols[2])
-        self.assertIsInstance(descriptors, list)
+        desc_calc = DescriptorsCalculator([PredictorDesc(model_path, meta_path)])
+
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
+        self.assertTrue(self.dataset.X.any().any())
 
     def test_MorganFP(self):
         desc_calc = DescriptorsCalculator([MorganFP(3, nBits=1000)])

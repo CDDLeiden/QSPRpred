@@ -161,10 +161,13 @@ def QSPR_modelling(args):
                 else:
                     parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs": args.ncpu}
 
+                # class_weight and scale_pos_weight are only used for RF, XGB and SVM
                 if not reg:
                     class_weight = 'balanced' if args.sample_weighing else None
                     counts = mydataset.y.value_counts()
-                    scale_pos_weight = counts[0] / counts[1] if args.sample_weighing else 1
+                    scale_pos_weight = counts[0] / counts[1] if (
+                        args.sample_weighing and not mydataset.isMultiClass()) else 1
+
                 alg_dict = {
                     'RF': RandomForestRegressor() if reg else RandomForestClassifier(class_weight=class_weight),
                     'XGB': XGBRegressor(objective='reg:squarederror') if reg else
