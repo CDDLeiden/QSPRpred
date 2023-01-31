@@ -29,6 +29,7 @@ from qsprpred.data.utils.featurefilters import (
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.models.tasks import ModelTasks
 from qsprpred.scorers.predictor import Predictor
+from rdkit import Chem
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
@@ -145,6 +146,33 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
             chunk_size=CHUNK_SIZE,
         )
         stopwatch.stop('Reinitialization took: ')
+        check_consistency(dataset_new)
+
+        # creation from a table file
+        stopwatch.reset()
+        dataset_new = QSPRDataset.fromTableFile(
+            "test_defaults",
+            f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
+            target_prop="CL",
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+        )
+        stopwatch.stop('Loading from table file took: ')
+        self.assertTrue(isinstance(dataset_new, QSPRDataset))
+        check_consistency(dataset_new)
+
+        dataset_new = QSPRDataset.fromTableFile(
+            "test_defaults_new",  # new name implies HBD below should exist again
+            f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
+            target_prop="CL",
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+        )
+        self.assertTrue(isinstance(dataset_new, QSPRDataset))
+        self.assertIn("HBD", dataset_new.getProperties())
+        dataset_new.removeProperty("HBD")
         check_consistency(dataset_new)
 
     def test_target_property(self):
@@ -370,50 +398,56 @@ class TestDataFilters(DataSets, TestCase):
 
 
 class TestFeatureFilters(PathMixIn, TestCase):
-    df = pd.DataFrame(
-        data=np.array(
-            [[1, 4, 2, 6, 2, 1],
-             [1, 8, 4, 2, 4, 2],
-             [1, 4, 3, 2, 5, 3],
-             [1, 8, 4, 9, 8, 4],
-             [1, 4, 2, 3, 9, 5],
-             [1, 8, 4, 7, 12, 6]]),
-        columns=["F1", "F2", "F3", "F4", "F5", "y"])
+
+    def setUp(self):
+        super().setUp()
+        self.descriptors = ["Descriptor_F1", "Descriptor_F2", "Descriptor_F3", "Descriptor_F4", "Descriptor_F5"]
+        self.df = pd.DataFrame(
+            data=np.array(
+                [["C", 1, 4, 2, 6, 2, 1],
+                 ["C", 1, 8, 4, 2, 4, 2],
+                 ["C", 1, 4, 3, 2, 5, 3],
+                 ["C", 1, 8, 4, 9, 8, 4],
+                 ["C", 1, 4, 2, 3, 9, 5],
+                 ["C", 1, 8, 4, 7, 12, 6]]),
+            columns=["SMILES"] + self.descriptors + ["y"]
+        )
+        self.dataset = QSPRDataset(
+            "TestFeatureFilters",
+            target_prop="y",
+            df=self.df,
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE)
 
     def test_lowVarianceFilter(self):
-        filter = lowVarianceFilter(0.01)
-        X = filter(self.df[["F1", "F2", "F3", "F4", "F5"]])
+        self.dataset.filterFeatures([lowVarianceFilter(0.01)])
 
         # check if correct columns selected and values still original
-        self.assertListEqual(list(X.columns), ["F2", "F3", "F4", "F5"])
-        self.assertTrue(self.df[X.columns].equals(X))
+        self.assertListEqual(list(self.dataset.featureNames), self.descriptors[1:])
+        self.assertListEqual(list(self.dataset.X.columns), self.descriptors[1:])
 
     def test_highCorrelationFilter(self):
-        filter = highCorrelationFilter(0.8)
-        X = filter(self.df[["F1", "F2", "F3", "F4", "F5"]])
+        self.dataset.filterFeatures([highCorrelationFilter(0.8)])
 
         # check if correct columns selected and values still original
-        self.assertListEqual(list(X.columns), ["F1", "F2", "F4", "F5"])
-        self.assertTrue(self.df[X.columns].equals(X))
+        self.descriptors.pop(2)
+        self.assertListEqual(list(self.dataset.featureNames), self.descriptors)
+        self.assertListEqual(list(self.dataset.X.columns), self.descriptors)
 
     def test_BorutaFilter(self):
-        filter = BorutaFilter()
-        X = filter(
-            features=self.df[["F1", "F2", "F3", "F4", "F5"]],
-            y_col=self.df["y"])
+        self.dataset.filterFeatures([BorutaFilter()])
 
         # check if correct columns selected and values still original
-        self.assertListEqual(list(X.columns), ["F5"])
-        self.assertTrue(self.df[X.columns].equals(X))
+        self.assertListEqual(list(self.dataset.featureNames), self.descriptors[-1:])
+        self.assertListEqual(list(self.dataset.X.columns), self.descriptors[-1:])
 
 
-class TestDescriptorsets(PathMixIn, TestCase):
-    def prep_testdata(self):
-        df = pd.read_csv(
-            f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-            sep='\t')
-        mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
-        return mols
+class TestDescriptorsets(DataSets, TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.dataset = self.create_small_dataset(self.__class__.__name__)
 
     def test_PredictorDesc(self):
         mols = self.prep_testdata()
@@ -426,111 +460,80 @@ class TestDescriptorsets(PathMixIn, TestCase):
         self.assertIsInstance(descriptors, list)
 
     def test_MorganFP(self):
-        mols = self.prep_testdata()
-        desc_calc = MorganFP(3, nBits=1000)
-        descriptors = desc_calc(mols[2])
-        self.assertIsInstance(descriptors, list)
-        descriptors = pd.DataFrame([descriptors])
-        self.assertEqual(descriptors.shape, (1, 1000))
-        self.assertTrue(descriptors.any().any())
-        self.assertTrue(descriptors.any().sum() > 1)
+        desc_calc = DescriptorsCalculator([MorganFP(3, nBits=1000)])
+        self.dataset.addDescriptors(desc_calc)
+
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1000))
+        self.assertTrue(self.dataset.X.any().any())
+        self.assertTrue(self.dataset.X.any().sum() > 1)
 
     def test_Mordred(self):
-        mols = self.prep_testdata()
-        desc_calc = Mordred()
-        descriptors = desc_calc(mols[1])
-        self.assertIsInstance(descriptors, list)
-        descriptors = pd.DataFrame([descriptors])
+        desc_calc = DescriptorsCalculator([Mordred()])
+        self.dataset.addDescriptors(desc_calc)
+
         self.assertEqual(
-            descriptors.shape,
-            (1, len(mordred.Calculator(mordreddescriptors).descriptors)))
-        self.assertTrue(descriptors.any().any())
-        self.assertTrue(descriptors.any().sum() > 1)
+            self.dataset.X.shape,
+            (len(self.dataset), len(mordred.Calculator(mordreddescriptors).descriptors)))
+        self.assertTrue(self.dataset.X.any().any())
+        self.assertTrue(self.dataset.X.any().sum() > 1)
 
     def test_DrugExPhyschem(self):
-        mols = self.prep_testdata()
-        desc_calc = DrugExPhyschem()
-        descriptors = desc_calc(mols[1])
-        self.assertIsInstance(descriptors, list)
-        descriptors = pd.DataFrame([descriptors])
-        self.assertEqual(descriptors.shape, (1, 19))
-        self.assertTrue(descriptors.any().any())
-        self.assertTrue(descriptors.any().sum() > 1)
+        desc_calc = DescriptorsCalculator([DrugExPhyschem()])
+        self.dataset.addDescriptors(desc_calc)
+
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 19))
+        self.assertTrue(self.dataset.X.any().any())
+        self.assertTrue(self.dataset.X.any().sum() > 1)
 
     def test_rdkit_descs(self):
-        mols = self.prep_testdata()
-        desc_calc = RDkitDescs()
-        descriptors = desc_calc(mols[1])
-        self.assertIsInstance(descriptors, list)
-        descriptors = pd.DataFrame([descriptors])
-        self.assertEqual(descriptors.shape, (1, len(Descriptors._descList)))
-        self.assertTrue(descriptors.any().any())
-        self.assertTrue(descriptors.any().sum() > 1)
+        desc_calc = DescriptorsCalculator([rdkit_descs()])
+        self.dataset.addDescriptors(desc_calc)
+
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList)))
+        self.assertTrue(self.dataset.X.any().any())
+        self.assertTrue(self.dataset.X.any().sum() > 1)
 
         # with 3D
-        desc_calc = RDkitDescs(compute_3Drdkit=True)
-        descriptors = desc_calc(mols[1])
-        self.assertIsInstance(descriptors, list)
-        descriptors = pd.DataFrame([descriptors])
-        self.assertEqual(descriptors.shape,
-                         (1, (len(Descriptors._descList) + 10)))
-        self.assertTrue(descriptors.any().any())
-        self.assertTrue(descriptors.any().sum() > 1)
+        desc_calc = DescriptorsCalculator([rdkit_descs(compute_3Drdkit=True)])
+        self.dataset.addDescriptors(desc_calc, recalculate=True)
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList) + 10))
 
 
-class TestDescriptorCalculator(PathMixIn, TestCase):
-    def prep_testdata(self):
-        df = pd.read_csv(
-            f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-            sep='\t')
-        mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
-        return mols
+class TestScaffolds(DataSets, TestCase):
 
-    def test_descriptorcalculator(self):
-        from mordred import ABCIndex
-        mols = self.prep_testdata()
-        desc_calc = DescriptorsCalculator([MorganFP(2, 10), DrugExPhyschem(), Mordred(
-            ABCIndex), PredictorDesc(
-            f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
-            f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json')])
-        mols.append(None)
-        descriptors = desc_calc(mols)
-        self.assertIsInstance(descriptors, pd.DataFrame)
-        self.assertEqual(descriptors.shape, (11, 32))
-        self.assertTrue(descriptors.any().any())
-        self.assertEqual(desc_calc.get_len(), 32)
+    def setUp(self):
+        super().setUp()
+        self.dataset = self.create_small_dataset(self.__class__.__name__)
 
-        filter = highCorrelationFilter(0.99)
-        descriptors = filter(descriptors)
-        desc_calc.keepDescriptors(descriptors)
-        desc_calc.toFile(
-            f"{os.path.dirname(__file__)}/test_files/qspr/data/test_calc.json")
-        DescriptorsCalculator.fromFile(
-            f"{os.path.dirname(__file__)}/test_files/qspr/data/test_calc.json")
+    def test_scaffold_add(self):
+        self.dataset.addScaffolds([Murcko()])
+        scaffs = self.dataset.getScaffolds()
+        self.assertEqual(scaffs.shape, (len(self.dataset), 1))
+
+        self.dataset.addScaffolds([Murcko()], add_rdkit_scaffold=True, recalculate=True)
+        scaffs = self.dataset.getScaffolds(includeMols=True)
+        self.assertEqual(scaffs.shape, (len(self.dataset), 2))
+        for mol in scaffs[f"Scaffold_{Murcko()}_RDMol"]:
+            self.assertTrue(isinstance(mol, Chem.rdchem.Mol))
 
 
-class TestFeatureStandardizer(PathMixIn, TestCase):
-    def prep_testdata(self):
-        df = pd.read_csv(
-            f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-            sep='\t')
-        mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
-        features = [
-            AllChem.GetMorganFingerprintAsBitVect(
-                x, 3, 1000) for x in mols]
-        return features
+class TestFeatureStandardizer(DataSets, TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.dataset = self.create_small_dataset(self.__class__.__name__)
+        self.dataset.addDescriptors(DescriptorsCalculator([MorganFP(3, nBits=1000)]))
 
     def test_featurestandarizer(self):
-        features = self.prep_testdata()
-        scaler = SKLearnStandardizer.fromFit(features, StandardScaler())
-        scaled_features = scaler(features)
+        scaler = SKLearnStandardizer.fromFit(self.dataset.X, StandardScaler())
+        scaled_features = scaler(self.dataset.X)
         scaler.toFile(
             f'{os.path.dirname(__file__)}/test_files/qspr/data/test_scaler.json')
         scaler_fromfile = SKLearnStandardizer.fromFile(
             f'{os.path.dirname(__file__)}/test_files/qspr/data/test_scaler.json')
-        scaled_features_fromfile = scaler_fromfile(features)
+        scaled_features_fromfile = scaler_fromfile(self.dataset.X)
         self.assertIsInstance(scaled_features, np.ndarray)
-        self.assertEqual(scaled_features.shape, (10, 1000))
+        self.assertEqual(scaled_features.shape, (len(self.dataset), 1000))
         self.assertEqual(
             np.array_equal(
                 scaled_features,
