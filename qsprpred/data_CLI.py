@@ -126,7 +126,6 @@ def QSPR_dataprep(args):
         os.makedirs(args.base_dir + '/qspr/data')
 
     for reg in args.regression:
-        task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
         reg_abbr = 'REG' if reg else 'CLS'
         for property in args.properties:
             log.info(f"Property: {property[0]} {reg_abbr}")
@@ -138,6 +137,10 @@ def QSPR_dataprep(args):
 
             # prepare dataset for training QSPR model
             th = args.threshold[property[0]] if args.threshold else None
+            if reg:
+                task = ModelTasks.REGRESSION
+            else:
+                task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
             if task == ModelTasks.REGRESSION and th:
                 log.warning("Threshold argument specified with regression. Threshold will be ignored.")
                 th = None

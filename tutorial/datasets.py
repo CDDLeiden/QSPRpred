@@ -6,12 +6,12 @@ On: 11.01.23, 15:17
 """
 import os
 
-import pandas as pd
 import numpy as np
-
-from qsprpred.data.sources.papyrus import Papyrus
+import pandas as pd
 from qsprpred.data.data import QSPRDataset
+from qsprpred.data.sources.papyrus import Papyrus
 from qsprpred.models.tasks import ModelTasks
+
 
 def A2AR(data_dir='data'):
     """
@@ -22,10 +22,10 @@ def A2AR(data_dir='data'):
         a `QSPRDataset` instance with the loaded data
     """
 
-    acc_keys = ["P29274"] # Adenosine receptor A2A (https://www.uniprot.org/uniprotkb/P29274/entry)
-    dataset_name = "A2A_LIGANDS" # name of the file to be generated
-    quality = "high" # choose minimum quality from {"high", "medium", "low"}
-    papyrus_version = '05.6' # Papyrus database version
+    acc_keys = ["P29274"]  # Adenosine receptor A2A (https://www.uniprot.org/uniprotkb/P29274/entry)
+    dataset_name = "A2A_LIGANDS"  # name of the file to be generated
+    quality = "high"  # choose minimum quality from {"high", "medium", "low"}
+    papyrus_version = '05.6'  # Papyrus database version
 
     papyrus = Papyrus(
         data_dir=data_dir,
@@ -41,7 +41,8 @@ def A2AR(data_dir='data'):
     )
 
     print(f"Number of samples loaded: {len(dataset.getDF())}")
-    return QSPRDataset.fromMolTable(dataset, "pchembl_value_Median", task=ModelTasks.CLASSIFICATION, th=[6.5])
+    return QSPRDataset.fromMolTable(dataset, "pchembl_value_Median", task=ModelTasks.SINGLECLASS, th=[6.5])
+
 
 def Parkinsons():
     """
@@ -90,4 +91,3 @@ def Parkinsons():
         task=ModelTasks.REGRESSION,
         store_dir="qspr/data"
     )
-

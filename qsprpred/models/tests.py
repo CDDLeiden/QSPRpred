@@ -124,7 +124,7 @@ class NeuralNet(PathMixIn, TestCase):
 
         # prepare classification test dataset
         no_features, trainloader, testloader = self.prep_testdata(
-            task=ModelTasks.CLASSIFICATION, th=[6.5])
+            task=ModelTasks.SINGLECLASS, th=[6.5])
 
         # fit model with regression is false
         model = STFullyConnected(n_dim=no_features, is_reg=False)
@@ -136,7 +136,7 @@ class NeuralNet(PathMixIn, TestCase):
 
         # prepare multi-classification test dataset
         no_features, trainloader, testloader = self.prep_testdata(
-            task=ModelTasks.CLASSIFICATION, th=[0, 1, 10, 1200])
+            task=ModelTasks.MULTICLASS, th=[0, 1, 10, 1200])
 
         # fit model with regression is false
         model = STFullyConnected(n_dim=no_features, n_class=3, is_reg=False)
@@ -151,7 +151,10 @@ class TestModels(PathMixIn, TestCase):
     GPUS = [idx for idx in range(torch.cuda.device_count())]
 
     def prep_testdata(self, reg=True, th=None):
-        task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
+        if reg:
+            task = ModelTasks.REGRESSION
+        else:
+            task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
 
         reg_abbr = 'REG' if reg else 'CLS'
         random.seed(42)

@@ -8,8 +8,6 @@ import mordred
 import numpy as np
 import pandas as pd
 from mordred import descriptors as mordreddescriptors
-from rdkit import Chem
-
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
@@ -28,11 +26,13 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.models.tasks import ModelTasks
+from rdkit import Chem
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 N_CPU = 4
 CHUNK_SIZE = 20
+
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
@@ -71,6 +71,7 @@ class DataSets(PathMixIn):
         return QSPRDataset(
             name, target_prop=target_prop, task=task, df=df,
             store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+
     def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
         return self.create_dataset(self.df_small, name, task=task, target_prop=target_prop)
 
@@ -159,7 +160,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         check_consistency(dataset_new)
 
         dataset_new = QSPRDataset.fromTableFile(
-            "test_defaults_new", # new name implies HBD below should exist again
+            "test_defaults_new",  # new name implies HBD below should exist again
             f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
             target_prop="CL",
             store_dir=self.qsprdatapath,
@@ -190,14 +191,17 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
             with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
-        
+
         def test_classification(dataset_to_test):
-            self.assertEqual(dataset_to_test.task, ModelTasks.CLASSIFICATION)
+            if len(th) == 1:
+                self.assertEqual(dataset_to_test.task, ModelTasks.SINGLECLASS)
+            else:
+                self.assertEqual(dataset_to_test.task, ModelTasks.MULTICLASS)
             self.assertEqual(dataset_to_test.targetProperty, "CL_class")
             self.assertEqual(dataset_to_test.originalTargetProperty, "CL")
             y = dataset_to_test.getTargetProperties(concat=True)
             self.assertTrue(y.columns[0] == dataset_to_test.targetProperty)
-            if len(th) == 1:
+            if dataset_to_test.task == ModelTasks.SINGLECLASS:
                 self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], 2)
             else:
                 self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], (len(th) - 1))
@@ -217,6 +221,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         test_classification(dataset_new)
 
         dataset_new.makeRegression(target_property="CL")
+
         def check_regression(dataset_to_check):
             self.assertEqual(dataset_to_check.task, ModelTasks.REGRESSION)
             self.assertTrue(dataset_to_check.hasProperty("CL"))
@@ -230,16 +235,17 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         check_regression(dataset_new)
 
+
 class TestDataSetPreparation(DataSets, TestCase):
 
     def test_preparation(self):
         paths = []
-        tasks = [ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION]
+        tasks = [ModelTasks.REGRESSION, ModelTasks.MULTICLASS]
         for task in tasks:
             dataset = QSPRDataset(
                 f"test_create_prep_{task.name}", "CL", df=self.df_large,
                 store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
-                if task == ModelTasks.CLASSIFICATION else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+                if task == ModelTasks.MULTICLASS else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
             np.random.seed(42)
             descriptor_sets = [
                 Mordred(),
@@ -271,7 +277,7 @@ class TestDataSetPreparation(DataSets, TestCase):
 
         for path, task in zip(paths, tasks):
             ds = QSPRDataset.fromFile(path, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-            if ds.task == ModelTasks.CLASSIFICATION:
+            if ds.task == ModelTasks.MULTICLASS:
                 self.assertEqual(ds.targetProperty, "CL_class")
             self.assertTrue(ds.task == task)
             self.assertTrue(ds.descriptorCalculator)
@@ -334,6 +340,7 @@ class TestDataSplitters(DataSets, TestCase):
 
         dataset_new.clearFiles()
 
+
 class TestFoldSplitters(DataSets, TestCase):
 
     def validate_folds(self, dataset, more=None):
@@ -363,6 +370,7 @@ class TestFoldSplitters(DataSets, TestCase):
         # test with a standarizer
         scaler = MinMaxScaler(feature_range=(1, 2))
         dataset.prepareDataset(feature_standardizers=[scaler])
+
         def check_min_max(X_train, X_test, y_train, y_test, train_index, test_index):
             self.assertTrue(np.max(X_train) == 2)
             self.assertTrue(np.min(X_train) == 1)
@@ -370,6 +378,7 @@ class TestFoldSplitters(DataSets, TestCase):
             self.assertTrue(np.min(X_test) == 1)
 
         self.validate_folds(dataset, more=check_min_max)
+
 
 class TestDataFilters(DataSets, TestCase):
 
@@ -404,7 +413,13 @@ class TestFeatureFilters(PathMixIn, TestCase):
                  ["C", 1, 8, 4, 7, 12, 6]]),
             columns=["SMILES"] + self.descriptors + ["y"]
         )
-        self.dataset = QSPRDataset("TestFeatureFilters", target_prop="y", df=self.df, store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        self.dataset = QSPRDataset(
+            "TestFeatureFilters",
+            target_prop="y",
+            df=self.df,
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE)
 
     def test_lowVarianceFilter(self):
         self.dataset.filterFeatures([lowVarianceFilter(0.01)])
@@ -473,6 +488,7 @@ class TestDescriptorsets(DataSets, TestCase):
         desc_calc = DescriptorsCalculator([rdkit_descs(compute_3Drdkit=True)])
         self.dataset.addDescriptors(desc_calc, recalculate=True)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList) + 10))
+
 
 class TestScaffolds(DataSets, TestCase):
 

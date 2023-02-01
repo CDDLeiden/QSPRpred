@@ -637,7 +637,7 @@ class QSPRDataset(MoleculeTable):
         add_rdkit: bool = False,
         store_dir: str = '.',
         overwrite: bool = False,
-        task: Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION] = ModelTasks.REGRESSION,
+        task: Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS] = ModelTasks.REGRESSION,
         target_transformer: Callable = None,
         th: List[float] = None,
         n_jobs: int = 0,
@@ -653,7 +653,7 @@ class QSPRDataset(MoleculeTable):
             add_rdkit (bool, optional): if true, column with rdkit molecules will be added to df. Defaults to False.
             store_dir (str, optional): directory for saving the output data. Defaults to '.'.
             overwrite (bool, optional): if already saved data at output dir if should be overwritten. Defaults to False.
-            task (Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION], optional): Defaults to ModelTasks.REGRESSION.
+            task (Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS], optional): Defaults to ModelTasks.REGRESSION.
             target_transformer (Callable, optional): Transformation(s) of target propery. Defaults to None.
             th (List[float], optional): threshold for activity if classification model, if len th
                 larger than 1, these values will used for binning (in this case lower and upper
@@ -690,7 +690,7 @@ class QSPRDataset(MoleculeTable):
         self.dropEmpty()
 
         self.th = None
-        if self.task == ModelTasks.CLASSIFICATION:
+        if self.task.isClassification():
             if th:
                 self.makeClassification(th)
             else:
@@ -699,7 +699,7 @@ class QSPRDataset(MoleculeTable):
                 ) for x in self.df[self.targetProperty]), f"Target property ({self.targetProperty}) should be integer if used for classification. Or specify threshold for binning."
         elif self.task == ModelTasks.REGRESSION and th:
             raise ValueError(
-                f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.CLASSIFICATION' in this case.")
+                f"Got regression task with specified thresholds: 'th={th}'. Use 'task=ModelType.S' in this case.")
 
         # populate feature matrix and target property array
         self.X = None
@@ -739,8 +739,8 @@ class QSPRDataset(MoleculeTable):
             *args: additional arguments for QSPRDataset constructor
             **kwargs: additional keyword arguments for QSPRDataset constructor
         """
-        raise NotImplementedError(f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can convert from 'MoleculeTable' with 'fromMolTable'.")
-
+        raise NotImplementedError(
+            f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can convert from 'MoleculeTable' with 'fromMolTable'.")
 
     def dropEmpty(self):
         """Drop rows with empty target property value from the data set."""
@@ -795,12 +795,12 @@ class QSPRDataset(MoleculeTable):
 
     def isMultiClass(self):
         """Return if model task is multi class classification."""
-        return self.task == ModelTasks.CLASSIFICATION and self.nClasses > 2
+        return self.task == ModelTasks.MULTICLASS and self.nClasses > 2
 
     @property
     def nClasses(self):
         """Return number of output classes for classification."""
-        if self.task == ModelTasks.CLASSIFICATION:
+        if self.task == ModelTasks.MULTICLASS:
             return len(self.df[self.targetProperty].unique())
         else:
             return 0
@@ -844,7 +844,7 @@ class QSPRDataset(MoleculeTable):
             self.df[new_prop] = LabelEncoder().fit_transform(self.df[f"{new_prop}_intervals"])
         else:
             self.df[new_prop] = self.df[self.originalTargetProperty] > th[0]
-        self.task = ModelTasks.CLASSIFICATION
+        self.task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
         self.targetProperty = new_prop
         self.th = th
         self.restoreTrainingData()
@@ -955,27 +955,26 @@ class QSPRDataset(MoleculeTable):
         self.y_ind = self.df.iloc[test_index, :][self.targetProperty]
 
         logger.info("Total: train: %s test: %s" % (len(self.y), len(self.y_ind)))
-        if self.task == ModelTasks.CLASSIFICATION:
-            if not self.isMultiClass():
-                logger.info(
-                    "    In train: active: %s not active: %s"
-                    % (sum(self.y), len(self.y) - sum(self.y))
+        if self.task == ModelTasks.SINGLECLASS:
+            logger.info(
+                "    In train: active: %s not active: %s"
+                % (sum(self.y), len(self.y) - sum(self.y))
+            )
+            logger.info(
+                "    In test:  active: %s not active: %s\n"
+                % (sum(self.y_ind), len(self.y_ind) - sum(self.y_ind))
+            )
+        if self.task == ModelTasks.MULTICLASS:
+            logger.info("train: %s" % self.y.value_counts())
+            logger.info("test: %s\n" % self.y_ind.value_counts())
+            try:
+                assert np.all([x > 0 for x in self.y.value_counts()])
+                assert np.all([x > 0 for x in self.y_ind.value_counts()])
+            except AssertionError as err:
+                logger.exception(
+                    "All bins in multi-class classification should contain at least one sample"
                 )
-                logger.info(
-                    "    In test:  active: %s not active: %s\n"
-                    % (sum(self.y_ind), len(self.y_ind) - sum(self.y_ind))
-                )
-            else:
-                logger.info("train: %s" % self.y.value_counts())
-                logger.info("test: %s\n" % self.y_ind.value_counts())
-                try:
-                    assert np.all([x > 0 for x in self.y.value_counts()])
-                    assert np.all([x > 0 for x in self.y_ind.value_counts()])
-                except AssertionError as err:
-                    logger.exception(
-                        "All bins in multi-class classification should contain at least one sample"
-                    )
-                    raise err
+                raise err
 
             if self.y.dtype.name == "category":
                 self.y = self.y.cat.codes
@@ -1004,7 +1003,7 @@ class QSPRDataset(MoleculeTable):
         self.df[columns] = self.df[columns].fillna(fill_value)
         logger.warning('Missing values filled with %s' % fill_value)
 
-    def filterFeatures(self, feature_filters : List[Callable]):
+    def filterFeatures(self, feature_filters: List[Callable]):
         """
         Filter features in the data set.
 
@@ -1111,7 +1110,7 @@ class QSPRDataset(MoleculeTable):
         Returns:
             datasplit (datasplit): default fold split implementation
         """
-        if self.task != ModelTasks.CLASSIFICATION:
+        if self.task == ModelTasks.REGRESSION:
             return KFold(5)
         else:
             return StratifiedKFold(5)
@@ -1280,3 +1279,126 @@ class QSPRDataset(MoleculeTable):
             json.dump(ret, f)
 
         return path
+
+
+# class QSPRmultitask(QSPRDataset):
+#     """Prepare dataset for QSPR model training.
+
+#     It splits the data in train and test set, as well as creating cross-validation folds.
+#     Optionally low quality data is filtered out.
+#     For classification the dataset samples are labelled as active/inactive.
+
+#     Attributes:
+#         targetProperties (list) : properties to be predicted with QSPRmodel
+#         task (ModelTask) : regression or classification
+#         df (pd.dataframe) : dataset
+#         X (np.ndarray/pd.DataFrame) : m x n feature matrix for cross validation, where m is
+#             the number of samplesand n is the number of features.
+#         y (np.ndarray/pd.DataFrame) : m x l label array for cross validation, where m is
+#             the number of samples and equals to row of X, and l is the number of target properties.
+#         X_ind (np.ndarray/pd.DataFrame) : m x n Feature matrix for independent set, where m
+#             is the number of samples and n is the number of features.
+#         y_ind (np.ndarray/pd.DataFrame) : m x l label array for independent set, where m is
+#             the number of samples and equals to row of X, and l is the number of target properties.
+#         featureNames (list of str) : feature names
+#         feature_standardizers (list of FeatureStandardizers): methods used to standardize the data features.
+#     """
+
+#     def __init__(self,
+#                  name: str,
+#                  target_props: str,
+#                  df: pd.DataFrame = None,
+#                  smilescol: str = "SMILES",
+#                  add_rdkit: bool = False,
+#                  store_dir: str = '.',
+#                  overwrite: bool = False,
+#                  task: Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION] = ModelTasks.REGRESSION,
+#                  target_transformer: Callable = None,
+#                  th: List[float] = None,
+#                  n_jobs: int = 0,
+#                  chunk_size: int = 50,
+#                  ):
+#         """Construct QSPRdata, also apply transformations of output properties if specified.
+
+#         Args:
+#             name (str): data name, used in saving the data
+#             target_props (str): target properties, should correspond with target columnname in df
+#             df (pd.DataFrame, optional): input dataframe containing smiles and target property. Defaults to None.
+#             smilescol (str, optional): name of column in df containing SMILES. Defaults to "SMILES".
+#             add_rdkit (bool, optional): if true, column with rdkit molecules will be added to df. Defaults to False.
+#             store_dir (str, optional): directory for saving the output data. Defaults to '.'.
+#             overwrite (bool, optional): if already saved data at output dir if should be overwritten. Defaults to False.
+#             task (Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION], optional): Defaults to ModelTasks.REGRESSION.
+#             target_transformer (Callable, optional): Transformation(s) of target propery. Defaults to None.
+#             th (List[float], optional): threshold for activity if classification model, if len th
+#                 larger than 1, these values will used for binning (in this case lower and upper
+#                 boundary need to be included). Defaults to None.
+
+#         Raises:
+#             ValueError: Raised if thershold given with non-classification task.
+#         """
+#         super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size)
+#         self.targetProperties = target_props
+#         self.originalTargetProperties = target_props
+#         self.task = task
+#         self.metaInfo = None
+#         try:
+#             self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
+#         except FileNotFoundError:
+#             pass
+
+#         if target_transformer:
+#             for idx, target_prop in enumerate(self.targetProperties):
+#                 transformed_prop = f'{target_prop}_transformed'
+#                 self.transform([target_prop], target_transformer, addAs=[transformed_prop])
+#                 self.targetProperties[idx] = f'{target_prop}_transformed'
+
+#         # load names of descriptors to use as training features
+#         self.featureNames = self.getFeatureNames()
+
+#         # load standardizers for features
+#         self.feature_standardizers = self.loadFeatureStandardizers()
+#         if not self.feature_standardizers:
+#             self.feature_standardizers = None
+#         self.fold_generator = self.getDefaultFoldGenerator()
+
+#         # drop rows with empty target property value
+#         self.dropEmpty()
+
+#         self.th = None
+#         if self.task == ModelTasks.CLASSIFICATION:
+#             if th:
+#                 self.makeClassification(th)
+#             else:
+#                 # if a precomputed target is expected, just check it
+#                 assert all(float(x).is_integer(
+#                 ) for x in self.df[self.targetProperty]), f"Target property ({self.targetProperty}) should be integer if used for classification. Or specify threshold for binning."
+#         elif self.task == ModelTasks.REGRESSION and th:
+#             raise ValueError(
+# f"Got regression task with specified thresholds: 'th={th}'. Use
+# 'task=ModelType.CLASSIFICATION' in this case.")
+
+#         # populate feature matrix and target property array
+#         self.X = None
+#         self.y = None
+#         self.X_ind = None
+#         self.y_ind = None
+#         self.restoreTrainingData()
+
+#         logger.info(f"Dataset '{self.name}' created for target targetProperty: '{self.targetProperty}'.")
+
+#     def getTargetProperties(self, concat=False):
+#         """
+#         Get the response values (training and test) for the set target property.
+
+#         Args:
+#             concat (bool): if `True`, return concatenated training and validation set target properties
+
+#         Returns:
+#             `tuple` of (train_responses, test_responses) or `pandas.DataFrame` of all target property values
+#         """
+
+#         if concat:
+#             return pd.concat([self.y, self.y_ind] if self.y_ind is not None else [self.y])
+#         else:
+#             return self.y, self.y_ind if self.y_ind is not None else self.y

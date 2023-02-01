@@ -148,7 +148,7 @@ class QSPRsklearn(QSPRModel):
             train, test = pd.DataFrame(
                 y.values, columns=['Label']), pd.DataFrame(
                 y_ind.values, columns=['Label'])
-            if self.data.task == ModelTasks.CLASSIFICATION and self.data.nClasses > 2:
+            if self.data.task == ModelTasks.MULTICLASS:
                 train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
                 train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
                 test = pd.concat([test, pd.DataFrame(inds)], axis=1)
@@ -361,7 +361,7 @@ class QSPRDNN(QSPRModel):
                 name='Label'), pd.Series(
                 y_ind.values.flatten()).to_frame(
                 name='Label')
-            if self.data.task == ModelTasks.CLASSIFICATION:
+            if self.data.task.isClassification():
                 train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
                 train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
                 test = pd.concat([test, pd.DataFrame(inds)], axis=1)

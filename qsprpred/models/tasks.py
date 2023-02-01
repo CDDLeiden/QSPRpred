@@ -9,4 +9,8 @@ from enum import Enum
 
 class ModelTasks(Enum):
     REGRESSION = 'REGRESSION'
-    CLASSIFICATION = 'CLASSIFICATION'
+    SINGLECLASS = 'SINGLECLASS'
+    MULTICLASS = 'MULTICLASS'
+
+    def isClassification(self):
+        return self in [self.SINGLECLASS, self.MULTICLASS]
