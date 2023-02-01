@@ -26,6 +26,7 @@ From v1.0.0 to v1.1.0
 - The `datasplit` interface was changed to mimic the `sklearn.model_selection.BaseCrossValidator` interface so all `sklearn` cross-validation methods can be used with QSPRPred out of the box to either generate train/test split or cross-validation splits (see the new features below)
 - Default `chunk_size` for `MoleculeTable` was set to 50 so that smaller data sets can take advantage of more CPUs as well.
 - The number of CPUs to use for parallel operations by `MoleculeTable` is now set in the `__init__` of the class
+- Passing invalid SMILES to the `getScores` function of  `Predictor` will now return a score of None. 
 
 ## New Features
 
