@@ -10,6 +10,7 @@ from typing import Union, List
 
 import mordred
 import numpy as np
+import pandas as pd
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
@@ -286,6 +287,60 @@ class rdkit_descs(DescriptorSet):
         return "RDkit"
 
 
+class PredictorDesc(DescriptorSet):
+    """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the descriptorset with a Predictor object.
+
+        Args:
+            predictor: Predictor object to use for calculating the descriptor
+        """
+        self._args = args
+        self._kwargs = kwargs
+        self._is_fp = False
+        from qsprpred.scorers.predictor import Predictor
+        self._predictor = Predictor.fromFile(*args, **kwargs)
+        self._descriptors = [self._predictor.getKey()]
+
+    def __call__(self, mol):
+        """
+        Calculate the descriptor for a molecule.
+
+        Args:
+            mol: smiles or rdkit molecule
+
+        Returns:
+            a `list` of descriptor values
+        """
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        return list(self._predictor.getScores([mol]))
+
+    @property
+    def is_fp(self):
+        return self._is_fp
+
+    @property
+    def settings(self):
+        """Return args and kwargs used to initialize the descriptorset."""
+        return self._args, self._kwargs
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, descriptors):
+        self._descriptors = descriptors
+
+    def get_len(self):
+        return 1
+
+    def __str__(self):
+        return "PredictorDesc"
+
+
 class _DescriptorSetRetriever:
     """Based on recipe 8.21 of the book "Python Cookbook".
 
@@ -310,6 +365,9 @@ class _DescriptorSetRetriever:
 
     def get_RDkit(self, *args, **kwargs):
         return rdkit_descs(*args, **kwargs)
+
+    def get_PredictorDesc(self, *args, **kwargs):
+        return PredictorDesc(*args, **kwargs)
 
 
 def get_descriptor(desc_type: str, *args, **kwargs):

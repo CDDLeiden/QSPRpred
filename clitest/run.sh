@@ -43,6 +43,8 @@ python -m qsprpred.data_CLI \
 -st 2000 \
 -fe Morgan \
 -fe RDkit \
+-pmo ../qsprpred/data/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json \
+-pme ../qsprpred/data/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json \
 -lv 0.01 \
 -hc 0.9
 

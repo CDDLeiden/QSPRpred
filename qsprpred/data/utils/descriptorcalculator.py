@@ -63,7 +63,7 @@ class DescriptorsCalculator(Calculator):
     @classmethod
     def fromFile(cls, fname: str):
         """Initialize descriptorset from a json file.
-        
+
         Args:
             fname: file name of json file with descriptor names and settings
         """
@@ -82,7 +82,7 @@ class DescriptorsCalculator(Calculator):
 
     def __call__(self, mols: List[Mol]) -> pd.DataFrame:
         """Calculate descriptors for list of mols.
-        
+
         Args:
             mols: list of rdkit mols
         """
@@ -94,12 +94,12 @@ class DescriptorsCalculator(Calculator):
 
         # replace errors by nan values
         df = df.apply(pd.to_numeric, errors='coerce')
-        
+
         return df
 
     def toFile(self, fname: str) -> None:
         """Save descriptorset to json file.
-        
+
         Args:
             fname: file name of json file with descriptor names and settings
         """
@@ -142,7 +142,7 @@ class DescriptorsCalculator(Calculator):
             # if the set is not a fingerprint, set descriptors to keep
             else:
                 self.descsets[idx].descriptors = descs_from_curr_set
-    
+
     def get_len(self):
         """Return number of descriptors calculated by all descriptorsets."""
         length = 0
