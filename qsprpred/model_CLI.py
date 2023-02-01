@@ -56,6 +56,8 @@ def QSPRArgParser(txt=None):
                              (base_dir/qspr/models/[-p]_params.json). NB. If json file with name \
                              {model_type}_{REG/CLS}_{property}_params.json) present in qspr/models folder those settings will also be used, \
                              but if the same parameter is present in both files the settings from (base_dir/[-p]_params.json) will be used.")
+    parser.add_argument('-sw', '--sample_weighing', action='store_true',
+                        help='Sets balanced class weights.')
     parser.add_argument('-pat', '--patience', type=int, default=50, help="for DNN, number of epochs for early stopping")
     parser.add_argument('-tol', '--tolerance', type=float, default=0.01,
                         help="for DNN, minimum absolute change of loss to count as progress")
@@ -159,11 +161,19 @@ def QSPR_modelling(args):
                 else:
                     parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs": args.ncpu}
 
+                # class_weight and scale_pos_weight are only used for RF, XGB and SVM
+                if not reg:
+                    class_weight = 'balanced' if args.sample_weighing else None
+                    counts = mydataset.y.value_counts()
+                    scale_pos_weight = counts[0] / counts[1] if (
+                        args.sample_weighing and not mydataset.isMultiClass()) else 1
+
                 alg_dict = {
-                    'RF': RandomForestRegressor() if reg else RandomForestClassifier(),
+                    'RF': RandomForestRegressor() if reg else RandomForestClassifier(class_weight=class_weight),
                     'XGB': XGBRegressor(objective='reg:squarederror') if reg else
-                    XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss'),
-                    'SVM': SVR() if reg else SVC(probability=True),
+                    XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss',
+                                  scale_pos_weight=scale_pos_weight),
+                    'SVM': SVR() if reg else SVC(probability=True, class_weight=class_weight),
                     'PLS': PLSRegression(),
                     'NB': GaussianNB(),
                     'KNN': KNeighborsRegressor() if reg else KNeighborsClassifier()}
