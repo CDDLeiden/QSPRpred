@@ -64,8 +64,7 @@ class QSPRsklearn(QSPRModel):
     def fit(self):
         """Build estimator model from entire data set."""
         X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargetProperties(concat=True).values
-        y_all = y_all.reshape(-1)
+        y_all = self.data.getTargetProperties(concat=True).values.ravel()
 
         fit_set = {'X': X_all}
 
@@ -105,10 +104,11 @@ class QSPRsklearn(QSPRModel):
 
             fit_set = {'X': X_train}
 
+            # self.data.createFolds() returns numpy arrays by default so we don't call `.values` here
             if type(self.alg).__name__ == 'PLSRegression':
-                fit_set['Y'] = y_train
+                fit_set['Y'] = y_train.ravel()
             else:
-                fit_set['y'] = y_train
+                fit_set['y'] = y_train.ravel()
             self.model.fit(**fit_set)
 
             if self.data.task == ModelTasks.REGRESSION:
@@ -127,9 +127,9 @@ class QSPRsklearn(QSPRModel):
         fit_set = {'X': X}
 
         if type(self.alg).__name__ == 'PLSRegression':
-            fit_set['Y'] = y
+            fit_set['Y'] = y.values.ravel()
         else:
-            fit_set['y'] = y
+            fit_set['y'] = y.values.ravel()
 
         self.model.fit(**fit_set)
 
@@ -176,7 +176,7 @@ class QSPRsklearn(QSPRModel):
 
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetProperties()
-        fit_set = {'X': X, 'y': y.iloc[:, 0]}
+        fit_set = {'X': X, 'y': y.iloc[:, 0].values.ravel()}
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         grid.fit(**fit_set)
         logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
