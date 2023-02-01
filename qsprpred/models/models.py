@@ -195,6 +195,19 @@ class QSPRsklearn(QSPRModel):
             n_trials (int): number of trials for bayes optimization
             save_m (bool): if true, after bayes optimization the model is refit on the entire data set
             n_jobs (int): the number of parallel trials
+            
+        Example of search_space_bs for scikit-learn's MLPClassifier:
+        >>> model = QSPRsklearn(base_dir='.', data=dataset, 
+        >>>                     alg = MLPClassifier(), alg_name="MLP")
+        >>>  search_space_bs = {
+        >>>    'learning_rate_init': ['float', 1e-5, 1e-3,],
+        >>>    'power_t' : ['discrete_uniform', 0.2, 0.8, 0.1],
+        >>>    'momentum': ['float', 0.0, 1.0],
+        >>> }
+        >>> model.bayesOptimization(search_space_bs=search_space_bs, n_trials=10)
+        
+        Avaliable suggestion types:
+        ['categorical', 'discrete_uniform', 'float', 'int', 'loguniform', 'uniform']
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         if n_jobs > 1:
