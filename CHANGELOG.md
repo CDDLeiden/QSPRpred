@@ -4,6 +4,7 @@ From v1.0.0 to v1.1.0
 ## Fixes
 
 - Fix issue with Mordred descriptor
+- Descriptor sets now process a list of molecules instead of just one at a time (prevents performance issues if multiple sets are calculated in parallel)
 
 
 ## Changes
