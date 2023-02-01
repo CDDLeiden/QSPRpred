@@ -6,6 +6,7 @@ On: 06.06.22, 20:15
 """
 import json
 import os
+import sys
 
 import numpy as np
 import sklearn_json as skljson
@@ -29,7 +30,7 @@ class Predictor(Scorer):
         """Construct predictor model, feature calculator & standardizer.
 
         Args:
-            model: fitted sklearn or toch model
+            model: fitted sklearn or pytorch model
             feature_calculators: DescriptorsCalculator object, calculates features from smiles
             standardizers: StandardStandardizer(s), scales features
             type: regression or classification
@@ -61,10 +62,29 @@ class Predictor(Scorer):
         with open(metadata_path) as f:
             meta = json.load(f)
 
-        feature_calculators = DescriptorsCalculator.fromFile(meta["descriptorcalculator_path"])
+        descriptorcalculator_path = meta["descriptorcalculator_path"]
+        if not os.path.exists(descriptorcalculator_path):
+            logger.warning(
+                f'Descriptor calculator not found at {descriptorcalculator_path}, trying to find it in the same folder as metadata file')
+            descriptorcalculator_path = os.path.join(
+                os.path.dirname(metadata_path),
+                os.path.basename(descriptorcalculator_path))
+            if not os.path.exists(descriptorcalculator_path):
+                logger.error(f"Descriptor calculator not found at {descriptorcalculator_path}")
+                sys.exit(1)
+        feature_calculators = DescriptorsCalculator.fromFile(descriptorcalculator_path)
         standardizers = []
         if meta['standardizer_paths'] is not None and scale:
             for standardizer_path in meta['standardizer_paths']:
+                if not os.path.exists(standardizer_path):
+                    logger.warning(
+                        f'Standardizer not found at {standardizer_path}, trying to find it in the same folder as metadata file')
+                    standardizer_path = os.path.join(
+                        os.path.dirname(metadata_path),
+                        os.path.basename(standardizer_path))
+                    if not os.path.exists(standardizer_path):
+                        logger.error(f"Standardizer not found at {standardizer_path}")
+                        sys.exit(1)
                 standardizers.append(SKLearnStandardizer.fromFile(standardizer_path))
 
         th = meta['init']['th'] if 'th' in meta['init'].keys() else None
@@ -105,7 +125,9 @@ class Predictor(Scorer):
         if (self.model.__class__.__name__ == "STFullyConnected"):
             fps_loader = self.model.get_dataloader(features)
             if self.type == 'CLS':
-                if len(self.th) > 1:
+                if self.th is None or len(self.th) == 1:
+                    scores = self.model.predict(fps_loader)[:, 1].astype(float)
+                elif len(self.th) > 1:
                     scores = np.argmax(
                         self.model.predict(fps_loader), axis=1).astype(float)
                 elif len(self.th) == 1:
@@ -118,14 +140,14 @@ class Predictor(Scorer):
         # Regression
         elif self.type == 'REG':
             scores = self.model.predict(features)
+        # Single-class classification
+        elif (self.type == 'CLS') and (self.th is None or len(self.th) == 1):
+            scores = self.model.predict_proba(features)[:, 1]
         # Multi-class classification
         elif len(self.th) > 1:
             scores = np.argmax(
                 self.model.predict_proba(features),
                 axis=1).astype(float)
-        # Single-class classification
-        elif (self.type == 'CLS'):
-            scores = self.model.predict_proba(features)[:, 1]
 
         if len(scores.shape) > 1 and scores.shape[1] == 1:
             scores = scores[:, 0]

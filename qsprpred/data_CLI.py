@@ -20,6 +20,7 @@ from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     Mordred,
     MorganFP,
+    PredictorDesc,
     rdkit_descs,
 )
 from qsprpred.data.utils.featurefilters import (
@@ -86,6 +87,16 @@ def QSPRArgParser(txt=None):
 
     # features to calculate
     parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'RDkit', 'Mordred', 'DrugEx'], nargs='*')
+    parser.add_argument('-pmo', '--predictor_model', type=str, nargs='+',
+                        help="It is also possible to use a QSPRpred model(s) as molecular feature(s). Give\
+                        the path(s) to the model(s) relative to the base_directory. Also pass the meta data\
+                        file(s) with the -pme argument. E.g. -pmo model1.json model2.json -pme model1_meta.json\
+                        model2_meta.json")
+    parser.add_argument('-pme', '--predictor_meta', type=str, nargs='+',
+                        help="It is also possible to use a QSPRpred model(s) as molecular feature(s). Give\
+                        the path(s) to the meta data file(s) relative to the base_directory. Also pass the model\
+                        file(s) with the -pme argument. E.g. -pmo model1.json model2.json -pme model1_meta.json\
+                        model2_meta.json")
 
     # feature filters
     parser.add_argument('-lv', '--low_variability', type=float, default=None, help="low variability threshold\
@@ -152,7 +163,7 @@ def QSPR_dataprep(args):
                 n_jobs=args.ncpu,
                 target_transformer=log_transform,
                 store_dir=f"{args.base_dir}/qspr/data/",
-                overwrite=False)
+                overwrite=True)
 
             # data filters
             datafilters = []
@@ -177,6 +188,11 @@ def QSPR_dataprep(args):
                 descriptorsets.append(Mordred())
             if 'DrugEx' in args.features:
                 descriptorsets.append(DrugExPhyschem())
+            if args.predictor_model:
+                for idx, predictor_path in enumerate(args.predictor_model):
+                    # load in predictor from files
+                    descriptorsets.append(
+                        PredictorDesc(predictor_path, args.predictor_meta[idx]))
 
             # feature filters
             featurefilters = []
