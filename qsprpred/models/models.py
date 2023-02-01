@@ -227,7 +227,7 @@ class QSPRsklearn(QSPRModel):
             if value[0] == 'categorical':
                 bayesian_params[key] = trial.suggest_categorical(key, value[1])
             elif value[0] == 'discrete_uniform':
-                bayesian_params[key] = trial.suggest_discrete_uniform(key, value[1], value[2], value[3])
+                bayesian_params[key] = trial.suggest_float(key, value[1], value[2], step=value[3])
             elif value[0] == 'float':
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
             elif value[0] == 'int':
