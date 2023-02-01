@@ -101,4 +101,4 @@ class Papyrus:
             plusplus=self.plusplus,
             papyrus_dir=self.data_dir,
         )
-        return MoleculeTable.fromFile(path, df=data)
+        return MoleculeTable.fromTableFile(name, path, store_dir=output_dir)
