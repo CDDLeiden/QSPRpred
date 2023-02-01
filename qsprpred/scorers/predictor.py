@@ -98,7 +98,7 @@ class Predictor(Scorer):
             scores (numpy.ndarray): 'np.array' of scores for "mols"
         """
 
-        scores = np.zeros(len(mols))
+        scores = np.full(len(mols), None)
 
         # create mask for valid molecules
         valids = [Chem.MolFromSmiles(mol) is not None if isinstance(mol, str) else True for mol in mols]

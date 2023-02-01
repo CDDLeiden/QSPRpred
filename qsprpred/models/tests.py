@@ -258,14 +258,14 @@ class TestModels(PathMixIn, TestCase):
         predictions = predictor.getScores(mols)
         self.assertEqual(predictions.shape, (len(mols),))
         self.assertIsInstance(predictions, np.ndarray)
-        self.assertIsInstance(predictions[0], np.floating)
+        self.assertIsInstance(predictions[0], float)
 
         # test with an invalid smiles
         invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
         predictions = predictor.getScores(invalid_smiles)
         self.assertEqual(predictions.shape, (len(invalid_smiles),))
-        self.assertEqual(predictions[1], 0)
-        self.assertNotEqual(predictions[0], 0)
+        self.assertEqual(predictions[1], None)
+        self.assertNotEqual(predictions[0], None)
 
         return predictions
 
