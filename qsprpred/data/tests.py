@@ -194,17 +194,20 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
             with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
-        th = [0, 20, 40, 60]
-
+        
         def test_classification(dataset_to_test):
             self.assertEqual(dataset_to_test.task, ModelTasks.CLASSIFICATION)
             self.assertEqual(dataset_to_test.targetProperty, "CL_class")
             self.assertEqual(dataset_to_test.originalTargetProperty, "CL")
             y = dataset_to_test.getTargetProperties(concat=True)
             self.assertTrue(y.columns[0] == dataset_to_test.targetProperty)
-            self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], (len(th) - 1))
+            if len(th) == 1:
+                self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], 2)
+            else:
+                self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], (len(th) - 1))
             self.assertEqual(dataset_to_test.th, th)
 
+        th = [6.5]
         test_bad_init(dataset)
         dataset.makeClassification(th=th)
         test_classification(dataset)
