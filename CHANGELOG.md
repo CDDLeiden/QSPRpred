@@ -4,6 +4,7 @@ From v1.0.0 to v1.1.0
 ## Fixes
 
 - Fix issue with Mordred descriptor
+- Descriptor sets now process a list of molecules instead of just one at a time (prevents performance issues if multiple sets are calculated in parallel)
 
 
 ## Changes
@@ -27,6 +28,7 @@ From v1.0.0 to v1.1.0
 - The number of CPUs to use for parallel operations  by `MoleculeTable` is now set in the `__init__` of the class
 - `DescriptorSets` are now initialized with the specific arguments instead of args and kwargs.
 - `MorganFP` was replaced by a more general class `FingerprintSet` which uses an object from the `Fingerprint` class as its fingerprint type
+- Passing invalid SMILES to the `getScores` function of  `Predictor` will now return a score of None. 
 
 ## New Features
 
@@ -38,3 +40,5 @@ From v1.0.0 to v1.1.0
 - Train/test split of the data set is now saved in the matrix itself and is reloaded upon deserialization
 - `MoleculeTable` was updated with new features to generate scaffolds of molecules
 - `TanimotoDistances` was added as descriptortype.
+- Balanced class weighing was added as an option to the CLI
+- `PredictorDesc` was added as a new `DescriptorSet` type. It uses a QSPRpred model as descriptor.

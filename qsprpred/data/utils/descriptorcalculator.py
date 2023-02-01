@@ -88,7 +88,7 @@ class DescriptorsCalculator(Calculator):
         """
         df = pd.DataFrame()
         for descset in self.descsets:
-            values = [descset(mol) if mol else [0] * len(descset.descriptors) for mol in mols]
+            values = descset(mols)
             values = pd.DataFrame(values, columns=descset.descriptors)
             if descset.is_fp:
                 values.add_prefix(f"{descset.fingerprint_type}_")

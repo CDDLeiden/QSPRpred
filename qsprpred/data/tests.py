@@ -7,6 +7,7 @@ from unittest import TestCase
 import mordred
 import numpy as np
 import pandas as pd
+import sklearn_json as skljson
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
@@ -16,6 +17,7 @@ from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
     Mordred,
+    PredictorDesc,
     TanimotoDistances,
     rdkit_descs,
 )
@@ -27,6 +29,7 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.models.tasks import ModelTasks
+from qsprpred.scorers.predictor import Predictor
 from rdkit import Chem
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
@@ -192,7 +195,6 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
             with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
-        th = [0, 20, 40, 60]
 
         def test_classification(dataset_to_test):
             self.assertEqual(dataset_to_test.task, ModelTasks.CLASSIFICATION)
@@ -200,9 +202,13 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
             self.assertEqual(dataset_to_test.originalTargetProperty, "CL")
             y = dataset_to_test.getTargetProperties(concat=True)
             self.assertTrue(y.columns[0] == dataset_to_test.targetProperty)
-            self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], (len(th) - 1))
+            if len(th) == 1:
+                self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], 2)
+            else:
+                self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], (len(th) - 1))
             self.assertEqual(dataset_to_test.th, th)
 
+        th = [6.5]
         test_bad_init(dataset)
         dataset.makeClassification(th=th)
         test_classification(dataset)
@@ -246,8 +252,10 @@ class TestDataSetPreparation(DataSets, TestCase):
                 Mordred(),
                 FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
                 rdkit_descs(),
-                DrugExPhyschem()
-            ]
+                DrugExPhyschem(),
+                PredictorDesc(
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json')]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
             dataset.prepareDataset(
                 feature_calculator=DescriptorsCalculator(descriptor_sets),
@@ -445,6 +453,16 @@ class TestDescriptorsets(DataSets, TestCase):
     def setUp(self):
         super().setUp()
         self.dataset = self.create_small_dataset(self.__class__.__name__)
+
+    def test_PredictorDesc(self):
+        # give path to saved model parameters
+        model_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json'
+        meta_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'
+        desc_calc = DescriptorsCalculator([PredictorDesc(model_path, meta_path)])
+
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
+        self.assertTrue(self.dataset.X.any().any())
 
     def test_fingerprintSet(self):
         desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)])
