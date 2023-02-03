@@ -406,7 +406,7 @@ class PredictorDesc(DescriptorSet):
         self._predictor = Predictor.fromFile(model_path, metadata_path)
         self._descriptors = [self._predictor.getKey()]
 
-    def __call__(self, mol):
+    def __call__(self, mols):
         """
         Calculate the descriptor for a molecule.
 
@@ -416,23 +416,22 @@ class PredictorDesc(DescriptorSet):
         Returns:
             a `list` of descriptor values
         """
-        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        return list(self._predictor.getScores([mol]))
+        return list(self._predictor.getScores(self.iterMols(mols, to_list=True)))
 
-    @property
+    @ property
     def is_fp(self):
         return self._is_fp
 
-    @property
+    @ property
     def settings(self):
         """Return args and kwargs used to initialize the descriptorset."""
         return {"model_path": self.model_path, "metadata_path": self.metadata_path}
 
-    @property
+    @ property
     def descriptors(self):
         return self._descriptors
 
-    @descriptors.setter
+    @ descriptors.setter
     def descriptors(self, descriptors):
         self._descriptors = descriptors
 
