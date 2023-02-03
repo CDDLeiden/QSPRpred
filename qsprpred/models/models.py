@@ -64,8 +64,7 @@ class QSPRsklearn(QSPRModel):
     def fit(self):
         """Build estimator model from entire data set."""
         X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargetProperties(concat=True).values
-        y_all = y_all.reshape(-1)
+        y_all = self.data.getTargetProperties(concat=True).values.ravel()
 
         fit_set = {'X': X_all}
 
@@ -105,10 +104,11 @@ class QSPRsklearn(QSPRModel):
 
             fit_set = {'X': X_train}
 
+            # self.data.createFolds() returns numpy arrays by default so we don't call `.values` here
             if type(self.alg).__name__ == 'PLSRegression':
-                fit_set['Y'] = y_train
+                fit_set['Y'] = y_train.ravel()
             else:
-                fit_set['y'] = y_train
+                fit_set['y'] = y_train.ravel()
             self.model.fit(**fit_set)
 
             if self.data.task == ModelTasks.REGRESSION:
@@ -127,9 +127,9 @@ class QSPRsklearn(QSPRModel):
         fit_set = {'X': X}
 
         if type(self.alg).__name__ == 'PLSRegression':
-            fit_set['Y'] = y
+            fit_set['Y'] = y.values.ravel()
         else:
-            fit_set['y'] = y
+            fit_set['y'] = y.values.ravel()
 
         self.model.fit(**fit_set)
 
@@ -176,7 +176,7 @@ class QSPRsklearn(QSPRModel):
 
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetProperties()
-        fit_set = {'X': X, 'y': y.iloc[:, 0]}
+        fit_set = {'X': X, 'y': y.iloc[:, 0].values.ravel()}
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         grid.fit(**fit_set)
         logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -195,6 +195,19 @@ class QSPRsklearn(QSPRModel):
             n_trials (int): number of trials for bayes optimization
             save_m (bool): if true, after bayes optimization the model is refit on the entire data set
             n_jobs (int): the number of parallel trials
+            
+        Example of search_space_bs for scikit-learn's MLPClassifier:
+        >>> model = QSPRsklearn(base_dir='.', data=dataset, 
+        >>>                     alg = MLPClassifier(), alg_name="MLP")
+        >>>  search_space_bs = {
+        >>>    'learning_rate_init': ['float', 1e-5, 1e-3,],
+        >>>    'power_t' : ['discrete_uniform', 0.2, 0.8, 0.1],
+        >>>    'momentum': ['float', 0.0, 1.0],
+        >>> }
+        >>> model.bayesOptimization(search_space_bs=search_space_bs, n_trials=10)
+        
+        Avaliable suggestion types:
+        ['categorical', 'discrete_uniform', 'float', 'int', 'loguniform', 'uniform']
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         if n_jobs > 1:
@@ -227,7 +240,7 @@ class QSPRsklearn(QSPRModel):
             if value[0] == 'categorical':
                 bayesian_params[key] = trial.suggest_categorical(key, value[1])
             elif value[0] == 'discrete_uniform':
-                bayesian_params[key] = trial.suggest_discrete_uniform(key, value[1], value[2], value[3])
+                bayesian_params[key] = trial.suggest_float(key, value[1], value[2], step=value[3])
             elif value[0] == 'float':
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
             elif value[0] == 'int':
