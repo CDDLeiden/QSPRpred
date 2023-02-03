@@ -167,7 +167,7 @@ class TestModels(PathMixIn, TestCase):
             target_prop="CL",
             task=task,
             th=th,
-            store_dir=self.qsprmodelspath)
+            store_dir=self.qsprdatapath)
         feature_calculators = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)])
         scaler = StandardScaler()
         data.prepareDataset(
@@ -231,25 +231,9 @@ class TestModels(PathMixIn, TestCase):
         # intialize dataset and model
         data, feature_calculators, scaler = self.prep_testdata(reg=reg, th=th)
         regid = 'REG' if reg else 'CLS'
-        if alg_name == 'DNN':
-            path = f'{os.path.dirname(__file__)}/test_files/qspr/models/DNN_{regid}_{data.targetProperty}.json'
-            with open(path) as f:
-                themodel_params = json.load(f)
-            themodel = STFullyConnected(**themodel_params)
-            themodel.load_state_dict(torch.load(f"{path[:-5]}_weights.pkg"))
-        else:
-            themodel = skljson.from_json(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.json')
-
-        # initialize predictor
-        predictor = Predictor(
-            themodel,
-            feature_calculators,
-            [scaler],
-            type=regid,
-            th=th,
-            name=None,
-            modifier=None)
+        predictor = Predictor.fromFile(
+            f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.json',
+            f'{os.path.dirname(__file__)}/test_files/qspr/data/{data.name}_meta.json')
 
         # load molecules to predict
         df = pd.read_csv(
@@ -403,4 +387,5 @@ class TestModels(PathMixIn, TestCase):
                 search_space_bs=search_space_bs, n_trials=5)
 
             # predictor
+            print(reg)
             self.predictor_test('DNN', reg=reg[0], th=reg[1])

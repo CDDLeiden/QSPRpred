@@ -20,6 +20,7 @@ from qsprpred.data.utils.feature_standardization import (
 )
 from qsprpred.logs import logger
 from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.models.tasks import ModelTasks
 from rdkit import Chem
 
 
@@ -27,7 +28,7 @@ class Predictor(Scorer):
 
     def __init__(
             self, model, feature_calculators, standardizers: SKLearnStandardizer,
-            type: str, th=(1,), name=None, modifier=None):
+            task: ModelTasks, name=None, modifier=None):
         """Construct predictor model, feature calculator & standardizer.
 
         Args:
@@ -43,8 +44,7 @@ class Predictor(Scorer):
         self.model = model
         self.feature_calculators = feature_calculators
         self.standardizers = standardizers
-        self.type = type
-        self.th = th
+        self.task = task
         self.key = f"{self.model.__class__.__name__}" if not name else name
 
     @staticmethod
@@ -88,8 +88,7 @@ class Predictor(Scorer):
                         sys.exit(1)
                 standardizers.append(SKLearnStandardizer.fromFile(standardizer_path))
 
-        th = meta['init']['th'] if 'th' in meta['init'].keys() else None
-        type = 'REG' if meta['init']['task'] == "REGRESSION" else 'CLS'
+        task = ModelTasks[meta['init']['task']]
 
         # load model
         name = os.path.basename(model_path)[:-5]
@@ -101,11 +100,9 @@ class Predictor(Scorer):
             model.load_state_dict(torch.load(f"{model_path[:-5]}_weights.pkg"))
             return Predictor(
                 model, feature_calculators=feature_calculators, standardizers=standardizers,
-                type=type, th=th, name=name, modifier=modifier)
-        return Predictor(
-            skljson.from_json(model_path),
-            feature_calculators=feature_calculators, standardizers=standardizers, type=type,
-            th=th, name=name, modifier=modifier)
+                task=task, name=name, modifier=modifier)
+        return Predictor(skljson.from_json(model_path), feature_calculators=feature_calculators,
+                         standardizers=standardizers, task=task, name=name, modifier=modifier)
 
     def getScores(self, mols, frags=None):
         """Return scores for the input molecules.
@@ -135,33 +132,25 @@ class Predictor(Scorer):
         # Special case DNN
         if (self.model.__class__.__name__ == "STFullyConnected"):
             fps_loader = self.model.get_dataloader(features)
-            if self.type == 'CLS':
-                if self.th is None or len(self.th) == 1:
-                    scores[valids] = self.model.predict(fps_loader)[:, 1].astype(float)
-                elif len(self.th) > 1:
-                    scores[valids] = np.argmax(
-                        self.model.predict(fps_loader), axis=1).astype(float)
-                elif len(self.th) == 1:
-                    scores[valids] = self.model.predict(fps_loader)[:, 1].astype(float)
+            if self.task == ModelTasks.MULTICLASS:
+                scores[valids] = np.argmax(self.model.predict(fps_loader), axis=1).astype(float)
             else:
                 scores[valids] = self.model.predict(fps_loader).flatten()
         # Special case PLS
         elif self.model.__class__.__name__ == 'PLSRegression':
             scores[valids] = self.model.predict(features)[:, 0]
         # Regression
-        elif self.type == 'REG':
+        elif self.task == ModelTasks.REGRESSION:
             scores[valids] = self.model.predict(features)
         # Single-class classification
-        elif (self.type == 'CLS') and (self.th is None or len(self.th) == 1):
+        elif self.task == ModelTasks.SINGLECLASS:
             scores[valids] = self.model.predict_proba(features)[:, 1]
         # Multi-class classification
-        elif len(self.th) > 1:
-            scores[valids] = np.argmax(
-                self.model.predict_proba(features),
-                axis=1).astype(float)
+        elif self.task == ModelTasks.MULTICLASS:
+            scores[valids] = np.argmax(self.model.predict_proba(features), axis=1).astype(float)
 
-        if len(scores.shape) > 1 and scores.shape[1] == 1:
-            scores = scores[:, 0]
+        # if len(scores.shape) > 1 and scores.shape[1] == 1:
+        #     scores = scores[:, 0]
         return scores
 
     def getKey(self):
