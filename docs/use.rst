@@ -285,6 +285,7 @@ Here we will predict activity values for the A1 (CHEMBL318) and A3 receptor (CHE
 dataset used in the previous examples.
 
 ..  code-block::
+    
     # input is in ./data/LIGAND_RAW_small_pivot.tsv
     python -m qsprpred.predict_CLI -i LIGAND_RAW_small_pivot.tsv -sm Smiles -pr CHEMBL318 -pr CHEMBL256 -r REG -m RF
 

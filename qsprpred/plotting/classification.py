@@ -28,16 +28,14 @@ class ROCPlot(ClassifierPlot):
     def makeCV(self, model : QSPRModel):
         df = pd.read_table(self.cvPaths[model])
 
-        fold_size = df.shape[0] // self.nFolds[model]
-        current_range = [0, fold_size + 1]
         tprs = []
         aucs = []
         mean_fpr = np.linspace(0, 1, 100)
         fig, ax = plt.subplots()
-        for fold in range(self.nFolds[model]):
+        for fold in df.Fold.unique():
             # get labels
-            y_pred = df.Score[current_range[0]:current_range[1]]
-            y_true = df.Label[current_range[0]:current_range[1]]
+            y_pred = df.Score[df.Fold == fold]
+            y_true = df.Label[df.Fold == fold]
 
             # do plotting
             viz = RocCurveDisplay.from_predictions(
@@ -52,10 +50,6 @@ class ROCPlot(ClassifierPlot):
             interp_tpr[0] = 0.0
             tprs.append(interp_tpr)
             aucs.append(viz.roc_auc)
-
-            # move on to the next fold
-            current_range[0] = current_range[1]
-            current_range[1] = current_range[0] + fold_size if fold + 1 < (self.nFolds[model] - 1) else df.shape[0]
 
         ax.plot([0, 1], [0, 1], linestyle="--", lw=2, color="r", label="Chance", alpha=0.8)
 
@@ -170,21 +164,17 @@ class MetricsPlot(ClassifierPlot):
         self.reset()
         for model in self.models:
             df = pd.read_table(self.cvPaths[model])
-            fold_size = df.shape[0] // self.nFolds[model]
-            current_range = [0, fold_size + 1]
-            for fold in range(self.nFolds[model]):
-                y_pred = df.Score[current_range[0]:current_range[1]]
+
+            for fold in df.Fold.unique():
+                y_pred = df.Score[df.Fold == fold]
                 y_pred_values = [1 if x > self.decision else 0 for x in y_pred]
-                y_true = df.Label[current_range[0]:current_range[1]]
+                y_true = df.Label[df.Fold == fold]
                 for metric in self.metrics:
                     val = metric(y_true, y_pred_values)
                     self.summary['Metric'].append(metric.__name__)
                     self.summary['Model'].append(self.modelNames[model])
                     self.summary['TestSet'].append(f'CV{fold + 1}')
                     self.summary['Value'].append(val)
-                # move on to the next fold
-                current_range[0] = current_range[1]
-                current_range[1] = current_range[0] + fold_size if fold + 1 < (self.nFolds[model] - 1) else df.shape[0]
 
             df = pd.read_table(self.indPaths[model])
             y_pred = df.Score

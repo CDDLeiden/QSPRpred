@@ -1,4 +1,4 @@
-"""Descriptorssets.
+"""Descriptorssets. A descriptorset is a collection of descriptors that can be calculated for a molecule.
 
 To add a new descriptor or fingerprint calculator:
 * Add a descriptor subclass for your descriptor calculator
@@ -11,6 +11,7 @@ from typing import Optional, Union, List
 import mordred
 import numpy as np
 from mordred import descriptors as mordreddescriptors
+from qsprpred.data.utils.descriptor_utils import fingerprints
 from Mold2_pywrapper import Mold2 as Mold2_calculator
 from PaDEL_pywrapper import PaDEL as PaDEL_calculator
 from PaDEL_pywrapper.descriptors import descriptors as PaDEL_descriptors
@@ -21,10 +22,13 @@ from rdkit.Chem import AllChem, Mol
 
 
 class DescriptorSet(ABC):
-    """Abstract base class for descriptorssets."""
+    """Abstract base class for descriptorsets.
+
+    A descriptorset is a collection of descriptors that can be calculated for a molecule.
+    """
 
     @abstractmethod
-    def __call__(self, mols : List[Union[str, Mol]]):
+    def __call__(self, mols: List[Union[str, Mol]]):
         """
         Calculate the descriptor for a molecule.
 
@@ -36,7 +40,7 @@ class DescriptorSet(ABC):
         """
         pass
 
-    def iterMols(self, mols : List[Union[str, Mol]], to_list=False):
+    def iterMols(self, mols: List[Union[str, Mol]], to_list=False):
         """
         Create a molecule iterator or list from RDKit molecules or SMILES.
 
@@ -46,7 +50,6 @@ class DescriptorSet(ABC):
         Returns:
             an array or data frame of descriptor values of shape (n_mols, n_descriptors)
         """
-
         ret = (Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol for mol in mols)
         if to_list:
             ret = list(ret)
@@ -65,6 +68,7 @@ class DescriptorSet(ABC):
         pass
 
     def get_len(self):
+        """Return the number of descriptors."""
         return len(self.descriptors)
 
     @abstractmethod
@@ -74,37 +78,40 @@ class DescriptorSet(ABC):
 
     @abstractmethod
     def settings(self):
-        """Return args and kwargs used to initialize the descriptorset."""
+        """Return dictionary with arguments used to initialize the descriptorset."""
         pass
 
     @abstractmethod
     def __str__(self):
+        """Return string representation of the descriptorset."""
         pass
 
 
-class MorganFP(DescriptorSet):
+class FingerprintSet(DescriptorSet):
+    """Generic fingerprint descriptorset can be used to calculate any fingerprint type defined in descriptorutils.fingerprints."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, fingerprint_type, *args, **kwargs):
         """
-        Initialize the descriptor with the same arguments as you would pass to `GetMorganFingerprintAsBitVect` function of RDKit.
+        Initialize the descriptor with the same arguments as you would pass to your fingerprint type of choice.
 
         Args:
-            *args: `GetMorganFingerprintAsBitVect` arguments
-            **kwargs: `GetMorganFingerprintAsBitVect` keyword arguments
+            fingerprint_type: fingerprint type
+            *args: fingerprint specific arguments
+            **kwargs: fingerprint specific arguments keyword arguments
         """
-        self._args = args
-        self._kwargs = kwargs
         self._is_fp = True
+        self.fingerprint_type = fingerprint_type
+        self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *args, **kwargs)
 
         self._keepindices = None
 
     def __call__(self, mols):
+        """Calculate the fingerprint for a list of molecules."""
         convertFP = DataStructs.ConvertToNumpyArray
-        morgan = AllChem.GetMorganFingerprintAsBitVect
 
         ret = np.zeros((len(mols), self.get_len()))
-        for idx,mol in enumerate(self.iterMols(mols)):
-            fp = morgan(mol, *self._args, **self._kwargs)
+        for idx, mol in enumerate(self.iterMols(mols)):
+            fp = self.get_fingerprint(mol)
             np_fp = np.zeros(len(fp))
             convertFP(fp, np_fp)
             if self.keepindices:
@@ -115,60 +122,86 @@ class MorganFP(DescriptorSet):
 
     @property
     def keepindices(self):
+        """Return the indices of the fingerprint to keep."""
         return self._keepindices
 
     @keepindices.setter
     def keepindices(self, val):
+        """Set the indices of the fingerprint to keep."""
         self._keepindices = [int(x) for x in val] if val else None
 
     @property
     def is_fp(self):
+        """Return True if descriptorset is fingerprint."""
         return self._is_fp
 
     @property
     def settings(self):
-        return self._args, self._kwargs
+        """Return dictionary with arguments used to initialize the descriptorset."""
+        return {"fingerprint_type": self.fingerprint_type, **self.get_fingerprint.settings}
 
     def get_len(self):
-        return len(AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles("C"), *self._args, **self._kwargs))
+        """Return the length of the fingerprint."""
+        return len(self.get_fingerprint(Chem.MolFromSmiles("C")))
 
     def __str__(self):
-        return "MorganFP"
+        return f"FingerprintSet"
 
     @property
     def descriptors(self):
+        """Return the indices of the fingerprint that are kept."""
         indices = self.keepindices if self.keepindices else range(self.get_len())
         return [f"{idx}" for idx in indices]
 
     @descriptors.setter
     def descriptors(self, value):
-        """
-        Sets the number of bits to a given value.
-        """
-        self._kwargs["nBits"] = value
+        """Set the indices of the fingerprint to keep."""
+        self.keepindices(value)
 
 
 class Mordred(DescriptorSet):
     """Descriptors from molecular descriptor calculation software Mordred.
 
     From https://github.com/mordred-descriptor/mordred.
-    Initialize the descriptor with the same arguments as you would pass to `Calculator` function of Mordred.
-    If no mordred descriptor object passed, then all descriptors are calculated.
 
     Args:
-        *args: `Calculator` arguments
-        **kwargs: `Calculator` keyword arguments
+        descs (list): list of mordred descriptor names
+        version (str): version of mordred
+        ignore_3D (bool): ignore 3D information
+        config (str): path to config file
     """
 
-    def __init__(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
-        self._process_args(*args, **kwargs)
+    def __init__(self, descs=None, version=None, ignore_3D=False, config=None):
+        """
+        Initialize the descriptor with the same arguments as you would pass to `Calculator` function of Mordred.
+
+        With the exception of the `descs` argument which can also be a list of mordred descriptor names instead
+        of a mordred descriptor module.
+
+        Args:
+            descs: List of Mordred descriptor names, a Mordred descriptor module or None for all mordred descriptors
+            version (str): version of mordred
+            ignore_3D (bool): ignore 3D information
+            config (str): path to config file?
+        """
+        if descs:
+            # if mordred descriptor module is passed, convert to list of descriptor instances
+            if not isinstance(descs, list):
+                descs = (mordred.Calculator(descs).descriptors)
+        else:
+            # use all mordred descriptors if no descriptors are specified
+            descs = mordred.Calculator(mordreddescriptors).descriptors
+
+        self.version = version
+        self.ignore_3D = ignore_3D
+        self.config = config
 
         self._is_fp = False
 
         self._mordred = None
-        self.descriptors = self._args[0]
+
+        # convert to list of descriptor names if descriptor instances are passed and initiate mordred calulator
+        self.descriptors = [str(d) for d in descs]
 
     def __call__(self, mols):
         return self._mordred.pandas(self.iterMols(mols), quiet=True, nproc=1).values
@@ -179,7 +212,7 @@ class Mordred(DescriptorSet):
 
     @property
     def settings(self):
-        return self._args, self._kwargs
+        return {"descs": self.descriptors, "version": self.version, "ignore_3D": self.ignore_3D, "config": self.config}
 
     @property
     def descriptors(self):
@@ -187,20 +220,19 @@ class Mordred(DescriptorSet):
 
     @descriptors.setter
     def descriptors(self, names):
+        """Set the descriptors to calculate.
+
+        Converts a list of Mordred descriptor names to Mordred descriptor instances which is used to initialize the
+        a Mordred calculator with the specified descriptors.
+
+        Args:
+            names: List of Mordred descriptor names.
+        """
         calc = mordred.Calculator(mordreddescriptors)
         self._mordred = mordred.Calculator(
-            [d for d in calc.descriptors if str(d) in names], **self._kwargs
-        )
+            [d for d in calc.descriptors if str(d) in names],
+            version=self.version, ignore_3D=self.ignore_3D, config=self.config)
         self._descriptors = names
-
-    def _process_args(self, descs=None, version=None, ignore_3D=False, config=None):
-        if descs:
-            if not isinstance(descs, list):
-                descs = (mordred.Calculator(descs).descriptors)
-        else:
-            descs = mordred.Calculator(mordreddescriptors).descriptors
-        self._args = [[str(d) for d in descs]]
-        self._kwargs = {"version": version, "ignore_3D": ignore_3D, "config": config}
 
     def __str__(self):
         return "Mordred"
@@ -208,21 +240,23 @@ class Mordred(DescriptorSet):
 
 class DrugExPhyschem(DescriptorSet):
     """
-    Physicochemical properties originally used in DrugEx for QSAR modelling
-    Initialize the descriptor with Property arguments (a list of properties to calculate) to select a subset.
+    Physciochemical properties originally used in DrugEx for QSAR modelling.
 
     Args:
-        *args: `Property` arguments
-        **kwargs: `Property` keyword arguments
+        props: list of properties to calculate
     """
 
-    def __init__(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
+    def __init__(self, physchem_props=None):
+        """Initialize the descriptorset with Property arguments (a list of properties to calculate) to select a subset.
+
+        Args:
+            physchem_props: list of properties to calculate
+        """
         self._is_fp = False
-        self.props = [x for x in Property(*args, **kwargs).props]
+        self.props = [x for x in Property(physchem_props).props]
 
     def __call__(self, mols):
+        """Calculate the DrugEx properties for a molecule."""
         calculator = Property(self.props)
         return calculator.getScores(self.iterMols(mols, to_list=True))
 
@@ -232,7 +266,7 @@ class DrugExPhyschem(DescriptorSet):
 
     @property
     def settings(self):
-        return self._args, self._kwargs
+        return {"physchem_props": self.props}
 
     @property
     def descriptors(self):
@@ -249,21 +283,18 @@ class DrugExPhyschem(DescriptorSet):
 
 class rdkit_descs(DescriptorSet):
     """
-    RDkit descriptors
-    Initialize the descriptor names (a list of properties to calculate) to select a subset of the rdkit descriptors.
-    Add compute_3Drdkit argument to indicate if 3D descriptors should also be calculated
+    Calculate RDkit descriptors.
 
     Args:
-        *args: `RDKit_desc` arguments
-        **kwargs: `RDKit_desc` keyword arguments
+        rdkit_descriptors: list of descriptors to calculate, if none, all 2D rdkit descriptors will be calculated
+        compute_3Drdkit: if True, 3D descriptors will be calculated
     """
 
-    def __init__(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
+    def __init__(self, rdkit_descriptors=None, compute_3Drdkit=False):
         self._is_fp = False
-        self._calculator = RDKit_desc(*args, **kwargs)
+        self._calculator = RDKit_desc(rdkit_descriptors, compute_3Drdkit)
         self._descriptors = self._calculator.descriptors
+        self.compute_3Drdkit = compute_3Drdkit
 
     def __call__(self, mols):
         return self._calculator.getScores(self.iterMols(mols, to_list=True))
@@ -274,7 +305,7 @@ class rdkit_descs(DescriptorSet):
 
     @property
     def settings(self):
-        return self._args, self._kwargs
+        return {"rdkit_descriptors": self.descriptors, "compute_3Drdkit": self.compute_3Drdkit}
 
     @property
     def descriptors(self):
@@ -289,6 +320,71 @@ class rdkit_descs(DescriptorSet):
         return "RDkit"
 
 
+class TanimotoDistances(DescriptorSet):
+    """
+    Calculate Tanimoto distances to a list of SMILES sequences.
+
+    Args:
+        list_of_smiles (list of strings): list of SMILES sequences to calculate distance to
+        fingerprint_type (str): fingerprint type to use
+        *args: `fingerprint` arguments
+        **kwargs: `fingerprint` keyword arguments, should contain fingerprint_type
+    """
+
+    def __init__(self, list_of_smiles, fingerprint_type, *args, **kwargs):
+        """Initialize the descriptorset with a list of SMILES sequences and a fingerprint type.
+
+        Args:
+            list_of_smiles (list of strings): list of SMILES sequences to calculate distance to
+            fingerprint_type (str): fingerprint type to use
+        """
+        self._descriptors = list_of_smiles
+        self.fingerprint_type = fingerprint_type
+        self._args = args
+        self._kwargs = kwargs
+        self._is_fp = False
+
+        # intialize fingerprint calculator
+        self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *self._args, **self._kwargs)
+        self.fps = self.calculate_fingerprints(self.list_of_smiles)
+
+    def __call__(self, mol):
+        """Calculate the Tanimoto distances to the list of SMILES sequences.
+
+        Args:
+            mol (str or rdkit.Chem.rdchem.Mol): SMILES sequence or RDKit molecule to calculate distances to
+        """
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        return list(1 - np.array(DataStructs.BulkTanimotoSimilarity(self.get_fingerprint(mol), self.fps)))
+
+    def calculate_fingerprints(self, list_of_smiles):
+        """Calculate the fingerprints for the list of SMILES sequences."""
+        self.fps = [self.get_fingerprint(Chem.MolFromSmiles(smiles)) for smiles in list_of_smiles]
+
+    @property
+    def is_fp(self):
+        return self._is_fp
+
+    @property
+    def settings(self):
+        return {"fingerprint_type": self.fingerprint_type,
+                "list_of_smiles": self.list_of_smiles, "args": self._args, "kwargs": self._kwargs}
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, list_of_smiles):
+        """Set new list of SMILES sequences to calculate distance to."""
+        self._descriptors = list_of_smiles
+        self.list_of_smiles = list_of_smiles
+        self.fps = self.calculate_fingerprints(self.list_of_smiles)
+
+    def __str__(self):
+        return "TanimotoDistances"
+
+
 class Mold2(DescriptorSet):
     """Descriptors from molecular descriptor calculation software Mold2.
 
@@ -297,27 +393,24 @@ class Mold2(DescriptorSet):
     All descriptors are always calculated.
     """
 
-    def __init__(self, *args, **kwargs):
-        """Initialize a PaDEL calculator
+    def __init__(self, descs: List[str]):
+        """Initialize a PaDEL calculator.
 
         Args:
-            *args: ignored
-            **kwargs: ignored
+            descs: names of Mold2 descriptors to be calculated (e.g. D001)
         """
-        # args and kwargs are ignored
-        self._args = None
-        self._kwargs = None
-
         self._is_fp = False
-
+        self._descs = descs
         self._mold2 = Mold2_calculator()
-        self._descriptors = self._mold2.calculate([Chem.MolFromSmiles("C")], show_banner=False).columns.tolist()
+        self._default_descs = self._mold2.calculate([Chem.MolFromSmiles("C")], show_banner=False).columns.tolist()
+        self._descriptors = self._default_descs[:]
         self._keepindices = list(range(len(self._descriptors)))
 
     def __call__(self, mols):
-        values = self._mold2.calculate(self.iterMols(mols), show_banner=False, njobs=1).values
+        values = self._mold2.calculate(self.iterMols(mols), show_banner=False, njobs=1)
         # Drop columns
-        return values[:, self._keepindices]
+        values = values[self._descriptors].values
+        return values
 
     @property
     def is_fp(self):
@@ -325,20 +418,28 @@ class Mold2(DescriptorSet):
 
     @property
     def settings(self):
-        return self._args, self._kwargs
+        return {'descs': self._descs}
 
     @property
     def descriptors(self):
         return self._descriptors
 
     @descriptors.setter
-    def descriptors(self, names):
-        # Remove names not listed
-        for i, index, desc_name in zip(range(-1, -len(self._keepindices)-1, -1),
-                                       self._keepindices[::-1],
-                                       self.descriptors[::-1]):
-            if desc_name not in names:
-                del self._keepindices[i], self._descriptors[i]
+    def descriptors(self, names: Optional[List[str]] = None):
+        if names is None:
+            self._descriptors = self._default_descs[:]
+            self._keepindices = list(range(len(self._descriptors)))
+        # Find descriptors not part of Mold2
+        remainder = set(names).difference(set(self._default_descs))
+        if len(remainder) > 0:
+            raise ValueError(f'names are not valid Mold2 descriptor names: {", ".join(remainder)}')
+        else:
+            new_indices = []
+            new_descs = []
+            for i, desc_name in enumerate(self._default_descs):
+                if desc_name in names:
+                    new_indices.append(i)
+                    new_descs.append(self._default_descs[i])
 
     def __str__(self):
         return "Mold2"
@@ -350,16 +451,15 @@ class PaDEL(DescriptorSet):
     From https://github.com/OlivierBeq/PaDEL_pywrapper.
     """
 
-    def __init__(self, descs: Optional[List[str]] = None, **kwargs):
+    def __init__(self, descs: Optional[List[str]] = None, ignore_3D: bool = True):
         """Initialize a PaDEL calculator
 
         Args:
             descs: list of PaDEL descriptor short names
-            **kwargs: keyword arguments of the `PaDEL_pywrapper.PaDEL` constructor
+            ignore_3D (bool): skip 3D descriptor calculation
         """
-        # args and kwargs are ignored
-        self._args = descs
-        self._process_kwargs(**kwargs)
+        self._descs = descs
+        self._ignore_3D = ignore_3D
 
         self._is_fp = False
 
@@ -370,18 +470,15 @@ class PaDEL(DescriptorSet):
                               for descriptor in PaDEL_descriptors
                               for name in descriptor().calculate(dummy_mol)}
 
-        # Initialize descriptor names
+        # Initialize descriptors and calculator
         if descs is None:
-            self._descriptors = PaDEL_descriptors
+            self.descriptors = None
         else:
             self.descriptors = descs
-        # Instantiate calculator
-        self._padel = PaDEL_calculator(self._descriptors, ignore_3D=self._ignore_3D)
-        # Obtain filtered descriptors from calculator
-        self._descriptors = self._padel.descriptors
 
     def __call__(self, mols):
-        values = self._padel.calculate(list(self.iterMols(mols)), show_banner=False, njobs=1).values
+        values = self._padel.calculate(list(self.iterMols(mols)), show_banner=False, njobs=1)
+        values = values[self._keep]
         return values
 
     @property
@@ -390,27 +487,89 @@ class PaDEL(DescriptorSet):
 
     @property
     def settings(self):
-        return self._args, self._kwargs
+        return {'descs': self._descs, 'ignore_3D': self._ignore_3D}
 
     @property
     def descriptors(self):
-        names = [name for name, desc in self._name_mapping.items() if desc in self._descriptors]
-        return names
+        return self._keep
 
     @descriptors.setter
-    def descriptors(self, names):
-        self._descriptors = [self._name_mapping[name] for name in names]
+    def descriptors(self, names: Optional[List[str]] = None):
+        # From name to PaDEL descriptor sub-classes
+        if names is None:
+            self._descriptors = PaDEL_descriptors
+        else:
+            remainder = set(names).difference(set(self._name_mapping.keys()))
+            if len(remainder) > 0:
+                raise ValueError(f'names are not valid PaDEL descriptor names: {", ".join(remainder)}')
+            self._descriptors = [self._name_mapping[name] for name in names]
+        # Instantiate calculator
         self._padel = PaDEL_calculator(self._descriptors, ignore_3D=self._ignore_3D)
+        # Set names to keep when calculating
+        if names is None:
+            self._keep = list(self._name_mapping.keys())
+        else:
+            self._keep = names
 
     def get_names(self):
         return self._padel.calculate([Chem.MolFromSmiles("C")], show_banner=False).columns.tolist()
 
-    def _process_kwargs(self, **kwargs):
-        self._ignore_3D = kwargs.get("ignore_3D", True)
-        self._kwargs = kwargs
-
     def __str__(self):
         return "PaDEL"
+
+
+class PredictorDesc(DescriptorSet):
+    """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the descriptorset with a Predictor object.
+
+        Args:
+            predictor: Predictor object to use for calculating the descriptor
+        """
+        self._args = args
+        self._kwargs = kwargs
+        self._is_fp = False
+        from qsprpred.scorers.predictor import Predictor
+        self._predictor = Predictor.fromFile(*args, **kwargs)
+        self._descriptors = [self._predictor.getKey()]
+
+    def __call__(self, mol):
+        """
+        Calculate the descriptor for a molecule.
+
+        Args:
+            mol: smiles or rdkit molecule
+
+        Returns:
+            a `list` of descriptor values
+        """
+        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        return list(self._predictor.getScores([mol]))
+
+    @property
+    def is_fp(self):
+        return self._is_fp
+
+    @property
+    def settings(self):
+        """Return args and kwargs used to initialize the descriptorset."""
+        return self._args, self._kwargs
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, descriptors):
+        self._descriptors = descriptors
+
+    def get_len(self):
+        return 1
+
+    def __str__(self):
+        return "PredictorDesc"
 
 
 class _DescriptorSetRetriever:
@@ -426,8 +585,8 @@ class _DescriptorSetRetriever:
             raise Exception(f"{desc_type} is not a supported descriptor set type.")
         return method(*args, **kwargs)
 
-    def get_MorganFP(self, *args, **kwargs):
-        return MorganFP(*args, **kwargs)
+    def get_FingerprintSet(self, *args, **kwargs):
+        return FingerprintSet(*args, **kwargs)
 
     def get_DrugExPhyschem(self, *args, **kwargs):
         return DrugExPhyschem(*args, **kwargs)
@@ -437,6 +596,12 @@ class _DescriptorSetRetriever:
 
     def get_RDkit(self, *args, **kwargs):
         return rdkit_descs(*args, **kwargs)
+
+    def get_PredictorDesc(self, *args, **kwargs):
+        return PredictorDesc(*args, **kwargs)
+
+    def get_TanimotoDistances(self, *args, **kwargs):
+        return TanimotoDistances(*args, **kwargs)
 
 
 def get_descriptor(desc_type: str, *args, **kwargs):

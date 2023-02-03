@@ -18,10 +18,11 @@ from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, tempor
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
+    FingerprintSet,
     Mordred,
-    MorganFP,
     Mold2,
     PaDEL,
+    PredictorDesc,
     rdkit_descs,
 )
 from qsprpred.data.utils.featurefilters import (
@@ -90,6 +91,16 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'RDkit', 'Mordred', 'Mold2',
                                                                 'PaDEL', 'DrugEx'],
                         nargs='*')
+    parser.add_argument('-pmo', '--predictor_model', type=str, nargs='+',
+                        help="It is also possible to use a QSPRpred model(s) as molecular feature(s). Give\
+                        the path(s) to the model(s) relative to the base_directory. Also pass the meta data\
+                        file(s) with the -pme argument. E.g. -pmo model1.json model2.json -pme model1_meta.json\
+                        model2_meta.json")
+    parser.add_argument('-pme', '--predictor_meta', type=str, nargs='+',
+                        help="It is also possible to use a QSPRpred model(s) as molecular feature(s). Give\
+                        the path(s) to the meta data file(s) relative to the base_directory. Also pass the model\
+                        file(s) with the -pme argument. E.g. -pmo model1.json model2.json -pme model1_meta.json\
+                        model2_meta.json")
 
     # feature filters
     parser.add_argument('-lv', '--low_variability', type=float, default=None, help="low variability threshold\
@@ -156,7 +167,7 @@ def QSPR_dataprep(args):
                 n_jobs=args.ncpu,
                 target_transformer=log_transform,
                 store_dir=f"{args.base_dir}/qspr/data/",
-                overwrite=False)
+                overwrite=True)
 
             # data filters
             datafilters = []
@@ -174,7 +185,7 @@ def QSPR_dataprep(args):
             # feature calculator
             descriptorsets = []
             if 'Morgan' in args.features:
-                descriptorsets.append(MorganFP(3, nBits=2048))
+                descriptorsets.append(FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048))
             if 'RDkit' in args.features:
                 descriptorsets.append(rdkit_descs())
             if 'Mordred' in args.features:
@@ -185,6 +196,11 @@ def QSPR_dataprep(args):
                 descriptorsets.append(PaDEL())
             if 'DrugEx' in args.features:
                 descriptorsets.append(DrugExPhyschem())
+            if args.predictor_model:
+                for idx, predictor_path in enumerate(args.predictor_model):
+                    # load in predictor from files
+                    descriptorsets.append(
+                        PredictorDesc(predictor_path, args.predictor_meta[idx]))
 
             # feature filters
             featurefilters = []

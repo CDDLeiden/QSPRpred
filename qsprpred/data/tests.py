@@ -7,20 +7,21 @@ from unittest import TestCase
 import mordred
 import numpy as np
 import pandas as pd
+import sklearn_json as skljson
 from mordred import descriptors as mordreddescriptors
-from rdkit import Chem
-
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
+    FingerprintSet,
     Mordred,
-    MorganFP,
+    PredictorDesc,
+    TanimotoDistances,
+    rdkit_descs,
     Mold2,
     PaDEL,
-    rdkit_descs,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (
@@ -30,11 +31,14 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.models.tasks import ModelTasks
+from qsprpred.scorers.predictor import Predictor
+from rdkit import Chem
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 N_CPU = 4
 CHUNK_SIZE = 20
+
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
@@ -73,6 +77,7 @@ class DataSets(PathMixIn):
         return QSPRDataset(
             name, target_prop=target_prop, task=task, df=df,
             store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+
     def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
         return self.create_dataset(self.df_small, name, task=task, target_prop=target_prop)
 
@@ -161,7 +166,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         check_consistency(dataset_new)
 
         dataset_new = QSPRDataset.fromTableFile(
-            "test_defaults_new", # new name implies HBD below should exist again
+            "test_defaults_new",  # new name implies HBD below should exist again
             f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
             target_prop="CL",
             store_dir=self.qsprdatapath,
@@ -192,16 +197,20 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
             with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
-        th = [0, 20, 40, 60]
+
         def test_classification(dataset_to_test):
             self.assertEqual(dataset_to_test.task, ModelTasks.CLASSIFICATION)
             self.assertEqual(dataset_to_test.targetProperty, "CL_class")
             self.assertEqual(dataset_to_test.originalTargetProperty, "CL")
             y = dataset_to_test.getTargetProperties(concat=True)
             self.assertTrue(y.columns[0] == dataset_to_test.targetProperty)
-            self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], (len(th) - 1))
+            if len(th) == 1:
+                self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], 2)
+            else:
+                self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], (len(th) - 1))
             self.assertEqual(dataset_to_test.th, th)
 
+        th = [6.5]
         test_bad_init(dataset)
         dataset.makeClassification(th=th)
         test_classification(dataset)
@@ -215,6 +224,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         test_classification(dataset_new)
 
         dataset_new.makeRegression(target_property="CL")
+
         def check_regression(dataset_to_check):
             self.assertEqual(dataset_to_check.task, ModelTasks.REGRESSION)
             self.assertTrue(dataset_to_check.hasProperty("CL"))
@@ -227,6 +237,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         dataset_new.save()
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         check_regression(dataset_new)
+
 
 class TestDataSetPreparation(DataSets, TestCase):
 
@@ -241,11 +252,15 @@ class TestDataSetPreparation(DataSets, TestCase):
             np.random.seed(42)
             descriptor_sets = [
                 Mordred(),
-                MorganFP(radius=3, nBits=2048),
+                FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
                 rdkit_descs(),
                 Mold2(),
                 PaDEL(),
-                DrugExPhyschem()
+                DrugExPhyschem(),
+                PredictorDesc(
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'),
+                TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000)
             ]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
             dataset.prepareDataset(
@@ -316,7 +331,7 @@ class TestDataSplitters(DataSets, TestCase):
     def test_serialization(self):
         dataset = self.create_large_dataset()
         split = scaffoldsplit(dataset, Murcko(), 0.1)
-        calculator = DescriptorsCalculator([MorganFP(radius=3, nBits=1024)])
+        calculator = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)])
         standardizers = [StandardScaler()]
         dataset.prepareDataset(
             split=split,
@@ -333,6 +348,7 @@ class TestDataSplitters(DataSets, TestCase):
         self.assertTrue(len(dataset_new.featureNames) == 1024)
 
         dataset_new.clearFiles()
+
 
 class TestFoldSplitters(DataSets, TestCase):
 
@@ -353,7 +369,8 @@ class TestFoldSplitters(DataSets, TestCase):
     def test_defaults(self):
         # test default settings with regression
         dataset = self.create_large_dataset()
-        dataset.addDescriptors(DescriptorsCalculator([MorganFP(radius=3, nBits=1024)]))
+        dataset.addDescriptors(DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]))
         self.validate_folds(dataset)
 
         # test default settings with classification
@@ -363,6 +380,7 @@ class TestFoldSplitters(DataSets, TestCase):
         # test with a standarizer
         scaler = MinMaxScaler(feature_range=(1, 2))
         dataset.prepareDataset(feature_standardizers=[scaler])
+
         def check_min_max(X_train, X_test, y_train, y_test, train_index, test_index):
             self.assertTrue(np.max(X_train) == 2)
             self.assertTrue(np.min(X_train) == 1)
@@ -370,6 +388,7 @@ class TestFoldSplitters(DataSets, TestCase):
             self.assertTrue(np.min(X_test) == 1)
 
         self.validate_folds(dataset, more=check_min_max)
+
 
 class TestDataFilters(DataSets, TestCase):
 
@@ -404,7 +423,13 @@ class TestFeatureFilters(PathMixIn, TestCase):
                  ["C", 1, 8, 4, 7, 12, 6]]),
             columns=["SMILES"] + self.descriptors + ["y"]
         )
-        self.dataset = QSPRDataset("TestFeatureFilters", target_prop="y", df=self.df, store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        self.dataset = QSPRDataset(
+            "TestFeatureFilters",
+            target_prop="y",
+            df=self.df,
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE)
 
     def test_lowVarianceFilter(self):
         self.dataset.filterFeatures([lowVarianceFilter(0.01)])
@@ -435,13 +460,29 @@ class TestDescriptorsets(DataSets, TestCase):
         super().setUp()
         self.dataset = self.create_small_dataset(self.__class__.__name__)
 
-    def test_MorganFP(self):
-        desc_calc = DescriptorsCalculator([MorganFP(3, nBits=1000)])
+    def test_PredictorDesc(self):
+        # give path to saved model parameters
+        model_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json'
+        meta_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'
+        desc_calc = DescriptorsCalculator([PredictorDesc(model_path, meta_path)])
+
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
+        self.assertTrue(self.dataset.X.any().any())
+
+    def test_fingerprintSet(self):
+        desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)])
         self.dataset.addDescriptors(desc_calc)
 
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1000))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
+
+    def test_TanimotoDistances(self):
+        list_of_smiles = ["C", "CC", "CCC", "CCCC", "CCCCC", "CCCCCC", "CCCCCCC"]
+        desc_calc = DescriptorsCalculator(
+            [TanimotoDistances(list_of_smiles=list_of_smiles, fingerprint_type="MorganFP", radius=3, nBits=1000)])
+        self.dataset.addDescriptors(desc_calc)
 
     def test_Mordred(self):
         desc_calc = DescriptorsCalculator([Mordred()])
@@ -494,6 +535,7 @@ class TestDescriptorsets(DataSets, TestCase):
         self.dataset.addDescriptors(desc_calc, recalculate=True)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList) + 10))
 
+
 class TestScaffolds(DataSets, TestCase):
 
     def setUp(self):
@@ -517,7 +559,8 @@ class TestFeatureStandardizer(DataSets, TestCase):
     def setUp(self):
         super().setUp()
         self.dataset = self.create_small_dataset(self.__class__.__name__)
-        self.dataset.addDescriptors(DescriptorsCalculator([MorganFP(3, nBits=1000)]))
+        self.dataset.addDescriptors(DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]))
 
     def test_featurestandarizer(self):
         scaler = SKLearnStandardizer.fromFit(self.dataset.X, StandardScaler())
