@@ -255,7 +255,9 @@ class TestDataSetPreparation(DataSets, TestCase):
                 DrugExPhyschem(),
                 PredictorDesc(
                     f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
-                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json')]
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'),
+                TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000)
+            ]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
             dataset.prepareDataset(
                 feature_calculator=DescriptorsCalculator(descriptor_sets),
@@ -325,7 +327,7 @@ class TestDataSplitters(DataSets, TestCase):
     def test_serialization(self):
         dataset = self.create_large_dataset()
         split = scaffoldsplit(dataset, Murcko(), 0.1)
-        calculator = DescriptorsCalculator([MorganFP(radius=3, nBits=1024)])
+        calculator = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)])
         standardizers = [StandardScaler()]
         dataset.prepareDataset(
             split=split,
@@ -473,17 +475,10 @@ class TestDescriptorsets(DataSets, TestCase):
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
     def test_TanimotoDistances(self):
-        mols = self.prep_testdata()
         list_of_smiles = ["C", "CC", "CCC", "CCCC", "CCCCC", "CCCCCC", "CCCCCCC"]
-        desc_calc = TanimotoDistances(list_of_smiles=list_of_smiles, fingerprint_type="MorganFP", radius=3, nBits=1000)
-        descriptors = desc_calc(mols[2])
-        self.assertIsInstance(descriptors, list)
-        descriptors = pd.DataFrame([descriptors])
-        self.assertEqual(
-            self.dataset.X.shape,
-            (len(self.dataset), len(mordred.Calculator(mordreddescriptors).descriptors)))
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+        desc_calc = DescriptorsCalculator(
+            [TanimotoDistances(list_of_smiles=list_of_smiles, fingerprint_type="MorganFP", radius=3, nBits=1000)])
+        self.dataset.addDescriptors(desc_calc)
 
     def test_Mordred(self):
         desc_calc = DescriptorsCalculator([Mordred()])

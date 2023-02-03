@@ -48,7 +48,6 @@ class DescriptorSet(ABC):
         Returns:
             an array or data frame of descriptor values of shape (n_mols, n_descriptors)
         """
-
         ret = (Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol for mol in mols)
         if to_list:
             ret = list(ret)
@@ -345,20 +344,23 @@ class TanimotoDistances(DescriptorSet):
 
         # intialize fingerprint calculator
         self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *self._args, **self._kwargs)
-        self.fps = self.calculate_fingerprints(self.list_of_smiles)
+        self.fps = self.calculate_fingerprints(list_of_smiles)
 
-    def __call__(self, mol):
+    def __call__(self, mols):
         """Calculate the Tanimoto distances to the list of SMILES sequences.
 
         Args:
-            mol (str or rdkit.Chem.rdchem.Mol): SMILES sequence or RDKit molecule to calculate distances to
+            mols (list of rdkit.Chem.rdchem.Mol): SMILES sequence or RDKit molecule to calculate distances to
         """
-        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        return list(1 - np.array(DataStructs.BulkTanimotoSimilarity(self.get_fingerprint(mol), self.fps)))
+        ret = np.zeros((len(mols), self.get_len()))
+        for idx, mol in enumerate(self.iterMols(mols, to_list=True)):
+            ret[idx] = 1 - np.array(DataStructs.BulkTanimotoSimilarity(self.get_fingerprint(mol), self.fps))
+
+        return ret
 
     def calculate_fingerprints(self, list_of_smiles):
         """Calculate the fingerprints for the list of SMILES sequences."""
-        self.fps = [self.get_fingerprint(Chem.MolFromSmiles(smiles)) for smiles in list_of_smiles]
+        return [self.get_fingerprint(Chem.MolFromSmiles(smiles)) for smiles in list_of_smiles]
 
     @property
     def is_fp(self):
@@ -367,7 +369,7 @@ class TanimotoDistances(DescriptorSet):
     @property
     def settings(self):
         return {"fingerprint_type": self.fingerprint_type,
-                "list_of_smiles": self.list_of_smiles, "args": self._args, "kwargs": self._kwargs}
+                "list_of_smiles": self.descriptors, "args": self._args, "kwargs": self._kwargs}
 
     @property
     def descriptors(self):
@@ -377,8 +379,10 @@ class TanimotoDistances(DescriptorSet):
     def descriptors(self, list_of_smiles):
         """Set new list of SMILES sequences to calculate distance to."""
         self._descriptors = list_of_smiles
-        self.list_of_smiles = list_of_smiles
-        self.fps = self.calculate_fingerprints(self.list_of_smiles)
+        self.fps = self.calculate_fingerprints(list_of_smiles)
+
+    def get_len(self):
+        return len(self.descriptors)
 
     def __str__(self):
         return "TanimotoDistances"
@@ -387,18 +391,19 @@ class TanimotoDistances(DescriptorSet):
 class PredictorDesc(DescriptorSet):
     """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, model_path: str, metadata_path: str):
         """
         Initialize the descriptorset with a Predictor object.
 
         Args:
-            predictor: Predictor object to use for calculating the descriptor
+            model_path: path to the model file
+            metadata_path: path to the metadata file
         """
-        self._args = args
-        self._kwargs = kwargs
         self._is_fp = False
+        self.model_path = model_path
+        self.metadata_path = metadata_path
         from qsprpred.scorers.predictor import Predictor
-        self._predictor = Predictor.fromFile(*args, **kwargs)
+        self._predictor = Predictor.fromFile(model_path, metadata_path)
         self._descriptors = [self._predictor.getKey()]
 
     def __call__(self, mol):
@@ -421,7 +426,7 @@ class PredictorDesc(DescriptorSet):
     @property
     def settings(self):
         """Return args and kwargs used to initialize the descriptorset."""
-        return self._args, self._kwargs
+        return {"model_path": self.model_path, "metadata_path": self.metadata_path}
 
     @property
     def descriptors(self):
