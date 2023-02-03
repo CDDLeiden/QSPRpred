@@ -15,7 +15,6 @@ class ModelPlot(ABC):
 
     def __init__(self, models : List[QSPRModel]):
         self.models = models
-        self.nFolds = {model : model.data.n_folds for model in self.models}
         self.modelOuts = {model: model.out for model in self.models}
         self.modelNames = {model: model.alg_name for model in self.models}
         self.cvPaths = dict()

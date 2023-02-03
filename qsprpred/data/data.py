@@ -190,7 +190,7 @@ class MoleculeTable(MoleculeDataSet):
         Remove all files associated with this data set from disk.
         """
 
-        for file in os.listdir(self.storeDir):
+        for file in [f for f in os.listdir(self.storeDir) if f.endswith('.pkl') or f.endswith('.json')]:
             if file.startswith(self.name):
                 os.remove(f'{self.storeDir}/{file}')
 
