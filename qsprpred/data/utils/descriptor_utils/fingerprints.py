@@ -2,22 +2,24 @@
 
 from abc import ABC, abstractmethod
 
+import numpy as np
+from rdkit import DataStructs
 from rdkit.Chem import AllChem
 
 
 class fingerprint(ABC):
     """Base class for fingerprints."""
 
-    def __call__(self, mol):
+    def __call__(self, mols):
         """Actual call method.
 
         Args:
-            mol: molecule to fingerprint
+            mols: molecules to obtain the fingerprints of
 
         Returns:
-            fingerprint (list): `list` of fingerprint for "mol"
+            fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self.getFingerprint(mol)
+        return self.getFingerprints(mols)
 
     @abstractmethod
     def settings(self):
@@ -42,16 +44,25 @@ class MorganFP(fingerprint):
         self.radius = radius
         self.nBits = nBits
 
-    def getFingerprint(self, mol):
-        """Return Morgan fingerprint for the input molecule.
+    def getFingerprints(self, mols):
+        """Return the Morgan fingerprints for the input molecules.
 
         Args:
-            mol: molecule to fingerprint
+            mols: molecules to obtain the fingerprint of
 
         Returns:
-            fingerprint (list): `list` of fingerprint for "mol"
+            fingerprint (list): `list` of fingerprints for "mols"
         """
-        return AllChem.GetMorganFingerprintAsBitVect(mol, self.radius, nBits=self.nBits)
+        convertFP = DataStructs.ConvertToNumpyArray
+
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = AllChem.GetMorganFingerprintAsBitVect(mol, self.radius, nBits=self.nBits)
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+
+        return ret
 
     @property
     def settings(self):

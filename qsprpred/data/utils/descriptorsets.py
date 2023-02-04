@@ -107,16 +107,10 @@ class FingerprintSet(DescriptorSet):
 
     def __call__(self, mols):
         """Calculate the fingerprint for a list of molecules."""
-        convertFP = DataStructs.ConvertToNumpyArray
+        ret = self.get_fingerprint(self.iterMols(mols, to_list=True))
 
-        ret = np.zeros((len(mols), self.get_len()))
-        for idx, mol in enumerate(self.iterMols(mols)):
-            fp = self.get_fingerprint(mol)
-            np_fp = np.zeros(len(fp))
-            convertFP(fp, np_fp)
-            if self.keepindices:
-                np_fp = np_fp[self.keepindices]
-            ret[idx] = np_fp
+        if self.keepindices:
+            ret = ret[self.keepindices]
 
         return ret
 
@@ -142,7 +136,7 @@ class FingerprintSet(DescriptorSet):
 
     def get_len(self):
         """Return the length of the fingerprint."""
-        return len(self.get_fingerprint(Chem.MolFromSmiles("C")))
+        return len(self.get_fingerprint)
 
     def __str__(self):
         return f"FingerprintSet"
@@ -346,20 +340,27 @@ class TanimotoDistances(DescriptorSet):
 
         # intialize fingerprint calculator
         self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *self._args, **self._kwargs)
-        self.fps = self.calculate_fingerprints(self.list_of_smiles)
+        self.calculate_fingerprints(list_of_smiles)
 
-    def __call__(self, mol):
+    def __call__(self, mols):
         """Calculate the Tanimoto distances to the list of SMILES sequences.
 
         Args:
-            mol (str or rdkit.Chem.rdchem.Mol): SMILES sequence or RDKit molecule to calculate distances to
+            mols (List[str] or List[rdkit.Chem.rdchem.Mol]): SMILES sequences or RDKit molecules to calculate distances to
         """
-        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        return list(1 - np.array(DataStructs.BulkTanimotoSimilarity(self.get_fingerprint(mol), self.fps)))
+        mols = [Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol for mol in mols]
+        # Convert np.arrays to BitVects
+        fps = list(map(lambda x: DataStructs.CreateFromBitString(''.join(map(str, x))),
+                   self.get_fingerprint(mols)))
+        return [list(1 - np.array(DataStructs.BulkTanimotoSimilarity(fp, self.fps)))
+                for fp in fps]
 
     def calculate_fingerprints(self, list_of_smiles):
         """Calculate the fingerprints for the list of SMILES sequences."""
-        self.fps = [self.get_fingerprint(Chem.MolFromSmiles(smiles)) for smiles in list_of_smiles]
+        # Convert np.arrays to BitVects
+        self.fps = list(map(lambda x: DataStructs.CreateFromBitString(''.join(map(str, x))),
+                            self.get_fingerprint([Chem.MolFromSmiles(smiles) for smiles in list_of_smiles])
+                            ))
 
     @property
     def is_fp(self):
@@ -368,7 +369,7 @@ class TanimotoDistances(DescriptorSet):
     @property
     def settings(self):
         return {"fingerprint_type": self.fingerprint_type,
-                "list_of_smiles": self.list_of_smiles, "args": self._args, "kwargs": self._kwargs}
+                "list_of_smiles": self._descriptors, "args": self._args, "kwargs": self._kwargs}
 
     @property
     def descriptors(self):
