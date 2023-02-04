@@ -10,6 +10,7 @@ from typing import Optional, Union, List
 
 import mordred
 import numpy as np
+import pandas as pd
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils import fingerprints
 from Mold2_pywrapper import Mold2 as Mold2_calculator

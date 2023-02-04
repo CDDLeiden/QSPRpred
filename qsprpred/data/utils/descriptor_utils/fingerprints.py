@@ -393,5 +393,6 @@ class _FingerprintRetriever:
     def get_CDKAtomPairs2DFP(self, *args, **kwargs):
         return CDKAtomPairs2DFP(*args, **kwargs)
 
+
 def get_fingerprint(fp_type: str, *args, **kwargs):
     return _FingerprintRetriever().get_fingerprint(fp_type, *args, **kwargs)
