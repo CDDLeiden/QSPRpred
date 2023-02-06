@@ -10,6 +10,7 @@ import os
 import os.path
 import sys
 from datetime import datetime
+from functools import partial
 
 import numpy as np
 import optuna
@@ -164,7 +165,7 @@ class QSPRsklearn(QSPRModel):
 
         Arguments:
             search_space_gs (dict): search space for the grid search
-            scoring (Optional[str]): scoring function for the grid search.
+            scoring (Optional[str, Callable]): scoring function for the grid search.
             n_jobs (int): number of jobs for hyperparameter optimization
             
         Note: Default `scoring=None` will use explained_variance for regression,
@@ -201,7 +202,7 @@ class QSPRsklearn(QSPRModel):
         Arguments:
             search_space_gs (dict): search space for the grid search
             n_trials (int): number of trials for bayes optimization
-            scoring (Optional[str]): scoring function for the optimization.
+            scoring (Optional[str, Callable]): scoring function for the optimization.
             n_jobs (int): the number of parallel trials
             
         Example of search_space_bs for scikit-learn's MLPClassifier:
@@ -281,15 +282,17 @@ class QSPRsklearn(QSPRModel):
         """Get scorer function from sklearn.metrics.
 
         Args:
-            scoring (str): metric name from sklearn.metrics.
+            scoring (Union[str, Callable]): metric name from sklearn.metrics or user-defined scoring function.
             
         Returns:
             score_func (Callable): scorer function from sklearn.metrics.
         """
-        if scoring is None:
+        if callable(scoring):
+            return scoring
+        elif scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
                 scorer = metrics.get_scorer('explained_variance')
-            elif self.data.nClasses > 2:
+            elif self.data.nClasses > 2: # multiclass
                 scorer = metrics.get_scorer('roc_auc_ovr_weighted')
             else:
                 scorer = metrics.get_scorer('roc_auc')
@@ -392,7 +395,6 @@ class QSPRDNN(QSPRModel):
             n_folds = max(fold_counter) + 1
             self.optimal_epochs = int(math.ceil(last_save_epochs / n_folds)) + 1
             self.model = self.model.set_params(**{"n_epochs": self.optimal_epochs})
-
             train_loader = self.model.get_dataloader(X.values, y.values)
             self.model.fit(train_loader, None, '%s_temp' % self.out, patience=-1)
             os.remove('%s_temp_weights.pkg' % self.out)
@@ -430,7 +432,7 @@ class QSPRDNN(QSPRModel):
                 neurons_h1 (int) ~ number of neurons in first hidden layer
                 neurons_hx (int) ~ number of neurons in other hidden layers
                 extra_layer (bool) ~ whether to add extra (3rd) hidden layer
-            scoring (Optional[str]): scoring function for the grid search.
+            scoring (Optional[str, Callable]): scoring function for the grid search.
             ES_val_size (float): validation set size for early stopping in CV
         """
         score_func = self.get_scoring_func(scoring)
@@ -475,7 +477,7 @@ class QSPRDNN(QSPRModel):
         arguments:
             search_space_gs (dict): search space for the grid search
             n_trials (int): number of trials for bayes optimization
-            scoring (Optional[str]): scoring function for the optimization.
+            scoring (Optional[str, Callable]): scoring function for the optimization.
             n_jobs (int): the number of parallel trials
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
@@ -537,16 +539,20 @@ class QSPRDNN(QSPRModel):
         """Get scorer function from sklearn.metrics.
 
         Args:
-            scoring (str): metric name from sklearn.metrics.
+            scoring (Union[str, Callable]): metric name from sklearn.metrics or user-defined scoring function.
             
         Returns:
             score_func (Callable): scorer function from sklearn.metrics.
         """
-        if scoring is None:
+        if callable(scoring):
+            return scoring
+        elif scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
                 scorer = metrics.get_scorer('explained_variance')
-            elif self.data.nClasses > 2:
-                scorer = metrics.get_scorer('roc_auc_ovr_weighted')
+            elif self.data.nClasses > 2: # multiclass
+                # Calling metrics.get_scorer('roc_auc_ovr_weighted') in this context
+                # raises the error `multi_class must be in ('ovo', 'ovr')` so let's avoid it
+                return partial(metrics.roc_auc_score, multi_class='ovr', average='weighted')
             else:
                 scorer = metrics.get_scorer('roc_auc')
         else:
