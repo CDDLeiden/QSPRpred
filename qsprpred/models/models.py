@@ -288,14 +288,14 @@ class QSPRsklearn(QSPRModel):
         """
         if scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
-                score_func = metrics.get_scorer('explained_variance')
+                scorer = metrics.get_scorer('explained_variance')
             elif self.data.nClasses > 2:
-                score_func = metrics.get_scorer('roc_auc_ovr_weighted')
+                scorer = metrics.get_scorer('roc_auc_ovr_weighted')
             else:
-                score_func = metrics.get_scorer('roc_auc')
+                scorer = metrics.get_scorer('roc_auc')
         else:
-            score_func = metrics.get_scorer(scoring)
-        return score_func
+            scorer = metrics.get_scorer(scoring)
+        return scorer._score_func
 
 
 class QSPRDNN(QSPRModel):
@@ -544,11 +544,11 @@ class QSPRDNN(QSPRModel):
         """
         if scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
-                score_func = metrics.get_scorer('explained_variance')
+                scorer = metrics.get_scorer('explained_variance')
             elif self.data.nClasses > 2:
-                score_func = metrics.get_scorer('roc_auc_ovr_weighted')
+                scorer = metrics.get_scorer('roc_auc_ovr_weighted')
             else:
-                score_func = metrics.get_scorer('roc_auc')
+                scorer = metrics.get_scorer('roc_auc')
         else:
-            score_func = metrics.get_scorer(scoring)
-        return score_func
+            scorer = metrics.get_scorer(scoring)
+        return scorer._score_func
