@@ -538,18 +538,20 @@ class PredictorDesc(DescriptorSet):
         self._predictor = Predictor.fromFile(*args, **kwargs)
         self._descriptors = [self._predictor.getKey()]
 
-    def __call__(self, mol):
+    def __call__(self, mols):
         """
-        Calculate the descriptor for a molecule.
+        Calculate the descriptor for a list of molecules.
 
         Args:
-            mol: smiles or rdkit molecule
+            mols (list): list of smiles or rdkit molecules
 
         Returns:
-            a `list` of descriptor values
+            an array of descriptor values
         """
-        mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        return list(self._predictor.getScores([mol]))
+        mols = self.iterMols(mols, to_list=True)
+        scores = np.zeros((len(mols), 1))
+        scores[:, 0] = self._predictor.getScores(mols)
+        return scores
 
     @property
     def is_fp(self):
