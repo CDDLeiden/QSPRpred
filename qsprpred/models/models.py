@@ -10,7 +10,6 @@ import os
 import os.path
 import sys
 from datetime import datetime
-from functools import partial
 
 import numpy as np
 import optuna
@@ -176,10 +175,10 @@ class QSPRsklearn(QSPRModel):
         if scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
                 scoring = 'explained_variance'
+            elif self.data.nClasses > 2: # multiclass
+                scoring = 'roc_auc_ovr_weighted'
             else:
-                scoring = 'roc_auc_ovr_weighted' if self.data.nClasses > 2 else 'roc_auc'
-        else:
-            scoring = scoring
+                scoring = 'roc_auc'
         grid = GridSearchCV(self.alg, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
             (x[4], x[5]) for x in self.data.createFolds()), scoring=scoring, refit=False)
 
@@ -269,22 +268,34 @@ class QSPRsklearn(QSPRModel):
         self.model = self.alg.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetProperties()
+        score_func = self.get_scoring_func(scoring)
+        try:
+            score = score_func(y, self.evaluate(save=False))
+        except ValueError:
+            logger.exception(
+                "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
+            score = -1
+        return score
+    
+    def get_scoring_func(self, scoring):
+        """Get scorer function from sklearn.metrics.
+
+        Args:
+            scoring (str): metric name from sklearn.metrics.
+            
+        Returns:
+            score_func (Callable): scorer function from sklearn.metrics.
+        """
         if scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
-                scorer = metrics.get_scorer('explained_variance')
-                score = scorer(y.iloc[:, 0], self.evaluate(save=False))
+                score_func = metrics.get_scorer('explained_variance')
+            elif self.data.nClasses > 2:
+                score_func = metrics.get_scorer('roc_auc_ovr_weighted')
             else:
-                try:
-                    scorer = metrics.get_scorer('roc_auc_ovr_weighted')
-                    score = scorer(y, self.evaluate(save=False))
-                except ValueError:
-                    logger.exception(
-                        "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
-                    score = -1
+                score_func = metrics.get_scorer('roc_auc')
         else:
-            scorer = metrics.get_scorer(scoring)
-            score = scorer(y, self.evaluate(save=False))
-        return score
+            score_func = metrics.get_scorer(scoring)
+        return score_func
 
 
 class QSPRDNN(QSPRModel):
@@ -408,7 +419,7 @@ class QSPRDNN(QSPRModel):
         else:
             return cvs
 
-    def gridSearch(self, search_space_gs, ES_val_size=0.1):
+    def gridSearch(self, search_space_gs, scoring=None, ES_val_size=0.1):
         """Optimization of hyperparameters using gridSearch.
 
         Arguments:
@@ -419,17 +430,10 @@ class QSPRDNN(QSPRModel):
                 neurons_h1 (int) ~ number of neurons in first hidden layer
                 neurons_hx (int) ~ number of neurons in other hidden layers
                 extra_layer (bool) ~ whether to add extra (3rd) hidden layer
-            save_m (bool): if true, after gs the model is refit on the entire data set
+            scoring (Optional[str]): scoring function for the grid search.
             ES_val_size (float): validation set size for early stopping in CV
         """
-        if self.data.task == ModelTasks.REGRESSION:
-            scoring = metrics.explained_variance_score
-        else:
-            scoring = partial(
-                metrics.roc_auc_score,
-                multi_class='ovr',
-                average='weighted') if self.data.isMultiClass() else metrics.roc_auc_score
-
+        score_func = self.get_scoring_func(scoring)
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         best_score = -np.inf
         for params in ParameterGrid(search_space_gs):
@@ -451,7 +455,7 @@ class QSPRDNN(QSPRModel):
                 y_pred = self.model.predict(valid_loader)
                 if self.data.nClasses == 2:
                     y_pred = y_pred[:, 1]
-                fold_scores.append(scoring(y_test, y_pred))
+                fold_scores.append(score_func(y_test, y_pred))
             os.remove('%s_temp.log' % self.out)
             param_score = np.mean(fold_scores)
             if param_score >= best_score:
@@ -465,13 +469,13 @@ class QSPRDNN(QSPRModel):
 
         self.model = self.alg.set_params(**best_params)
 
-    def bayesOptimization(self, search_space_bs, n_trials, n_jobs=1):
+    def bayesOptimization(self, search_space_bs, n_trials, scoring=None, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
         arguments:
             search_space_gs (dict): search space for the grid search
             n_trials (int): number of trials for bayes optimization
-            save_m (bool): if true, after bayes optimization the model is refit on the entire data set
+            scoring (Optional[str]): scoring function for the optimization.
             n_jobs (int): the number of parallel trials
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
@@ -483,7 +487,7 @@ class QSPRDNN(QSPRModel):
 
         study = optuna.create_study(direction='maximize')
         logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, search_space_bs), n_trials, n_jobs=n_jobs)
+        study.optimize(lambda trial: self.objective(trial, scoring, search_space_bs), n_trials, n_jobs=n_jobs)
         logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         trial = study.best_trial
@@ -494,7 +498,7 @@ class QSPRDNN(QSPRModel):
 
         self.model = self.alg.set_params(**trial.params)
 
-    def objective(self, trial, search_space_bs):
+    def objective(self, trial, scoring, search_space_bs):
         """Objective for bayesian optimization.
 
         arguments:
@@ -520,8 +524,31 @@ class QSPRDNN(QSPRModel):
         self.model = self.alg.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetProperties()
-        if self.data.task == ModelTasks.REGRESSION:
-            score = metrics.explained_variance_score(y, self.evaluate(save=False))
-        else:
-            score = metrics.roc_auc_score(y.iloc[:, 0], self.evaluate(save=False), multi_class='ovo')
+        score_func = self.get_scoring_func(scoring)
+        try:
+            score = score_func(y, self.evaluate(save=False))
+        except ValueError:
+            logger.exception(
+                "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
+            score = -1
         return score
+    
+    def get_scoring_func(self, scoring):
+        """Get scorer function from sklearn.metrics.
+
+        Args:
+            scoring (str): metric name from sklearn.metrics.
+            
+        Returns:
+            score_func (Callable): scorer function from sklearn.metrics.
+        """
+        if scoring is None:
+            if self.data.task == ModelTasks.REGRESSION:
+                score_func = metrics.get_scorer('explained_variance')
+            elif self.data.nClasses > 2:
+                score_func = metrics.get_scorer('roc_auc_ovr_weighted')
+            else:
+                score_func = metrics.get_scorer('roc_auc')
+        else:
+            score_func = metrics.get_scorer(scoring)
+        return score_func
