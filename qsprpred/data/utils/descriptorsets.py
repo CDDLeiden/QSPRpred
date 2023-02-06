@@ -479,7 +479,7 @@ class PaDEL(DescriptorSet):
             self.descriptors = descs
 
     def __call__(self, mols):
-        values = self._padel.calculate(self.iterMols(mols, to_list=True), show_banner=False)
+        values = self._padel.calculate(self.iterMols(mols, to_list=True), show_banner=False, njobs=1)
         intersection = list(set(self._keep).intersection(values.columns))
         values = values[intersection]
         return values
@@ -515,7 +515,7 @@ class PaDEL(DescriptorSet):
             self._keep = names
 
     def get_names(self):
-        return self._padel.calculate([Chem.MolFromSmiles("C")], show_banner=False).columns.tolist()
+        return self._padel.calculate([Chem.MolFromSmiles("C")], show_banner=False, njobs=1).columns.tolist()
 
     def __str__(self):
         return "PaDEL"
