@@ -8,7 +8,7 @@ from collections import defaultdict
 import numpy as np
 
 from qsprpred.data.interfaces import datasplit
-from qsprpred.data.utils.scaffolds import Scaffold
+from qsprpred.data.utils.scaffolds import Scaffold, Murcko
 from qsprpred.logs import logger
 from sklearn.model_selection import ShuffleSplit
 
@@ -59,10 +59,14 @@ class scaffoldsplit(datasplit):
     """Splits dataset in train and test subsets based on their Murcko scaffold.
 
     Attributes:
-        test_fraction (float): fraction of total dataset to testset
-    """
-    
-    def __init__(self, dataset, scaffold : Scaffold, test_fraction=0.1, shuffle=True) -> None:
+        dataset: QSPRDataset object.
+        scaffold (qsprpred.data.utils.scaffolds.Scaffold()): `Murcko()` and
+            `BemisMurcko()` are currently available, other types can be added through
+            the abstract class `Scaffold`. Defaults to Murcko().
+        test_fraction (float): fraction of the test set. Defaults to 0.1.
+        shuffle (bool): whether to shuffle the data or not. Defaults to True.
+    """        
+    def __init__(self, dataset, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True) -> None:
         self.dataset = dataset
         self.scaffold = scaffold
         self.test_fraction = test_fraction
