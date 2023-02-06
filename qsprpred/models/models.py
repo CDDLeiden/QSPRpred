@@ -160,17 +160,26 @@ class QSPRsklearn(QSPRModel):
 
         return cvs
 
-    def gridSearch(self, search_space_gs, n_jobs=1):
+    def gridSearch(self, search_space_gs, scoring=None, n_jobs=1):
         """Optimization of hyperparameters using gridSearch.
 
         Arguments:
             search_space_gs (dict): search space for the grid search
+            scoring (Optional[str]): scoring function for the grid search.
             n_jobs (int): number of jobs for hyperparameter optimization
+            
+        Note: Default `scoring=None` will use explained_variance for regression,
+        roc_auc_ovr_weighted for multiclass, and roc_auc for binary classification.
+        For a list of the available scoring functions see:
+        https://scikit-learn.org/stable/modules/model_evaluation.html
         """
-        if self.data.task == ModelTasks.REGRESSION:
-            scoring = 'explained_variance'
+        if scoring is None:
+            if self.data.task == ModelTasks.REGRESSION:
+                scoring = 'explained_variance'
+            else:
+                scoring = 'roc_auc_ovr_weighted' if self.data.nClasses > 2 else 'roc_auc'
         else:
-            scoring = 'roc_auc_ovr_weighted' if self.data.nClasses > 2 else 'roc_auc'
+            scoring = scoring
         grid = GridSearchCV(self.alg, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
             (x[4], x[5]) for x in self.data.createFolds()), scoring=scoring, refit=False)
 
@@ -187,13 +196,13 @@ class QSPRsklearn(QSPRModel):
 
         self.model = self.alg.set_params(**grid.best_params_)
 
-    def bayesOptimization(self, search_space_bs, n_trials, n_jobs=1):
+    def bayesOptimization(self, search_space_bs, n_trials, scoring=None, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
         Arguments:
             search_space_gs (dict): search space for the grid search
             n_trials (int): number of trials for bayes optimization
-            save_m (bool): if true, after bayes optimization the model is refit on the entire data set
+            scoring (Optional[str]): scoring function for the optimization.
             n_jobs (int): the number of parallel trials
             
         Example of search_space_bs for scikit-learn's MLPClassifier:
@@ -208,6 +217,11 @@ class QSPRsklearn(QSPRModel):
         
         Avaliable suggestion types:
         ['categorical', 'discrete_uniform', 'float', 'int', 'loguniform', 'uniform']
+        
+        Note: Default `scoring=None` will use explained_variance for regression,
+        roc_auc_ovr_weighted for multiclass, and roc_auc for binary classification.
+        For a list of the available scoring functions see:
+        https://scikit-learn.org/stable/modules/model_evaluation.html
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         if n_jobs > 1:
@@ -216,7 +230,7 @@ class QSPRsklearn(QSPRModel):
 
         study = optuna.create_study(direction='maximize')
         logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, search_space_bs), n_trials, n_jobs=n_jobs)
+        study.optimize(lambda trial: self.objective(trial, scoring, search_space_bs), n_trials, n_jobs=n_jobs)
         logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         trial = study.best_trial
@@ -227,11 +241,12 @@ class QSPRsklearn(QSPRModel):
 
         self.model = self.alg.set_params(**trial.params)
 
-    def objective(self, trial, search_space_bs):
+    def objective(self, trial, scoring,  search_space_bs):
         """Objective for bayesian optimization.
 
         Arguments:
             trial (int): current trial number
+            scoring (Optional[str]): scoring function for the objective.
             search_space_bs (dict): search space for bayes optimization
         """
         bayesian_params = {}
@@ -254,17 +269,21 @@ class QSPRsklearn(QSPRModel):
         self.model = self.alg.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetProperties()
-        if self.data.task == ModelTasks.REGRESSION:
-            score = metrics.explained_variance_score(y.iloc[:, 0], self.evaluate(save=False))
+        if scoring is None:
+            if self.data.task == ModelTasks.REGRESSION:
+                scorer = metrics.get_scorer('explained_variance')
+                score = scorer(y.iloc[:, 0], self.evaluate(save=False))
+            else:
+                try:
+                    scorer = metrics.get_scorer('roc_auc_ovr_weighted')
+                    score = scorer(y, self.evaluate(save=False))
+                except ValueError:
+                    logger.exception(
+                        "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
+                    score = -1
         else:
-            try:
-                score = metrics.roc_auc_score(
-                    y, self.evaluate(save=False),
-                    average="weighted", multi_class='ovr',)
-            except ValueError:
-                logger.exception(
-                    "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
-                score = -1
+            scorer = metrics.get_scorer(scoring)
+            score = scorer(y, self.evaluate(save=False))
         return score
 
 
