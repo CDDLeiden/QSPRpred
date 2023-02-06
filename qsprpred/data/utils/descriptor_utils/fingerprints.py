@@ -85,7 +85,7 @@ class CDKFP(fingerprint):
         self.size = size
         self._padel = PaDEL_calculator([_fingerprints[0]])
 
-    def getFingerprint(self, mols):
+    def getFingerprints(self, mols):
         """Return the CDK fingerprint for the input molecules.
 
         Args:
@@ -94,7 +94,7 @@ class CDKFP(fingerprint):
         Returns:
             fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self._padel.calculate(mols, show_banner=False)
+        return self._padel.calculate(mols, show_banner=False).values
 
     @property
     def settings(self):
@@ -115,7 +115,7 @@ class CDKExtendedFP(fingerprint):
         self.size = size
         self._padel = PaDEL_calculator([_fingerprints[1]])
 
-    def getFingerprint(self, mols):
+    def getFingerprints(self, mols):
         """Return the CDK extended fingerprint for the input molecules.
 
         Args:
@@ -124,7 +124,7 @@ class CDKExtendedFP(fingerprint):
         Returns:
             fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self._padel.calculate(mols, show_banner=False)
+        return self._padel.calculate(mols, show_banner=False).values
 
     @property
     def settings(self):
@@ -143,7 +143,7 @@ class CDKEStatedFP(fingerprint):
     def __init__(self):
         self._padel = PaDEL_calculator([_fingerprints[2]])
 
-    def getFingerprint(self, mols):
+    def getFingerprints(self, mols):
         """Return the CDK extended fingerprint for the input molecules.
 
         Args:
@@ -152,7 +152,7 @@ class CDKEStatedFP(fingerprint):
         Returns:
             fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self._padel.calculate(mols, show_banner=False)
+        return self._padel.calculate(mols, show_banner=False).values
 
     @property
     def settings(self):
@@ -173,7 +173,7 @@ class CDKGraphOnlyFP(fingerprint):
         self.size = size
         self._padel = PaDEL_calculator([_fingerprints[3]])
 
-    def getFingerprint(self, mols):
+    def getFingerprints(self, mols):
         """Return the CDK graph only fingerprint for the input molecules.
 
         Args:
@@ -182,7 +182,7 @@ class CDKGraphOnlyFP(fingerprint):
         Returns:
             fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self._padel.calculate(mols, show_banner=False)
+        return self._padel.calculate(mols, show_banner=False).values
 
     @property
     def settings(self):
@@ -201,7 +201,7 @@ class CDKMACCSFP(fingerprint):
     def __init__(self):
         self._padel = PaDEL_calculator([_fingerprints[4]])
 
-    def getFingerprint(self, mols):
+    def getFingerprints(self, mols):
         """Return the CDK MACCS fingerprint for the input molecules.
 
         Args:
@@ -210,7 +210,7 @@ class CDKMACCSFP(fingerprint):
         Returns:
             fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self._padel.calculate(mols, show_banner=False)
+        return self._padel.calculate(mols, show_banner=False).values
 
     @property
     def settings(self):
@@ -229,7 +229,7 @@ class CDKPubchemFP(fingerprint):
     def __init__(self):
         self._padel = PaDEL_calculator([_fingerprints[5]])
 
-    def getFingerprint(self, mols):
+    def getFingerprints(self, mols):
         """Return the CDK PubChem fingerprint for the input molecules.
 
         Args:
@@ -238,7 +238,7 @@ class CDKPubchemFP(fingerprint):
         Returns:
             fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self._padel.calculate(mols, show_banner=False)
+        return self._padel.calculate(mols, show_banner=False).values
 
     @property
     def settings(self):
@@ -264,7 +264,7 @@ class CDKSubstructureFP(fingerprint):
         else:
             self._padel = PaDEL_calculator([_fingerprints[9]])
 
-    def getFingerprint(self, mols):
+    def getFingerprints(self, mols):
         """Return the CDK Substructure fingerprint for the input molecules.
 
         Args:
@@ -273,7 +273,7 @@ class CDKSubstructureFP(fingerprint):
         Returns:
             fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self._padel.calculate(mols, show_banner=False)
+        return self._padel.calculate(mols, show_banner=False).values
 
     @property
     def settings(self):
@@ -296,7 +296,7 @@ class CDKKlekotaRothFP(fingerprint):
         else:
             self._padel = PaDEL_calculator([_fingerprints[10]])
 
-    def getFingerprint(self, mols):
+    def getFingerprints(self, mols):
         """Return the CDK Klekota & Roth fingerprint for the input molecules.
 
         Args:
@@ -305,7 +305,7 @@ class CDKKlekotaRothFP(fingerprint):
         Returns:
             fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self._padel.calculate(mols, show_banner=False)
+        return self._padel.calculate(mols, show_banner=False).values
 
     @property
     def settings(self):
@@ -328,7 +328,7 @@ class CDKAtomPairs2DFP(fingerprint):
         else:
             self._padel = PaDEL_calculator([_fingerprints[11]])
 
-    def getFingerprint(self, mols):
+    def getFingerprints(self, mols):
         """Return the CDK atom pairs and topological fingerprint for the input molecules.
 
         Args:
@@ -337,7 +337,7 @@ class CDKAtomPairs2DFP(fingerprint):
         Returns:
             fingerprint (list): `list` of fingerprints for "mols"
         """
-        return self._padel.calculate(mols, show_banner=False)
+        return self._padel.calculate(mols, show_banner=False).values
 
     @property
     def settings(self):
