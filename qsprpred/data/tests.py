@@ -73,7 +73,7 @@ class DataSets(PathMixIn):
 
     def create_dataset(self, df, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
         return QSPRDataset(
-            name, target_prop=target_prop, task=task, df=df,
+            name, target_props=[{"name": target_prop, "task": task}], df=df,
             store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
 
     def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
@@ -188,35 +188,35 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
 
         def test_bad_init(dataset_to_test):
             with self.assertRaises(AssertionError):
-                dataset_to_test.makeClassification([])
+                dataset_to_test.makeClassification("CL", [])
             with self.assertRaises(TypeError):
-                dataset_to_test.makeClassification(th=6.5)
+                dataset_to_test.makeClassification("CL", th=6.5)
             with self.assertRaises(AssertionError):
-                dataset_to_test.makeClassification(th=[0, 2, 3])
+                dataset_to_test.makeClassification("CL", th=[0, 2, 3])
             with self.assertRaises(AssertionError):
-                dataset_to_test.makeClassification(th=[0, 2, 3])
+                dataset_to_test.makeClassification("CL", th=[0, 2, 3])
 
         def test_classification(dataset_to_test):
             if len(th) == 1:
-                self.assertEqual(dataset_to_test.task, ModelTasks.SINGLECLASS)
+                self.assertEqual(dataset_to_test.targetProperties[0].task, ModelTasks.SINGLECLASS)
             else:
-                self.assertEqual(dataset_to_test.task, ModelTasks.MULTICLASS)
-            self.assertEqual(dataset_to_test.targetProperty, "CL_class")
-            self.assertEqual(dataset_to_test.originalTargetProperty, "CL")
-            y = dataset_to_test.getTargetProperties(concat=True)
-            self.assertTrue(y.columns[0] == dataset_to_test.targetProperty)
-            if dataset_to_test.task == ModelTasks.SINGLECLASS:
-                self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], 2)
+                self.assertEqual(dataset_to_test.targetProperties[0].task, ModelTasks.MULTICLASS)
+            self.assertEqual(dataset_to_test.targetProperties[0].name, "CL_class")
+            self.assertEqual(dataset_to_test.targetProperties[0].originalName, "CL")
+            y = dataset_to_test.getTargetPropertiesValues(concat=True)
+            self.assertTrue(y.columns[0] == dataset_to_test.targetProperties[0].name)
+            if dataset_to_test.targetProperties[0].task == ModelTasks.SINGLECLASS:
+                self.assertEqual(y[dataset_to_test.targetProperties[0].name].unique().shape[0], 2)
             else:
-                self.assertEqual(y[dataset_to_test.targetProperty].unique().shape[0], (len(th) - 1))
-            self.assertEqual(dataset_to_test.th, th)
+                self.assertEqual(y[dataset_to_test.targetProperties[0].name].unique().shape[0], (len(th) - 1))
+            self.assertEqual(dataset_to_test.targetProperties[0].th, th)
 
         th = [6.5]
         test_bad_init(dataset)
-        dataset.makeClassification(th=th)
+        dataset.makeClassification("CL", th=th)
         test_classification(dataset)
         th = [0, 15, 30, 60]
-        dataset.makeClassification(th=th)
+        dataset.makeClassification("CL", th=th)
         test_classification(dataset)
         dataset.save()
 
@@ -227,12 +227,12 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         dataset_new.makeRegression(target_property="CL")
 
         def check_regression(dataset_to_check):
-            self.assertEqual(dataset_to_check.task, ModelTasks.REGRESSION)
+            self.assertEqual(dataset_to_check.targetProperties[0].task, ModelTasks.REGRESSION)
             self.assertTrue(dataset_to_check.hasProperty("CL"))
-            self.assertEqual(dataset_to_check.targetProperty, "CL")
-            self.assertEqual(dataset_to_check.originalTargetProperty, "CL")
-            y = dataset_to_check.getTargetProperties(concat=True)
-            self.assertNotEqual(y[dataset_to_check.targetProperty].unique().shape[0], (len(th) - 1))
+            self.assertEqual(dataset_to_check.targetProperties[0].name, "CL")
+            self.assertEqual(dataset_to_check.targetProperties[0].originalName, "CL")
+            y = dataset_to_check.getTargetPropertiesValues(concat=True)
+            self.assertNotEqual(y[dataset_to_check.targetProperties[0].name].unique().shape[0], (len(th) - 1))
 
         check_regression(dataset_new)
         dataset_new.save()
@@ -247,9 +247,9 @@ class TestDataSetPreparation(DataSets, TestCase):
         tasks = [ModelTasks.REGRESSION, ModelTasks.MULTICLASS]
         for task in tasks:
             dataset = QSPRDataset(
-                f"test_create_prep_{task.name}", "CL", df=self.df_large,
-                store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
-                if task == ModelTasks.MULTICLASS else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+                f"test_create_prep_{task.name}", [{"name": "CL", "task": task, "th": [0, 1, 10, 1200]
+                                                   if task == ModelTasks.MULTICLASS else None}], df=self.df_large,
+                store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
             np.random.seed(42)
             descriptor_sets = [
                 Mordred(),
@@ -285,9 +285,9 @@ class TestDataSetPreparation(DataSets, TestCase):
 
         for path, task in zip(paths, tasks):
             ds = QSPRDataset.fromFile(path, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-            if ds.task == ModelTasks.MULTICLASS:
-                self.assertEqual(ds.targetProperty, "CL_class")
-            self.assertTrue(ds.task == task)
+            if ds.targetProperties[0].task == ModelTasks.MULTICLASS:
+                self.assertEqual(ds.targetProperties[0].name, "CL_class")
+            self.assertTrue(ds.targetProperties[0].task == task)
             self.assertTrue(ds.descriptorCalculator)
             self.assertTrue(
                 isinstance(
@@ -373,7 +373,7 @@ class TestFoldSplitters(DataSets, TestCase):
         self.validate_folds(dataset)
 
         # test default settings with classification
-        dataset.makeClassification(th=[20])
+        dataset.makeClassification("CL", th=[20])
         self.validate_folds(dataset)
 
         # test with a standarizer
@@ -424,7 +424,7 @@ class TestFeatureFilters(PathMixIn, TestCase):
         )
         self.dataset = QSPRDataset(
             "TestFeatureFilters",
-            target_prop="y",
+            target_props=[{"name": "y", "task": ModelTasks.REGRESSION}],
             df=self.df,
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,

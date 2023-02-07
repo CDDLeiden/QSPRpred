@@ -64,7 +64,7 @@ class QSPRsklearn(QSPRModel):
     def fit(self):
         """Build estimator model from entire data set."""
         X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargetProperties(concat=True).values.ravel()
+        y_all = self.data.getTargetPropertiesValues(concat=True).values.ravel()
 
         fit_set = {'X': X_all}
 
@@ -86,13 +86,13 @@ class QSPRsklearn(QSPRModel):
         """
         folds = self.data.createFolds()
         X, X_ind = self.data.getFeatures()
-        y, y_ind = self.data.getTargetProperties()
+        y, y_ind = self.data.getTargetPropertiesValues()
 
         cvs = np.zeros(
             len(y)) if (
-            self.data.task == ModelTasks.REGRESSION or not self.data.isMultiClass()) else np.zeros(
-            (y.shape[0],
-             self.data.nClasses))
+            self.data.targetProperties[0].task == ModelTasks.REGRESSION or not self.data.isMultiClass(
+                self.data.targetProperties[0])) else np.zeros(
+            (y.shape[0], self.data.nClasses(self.data.targetProperties[0])))
 
         fold_counter = np.zeros(y.shape[0])
 
@@ -111,12 +111,12 @@ class QSPRsklearn(QSPRModel):
                 fit_set['y'] = y_train.ravel()
             self.model.fit(**fit_set)
 
-            if self.data.task == ModelTasks.REGRESSION:
+            if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
                 preds = self.model.predict(X_test)
                 if len(preds.shape) > 1:
                     preds = preds[:, 0]
                 cvs[idx_test] = preds
-            elif self.data.nClasses > 2:
+            elif self.data.nClasses(self.data.targetProperties[0]) > 2:
                 cvs[idx_test] = self.model.predict_proba(X_test)
             else:
                 cvs[idx_test] = self.model.predict_proba(X_test)[:, -1]
@@ -133,12 +133,12 @@ class QSPRsklearn(QSPRModel):
 
         self.model.fit(**fit_set)
 
-        if self.data.task == ModelTasks.REGRESSION:
+        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
             preds = self.model.predict(X_ind)
             if len(preds.shape) > 1:
                 preds = preds[:, 0]
             inds = preds
-        elif self.data.nClasses > 2:
+        elif self.data.nClasses(self.data.targetProperties[0]) > 2:
             inds = self.model.predict_proba(X_ind)
         else:
             inds = self.model.predict_proba(X_ind)[:, -1]
@@ -148,7 +148,7 @@ class QSPRsklearn(QSPRModel):
             train, test = pd.DataFrame(
                 y.values, columns=['Label']), pd.DataFrame(
                 y_ind.values, columns=['Label'])
-            if self.data.task == ModelTasks.MULTICLASS:
+            if self.data.targetProperties[0].task == ModelTasks.MULTICLASS:
                 train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
                 train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
                 test = pd.concat([test, pd.DataFrame(inds)], axis=1)
@@ -167,15 +167,15 @@ class QSPRsklearn(QSPRModel):
             search_space_gs (dict): search space for the grid search
             n_jobs (int): number of jobs for hyperparameter optimization
         """
-        if self.data.task == ModelTasks.REGRESSION:
+        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
             scoring = 'explained_variance'
         else:
-            scoring = 'roc_auc_ovr_weighted' if self.data.nClasses > 2 else 'roc_auc'
+            scoring = 'roc_auc_ovr_weighted' if self.data.nClasses(self.data.targetProperties[0]) > 2 else 'roc_auc'
         grid = GridSearchCV(self.alg, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
             (x[4], x[5]) for x in self.data.createFolds()), scoring=scoring, refit=False)
 
         X, X_ind = self.data.getFeatures()
-        y, y_ind = self.data.getTargetProperties()
+        y, y_ind = self.data.getTargetPropertiesValues()
         fit_set = {'X': X, 'y': y.iloc[:, 0].values.ravel()}
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         grid.fit(**fit_set)
@@ -195,9 +195,9 @@ class QSPRsklearn(QSPRModel):
             n_trials (int): number of trials for bayes optimization
             save_m (bool): if true, after bayes optimization the model is refit on the entire data set
             n_jobs (int): the number of parallel trials
-            
+
         Example of search_space_bs for scikit-learn's MLPClassifier:
-        >>> model = QSPRsklearn(base_dir='.', data=dataset, 
+        >>> model = QSPRsklearn(base_dir='.', data=dataset,
         >>>                     alg = MLPClassifier(), alg_name="MLP")
         >>>  search_space_bs = {
         >>>    'learning_rate_init': ['float', 1e-5, 1e-3,],
@@ -205,7 +205,7 @@ class QSPRsklearn(QSPRModel):
         >>>    'momentum': ['float', 0.0, 1.0],
         >>> }
         >>> model.bayesOptimization(search_space_bs=search_space_bs, n_trials=10)
-        
+
         Avaliable suggestion types:
         ['categorical', 'discrete_uniform', 'float', 'int', 'loguniform', 'uniform']
         """
@@ -253,8 +253,8 @@ class QSPRsklearn(QSPRModel):
         print(bayesian_params)
         self.model = self.alg.set_params(**bayesian_params)
 
-        y, y_ind = self.data.getTargetProperties()
-        if self.data.task == ModelTasks.REGRESSION:
+        y, y_ind = self.data.getTargetPropertiesValues()
+        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
             score = metrics.explained_variance_score(y.iloc[:, 0], self.evaluate(save=False))
         else:
             try:
@@ -284,9 +284,18 @@ class QSPRDNN(QSPRModel):
 
     def __init__(self, base_dir, data, parameters=None, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, patience=50, tol=0):
 
-        self.n_class = max(1, data.nClasses)
-        super().__init__(base_dir, data, STFullyConnected(n_dim=data.X.shape[1], n_class=self.n_class, device=device,
-                         gpus=gpus, is_reg=data.task == ModelTasks.REGRESSION), "DNN", parameters=parameters)
+        self.n_class = max(1, data.nClasses(data.targetProperties[0]))
+        super().__init__(
+            base_dir,
+            data,
+            STFullyConnected(
+                n_dim=data.X.shape[1],
+                n_class=self.n_class,
+                device=device,
+                gpus=gpus,
+                is_reg=data.targetProperties[0].task == ModelTasks.REGRESSION),
+            "DNN",
+            parameters=parameters)
 
         self.patience = patience
         self.tol = tol
@@ -313,7 +322,7 @@ class QSPRDNN(QSPRModel):
             sys.exit()
 
         X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargetProperties(concat=True).values
+        y_all = self.data.getTargetPropertiesValues(concat=True).values
 
         self.model = self.model.set_params(**{"n_epochs": self.optimal_epochs})
         train_loader = self.model.get_dataloader(X_all, y_all)
@@ -335,11 +344,11 @@ class QSPRDNN(QSPRModel):
             ES_val_size (float): validation set size for early stopping in CV
         """
         X, X_ind = self.data.getFeatures()
-        y, y_ind = self.data.getTargetProperties()
+        y, y_ind = self.data.getTargetPropertiesValues()
         indep_loader = self.model.get_dataloader(X_ind.values)
         last_save_epochs = 0
 
-        cvs = np.zeros((y.shape[0], max(1, self.data.nClasses)))
+        cvs = np.zeros((y.shape[0], max(1, self.data.nClasses(self.data.targetProperties[0]))))
         fold_counter = np.zeros(y.shape[0])
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
             y_train = y_train.reshape(-1, 1)
@@ -374,7 +383,7 @@ class QSPRDNN(QSPRModel):
                 name='Label'), pd.Series(
                 y_ind.values.flatten()).to_frame(
                 name='Label')
-            if self.data.task.isClassification():
+            if self.data.targetProperties[0].task.isClassification():
                 train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
                 train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
                 test = pd.concat([test, pd.DataFrame(inds)], axis=1)
@@ -384,7 +393,7 @@ class QSPRDNN(QSPRModel):
             train.to_csv(self.out + '.cv.tsv', sep='\t')
             test.to_csv(self.out + '.ind.tsv', sep='\t')
 
-        if self.data.nClasses == 2:
+        if self.data.nClasses(self.data.targetProperties[0]) == 2:
             return cvs[:, 1]
         else:
             return cvs
@@ -403,13 +412,13 @@ class QSPRDNN(QSPRModel):
             save_m (bool): if true, after gs the model is refit on the entire data set
             ES_val_size (float): validation set size for early stopping in CV
         """
-        if self.data.task == ModelTasks.REGRESSION:
+        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
             scoring = metrics.explained_variance_score
         else:
             scoring = partial(
                 metrics.roc_auc_score,
                 multi_class='ovr',
-                average='weighted') if self.data.isMultiClass() else metrics.roc_auc_score
+                average='weighted') if self.data.isMultiClass(self.data.targetProperties[0]) else metrics.roc_auc_score
 
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         best_score = -np.inf
@@ -430,7 +439,7 @@ class QSPRDNN(QSPRModel):
                 self.model.fit(train_loader, ES_valid_loader, '%s_temp' % self.out, self.patience, self.tol)
                 os.remove('%s_temp_weights.pkg' % self.out)
                 y_pred = self.model.predict(valid_loader)
-                if self.data.nClasses == 2:
+                if self.data.nClasses(self.data.targetProperties[0]) == 2:
                     y_pred = y_pred[:, 1]
                 fold_scores.append(scoring(y_test, y_pred))
             os.remove('%s_temp.log' % self.out)
@@ -500,8 +509,8 @@ class QSPRDNN(QSPRModel):
 
         self.model = self.alg.set_params(**bayesian_params)
 
-        y, y_ind = self.data.getTargetProperties()
-        if self.data.task == ModelTasks.REGRESSION:
+        y, y_ind = self.data.getTargetPropertiesValues()
+        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
             score = metrics.explained_variance_score(y, self.evaluate(save=False))
         else:
             score = metrics.roc_auc_score(y.iloc[:, 0], self.evaluate(save=False), multi_class='ovo')

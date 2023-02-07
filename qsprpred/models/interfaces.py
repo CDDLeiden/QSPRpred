@@ -35,9 +35,9 @@ class QSPRModel(ABC):
         self.alg_name = alg_name
 
         d = '%s/qspr/models' % base_dir
-        self.type = 'REG' if data.task == ModelTasks.REGRESSION else 'CLS'
+        self.type = 'REG' if data.targetProperties[0].task == ModelTasks.REGRESSION else 'CLS'
         self.out = '%s/%s_%s_%s' % (d, alg_name,
-                                    self.type, data.targetProperty)
+                                    self.type, data.targetProperties[0].name)
 
         if os.path.isfile('%s_params.json' % self.out):
             with open('%s_params.json' % self.out) as j:

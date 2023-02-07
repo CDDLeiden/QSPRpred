@@ -1,5 +1,6 @@
 """This module contains the QSPRDataset that holds and prepares data for modelling."""
 import concurrent
+import copy
 import json
 import os
 import warnings
@@ -614,7 +615,7 @@ class TargetProperty():
             self, name: str,
             task: Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS],
             originalName: str = None,
-            th: Union[List[int], str] = None,
+            th: Union[List[float], str] = None,
             transformer: Callable = None):
         """Initialize a TargetProperty object.
 
@@ -622,7 +623,7 @@ class TargetProperty():
             name (str): name of the target property
             task (Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS]): task type for the target property
             originalName (str): original name of the target property, if not specified, the name is used
-            th (int): threshold for the target property, only used for classification tasks
+            th (Union[List[float], str]): threshold for the target property, only used for classification tasks
             transformer (Callable): function to transform the target property
         """
         self.name = name
@@ -633,6 +634,15 @@ class TargetProperty():
                 logger.warning(f"Threshold not specified for classification task {name}")
             self.th = th
         self.transformer = transformer
+
+    def setThreshold(self, th: Union[List[float], str]):
+        """Set the threshold for the target property.
+
+        Args:
+            th (Union[List[int], str]): threshold for the target property
+        """
+        assert self.task.isClassification(), "Threshold can only be set for classification tasks"
+        self.th = th
 
     def __repr__(self):
         if self.task.isClassification() and self.th is not None:
@@ -677,16 +687,19 @@ class TargetProperty():
         return target_props
 
     @staticmethod
-    def selectFromList(l: list, names: list):
+    def selectFromList(l: list, names: list, original_names: bool = False):
         """Select a subset of TargetProperty objects from a list of TargetProperty objects.
 
         Args:
             l (list): list of TargetProperty objects
             names (list): list of names of the target properties to be selected
+            original_names (bool): whether to use the original names of the target properties
 
         Returns:
             List[TargetProperty]: list of TargetProperty objects
         """
+        if original_names:
+            return [t for t in l if t.originalName in names]
         return [t for t in l if t.name in names]
 
     @staticmethod
@@ -770,8 +783,6 @@ class QSPRDataset(MoleculeTable):
         """
         super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size)
 
-        self.setTargetProperties(target_props)
-
         self.metaInfo = None
         try:
             self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
@@ -780,6 +791,9 @@ class QSPRDataset(MoleculeTable):
 
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
+
+        # load target properties
+        self.setTargetProperties(target_props)
 
         # load standardizers for features
         self.feature_standardizers = self.loadFeatureStandardizers()
@@ -848,7 +862,7 @@ class QSPRDataset(MoleculeTable):
             assert all([isinstance(d, TargetProperty) for d in target_props]
                        ), "target_props should be a list of TargetProperty objects or dictionaries to initialize TargetProperties from, not a mix."
             self.targetProperties = target_props
-        assert all([prop in self.df.columns for prop in TargetProperty.getNames(self.targetProperties)]
+        assert all([prop in self.df.columns for prop in self.targetPropertyNames]
                    ), "Not all target properties not in dataframe columns."
 
         # transform target properties
@@ -863,17 +877,9 @@ class QSPRDataset(MoleculeTable):
             if target_prop.task.isClassification():
                 self.makeClassification(target_prop)
 
-    def getTargetProperties(self) -> List[TargetProperty]:
-        """Get list of target properties names.
-
-        Returns:
-            List[TargetProperty]: list of target properties names
-        """
-        return TargetProperty.getNames(self.targetProperties)
-
     def dropEmpty(self):
         """Drop rows with empty target property value from the data set."""
-        self.df.dropna(subset=([self.smilescol] + TargetProperty.getNames(self.targetProperties)), inplace=True)
+        self.df.dropna(subset=([self.smilescol] + self.targetPropertyNames), inplace=True)
 
     def getFeatureNames(self) -> List[str]:
         """Get current feature names for this data set.
@@ -899,16 +905,15 @@ class QSPRDataset(MoleculeTable):
         the data will be split into training and independent sets. Otherwise, the independent set will
         be empty. If descriptors are available, the resulting training matrices will be featurized.
         """
-        targetPropertiesNames = TargetProperty.getNames(self.targetProperties)
         self.X = self.df
-        self.y = self.df[targetPropertiesNames]
+        self.y = self.df[self.targetPropertyNames]
 
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.X = self.df[self.df["Split_IsTrain"] == True]
             self.X_ind = self.df[self.df["Split_IsTrain"] == False]
-            self.y = self.X[targetPropertiesNames]
-            self.y_ind = self.X_ind[targetPropertiesNames]
+            self.y = self.X[self.targetPropertyNames]
+            self.y_ind = self.X_ind[self.targetPropertyNames]
         else:
             self.X_ind = self.X.drop(self.X.index)
             self.y_ind = self.y.drop(self.y.index)
@@ -922,14 +927,18 @@ class QSPRDataset(MoleculeTable):
             self.X = self.X[self.featureNames]
             self.X_ind = self.X_ind[self.featureNames]
 
-    def isMultiClass(self, target_prop: str):
+    def isMultiClass(self, target_prop: Union[TargetProperty, str]):
         """Return if model task is multi class classification."""
+        if isinstance(target_prop, str):
+            target_prop = self.getTargetProperties([target_prop])[0]
         return target_prop.task == ModelTasks.MULTICLASS and self.nClasses(target_prop) > 2
 
     def nClasses(self, target_prop: str):
         """Return number of output classes for classification."""
-        if ModelTasks.isClassification(target_prop.task):
-            return len(self.df[target_prop].unique())
+        if isinstance(target_prop, str):
+            target_prop = self.getTargetProperties([target_prop])[0]
+        if target_prop.task.isClassification():
+            return len(self.df[target_prop.name].unique())
         else:
             return 0
 
@@ -941,7 +950,7 @@ class QSPRDataset(MoleculeTable):
             target_property (str): name of the target property to use for regression
         """
         if isinstance(target_property, str):
-            target_property = TargetProperty.selectFromList(self.targetProperties, [target_property])[0]
+            target_property = self.getTargetProperties([target_property], original_names=True)[0]
         target_property.name = target_property.originalName
         target_property.th = None
         target_property.task = ModelTasks.REGRESSION
@@ -956,7 +965,7 @@ class QSPRDataset(MoleculeTable):
             th (List[float], optional): list of threshold values. If not provided, the values will be inferred from th specified in TargetProperty. Defaults to None.
         """
         if isinstance(target_property, str):
-            target_property = TargetProperty.selectFromList(self.targetProperties, [target_property])[0]
+            target_property = self.getTargetProperties([target_property], original_names=True)[0]
 
         new_prop = f"{target_property.originalName}_class"
         if th is None:
@@ -988,6 +997,7 @@ class QSPRDataset(MoleculeTable):
             else:
                 self.df[new_prop] = self.df[target_property.originalName] > th[0]
             target_property.task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
+        target_property.setThreshold(th)
         target_property.name = new_prop
         self.restoreTrainingData()
         logger.info("Target property converted to classification.")
@@ -1088,50 +1098,51 @@ class QSPRDataset(MoleculeTable):
         Args:
             split (datasplit) : split instance orchestrating the split
         """
-        targetPropertyNames = TargetProperty.getNames(self.targetProperties)
         folds = Folds(split)
         self.X, self.X_ind, self.y, self.y_ind, train_index, test_index = next(
-            folds.iterFolds(self.df, self.df[targetPropertyNames]))
+            folds.iterFolds(self.df, self.df[self.targetPropertyNames]))
         self.X = self.df.iloc[train_index, :]
         self.X_ind = self.df.iloc[test_index, :]
-        self.y = self.df.iloc[train_index, :][targetPropertyNames]
-        self.y_ind = self.df.iloc[test_index, :][targetPropertyNames]
+        self.y = self.df.iloc[train_index, :][self.targetPropertyNames]
+        self.y_ind = self.df.iloc[test_index, :][self.targetPropertyNames]
 
         logger.info("Total: train: %s test: %s" % (len(self.y), len(self.y_ind)))
-        if self.task == ModelTasks.SINGLECLASS:
-            logger.info(
-                "    In train: active: %s not active: %s"
-                % (sum(self.y), len(self.y) - sum(self.y))
-            )
-            logger.info(
-                "    In test:  active: %s not active: %s\n"
-                % (sum(self.y_ind), len(self.y_ind) - sum(self.y_ind))
-            )
-        if self.task == ModelTasks.MULTICLASS:
-            logger.info("train: %s" % self.y.value_counts())
-            logger.info("test: %s\n" % self.y_ind.value_counts())
-            try:
-                assert np.all([x > 0 for x in self.y.value_counts()])
-                assert np.all([x > 0 for x in self.y_ind.value_counts()])
-            except AssertionError as err:
-                logger.exception(
-                    "All bins in multi-class classification should contain at least one sample"
+        for prop in self.targetProperties:
+            logger.info("Target property: %s" % prop.name)
+            if prop.task == ModelTasks.SINGLECLASS:
+                logger.info(
+                    "    In train: active: %s not active: %s"
+                    % (sum(self.y[prop.name]), len(self.y[prop.name]) - sum(self.y[prop.name]))
                 )
-                raise err
+                logger.info(
+                    "    In test:  active: %s not active: %s\n"
+                    % (sum(self.y_ind[prop.name]), len(self.y_ind[prop.name]) - sum(self.y_ind[prop.name]))
+                )
+            if prop.task == ModelTasks.MULTICLASS:
+                logger.info("train: %s" % self.y[prop.name].value_counts())
+                logger.info("test: %s\n" % self.y_ind[prop.name].value_counts())
+                try:
+                    assert np.all([x > 0 for x in self.y[prop.name].value_counts()])
+                    assert np.all([x > 0 for x in self.y_ind[prop.name].value_counts()])
+                except AssertionError as err:
+                    logger.exception(
+                        "All bins in multi-class classification should contain at least one sample"
+                    )
+                    raise err
 
-            if self.y.dtype.name == "category":
-                self.y = self.y.cat.codes
-                self.y_ind = self.y_ind.cat.codes
+                if self.y[prop.name].dtype.name == "category":
+                    self.y[prop.name] = self.y[prop.name].cat.codes
+                    self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
 
     def featurizeSplits(self):
         """Keep only features that will be used by the model. In our case, descriptors."""
         descriptors = self.getDescriptors()
         self.X = descriptors.loc[self.X.index, :]
-        self.y = self.df.loc[self.y.index, [self.targetProperties]]
+        self.y = self.df.loc[self.y.index, self.targetPropertyNames]
 
         if self.X_ind is not None and self.y_ind is not None:
             self.X_ind = descriptors.loc[self.X_ind.index, :]
-            self.y_ind = self.df.loc[self.y_ind.index, [self.targetProperties]]
+            self.y_ind = self.df.loc[self.y_ind.index, self.targetPropertyNames]
 
     def fillMissing(self, fill_value: float, columns: List[str] = None):
         """
@@ -1216,7 +1227,7 @@ class QSPRDataset(MoleculeTable):
             self.split(split)
         else:
             self.X = self.df
-            self.y = self.df[self.targetProperties]
+            self.y = self.df[self.targetPropertyNames]
 
         # featurize splits
         if self.hasDescriptors:
@@ -1346,7 +1357,7 @@ class QSPRDataset(MoleculeTable):
 
         return (X, X_ind) if not concat else X
 
-    def getTargetProperties(self, concat=False):
+    def getTargetPropertiesValues(self, concat=False):
         """
         Get the response values (training and test) for the set target property.
 
@@ -1361,6 +1372,27 @@ class QSPRDataset(MoleculeTable):
             return pd.concat([self.y, self.y_ind] if self.y_ind is not None else [self.y])
         else:
             return self.y, self.y_ind if self.y_ind is not None else self.y
+
+    def getTargetProperties(self, names=None, original_names=False):
+        """
+        Get the target properties with the given names
+
+        Args:
+            name (List[str]): name of the target properties
+            original_names (bool): if `True`, use the original names of the target properties
+
+        Returns:
+            `TargetProperty`: target property with the given name
+        """
+        return TargetProperty.selectFromList(self.targetProperties, names, original_names=True)
+
+    @property
+    def targetPropertyNames(self):
+        return TargetProperty.getNames(self.targetProperties)
+
+    @property
+    def targetPropertyOriginalNames(self):
+        return TargetProperty.getOriginalNames(self.targetProperties)
 
     def loadFeatureStandardizers(self):
         """
@@ -1407,7 +1439,7 @@ class QSPRDataset(MoleculeTable):
         paths = self.saveFeatureStandardizers()
 
         meta_init = {
-            'target_props': TargetProperty.toList(self.targetProperties, task_as_str=True),
+            'target_props': TargetProperty.toList(copy.deepcopy(self.targetProperties), task_as_str=True),
             'smilescol': self.smilescol,
         }
         ret = {

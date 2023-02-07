@@ -88,7 +88,7 @@ class Predictor(Scorer):
                         sys.exit(1)
                 standardizers.append(SKLearnStandardizer.fromFile(standardizer_path))
 
-        task = ModelTasks[meta['init']['task']]
+        task = ModelTasks[meta['init']['target_props'][0]['task']]
 
         # load model
         name = os.path.basename(model_path)[:-5]
