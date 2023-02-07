@@ -36,8 +36,8 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-N_CPU = 4
-CHUNK_SIZE = 20
+N_CPU = 2
+CHUNK_SIZE = 100
 
 
 class PathMixIn:
@@ -464,6 +464,38 @@ class TestFeatureFilters(PathMixIn, TestCase):
         # check if correct columns selected and values still original
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors[-1:])
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors[-1:])
+
+
+class TestDescriptorCalculation(DataSets, TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.dataset = self.create_large_dataset(self.__class__.__name__)
+
+    def test_switching(self):
+        feature_calculator = DescriptorsCalculator(
+            descsets=[FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048), DrugExPhyschem()])
+        split = randomsplit(test_fraction=0.1)
+        lv = lowVarianceFilter(0.05)
+        hc = highCorrelationFilter(0.9)
+
+        self.dataset.prepareDataset(
+            split=split,
+            feature_calculator=feature_calculator,
+            feature_filters=[lv, hc],
+            recalculate_features=True,
+            fill_value=None
+        )
+
+        # create new dataset with different feature calculator
+        dataset_next = self.create_large_dataset(self.__class__.__name__)
+        dataset_next.prepareDataset(
+            split=split,
+            feature_calculator=feature_calculator,
+            feature_filters=[lv, hc],
+            recalculate_features=True,
+            fill_value=None
+        )
 
 
 class TestDescriptorsets(DataSets, TestCase):

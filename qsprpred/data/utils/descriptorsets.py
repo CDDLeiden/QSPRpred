@@ -10,7 +10,6 @@ from typing import Optional, Union, List
 
 import mordred
 import numpy as np
-import pandas as pd
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils import fingerprints
 from Mold2_pywrapper import Mold2 as Mold2_calculator
@@ -19,7 +18,7 @@ from PaDEL_pywrapper.descriptors import _descs_2D as PaDEL_2D_descriptors, descr
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
-from rdkit.Chem import AllChem, Mol
+from rdkit.Chem import Mol
 
 
 class DescriptorSet(ABC):
