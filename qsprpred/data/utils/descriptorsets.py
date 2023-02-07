@@ -10,13 +10,12 @@ from typing import List, Union
 
 import mordred
 import numpy as np
-import pandas as pd
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils import fingerprints
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
-from rdkit.Chem import AllChem, Mol
+from rdkit.Chem import Mol
 
 
 class DescriptorSet(ABC):
@@ -107,7 +106,7 @@ class FingerprintSet(DescriptorSet):
         """Calculate the fingerprint for a list of molecules."""
         convertFP = DataStructs.ConvertToNumpyArray
 
-        ret = np.zeros((len(mols), self.get_len()))
+        ret = np.zeros((len(mols), self.get_len() if not self.keepindices else len(self.keepindices)))
         for idx, mol in enumerate(self.iterMols(mols)):
             fp = self.get_fingerprint(mol)
             np_fp = np.zeros(len(fp))
