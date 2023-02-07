@@ -110,7 +110,7 @@ class FingerprintSet(DescriptorSet):
         ret = self.get_fingerprint(self.iterMols(mols, to_list=True))
 
         if self.keepindices:
-            ret = ret[self.keepindices]
+            ret = ret[:,self.keepindices]
 
         return ret
 
