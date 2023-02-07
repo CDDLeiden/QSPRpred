@@ -72,7 +72,7 @@ class DescriptorsCalculator(Calculator):
 
         descsets = []
         for key, value in descset_dict.items():
-            descset = get_descriptor(key, *value["settings"][0], **value["settings"][1])
+            descset = get_descriptor(key, **value["settings"])
             if descset.is_fp:
                 descset.keepindices = value["keepindices"]
             else:
@@ -90,6 +90,8 @@ class DescriptorsCalculator(Calculator):
         for descset in self.descsets:
             values = descset(mols)
             values = pd.DataFrame(values, columns=descset.descriptors)
+            if descset.is_fp:
+                values.add_prefix(f"{descset.fingerprint_type}_")
             df = pd.concat([df, values.add_prefix(f"Descriptor_{descset}_")], axis=1)
 
         # replace errors by nan values

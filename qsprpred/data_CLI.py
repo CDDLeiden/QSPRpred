@@ -18,8 +18,8 @@ from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, tempor
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
+    FingerprintSet,
     Mordred,
-    MorganFP,
     PredictorDesc,
     rdkit_descs,
 )
@@ -181,7 +181,7 @@ def QSPR_dataprep(args):
             # feature calculator
             descriptorsets = []
             if 'Morgan' in args.features:
-                descriptorsets.append(MorganFP(3, nBits=2048))
+                descriptorsets.append(FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048))
             if 'RDkit' in args.features:
                 descriptorsets.append(rdkit_descs())
             if 'Mordred' in args.features:

@@ -121,7 +121,8 @@ class Predictor(Scorer):
         scores = np.full(len(mols), None)
 
         # create mask for valid molecules
-        valids = [Chem.MolFromSmiles(mol) is not None if isinstance(mol, str) else True for mol in mols]
+        valids = [Chem.MolFromSmiles(mol) is not None if isinstance(
+            mol, str) and mol is not None else True for mol in mols]
 
         # get all valid mols
         valid_mols = [mol for is_valid, mol in zip(valids, mols) if is_valid]

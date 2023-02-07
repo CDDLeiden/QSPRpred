@@ -15,9 +15,10 @@ from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, tempor
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
+    FingerprintSet,
     Mordred,
-    MorganFP,
     PredictorDesc,
+    TanimotoDistances,
     rdkit_descs,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
@@ -194,7 +195,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
             with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification(th=[0, 2, 3])
-        
+
         def test_classification(dataset_to_test):
             self.assertEqual(dataset_to_test.task, ModelTasks.CLASSIFICATION)
             self.assertEqual(dataset_to_test.targetProperty, "CL_class")
@@ -249,12 +250,14 @@ class TestDataSetPreparation(DataSets, TestCase):
             np.random.seed(42)
             descriptor_sets = [
                 Mordred(),
-                MorganFP(radius=3, nBits=2048),
+                FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
                 rdkit_descs(),
                 DrugExPhyschem(),
                 PredictorDesc(
                     f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
-                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json')]
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'),
+                TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000)
+            ]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
             dataset.prepareDataset(
                 feature_calculator=DescriptorsCalculator(descriptor_sets),
@@ -324,7 +327,7 @@ class TestDataSplitters(DataSets, TestCase):
     def test_serialization(self):
         dataset = self.create_large_dataset()
         split = scaffoldsplit(dataset, Murcko(), 0.1)
-        calculator = DescriptorsCalculator([MorganFP(radius=3, nBits=1024)])
+        calculator = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)])
         standardizers = [StandardScaler()]
         dataset.prepareDataset(
             split=split,
@@ -362,7 +365,8 @@ class TestFoldSplitters(DataSets, TestCase):
     def test_defaults(self):
         # test default settings with regression
         dataset = self.create_large_dataset()
-        dataset.addDescriptors(DescriptorsCalculator([MorganFP(radius=3, nBits=1024)]))
+        dataset.addDescriptors(DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]))
         self.validate_folds(dataset)
 
         # test default settings with classification
@@ -462,13 +466,19 @@ class TestDescriptorsets(DataSets, TestCase):
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
         self.assertTrue(self.dataset.X.any().any())
 
-    def test_MorganFP(self):
-        desc_calc = DescriptorsCalculator([MorganFP(3, nBits=1000)])
+    def test_fingerprintSet(self):
+        desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)])
         self.dataset.addDescriptors(desc_calc)
 
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1000))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
+
+    def test_TanimotoDistances(self):
+        list_of_smiles = ["C", "CC", "CCC", "CCCC", "CCCCC", "CCCCCC", "CCCCCCC"]
+        desc_calc = DescriptorsCalculator(
+            [TanimotoDistances(list_of_smiles=list_of_smiles, fingerprint_type="MorganFP", radius=3, nBits=1000)])
+        self.dataset.addDescriptors(desc_calc)
 
     def test_Mordred(self):
         desc_calc = DescriptorsCalculator([Mordred()])
@@ -525,7 +535,8 @@ class TestFeatureStandardizer(DataSets, TestCase):
     def setUp(self):
         super().setUp()
         self.dataset = self.create_small_dataset(self.__class__.__name__)
-        self.dataset.addDescriptors(DescriptorsCalculator([MorganFP(3, nBits=1000)]))
+        self.dataset.addDescriptors(DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]))
 
     def test_featurestandarizer(self):
         scaler = SKLearnStandardizer.fromFit(self.dataset.X, StandardScaler())
