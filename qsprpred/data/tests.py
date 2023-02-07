@@ -7,7 +7,6 @@ from unittest import TestCase
 import mordred
 import numpy as np
 import pandas as pd
-import sklearn_json as skljson
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
@@ -31,9 +30,8 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.models.tasks import ModelTasks
-from qsprpred.scorers.predictor import Predictor
 from rdkit import Chem
-from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
+from rdkit.Chem import Descriptors
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 N_CPU = 2
