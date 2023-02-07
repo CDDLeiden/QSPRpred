@@ -104,7 +104,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         # creation from data frame
         dataset = QSPRDataset(
             "test_defaults",
-            "CL",
+            [{"name": "CL", "task": ModelTasks.REGRESSION}],
             df=self.df_small,
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
