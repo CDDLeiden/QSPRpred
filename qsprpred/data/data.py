@@ -873,7 +873,7 @@ class QSPRDataset(MoleculeTable):
 
     def dropEmpty(self):
         """Drop rows with empty target property value from the data set."""
-        self.df.dropna(subset=([self.smilescol].extend(TargetProperty.getNames(self.targetProperties))), inplace=True)
+        self.df.dropna(subset=([self.smilescol] + TargetProperty.getNames(self.targetProperties)), inplace=True)
 
     def getFeatureNames(self) -> List[str]:
         """Get current feature names for this data set.
@@ -1088,13 +1088,14 @@ class QSPRDataset(MoleculeTable):
         Args:
             split (datasplit) : split instance orchestrating the split
         """
+        targetPropertyNames = TargetProperty.getNames(self.targetProperties)
         folds = Folds(split)
         self.X, self.X_ind, self.y, self.y_ind, train_index, test_index = next(
-            folds.iterFolds(self.df, self.df[self.targetProperties]))
+            folds.iterFolds(self.df, self.df[targetPropertyNames]))
         self.X = self.df.iloc[train_index, :]
         self.X_ind = self.df.iloc[test_index, :]
-        self.y = self.df.iloc[train_index, :][self.targetProperties]
-        self.y_ind = self.df.iloc[test_index, :][self.targetProperties]
+        self.y = self.df.iloc[train_index, :][targetPropertyNames]
+        self.y_ind = self.df.iloc[test_index, :][targetPropertyNames]
 
         logger.info("Total: train: %s test: %s" % (len(self.y), len(self.y_ind)))
         if self.task == ModelTasks.SINGLECLASS:

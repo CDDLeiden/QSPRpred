@@ -122,10 +122,10 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
             self.assertNotIn("Notes", dataset_to_check.getProperties())
             self.assertNotIn("HBD", dataset_to_check.getProperties())
             self.assertTrue(len(self.df_small) - 1 == len(dataset_to_check))
-            self.assertEqual(dataset_to_check.task, ModelTasks.REGRESSION)
+            self.assertEqual(dataset_to_check.targetProperties[0].task, ModelTasks.REGRESSION)
             self.assertTrue(dataset_to_check.hasProperty("CL"))
-            self.assertEqual(dataset_to_check.targetProperty, "CL")
-            self.assertEqual(dataset_to_check.originalTargetProperty, "CL")
+            self.assertEqual(dataset_to_check.targetProperties[0].name, "CL")
+            self.assertEqual(dataset_to_check.targetProperties[0].originalName, "CL")
             self.assertEqual(len(dataset_to_check.X), len(dataset_to_check))
             self.assertEqual(len(dataset_to_check.X_ind), 0)
             self.assertEqual(len(dataset_to_check.y), len(dataset_to_check))
@@ -141,7 +141,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         stopwatch.reset()
         dataset_new = QSPRDataset(
             "test_defaults",
-            "CL",
+            [{"name": "CL", "task": ModelTasks.REGRESSION}],
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
@@ -154,7 +154,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         dataset_new = QSPRDataset.fromTableFile(
             "test_defaults",
             f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-            target_prop="CL",
+            target_props=[{"name": "CL", "task": ModelTasks.REGRESSION}],
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
@@ -166,7 +166,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         dataset_new = QSPRDataset.fromTableFile(
             "test_defaults_new",  # new name implies HBD below should exist again
             f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-            target_prop="CL",
+            target_props=[{"name": "CL", "task": ModelTasks.REGRESSION}],
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
@@ -179,7 +179,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
     def test_target_property(self):
         dataset = QSPRDataset(
             "test_target_property",
-            "CL",
+            [{"name": "CL", "task": ModelTasks.REGRESSION}],
             df=self.df_small,
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
