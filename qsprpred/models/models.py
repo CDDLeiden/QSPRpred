@@ -11,12 +11,17 @@ import os.path
 import sys
 from datetime import datetime
 from functools import partial
+from inspect import isclass
+from typing import Union, Type
 
 import numpy as np
 import optuna
 import pandas as pd
 import sklearn_json as skljson
+from sklearn.base import BaseEstimator
+
 from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
+from qsprpred.data.data import QSPRDataset
 from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.neural_network import STFullyConnected
@@ -42,33 +47,31 @@ class QSPRsklearn(QSPRModel):
     gridSearch: optimization of hyperparameters using gridSearch
     """
 
-    def __init__(self, base_dir, data, alg, alg_name, parameters=None):
+    def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None, name: str = None, parameters: dict = None):
+        super().__init__(base_dir, alg, data, name, parameters)
 
-        super().__init__(base_dir, data, alg, alg_name, parameters=parameters)
         # initialize models with defined parameters
-        if self.parameters:
-            self.model = self.alg.set_params(**self.parameters)
-        else:
-            if type(self.alg) in [SVC, SVR]:
-                logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
-                                 Manually set this parameter if this is not desired.")
-                self.model = self.alg.set_params(max_iter=10000)
-            else:
-                self.model = self.alg
+        if self.data and (type(self.model) in [SVC, SVR]):
+            logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
+                             Manually set this parameter if this is not desired.")
+            self.parameters.update({'max_iter': 10000})
+            self.model.set_params(**self.parameters)
 
         logger.info('parameters: %s' % self.parameters)
-        logger.debug('Model intialized: %s' % self.out)
-
-        os.makedirs(os.path.dirname(self.out), exist_ok=True)
+        logger.debug(f'Model "{self.name}" intialized in: "{self.baseDir}"')
 
     def fit(self):
         """Build estimator model from entire data set."""
+
+        # check if data is available
+        self.checkForData()
+
         X_all = self.data.getFeatures(concat=True).values
         y_all = self.data.getTargetProperties(concat=True).values.ravel()
 
         fit_set = {'X': X_all}
 
-        if type(self.alg).__name__ == 'PLSRegression':
+        if type(self.model).__name__ == 'PLSRegression':
             fit_set['Y'] = y_all
         else:
             fit_set['y'] = y_all
@@ -76,7 +79,7 @@ class QSPRsklearn(QSPRModel):
         logger.info('Model fit started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         self.model.fit(**fit_set)
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        skljson.to_json(self.model, '%s.json' % self.out)
+        self.save()
 
     def evaluate(self, save=True):
         """Make predictions for crossvalidation and independent test set.
@@ -84,6 +87,10 @@ class QSPRsklearn(QSPRModel):
         arguments:
             save (bool): don't save predictions when used in bayesian optimization
         """
+
+        # check if data is available
+        self.checkForData()
+
         folds = self.data.createFolds()
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetProperties()
@@ -126,7 +133,7 @@ class QSPRsklearn(QSPRModel):
         # fitting on whole trainingset and predicting on test set
         fit_set = {'X': X}
 
-        if type(self.alg).__name__ == 'PLSRegression':
+        if type(self.model).__name__ == 'PLSRegression':
             fit_set['Y'] = y.values.ravel()
         else:
             fit_set['y'] = y.values.ravel()
@@ -155,8 +162,8 @@ class QSPRsklearn(QSPRModel):
             else:
                 train['Score'], test['Score'] = cvs, inds
             train['Fold'] = fold_counter
-            train.to_csv(self.out + '.cv.tsv', sep='\t')
-            test.to_csv(self.out + '.ind.tsv', sep='\t')
+            train.to_csv(self.outPrefix + '.cv.tsv', sep='\t')
+            test.to_csv(self.outPrefix + '.ind.tsv', sep='\t')
 
         return cvs
 
@@ -171,7 +178,7 @@ class QSPRsklearn(QSPRModel):
             scoring = 'explained_variance'
         else:
             scoring = 'roc_auc_ovr_weighted' if self.data.nClasses > 2 else 'roc_auc'
-        grid = GridSearchCV(self.alg, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
+        grid = GridSearchCV(self.model, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
             (x[4], x[5]) for x in self.data.createFolds()), scoring=scoring, refit=False)
 
         X, X_ind = self.data.getFeatures()
@@ -182,10 +189,9 @@ class QSPRsklearn(QSPRModel):
         logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         logger.info('Grid search best parameters: %s' % grid.best_params_)
-        with open('%s_params.json' % self.out, 'w') as f:
-            json.dump(grid.best_params_, f)
-
-        self.model = self.alg.set_params(**grid.best_params_)
+        self.parameters = grid.best_params_
+        self.model = self.model.set_params(**grid.best_params_)
+        self.save()
 
     def bayesOptimization(self, search_space_bs, n_trials, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
@@ -222,10 +228,9 @@ class QSPRsklearn(QSPRModel):
         trial = study.best_trial
 
         logger.info('Bayesian optimization best params: %s' % trial.params)
-        with open('%s_params.json' % self.out, 'w') as f:
-            json.dump(trial.params, f)
-
-        self.model = self.alg.set_params(**trial.params)
+        self.parameters = trial.params
+        self.model = self.model.set_params(**trial.params)
+        self.save()
 
     def objective(self, trial, search_space_bs):
         """Objective for bayesian optimization.
@@ -251,7 +256,7 @@ class QSPRsklearn(QSPRModel):
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
 
         print(bayesian_params)
-        self.model = self.alg.set_params(**bayesian_params)
+        self.model.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetProperties()
         if self.data.task == ModelTasks.REGRESSION:
@@ -266,6 +271,36 @@ class QSPRsklearn(QSPRModel):
                     "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
                 score = -1
         return score
+
+    def loadModel(self, alg: Union[Type, BaseEstimator] = None, params: dict = None):
+        if alg and isinstance(alg, BaseEstimator):
+            if params:
+                return alg.set_params(**params)
+            else:
+                return alg
+        elif isclass(alg):
+            if params:
+                return alg(**params)
+            else:
+                return alg()
+        else:
+            model_path = f'{self.outDir}/{self.name}.json'
+            model = skljson.from_json(model_path)
+            self.alg = model.__class__
+            self.model = model
+            return model
+
+    def saveModel(self) -> str:
+        model_path = f'{self.outDir}/{self.name}.json'
+        skljson.to_json(self.model, model_path)
+        return model_path
+
+    def predict(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+        if isinstance(X, QSPRDataset):
+            X = X.getFeatures(raw=True, concat=True)
+        if self.featureStandardizer:
+            X = self.featureStandardizer(X)
+        return self.model.predict(X)
 
 
 class QSPRDNN(QSPRModel):
