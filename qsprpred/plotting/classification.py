@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.metrics import RocCurveDisplay, auc, f1_score, matthews_corrcoef, precision_score, recall_score, \
-    accuracy_score
+    accuracy_score, PrecisionRecallDisplay
 
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.plotting.interfaces import ModelPlot
@@ -128,6 +128,95 @@ class ROCPlot(ClassifierPlot):
                 plt.show()
                 plt.clf()
         return figures
+
+class PRCPlot(ClassifierPlot):
+
+    def makeCV(self, model : QSPRModel):
+        df = pd.read_table(self.cvPaths[model])
+
+        y_real = []
+        y_predproba = []
+        
+        ax = plt.gca()
+        for fold in df.Fold.unique():
+            # get labels
+            y_pred = df.Score[df.Fold == fold]
+            y_true = df.Label[df.Fold == fold]
+            y_predproba.append(y_pred)
+            y_real.append(y_true)
+            # do plotting
+            viz = PrecisionRecallDisplay.from_predictions(
+                y_true,
+                y_pred,
+                name="PRC fold {}".format(fold + 1),
+                ax=ax,
+                alpha=0.3,
+                lw=1,
+            )
+        # Linear iterpolation of PR curve is not recommended, so we don't plot "chance"
+        # https://dl.acm.org/doi/10.1145/1143844.1143874     
+           
+        # Plotting the average precision-recall curve over the cross validation runs
+        y_real = np.concatenate(y_real)
+        y_predproba = np.concatenate(y_predproba)
+        viz = PrecisionRecallDisplay.from_predictions(
+            y_real,
+            y_predproba,
+            name="Mean PRC",
+            color="b",
+            ax=ax,
+            lw=1.2,
+            alpha=0.8,
+        )
+        ax.set(
+            xlim=[-0.05, 1.05],
+            ylim=[-0.05, 1.05],
+            title=f"Precision-Recall Curve ({self.modelNames[model]})",
+        )
+        ax.legend(loc="best")
+        return ax
+
+    def makeInd(self, model : QSPRModel):
+        df = pd.read_table(self.indPaths[model])
+        y_pred = df.Score
+        y_true = df.Label
+
+        ax = plt.gca()
+        PrecisionRecallDisplay.from_predictions(
+            y_true,
+            y_pred,
+            name="PRC",
+            ax=ax,
+        )
+        # 
+        ax.set(
+            xlim=[-0.05, 1.05],
+            ylim=[-0.05, 1.05],
+            title=f"Receiver Operating Characteristic ({self.modelNames[model]})",
+        )
+        ax.legend(loc="best")
+        return ax
+
+    def make(self, validation : str = "cv", figsize:tuple = (6,4), save : bool = True, show : bool = False):
+        """
+        Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
+        """
+
+        choices = {
+            "cv": self.makeCV,
+            "ind": self.makeInd
+        }
+        axes = []
+        for model in self.models:
+            ax, fig = plt.subplots(figsize=figsize)
+            ax = choices[validation](model)
+            axes.append(ax)
+            if save:
+                fig.savefig(f'{self.modelOuts[model]}.{validation}.png')
+            if show:
+                plt.show()
+                plt.clf()
+        return axes
 
 class MetricsPlot(ClassifierPlot):
 
