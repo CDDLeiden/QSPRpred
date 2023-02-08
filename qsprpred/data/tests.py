@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import sklearn_json as skljson
 from mordred import descriptors as mordreddescriptors
-from qsprpred.data.data import QSPRDataset
+from qsprpred.data.data import QSPRDataset, TargetProperty
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
@@ -295,25 +295,69 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         check_regression(dataset_new, ["CL", "fu"], [[0, 15, 30, 60], [0.3]])
 
 
+class TestTargetProperty(TestCase):
+
+    def test_target_property(self):
+        def check_target_property(targetprop, name, task, original_name, th):
+            self.assertEqual(targetprop.name, name)
+            self.assertEqual(targetprop.task, task)
+            self.assertEqual(targetprop.originalName, original_name)
+            if task.isClassification():
+                self.assertTrue(targetprop.task.isClassification())
+                self.assertEqual(targetprop.th, th)
+
+        targetprop = TargetProperty("CL", ModelTasks.REGRESSION)
+        check_target_property(targetprop, "CL", ModelTasks.REGRESSION, "CL", None)
+
+        targetprop = TargetProperty("CL", ModelTasks.MULTICLASS, th=[0, 1, 10, 1200])
+        check_target_property(targetprop, "CL", ModelTasks.MULTICLASS, "CL", [0, 1, 10, 1200])
+
+        targetprop = TargetProperty("CL", ModelTasks.SINGLECLASS, th=[5])
+        check_target_property(targetprop, "CL", ModelTasks.SINGLECLASS, "CL", [5])
+
+        targetprop = TargetProperty.fromDict({"name": "CL", "task": ModelTasks.REGRESSION})
+        check_target_property(targetprop, "CL", ModelTasks.REGRESSION, "CL", None)
+
+        targetprop = TargetProperty.fromDict({"name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]})
+        check_target_property(targetprop, "CL", ModelTasks.MULTICLASS, "CL", [0, 1, 10, 1200])
+
+        targetprops = TargetProperty.fromList(
+            [{"name": "CL", "task": ModelTasks.REGRESSION},
+             {"name": "fu", "task": ModelTasks.REGRESSION}])
+        check_target_property(targetprops[0], "CL", ModelTasks.REGRESSION, "CL", None)
+        check_target_property(targetprops[1], "fu", ModelTasks.REGRESSION, "fu", None)
+        self.assertEqual(TargetProperty.selectFromList(targetprops, "CL")[0], targetprops[0])
+        self.assertListEqual(TargetProperty.getNames(targetprops), ["CL", "fu"])
+
+        targetprops = TargetProperty.toList(targetprops)
+        self.assertIsInstance(targetprops, list)
+        self.assertIsInstance(targetprops[0], dict)
+        self.assertEqual(targetprops[0]["name"], "CL")
+        self.assertEqual(targetprops[0]["task"], ModelTasks.REGRESSION)
+
+
 class TestDataSetPreparation(DataSets, TestCase):
 
     def test_preparation(self):
         paths = []
-        tasks = [ModelTasks.REGRESSION, ModelTasks.MULTICLASS]
-        for task in tasks:
-            dataset = QSPRDataset(
-                f"test_create_prep_{task.name}", [{"name": "CL", "task": task, "th": [0, 1, 10, 1200]
-                                                   if task == ModelTasks.MULTICLASS else None}], df=self.df_large,
-                store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        targetprops_list = [[{"name": "CL", "task": ModelTasks.REGRESSION}],
+                            [{"name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]}],
+                            [{"name": "fu", "task": ModelTasks.REGRESSION},
+                             {"name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]}]]
+
+        for targetprops in targetprops_list:
+            targetprops = TargetProperty.fromList(targetprops)
+            targetprops_id = "_".join([f"{targetprop.name}_{targetprop.task.name}" for targetprop in targetprops])
+            dataset = QSPRDataset(f"test_create_prep_{targetprops_id}", targetprops, df=self.df_large,
+                                  store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
             np.random.seed(42)
-            descriptor_sets = [
-                Mordred(),
-                FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-                rdkit_descs(),
-                DrugExPhyschem(),
-                PredictorDesc(
-                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
-                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'),
+            descriptor_sets = [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
+                               Mordred(),
+                               rdkit_descs(),
+                               DrugExPhyschem(),
+                               PredictorDesc(
+                f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
+                f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'),
                 TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000)
             ]
             expected_length = sum([len(x.descriptors) for x in descriptor_sets])
@@ -338,11 +382,14 @@ class TestDataSetPreparation(DataSets, TestCase):
             dataset.save()
             paths.append(dataset.storePath)
 
-        for path, task in zip(paths, tasks):
+        for path, targetprops in zip(paths, targetprops_list):
+            targetprops = TargetProperty.fromList(targetprops)
             ds = QSPRDataset.fromFile(path, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-            if ds.targetProperties[0].task == ModelTasks.MULTICLASS:
-                self.assertEqual(ds.targetProperties[0].name, "CL_class")
-            self.assertTrue(ds.targetProperties[0].task == task)
+            for targetprop in targetprops:
+                dstargetprop = ds.getTargetProperties(targetprop.originalName, original_names=True)[0]
+                if targetprop.task.isClassification():
+                    self.assertEqual(dstargetprop.name, f"{targetprop.originalName}_class")
+                self.assertTrue(dstargetprop.task == targetprop.task)
             self.assertTrue(ds.descriptorCalculator)
             self.assertTrue(
                 isinstance(

@@ -1394,7 +1394,7 @@ class QSPRDataset(MoleculeTable):
         Get the target properties with the given names
 
         Args:
-            name (List[str]): name of the target properties
+            names (List[str]): name of the target properties
             original_names (bool): if `True`, use the original names of the target properties
 
         Returns:
