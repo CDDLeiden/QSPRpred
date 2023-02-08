@@ -45,6 +45,10 @@ class QSPRsklearn(QSPRModel):
     def __init__(self, base_dir, data, alg, alg_name, parameters=None):
 
         super().__init__(base_dir, data, alg, alg_name, parameters=parameters)
+        # Adding scoring functions available for hyperparam optimization:
+        self._supported_scoring = [
+            'average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
+            'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
         # initialize models with defined parameters
         if self.parameters:
             self.model = self.alg.set_params(**self.parameters)
@@ -279,15 +283,27 @@ class QSPRsklearn(QSPRModel):
         return score
     
     def get_scoring_func(self, scoring):
-        """Get scorer function from sklearn.metrics.
+        """Get scoring function from sklearn.metrics.
 
         Args:
-            scoring (Union[str, Callable]): metric name from sklearn.metrics or user-defined scoring function.
-            
+            scoring (Union[str, Callable]): metric name from sklearn.metrics or 
+                user-defined scoring function.
+
+        Raises:
+            ValueError: If the scoring function is currently not supported by 
+                GridSearch and BayesOptimization.
+
         Returns:
-            score_func (Callable): scorer function from sklearn.metrics.
+            score_func (Callable): scorer function from sklearn.metrics (`str` as input)
+            or user-defined function (`callable` as input)
         """
-        if callable(scoring):
+        # TODO: to add support for more scoring functions we will need to ensure that
+        # the cross validation returns the correct input for the scoring function. 
+        # It's possible to inspect that by calling `str(scorer)` and checking the attributes.
+        if all([scoring not in self._supported_scoring, isinstance(scoring, str)]):
+            raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"
+                             % (scoring, self._supported_scoring))
+        elif callable(scoring):
             return scoring
         elif scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
@@ -320,7 +336,9 @@ class QSPRDNN(QSPRModel):
         self.n_class = max(1, data.nClasses)
         super().__init__(base_dir, data, STFullyConnected(n_dim=data.X.shape[1], n_class=self.n_class, device=device,
                          gpus=gpus, is_reg=data.task == ModelTasks.REGRESSION), "DNN", parameters=parameters)
-
+        self._supported_scoring = [
+            'average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
+            'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
         self.patience = patience
         self.tol = tol
 
@@ -536,23 +554,32 @@ class QSPRDNN(QSPRModel):
         return score
     
     def get_scoring_func(self, scoring):
-        """Get scorer function from sklearn.metrics.
+        """Get scoring function from sklearn.metrics.
 
         Args:
-            scoring (Union[str, Callable]): metric name from sklearn.metrics or user-defined scoring function.
-            
+            scoring (Union[str, Callable]): metric name from sklearn.metrics or 
+                user-defined scoring function.
+
+        Raises:
+            ValueError: If the scoring function is currently not supported by 
+                GridSearch and BayesOptimization.
+
         Returns:
-            score_func (Callable): scorer function from sklearn.metrics.
+            score_func (Callable): scorer function from sklearn.metrics (`str` as input)
+            or user-defined function (`callable` as input)
         """
-        if callable(scoring):
+        if all([scoring not in self._supported_scoring, isinstance(scoring, str)]):
+            raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"
+                             % (scoring, self._supported_scoring))
+        elif callable(scoring):
             return scoring
         elif scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
                 scorer = metrics.get_scorer('explained_variance')
             elif self.data.nClasses > 2: # multiclass
-                # Calling metrics.get_scorer('roc_auc_ovr_weighted') in this context
-                # raises the error `multi_class must be in ('ovo', 'ovr')` so let's avoid it
-                return partial(metrics.roc_auc_score, multi_class='ovr', average='weighted')
+            # Calling metrics.get_scorer('roc_auc_ovr_weighted') in this context
+            # raises the error `multi_class must be in ('ovo', 'ovr')` so let's avoid it
+                scorer = metrics.get_scorer('roc_auc_ovr_weighted')
             else:
                 scorer = metrics.get_scorer('roc_auc')
         else:
