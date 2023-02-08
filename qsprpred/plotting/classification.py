@@ -31,7 +31,7 @@ class ROCPlot(ClassifierPlot):
         tprs = []
         aucs = []
         mean_fpr = np.linspace(0, 1, 100)
-        fig, ax = plt.subplots()
+        ax = plt.gca()
         for fold in df.Fold.unique():
             # get labels
             y_pred = df.Score[df.Fold == fold]
@@ -84,7 +84,6 @@ class ROCPlot(ClassifierPlot):
             title=f"Receiver Operating Characteristic ({self.modelNames[model]})",
         )
         ax.legend(loc="lower right")
-
         return ax
 
     def makeInd(self, model : QSPRModel):
@@ -92,7 +91,7 @@ class ROCPlot(ClassifierPlot):
         y_pred = df.Score
         y_true = df.Label
 
-        fig, ax = plt.subplots()
+        ax = plt.gca()
         RocCurveDisplay.from_predictions(
             y_true,
             y_pred,
@@ -106,10 +105,9 @@ class ROCPlot(ClassifierPlot):
             title=f"Receiver Operating Characteristic ({self.modelNames[model]})",
         )
         ax.legend(loc="lower right")
-
         return ax
 
-    def make(self, validation : str = "cv", save : bool = True, show : bool = False):
+    def make(self, validation : str = "cv", figsize:tuple = (6,4), save : bool = True, show : bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -118,16 +116,17 @@ class ROCPlot(ClassifierPlot):
             "cv": self.makeCV,
             "ind": self.makeInd
         }
-        figures = []
+        axes = []
         for model in self.models:
-            fig = choices[validation](model)
-            figures.append(fig)
+            fig, ax = plt.subplots(figsize=figsize)
+            ax = choices[validation](model)
+            axes.append(fig)
             if save:
-                plt.savefig(f'{self.modelOuts[model]}.{validation}.png')
+                fig.savefig(f'{self.modelOuts[model]}.{validation}.png')
             if show:
                 plt.show()
                 plt.clf()
-        return figures
+        return axes
 
 class PRCPlot(ClassifierPlot):
 
@@ -208,7 +207,7 @@ class PRCPlot(ClassifierPlot):
         }
         axes = []
         for model in self.models:
-            ax, fig = plt.subplots(figsize=figsize)
+            fig, ax = plt.subplots(figsize=figsize)
             ax = choices[validation](model)
             axes.append(ax)
             if save:
