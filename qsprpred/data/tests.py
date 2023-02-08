@@ -176,10 +176,63 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         dataset_new.removeProperty("HBD")
         check_consistency(dataset_new)
 
+    def test_multi_task(self):
+        # test multi task
+        dataset = QSPRDataset(
+            "test_multi_task",
+            [{"name": "CL", "task": ModelTasks.REGRESSION},
+             {"name": "fu", "task": ModelTasks.REGRESSION}],
+            df=self.df_small,
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+        )
+
+        def check_multiclass(dataset_to_check):
+            self.assertTrue(dataset_to_check.isMultiTask)
+            self.assertEqual(dataset_to_check.nTasks, 2)
+            self.assertEqual(len(dataset_to_check.targetProperties), 2)
+            self.assertEqual(dataset_to_check.targetProperties[0].name, "CL")
+            self.assertEqual(dataset_to_check.targetProperties[1].name, "fu")
+            self.assertEqual(dataset_to_check.targetProperties[0].task, ModelTasks.REGRESSION)
+            self.assertEqual(dataset_to_check.targetProperties[1].task, ModelTasks.REGRESSION)
+            self.assertEqual(len(dataset_to_check.X), len(dataset_to_check))
+            self.assertEqual(len(dataset_to_check.y), len(dataset_to_check))
+            self.assertEqual(len(dataset_to_check.y.columns), 2)
+            self.assertEqual(dataset_to_check.y.columns[0], "CL")
+            self.assertEqual(dataset_to_check.y.columns[1], "fu")
+
+        check_multiclass(dataset)
+
+        dataset.dropTask("fu")
+
+        def check_singleclass(dataset_to_check):
+            self.assertFalse(dataset_to_check.isMultiTask)
+            self.assertEqual(dataset_to_check.nTasks, 1)
+            self.assertEqual(len(dataset_to_check.targetProperties), 1)
+            self.assertEqual(dataset_to_check.targetProperties[0].name, "CL")
+            self.assertEqual(dataset_to_check.targetProperties[0].task, ModelTasks.REGRESSION)
+            self.assertEqual(len(dataset_to_check.X), len(dataset_to_check))
+            self.assertEqual(len(dataset_to_check.y), len(dataset_to_check))
+            self.assertEqual(len(dataset_to_check.y.columns), 1)
+            self.assertEqual(dataset_to_check.y.columns[0], "CL")
+
+        check_singleclass(dataset)
+
+        with self.assertRaises(AssertionError):
+            dataset.dropTask("fu")
+
+        with self.assertRaises(AssertionError):
+            dataset.dropTask("CL")
+
+        dataset.addTask({"name": "fu", "task": ModelTasks.REGRESSION})
+        check_multiclass(dataset)
+
     def test_target_property(self):
         dataset = QSPRDataset(
             "test_target_property",
-            [{"name": "CL", "task": ModelTasks.REGRESSION}],
+            [{"name": "CL", "task": ModelTasks.REGRESSION},
+             {"name": "fu", "task": ModelTasks.REGRESSION}],
             df=self.df_small,
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
@@ -196,48 +249,50 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
             with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification("CL", th=[0, 2, 3])
 
-        def test_classification(dataset_to_test):
-            if len(th) == 1:
-                self.assertEqual(dataset_to_test.targetProperties[0].task, ModelTasks.SINGLECLASS)
-            else:
-                self.assertEqual(dataset_to_test.targetProperties[0].task, ModelTasks.MULTICLASS)
-            self.assertEqual(dataset_to_test.targetProperties[0].name, "CL_class")
-            self.assertEqual(dataset_to_test.targetProperties[0].originalName, "CL")
-            y = dataset_to_test.getTargetPropertiesValues(concat=True)
-            self.assertTrue(y.columns[0] == dataset_to_test.targetProperties[0].name)
-            if dataset_to_test.targetProperties[0].task == ModelTasks.SINGLECLASS:
-                self.assertEqual(y[dataset_to_test.targetProperties[0].name].unique().shape[0], 2)
-            else:
-                self.assertEqual(y[dataset_to_test.targetProperties[0].name].unique().shape[0], (len(th) - 1))
-            self.assertEqual(dataset_to_test.targetProperties[0].th, th)
+        def test_classification(dataset_to_test, target_names, ths):
+            for idx, target_prop in enumerate(dataset_to_test.targetProperties):
+                if len(ths[idx]) == 1:
+                    self.assertEqual(target_prop.task, ModelTasks.SINGLECLASS)
+                else:
+                    self.assertEqual(target_prop.task, ModelTasks.MULTICLASS)
+                self.assertEqual(target_prop.name, f"{target_names[idx]}_class")
+                self.assertEqual(target_prop.originalName, f"{target_names[idx]}")
+                y = dataset_to_test.getTargetPropertiesValues(concat=True)
+                self.assertTrue(y.columns[idx] == target_prop.name)
+                if target_prop.task == ModelTasks.SINGLECLASS:
+                    self.assertEqual(y[target_prop.name].unique().shape[0], 2)
+                else:
+                    self.assertEqual(y[target_prop.name].unique().shape[0], (len(ths[idx]) - 1))
+                self.assertEqual(target_prop.th, ths[idx])
 
-        th = [6.5]
         test_bad_init(dataset)
-        dataset.makeClassification("CL", th=th)
-        test_classification(dataset)
-        th = [0, 15, 30, 60]
-        dataset.makeClassification("CL", th=th)
-        test_classification(dataset)
+        dataset.makeClassification("CL", th=[6.5])
+        dataset.makeClassification("fu", th=[0.3])
+        test_classification(dataset, ["CL", "fu"], [[6.5], [0.3]])
+        dataset.makeClassification("CL", th=[0, 15, 30, 60])
+        test_classification(dataset, ["CL", "fu"], [[0, 15, 30, 60], [0.3]])
         dataset.save()
 
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         test_bad_init(dataset)
-        test_classification(dataset_new)
+        test_classification(dataset_new, ["CL", "fu"], [[0, 15, 30, 60], [0.3]])
 
         dataset_new.makeRegression(target_property="CL")
+        dataset_new.makeRegression(target_property="fu")
 
-        def check_regression(dataset_to_check):
-            self.assertEqual(dataset_to_check.targetProperties[0].task, ModelTasks.REGRESSION)
-            self.assertTrue(dataset_to_check.hasProperty("CL"))
-            self.assertEqual(dataset_to_check.targetProperties[0].name, "CL")
-            self.assertEqual(dataset_to_check.targetProperties[0].originalName, "CL")
-            y = dataset_to_check.getTargetPropertiesValues(concat=True)
-            self.assertNotEqual(y[dataset_to_check.targetProperties[0].name].unique().shape[0], (len(th) - 1))
+        def check_regression(dataset_to_check, target_names, ths):
+            for idx, target_prop in enumerate(dataset_to_check.targetProperties):
+                self.assertEqual(target_prop.task, ModelTasks.REGRESSION)
+                self.assertTrue(dataset_to_check.hasProperty(target_names[idx]))
+                self.assertEqual(target_prop.name, target_names[idx])
+                self.assertEqual(target_prop.originalName, target_names[idx])
+                y = dataset_to_check.getTargetPropertiesValues(concat=True)
+                self.assertNotEqual(y[target_prop.name].unique().shape[0], (len(ths[idx]) - 1))
 
-        check_regression(dataset_new)
+        check_regression(dataset_new, ["CL", "fu"], [[0, 15, 30, 60], [0.3]])
         dataset_new.save()
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
-        check_regression(dataset_new)
+        check_regression(dataset_new, ["CL", "fu"], [[0, 15, 30, 60], [0.3]])
 
 
 class TestDataSetPreparation(DataSets, TestCase):

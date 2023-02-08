@@ -654,6 +654,22 @@ class TargetProperty():
         return self.name
 
     @classmethod
+    def fromDict(cls, d: dict, task_from_str: bool = False):
+        """Create a TargetProperty object from a dictionary.
+
+        Args:
+            d (dict): dictionary containing the target property information
+            task_from_str (bool): whether to convert the task from a string
+
+        Returns:
+            TargetProperty: TargetProperty object
+        """
+        if task_from_str:
+            return TargetProperty(**{k: ModelTasks[v] if k == "task" else v for k, v in d.items()})
+        else:
+            return TargetProperty(**d)
+
+    @classmethod
     def fromList(cls, l: List[dict], task_from_str: bool = False):
         """Create a list of TargetProperty objects from a list of dictionaries.
 
@@ -1453,3 +1469,45 @@ class QSPRDataset(MoleculeTable):
             json.dump(ret, f)
 
         return path
+
+    @property
+    def isMultiTask(self):
+        """
+        Check if the dataset contains multiple target properties.
+
+        Returns:
+            `bool`: `True` if the dataset contains multiple target properties
+        """
+        return len(self.targetProperties) > 1
+
+    @property
+    def nTasks(self):
+        return len(self.targetProperties)
+
+    def dropTask(self, task):
+        """
+        Drop the given task from the dataset.
+
+        Args:
+            task (str): name of the task to drop
+        """
+        assert task in self.targetPropertyNames, f"Task {task} not found in dataset."
+        assert len(self.targetProperties) > 1, "Cannot drop task from single-task dataset."
+        self.targetProperties = [tp for tp in self.targetProperties if tp.name != task]
+        self.restoreTrainingData()
+
+    def addTask(self, task: Union[TargetProperty, dict]):
+        """
+        Add a task to the dataset.
+
+        Args:
+            task (TargetProperty): name of the task to add
+        """
+        if isinstance(task, dict):
+            task = TargetProperty.fromDict(task)
+
+        assert task.name not in self.targetPropertyNames, f"Task {task} already exists in dataset."
+        assert task.name in self.df.columns, f"Task {task} not found in dataset."
+
+        self.targetProperties.append(task)
+        self.restoreTrainingData()
