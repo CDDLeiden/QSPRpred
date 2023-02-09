@@ -121,7 +121,7 @@ def QSPR_predict(args):
             metadata_path = f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_meta.json'
             with open(metadata_path, 'r') as f:
                 metadata = json.load(f)
-                current_propertyname = metadata['new_target_prop']
+                current_propertyname = metadata['init']['target_props'][0]['name']
             log.info(f"Property: {property[0]}")
             for model_type in args.model_types:
                 print(model_type)

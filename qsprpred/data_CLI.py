@@ -158,13 +158,10 @@ def QSPR_dataprep(args):
             log_transform = np.log if args.log_transform and args.log_transform[property[0]] else None
             mydataset = QSPRDataset(
                 f"{property[0]}_{reg_abbr}_QSPRdata",
-                target_prop=property[0],
+                target_props=[{"name": property[0], "task": task, "th": th, "transformer": log_transform}],
                 df=df,
                 smilescol=args.smilescol,
-                task=task,
-                th=th,
                 n_jobs=args.ncpu,
-                target_transformer=log_transform,
                 store_dir=f"{args.base_dir}/qspr/data/",
                 overwrite=True)
 

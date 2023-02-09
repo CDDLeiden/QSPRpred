@@ -686,7 +686,7 @@ class TargetProperty():
             return [TargetProperty(**d) for d in l]
 
     @staticmethod
-    def toList(l: list, task_as_str: bool = False):
+    def toList(l: list, task_as_str: bool = False, drop_transformer: bool = True):
         """Convert a list of TargetProperty objects to a list of dictionaries.
 
         Args:
@@ -700,6 +700,9 @@ class TargetProperty():
         if task_as_str:
             for t in target_props:
                 t["task"] = t["task"].name
+        if drop_transformer:
+            for t in target_props:
+                t.pop("transformer")
         return target_props
 
     @staticmethod
