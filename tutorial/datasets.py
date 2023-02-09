@@ -41,7 +41,8 @@ def A2AR(data_dir='data'):
     )
 
     print(f"Number of samples loaded: {len(dataset.getDF())}")
-    return QSPRDataset.fromMolTable(dataset, "pchembl_value_Median", task=ModelTasks.SINGLECLASS, th=[6.5])
+    return QSPRDataset.fromMolTable(
+        dataset, [{"name": "pchembl_value_Median", "task": ModelTasks.SINGLECLASS, "th": [6.5]}])
 
 
 def Parkinsons():
@@ -87,7 +88,6 @@ def Parkinsons():
         name='tutorial_data',
         df=df,
         smilescol=smiles_col,
-        target_prop="GABAAalpha",
-        task=ModelTasks.REGRESSION,
+        target_props=[{"name": "GABAAalpha", "task": ModelTasks.REGRESSION}],
         store_dir="qspr/data"
     )
