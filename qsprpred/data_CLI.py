@@ -114,10 +114,6 @@ def QSPRArgParser(txt=None):
     else:
         args = parser.parse_args()
 
-    for props in args.properties:
-        if len(props) > 1:
-            sys.exit("Multitask not yet implemented")
-
     # If no regression argument, does both regression and classification
     if args.regression is None:
         args.regression = [True, False]
@@ -138,8 +134,9 @@ def QSPR_dataprep(args):
 
     for reg in args.regression:
         reg_abbr = 'REG' if reg else 'CLS'
-        for property in args.properties:
-            log.info(f"Property: {property[0]} {reg_abbr}")
+        for props in args.properties:
+            props_name = '_'.join(props)
+            log.info(f"Property: {props_name} {reg_abbr}")
             try:
                 df = pd.read_csv(f'{args.base_dir}/data/{args.input}', sep='\t')
             except BaseException:
@@ -147,18 +144,22 @@ def QSPR_dataprep(args):
                 sys.exit()
 
             # prepare dataset for training QSPR model
-            th = args.threshold[property[0]] if args.threshold else None
-            if reg:
-                task = ModelTasks.REGRESSION
-            else:
-                task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
-            if task == ModelTasks.REGRESSION and th:
-                log.warning("Threshold argument specified with regression. Threshold will be ignored.")
-                th = None
-            log_transform = np.log if args.log_transform and args.log_transform[property[0]] else None
+            target_props = []
+            for prop in props:
+                th = args.threshold[prop] if args.threshold else None
+                if reg:
+                    task = ModelTasks.REGRESSION
+                else:
+                    task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
+                if task == ModelTasks.REGRESSION and th:
+                    log.warning("Threshold argument specified with regression. Threshold will be ignored.")
+                    th = None
+                log_transform = np.log if args.log_transform and args.log_transform[prop] else None
+                target_props.append({"name": prop, "task": task, "th": th, "transformer": log_transform})
+
             mydataset = QSPRDataset(
-                f"{property[0]}_{reg_abbr}_QSPRdata",
-                target_props=[{"name": property[0], "task": task, "th": th, "transformer": log_transform}],
+                f"{props_name}_{reg_abbr}_QSPRdata",
+                target_props=target_props,
                 df=df,
                 smilescol=args.smilescol,
                 n_jobs=args.ncpu,
