@@ -1056,7 +1056,7 @@ class QSPRDataset(MoleculeTable):
             fold (datasplitter obj): splits the train set into folds for cross validation
             feature_calculator (DescriptorsCalculator): calculates features from smiles
             feature_filters (list of feature filter objs): filters features
-            feature_standardizer (SKLearnStandardizer): standardizes and/or scales features
+            feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator): standardizes and/or scales features
             recalculate_features (bool): recalculate features even if they are already present in the file
             fill_value (float): value to fill missing values with, defaults to `numpy.nan`
         """
@@ -1155,7 +1155,7 @@ class QSPRDataset(MoleculeTable):
 
         return self.fold_generator.iterFolds(self.X, self.y)
 
-    def fitFeatureStandardizers(self):
+    def fitFeatureStandardizer(self):
         """
         Fit the feature standardizers on the training set.
 
@@ -1253,14 +1253,14 @@ class QSPRDataset(MoleculeTable):
         """
         paths = []
         if self.feature_standardizer:
-            self.fitFeatureStandardizers()  # make sure feature standardizers are fitted before serialization
-            for idx, standardizer in enumerate(self.feature_standardizer):
-                path = f'{self.storePrefix}_feature_standardizer_{idx}.json'
-                if not hasattr(standardizer, 'toFile'):
-                    SKLearnStandardizer(standardizer).toFile(path)
-                else:
-                    standardizer.toFile(path)
-                paths.append(path)
+            # make sure feature standardizers are fitted before serialization
+            self.fitFeatureStandardizer()
+            path = f'{self.storePrefix}_feature_standardizer.json'
+            if not hasattr(self.feature_standardizer, 'toFile'):
+                SKLearnStandardizer(self.feature_standardizer).toFile(path)
+            else:
+                self.feature_standardizer.toFile(path)
+            paths.append(path)
         return paths
 
     def saveMetadata(self):

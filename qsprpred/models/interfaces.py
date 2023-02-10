@@ -4,6 +4,7 @@ import os
 import shutil
 import sys
 from abc import ABC, abstractmethod
+from inspect import isclass
 from typing import Union, Type
 
 import numpy as np
@@ -34,7 +35,7 @@ class QSPRModel(ABC):
         gridSearch: optimization of hyperparameters using gridSearch
     """
 
-    def __init__(self, base_dir : str, alg = None, data : QSPRDataset = None, name : str =None, parameters : dict = None):
+    def __init__(self, base_dir : str, alg = None, data : QSPRDataset = None, name : str =None, parameters : dict = None, autoload=True):
         """Initialize model from saved or default hyperparameters."""
         self.data = data
         self.name = name or alg.__class__.__name__
@@ -65,7 +66,8 @@ class QSPRModel(ABC):
 
         # initialize a model instance with the given parameters
         self.alg = alg
-        self.model = self.loadModel(alg=self.alg, params=self.parameters)
+        if autoload:
+            self.model = self.loadModel(alg=self.alg, params=self.parameters)
 
     def __str__(self):
         return self.name
@@ -146,6 +148,7 @@ class QSPRModel(ABC):
     def save(self):
         self.metaInfo['name'] = self.name
         self.metaInfo['task'] = str(self.task)
+        self.metaInfo['th'] = self.data.th
         self.metaInfo['target_property'] = self.targetProperty
         self.metaInfo['parameters_path'] = self.saveParams(self.parameters).replace(f"{self.baseDir}/", '')
         self.metaInfo['feature_calculator_path'] = self.saveDescriptorCalculator().replace(f"{self.baseDir}/", '')
@@ -257,7 +260,11 @@ class QSPRModel(ABC):
     def predict(self, X : Union[pd.DataFrame, np.ndarray, QSPRDataset]):
         pass
 
-    def predictMols(self, mols):
+    @abstractmethod
+    def predictProba(self, X : Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+        pass
+
+    def predictMols(self, mols, use_probas=False):
         dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False)
         dataset.addProperty(self.targetProperty, np.nan)
         dataset = QSPRDataset.fromMolTable(dataset, self.targetProperty, drop_empty=False, drop_invalids=False)
@@ -271,7 +278,12 @@ class QSPRModel(ABC):
             feature_calculator=self.featureCalculator,
             feature_standardizer=self.featureStandardizer
         )
-        predictions = self.predict(dataset)
+        if self.task == ModelTasks.REGRESSION or not use_probas:
+            predictions = self.predict(dataset)
+            if (isclass(self.alg) and self.alg.__name__ == 'PLSRegression') or (type(self.alg).__name__ == 'PLSRegression'):
+                predictions = predictions[:, 0]
+        else:
+            predictions = self.predictProba(dataset)
 
         if failed_indices:
             predictions = list(predictions)
@@ -288,7 +300,7 @@ class QSPRModel(ABC):
     @classmethod
     def fromFile(cls, path):
         name = cls.readMetadata(path)['name']
-        dir_name = os.path.dirname(path)
+        dir_name = os.path.dirname(path).replace(f"qspr/models/{name}", "")
         return cls(name=name, base_dir=dir_name)
 
     def cleanFiles(self):

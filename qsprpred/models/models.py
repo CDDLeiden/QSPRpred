@@ -4,7 +4,6 @@ At the moment there is a class for sklearn type models
 and one for a keras DNN model. To add more types a model class should be added, which
 is a sublass of the QSPRModel type.
 """
-import json
 import math
 import os
 import os.path
@@ -18,6 +17,7 @@ import numpy as np
 import optuna
 import pandas as pd
 import sklearn_json as skljson
+import torch
 from sklearn.base import BaseEstimator
 
 from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
@@ -47,8 +47,8 @@ class QSPRsklearn(QSPRModel):
     gridSearch: optimization of hyperparameters using gridSearch
     """
 
-    def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None, name: str = None, parameters: dict = None):
-        super().__init__(base_dir, alg, data, name, parameters)
+    def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None, name: str = None, parameters: dict = None, autoload: bool = True):
+        super().__init__(base_dir, alg, data, name, parameters, autoload)
 
         # initialize models with defined parameters
         if self.data and (type(self.model) in [SVC, SVR]):
@@ -112,7 +112,7 @@ class QSPRsklearn(QSPRModel):
             fit_set = {'X': X_train}
 
             # self.data.createFolds() returns numpy arrays by default so we don't call `.values` here
-            if type(self.alg).__name__ == 'PLSRegression':
+            if (isclass(self.alg) and self.alg.__name__ == 'PLSRegression') or (type(self.alg).__name__ == 'PLSRegression'):
                 fit_set['Y'] = y_train.ravel()
             else:
                 fit_set['y'] = y_train.ravel()
@@ -302,6 +302,13 @@ class QSPRsklearn(QSPRModel):
             X = self.featureStandardizer(X)
         return self.model.predict(X)
 
+    def predictProba(self, X : Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+        if isinstance(X, QSPRDataset):
+            X = X.getFeatures(raw=True, concat=True)
+        if self.featureStandardizer:
+            X = self.featureStandardizer(X)
+        return self.model.predict_proba(X)
+
 
 class QSPRDNN(QSPRModel):
     """This class holds the methods for training and fitting a Deep Neural Net QSPR model initialization.
@@ -317,24 +324,91 @@ class QSPRDNN(QSPRModel):
         tol (float): minimum absolute improvement of loss necessary to count as progress on best validation score
     """
 
-    def __init__(self, base_dir, data, parameters=None, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, patience=50, tol=0):
+    def __init__(self,
+                 base_dir: str,
+                 alg : Union[STFullyConnected, Type] = STFullyConnected,
+                 data: QSPRDataset = None,
+                 name: str = None,
+                 parameters: dict = None,
+                 autoload: bool = True,
+                 device=DEFAULT_DEVICE,
+                 gpus=DEFAULT_GPUS,
+                 patience=50, tol=0
+        ):
 
-        self.n_class = max(1, data.nClasses)
-        super().__init__(base_dir, data, STFullyConnected(n_dim=data.X.shape[1], n_class=self.n_class, device=device,
-                         gpus=gpus, is_reg=data.task == ModelTasks.REGRESSION), "DNN", parameters=parameters)
+        super().__init__(base_dir, alg, data, name, parameters, autoload=False)
+        self.device = device
+        self.gpus = gpus
 
+        self.optimal_epochs = -1
+        self.n_class = max(1, self.data.nClasses) if self.data else self.metaInfo['n_class']
+        self.n_dim = self.data.X.shape[1] if self.data else self.metaInfo['n_dim']
         self.patience = patience
         self.tol = tol
 
-        # Initialize model with defined parameters
-        if self.parameters:
-            self.model = self.alg.set_params(**self.parameters)
-        else:
-            self.model = self.alg
-        logger.info('parameters: %s' % self.parameters)
-        logger.debug('Model intialized: %s' % self.out)
+        if autoload:
+            self.model = self.loadModel(alg, self.parameters)
 
-        self.optimal_epochs = -1
+    def loadModel(self, alg : Union[Type, object] = None, params : dict = None):
+        """
+        Load model from file or initialize new model
+
+        Args:
+            alg (Union[Type, object], optional): model class or instance. Defaults to None.
+            params (dict, optional): model parameters. Defaults to None.
+
+        Returns:
+            model (object): model instance
+        """
+        # initialize model
+        if alg is not None:
+            if isclass(alg):
+                if params:
+                    model = alg(
+                        n_dim=self.n_dim,
+                        n_class=self.n_class,
+                        device=self.device,
+                        gpus=self.gpus,
+                        is_reg=self.task == ModelTasks.REGRESSION
+                    )
+                    model.set_params(**params)
+                else:
+                    model = alg(
+                        n_dim=self.n_dim,
+                        n_class=self.n_class,
+                        device=self.device,
+                        gpus=self.gpus,
+                        is_reg=self.task == ModelTasks.REGRESSION
+                    )
+            else:
+                model = alg
+                model.set_params(**params)
+        else:
+            if params:
+                model = STFullyConnected(
+                    n_dim=self.n_dim,
+                    n_class=self.n_class,
+                    device=self.device,
+                    gpus=self.gpus,
+                    is_reg=self.task == ModelTasks.REGRESSION
+                )
+                model.set_params(**params)
+            else:
+                model = STFullyConnected(
+                    n_dim=self.n_dim,
+                    n_class=self.n_class,
+                    device=self.device,
+                    gpus=self.gpus,
+                    is_reg=self.task == ModelTasks.REGRESSION
+                )
+
+        # load states if available
+        if 'model_path' in self.metaInfo:
+            model_path = os.path.join(self.baseDir, self.metaInfo['model_path'])
+            if os.path.exists(model_path):
+                model.load_state_dict(torch.load(model_path))
+
+        return model
 
     def fit(self):
         """Train model on the trainings data, determine best model using test set, save best model.
@@ -347,20 +421,29 @@ class QSPRDNN(QSPRModel):
                           first run evaluate.')
             sys.exit()
 
+        self.checkForData()
+
         X_all = self.data.getFeatures(concat=True).values
         y_all = self.data.getTargetProperties(concat=True).values
 
-        self.model = self.model.set_params(**{"n_epochs": self.optimal_epochs})
+        self.parameters.update({"n_epochs": self.optimal_epochs})
+        self.model.set_params(**self.parameters)
         train_loader = self.model.get_dataloader(X_all, y_all)
 
         logger.info('Model fit started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        self.model.fit(train_loader, None, self.out, patience=-1)
-        with open('%s.json' % self.out, 'w') as fp:
-            all_params = self.model.__dict__
-            hyper_params = {k: all_params[k] for k in all_params if not k.startswith('_') and k not in [
-                'training', 'device', 'gpus']}
-            json.dump(hyper_params, fp)
+        self.model.fit(train_loader, None, self.outPrefix, patience=-1)
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+        self.save()
+
+    def saveParams(self, params):
+        return super().saveParams(
+            {
+                k: params[k] for k in params
+                if not k.startswith('_')
+                   and k not in ['training', 'device', 'gpus']
+            }
+        )
 
     def evaluate(self, save=True, ES_val_size=0.1):
         """Make predictions for crossvalidation and independent test set.
@@ -385,13 +468,13 @@ class QSPRDNN(QSPRModel):
             valid_loader = self.model.get_dataloader(X_test)
             last_save_epoch = self.model.fit(
                 train_loader, ES_valid_loader, '%s_temp' %
-                self.out, self.patience, self.tol)
+                self.outPrefix, self.patience, self.tol)
             last_save_epochs += last_save_epoch
             logger.info(f'cross validation fold {i}: last save epoch {last_save_epoch}')
-            os.remove('%s_temp_weights.pkg' % self.out)
+            os.remove('%s_temp_weights.pkg' % self.outPrefix)
             cvs[idx_test] = self.model.predict(valid_loader)
             fold_counter[idx_test] = i
-        os.remove('%s_temp.log' % self.out)
+        os.remove('%s_temp.log' % self.outPrefix)
 
         if save:
             n_folds = max(fold_counter) + 1
@@ -399,9 +482,9 @@ class QSPRDNN(QSPRModel):
             self.model = self.model.set_params(**{"n_epochs": self.optimal_epochs})
 
             train_loader = self.model.get_dataloader(X.values, y.values)
-            self.model.fit(train_loader, None, '%s_temp' % self.out, patience=-1)
-            os.remove('%s_temp_weights.pkg' % self.out)
-            os.remove('%s_temp.log' % self.out)
+            self.model.fit(train_loader, None, '%s_temp' % self.outPrefix, patience=-1)
+            os.remove('%s_temp_weights.pkg' % self.outPrefix)
+            os.remove('%s_temp.log' % self.outPrefix)
             inds = self.model.predict(indep_loader)
 
             train, test = pd.Series(
@@ -416,8 +499,8 @@ class QSPRDNN(QSPRModel):
             else:
                 train['Score'], test['Score'] = cvs, inds
             train['Fold'] = fold_counter
-            train.to_csv(self.out + '.cv.tsv', sep='\t')
-            test.to_csv(self.out + '.ind.tsv', sep='\t')
+            train.to_csv(self.outPrefix + '.cv.tsv', sep='\t')
+            test.to_csv(self.outPrefix + '.ind.tsv', sep='\t')
 
         if self.data.nClasses == 2:
             return cvs[:, 1]
@@ -438,6 +521,8 @@ class QSPRDNN(QSPRModel):
             save_m (bool): if true, after gs the model is refit on the entire data set
             ES_val_size (float): validation set size for early stopping in CV
         """
+        self.model = self.loadModel(self.alg)
+
         if self.data.task == ModelTasks.REGRESSION:
             scoring = metrics.explained_variance_score
         else:
@@ -462,24 +547,24 @@ class QSPRDNN(QSPRModel):
                 ES_valid_loader = self.model.get_dataloader(X_val_fold, y_val_fold)
                 valid_loader = self.model.get_dataloader(X_test)
                 self.model.set_params(**params)
-                self.model.fit(train_loader, ES_valid_loader, '%s_temp' % self.out, self.patience, self.tol)
-                os.remove('%s_temp_weights.pkg' % self.out)
+                self.model.fit(train_loader, ES_valid_loader, '%s_temp' % self.outPrefix, self.patience, self.tol)
+                os.remove('%s_temp_weights.pkg' % self.outPrefix)
                 y_pred = self.model.predict(valid_loader)
                 if self.data.nClasses == 2:
                     y_pred = y_pred[:, 1]
                 fold_scores.append(scoring(y_test, y_pred))
-            os.remove('%s_temp.log' % self.out)
+            os.remove('%s_temp.log' % self.outPrefix)
             param_score = np.mean(fold_scores)
             if param_score >= best_score:
                 best_params = params
                 best_score = param_score
 
         logger.info('Grid search best parameters: %s' % best_params)
-        with open('%s_params.json' % self.out, 'w') as f:
-            json.dump(best_params, f)
         logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-        self.model = self.alg.set_params(**best_params)
+        self.parameters = best_params
+        self.model.set_params(**self.parameters)
+        self.save()
 
     def bayesOptimization(self, search_space_bs, n_trials, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
@@ -493,6 +578,8 @@ class QSPRDNN(QSPRModel):
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         # TODO add timeout function
 
+        self.model = self.loadModel(self.alg)
+
         if n_jobs > 1:
             logger.warning("At the moment n_jobs>1 not available for bayesoptimization. n_jobs set to 1")
             n_jobs = 1
@@ -505,10 +592,10 @@ class QSPRDNN(QSPRModel):
         trial = study.best_trial
 
         logger.info('Bayesian optimization best params: %s' % trial.params)
-        with open('%s_params.json' % self.out, 'w') as f:
-            json.dump(trial.params, f)
 
-        self.model = self.alg.set_params(**trial.params)
+        self.parameters = trial.params
+        self.model.set_params(**self.parameters)
+        self.save()
 
     def objective(self, trial, search_space_bs):
         """Objective for bayesian optimization.
@@ -533,7 +620,7 @@ class QSPRDNN(QSPRModel):
             elif value[0] == 'uniform':
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
 
-        self.model = self.alg.set_params(**bayesian_params)
+        self.model.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetProperties()
         if self.data.task == ModelTasks.REGRESSION:
@@ -541,3 +628,31 @@ class QSPRDNN(QSPRModel):
         else:
             score = metrics.roc_auc_score(y.iloc[:, 0], self.evaluate(save=False), multi_class='ovo')
         return score
+
+    def saveModel(self) -> str:
+        path = self.outPrefix + '_weights.pkg'
+        torch.save(self.model.state_dict(), path)
+        return path
+
+    def save(self):
+        self.metaInfo['n_dim'] = self.n_dim
+        self.metaInfo['n_class'] = self.n_class
+        return super().save()
+
+    def predict(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+        scores = self.predictProba(X)
+        if self.task == ModelTasks.CLASSIFICATION:
+            return np.argmax(scores, axis=1)
+        else:
+            return scores.flatten()
+
+    def predictProba(self, X : Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+        if isinstance(X, QSPRDataset):
+            X = X.getFeatures(raw=True, concat=True)
+        if self.featureStandardizer:
+            X = self.featureStandardizer(X)
+
+        loader = self.model.get_dataloader(X)
+        return self.model.predict(loader)
+
+
