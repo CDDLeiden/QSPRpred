@@ -17,7 +17,7 @@ from sklearn.calibration import CalibrationDisplay
 
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.plotting.interfaces import ModelPlot
-from qsprpred.metrics import calibration_error
+from qsprpred.metrics.calibration import calibration_error
 
 
 class ClassifierPlot(ModelPlot, ABC):
@@ -288,7 +288,7 @@ class CalibrationPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def make(self, n_bins : int = 10, validation : str = "cv", figsize:tuple = (4,4), save : bool = True, show : bool = False):
+    def make(self, validation : str = "cv", n_bins : int = 10, figsize:tuple = (4,4), save : bool = True, show : bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
