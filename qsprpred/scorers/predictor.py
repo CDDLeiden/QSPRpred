@@ -16,7 +16,7 @@ from qsprpred.data.utils.descriptor_utils.interfaces import Scorer
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import (
     SKLearnStandardizer,
-    apply_feature_standardizers,
+    apply_feature_standardizer,
 )
 from qsprpred.logs import logger
 from qsprpred.models.neural_network import STFullyConnected
@@ -130,7 +130,7 @@ class Predictor(Scorer):
         # Calculate and scale the features
         features = self.feature_calculators(valid_mols)
         if self.standardizers is not None:
-            features, _ = apply_feature_standardizers(self.standardizers, features, fit=False)
+            features, _ = apply_feature_standardizer(self.standardizers, features, fit=False)
 
         # Special case DNN
         if (self.model.__class__.__name__ == "STFullyConnected"):
