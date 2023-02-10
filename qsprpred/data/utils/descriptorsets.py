@@ -19,6 +19,7 @@ from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
 from rdkit.Chem import Mol
+from qsprpred.models.tasks import ModelTasks
 
 
 class DescriptorSet(ABC):
@@ -523,19 +524,15 @@ class PaDEL(DescriptorSet):
 class PredictorDesc(DescriptorSet):
     """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, model : "QSPRModel"):
         """
-        Initialize the descriptorset with a Predictor object.
+        Initialize the descriptorset with a `QSPRModel` object.
 
         Args:
-            predictor: Predictor object to use for calculating the descriptor
+            model: a fitted model instance
         """
-        self._args = args
-        self._kwargs = kwargs
-        self._is_fp = False
-        from qsprpred.scorers.predictor import Predictor
-        self._predictor = Predictor.fromFile(*args, **kwargs)
-        self._descriptors = [self._predictor.getKey()]
+        self.model = model
+        self._descriptors = [self.model.name]
 
     def __call__(self, mols):
         """
@@ -547,19 +544,19 @@ class PredictorDesc(DescriptorSet):
         Returns:
             an array of descriptor values
         """
-        mols = self.iterMols(mols, to_list=True)
-        scores = np.zeros((len(mols), 1))
-        scores[:, 0] = self._predictor.getScores(mols)
-        return scores
+        mols = list(mols)
+        if type(mols[0]) != str:
+            mols = [Chem.MolToSmiles(mol) for mol in mols]
+        return self.model.predictMols(mols, use_probas=False)
 
     @property
     def is_fp(self):
-        return self._is_fp
+        return False
 
     @property
     def settings(self):
         """Return args and kwargs used to initialize the descriptorset."""
-        return self._args, self._kwargs
+        return {'model': self.model}
 
     @property
     def descriptors(self):
