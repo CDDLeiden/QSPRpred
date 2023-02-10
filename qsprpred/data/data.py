@@ -654,7 +654,7 @@ class TargetProperty():
         return self.name
 
     @classmethod
-    def fromDict(cls, d: dict, task_from_str: bool = False):
+    def fromDict(cls, d: dict):
         """Create a TargetProperty object from a dictionary.
 
         Args:
@@ -664,7 +664,7 @@ class TargetProperty():
         Returns:
             TargetProperty: TargetProperty object
         """
-        if task_from_str:
+        if isinstance(d["task"], str):
             return TargetProperty(**{k: ModelTasks[v] if k == "task" else v for k, v in d.items()})
         else:
             return TargetProperty(**d)
@@ -898,7 +898,8 @@ class QSPRDataset(MoleculeTable):
 
     def dropEmpty(self):
         """Drop rows with empty target property value from the data set."""
-        self.df.dropna(subset=([self.smilescol] + self.targetPropertyNames), inplace=True)
+        self.df.dropna(subset=([self.smilescol]), inplace=True)
+        self.df.dropna(subset=(self.targetPropertyNames), how='all', inplace=True)
 
     def getFeatureNames(self) -> List[str]:
         """Get current feature names for this data set.
@@ -1392,7 +1393,7 @@ class QSPRDataset(MoleculeTable):
         else:
             return self.y, self.y_ind if self.y_ind is not None else self.y
 
-    def getTargetProperties(self, names=None, original_names=False):
+    def getTargetProperties(self, names, original_names=False):
         """
         Get the target properties with the given names
 

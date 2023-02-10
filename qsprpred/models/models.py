@@ -2,7 +2,7 @@
 
 At the moment there is a class for sklearn type models
 and one for a keras DNN model. To add more types a model class should be added, which
-is a sublass of the QSPRModel type.
+is a subclass of the QSPRModel type.
 """
 import json
 import math
@@ -23,6 +23,7 @@ from qsprpred.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
 from sklearn import metrics
 from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
+from sklearn.multioutput import MultiOutputClassifier, MultiOutputRegressor
 from sklearn.svm import SVC, SVR
 
 
@@ -45,6 +46,9 @@ class QSPRsklearn(QSPRModel):
     def __init__(self, base_dir, data, alg, alg_name, parameters=None):
 
         super().__init__(base_dir, data, alg, alg_name, parameters=parameters)
+        assert (len(set([prop.task.isClassification() for prop in self.data.targetProperties])) ==
+                1), "All target properties must have the same task for sklearn multi-output models."
+
         # initialize models with defined parameters
         if self.parameters:
             self.model = self.alg.set_params(**self.parameters)
@@ -57,7 +61,7 @@ class QSPRsklearn(QSPRModel):
                 self.model = self.alg
 
         logger.info('parameters: %s' % self.parameters)
-        logger.debug('Model intialized: %s' % self.out)
+        logger.debug('Model initialized: %s' % self.out)
 
         os.makedirs(os.path.dirname(self.out), exist_ok=True)
 
@@ -284,6 +288,8 @@ class QSPRDNN(QSPRModel):
 
     def __init__(self, base_dir, data, parameters=None, device=DEFAULT_DEVICE, gpus=DEFAULT_GPUS, patience=50, tol=0):
 
+        # TODO: add multitask support
+        assert (data.isMultitask() == False), "Multitask data not supported for DNN"
         self.n_class = max(1, data.nClasses(data.targetProperties[0]))
         super().__init__(
             base_dir,
