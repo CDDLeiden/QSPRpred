@@ -1,14 +1,18 @@
 """This module holds the test for functions regarding QSPR data preparation."""
 import glob
+import logging
 import os
 import shutil
 import time
-from unittest import TestCase, skip
+from datetime import datetime
+from unittest import TestCase
 
 import mordred
 import numpy as np
 import pandas as pd
 from mordred import descriptors as mordreddescriptors
+from parameterized import parameterized
+
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
@@ -30,6 +34,7 @@ from qsprpred.data.utils.featurefilters import (
     lowVarianceFilter,
 )
 from qsprpred.data.utils.scaffolds import Murcko
+from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
 from rdkit import Chem
 from rdkit.Chem import Descriptors
@@ -37,7 +42,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 N_CPU = 2
 CHUNK_SIZE = 100
-
+logging.basicConfig(level=logging.DEBUG)
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
@@ -240,72 +245,76 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
 
 
 class TestDataSetPreparation(DataSets, TestCase):
+    sets = [
+        rdkit_descs(),
+        DrugExPhyschem(),
+        PredictorDesc(
+            QSPRsklearn.fromFile(
+                f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
+        ),
+        TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
+        FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
+        Mordred(),
 
-    def test_preparation(self):
-        paths = []
-        tasks = [ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION]
-        for task in tasks:
-            dataset = QSPRDataset(
-                f"test_create_prep_{task.name}", "CL", df=self.df_large,
-                store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
-                if task == ModelTasks.CLASSIFICATION else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-            np.random.seed(42)
-            descriptor_sets = [
-                # Mordred(),
-                FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-                # FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
-                # FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
-                # FingerprintSet(fingerprint_type="CDKEStatedFP"),
-                # FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
-                # FingerprintSet(fingerprint_type="CDKMACCSFP"),
-                # FingerprintSet(fingerprint_type="CDKPubchemFP"),
-                # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
-                # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
-                # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
-                # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
-                # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
-                # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
-                rdkit_descs(),
-                # Mold2(),
-                # PaDEL(),
-                # DrugExPhyschem(),
-                # PredictorDesc(
-                #     f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
-                #     f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'),
-                # TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000)
-            ]
-            expected_length = sum([len(x.descriptors) for x in descriptor_sets])
-            dataset.prepareDataset(
-                feature_calculator=DescriptorsCalculator(descriptor_sets),
-                split=randomsplit(0.1),
-                datafilters=[
-                    CategoryFilter(
-                        name="moka_ionState7.4",
-                        values=["cationic"])],
-                feature_filters=[lowVarianceFilter(0.05),
-                                 highCorrelationFilter(0.8)])
+        # external
+        FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
+        FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
+        FingerprintSet(fingerprint_type="CDKEStatedFP"),
+        FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
+        FingerprintSet(fingerprint_type="CDKMACCSFP"),
+        FingerprintSet(fingerprint_type="CDKPubchemFP"),
+        FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+        FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+        FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+        FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+        FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+        FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
+        Mold2(),
+        PaDEL(),
+    ]
 
-            # test some basics
-            descriptors = dataset.getDescriptors()
-            descriptor_names = dataset.getDescriptorNames()
-            self.assertEqual(len(descriptor_names), expected_length)
-            self.assertEqual(descriptors.shape[0], len(dataset))
-            self.assertEqual(descriptors.shape[1], expected_length)
+    @parameterized.expand(
+        [(f"{desc_set}_{ModelTasks.CLASSIFICATION}", desc_set, ModelTasks.CLASSIFICATION) for desc_set in sets] +
+        [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set, ModelTasks.REGRESSION) for desc_set in sets]
+    )
+    def test_preparation(self, _, desc_set, task):
+        ds_name = f"{desc_set}_{task}_{datetime.now()}"
+        logging.debug(f"Testing data set: {ds_name}")
+        dataset = QSPRDataset(
+            ds_name, "CL", df=self.df_large,
+            store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
+            if task == ModelTasks.CLASSIFICATION else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        np.random.seed(42)
+        descriptor_sets = [
+            desc_set
+        ]
+        dataset.prepareDataset(
+            feature_calculator=DescriptorsCalculator(descriptor_sets),
+            split=randomsplit(0.1),
+            datafilters=[
+                CategoryFilter(
+                    name="moka_ionState7.4",
+                    values=["cationic"])],
+            feature_filters=[lowVarianceFilter(0.05),
+                             highCorrelationFilter(0.8)])
 
-            # save to file
-            dataset.save()
-            paths.append(dataset.storePath)
+        # test some basics
+        expected_length = sum([len(x.descriptors) for x in descriptor_sets])
+        features = dataset.getFeatures(concat=True)
+        self.assertEqual(features.shape[0], len(dataset))
+        self.assertEqual(features.shape[1], expected_length)
 
-        for path, task in zip(paths, tasks):
-            ds = QSPRDataset.fromFile(path, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-            if ds.task == ModelTasks.CLASSIFICATION:
-                self.assertEqual(ds.targetProperty, "CL_class")
-            self.assertTrue(ds.task == task)
-            self.assertTrue(ds.descriptorCalculator)
-            self.assertTrue(
-                isinstance(
-                    ds.descriptorCalculator,
-                    DescriptorsCalculator))
+        # save to file and check if it can be loaded
+        dataset.save()
+        ds = QSPRDataset.fromFile(dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        if ds.task == ModelTasks.CLASSIFICATION:
+            self.assertEqual(ds.targetProperty, "CL_class")
+        self.assertTrue(ds.task == task)
+        self.assertTrue(ds.descriptorCalculator)
+        self.assertTrue(
+            isinstance(
+                ds.descriptorCalculator,
+                DescriptorsCalculator))
 
 
 class TestDataSplitters(DataSets, TestCase):
