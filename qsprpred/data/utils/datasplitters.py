@@ -24,7 +24,7 @@ class randomsplit(datasplit):
         self.test_fraction = test_fraction
 
     def split(self, X, y):
-        return ShuffleSplit(1).split(X, y)
+        return ShuffleSplit(1, test_size=self.test_fraction).split(X, y)
 
 
 class temporalsplit(datasplit):
