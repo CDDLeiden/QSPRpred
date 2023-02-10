@@ -1,6 +1,6 @@
 import numpy as np
 
-def calibration_error(y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 10, norm : str = 'L1') -> float:
+def calibration_error(y_true: np.array, y_prob: np.array, n_bins: int = 10, norm : str = 'L1') -> float:
 
     """
     Compute the calibration error of a multiclass classifier.
@@ -47,7 +47,7 @@ def calibration_error(y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 10, 
     #  Sort data based on the highest probability
     sorted_indices = np.argsort(y_prob_max)
     sorted_y_true = y_true[sorted_indices]
-    sorted_y_prob_max = y_prob[sorted_indices]
+    sorted_y_prob_max = y_prob_max[sorted_indices]
     sorted_y_pred_class = y_pred_class[sorted_indices]
 
     # Bin sorted data
@@ -58,18 +58,18 @@ def calibration_error(y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 10, 
     # Compute the calibration error
     calibration_error = 0.0
     for bin_y_true, bin_y_prob_max, bin_y_pred_class in zip(binned_y_true, binned_y_prob_max, binned_y_pred_class):
-        mean_prob = np.mean(bin_y_prob_max, axis=0)
+        mean_prob = np.mean(bin_y_prob_max)
         accuracy = np.mean(bin_y_true == bin_y_pred_class)
 
         if norm == 'L1':
             calibration_error += np.abs(mean_prob - accuracy) * len(bin_y_true) / len(y_true)
         elif norm == 'L2':
             calibration_error += np.square(mean_prob - accuracy) **2 * len(bin_y_true) / len(y_true)
-        elif norm == 'max':
+        elif norm == 'infinity':
             calibration_error = max(calibration_error, np.abs(mean_prob - accuracy))
         else:
             raise ValueError(f'Unknown norm {norm}')
-
+        
     if norm == 'L2':
         calibration_error = np.sqrt(calibration_error)
 
