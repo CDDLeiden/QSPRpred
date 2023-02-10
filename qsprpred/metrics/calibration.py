@@ -35,6 +35,9 @@ def calibration_error(y_true: np.array, y_prob: np.array, n_bins: int = 10, norm
         The calibration error.
     """
 
+    y_true = np.array(y_true)
+    y_prob = np.array(y_prob)
+
     # If y_prob is 1d, convert it to 2d by adding a new axis corresponding to the negative class
     if y_prob.ndim == 1:
         y_prob_0 = 1 - y_prob
