@@ -61,7 +61,7 @@ class QSPRModel(ABC):
 
         # initialize a standardizer instance
         self.featureStandardizer = self.data.feature_standardizer if self.data else self.readStandardizer(os.path.join(self.baseDir, self.metaInfo['feature_standardizer_path']))
-        if not isinstance(self.featureStandardizer, SKLearnStandardizer):
+        if self.featureStandardizer and not isinstance(self.featureStandardizer, SKLearnStandardizer):
             self.featureStandardizer = SKLearnStandardizer(self.featureStandardizer)
 
         # initialize a model instance with the given parameters
@@ -106,9 +106,8 @@ class QSPRModel(ABC):
 
     @staticmethod
     def readDescriptorCalculator(path):
-        if not os.path.exists(path):
-            raise FileNotFoundError(f'Descriptor calculator file "{path}" does not exist.')
-        return DescriptorsCalculator.fromFile(path)
+        if os.path.exists(path):
+            return DescriptorsCalculator.fromFile(path)
 
     def saveDescriptorCalculator(self):
         path = f'{self.outDir}/{self.name}_descriptor_calculator.json'
@@ -117,9 +116,8 @@ class QSPRModel(ABC):
 
     @staticmethod
     def readStandardizer(path):
-        if not os.path.exists(path):
-            raise FileNotFoundError(f'Standardizer file "{path}" does not exist.')
-        return SKLearnStandardizer.fromFile(path)
+        if os.path.exists(path):
+            return SKLearnStandardizer.fromFile(path)
 
     def saveStandardizer(self):
         path = f'{self.outDir}/{self.name}_feature_standardizer.json'
@@ -151,8 +149,8 @@ class QSPRModel(ABC):
         self.metaInfo['th'] = self.data.th
         self.metaInfo['target_property'] = self.targetProperty
         self.metaInfo['parameters_path'] = self.saveParams(self.parameters).replace(f"{self.baseDir}/", '')
-        self.metaInfo['feature_calculator_path'] = self.saveDescriptorCalculator().replace(f"{self.baseDir}/", '')
-        self.metaInfo['feature_standardizer_path'] = self.saveStandardizer().replace(f"{self.baseDir}/", '')
+        self.metaInfo['feature_calculator_path'] = self.saveDescriptorCalculator().replace(f"{self.baseDir}/", '') if self.featureCalculator else None
+        self.metaInfo['feature_standardizer_path'] = self.saveStandardizer().replace(f"{self.baseDir}/", '') if self.featureStandardizer else None
         self.metaInfo['model_path'] = self.saveModel().replace(f"{self.baseDir}/", '')
         return self.saveMetadata()
 
