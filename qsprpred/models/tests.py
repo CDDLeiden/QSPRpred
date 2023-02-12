@@ -51,8 +51,8 @@ class ModelDataSets(DataSets):
             os.makedirs(cls.qsprmodelspath)
 
     @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
+    def clean_directories(cls):
+        super().clean_directories()
         if os.path.exists(cls.qsprmodelspath):
             shutil.rmtree(cls.qsprmodelspath)
 
