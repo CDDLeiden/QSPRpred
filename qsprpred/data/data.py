@@ -84,7 +84,7 @@ class MoleculeTable(MoleculeDataSet):
             add_rdkit: bool = False,
             store_dir: str = '.',
             overwrite: bool = False,
-            n_jobs: int = 0,
+            n_jobs: int = 1,
             chunk_size: int = 50,
             drop_invalids: bool = True,
     ):
@@ -101,7 +101,7 @@ class MoleculeTable(MoleculeDataSet):
             add_rdkit (bool): Add RDKit molecule instances to the dataframe. WARNING: This can take a lot of memory.
             store_dir (str): Directory to store the dataset files. Defaults to the current directory. If it already contains files with the same name, the existing data will be loaded.
             overwrite (bool): Overwrite existing dataset.
-            n_jobs (int): Number of jobs to use for parallel processing.
+            n_jobs (int): Number of jobs to use for parallel processing. If <= 0, all available cores will be used.
             chunk_size (int): Size of chunks to use per job in parallel processing.
             drop_invalids (bool): Drop invalid molecules from the data frame.
         """
@@ -642,7 +642,7 @@ class QSPRDataset(MoleculeTable):
         task: Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION] = ModelTasks.REGRESSION,
         target_transformer: Callable = None,
         th: List[float] = None,
-        n_jobs: int = 0,
+        n_jobs: int = 1,
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
@@ -662,7 +662,7 @@ class QSPRDataset(MoleculeTable):
             th (List[float], optional): threshold for activity if classification model, if len th
                 larger than 1, these values will used for binning (in this case lower and upper
                 boundary need to be included). Defaults to None.
-            n_jobs (int, optional): number of parallel jobs. Defaults to 0.
+            n_jobs (int, optional): number of parallel jobs. If <= 0, all available cores will be used. Defaults to 1.
             chunk_size (int, optional): chunk size for parallel processing. Defaults to 50.
             drop_invalids (bool, optional): if true, invalid SMILES will be dropped. Defaults to True.
             drop_empty (bool, optional): if true, rows with empty target property will be removed.
