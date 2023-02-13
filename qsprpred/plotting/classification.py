@@ -109,7 +109,7 @@ class ROCPlot(ClassifierPlot):
         ax.legend(loc="lower right")
         return ax
 
-    def make(self, validation : str = "cv", figsize:tuple = (4,4), save : bool = True, show : bool = False):
+    def make(self, validation : str = "cv", figsize:tuple = (6,6), save : bool = True, show : bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -198,7 +198,7 @@ class PRCPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def make(self, validation : str = "cv", figsize:tuple = (4,4), save : bool = True, show : bool = False):
+    def make(self, validation : str = "cv", figsize:tuple = (6,6), save : bool = True, show : bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -288,7 +288,7 @@ class CalibrationPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def make(self, validation : str = "cv", n_bins : int = 10, figsize:tuple = (4,4), save : bool = True, show : bool = False):
+    def make(self, validation : str = "cv", n_bins : int = 10, figsize:tuple = (6,6), save : bool = True, show : bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
