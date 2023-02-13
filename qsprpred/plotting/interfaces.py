@@ -45,7 +45,7 @@ class ModelPlot(ABC):
         Get the types of models this plotter supports.
 
         Returns:
-            `list` of `ModelTasks`: list of supporteclad `ModelTasks`
+            `list` of `ModelTasks`: list of supported `ModelTasks`
         """
         pass
 
