@@ -20,6 +20,8 @@ from qsprpred.data.utils.descriptorsets import (
     PredictorDesc,
     TanimotoDistances,
     rdkit_descs,
+    Mold2,
+    PaDEL,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (
@@ -251,7 +253,21 @@ class TestDataSetPreparation(DataSets, TestCase):
             descriptor_sets = [
                 Mordred(),
                 FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
+                FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
+                FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
+                FingerprintSet(fingerprint_type="CDKEStatedFP"),
+                FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
+                FingerprintSet(fingerprint_type="CDKMACCSFP"),
+                FingerprintSet(fingerprint_type="CDKPubchemFP"),
+                FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+                FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+                FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+                FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+                FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+                FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
                 rdkit_descs(),
+                Mold2(),
+                PaDEL(),
                 DrugExPhyschem(),
                 PredictorDesc(
                     f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
@@ -519,6 +535,26 @@ class TestDescriptorsets(DataSets, TestCase):
         self.assertEqual(
             self.dataset.X.shape,
             (len(self.dataset), len(mordred.Calculator(mordreddescriptors).descriptors)))
+        self.assertTrue(self.dataset.X.any().any())
+        self.assertTrue(self.dataset.X.any().sum() > 1)
+
+    def test_Mold2(self):
+        desc_calc = DescriptorsCalculator([Mold2()])
+        self.dataset.addDescriptors(desc_calc)
+
+        self.assertEqual(
+            self.dataset.X.shape,
+            (len(self.dataset), 777))
+        self.assertTrue(self.dataset.X.any().any())
+        self.assertTrue(self.dataset.X.any().sum() > 1)
+
+    def test_PaDEL(self):
+        desc_calc = DescriptorsCalculator([PaDEL()])
+        self.dataset.addDescriptors(desc_calc)
+
+        self.assertEqual(
+            self.dataset.X.shape,
+            (len(self.dataset), 1444))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
