@@ -523,6 +523,13 @@ class TestDescriptorsets(DataSets, TestCase):
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
         self.assertTrue(self.dataset.X.any().any())
 
+        # test from file instantiation
+        desc_calc.toFile(f"{self.qsprdatapath}/test_calc.json")
+        desc_calc_file = DescriptorsCalculator.fromFile(f"{self.qsprdatapath}/test_calc.json")
+        self.dataset.addDescriptors(desc_calc_file, recalculate=True)
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
+        self.assertTrue(self.dataset.X.any().any())
+
     def test_fingerprintSet(self):
         desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)])
         self.dataset.addDescriptors(desc_calc)
