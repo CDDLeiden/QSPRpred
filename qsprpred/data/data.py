@@ -1020,18 +1020,23 @@ class QSPRDataset(MoleculeTable):
         Args:
             feature_filters (List[Callable]): list of feature filter functions that take X feature matrix and y target vector as arguments
         """
+        if self.X is None and self.X.shape[1] == 0:
+            raise ValueError("No features to filter")
+        
+        if self.X.shape[1] == 1:
+            logger.warning("Only one feature present. Skipping feature filtering.")
+        else:
+            for featurefilter in feature_filters:
+                self.X = featurefilter(self.X, self.y)
 
-        for featurefilter in feature_filters:
-            self.X = featurefilter(self.X, self.y)
+            self.featureNames = self.X.columns
+            if self.X_ind is not None:
+                self.X_ind = self.X_ind[self.featureNames]
+            logger.info(f"Selected features: {self.featureNames}")
 
-        self.featureNames = self.X.columns
-        if self.X_ind is not None:
-            self.X_ind = self.X_ind[self.featureNames]
-        logger.info(f"Selected features: {self.featureNames}")
-
-        # update descriptor calculator
-        if self.descriptorCalculator is not None:
-            self.descriptorCalculator.keepDescriptors(self.featureNames)
+            # update descriptor calculator
+            if self.descriptorCalculator is not None:
+                self.descriptorCalculator.keepDescriptors(self.featureNames)
 
     def prepareDataset(
         self,
