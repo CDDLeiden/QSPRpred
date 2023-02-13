@@ -42,4 +42,5 @@ From v1.0.0 to v1.1.0
 - `TanimotoDistances` was added as descriptortype.
 - Balanced class weighing was added as an option to the CLI
 - `PredictorDesc` was added as a new `DescriptorSet` type. It uses a QSPRpred model as descriptor.
+- New submodule for evaluation metric custom (`qsprpred.metrics`) with `calibration_error` function to estimate the calibration of a classifier
 - Added the [Mold2](https://pubs.acs.org/doi/10.1021/ci800038f) and [PaDEL](https://onlinelibrary.wiley.com/doi/10.1002/jcc.21707) molecular descriptors
