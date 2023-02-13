@@ -3,7 +3,7 @@ import numpy as np
 def calibration_error(y_true: np.array, y_prob: np.array, n_bins: int = 10, norm : str = 'L1') -> float:
 
     """
-    Compute the calibration error of a multiclass classifier.
+    Compute the calibration error of a classifier.
 
     ECE is defined as the expected difference between the predicted probability
     and the observed frequency in each bin. The lower the ECE, the more
@@ -18,21 +18,14 @@ def calibration_error(y_true: np.array, y_prob: np.array, n_bins: int = 10, norm
 
     Referece: Guo et al. (2017) On Calibration of Modern Neural Networks. https://arxiv.org/abs/1706.04599
 
-    Parameters
-    ----------
-    y_true : 1d ndarray
-        Multiclass true targets.
-    y_prob : 1d or 2d ndarray
-        Raw probability/score of the positive class or multiclass probability.
-    n_bins : int, default = 10
-        Number of bins to use for calibration. A bigger bin number requires more data.
-    norm : str, default = 'L1'
-        The norm to use for the calibration error. Can be 'L1' or 'L2' or 'infinity'.
-    
-    Returns
-    -------
-    float:
-        The calibration error.
+    Args:
+        y_true (np.array): True class labels. 1d array.
+        y_prob (np.array): Raw probability/score of the positive class or multiclass probability. 1d or 2d array.
+        n_bins (int, optional): Number of bins to use for calibration. A bigger bin number requires more data. Defaults to 10.
+        norm (str, optional): The norm to use for the calibration error. Can be 'L1' or 'L2' or 'infinity'. Defaults to 'L1'.
+
+    Returns:
+        float: The calibration error.
     """
 
     y_true = np.array(y_true)
