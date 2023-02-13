@@ -689,7 +689,7 @@ class QSPRDataset(MoleculeTable):
         self.featureNames = self.getFeatureNames()
 
         # load standardizers for features
-        self.feature_standardizer = self.loadFeatureStandardizers()
+        self.feature_standardizer = self.loadFeatureStandardizer()
         if not self.feature_standardizer:
             self.feature_standardizer = None
         self.fold_generator = self.getDefaultFoldGenerator()
@@ -748,8 +748,8 @@ class QSPRDataset(MoleculeTable):
             *args: additional arguments for QSPRDataset constructor
             **kwargs: additional keyword arguments for QSPRDataset constructor
         """
-        raise NotImplementedError(f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can convert from 'MoleculeTable' with 'fromMolTable'.")
-
+        raise NotImplementedError(
+            f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can convert from 'MoleculeTable' with 'fromMolTable'.")
 
     def dropEmpty(self):
         """Drop rows with empty target property value from the data set."""
@@ -1013,7 +1013,7 @@ class QSPRDataset(MoleculeTable):
         self.df[columns] = self.df[columns].fillna(fill_value)
         logger.warning('Missing values filled with %s' % fill_value)
 
-    def filterFeatures(self, feature_filters : List[Callable]):
+    def filterFeatures(self, feature_filters: List[Callable]):
         """
         Filter features in the data set.
 
@@ -1022,7 +1022,7 @@ class QSPRDataset(MoleculeTable):
         """
         if self.X is None and self.X.shape[1] == 0:
             raise ValueError("No features to filter")
-        
+
         if self.X.shape[1] == 1:
             logger.warning("Only one feature present. Skipping feature filtering.")
         else:
@@ -1233,30 +1233,26 @@ class QSPRDataset(MoleculeTable):
         else:
             return self.y, self.y_ind if self.y_ind is not None else self.y
 
-    def loadFeatureStandardizers(self):
+    def loadFeatureStandardizer(self):
         """
-        Load feature standardizers from the metadata.
+        Load feature standardizer from the metadata.
 
         Returns:
-            `list` of `SKLearnStandardizer`
+            `SKLearnStandardizer`
         """
 
         if self.metaInfo:
-            standardizers = []
-            for path in self.metaInfo['standardizer_paths']:
-                standardizers.append(SKLearnStandardizer.fromFile(path))
-            return standardizers
+            return SKLearnStandardizer.fromFile(self.metaInfo['standardizer_path'])
         else:
             return None
 
-    def saveFeatureStandardizers(self):
+    def saveFeatureStandardizer(self):
         """
         Save feature standardizers to the metadata.
 
         Returns:
             `list` of `str`: paths to the saved standardizers
         """
-        paths = []
         if self.feature_standardizer:
             # make sure feature standardizers are fitted before serialization
             self.fitFeatureStandardizer()
@@ -1265,8 +1261,7 @@ class QSPRDataset(MoleculeTable):
                 SKLearnStandardizer(self.feature_standardizer).toFile(path)
             else:
                 self.feature_standardizer.toFile(path)
-            paths.append(path)
-        return paths
+        return path
 
     def saveMetadata(self):
         """
@@ -1275,7 +1270,7 @@ class QSPRDataset(MoleculeTable):
         Returns:
             `str`: path to the saved metadata file
         """
-        paths = self.saveFeatureStandardizers()
+        path = self.saveFeatureStandardizer()
 
         meta_init = {
             'target_prop': self.originalTargetProperty,
@@ -1285,7 +1280,7 @@ class QSPRDataset(MoleculeTable):
         }
         ret = {
             'init': meta_init,
-            'standardizer_paths': paths,
+            'standardizer_path': path,
             'descriptorcalculator_path': self.descriptorCalculatorPath,
             'new_target_prop': self.targetProperty,
             'feature_names': list(self.featureNames) if self.featureNames is not None else None,

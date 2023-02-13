@@ -237,7 +237,7 @@ if __name__ == '__main__':
         tuple(file_prefixes),
         cp_suffix=[
             'calculators',
-            'standardizer_0',
+            'standardizer',
             'meta'])
 
     if not os.path.exists(f'{args.base_dir}/qspr/data'):

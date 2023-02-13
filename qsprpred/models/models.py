@@ -11,15 +11,13 @@ import sys
 from datetime import datetime
 from functools import partial
 from inspect import isclass
-from typing import Union, Type
+from typing import Type, Union
 
 import numpy as np
 import optuna
 import pandas as pd
 import sklearn_json as skljson
 import torch
-from sklearn.base import BaseEstimator
-
 from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
 from qsprpred.data.data import QSPRDataset
 from qsprpred.logs import logger
@@ -27,6 +25,7 @@ from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
 from sklearn import metrics
+from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
 from sklearn.svm import SVC, SVR
 
@@ -47,7 +46,8 @@ class QSPRsklearn(QSPRModel):
     gridSearch: optimization of hyperparameters using gridSearch
     """
 
-    def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None, name: str = None, parameters: dict = None, autoload: bool = True):
+    def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None,
+                 name: str = None, parameters: dict = None, autoload: bool = True):
         super().__init__(base_dir, alg, data, name, parameters, autoload)
         # Adding scoring functions available for hyperparam optimization:
         self._supported_scoring = [
@@ -115,7 +115,8 @@ class QSPRsklearn(QSPRModel):
             fit_set = {'X': X_train}
 
             # self.data.createFolds() returns numpy arrays by default so we don't call `.values` here
-            if (isclass(self.alg) and self.alg.__name__ == 'PLSRegression') or (type(self.alg).__name__ == 'PLSRegression'):
+            if (isclass(self.alg) and self.alg.__name__ == 'PLSRegression') or (
+                    type(self.alg).__name__ == 'PLSRegression'):
                 fit_set['Y'] = y_train.ravel()
             else:
                 fit_set['y'] = y_train.ravel()
@@ -177,7 +178,7 @@ class QSPRsklearn(QSPRModel):
             search_space_gs (dict): search space for the grid search
             scoring (Optional[str, Callable]): scoring function for the grid search.
             n_jobs (int): number of jobs for hyperparameter optimization
-            
+
         Note: Default `scoring=None` will use explained_variance for regression,
         roc_auc_ovr_weighted for multiclass, and roc_auc for binary classification.
         For a list of the available scoring functions see:
@@ -186,7 +187,7 @@ class QSPRsklearn(QSPRModel):
         if scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
                 scoring = 'explained_variance'
-            elif self.data.nClasses > 2: # multiclass
+            elif self.data.nClasses > 2:  # multiclass
                 scoring = 'roc_auc_ovr_weighted'
             else:
                 scoring = 'roc_auc'
@@ -213,9 +214,9 @@ class QSPRsklearn(QSPRModel):
             n_trials (int): number of trials for bayes optimization
             scoring (Optional[str, Callable]): scoring function for the optimization.
             n_jobs (int): the number of parallel trials
-            
+
         Example of search_space_bs for scikit-learn's MLPClassifier:
-        >>> model = QSPRsklearn(base_dir='.', data=dataset, 
+        >>> model = QSPRsklearn(base_dir='.', data=dataset,
         >>>                     alg = MLPClassifier(), alg_name="MLP")
         >>>  search_space_bs = {
         >>>    'learning_rate_init': ['float', 1e-5, 1e-3,],
@@ -223,10 +224,10 @@ class QSPRsklearn(QSPRModel):
         >>>    'momentum': ['float', 0.0, 1.0],
         >>> }
         >>> model.bayesOptimization(search_space_bs=search_space_bs, n_trials=10)
-        
+
         Avaliable suggestion types:
         ['categorical', 'discrete_uniform', 'float', 'int', 'loguniform', 'uniform']
-        
+
         Note: Default `scoring=None` will use explained_variance for regression,
         roc_auc_ovr_weighted for multiclass, and roc_auc for binary classification.
         For a list of the available scoring functions see:
@@ -249,7 +250,7 @@ class QSPRsklearn(QSPRModel):
         self.model = self.model.set_params(**trial.params)
         self.save()
 
-    def objective(self, trial, scoring,  search_space_bs):
+    def objective(self, trial, scoring, search_space_bs):
         """Objective for bayesian optimization.
 
         Arguments:
@@ -285,16 +286,16 @@ class QSPRsklearn(QSPRModel):
                 "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
             score = -1
         return score
-    
+
     def get_scoring_func(self, scoring):
         """Get scoring function from sklearn.metrics.
 
         Args:
-            scoring (Union[str, Callable]): metric name from sklearn.metrics or 
+            scoring (Union[str, Callable]): metric name from sklearn.metrics or
                 user-defined scoring function.
 
         Raises:
-            ValueError: If the scoring function is currently not supported by 
+            ValueError: If the scoring function is currently not supported by
                 GridSearch and BayesOptimization.
 
         Returns:
@@ -302,7 +303,7 @@ class QSPRsklearn(QSPRModel):
             or user-defined function (`callable` as input)
         """
         # TODO: to add support for more scoring functions we will need to ensure that
-        # the cross validation returns the correct input for the scoring function. 
+        # the cross validation returns the correct input for the scoring function.
         # It's possible to inspect that by calling `str(scorer)` and checking the attributes.
         if all([scoring not in self._supported_scoring, isinstance(scoring, str)]):
             raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"
@@ -312,7 +313,7 @@ class QSPRsklearn(QSPRModel):
         elif scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
                 scorer = metrics.get_scorer('explained_variance')
-            elif self.data.nClasses > 2: # multiclass
+            elif self.data.nClasses > 2:  # multiclass
                 scorer = metrics.get_scorer('roc_auc_ovr_weighted')
             else:
                 scorer = metrics.get_scorer('roc_auc')
@@ -321,7 +322,7 @@ class QSPRsklearn(QSPRModel):
         return scorer._score_func
 
     def loadModel(self, alg: Union[Type, BaseEstimator] = None, params: dict = None):
-        if alg and isinstance(alg, BaseEstimator):
+        if alg is not None and isinstance(alg, BaseEstimator):
             if params:
                 return alg.set_params(**params)
             else:
@@ -350,7 +351,7 @@ class QSPRsklearn(QSPRModel):
             X = self.featureStandardizer(X)
         return self.model.predict(X)
 
-    def predictProba(self, X : Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+    def predictProba(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
         if isinstance(X, QSPRDataset):
             X = X.getFeatures(raw=True, concat=True)
         if self.featureStandardizer:
@@ -374,7 +375,7 @@ class QSPRDNN(QSPRModel):
 
     def __init__(self,
                  base_dir: str,
-                 alg : Union[STFullyConnected, Type] = STFullyConnected,
+                 alg: Union[STFullyConnected, Type] = STFullyConnected,
                  data: QSPRDataset = None,
                  name: str = None,
                  parameters: dict = None,
@@ -382,7 +383,7 @@ class QSPRDNN(QSPRModel):
                  device=DEFAULT_DEVICE,
                  gpus=DEFAULT_GPUS,
                  patience=50, tol=0
-        ):
+                 ):
 
         super().__init__(base_dir, alg, data, name, parameters, autoload=False)
         self.device = device
@@ -400,7 +401,7 @@ class QSPRDNN(QSPRModel):
         if autoload:
             self.model = self.loadModel(alg, self.parameters)
 
-    def loadModel(self, alg : Union[Type, object] = None, params : dict = None):
+    def loadModel(self, alg: Union[Type, object] = None, params: dict = None):
         """
         Load model from file or initialize new model
 
@@ -492,7 +493,7 @@ class QSPRDNN(QSPRModel):
             {
                 k: params[k] for k in params
                 if not k.startswith('_')
-                   and k not in ['training', 'device', 'gpus']
+                and k not in ['training', 'device', 'gpus']
             }
         )
 
@@ -700,7 +701,7 @@ class QSPRDNN(QSPRModel):
         else:
             return scores.flatten()
 
-    def predictProba(self, X : Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+    def predictProba(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
         if isinstance(X, QSPRDataset):
             X = X.getFeatures(raw=True, concat=True)
         if self.featureStandardizer:
@@ -708,15 +709,16 @@ class QSPRDNN(QSPRModel):
 
         loader = self.model.get_dataloader(X)
         return self.model.predict(loader)
+
     def get_scoring_func(self, scoring):
         """Get scoring function from sklearn.metrics.
 
         Args:
-            scoring (Union[str, Callable]): metric name from sklearn.metrics or 
+            scoring (Union[str, Callable]): metric name from sklearn.metrics or
                 user-defined scoring function.
 
         Raises:
-            ValueError: If the scoring function is currently not supported by 
+            ValueError: If the scoring function is currently not supported by
                 GridSearch and BayesOptimization.
 
         Returns:
@@ -731,9 +733,9 @@ class QSPRDNN(QSPRModel):
         elif scoring is None:
             if self.data.task == ModelTasks.REGRESSION:
                 scorer = metrics.get_scorer('explained_variance')
-            elif self.data.nClasses > 2: # multiclass
-            # Calling metrics.get_scorer('roc_auc_ovr_weighted') in this context
-            # raises the error `multi_class must be in ('ovo', 'ovr')` so let's avoid it
+            elif self.data.nClasses > 2:  # multiclass
+                # Calling metrics.get_scorer('roc_auc_ovr_weighted') in this context
+                # raises the error `multi_class must be in ('ovo', 'ovr')` so let's avoid it
                 scorer = metrics.get_scorer('roc_auc_ovr_weighted')
             else:
                 scorer = metrics.get_scorer('roc_auc')

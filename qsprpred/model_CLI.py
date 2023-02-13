@@ -188,11 +188,12 @@ def QSPR_modelling(args):
                         patience=args.patience,
                         tol=args.tolerance)
                 else:
+                    name_task = "REGRESSION" if reg else "CLASSIFICATION"
                     QSPRmodel = QSPRsklearn(
                         args.base_dir,
                         data=mydataset,
                         alg=alg_dict[model_type],
-                        alg_name=model_type,
+                        name=f"{model_type}_{name_task}",
                         parameters=parameters)
 
                 # if desired run parameter optimization
