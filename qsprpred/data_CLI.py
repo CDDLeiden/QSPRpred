@@ -136,7 +136,7 @@ def QSPR_dataprep(args):
 
     for reg in args.regression:
         task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
-        reg_abbr = 'REG' if reg else 'CLS'
+        reg_abbr = 'REGRESSION' if reg else 'CLASSIFICATION'
         for property in args.properties:
             log.info(f"Property: {property[0]} {reg_abbr}")
             try:
@@ -152,7 +152,7 @@ def QSPR_dataprep(args):
                 th = None
             log_transform = np.log if args.log_transform and args.log_transform[property[0]] else None
             mydataset = QSPRDataset(
-                f"{property[0]}_{reg_abbr}_QSPRdata",
+                f"{reg_abbr}_{property[0]}",
                 target_prop=property[0],
                 df=df,
                 smilescol=args.smilescol,

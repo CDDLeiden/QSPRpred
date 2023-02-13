@@ -130,11 +130,11 @@ def QSPR_modelling(args):
                 None, args.optimization, args.model_types)
 
     for reg in args.regression:
-        reg_abbr = 'REG' if reg else 'CLS'
+        reg_abbr = 'REGRESSION' if reg else 'CLASSIFICATION'
         for property in args.properties:
             log.info(f"Property: {property[0]}")
 
-            mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_df.pkl')
+            mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{reg_abbr}_{property[0]}_df.pkl')
 
             for model_type in args.model_types:
                 print(model_type)
@@ -184,16 +184,16 @@ def QSPR_modelling(args):
                         base_dir=args.base_dir,
                         data=mydataset,
                         parameters=parameters,
+                        name=f"{model_type}_{reg_abbr}_{property[0]}",
                         gpus=args.gpus,
                         patience=args.patience,
                         tol=args.tolerance)
                 else:
-                    name_task = "REGRESSION" if reg else "CLASSIFICATION"
                     QSPRmodel = QSPRsklearn(
                         args.base_dir,
                         data=mydataset,
                         alg=alg_dict[model_type],
-                        name=f"{model_type}_{name_task}",
+                        name=f"{model_type}_{reg_abbr}_{property[0]}",
                         parameters=parameters)
 
                 # if desired run parameter optimization

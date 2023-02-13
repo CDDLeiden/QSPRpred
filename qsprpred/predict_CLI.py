@@ -122,7 +122,7 @@ def QSPR_predict(args):
                 print(model_type)
                 log.info(f'Model: {model_type} {reg_abbr} {property[0]}')
 
-                metadata_path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}/{model_type}_{reg_abbr}_meta.json'
+                metadata_path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property[0]}/{model_type}_{reg_abbr}_{property[0]}_meta.json'
                 if not os.path.exists(metadata_path):
                     log.warning(f"{metadata_path} does not exist. Model skipped.")
                     continue
