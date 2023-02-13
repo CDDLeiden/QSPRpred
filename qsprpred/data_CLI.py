@@ -20,6 +20,8 @@ from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
     Mordred,
+    Mold2,
+    PaDEL,
     PredictorDesc,
     rdkit_descs,
 )
@@ -86,7 +88,9 @@ def QSPRArgParser(txt=None):
                         help="Temporal split time column. Used for temporal split.")
 
     # features to calculate
-    parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'RDkit', 'Mordred', 'DrugEx'], nargs='*')
+    parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'RDkit', 'Mordred', 'Mold2',
+                                                                'PaDEL', 'DrugEx'],
+                        nargs='*')
     parser.add_argument('-pmo', '--predictor_model', type=str, nargs='+',
                         help="It is also possible to use a QSPRpred model(s) as molecular feature(s). Give\
                         the path(s) to the model(s) relative to the base_directory. Also pass the meta data\
@@ -186,6 +190,10 @@ def QSPR_dataprep(args):
                 descriptorsets.append(rdkit_descs())
             if 'Mordred' in args.features:
                 descriptorsets.append(Mordred())
+            if 'Mold2' in args.features:
+                descriptorsets.append(Mold2())
+            if 'PaDEL' in args.features:
+                descriptorsets.append(PaDEL())
             if 'DrugEx' in args.features:
                 descriptorsets.append(DrugExPhyschem())
             if args.predictor_model:

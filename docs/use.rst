@@ -130,15 +130,15 @@ the bins need to be given. For binary classification only give 1 threshold per p
 
 Feature calculation
 """""""""""""""""""
-There are four different descriptor sets that can be calculated at the moment,
-namely Morgan fingerprints, rdkit descriptors, Mordred descriptors and the
+There are six different descriptor sets that can be calculated at the moment,
+namely Morgan fingerprints, rdkit, Mordred, Mold2 and Padel descriptors, and the
 physicochemical properties used in the QSAR models in the DrugEx papers. They can also
 be combined. For more control over the descriptorcalculator settings use the python API.
 
 ..  code-block::
 
-    # With Morgan, RDkit, Mordred and DrugEx descriptors
-        python -m qsprpred.data_CLI -i LIGAND_RAW_small_pivot.tsv -sm Smiles -pr CHEMBL318 -pr CHEMBL256 -r REG -sp random -sf 0.15 -fe Morgan RDkit Mordred DrugEx
+    # With Morgan, RDkit, Mordred, Mold2, PaDEL and DrugEx descriptors
+        python -m qsprpred.data_CLI -i LIGAND_RAW_small_pivot.tsv -sm Smiles -pr CHEMBL318 -pr CHEMBL256 -r REG -sp random -sf 0.15 -fe Morgan RDkit Mordred Mold2 PaDEL DrugEx
 
 Feature filtering
 """""""""""""""""
