@@ -10,3 +10,6 @@ from enum import Enum
 class ModelTasks(Enum):
     REGRESSION = 'REGRESSION'
     CLASSIFICATION = 'CLASSIFICATION'
+
+    def __str__(self):
+        return self.name

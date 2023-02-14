@@ -4,7 +4,7 @@ To add a new descriptor or fingerprint calculator:
 * Add a descriptor subclass for your descriptor calculator
 * Add a function to retrieve your descriptor by name to the descriptor retriever class
 """
-
+import importlib
 from abc import ABC, abstractmethod
 from typing import Optional, Union, List
 
@@ -18,7 +18,7 @@ from PaDEL_pywrapper.descriptors import _descs_2D as PaDEL_2D_descriptors, descr
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
-from rdkit.Chem import Mol
+from rdkit.Chem import Mol, AllChem
 
 
 class DescriptorSet(ABC):
@@ -430,6 +430,7 @@ class Mold2(DescriptorSet):
         if names is None:
             self._descriptors = self._default_descs[:]
             self._keepindices = list(range(len(self._descriptors)))
+            return
         # Find descriptors not part of Mold2
         remainder = set(names).difference(set(self._default_descs))
         if len(remainder) > 0:
@@ -441,6 +442,8 @@ class Mold2(DescriptorSet):
                 if desc_name in names:
                     new_indices.append(i)
                     new_descs.append(self._default_descs[i])
+            self._descriptors = new_descs
+            self._keepindices = new_indices
 
     def __str__(self):
         return "Mold2"
@@ -519,23 +522,37 @@ class PaDEL(DescriptorSet):
     def __str__(self):
         return "PaDEL"
 
-
 class PredictorDesc(DescriptorSet):
     """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
 
-    def __init__(self, *args, **kwargs):
+    @staticmethod
+    def import_class(class_path):
+        """Import a class from a string path."""
+        class_name = class_path.split(".")[-1]
+        module_name = class_path.replace(f".{class_name}", "")
+        module = importlib.import_module(module_name)
+        return getattr(module, class_name)
+
+    def __init__(self, model : Union["QSPRModel", str], model_class : str = None):
         """
-        Initialize the descriptorset with a Predictor object.
+        Initialize the descriptorset with a `QSPRModel` object.
 
         Args:
-            predictor: Predictor object to use for calculating the descriptor
+            model: a fitted model instance or a path to the model's meta file
         """
-        self._args = args
-        self._kwargs = kwargs
-        self._is_fp = False
-        from qsprpred.scorers.predictor import Predictor
-        self._predictor = Predictor.fromFile(*args, **kwargs)
-        self._descriptors = [self._predictor.getKey()]
+        from qsprpred.models.models import QSPRModel
+
+        if isinstance(model, str):
+            if model_class is not None:
+                self.modelClass = self.import_class(model_class)
+                self.model = self.modelClass.fromFile(model)
+            else:
+                raise ValueError("Model class must be specified if model is a path to meta file.")
+        else:
+            self.model = model
+            self.modelClass = type(model)
+
+        self._descriptors = [self.model.name]
 
     def __call__(self, mols):
         """
@@ -547,19 +564,22 @@ class PredictorDesc(DescriptorSet):
         Returns:
             an array of descriptor values
         """
-        mols = self.iterMols(mols, to_list=True)
-        scores = np.zeros((len(mols), 1))
-        scores[:, 0] = self._predictor.getScores(mols)
-        return scores
+        mols = list(mols)
+        if type(mols[0]) != str:
+            mols = [Chem.MolToSmiles(mol) for mol in mols]
+        return self.model.predictMols(mols, use_probas=False)
 
     @property
     def is_fp(self):
-        return self._is_fp
+        return False
 
     @property
     def settings(self):
         """Return args and kwargs used to initialize the descriptorset."""
-        return self._args, self._kwargs
+        return {
+            'model': self.model.metaFile, # FIXME: we save absolute path to meta file so this descriptor set is not really portable
+            'model_class': self.modelClass.__module__ + "." + self.modelClass.__name__
+        }
 
     @property
     def descriptors(self):

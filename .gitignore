@@ -6,9 +6,6 @@
 !.gitignore
 /build/
 /base_test/
-/tutorial/qspr/
-/tutorial/figures
-/tutorial/CLI
 /docs/_build
 *.pkg
 *.tgz

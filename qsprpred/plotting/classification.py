@@ -4,7 +4,7 @@ classification
 Created by: Martin Sicho
 On: 16.11.22, 12:12
 """
-import os
+import os.path
 from abc import ABC
 from typing import List
 
@@ -16,14 +16,15 @@ from sklearn.metrics import RocCurveDisplay, auc, f1_score, matthews_corrcoef, p
 from sklearn.calibration import CalibrationDisplay 
 
 from qsprpred.models.interfaces import QSPRModel
+from qsprpred.models.tasks import ModelTasks
 from qsprpred.plotting.interfaces import ModelPlot
 from qsprpred.metrics.calibration import calibration_error
 
 
 class ClassifierPlot(ModelPlot, ABC):
 
-    def getSupportedTypes(self):
-        return ["CLS"]
+    def getSupportedTasks(self):
+        return [ModelTasks.CLASSIFICATION]
 
 class ROCPlot(ClassifierPlot):
 
@@ -337,7 +338,7 @@ class MetricsPlot(ClassifierPlot):
             'Value': []
         }
 
-    def make(self, save : bool = True, show : bool = False, filename_prefix : str = 'metrics', save_summary_to : str = None):
+    def make(self, save : bool = True, show : bool = False, filename_prefix : str = 'metrics', out_dir : str = "."):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -369,8 +370,8 @@ class MetricsPlot(ClassifierPlot):
                 self.summary['Value'].append(val)
 
         df_summary = pd.DataFrame(self.summary)
-        if save_summary_to is not None:
-            df_summary.to_csv(save_summary_to, sep='\t', index=False, header=True)
+        if save:
+            df_summary.to_csv(os.path.join(out_dir, f"{filename_prefix}_summary.tsv"), sep='\t', index=False, header=True)
 
         figures = []
         for metric in df_summary.Metric.unique():
@@ -403,7 +404,7 @@ class MetricsPlot(ClassifierPlot):
             plt.subplots_adjust(bottom=0.4)
             plt.axhline(y=1.0, color='grey', linestyle='-', alpha=0.3)
             if save:
-                plt.savefig(f'{filename_prefix}_{metric}.png')
+                plt.savefig(os.path.join(out_dir, f"{filename_prefix}_{metric}.png"))
             if show:
                 plt.show()
                 plt.clf()

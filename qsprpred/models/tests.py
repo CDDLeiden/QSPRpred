@@ -1,26 +1,23 @@
 """This module holds the tests for functions regarding QSPR modelling."""
-import glob
-import json
+import numbers
 import os
-import random
 import shutil
+import logging
 from os.path import exists
-from unittest import TestCase, skip
+from unittest import TestCase
+from parameterized import parameterized
 
 import numpy as np
 import pandas as pd
-import sklearn_json as skljson
 import torch
-from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datasplitters import randomsplit
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import FingerprintSet
-from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
+from qsprpred.data.utils.featurefilters import lowVarianceFilter, highCorrelationFilter
+from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
-from qsprpred.scorers.predictor import Predictor
-from rdkit.Chem import MolFromSmiles
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.naive_bayes import GaussianNB
@@ -29,51 +26,134 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC, SVR
 from torch.utils.data import DataLoader, TensorDataset
 from xgboost import XGBClassifier, XGBRegressor
+from qsprpred.data.tests import DataSets
 
+N_CPUS = 2
+GPUS = [idx for idx in range(torch.cuda.device_count())]
+logging.basicConfig(level=logging.DEBUG)
 
-class PathMixIn:
-    datapath = f'{os.path.dirname(__file__)}/test_files/data'
-    qsprdatapath = f'{os.path.dirname(__file__)}/test_files/qspr/data'
+class ModelDataSets(DataSets):
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
+    preparation = {
+        "feature_calculator" : DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]),
+        "split" : randomsplit(0.1),
+        "feature_standardizer" : StandardScaler(),
+        "feature_filters" : [
+            lowVarianceFilter(0.05),
+            highCorrelationFilter(0.8)
+        ],
+    }
 
     @classmethod
     def setUpClass(cls):
-        cls.tearDownClass()
+        super().setUpClass()
         if not os.path.exists(cls.qsprmodelspath):
             os.makedirs(cls.qsprmodelspath)
-        if not os.path.exists(cls.qsprdatapath):
-            os.mkdir(cls.qsprdatapath)
 
     @classmethod
-    def tearDownClass(cls):
+    def clean_directories(cls):
+        super().clean_directories()
         if os.path.exists(cls.qsprmodelspath):
             shutil.rmtree(cls.qsprmodelspath)
-        if os.path.exists(cls.qsprdatapath):
-            shutil.rmtree(cls.qsprdatapath)
-        for extension in ['log', 'pkg', 'json']:
-            globs = glob.glob(f'{cls.datapath}/*.{extension}')
-            for path in globs:
-                os.remove(path)
 
+    @staticmethod
+    def prepare(dataset):
+        dataset.prepareDataset(
+            **ModelDataSets.preparation,
+        )
 
-class NeuralNet(PathMixIn, TestCase):
+        return dataset
+
+    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
+        dataset = super().create_large_dataset(name=name, task=task, target_prop=target_prop, th=th)
+        return self.prepare(dataset)
+
+    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
+        dataset = super().create_small_dataset(name=name, task=task, target_prop=target_prop, th=th)
+        return self.prepare(dataset)
+
+class ModelTestMixIn:
+    def fit_test(self, themodel):
+        # perform bayes optimization
+        fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
+        mname = themodel.name.split("_")[0]
+        grid_params = themodel.__class__.loadParamsGrid(fname, "bayes", mname)
+        search_space_bs = grid_params[grid_params[:, 0] == mname, 1][0]
+        themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=1)
+        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['parameters_path']}"))
+
+        # perform grid search
+        themodel.cleanFiles()
+        grid_params = themodel.__class__.loadParamsGrid(fname, "grid", mname)
+        search_space_gs = grid_params[grid_params[:, 0] == mname, 1][0]
+        themodel.gridSearch(search_space_gs=search_space_gs)
+        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['parameters_path']}"))
+        themodel.cleanFiles()
+
+        # perform crossvalidation
+        themodel.evaluate()
+        self.assertTrue(
+            exists(
+                f'{themodel.outDir}/{themodel.name}.ind.tsv'))
+        self.assertTrue(
+            exists(
+                f'{themodel.outDir}/{themodel.name}.cv.tsv'))
+
+        # train the model on all data
+        themodel.fit()
+        self.assertTrue(exists(themodel.metaFile))
+        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['model_path']}"))
+        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['parameters_path']}"))
+        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_calculator_path']}"))
+        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_standardizer_path']}"))
+
+    def predictor_test(self, model_name, base_dir, cls : QSPRModel = QSPRsklearn):
+        # initialize model as predictor
+        predictor = cls(name=model_name, base_dir=base_dir)
+
+        # load molecules to predict
+        df = pd.read_csv(
+            f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
+            sep='\t')
+
+        # predict the property
+        predictions = predictor.predictMols(df.SMILES.to_list())
+        self.assertEqual(predictions.shape, (len(df.SMILES),))
+        self.assertIsInstance(predictions, np.ndarray)
+        if predictor.task == ModelTasks.REGRESSION:
+            self.assertIsInstance(predictions[0], numbers.Real)
+        elif predictor.task == ModelTasks.CLASSIFICATION:
+            self.assertIsInstance(predictions[0], numbers.Integral)
+        else:
+            return AssertionError(f"Unknown task: {predictor.task}")
+
+        # test with an invalid smiles
+        invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
+        predictions = predictor.predictMols(invalid_smiles)
+        self.assertEqual(predictions.shape, (len(invalid_smiles),))
+        self.assertEqual(predictions[1], None)
+        self.assertIsInstance(predictions[0], numbers.Number)
+
+class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
+
+    @staticmethod
+    def get_model(name, alg=None, dataset=None, parameters=None):
+        # intialize dataset and model
+        return QSPRDNN(
+            base_dir=f'{os.path.dirname(__file__)}/test_files/',
+            alg=alg,
+            data=dataset,
+            name=name,
+            parameters=parameters,
+            gpus=GPUS,
+            patience=3,
+            tol=0.02
+        )
 
     def prep_testdata(self, task=ModelTasks.REGRESSION, th=None):
 
         # prepare test dataset
-        df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
-        data = QSPRDataset(
-            name="testmodel",
-            df=df,
-            target_prop="CL",
-            task=task,
-            th=th,
-            store_dir=self.qsprmodelspath)
-        data.prepareDataset(
-            feature_calculator=DescriptorsCalculator(
-                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]),
-            split=randomsplit(0.1),
-            feature_standardizers=[StandardScaler()])
+        data = self.create_large_dataset(task=task, th=th)
         data.save()
         # prepare data for torch DNN
         trainloader = DataLoader(
@@ -89,315 +169,142 @@ class NeuralNet(PathMixIn, TestCase):
 
         return data.X.shape[1], trainloader, testloader
 
-    def test_STFullyConnected(self):
+    @parameterized.expand([
+        (f"{alg_name}_{task}", task, alg_name, alg, th)
+        for alg, alg_name, task, th in (
+                (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
+                (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [6.5]),
+                (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [0, 1, 10, 1200]),
+        )
+    ])
+    def test_base_model(self, _, task, alg_name, alg, th):
         # prepare test regression dataset
-        no_features, trainloader, testloader = self.prep_testdata()
+        is_reg = True if task == ModelTasks.REGRESSION else False
+        no_features, trainloader, testloader = self.prep_testdata(task=task, th=th)
 
         # fit model with default settings
-        model = STFullyConnected(n_dim=no_features)
+        model = alg(n_dim=no_features, is_reg=is_reg)
         model.fit(
             trainloader,
             testloader,
-            out=f'{self.datapath}/testmodel',
+            out=f'{self.datapath}/{alg_name}_{task}',
             patience=3)
 
         # fit model with non-default epochs and learning rate and tolerance
-        model = STFullyConnected(n_dim=no_features, n_epochs=50, lr=0.5)
+        model = alg(n_dim=no_features, n_epochs=50, lr=0.5, is_reg=is_reg)
         model.fit(
             trainloader,
             testloader,
-            out=f'{self.datapath}/testmodel',
+            out=f'{self.datapath}/{alg_name}_{task}',
             patience=3,
             tol=0.01)
 
         # fit model with non-default settings for model construction
-        model = STFullyConnected(
+        model = alg(
             n_dim=no_features,
             neurons_h1=2000,
             neurons_hx=500,
-            extra_layer=True)
-        model.fit(
-            trainloader,
-            testloader,
-            out=f'{self.datapath}/testmodel',
-            patience=3)
-
-        # prepare classification test dataset
-        no_features, trainloader, testloader = self.prep_testdata(
-            task=ModelTasks.CLASSIFICATION, th=[6.5])
-
-        # fit model with regression is false
-        model = STFullyConnected(n_dim=no_features, is_reg=False)
-        model.fit(
-            trainloader,
-            testloader,
-            out=f'{self.datapath}/testmodel',
-            patience=3)
-
-        # prepare multi-classification test dataset
-        no_features, trainloader, testloader = self.prep_testdata(
-            task=ModelTasks.CLASSIFICATION, th=[0, 1, 10, 1200])
-
-        # fit model with regression is false
-        model = STFullyConnected(n_dim=no_features, n_class=3, is_reg=False)
-        model.fit(
-            trainloader,
-            testloader,
-            out=f'{self.datapath}/testmodel',
-            patience=3)
-
-
-class TestModels(PathMixIn, TestCase):
-    GPUS = [idx for idx in range(torch.cuda.device_count())]
-
-    def prep_testdata(self, reg=True, th=None):
-        task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
-
-        reg_abbr = 'REG' if reg else 'CLS'
-        random.seed(42)
-
-        # prepare test dataset
-        df = pd.read_csv(f'{self.datapath}/test_data_large.tsv', sep='\t')
-        data = QSPRDataset(
-            name=f"test_data_large_{task.name}",
-            df=df,
-            target_prop="CL",
-            task=task,
-            th=th,
-            store_dir=self.qsprmodelspath)
-        feature_calculators = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)])
-        scaler = StandardScaler()
-        data.prepareDataset(
-            feature_calculator=feature_calculators,
-            split=randomsplit(0.1),
-            feature_standardizers=[scaler]
+            extra_layer=True,
+            is_reg=is_reg
         )
-        data.save()
+        model.fit(
+            trainloader,
+            testloader,
+            out=f'{self.datapath}/{alg_name}_{task}',
+            patience=3)
 
-        return data, feature_calculators, SKLearnStandardizer(scaler)
+    @parameterized.expand([
+        (f"{alg_name}_{task}", task, alg_name, alg, th)
+        for alg, alg_name, task, th in (
+                (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
+                (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [6.5]),
+                (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [0, 1, 10, 1100]),
+        )
+    ])
+    def test_qsprpred_model(self, _, task, alg_name, alg, th):
+        # initialize dataset
+        dataset = self.create_large_dataset(task=task, th=th)
 
-    def QSPRsklearn_models_test(self, alg, alg_name, reg, th=None, n_jobs=8):
+        # initialize model for training from class
+        alg_name = f"{alg_name}_{task}_th={th}"
+        model = self.get_model(
+            name=alg_name,
+            alg=alg,
+            dataset=dataset
+        )
+        self.fit_test(model)
+        self.predictor_test(alg_name, model.baseDir, QSPRDNN)
+
+class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
+
+    @staticmethod
+    def get_model(name, alg=None, dataset=None, parameters=None):
         # intialize dataset and model
-        data, _, _ = self.prep_testdata(reg=reg, th=th)
+        return QSPRsklearn(
+            base_dir=f'{os.path.dirname(__file__)}/test_files/',
+            alg=alg,
+            data=dataset,
+            name=name,
+            parameters=parameters
+        )
 
-        if not alg_name in ["NB", "PLS", "SVM"]:
-            parameters = {"n_jobs": n_jobs}
+    @parameterized.expand([
+        (alg_name, ModelTasks.REGRESSION, alg_name, alg)
+        for alg, alg_name  in (
+        (PLSRegression, "PLSR"),
+        (SVR, "SVR"),
+        (RandomForestRegressor, "RFR"),
+        (XGBRegressor, "XGBR"),
+        (KNeighborsRegressor, "KNNR")
+    )
+    ])
+    def test_regression_basic_fit(self, _, task, model_name, model_class):
+        if not model_name in ["SVR", "PLSR"]:
+            parameters = {"n_jobs": N_CPUS}
         else:
             parameters = {}
-        themodel = QSPRsklearn(
-            base_dir=f'{os.path.dirname(__file__)}/test_files/',
-            data=data,
-            alg=alg,
-            alg_name=alg_name,
-            parameters=parameters)
 
-        # train the model on all data
-        themodel.fit()
-        regid = 'REG' if reg else 'CLS'
-        self.assertTrue(
-            exists(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.json'))
+        # initialize dataset
+        dataset = self.create_large_dataset(task=task)
 
-        # perform crossvalidation
-        themodel.evaluate()
-        self.assertTrue(
-            exists(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.ind.tsv'))
-        self.assertTrue(
-            exists(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.cv.tsv'))
-
-        # perform bayes optimization
-        fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
-        grid_params = QSPRsklearn.loadParamsGrid(fname, "bayes", alg_name)
-        search_space_bs = grid_params[grid_params[:, 0] == alg_name, 1][0]
-        themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=1)
-        self.assertTrue(
-            exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}_params.json'))
-
-        # perform grid search
-        os.remove(
-            f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}_params.json')
-        grid_params = QSPRsklearn.loadParamsGrid(fname, "grid", alg_name)
-        search_space_gs = grid_params[grid_params[:, 0] == alg_name, 1][0]
-        themodel.gridSearch(search_space_gs=search_space_gs)
-        self.assertTrue(
-            exists(f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}_params.json'))
-
-    def predictor_test(self, alg_name, reg, th=None):
-        # intialize dataset and model
-        data, feature_calculators, scaler = self.prep_testdata(reg=reg, th=th)
-        regid = 'REG' if reg else 'CLS'
-        if alg_name == 'DNN':
-            path = f'{os.path.dirname(__file__)}/test_files/qspr/models/DNN_{regid}_{data.targetProperty}.json'
-            with open(path) as f:
-                themodel_params = json.load(f)
-            themodel = STFullyConnected(**themodel_params)
-            themodel.load_state_dict(torch.load(f"{path[:-5]}_weights.pkg"))
+        # initialize model for training from class
+        model = self.get_model(
+            name=f"{model_name}_{task}",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters
+        )
+        self.fit_test(model)
+        self.predictor_test(f"{model_name}_{task}", model.baseDir)
+    @parameterized.expand([
+        (alg_name, ModelTasks.CLASSIFICATION, alg_name, alg)
+        for alg, alg_name in (
+                (SVC, "SVC"),
+                (RandomForestClassifier, "RFC"),
+                (XGBClassifier, "XGBC"),
+                (KNeighborsClassifier, "KNNC"),
+                (GaussianNB, "NB")
+        )
+    ])
+    def test_classification_basic_fit(self, _, task, model_name, model_class):
+        if not model_name in ["NB", "SVC"]:
+            parameters = {"n_jobs": N_CPUS}
         else:
-            themodel = skljson.from_json(
-                f'{os.path.dirname(__file__)}/test_files/qspr/models/{alg_name}_{regid}_{data.targetProperty}.json')
+            parameters = {}
 
-        # initialize predictor
-        predictor = Predictor(
-            themodel,
-            feature_calculators,
-            [scaler],
-            type=regid,
-            th=th,
-            name=None,
-            modifier=None)
+        if model_name == "SVC":
+            parameters.update({"probability": True})
 
-        # load molecules to predict
-        df = pd.read_csv(
-            f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-            sep='\t')
-        mols = [MolFromSmiles(smiles) for smiles in df.SMILES]
-
-        # predict property
-        predictions = predictor.getScores(mols)
-        self.assertEqual(predictions.shape, (len(mols),))
-        self.assertIsInstance(predictions, np.ndarray)
-        self.assertIsInstance(predictions[0], float)
-
-        # test with an invalid smiles
-        invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
-        predictions = predictor.getScores(invalid_smiles)
-        self.assertEqual(predictions.shape, (len(invalid_smiles),))
-        self.assertEqual(predictions[1], None)
-        self.assertNotEqual(predictions[0], None)
-
-        return predictions
-
-    def testRF(self):
-        alg_name = "RF"
-        # test regression
-        alg = RandomForestRegressor()
-        self.QSPRsklearn_models_test(alg, alg_name, reg=True)
-        self.predictor_test(alg_name, reg=True)
+        # initialize dataset
+        dataset = self.create_large_dataset(task=task, th=[0, 1, 10, 1100])
 
         # test classifier
-        alg = RandomForestClassifier()
-        self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
-        self.predictor_test(alg_name, reg=False, th=[6.5])
-
-        # test multi-classifier
-        alg = RandomForestClassifier()
-        self.QSPRsklearn_models_test(
-            alg, alg_name, reg=False, th=[
-                0, 1, 10, 1100])
-        self.predictor_test(alg_name, reg=False, th=[0, 1, 10, 1100])
-
-    def testKNN(self):
-        alg_name = "KNN"
-        # test regression
-        alg = KNeighborsRegressor()
-        self.QSPRsklearn_models_test(alg, alg_name, reg=True)
-        self.predictor_test(alg_name, reg=True)
-
-        # test classifier
-        alg = KNeighborsClassifier()
-        self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
-        self.predictor_test(alg_name, reg=False, th=[6.5])
-
-        # test multiclass
-        self.QSPRsklearn_models_test(
-            alg, alg_name, reg=False, th=[
-                0, 1, 10, 1100])
-        self.predictor_test(alg_name, reg=False, th=[0, 1, 10, 1100])
-
-    def testXGB(self):
-        alg_name = "XGB"
-        # test regression
-        alg = XGBRegressor(objective='reg:squarederror')
-        self.QSPRsklearn_models_test(alg, alg_name, reg=True)
-        self.predictor_test(alg_name, reg=True)
-
-        # test classifier
-        alg = XGBClassifier(
-            objective='binary:logistic',
-            use_label_encoder=False,
-            eval_metric='logloss')
-        self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
-        self.predictor_test(alg_name, reg=False, th=[6.5])
-
-        # test multiclass
-        alg = XGBClassifier(
-            objective='multi:softmax',
-            use_label_encoder=False,
-            eval_metric='logloss')
-        self.QSPRsklearn_models_test(
-            alg, alg_name, reg=False, th=[
-                0, 1, 10, 1100])
-        self.predictor_test(alg_name, reg=False, th=[0, 1, 10, 1100])
-
-    def testSVM(self):
-        alg_name = "SVM"
-        # test regression
-        alg = SVR()
-        self.QSPRsklearn_models_test(alg, alg_name, reg=True)
-        self.predictor_test(alg_name, reg=True)
-
-        # test classifier
-        alg = SVC(probability=True)
-        self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
-        self.predictor_test(alg_name, reg=False, th=[6.5])
-
-        # test multiclass
-        self.QSPRsklearn_models_test(
-            alg, alg_name, reg=False, th=[
-                0, 1, 10, 1100])
-        self.predictor_test(alg_name, reg=False, th=[0, 1, 10, 1100])
-
-    def testPLS(self):
-        alg_name = "PLS"
-        # test regression
-        alg = PLSRegression()
-        self.QSPRsklearn_models_test(alg, alg_name, reg=True)
-        self.predictor_test(alg_name, reg=True)
-
-    def testNB(self):
-        alg_name = "NB"
-        # test classfier
-        alg = GaussianNB()
-        self.QSPRsklearn_models_test(alg, alg_name, reg=False, th=[6.5])
-        self.predictor_test(alg_name, reg=False, th=[6.5])
-
-        # test multiclass
-        self.QSPRsklearn_models_test(
-            alg, alg_name, reg=False, th=[
-                0, 1, 10, 1100])
-        self.predictor_test(alg_name, reg=False, th=[0, 1, 10, 1100])
-
-    def test_QSPRDNN(self):
-        # intialize model for single class, multi class and regression DNN's
-        for reg in [(False, [6.5]), (False, [0, 1, 10, 1100]), (True, [])]:
-            data, feature_calculators, scaler = self.prep_testdata(
-                reg=reg[0], th=reg[1])
-            themodel = QSPRDNN(
-                base_dir=f'{os.path.dirname(__file__)}/test_files',
-                data=data,
-                gpus=self.GPUS,
-                patience=3,
-                tol=0.02)
-
-            #fit and cross-validation
-            themodel.evaluate()
-            themodel.fit()
-
-            # optimization
-            fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
-
-            # grid search
-            grid_params = QSPRDNN.loadParamsGrid(fname, "grid", "DNN")
-            search_space_gs = grid_params[grid_params[:, 0] == "DNN", 1][0]
-            themodel.gridSearch(search_space_gs=search_space_gs)
-
-            # bayesian optimization
-            bayes_params = QSPRDNN.loadParamsGrid(fname, "bayes", "DNN")
-            search_space_bs = bayes_params[bayes_params[:, 0] == "DNN", 1][0]
-            themodel.bayesOptimization(
-                search_space_bs=search_space_bs, n_trials=5)
-
-            # predictor
-            self.predictor_test('DNN', reg=reg[0], th=reg[1])
+        # initialize model for training from class
+        model = self.get_model(
+            name=f"{model_name}_{task}",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters
+        )
+        self.fit_test(model)
+        self.predictor_test(f"{model_name}_{task}", model.baseDir)

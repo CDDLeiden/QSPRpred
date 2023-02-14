@@ -11,7 +11,7 @@ from qsprpred.data.interfaces import MoleculeDataSet, datasplit
 from qsprpred.data.utils.descriptorcalculator import Calculator, DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import (
     SKLearnStandardizer,
-    apply_feature_standardizers,
+    apply_feature_standardizer,
 )
 from qsprpred.data.utils.folds import Folds
 from qsprpred.data.utils.scaffolds import Scaffold
@@ -84,8 +84,9 @@ class MoleculeTable(MoleculeDataSet):
             add_rdkit: bool = False,
             store_dir: str = '.',
             overwrite: bool = False,
-            n_jobs: int = 0,
+            n_jobs: int = 1,
             chunk_size: int = 50,
+            drop_invalids: bool = True,
     ):
         """
 
@@ -100,8 +101,9 @@ class MoleculeTable(MoleculeDataSet):
             add_rdkit (bool): Add RDKit molecule instances to the dataframe. WARNING: This can take a lot of memory.
             store_dir (str): Directory to store the dataset files. Defaults to the current directory. If it already contains files with the same name, the existing data will be loaded.
             overwrite (bool): Overwrite existing dataset.
-            n_jobs (int): Number of jobs to use for parallel processing.
+            n_jobs (int): Number of jobs to use for parallel processing. If <= 0, all available cores will be used.
             chunk_size (int): Size of chunks to use per job in parallel processing.
+            drop_invalids (bool): Drop invalid molecules from the data frame.
         """
 
         # settings
@@ -139,7 +141,8 @@ class MoleculeTable(MoleculeDataSet):
             self.reload()
 
         # drop invalid columns
-        self.dropInvalids()
+        if drop_invalids:
+            self.dropInvalids()
 
     def __len__(self):
         """
@@ -601,6 +604,8 @@ class MoleculeTable(MoleculeDataSet):
         )
         self.df = self.df[invalid_mask].copy()
 
+        return invalid_mask
+
 
 class QSPRDataset(MoleculeTable):
     """Prepare dataset for QSPR model training.
@@ -637,8 +642,10 @@ class QSPRDataset(MoleculeTable):
         task: Literal[ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION] = ModelTasks.REGRESSION,
         target_transformer: Callable = None,
         th: List[float] = None,
-        n_jobs: int = 0,
+        n_jobs: int = 1,
         chunk_size: int = 50,
+        drop_invalids: bool = True,
+        drop_empty: bool = True,
     ):
         """Construct QSPRdata, also apply transformations of output property if specified.
 
@@ -655,11 +662,15 @@ class QSPRDataset(MoleculeTable):
             th (List[float], optional): threshold for activity if classification model, if len th
                 larger than 1, these values will used for binning (in this case lower and upper
                 boundary need to be included). Defaults to None.
+            n_jobs (int, optional): number of parallel jobs. If <= 0, all available cores will be used. Defaults to 1.
+            chunk_size (int, optional): chunk size for parallel processing. Defaults to 50.
+            drop_invalids (bool, optional): if true, invalid SMILES will be dropped. Defaults to True.
+            drop_empty (bool, optional): if true, rows with empty target property will be removed.
 
         Raises:
             ValueError: Raised if thershold given with non-classification task.
         """
-        super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size)
+        super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size, drop_invalids)
         self.targetProperty = target_prop
         self.originalTargetProperty = target_prop
         self.task = task
@@ -678,13 +689,14 @@ class QSPRDataset(MoleculeTable):
         self.featureNames = self.getFeatureNames()
 
         # load standardizers for features
-        self.feature_standardizers = self.loadFeatureStandardizers()
-        if not self.feature_standardizers:
-            self.feature_standardizers = None
+        self.feature_standardizer = self.loadFeatureStandardizer()
+        if not self.feature_standardizer:
+            self.feature_standardizer = None
         self.fold_generator = self.getDefaultFoldGenerator()
 
         # drop rows with empty target property value
-        self.dropEmpty()
+        if drop_empty:
+            self.dropEmpty()
 
         self.th = None
         if self.task == ModelTasks.CLASSIFICATION:
@@ -736,8 +748,8 @@ class QSPRDataset(MoleculeTable):
             *args: additional arguments for QSPRDataset constructor
             **kwargs: additional keyword arguments for QSPRDataset constructor
         """
-        raise NotImplementedError(f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can convert from 'MoleculeTable' with 'fromMolTable'.")
-
+        raise NotImplementedError(
+            f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can convert from 'MoleculeTable' with 'fromMolTable'.")
 
     def dropEmpty(self):
         """Drop rows with empty target property value from the data set."""
@@ -1001,25 +1013,41 @@ class QSPRDataset(MoleculeTable):
         self.df[columns] = self.df[columns].fillna(fill_value)
         logger.warning('Missing values filled with %s' % fill_value)
 
-    def filterFeatures(self, feature_filters : List[Callable]):
+    def filterFeatures(self, feature_filters: List[Callable]):
         """
         Filter features in the data set.
 
         Args:
             feature_filters (List[Callable]): list of feature filter functions that take X feature matrix and y target vector as arguments
         """
+        if self.X is None and self.X.shape[1] == 0:
+            raise ValueError("No features to filter")
 
-        for featurefilter in feature_filters:
-            self.X = featurefilter(self.X, self.y)
+        if self.X.shape[1] == 1:
+            logger.warning("Only one feature present. Skipping feature filtering.")
+        else:
+            for featurefilter in feature_filters:
+                self.X = featurefilter(self.X, self.y)
 
-        self.featureNames = self.X.columns
-        if self.X_ind is not None:
-            self.X_ind = self.X_ind[self.featureNames]
-        logger.info(f"Selected features: {self.featureNames}")
+            self.featureNames = self.X.columns
+            if self.X_ind is not None:
+                self.X_ind = self.X_ind[self.featureNames]
+            logger.info(f"Selected features: {self.featureNames}")
 
-        # update descriptor calculator
-        if self.descriptorCalculator is not None:
-            self.descriptorCalculator.keepDescriptors(self.featureNames)
+            # update descriptor calculator
+            if self.descriptorCalculator is not None:
+                self.descriptorCalculator.keepDescriptors(self.featureNames)
+
+    def setFeatureStandardizer(self, feature_standardizer):
+        """
+        Set feature standardizer.
+
+        Args:
+            feature_standardizer (Union[SKLearnStandardizer, BaseEstimator]): feature standardizer
+        """
+        if not hasattr(feature_standardizer, 'toFile'):
+            feature_standardizer = SKLearnStandardizer(feature_standardizer)
+        self.feature_standardizer = feature_standardizer
 
     def prepareDataset(
         self,
@@ -1030,9 +1058,9 @@ class QSPRDataset(MoleculeTable):
         fold=None,
         feature_calculator=None,
         feature_filters=None,
-        feature_standardizers=None,
+        feature_standardizer=None,
         recalculate_features=False,
-        fill_value=0
+        fill_value=np.nan
     ):
         """Prepare the dataset for use in QSPR model.
 
@@ -1044,9 +1072,9 @@ class QSPRDataset(MoleculeTable):
             fold (datasplitter obj): splits the train set into folds for cross validation
             feature_calculator (DescriptorsCalculator): calculates features from smiles
             feature_filters (list of feature filter objs): filters features
-            feature_standardizers (list of feature standardizer objs): standardizes and/or scales features
+            feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator): standardizes and/or scales features
             recalculate_features (bool): recalculate features even if they are already present in the file
-            fill_value (float): value to fill missing values with
+            fill_value (float): value to fill missing values with, defaults to `numpy.nan`
         """
         # apply sanitization and standardization
         if standardize:
@@ -1080,26 +1108,26 @@ class QSPRDataset(MoleculeTable):
             logger.warning("Attempting to featurize splits without descriptors. Skipping this step...")
 
         # apply feature filters on training set
-        if feature_filters is not None:
-            if not self.hasDescriptors:
-                logger.warning(
-                    "No descriptors present, feature filters will be applied, but might have no effect."
-                )
+        if feature_filters and self.hasDescriptors:
             self.filterFeatures(feature_filters)
+        elif not self.hasDescriptors:
+            logger.warning(
+                "No descriptors present, feature filters will be skipped."
+            )
 
         # set feature standardizers
-        if feature_standardizers is not None:
+        if feature_standardizer:
+            self.setFeatureStandardizer(feature_standardizer)
+            if self.fold_generator:
+                self.fold_generator = Folds(self.fold_generator.split, self.feature_standardizer)
             if not self.hasDescriptors:
                 logger.warning(
-                    "No descriptors present, feature standardizers will have no effect."
+                    "No descriptors present, feature standardizers were initialized, but might fail or have no effect."
                 )
-            self.feature_standardizers = feature_standardizers
-            if self.fold_generator:
-                self.fold_generator = Folds(self.fold_generator.split, self.feature_standardizers)
 
         # create fold generator
         if fold:
-            self.fold_generator = Folds(fold, self.feature_standardizers)
+            self.fold_generator = Folds(fold, self.feature_standardizer)
 
     def getDefaultFoldSplit(self):
         """
@@ -1120,7 +1148,7 @@ class QSPRDataset(MoleculeTable):
         Returns:
             Folds (Folds): default fold generator implementation
         """
-        return Folds(self.getDefaultFoldSplit(), self.feature_standardizers)
+        return Folds(self.getDefaultFoldSplit(), self.feature_standardizer)
 
     def createFolds(self, split: datasplit = None):
         """
@@ -1139,11 +1167,11 @@ class QSPRDataset(MoleculeTable):
         if split is None and not self.fold_generator:
             self.fold_generator = self.getDefaultFoldGenerator()
         elif split is not None:
-            self.fold_generator = Folds(split, self.feature_standardizers)
+            self.fold_generator = Folds(split, self.feature_standardizer)
 
         return self.fold_generator.iterFolds(self.X, self.y)
 
-    def fitFeatureStandardizers(self):
+    def fitFeatureStandardizer(self):
         """
         Fit the feature standardizers on the training set.
 
@@ -1154,9 +1182,9 @@ class QSPRDataset(MoleculeTable):
             X = self.getDescriptors()
             if self.featureNames is not None:
                 X = X[self.featureNames]
-            return apply_feature_standardizers(self.feature_standardizers, X, fit=True)
+            return apply_feature_standardizer(self.feature_standardizer, X, fit=True)[0]
 
-    def getFeatures(self, inplace=False, concat=False):
+    def getFeatures(self, inplace=False, concat=False, raw=False):
         """
         Get the current feature sets (training and test) from the dataset.
         This method also applies any feature standardizers that have been set on the dataset during preparation.
@@ -1165,6 +1193,7 @@ class QSPRDataset(MoleculeTable):
             inplace (bool): If `True`, the created feature matrices will be saved to the dataset object itself as 'X' and 'X_ind' attributes. Note that this will overwrite any existing feature matrices and if the data preparation workflow changes, these are not kept up to date. Therefore, it is recommended to generate new feature sets after any data set changes.
             concat (bool): If `True`, the training and test feature matrices will be concatenated into a single matrix. This is useful for
                 training models that do not require separate training and test sets (i.e. the final optimized models).
+            raw (bool): If `True`, the raw feature matrices will be returned without any standardization applied.
         """
 
         if concat:
@@ -1176,15 +1205,15 @@ class QSPRDataset(MoleculeTable):
 
         X = df_X.values
         X_ind = df_X_ind.values if df_X_ind is not None else None
-        if self.feature_standardizers:
-            X, self.feature_standardizers = apply_feature_standardizers(
-                self.feature_standardizers,
+        if not raw and self.feature_standardizer:
+            X, self.feature_standardizer = apply_feature_standardizer(
+                self.feature_standardizer,
                 df_X,
                 fit=True
             )
             if X_ind is not None:
-                X_ind, _ = apply_feature_standardizers(
-                    self.feature_standardizers,
+                X_ind, _ = apply_feature_standardizer(
+                    self.feature_standardizer,
                     df_X_ind,
                     fit=False
                 )
@@ -1215,40 +1244,36 @@ class QSPRDataset(MoleculeTable):
         else:
             return self.y, self.y_ind if self.y_ind is not None else self.y
 
-    def loadFeatureStandardizers(self):
+    def loadFeatureStandardizer(self):
         """
-        Load feature standardizers from the metadata.
+        Load feature standardizer from the metadata.
 
         Returns:
-            `list` of `SKLearnStandardizer`
+            `SKLearnStandardizer`
         """
 
-        if self.metaInfo:
-            standardizers = []
-            for path in self.metaInfo['standardizer_paths']:
-                standardizers.append(SKLearnStandardizer.fromFile(path))
-            return standardizers
+        if self.metaInfo is not None and 'standardizer_path' in self.metaInfo and self.metaInfo['standardizer_path']:
+            return SKLearnStandardizer.fromFile(f"{self.storePrefix}{self.metaInfo['standardizer_path']}")
         else:
             return None
 
-    def saveFeatureStandardizers(self):
+    def saveFeatureStandardizer(self):
         """
         Save feature standardizers to the metadata.
 
         Returns:
             `list` of `str`: paths to the saved standardizers
         """
-        paths = []
-        if self.feature_standardizers:
-            self.fitFeatureStandardizers()  # make sure feature standardizers are fitted before serialization
-            for idx, standardizer in enumerate(self.feature_standardizers):
-                path = f'{self.storePrefix}_feature_standardizer_{idx}.json'
-                if not hasattr(standardizer, 'toFile'):
-                    SKLearnStandardizer(standardizer).toFile(path)
-                else:
-                    standardizer.toFile(path)
-                paths.append(path)
-        return paths
+        path = f'{self.storePrefix}_feature_standardizer.json'
+
+        if self.feature_standardizer and self.featureNames is not None and len(self.featureNames) > 0:
+            # make sure feature standardizers are fitted before serialization
+            self.fitFeatureStandardizer()
+            self.feature_standardizer.toFile(path)
+            return path
+        elif self.feature_standardizer:
+            self.feature_standardizer.toFile(path)
+            return path
 
     def saveMetadata(self):
         """
@@ -1257,7 +1282,7 @@ class QSPRDataset(MoleculeTable):
         Returns:
             `str`: path to the saved metadata file
         """
-        paths = self.saveFeatureStandardizers()
+        path = self.saveFeatureStandardizer()
 
         meta_init = {
             'target_prop': self.originalTargetProperty,
@@ -1267,8 +1292,8 @@ class QSPRDataset(MoleculeTable):
         }
         ret = {
             'init': meta_init,
-            'standardizer_paths': paths,
-            'descriptorcalculator_path': self.descriptorCalculatorPath,
+            'standardizer_path': path.replace(self.storePrefix, '') if path else None,
+            'descriptorcalculator_path': self.descriptorCalculatorPath.replace(self.storePrefix, '') if self.descriptorCalculatorPath else None,
             'new_target_prop': self.targetProperty,
             'feature_names': list(self.featureNames) if self.featureNames is not None else None,
         }

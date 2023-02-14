@@ -19,8 +19,8 @@ from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
-    Mordred,
     Mold2,
+    Mordred,
     PaDEL,
     PredictorDesc,
     rdkit_descs,
@@ -32,6 +32,7 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
+from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
@@ -91,16 +92,9 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'RDkit', 'Mordred', 'Mold2',
                                                                 'PaDEL', 'DrugEx'],
                         nargs='*')
-    parser.add_argument('-pmo', '--predictor_model', type=str, nargs='+',
+    parser.add_argument('-pd', '--predictor_descs', type=str, nargs='+',
                         help="It is also possible to use a QSPRpred model(s) as molecular feature(s). Give\
-                        the path(s) to the model(s) relative to the base_directory. Also pass the meta data\
-                        file(s) with the -pme argument. E.g. -pmo model1.json model2.json -pme model1_meta.json\
-                        model2_meta.json")
-    parser.add_argument('-pme', '--predictor_meta', type=str, nargs='+',
-                        help="It is also possible to use a QSPRpred model(s) as molecular feature(s). Give\
-                        the path(s) to the meta data file(s) relative to the base_directory. Also pass the model\
-                        file(s) with the -pme argument. E.g. -pmo model1.json model2.json -pme model1_meta.json\
-                        model2_meta.json")
+                        the path(s) to the metadata of the model(s) relative to the base_directory.")
 
     # feature filters
     parser.add_argument('-lv', '--low_variability', type=float, default=None, help="low variability threshold\
@@ -142,7 +136,7 @@ def QSPR_dataprep(args):
 
     for reg in args.regression:
         task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
-        reg_abbr = 'REG' if reg else 'CLS'
+        reg_abbr = 'REGRESSION' if reg else 'CLASSIFICATION'
         for property in args.properties:
             log.info(f"Property: {property[0]} {reg_abbr}")
             try:
@@ -158,7 +152,7 @@ def QSPR_dataprep(args):
                 th = None
             log_transform = np.log if args.log_transform and args.log_transform[property[0]] else None
             mydataset = QSPRDataset(
-                f"{property[0]}_{reg_abbr}_QSPRdata",
+                f"{reg_abbr}_{property[0]}",
                 target_prop=property[0],
                 df=df,
                 smilescol=args.smilescol,
@@ -196,11 +190,13 @@ def QSPR_dataprep(args):
                 descriptorsets.append(PaDEL())
             if 'DrugEx' in args.features:
                 descriptorsets.append(DrugExPhyschem())
-            if args.predictor_model:
-                for idx, predictor_path in enumerate(args.predictor_model):
+            if args.predictor_descs:
+                for predictor_path in args.predictor_descs:
                     # load in predictor from files
-                    descriptorsets.append(
-                        PredictorDesc(predictor_path, args.predictor_meta[idx]))
+                    if "DNN" in predictor_path:
+                        descriptorsets.append(PredictorDesc(QSPRDNN.fromFile(predictor_path)))
+                    else:
+                        descriptorsets.append(PredictorDesc(QSPRsklearn.fromFile(predictor_path)))
 
             # feature filters
             featurefilters = []
@@ -217,7 +213,7 @@ def QSPR_dataprep(args):
             # prepare dataset for modelling
             mydataset.prepareDataset(feature_calculator=DescriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, feature_filters=featurefilters,
-                                     feature_standardizers=[StandardScaler()])
+                                     feature_standardizer=StandardScaler())
 
             # save dataset files and fingerprints
             mydataset.save()
@@ -241,7 +237,7 @@ if __name__ == '__main__':
         tuple(file_prefixes),
         cp_suffix=[
             'calculators',
-            'standardizer_0',
+            'standardizer',
             'meta'])
 
     if not os.path.exists(f'{args.base_dir}/qspr/data'):

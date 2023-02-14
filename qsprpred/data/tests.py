@@ -1,14 +1,19 @@
 """This module holds the test for functions regarding QSPR data preparation."""
+import glob
+import logging
 import os
+import platform
 import shutil
 import time
-from unittest import TestCase
+from datetime import datetime
+from unittest import TestCase, skipIf
 
 import mordred
 import numpy as np
 import pandas as pd
-import sklearn_json as skljson
 from mordred import descriptors as mordreddescriptors
+from parameterized import parameterized
+
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
@@ -30,59 +35,60 @@ from qsprpred.data.utils.featurefilters import (
     lowVarianceFilter,
 )
 from qsprpred.data.utils.scaffolds import Murcko
+from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
-from qsprpred.scorers.predictor import Predictor
 from rdkit import Chem
-from rdkit.Chem import AllChem, Descriptors, MolFromSmiles
+from rdkit.Chem import Descriptors
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 N_CPU = 2
 CHUNK_SIZE = 100
-
+logging.basicConfig(level=logging.DEBUG)
 
 class PathMixIn:
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
-    qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
     qsprdatapath = f'{os.path.dirname(__file__)}/test_files/qspr/data'
 
     @classmethod
     def setUpClass(cls):
-        cls.clean_directories()
-        if not os.path.exists(cls.qsprmodelspath):
-            os.makedirs(cls.qsprmodelspath)
+        cls.tearDownClass()
         if not os.path.exists(cls.qsprdatapath):
             os.makedirs(cls.qsprdatapath)
 
     @classmethod
     def tearDownClass(cls):
         cls.clean_directories()
+        if os.path.exists(cls.qsprdatapath):
+            shutil.rmtree(cls.qsprdatapath)
+        for extension in ['log', 'pkg', 'json']:
+            globs = glob.glob(f'{cls.datapath}/*.{extension}')
+            for path in globs:
+                os.remove(path)
 
     @classmethod
     def clean_directories(cls):
-        if os.path.exists(cls.qsprmodelspath):
-            shutil.rmtree(cls.qsprmodelspath)
         if os.path.exists(cls.qsprdatapath):
             shutil.rmtree(cls.qsprdatapath)
 
 
 class DataSets(PathMixIn):
     df_large = pd.read_csv(
-        f'{os.path.dirname(__file__)}/test_files/data/test_data_large.tsv',
+        f'{PathMixIn.datapath}/test_data_large.tsv',
         sep='\t')
     df_small = pd.read_csv(
-        f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
+        f'{PathMixIn.datapath}/test_data.tsv',
         sep='\t').sample(10)
 
-    def create_dataset(self, df, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
+    def create_dataset(self, df, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
         return QSPRDataset(
             name, target_prop=target_prop, task=task, df=df,
-            store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+            store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE, th=th)
 
-    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
-        return self.create_dataset(self.df_small, name, task=task, target_prop=target_prop)
+    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
+        return self.create_dataset(self.df_small, name, task=task, target_prop=target_prop, th=th)
 
-    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL'):
-        return self.create_dataset(self.df_large, name, task=task, target_prop=target_prop)
+    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
+        return self.create_dataset(self.df_large, name, task=task, target_prop=target_prop, th=th)
 
 
 class StopWatch:
@@ -240,72 +246,81 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
 
 
 class TestDataSetPreparation(DataSets, TestCase):
+    sets = [
+        rdkit_descs(),
+        DrugExPhyschem(),
+        PredictorDesc(
+            QSPRsklearn.fromFile(
+                f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
+        ),
+        TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
+        FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
+        Mordred(),
+        Mold2(),
+    ]
+    if platform.system() != "Linux":
+        # FIXME: Java-based descriptors do not run on Linux
+        sets.append([
+            FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
+            FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
+            FingerprintSet(fingerprint_type="CDKEStatedFP"),
+            FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
+            FingerprintSet(fingerprint_type="CDKMACCSFP"),
+            FingerprintSet(fingerprint_type="CDKPubchemFP"),
+            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
+            PaDEL(),
+        ])
 
-    def test_preparation(self):
-        paths = []
-        tasks = [ModelTasks.REGRESSION, ModelTasks.CLASSIFICATION]
-        for task in tasks:
-            dataset = QSPRDataset(
-                f"test_create_prep_{task.name}", "CL", df=self.df_large,
-                store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
-                if task == ModelTasks.CLASSIFICATION else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-            np.random.seed(42)
-            descriptor_sets = [
-                Mordred(),
-                FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-                FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
-                FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
-                FingerprintSet(fingerprint_type="CDKEStatedFP"),
-                FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
-                FingerprintSet(fingerprint_type="CDKMACCSFP"),
-                FingerprintSet(fingerprint_type="CDKPubchemFP"),
-                FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
-                FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
-                FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
-                FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
-                FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
-                FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
-                rdkit_descs(),
-                Mold2(),
-                PaDEL(),
-                DrugExPhyschem(),
-                PredictorDesc(
-                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json',
-                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'),
-                TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000)
-            ]
-            expected_length = sum([len(x.descriptors) for x in descriptor_sets])
-            dataset.prepareDataset(
-                feature_calculator=DescriptorsCalculator(descriptor_sets),
-                split=randomsplit(0.1),
-                datafilters=[
-                    CategoryFilter(
-                        name="moka_ionState7.4",
-                        values=["cationic"])],
-                feature_filters=[lowVarianceFilter(0.05),
-                                 highCorrelationFilter(0.8)])
+    @parameterized.expand(
+        [(f"{desc_set}_{ModelTasks.CLASSIFICATION}", desc_set, ModelTasks.CLASSIFICATION) for desc_set in sets] +
+        [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set, ModelTasks.REGRESSION) for desc_set in sets]
+    )
+    def test_preparation(self, _, desc_set, task):
+        ds_name = f"{desc_set}_{task}_{datetime.now()}"
+        logging.debug(f"Testing data set: {ds_name}")
+        dataset = QSPRDataset(
+            ds_name, "CL", df=self.df_large,
+            store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
+            if task == ModelTasks.CLASSIFICATION else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        np.random.seed(42)
+        descriptor_sets = [
+            desc_set
+        ]
+        dataset.prepareDataset(
+            feature_calculator=DescriptorsCalculator(descriptor_sets),
+            split=randomsplit(0.1),
+            datafilters=[
+                CategoryFilter(
+                    name="moka_ionState7.4",
+                    values=["cationic"])],
+            feature_filters=[lowVarianceFilter(0.05),
+                             highCorrelationFilter(0.8)])
 
-            # test some basics
-            descriptors = dataset.getDescriptors()
-            descriptor_names = dataset.getDescriptorNames()
-            self.assertEqual(len(descriptor_names), expected_length)
-            self.assertEqual(descriptors.shape[0], len(dataset))
-            self.assertEqual(descriptors.shape[1], expected_length)
+        # test some basics
+        expected_length = sum([len(x.descriptors) for x in descriptor_sets if x in dataset.descriptorCalculator])
+        features = dataset.getFeatures(concat=True)
+        self.assertEqual(features.shape[0], len(dataset))
+        self.assertEqual(features.shape[1], expected_length)
 
-            # save to file
-            dataset.save()
-            paths.append(dataset.storePath)
-
-        for path, task in zip(paths, tasks):
-            ds = QSPRDataset.fromFile(path, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-            if ds.task == ModelTasks.CLASSIFICATION:
-                self.assertEqual(ds.targetProperty, "CL_class")
-            self.assertTrue(ds.task == task)
-            self.assertTrue(ds.descriptorCalculator)
-            self.assertTrue(
-                isinstance(
-                    ds.descriptorCalculator,
-                    DescriptorsCalculator))
+        # save to file and check if it can be loaded
+        dataset.save()
+        ds = QSPRDataset.fromFile(dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        if ds.task == ModelTasks.CLASSIFICATION:
+            self.assertEqual(ds.targetProperty, "CL_class")
+        self.assertTrue(ds.task == task)
+        self.assertTrue(ds.descriptorCalculator)
+        self.assertTrue(
+            isinstance(
+                ds.descriptorCalculator,
+                DescriptorsCalculator))
+        features = dataset.getFeatures(concat=True)
+        self.assertEqual(features.shape[0], len(dataset))
+        self.assertEqual(features.shape[1], expected_length)
 
 
 class TestDataSplitters(DataSets, TestCase):
@@ -344,19 +359,18 @@ class TestDataSplitters(DataSets, TestCase):
         dataset = self.create_large_dataset()
         split = scaffoldsplit(dataset, Murcko(), 0.1)
         calculator = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)])
-        standardizers = [StandardScaler()]
         dataset.prepareDataset(
             split=split,
             feature_calculator=calculator,
-            feature_standardizers=standardizers)
+            feature_standardizer=StandardScaler())
         self.validate_split(dataset)
         dataset.save()
 
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         self.validate_split(dataset_new)
         self.assertTrue(dataset_new.descriptorCalculator)
-        self.assertTrue(len(dataset_new.feature_standardizers) == 1)
-        self.assertTrue(len(dataset_new.fold_generator.featureStandardizers) == 1)
+        self.assertTrue(dataset_new.feature_standardizer)
+        self.assertTrue(dataset_new.fold_generator.featureStandardizer)
         self.assertTrue(len(dataset_new.featureNames) == 1024)
 
         dataset_new.clearFiles()
@@ -391,7 +405,7 @@ class TestFoldSplitters(DataSets, TestCase):
 
         # test with a standarizer
         scaler = MinMaxScaler(feature_range=(1, 2))
-        dataset.prepareDataset(feature_standardizers=[scaler])
+        dataset.prepareDataset(feature_standardizer=scaler)
 
         def check_min_max(X_train, X_test, y_train, y_test, train_index, test_index):
             self.assertTrue(np.max(X_train) == 2)
@@ -506,11 +520,19 @@ class TestDescriptorsets(DataSets, TestCase):
 
     def test_PredictorDesc(self):
         # give path to saved model parameters
-        model_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/RF_CLS_fu_class.json'
-        meta_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/data/fu_CLS_QSPRdata_meta.json'
-        desc_calc = DescriptorsCalculator([PredictorDesc(model_path, meta_path)])
+        meta_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json'
+        from qsprpred.models.models import QSPRsklearn
+        model = QSPRsklearn.fromFile(meta_path)
+        desc_calc = DescriptorsCalculator([PredictorDesc(model)])
 
         self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
+        self.assertTrue(self.dataset.X.any().any())
+
+        # test from file instantiation
+        desc_calc.toFile(f"{self.qsprdatapath}/test_calc.json")
+        desc_calc_file = DescriptorsCalculator.fromFile(f"{self.qsprdatapath}/test_calc.json")
+        self.dataset.addDescriptors(desc_calc_file, recalculate=True)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
         self.assertTrue(self.dataset.X.any().any())
 
@@ -548,6 +570,8 @@ class TestDescriptorsets(DataSets, TestCase):
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
+    # FIXME: PaDEL descriptors are not available on Linux
+    @skipIf(platform.system() == "Linux", "PaDEL descriptors are not available on Linux")
     def test_PaDEL(self):
         desc_calc = DescriptorsCalculator([PaDEL()])
         self.dataset.addDescriptors(desc_calc)
