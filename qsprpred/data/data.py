@@ -1481,6 +1481,7 @@ class QSPRDataset(MoleculeTable):
         Returns:
             `str`: path to the saved metadata file
         """
+        path = self.saveFeatureStandardizer()
 
         meta_init = {
             'target_props': TargetProperty.toList(copy.deepcopy(self.targetProperties), task_as_str=True),

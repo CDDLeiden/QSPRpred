@@ -372,12 +372,12 @@ class TestDataSetPreparation(DataSets, TestCase):
         PaDEL(),
     ]
 
-    @parameterized.expand([(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set,
+    @parameterized.expand([(f"{desc_set}_CL_{ModelTasks.REGRESSION}", desc_set,
                             [{"name": "CL", "task": ModelTasks.REGRESSION}]) for desc_set in sets] +
-                          [(f"{desc_set}_{ModelTasks.MULTICLASS}", desc_set,
+                          [(f"{desc_set}_CL_{ModelTasks.MULTICLASS}", desc_set,
                             [{"name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]}])
                            for desc_set in sets] +
-                          [(f"{desc_set}_{ModelTasks.REGRESSION}_{ModelTasks.MULTICLASS}", desc_set,
+                          [(f"{desc_set}_fu_{ModelTasks.REGRESSION}_CL_{ModelTasks.MULTICLASS}", desc_set,
                             [{"name": "fu", "task": ModelTasks.REGRESSION},
                              {"name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]}])
                            for desc_set in sets])
@@ -386,7 +386,7 @@ class TestDataSetPreparation(DataSets, TestCase):
         ds_name = f"{desc_set}_{target_props_names}_{datetime.now()}"
         logging.debug(f"Testing data set: {ds_name}")
         dataset = QSPRDataset(
-            ds_name, task, df=self.df_large,
+            ds_name, target_props, df=self.df_large,
             store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
 
         np.random.seed(42)
@@ -412,18 +412,25 @@ class TestDataSetPreparation(DataSets, TestCase):
         # save to file and check if it can be loaded
         dataset.save()
 
+        # test if the dataset can be loaded
         ds = QSPRDataset.fromFile(dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-        targetprops = TargetProperty.fromList(targetprops)
-        for targetprop in targetprops:
+        target_props = TargetProperty.fromList(target_props)
+
+        # test if the target properties are the same
+        for targetprop in target_props:
             dstargetprop = ds.getTargetProperties(targetprop.originalName, original_names=True)[0]
             if targetprop.task.isClassification():
                 self.assertEqual(dstargetprop.name, f"{targetprop.originalName}_class")
             self.assertTrue(dstargetprop.task == targetprop.task)
+        
+        # test if the descriptor calculator is the same
         self.assertTrue(ds.descriptorCalculator)
         self.assertTrue(
             isinstance(
                 ds.descriptorCalculator,
                 DescriptorsCalculator))
+        
+        # test if the data filters are the same
         features = dataset.getFeatures(concat=True)
         self.assertEqual(features.shape[0], len(dataset))
         self.assertEqual(features.shape[1], expected_length)
