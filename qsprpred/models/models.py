@@ -60,7 +60,7 @@ class QSPRsklearn(QSPRModel):
         else:
             if type(self.alg) in [SVC, SVR]:
                 logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
-                                 Manually set this parameter if this is not desired.")
+                                Manually set this parameter if this is not desired.")
                 self.model = self.alg.set_params(max_iter=10000)
             else:
                 self.model = self.alg
@@ -97,11 +97,17 @@ class QSPRsklearn(QSPRModel):
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetPropertiesValues()
 
-        cvs = np.zeros(
-            len(y)) if (
-            self.data.targetProperties[0].task == ModelTasks.REGRESSION or not self.data.isMultiClass(
-                self.data.targetProperties[0])) else np.zeros(
-            (y.shape[0], self.data.nClasses(self.data.targetProperties[0])))
+        # initialize arrays for predictions
+        if self.data.isMultiTask():
+            if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+                cvs = np.zeros((y.shape[0], len(self.data.targetProperties)))
+            else:
+                cvs = [np.zeros((y.shape[0], self.data.nClasses(prop))) for prop in self.data.targetProperties]
+        else:
+            if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+                cvs = np.zeros(y.shape[0])
+            else:
+                cvs = np.zeros((y.shape[0], self.data.nClasses(self.data.targetProperties[0])))
 
         fold_counter = np.zeros(y.shape[0])
 
@@ -121,14 +127,14 @@ class QSPRsklearn(QSPRModel):
             self.model.fit(**fit_set)
 
             if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
-                preds = self.model.predict(X_test)
-                if len(preds.shape) > 1:
-                    preds = preds[:, 0]
-                cvs[idx_test] = preds
-            elif self.data.nClasses(self.data.targetProperties[0]) > 2:
-                cvs[idx_test] = self.model.predict_proba(X_test)
+                cvs[idx_test] = self.model.predict(X_test)
             else:
-                cvs[idx_test] = self.model.predict_proba(X_test)[:, -1]
+                if not self.data.isMultiTask():
+                    cvs[idx_test] = self.model.predict_proba(X_test)
+                else:
+                    preds = self.model.predict_proba(X_test)
+                    for idx in range(len(self.data.targetProperties)):
+                        cvs[idx][idx_test] = preds[idx]
 
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
@@ -143,26 +149,21 @@ class QSPRsklearn(QSPRModel):
         self.model.fit(**fit_set)
 
         if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
-            preds = self.model.predict(X_ind)
-            if len(preds.shape) > 1:
-                preds = preds[:, 0]
-            inds = preds
-        elif self.data.nClasses(self.data.targetProperties[0]) > 2:
-            inds = self.model.predict_proba(X_ind)
+            inds = self.model.predict(X_ind)
         else:
-            inds = self.model.predict_proba(X_ind)[:, -1]
+            inds = self.model.predict_proba(X_ind)
 
         # save crossvalidation results
         if save:
-            train, test = pd.DataFrame(
-                y.values, columns=['Label']), pd.DataFrame(
-                y_ind.values, columns=['Label'])
-            if self.data.targetProperties[0].task == ModelTasks.MULTICLASS:
-                train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
-                train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
-                test = pd.concat([test, pd.DataFrame(inds)], axis=1)
-            else:
-                train['Score'], test['Score'] = cvs, inds
+            train, test = y.add_prefix('Label_'), y_ind.add_prefix('Label_')
+            for prop in self.data.targetProperties:
+                train[prop.name], test[prop.name] = X[prop.name], X_ind[prop.name]
+                if prop.task.isClassification:
+                    train[f'Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
+                    train = pd.concat([train, pd.DataFrame(cvs).add_prefix('Prob_')], axis=1)
+                    test = pd.concat([test, pd.DataFrame(inds).add_prefix('Prob_')], axis=1)
+                else:
+                    train['Score'], test['Score'] = cvs, inds
             train['Fold'] = fold_counter
             train.to_csv(self.out + '.cv.tsv', sep='\t')
             test.to_csv(self.out + '.ind.tsv', sep='\t')
