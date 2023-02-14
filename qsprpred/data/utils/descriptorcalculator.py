@@ -58,7 +58,9 @@ class DescriptorsCalculator(Calculator):
 
     def __init__(self, descsets: List[DescriptorSet]) -> None:
         """Set the descriptorsets to be calculated with this calculator."""
-        self.descsets = descsets
+        self.descsets = list(descsets)
+
+    __in__ = __contains__ = lambda self, x: x in self.descsets
 
     @classmethod
     def fromFile(cls, fname: str):

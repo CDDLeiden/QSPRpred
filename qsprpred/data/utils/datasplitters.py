@@ -66,13 +66,19 @@ class scaffoldsplit(datasplit):
         test_fraction (float): fraction of the test set. Defaults to 0.1.
         shuffle (bool): whether to shuffle the data or not. Defaults to True.
     """        
-    def __init__(self, dataset, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True) -> None:
+    def __init__(self, dataset  = None, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True) -> None:
         self.dataset = dataset
         self.scaffold = scaffold
         self.test_fraction = test_fraction
         self.shuffle = shuffle
 
+    def setDataSet(self, dataset):
+        self.dataset = dataset
+
     def split(self, X, y):
+        if not self.dataset:
+            raise AttributeError("Dataset not set for splitter. Use 'setDataSet(dataset)' to attach it to this instance.")
+
         self.dataset.addScaffolds([self.scaffold])
 
         # make sure dataframe is shuffled
