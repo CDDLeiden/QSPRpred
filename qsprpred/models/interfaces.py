@@ -103,7 +103,7 @@ class QSPRModel(ABC):
         return self.data.task if self.data else self.metaInfo['task']
 
     @property
-    def targetProperty(self):
+    def targetProperties(self):
         """
         The target property of the model, taken from the data set or deserialized from file if the model is loaded without data.
 
@@ -111,7 +111,7 @@ class QSPRModel(ABC):
             str: target property of the model
         """
 
-        return self.data.targetProperty if self.data else self.metaInfo['target_property']
+        return self.data.targetProperties if self.data else self.metaInfo['target_properties']
 
     @property
     def outDir(self):
@@ -267,7 +267,7 @@ class QSPRModel(ABC):
             dict: dictionary containing the model metadata that was saved
         """
         self.metaInfo['target_properties'] = TargetProperty.toList(
-            copy.deepcopy(self.data.targetProperties), task_as_str=True),
+            copy.deepcopy(self.data.targetProperties), task_as_str=True)
         self.metaInfo['parameters_path'] = self.saveParams(self.parameters).replace(f"{self.baseDir}/", '')
         self.metaInfo['feature_calculator_path'] = self.saveDescriptorCalculator().replace(
             f"{self.baseDir}/", '') if self.featureCalculator else None
@@ -421,8 +421,9 @@ class QSPRModel(ABC):
         """
 
         dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False)
-        dataset.addProperty(self.targetProperty, np.nan)
-        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperty, drop_empty=False, drop_invalids=False)
+        for targetproperty in self.targetProperties:
+            dataset.addProperty(targetproperty.name, np.nan)
+        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False)
         failed_mask = dataset.dropInvalids().to_list()
         failed_indices = [idx for idx, x in enumerate(failed_mask) if not x]
         if not self.featureCalculator:
@@ -433,7 +434,7 @@ class QSPRModel(ABC):
             feature_calculator=self.featureCalculator,
             feature_standardizer=self.featureStandardizer
         )
-        if self.task == ModelTasks.REGRESSION or not use_probas:
+        if self.targetProperties[0].task == ModelTasks.REGRESSION or not use_probas:
             predictions = self.predict(dataset)
             if (isclass(self.alg) and self.alg.__name__ == 'PLSRegression') or (
                     type(self.alg).__name__ == 'PLSRegression'):

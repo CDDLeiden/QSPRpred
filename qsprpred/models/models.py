@@ -55,15 +55,16 @@ class QSPRsklearn(QSPRModel):
             'average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
             'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
 
-        assert (len(set([prop.task.isClassification() for prop in self.data.targetProperties])) ==
-                1), "All target properties must have the same task for sklearn multi-output models."
+        if self.data is not None:
+            assert (len(set([prop.task.isClassification() for prop in self.data.targetProperties])) ==
+                    1), "All target properties must have the same task for sklearn multi-output models."
 
-        # initialize models with defined parameters
-        if self.data and (type(self.model) in [SVC, SVR]):
-            logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
-                             Manually set this parameter if this is not desired.")
-            self.parameters.update({'max_iter': 10000})
-            self.model.set_params(**self.parameters)
+            # initialize models with defined parameters
+            if (type(self.model) in [SVC, SVR]):
+                logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
+                                Manually set this parameter if this is not desired.")
+                self.parameters.update({'max_iter': 10000})
+                self.model.set_params(**self.parameters)
 
         logger.info('parameters: %s' % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
@@ -128,7 +129,11 @@ class QSPRsklearn(QSPRModel):
             self.model.fit(**fit_set)
 
             if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
-                cvs[idx_test] = self.model.predict(X_test)
+                preds = self.model.predict(X_test)
+                # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
+                if preds.ndim == 1:
+                    preds = preds.reshape(-1, 1)
+                cvs[idx_test] = preds
             else:
                 preds = self.model.predict_proba(X_test)
                 for idx in range(len(self.data.targetProperties)):
@@ -147,7 +152,11 @@ class QSPRsklearn(QSPRModel):
         self.model.fit(**fit_set)
 
         if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
-            inds = self.model.predict(X_ind)
+            preds = self.model.predict(X_ind)
+            # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
+            if preds.ndim == 1:
+                preds = preds
+            inds = preds.reshape(-1, 1)
         else:
             inds = self.model.predict_proba(X_ind)
 

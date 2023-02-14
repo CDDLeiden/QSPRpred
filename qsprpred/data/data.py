@@ -1069,7 +1069,9 @@ class QSPRDataset(MoleculeTable):
         return QSPRDataset(*args, name=name, store_dir=store_dir, **meta['init'], **kwargs)
 
     @staticmethod
-    def fromMolTable(mol_table: MoleculeTable, target_prop: str, name=None, **kwargs) -> 'QSPRDataset':
+    def fromMolTable(
+            mol_table: MoleculeTable, target_props: List[Union[TargetProperty, dict]],
+            name=None, **kwargs) -> 'QSPRDataset':
         """
         Create QSPRDataset from a MoleculeTable.
 
@@ -1084,7 +1086,7 @@ class QSPRDataset(MoleculeTable):
         """
         kwargs['store_dir'] = mol_table.storeDir if 'store_dir' not in kwargs else kwargs['store_dir']
         name = mol_table.name if name is None else name
-        return QSPRDataset(name, target_prop, mol_table.getDF(), **kwargs)
+        return QSPRDataset(name, target_props, mol_table.getDF(), **kwargs)
 
     def addDescriptors(self, calculator: Calculator, recalculate=False, featurize=True):
         """
@@ -1488,11 +1490,10 @@ class QSPRDataset(MoleculeTable):
             'smilescol': self.smilescol,
         }
         ret = {
-            'init': meta_init,
-            'standardizer_path': path.replace(self.storePrefix, '') if path else None,
-            'descriptorcalculator_path': self.descriptorCalculatorPath.replace(self.storePrefix, '') if self.descriptorCalculatorPath else None,
-            'feature_names': list(self.featureNames) if self.featureNames is not None else None,
-        }
+            'init': meta_init, 'standardizer_path': path.replace(
+                self.storePrefix, '') if path else None, 'descriptorcalculator_path': self.descriptorCalculatorPath.replace(
+                self.storePrefix, '') if self.descriptorCalculatorPath else None, 'feature_names': list(
+                self.featureNames) if self.featureNames is not None else None, }
         path = f"{self.storePrefix}_meta.json"
         with open(path, 'w') as f:
             json.dump(ret, f)

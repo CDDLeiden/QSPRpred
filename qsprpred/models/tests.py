@@ -98,10 +98,10 @@ class ModelTestMixIn:
         themodel.evaluate()
         self.assertTrue(
             exists(
-                f'{themodel.outDir}/{themodel}.ind.tsv'))
+                f'{themodel.outDir}/{themodel.name}.ind.tsv'))
         self.assertTrue(
             exists(
-                f'{themodel.outDir}/{themodel}.cv.tsv'))
+                f'{themodel.outDir}/{themodel.name}.cv.tsv'))
 
         # train the model on all data
         themodel.fit()
@@ -124,9 +124,9 @@ class ModelTestMixIn:
         predictions = predictor.predictMols(df.SMILES.to_list())
         self.assertEqual(predictions.shape, (len(df.SMILES),))
         self.assertIsInstance(predictions, np.ndarray)
-        if predictor.task == ModelTasks.REGRESSION:
+        if predictor.targetProperties[0].task == ModelTasks.REGRESSION:
             self.assertIsInstance(predictions[0], numbers.Real)
-        elif predictor.task == ModelTasks.SINGLECLASS:
+        elif predictor.targetProperties[0].task.isClassification():
             self.assertIsInstance(predictions[0], numbers.Integral)
         else:
             return AssertionError(f"Unknown task: {predictor.task}")
