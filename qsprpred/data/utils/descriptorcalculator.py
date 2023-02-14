@@ -1,7 +1,7 @@
 """This module is used for calculating molecular descriptors using descriptorsets."""
 import json
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
@@ -12,15 +12,14 @@ class Calculator(ABC):
     """Calculator for molecule properties."""
 
     @abstractmethod
-    def __call__(self, mols: List[Mol]) -> pd.DataFrame:
+    def __call__(self, mols: List[Union[Mol, str]]) -> pd.DataFrame:
         """Calculate all specified descriptors for a list of rdkit mols.
 
         Args:
-            df: dataframe containing a column with SMILES
-
+            mols: list of rdkit mols or smiles strings
 
         Returns:
-            df: original dataframe with added descriptor columns
+            a numpy array with the calculated descriptors of shape (n_mols, n_descriptors)
         """
         pass
 
