@@ -61,6 +61,9 @@ class DescriptorsCalculator(Calculator):
 
     __in__ = __contains__ = lambda self, x: x in self.descsets
 
+    def __str__(self):
+        return f"{self.__class__.__name__}_{'_'.join([str(x) for x in self.descsets])}"
+
     @classmethod
     def fromFile(cls, fname: str):
         """Initialize descriptorset from a json file.
@@ -73,6 +76,8 @@ class DescriptorsCalculator(Calculator):
 
         descsets = []
         for key, value in descset_dict.items():
+            if key.startswith("FingerprintSet_"):
+                key = "FingerprintSet"
             descset = get_descriptor(key, **value["settings"])
             if descset.is_fp:
                 descset.keepindices = value["keepindices"]

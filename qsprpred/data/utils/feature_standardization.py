@@ -76,6 +76,9 @@ def apply_feature_standardizer(feature_standardizer, X, fit=True):
         pd.DataFrame: standardized feature matrix of the same dimensions as X
         SKLearnStandardizer: (fitted) feature standardizer
     """
+    if X.shape[1] == 0:
+        raise ValueError("No features to standardize.")
+
     standardizer = feature_standardizer
     if isinstance(standardizer, SKLearnStandardizer):
         standardizer = standardizer.getInstance()

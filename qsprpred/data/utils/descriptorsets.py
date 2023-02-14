@@ -139,7 +139,7 @@ class FingerprintSet(DescriptorSet):
         return len(self.get_fingerprint)
 
     def __str__(self):
-        return f"FingerprintSet"
+        return f"FingerprintSet_{self.fingerprint_type}"
 
     @property
     def descriptors(self):

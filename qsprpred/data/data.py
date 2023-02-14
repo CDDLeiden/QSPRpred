@@ -1025,6 +1025,7 @@ class QSPRDataset(MoleculeTable):
 
         if self.X.shape[1] == 1:
             logger.warning("Only one feature present. Skipping feature filtering.")
+            return
         else:
             for featurefilter in feature_filters:
                 self.X = featurefilter(self.X, self.y)
@@ -1070,7 +1071,7 @@ class QSPRDataset(MoleculeTable):
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             fold (datasplitter obj): splits the train set into folds for cross validation
-            feature_calculator (DescriptorsCalculator): calculates features from smiles
+            feature_calculator (Calculator): calculates features from smiles
             feature_filters (list of feature filter objs): filters features
             feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator): standardizes and/or scales features
             recalculate_features (bool): recalculate features even if they are already present in the file
