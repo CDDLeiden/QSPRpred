@@ -31,20 +31,6 @@ from sklearn.svm import SVC, SVR
 
 
 class QSPRsklearn(QSPRModel):
-    """Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
-
-    Attributes:
-    data: instance QSPRDataset
-    alg:  instance of estimator
-    parameters (dict): dictionary of algorithm specific parameters
-
-    Methods:
-    init_model: initialize model from saved hyperparameters
-    fit: build estimator model from entire data set
-    objective: objective used by bayesian optimization
-    bayesOptimization: bayesian optimization of hyperparameters using optuna
-    gridSearch: optimization of hyperparameters using gridSearch
-    """
 
     def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None,
                  name: str = None, parameters: dict = None, autoload: bool = True):
@@ -365,12 +351,27 @@ class QSPRDNN(QSPRModel):
     Here the model instance is created and parameters can be defined.
 
     Attributes:
-        data: instance of QSPRDataset
-        parameters (dict): dictionary of parameters to set for model fitting
+        name (str): name of the model
+        data (QSPRDataset): data set used to train the model
+        alg (estimator): estimator instance or class
+        parameters (dict): dictionary of algorithm specific parameters
+        model (estimator): the underlying estimator instance, if `fit` or optimization is perforemed, this model instance gets updated accordingly
+        featureCalculator (DescriptorsCalculator): feature calculator instance taken from the data set or deserialized from file if the model is loaded without data
+        featureStandardizer (SKLearnStandardizer): feature standardizer instance taken from the data set or deserialized from file if the model is loaded without data
+        metaInfo (dict): dictionary of metadata about the model, only available after the model is saved
+        baseDir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`
+        outDir (str): output directory of the model, the model files are stored in this directory (`{baseDir}/qspr/models/{name}`)
+        outPrefix (str): output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`)
+        metaFile (str): absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
+        task (ModelTasks): task of the model, taken from the data set or deserialized from file if the model is loaded without data
+        targetProperty (str): target property of the model, taken from the data set or deserialized from file if the model is loaded without data
         device (cuda device): cuda device
         gpus (int/ list of ints): gpu number(s) to use for model fitting
         patience (int): number of epochs to wait before early stop if no progress on validiation set score
         tol (float): minimum absolute improvement of loss necessary to count as progress on best validation score
+        n_class (int): number of classes
+        n_dim (int): number of features
+        optimal_epochs (int): number of epochs to train the model for optimal performance
     """
 
     def __init__(self,
