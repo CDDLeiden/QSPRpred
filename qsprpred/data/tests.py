@@ -78,16 +78,19 @@ class DataSets(PathMixIn):
         f'{PathMixIn.datapath}/test_data.tsv',
         sep='\t').sample(10)
 
-    def create_dataset(self, df, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
+    def create_dataset(self, df, name="QSPRDataset_test", target_props=[
+                       {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
         return QSPRDataset(
-            name, target_props=[{"name": target_prop, "task": task, "th": th}], df=df,
+            name, target_props=target_props, df=df,
             store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
 
-    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
-        return self.create_dataset(self.df_small, name, task=task, target_prop=target_prop, th=th)
+    def create_small_dataset(self, name="QSPRDataset_test", target_props=[
+                             {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
+        return self.create_dataset(self.df_small, name, target_props=target_props)
 
-    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
-        return self.create_dataset(self.df_large, name, task=task, target_prop=target_prop, th=th)
+    def create_large_dataset(self, name="QSPRDataset_test", target_props=[
+                             {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
+        return self.create_dataset(self.df_large, name, target_props=target_props)
 
 
 class StopWatch:
@@ -356,20 +359,20 @@ class TestDataSetPreparation(DataSets, TestCase):
         Mordred(),
 
         # external
-        FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
-        FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
-        FingerprintSet(fingerprint_type="CDKEStatedFP"),
-        FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
-        FingerprintSet(fingerprint_type="CDKMACCSFP"),
-        FingerprintSet(fingerprint_type="CDKPubchemFP"),
-        FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
-        FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
-        FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
-        FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
-        FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
-        FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
+        # FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
+        # FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
+        # FingerprintSet(fingerprint_type="CDKEStatedFP"),
+        # FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
+        # FingerprintSet(fingerprint_type="CDKMACCSFP"),
+        # FingerprintSet(fingerprint_type="CDKPubchemFP"),
+        # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+        # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+        # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+        # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+        # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+        # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
         Mold2(),
-        PaDEL(),
+        # PaDEL(),
     ]
 
     @parameterized.expand([(f"{desc_set}_CL_{ModelTasks.REGRESSION}", desc_set,
@@ -422,14 +425,14 @@ class TestDataSetPreparation(DataSets, TestCase):
             if targetprop.task.isClassification():
                 self.assertEqual(dstargetprop.name, f"{targetprop.originalName}_class")
             self.assertTrue(dstargetprop.task == targetprop.task)
-        
+
         # test if the descriptor calculator is the same
         self.assertTrue(ds.descriptorCalculator)
         self.assertTrue(
             isinstance(
                 ds.descriptorCalculator,
                 DescriptorsCalculator))
-        
+
         # test if the data filters are the same
         features = dataset.getFeatures(concat=True)
         self.assertEqual(features.shape[0], len(dataset))

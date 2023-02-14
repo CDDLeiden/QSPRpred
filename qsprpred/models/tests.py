@@ -65,12 +65,14 @@ class ModelDataSets(DataSets):
 
         return dataset
 
-    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
-        dataset = super().create_large_dataset(name=name, task=task, target_prop=target_prop, th=th)
+    def create_large_dataset(self, name="QSPRDataset_test", target_props=[
+            {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
+        dataset = super().create_large_dataset(name=name, target_props=target_props)
         return self.prepare(dataset)
 
-    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
-        dataset = super().create_small_dataset(name=name, task=task, target_prop=target_prop, th=th)
+    def create_small_dataset(self, name="QSPRDataset_test", target_props=[
+            {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
+        dataset = super().create_small_dataset(name=name, target_props=target_props)
         return self.prepare(dataset)
 
 
@@ -124,7 +126,7 @@ class ModelTestMixIn:
         self.assertIsInstance(predictions, np.ndarray)
         if predictor.task == ModelTasks.REGRESSION:
             self.assertIsInstance(predictions[0], numbers.Real)
-        elif predictor.task == Modeltasks.SINGLECLASS:
+        elif predictor.task == ModelTasks.SINGLECLASS:
             self.assertIsInstance(predictions[0], numbers.Integral)
         else:
             return AssertionError(f"Unknown task: {predictor.task}")
@@ -156,7 +158,7 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
     def prep_testdata(self, task=ModelTasks.REGRESSION, th=None):
 
         # prepare test dataset
-        data = self.create_large_dataset(task=task, th=th)
+        data = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": th}])
         data.save()
         # prepare data for torch DNN
         trainloader = DataLoader(
@@ -176,8 +178,8 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
         (f"{alg_name}_{task}", task, alg_name, alg, th)
         for alg, alg_name, task, th in (
             (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
-            (STFullyConnected, "STFullyConnected", Modeltasks.SINGLECLASS, [6.5]),
-            (STFullyConnected, "STFullyConnected", Modeltasks.SINGLECLASS, [0, 1, 10, 1200]),
+            (STFullyConnected, "STFullyConnected", ModelTasks.SINGLECLASS, [6.5]),
+            (STFullyConnected, "STFullyConnected", ModelTasks.SINGLECLASS, [0, 1, 10, 1200]),
         )
     ])
     def test_base_model(self, _, task, alg_name, alg, th):
@@ -220,13 +222,13 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
         (f"{alg_name}_{task}", task, alg_name, alg, th)
         for alg, alg_name, task, th in (
             (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
-            (STFullyConnected, "STFullyConnected", Modeltasks.SINGLECLASS, [6.5]),
-            (STFullyConnected, "STFullyConnected", Modeltasks.SINGLECLASS, [0, 1, 10, 1100]),
+            (STFullyConnected, "STFullyConnected", ModelTasks.SINGLECLASS, [6.5]),
+            (STFullyConnected, "STFullyConnected", ModelTasks.SINGLECLASS, [0, 1, 10, 1100]),
         )
     ])
     def test_qsprpred_model(self, _, task, alg_name, alg, th):
         # initialize dataset
-        dataset = self.create_large_dataset(task=task, th=th)
+        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": th}])
 
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
@@ -269,7 +271,7 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
             parameters = {}
 
         # initialize dataset
-        dataset = self.create_large_dataset(task=task)
+        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task}])
 
         # initialize model for training from class
         model = self.get_model(
@@ -301,7 +303,7 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
             parameters.update({"probability": True})
 
         # initialize dataset
-        dataset = self.create_large_dataset(task=task, th=[0, 1, 10, 1100])
+        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": [0, 1, 10, 1100]}])
 
         # test classifier
         # initialize model for training from class
