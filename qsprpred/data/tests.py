@@ -429,47 +429,47 @@ class TestDataSetPreparation(DataSets, TestCase):
         else:
             self.assertRaises(ValueError, ds.getFeatures, concat=True)
 
-    # @parameterized.expand(
-    #     [(f"{desc_set}_{ModelTasks.CLASSIFICATION}", desc_set, ModelTasks.CLASSIFICATION) for desc_set in descriptor_sets] +
-    #     [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set, ModelTasks.REGRESSION) for desc_set in descriptor_sets]
-    # )
-    # def test_descriptors_all(self, _, desc_set, task):
-    #     np.random.seed(42)
-    #
-    #     # get the data set
-    #     ds_name = f"{desc_set}_{task}_{datetime.now()}" # unique name to avoid conflicts
-    #     logging.debug(f"Testing data set: {ds_name}")
-    #     dataset = self.create_large_dataset(
-    #         name=ds_name,
-    #         task=task,
-    #         th=[0, 1, 10, 1200] if task == ModelTasks.CLASSIFICATION else None
-    #     )
-    #
-    #     # run the preparation
-    #     descriptor_sets = [desc_set]
-    #     preparation = dict()
-    #     preparation.update(self.default_preparation)
-    #     preparation['feature_calculator'] = DescriptorsCalculator(descriptor_sets)
-    #     dataset.prepareDataset(**preparation)
-    #
-    #     # test some basic consistency rules on the resulting features
-    #     expected_length = sum([len(x.descriptors) for x in descriptor_sets if x in dataset.descriptorCalculator])
-    #     self.feature_consistency_checks(dataset, expected_length)
-    #
-    #     # save to file and check if it can be loaded and the features are still there and correct
-    #     dataset.save()
-    #     ds_loaded = QSPRDataset.fromFile(dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-    #     if ds_loaded.task == ModelTasks.CLASSIFICATION:
-    #         self.assertEqual(ds_loaded.targetProperty, "CL_class")
-    #     self.assertTrue(ds_loaded.task == task)
-    #     self.assertTrue(ds_loaded.descriptorCalculator)
-    #     self.assertTrue(
-    #         isinstance(
-    #             ds_loaded.descriptorCalculator,
-    #             DescriptorsCalculator))
-    #     for descset in ds_loaded.descriptorCalculator.descsets:
-    #         self.assertTrue(isinstance(descset, DescriptorSet))
-    #     self.feature_consistency_checks(dataset, expected_length)
+    @parameterized.expand(
+        [(f"{desc_set}_{ModelTasks.CLASSIFICATION}", desc_set, ModelTasks.CLASSIFICATION) for desc_set in descriptor_sets] +
+        [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set, ModelTasks.REGRESSION) for desc_set in descriptor_sets]
+    )
+    def test_descriptors_all(self, _, desc_set, task):
+        np.random.seed(42)
+
+        # get the data set
+        ds_name = f"{desc_set}_{task}_{datetime.now()}" # unique name to avoid conflicts
+        logging.debug(f"Testing data set: {ds_name}")
+        dataset = self.create_large_dataset(
+            name=ds_name,
+            task=task,
+            th=[0, 1, 10, 1200] if task == ModelTasks.CLASSIFICATION else None
+        )
+
+        # run the preparation
+        descriptor_sets = [desc_set]
+        preparation = dict()
+        preparation.update(self.default_preparation)
+        preparation['feature_calculator'] = DescriptorsCalculator(descriptor_sets)
+        dataset.prepareDataset(**preparation)
+
+        # test some basic consistency rules on the resulting features
+        expected_length = sum([len(x.descriptors) for x in descriptor_sets if x in dataset.descriptorCalculator])
+        self.feature_consistency_checks(dataset, expected_length)
+
+        # save to file and check if it can be loaded and the features are still there and correct
+        dataset.save()
+        ds_loaded = QSPRDataset.fromFile(dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        if ds_loaded.task == ModelTasks.CLASSIFICATION:
+            self.assertEqual(ds_loaded.targetProperty, "CL_class")
+        self.assertTrue(ds_loaded.task == task)
+        self.assertTrue(ds_loaded.descriptorCalculator)
+        self.assertTrue(
+            isinstance(
+                ds_loaded.descriptorCalculator,
+                DescriptorsCalculator))
+        for descset in ds_loaded.descriptorCalculator.descsets:
+            self.assertTrue(isinstance(descset, DescriptorSet))
+        self.feature_consistency_checks(dataset, expected_length)
 
 
 class TestDataSplitters(DataSets, TestCase):
