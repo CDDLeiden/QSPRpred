@@ -430,6 +430,7 @@ class Mold2(DescriptorSet):
         if names is None:
             self._descriptors = self._default_descs[:]
             self._keepindices = list(range(len(self._descriptors)))
+            return
         # Find descriptors not part of Mold2
         remainder = set(names).difference(set(self._default_descs))
         if len(remainder) > 0:
@@ -441,6 +442,8 @@ class Mold2(DescriptorSet):
                 if desc_name in names:
                     new_indices.append(i)
                     new_descs.append(self._default_descs[i])
+            self._descriptors = new_descs
+            self._keepindices = new_indices
 
     def __str__(self):
         return "Mold2"

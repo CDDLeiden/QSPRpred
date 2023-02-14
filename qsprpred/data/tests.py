@@ -3,9 +3,10 @@ import glob
 import itertools
 import logging
 import os
+import platform
 import shutil
 from datetime import datetime
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 import mordred
 import numpy as np
@@ -400,23 +401,26 @@ class TestDataSetPreparation(DataSets, TestCase):
         TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
         FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
         Mordred(),
-
-        # external
-        FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
-        FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
-        FingerprintSet(fingerprint_type="CDKEStatedFP"),
-        FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
-        FingerprintSet(fingerprint_type="CDKMACCSFP"),
-        FingerprintSet(fingerprint_type="CDKPubchemFP"),
-        FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
-        FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
-        FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
-        FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
-        FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
-        FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
         Mold2(),
-        PaDEL(),
     ]
+    if platform.system() != "Linux":
+        # FIXME: Java-based descriptors do not run on Linux
+        descriptor_sets.append([
+            FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
+            FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
+            FingerprintSet(fingerprint_type="CDKEStatedFP"),
+            FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
+            FingerprintSet(fingerprint_type="CDKMACCSFP"),
+            FingerprintSet(fingerprint_type="CDKPubchemFP"),
+            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
+            PaDEL(),
+        ])
+
     @parameterized.expand(
         [(f"{desc_set}_{ModelTasks.CLASSIFICATION}", desc_set, ModelTasks.CLASSIFICATION) for desc_set in descriptor_sets] +
         [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set, ModelTasks.REGRESSION) for desc_set in descriptor_sets]
@@ -712,6 +716,8 @@ class TestDescriptorsets(DataSets, TestCase):
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
+    # FIXME: PaDEL descriptors are not available on Linux
+    @skipIf(platform.system() == "Linux", "PaDEL descriptors are not available on Linux")
     def test_PaDEL(self):
         desc_calc = DescriptorsCalculator([PaDEL()])
         self.dataset.addDescriptors(desc_calc)

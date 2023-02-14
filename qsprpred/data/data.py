@@ -1108,9 +1108,9 @@ class QSPRDataset(MoleculeTable):
             logger.warning("Attempting to featurize splits without descriptors. Skipping this step...")
 
         # apply feature filters on training set
-        if self.hasDescriptors and feature_filters:
+        if feature_filters and self.hasDescriptors:
             self.filterFeatures(feature_filters)
-        else:
+        elif not self.hasDescriptors:
             logger.warning(
                 "No descriptors present, feature filters will be skipped."
             )
@@ -1120,10 +1120,10 @@ class QSPRDataset(MoleculeTable):
             self.setFeatureStandardizer(feature_standardizer)
             if self.fold_generator:
                 self.fold_generator = Folds(self.fold_generator.split, self.feature_standardizer)
-        if not self.hasDescriptors:
-            logger.warning(
-                "No descriptors present, feature standardizers might fail or have no effect."
-            )
+            if not self.hasDescriptors:
+                logger.warning(
+                    "No descriptors present, feature standardizers were initialized, but might fail or have no effect."
+                )
 
         # create fold generator
         if fold:
