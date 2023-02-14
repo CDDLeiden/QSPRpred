@@ -1038,6 +1038,17 @@ class QSPRDataset(MoleculeTable):
             if self.descriptorCalculator is not None:
                 self.descriptorCalculator.keepDescriptors(self.featureNames)
 
+    def setFeatureStandardizer(self, feature_standardizer):
+        """
+        Set feature standardizer.
+
+        Args:
+            feature_standardizer (Union[SKLearnStandardizer, BaseEstimator]): feature standardizer
+        """
+        if not hasattr(feature_standardizer, 'toFile'):
+            feature_standardizer = SKLearnStandardizer(feature_standardizer)
+        self.feature_standardizer = feature_standardizer
+
     def prepareDataset(
         self,
         standardize=True,
@@ -1097,22 +1108,22 @@ class QSPRDataset(MoleculeTable):
             logger.warning("Attempting to featurize splits without descriptors. Skipping this step...")
 
         # apply feature filters on training set
-        if feature_filters is not None:
-            if not self.hasDescriptors:
-                logger.warning(
-                    "No descriptors present, feature filters will be applied, but might have no effect."
-                )
+        if self.hasDescriptors and feature_filters:
             self.filterFeatures(feature_filters)
+        else:
+            logger.warning(
+                "No descriptors present, feature filters will be skipped."
+            )
 
         # set feature standardizers
-        if feature_standardizer is not None:
-            if not self.hasDescriptors:
-                logger.warning(
-                    "No descriptors present, feature standardizers will have no effect."
-                )
-            self.feature_standardizer = feature_standardizer
+        if feature_standardizer:
+            self.setFeatureStandardizer(feature_standardizer)
             if self.fold_generator:
                 self.fold_generator = Folds(self.fold_generator.split, self.feature_standardizer)
+        if not self.hasDescriptors:
+            logger.warning(
+                "No descriptors present, feature standardizers might fail or have no effect."
+            )
 
         # create fold generator
         if fold:
@@ -1241,8 +1252,8 @@ class QSPRDataset(MoleculeTable):
             `SKLearnStandardizer`
         """
 
-        if self.metaInfo:
-            return SKLearnStandardizer.fromFile(self.metaInfo['standardizer_path'])
+        if self.metaInfo is not None and 'standardizer_path' in self.metaInfo and self.metaInfo['standardizer_path']:
+            return SKLearnStandardizer.fromFile(f"{self.storePrefix}{self.metaInfo['standardizer_path']}")
         else:
             return None
 
@@ -1253,15 +1264,16 @@ class QSPRDataset(MoleculeTable):
         Returns:
             `list` of `str`: paths to the saved standardizers
         """
-        if self.feature_standardizer:
+        path = f'{self.storePrefix}_feature_standardizer.json'
+
+        if self.feature_standardizer and self.featureNames is not None and len(self.featureNames) > 0:
             # make sure feature standardizers are fitted before serialization
             self.fitFeatureStandardizer()
-            path = f'{self.storePrefix}_feature_standardizer.json'
-            if not hasattr(self.feature_standardizer, 'toFile'):
-                SKLearnStandardizer(self.feature_standardizer).toFile(path)
-            else:
-                self.feature_standardizer.toFile(path)
-        return path
+            self.feature_standardizer.toFile(path)
+            return path
+        elif self.feature_standardizer:
+            self.feature_standardizer.toFile(path)
+            return path
 
     def saveMetadata(self):
         """
@@ -1280,8 +1292,8 @@ class QSPRDataset(MoleculeTable):
         }
         ret = {
             'init': meta_init,
-            'standardizer_path': path,
-            'descriptorcalculator_path': self.descriptorCalculatorPath,
+            'standardizer_path': path.replace(self.storePrefix, '') if path else None,
+            'descriptorcalculator_path': self.descriptorCalculatorPath.replace(self.storePrefix, '') if self.descriptorCalculatorPath else None,
             'new_target_prop': self.targetProperty,
             'feature_names': list(self.featureNames) if self.featureNames is not None else None,
         }
