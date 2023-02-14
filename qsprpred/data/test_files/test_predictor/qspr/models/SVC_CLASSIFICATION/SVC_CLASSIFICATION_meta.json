@@ -1,0 +1,15 @@
+{
+    "name": "SVC_CLASSIFICATION",
+    "task": "CLASSIFICATION",
+    "th": [
+        0,
+        1,
+        10,
+        1100
+    ],
+    "target_property": "CL_class",
+    "parameters_path": "qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_params.json",
+    "feature_calculator_path": "qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_descriptor_calculator.json",
+    "feature_standardizer_path": "qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_feature_standardizer.json",
+    "model_path": "qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION.json"
+}

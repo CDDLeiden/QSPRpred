@@ -4,18 +4,21 @@ To add a new descriptor or fingerprint calculator:
 * Add a descriptor subclass for your descriptor calculator
 * Add a function to retrieve your descriptor by name to the descriptor retriever class
 """
-
+import importlib
 from abc import ABC, abstractmethod
-from typing import List, Union
+from typing import Optional, Union, List
 
 import mordred
 import numpy as np
 from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils import fingerprints
+from Mold2_pywrapper import Mold2 as Mold2_calculator
+from PaDEL_pywrapper import PaDEL as PaDEL_calculator
+from PaDEL_pywrapper.descriptors import _descs_2D as PaDEL_2D_descriptors, descriptors as PaDEL_All_descriptors
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
-from rdkit.Chem import Mol
+from rdkit.Chem import Mol, AllChem
 
 
 class DescriptorSet(ABC):
@@ -39,7 +42,7 @@ class DescriptorSet(ABC):
 
     def iterMols(self, mols: List[Union[str, Mol]], to_list=False):
         """
-        Calculate the descriptor for a molecule.
+        Create a molecule iterator or list from RDKit molecules or SMILES.
 
         Args:
             mols: list of molecules (SMILES `str` or RDKit Mol)
@@ -104,16 +107,10 @@ class FingerprintSet(DescriptorSet):
 
     def __call__(self, mols):
         """Calculate the fingerprint for a list of molecules."""
-        convertFP = DataStructs.ConvertToNumpyArray
+        ret = self.get_fingerprint(self.iterMols(mols, to_list=True))
 
-        ret = np.zeros((len(mols), self.get_len() if not self.keepindices else len(self.keepindices)))
-        for idx, mol in enumerate(self.iterMols(mols)):
-            fp = self.get_fingerprint(mol)
-            np_fp = np.zeros(len(fp))
-            convertFP(fp, np_fp)
-            if self.keepindices:
-                np_fp = np_fp[self.keepindices]
-            ret[idx] = np_fp
+        if self.keepindices:
+            ret = ret[:,self.keepindices]
 
         return ret
 
@@ -139,7 +136,7 @@ class FingerprintSet(DescriptorSet):
 
     def get_len(self):
         """Return the length of the fingerprint."""
-        return len(self.get_fingerprint(Chem.MolFromSmiles("C")))
+        return len(self.get_fingerprint)
 
     def __str__(self):
         return f"FingerprintSet"
@@ -237,7 +234,7 @@ class Mordred(DescriptorSet):
 
 class DrugExPhyschem(DescriptorSet):
     """
-    Pysciochemical properties originally used in DrugEx for QSAR modelling.
+    Physciochemical properties originally used in DrugEx for QSAR modelling.
 
     Args:
         props: list of properties to calculate
@@ -343,23 +340,27 @@ class TanimotoDistances(DescriptorSet):
 
         # intialize fingerprint calculator
         self.get_fingerprint = fingerprints.get_fingerprint(self.fingerprint_type, *self._args, **self._kwargs)
-        self.fps = self.calculate_fingerprints(list_of_smiles)
+        self.calculate_fingerprints(list_of_smiles)
 
     def __call__(self, mols):
         """Calculate the Tanimoto distances to the list of SMILES sequences.
 
         Args:
-            mols (list of rdkit.Chem.rdchem.Mol): SMILES sequence or RDKit molecule to calculate distances to
+            mols (List[str] or List[rdkit.Chem.rdchem.Mol]): SMILES sequences or RDKit molecules to calculate distances to
         """
-        ret = np.zeros((len(mols), self.get_len()))
-        for idx, mol in enumerate(self.iterMols(mols, to_list=True)):
-            ret[idx] = 1 - np.array(DataStructs.BulkTanimotoSimilarity(self.get_fingerprint(mol), self.fps))
-
-        return ret
+        mols = [Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol for mol in mols]
+        # Convert np.arrays to BitVects
+        fps = list(map(lambda x: DataStructs.CreateFromBitString(''.join(map(str, x))),
+                   self.get_fingerprint(mols)))
+        return [list(1 - np.array(DataStructs.BulkTanimotoSimilarity(fp, self.fps)))
+                for fp in fps]
 
     def calculate_fingerprints(self, list_of_smiles):
         """Calculate the fingerprints for the list of SMILES sequences."""
-        return [self.get_fingerprint(Chem.MolFromSmiles(smiles)) for smiles in list_of_smiles]
+        # Convert np.arrays to BitVects
+        self.fps = list(map(lambda x: DataStructs.CreateFromBitString(''.join(map(str, x))),
+                            self.get_fingerprint([Chem.MolFromSmiles(smiles) for smiles in list_of_smiles])
+                            ))
 
     @property
     def is_fp(self):
@@ -368,7 +369,7 @@ class TanimotoDistances(DescriptorSet):
     @property
     def settings(self):
         return {"fingerprint_type": self.fingerprint_type,
-                "list_of_smiles": self.descriptors, "args": self._args, "kwargs": self._kwargs}
+                "list_of_smiles": self._descriptors, "args": self._args, "kwargs": self._kwargs}
 
     @property
     def descriptors(self):
@@ -378,59 +379,210 @@ class TanimotoDistances(DescriptorSet):
     def descriptors(self, list_of_smiles):
         """Set new list of SMILES sequences to calculate distance to."""
         self._descriptors = list_of_smiles
-        self.fps = self.calculate_fingerprints(list_of_smiles)
-
-    def get_len(self):
-        return len(self.descriptors)
+        self.list_of_smiles = list_of_smiles
+        self.fps = self.calculate_fingerprints(self.list_of_smiles)
 
     def __str__(self):
         return "TanimotoDistances"
 
 
-class PredictorDesc(DescriptorSet):
-    """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
+class Mold2(DescriptorSet):
+    """Descriptors from molecular descriptor calculation software Mold2.
 
-    def __init__(self, model_path: str, metadata_path: str):
-        """
-        Initialize the descriptorset with a Predictor object.
+    From https://github.com/OlivierBeq/Mold2_pywrapper.
+    Initialize the descriptor with no arguments.
+    All descriptors are always calculated.
+    """
+
+    def __init__(self, descs: Optional[List[str]] = None):
+        """Initialize a PaDEL calculator.
 
         Args:
-            model_path: path to the model file
-            metadata_path: path to the metadata file
+            descs: names of Mold2 descriptors to be calculated (e.g. D001)
         """
         self._is_fp = False
-        self.model_path = model_path
-        self.metadata_path = metadata_path
-        from qsprpred.scorers.predictor import Predictor
-        self._predictor = Predictor.fromFile(model_path, metadata_path)
-        self._descriptors = [self._predictor.getKey()]
+        self._descs = descs
+        self._mold2 = Mold2_calculator()
+        self._default_descs = self._mold2.calculate([Chem.MolFromSmiles("C")], show_banner=False).columns.tolist()
+        self._descriptors = self._default_descs[:]
+        self._keepindices = list(range(len(self._descriptors)))
 
     def __call__(self, mols):
-        """
-        Calculate the descriptor for a molecule.
+        values = self._mold2.calculate(self.iterMols(mols), show_banner=False)
+        # Drop columns
+        values = values[self._descriptors].values
+        return values
 
-        Args:
-            mol: smiles or rdkit molecule
-
-        Returns:
-            a `list` of descriptor values
-        """
-        return list(self._predictor.getScores(self.iterMols(mols, to_list=True)))
-
-    @ property
+    @property
     def is_fp(self):
         return self._is_fp
 
-    @ property
+    @property
     def settings(self):
-        """Return args and kwargs used to initialize the descriptorset."""
-        return {"model_path": self.model_path, "metadata_path": self.metadata_path}
+        return {'descs': self._descs}
 
-    @ property
+    @property
     def descriptors(self):
         return self._descriptors
 
-    @ descriptors.setter
+    @descriptors.setter
+    def descriptors(self, names: Optional[List[str]] = None):
+        if names is None:
+            self._descriptors = self._default_descs[:]
+            self._keepindices = list(range(len(self._descriptors)))
+        # Find descriptors not part of Mold2
+        remainder = set(names).difference(set(self._default_descs))
+        if len(remainder) > 0:
+            raise ValueError(f'names are not valid Mold2 descriptor names: {", ".join(remainder)}')
+        else:
+            new_indices = []
+            new_descs = []
+            for i, desc_name in enumerate(self._default_descs):
+                if desc_name in names:
+                    new_indices.append(i)
+                    new_descs.append(self._default_descs[i])
+
+    def __str__(self):
+        return "Mold2"
+
+
+class PaDEL(DescriptorSet):
+    """Descriptors from molecular descriptor calculation software PaDEL.
+
+    From https://github.com/OlivierBeq/PaDEL_pywrapper.
+    """
+
+    def __init__(self, descs: Optional[List[str]] = None, ignore_3D: bool = True):
+        """Initialize a PaDEL calculator
+
+        Args:
+            descs: list of PaDEL descriptor short names
+            ignore_3D (bool): skip 3D descriptor calculation
+        """
+        self._descs = descs
+        self._ignore_3D = ignore_3D
+
+        self._is_fp = False
+
+        # Create calculator and obtain default descriptor names
+        dummy_mol = Chem.AddHs(Chem.MolFromSmiles("CC"))
+        AllChem.EmbedMolecule(dummy_mol)  # Required for line below, since 3D descs would raise without 3D coords
+        self._name_mapping = {name: descriptor
+                              for descriptor in (PaDEL_2D_descriptors if ignore_3D else PaDEL_All_descriptors)
+                              for name in descriptor().calculate(dummy_mol)}
+
+        # Initialize descriptors and calculator
+        if descs is None:
+            self.descriptors = None
+        else:
+            self.descriptors = descs
+
+    def __call__(self, mols):
+        values = self._padel.calculate(self.iterMols(mols, to_list=True), show_banner=False, njobs=1)
+        intersection = list(set(self._keep).intersection(values.columns))
+        values = values[intersection]
+        return values
+
+    @property
+    def is_fp(self):
+        return self._is_fp
+
+    @property
+    def settings(self):
+        return {'descs': self._descs, 'ignore_3D': self._ignore_3D}
+
+    @property
+    def descriptors(self):
+        return self._keep
+
+    @descriptors.setter
+    def descriptors(self, names: Optional[List[str]] = None):
+        # From name to PaDEL descriptor sub-classes
+        if names is None:
+            self._descriptors = list(set(self._name_mapping.values()))
+        else:
+            remainder = set(names).difference(set(self._name_mapping.keys()))
+            if len(remainder) > 0:
+                raise ValueError(f'names are not valid PaDEL descriptor names: {", ".join(remainder)}')
+            self._descriptors = list(set(self._name_mapping[name] for name in names))
+        # Instantiate calculator
+        self._padel = PaDEL_calculator(self._descriptors, ignore_3D=self._ignore_3D)
+        # Set names to keep when calculating
+        if names is None:
+            self._keep = [name for name, desc in self._name_mapping.items() if desc in self._descriptors]
+        else:
+            self._keep = names
+
+    def get_names(self):
+        return self._padel.calculate([Chem.MolFromSmiles("C")], show_banner=False, njobs=1).columns.tolist()
+
+    def __str__(self):
+        return "PaDEL"
+
+class PredictorDesc(DescriptorSet):
+    """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
+
+    @staticmethod
+    def import_class(class_path):
+        """Import a class from a string path."""
+        class_name = class_path.split(".")[-1]
+        module_name = class_path.replace(f".{class_name}", "")
+        module = importlib.import_module(module_name)
+        return getattr(module, class_name)
+
+    def __init__(self, model : Union["QSPRModel", str], model_class : str = None):
+        """
+        Initialize the descriptorset with a `QSPRModel` object.
+
+        Args:
+            model: a fitted model instance or a path to the model's meta file
+        """
+        from qsprpred.models.models import QSPRModel
+
+        if isinstance(model, str):
+            if model_class is not None:
+                self.modelClass = self.import_class(model_class)
+                self.model = self.modelClass.fromFile(model)
+            else:
+                raise ValueError("Model class must be specified if model is a path to meta file.")
+        else:
+            self.model = model
+            self.modelClass = type(model)
+
+        self._descriptors = [self.model.name]
+
+    def __call__(self, mols):
+        """
+        Calculate the descriptor for a list of molecules.
+
+        Args:
+            mols (list): list of smiles or rdkit molecules
+
+        Returns:
+            an array of descriptor values
+        """
+        mols = list(mols)
+        if type(mols[0]) != str:
+            mols = [Chem.MolToSmiles(mol) for mol in mols]
+        return self.model.predictMols(mols, use_probas=False)
+
+    @property
+    def is_fp(self):
+        return False
+
+    @property
+    def settings(self):
+        """Return args and kwargs used to initialize the descriptorset."""
+        return {
+            'model': self.model.metaFile, # FIXME: we save absolute path to meta file so this descriptor set is not really portable
+            'model_class': self.modelClass.__module__ + "." + self.modelClass.__name__
+        }
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
     def descriptors(self, descriptors):
         self._descriptors = descriptors
 
@@ -462,6 +614,12 @@ class _DescriptorSetRetriever:
 
     def get_Mordred(self, *args, **kwargs):
         return Mordred(*args, **kwargs)
+
+    def get_Mold2(self, *args, **kwargs):
+        return Mold2(*args, **kwargs)
+
+    def get_PaDEL(self, *args, **kwargs):
+        return PaDEL(*args, **kwargs)
 
     def get_RDkit(self, *args, **kwargs):
         return rdkit_descs(*args, **kwargs)

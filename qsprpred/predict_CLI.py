@@ -16,7 +16,7 @@ from qsprpred.data.utils.smiles_standardization import (
     sanitize_smiles,
 )
 from qsprpred.logs.utils import commit_hash, enable_file_logger
-from qsprpred.scorers.predictor import Predictor
+from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from rdkit import Chem
 
 
@@ -116,26 +116,22 @@ def QSPR_predict(args):
     mols = [Chem.MolFromSmiles(smiles) for smiles in smiles_list]
 
     for reg in args.regression:
-        reg_abbr = 'REG' if reg else 'CLS'
+        reg_abbr = 'REGRESSION' if reg else 'CLASSIFICATION'
         for property in args.properties:
-            metadata_path = f'{args.base_dir}/qspr/data/{property[0]}_{reg_abbr}_QSPRdata_meta.json'
-            with open(metadata_path, 'r') as f:
-                metadata = json.load(f)
-                current_propertyname = metadata['init']['target_props'][0]['name']
-            log.info(f"Property: {property[0]}")
             for model_type in args.model_types:
                 print(model_type)
                 log.info(f'Model: {model_type} {reg_abbr} {property[0]}')
 
-                # give path to saved model
-                model_path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{current_propertyname}.json'
-                if not os.path.exists(model_path):
-                    log.warning(
-                        f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{current_propertyname}.json does not exist. Model skipped.')
+                metadata_path = f'{args.base_dir}/qspr/models/{model_type}_{reg_abbr}_{property[0]}/{model_type}_{reg_abbr}_{property[0]}_meta.json'
+                if not os.path.exists(metadata_path):
+                    log.warning(f"{metadata_path} does not exist. Model skipped.")
                     continue
 
-                predictor = Predictor.fromFile(model_path, metadata_path)
-                predictions = predictor.getScores(mols)
+                if "DNN" == model_type:
+                    predictor = QSPRDNN.fromFile(metadata_path)
+                else:
+                    predictor = QSPRsklearn.fromFile(metadata_path)
+                predictions = predictor.predictMols(smiles_list)
                 results.update({f"preds_{model_type}_{reg_abbr}_{property[0]}": predictions})
 
     pred_path = f"{args.base_dir}/qspr/predictions/{args.output}.tsv"

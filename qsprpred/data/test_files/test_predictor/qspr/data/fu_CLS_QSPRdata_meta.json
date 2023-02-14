@@ -1,1 +1,0 @@
-{"init": {"target_props": [{"name":"fu_class", "originalName":"fu", "task": "MULTICLASS", "th": [0, 0.2, 0.5, 4]}], "smilescol": "SMILES"}, "standardizer_paths": ["./qspr/data/fu_CLS_QSPRdata_feature_standardizer_0.json"], "descriptorcalculator_path": "./qspr/data/fu_CLS_QSPRdata_feature_calculators.json"}

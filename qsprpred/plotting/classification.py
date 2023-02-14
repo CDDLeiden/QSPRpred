@@ -4,7 +4,7 @@ classification
 Created by: Martin Sicho
 On: 16.11.22, 12:12
 """
-import os
+import os.path
 from abc import ABC
 from typing import List
 
@@ -13,15 +13,18 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.metrics import RocCurveDisplay, auc, f1_score, matthews_corrcoef, precision_score, recall_score, \
     accuracy_score, PrecisionRecallDisplay
+from sklearn.calibration import CalibrationDisplay 
 
 from qsprpred.models.interfaces import QSPRModel
+from qsprpred.models.tasks import ModelTasks
 from qsprpred.plotting.interfaces import ModelPlot
+from qsprpred.metrics.calibration import calibration_error
 
 
 class ClassifierPlot(ModelPlot, ABC):
 
-    def getSupportedTypes(self):
-        return ["CLS"]
+    def getSupportedTasks(self):
+        return [ModelTasks.CLASSIFICATION]
 
 class ROCPlot(ClassifierPlot):
 
@@ -107,7 +110,7 @@ class ROCPlot(ClassifierPlot):
         ax.legend(loc="lower right")
         return ax
 
-    def make(self, validation : str = "cv", figsize:tuple = (6,4), save : bool = True, show : bool = False):
+    def make(self, validation : str = "cv", figsize:tuple = (6,6), save : bool = True, show : bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -196,7 +199,7 @@ class PRCPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def make(self, validation : str = "cv", figsize:tuple = (6,4), save : bool = True, show : bool = False):
+    def make(self, validation : str = "cv", figsize:tuple = (6,6), save : bool = True, show : bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -216,6 +219,96 @@ class PRCPlot(ClassifierPlot):
                 plt.show()
                 plt.clf()
         return axes
+    
+class CalibrationPlot(ClassifierPlot):
+
+    def makeCV(self, model : QSPRModel, n_bins : int = 10):
+        df = pd.read_table(self.cvPaths[model])
+
+        y_real = []
+        y_predproba = []
+        
+        ax = plt.gca()
+        for fold in df.Fold.unique():
+            # get labels
+            y_pred = df.Score[df.Fold == fold]
+            y_true = df.Label[df.Fold == fold]
+            y_predproba.append(y_pred)
+            y_real.append(y_true)
+            # do plotting
+            viz = CalibrationDisplay.from_predictions(
+                y_true,
+                y_pred,
+                n_bins=n_bins,
+                name="Fold: {}".format(fold + 1),
+                ax=ax,
+                alpha=0.3,
+                lw=1,
+            )
+           
+        # Plotting the average precision-recall curve over the cross validation runs
+        y_real = np.concatenate(y_real)
+        y_predproba = np.concatenate(y_predproba)
+        viz = CalibrationDisplay.from_predictions(
+            y_real,
+            y_predproba,
+            n_bins=n_bins,
+            name="Mean",
+            color="b",
+            ax=ax,
+            lw=1.2,
+            alpha=0.8,
+        )
+        ax.set(
+            xlim=[-0.05, 1.05],
+            ylim=[-0.05, 1.05],
+            title=f"Calibration Curve ({self.modelNames[model]})",
+        )
+        ax.legend(loc="best")
+        return ax
+
+    def makeInd(self, model : QSPRModel, n_bins : int = 10):
+        df = pd.read_table(self.indPaths[model])
+        y_pred = df.Score
+        y_true = df.Label
+
+        ax = plt.gca()
+        CalibrationDisplay.from_predictions(
+            y_true,
+            y_pred,
+            n_bins=n_bins,
+            name="Calibration",
+            ax=ax,
+        )
+        # 
+        ax.set(
+            xlim=[-0.05, 1.05],
+            ylim=[-0.05, 1.05],
+            title=f"Calibration Curve ({self.modelNames[model]})",
+        )
+        ax.legend(loc="best")
+        return ax
+
+    def make(self, validation : str = "cv", n_bins : int = 10, figsize:tuple = (6,6), save : bool = True, show : bool = False):
+        """
+        Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
+        """
+
+        choices = {
+            "cv": self.makeCV,
+            "ind": self.makeInd
+        }
+        axes = []
+        for model in self.models:
+            fig, ax = plt.subplots(figsize=figsize)
+            ax = choices[validation](model, n_bins)
+            axes.append(ax)
+            if save:
+                fig.savefig(f'{self.modelOuts[model]}.{validation}.png')
+            if show:
+                plt.show()
+                plt.clf()
+        return axes
 
 class MetricsPlot(ClassifierPlot):
 
@@ -226,7 +319,8 @@ class MetricsPlot(ClassifierPlot):
             matthews_corrcoef,
             precision_score,
             recall_score,
-            accuracy_score
+            accuracy_score,
+            calibration_error
         ),
         decision_threshold : float = 0.5)\
         :
@@ -244,7 +338,7 @@ class MetricsPlot(ClassifierPlot):
             'Value': []
         }
 
-    def make(self, save : bool = True, show : bool = False, filename_prefix : str = 'metrics', save_summary_to : str = None):
+    def make(self, save : bool = True, show : bool = False, filename_prefix : str = 'metrics', out_dir : str = "."):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -276,8 +370,8 @@ class MetricsPlot(ClassifierPlot):
                 self.summary['Value'].append(val)
 
         df_summary = pd.DataFrame(self.summary)
-        if save_summary_to is not None:
-            df_summary.to_csv(save_summary_to, sep='\t', index=False, header=True)
+        if save:
+            df_summary.to_csv(os.path.join(out_dir, f"{filename_prefix}_summary.tsv"), sep='\t', index=False, header=True)
 
         figures = []
         for metric in df_summary.Metric.unique():
@@ -310,7 +404,7 @@ class MetricsPlot(ClassifierPlot):
             plt.subplots_adjust(bottom=0.4)
             plt.axhline(y=1.0, color='grey', linestyle='-', alpha=0.3)
             if save:
-                plt.savefig(f'{filename_prefix}_{metric}.png')
+                plt.savefig(os.path.join(out_dir, f"{filename_prefix}_{metric}.png"))
             if show:
                 plt.show()
                 plt.clf()

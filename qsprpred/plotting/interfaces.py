@@ -15,8 +15,8 @@ class ModelPlot(ABC):
 
     def __init__(self, models : List[QSPRModel]):
         self.models = models
-        self.modelOuts = {model: model.out for model in self.models}
-        self.modelNames = {model: model.alg_name for model in self.models}
+        self.modelOuts = {model: model.outPrefix for model in self.models}
+        self.modelNames = {model: model.name for model in self.models}
         self.cvPaths = dict()
         self.indPaths = dict()
         for model in self.models:
@@ -27,25 +27,25 @@ class ModelPlot(ABC):
     def checkModel(self, model):
         cvPath = f"{self.modelOuts[model]}.cv.tsv"
         indPath = f"{self.modelOuts[model]}.ind.tsv"
-        if model.type not in self.getSupportedTypes():
-            raise ValueError("Unsupported model type: %s" % model.type)
-        if not os.path.exists(f"{model.out}.json"):
-            raise ValueError("Model output file does not exist: %s. Have you fitted the model, yet?" % model.out)
+        if model.task not in self.getSupportedTasks():
+            raise ValueError("Unsupported model type: %s" % model.task)
+        if 'model_path' in model.metaInfo['model_path'] and not os.path.exists(model.metaInfo['model_path']):
+            raise ValueError("Model output file does not exist: %s. Have you evaluated and saved the model, yet?" % model.metaInfo['model_path'])
         if not os.path.exists(cvPath):
-            raise ValueError("Model output file does not exist: %s. Have you fitted the model, yet?" % cvPath)
+            raise ValueError("Model output file does not exist: %s. Have you evaluated and saved the model, yet?" % cvPath)
         if not os.path.exists(indPath):
-            raise ValueError("Model output file does not exist: %s. Have you fitted the model, yet?" % indPath)
+            raise ValueError("Model output file does not exist: %s. Have you evaluated and saved the model, yet?" % indPath)
 
         return cvPath, indPath
 
 
     @abstractmethod
-    def getSupportedTypes(self):
+    def getSupportedTasks(self):
         """
         Get the types of models this plotter supports.
 
         Returns:
-            `list` of `str`: list of supporteclad model types
+            `list` of `ModelTasks`: list of supported `ModelTasks`
         """
         pass
 

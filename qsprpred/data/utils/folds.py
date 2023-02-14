@@ -5,7 +5,7 @@ Created by: Martin Sicho
 On: 23.01.23, 13:52
 """
 from qsprpred.data.interfaces import datasplit
-from qsprpred.data.utils.feature_standardization import apply_feature_standardizers
+from qsprpred.data.utils.feature_standardization import apply_feature_standardizer
 
 
 class Folds:
@@ -33,9 +33,9 @@ class Folds:
         """
 
         for X_train, X_test, y_train, y_test, train_index, test_index in folds:
-            X_train, standardizers = apply_feature_standardizers(
-                self.featureStandardizers, X_train, fit=True)
-            X_test, _ = apply_feature_standardizers(standardizers, X_test, fit=False)
+            X_train, standardizer = apply_feature_standardizer(
+                self.featureStandardizer, X_train, fit=True)
+            X_test, _ = apply_feature_standardizer(standardizer, X_test, fit=False)
             yield X_train, X_test, y_train, y_test, train_index, test_index
 
     def _make_folds(self, X, y):
@@ -55,9 +55,9 @@ class Folds:
         for train_index, test_index in folds:
             yield X_arr[train_index, :], X_arr[test_index, :], y_arr[train_index], y_arr[test_index], train_index, test_index
 
-    def __init__(self, split : datasplit, feature_standardizers=None):
+    def __init__(self, split : datasplit, feature_standardizer=None):
         self.split = split
-        self.featureStandardizers = feature_standardizers
+        self.featureStandardizer = feature_standardizer
 
     def iterFolds(self, X, y):
         """
@@ -81,7 +81,7 @@ class Folds:
 
         """
 
-        if self.featureStandardizers:
+        if self.featureStandardizer:
             return self._standardize_folds(self._make_folds(X, y))
         else:
             return self._make_folds(X, y)

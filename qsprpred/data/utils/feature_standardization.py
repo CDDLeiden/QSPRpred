@@ -63,30 +63,28 @@ class SKLearnStandardizer:
         scaler.fit(features)
         return SKLearnStandardizer(scaler)
 
-def apply_feature_standardizers(feature_standardizers, X, fit=True):
+def apply_feature_standardizer(feature_standardizer, X, fit=True):
     """
     Apply and/or fit feature standardizers.
 
     Arguments:
-        feature_standardizers (list of feature standardizer objs): standardizes and/or scales features (i.e `StandardScaler` from scikit-learn or `SKLearnStandardizer`)
+        feature_standardizer (SKLearnStandardizer): standardizes and/or scales features (i.e `StandardScaler` from scikit-learn or `SKLearnStandardizer`)
         X (pd.DataFrame): feature matrix to standardize
         fit (bool): fit the standardizer on the data instead of just applying it
 
     Returns:
         pd.DataFrame: standardized feature matrix of the same dimensions as X
-        list: list of (fitted) feature standardizers
+        SKLearnStandardizer: (fitted) feature standardizer
     """
-    fitted_standardizers = []
-    for idx, standardizer in enumerate(feature_standardizers):
-        if isinstance(standardizer, SKLearnStandardizer):
-            standardizer = standardizer.getInstance()
+    standardizer = feature_standardizer
+    if isinstance(standardizer, SKLearnStandardizer):
+        standardizer = standardizer.getInstance()
 
-        if fit:
-            standardizer = SKLearnStandardizer.fromFit(X, standardizer)
-        else:
-            standardizer = SKLearnStandardizer(standardizer)
+    if fit:
+        standardizer = SKLearnStandardizer.fromFit(X, standardizer)
+    else:
+        standardizer = SKLearnStandardizer(standardizer)
 
-        X = standardizer(X)
-        fitted_standardizers.append(standardizer)
+    X = standardizer(X)
 
-    return X, fitted_standardizers
+    return X, standardizer

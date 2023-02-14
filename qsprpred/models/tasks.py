@@ -14,3 +14,6 @@ class ModelTasks(Enum):
 
     def isClassification(self):
         return self in [self.SINGLECLASS, self.MULTICLASS]
+
+    def __str__(self):
+        return self.name
