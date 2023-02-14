@@ -10,10 +10,6 @@ from parameterized import parameterized
 import numpy as np
 import pandas as pd
 import torch
-from qsprpred.data.utils.datasplitters import randomsplit
-from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
-from qsprpred.data.utils.descriptorsets import FingerprintSet
-from qsprpred.data.utils.featurefilters import lowVarianceFilter, highCorrelationFilter
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
@@ -22,7 +18,6 @@ from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC, SVR
 from torch.utils.data import DataLoader, TensorDataset
 from xgboost import XGBClassifier, XGBRegressor
@@ -34,15 +29,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 class ModelDataSets(DataSets):
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
-    preparation = {
-        "feature_calculator" : DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]),
-        "split" : randomsplit(0.1),
-        "feature_standardizer" : StandardScaler(),
-        "feature_filters" : [
-            lowVarianceFilter(0.05),
-            highCorrelationFilter(0.8)
-        ],
-    }
 
     @classmethod
     def setUpClass(cls):
@@ -55,22 +41,6 @@ class ModelDataSets(DataSets):
         super().clean_directories()
         if os.path.exists(cls.qsprmodelspath):
             shutil.rmtree(cls.qsprmodelspath)
-
-    @staticmethod
-    def prepare(dataset):
-        dataset.prepareDataset(
-            **ModelDataSets.preparation,
-        )
-
-        return dataset
-
-    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
-        dataset = super().create_large_dataset(name=name, task=task, target_prop=target_prop, th=th)
-        return self.prepare(dataset)
-
-    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
-        dataset = super().create_small_dataset(name=name, task=task, target_prop=target_prop, th=th)
-        return self.prepare(dataset)
 
 class ModelTestMixIn:
     def fit_test(self, themodel):

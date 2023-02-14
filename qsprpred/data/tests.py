@@ -1,9 +1,9 @@
 """This module holds the test for functions regarding QSPR data preparation."""
 import glob
+import itertools
 import logging
 import os
 import shutil
-import time
 from datetime import datetime
 from unittest import TestCase
 
@@ -25,7 +25,7 @@ from qsprpred.data.utils.descriptorsets import (
     TanimotoDistances,
     rdkit_descs,
     Mold2,
-    PaDEL,
+    PaDEL, DescriptorSet,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (
@@ -34,6 +34,7 @@ from qsprpred.data.utils.featurefilters import (
     lowVarianceFilter,
 )
 from qsprpred.data.utils.scaffolds import Murcko
+from qsprpred.logs.stopwatch import StopWatch
 from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
 from rdkit import Chem
@@ -45,6 +46,10 @@ CHUNK_SIZE = 100
 logging.basicConfig(level=logging.DEBUG)
 
 class PathMixIn:
+    """
+    Mix-in class that provides paths to test files and directories and handles their creation and deletion.
+    """
+
     datapath = f'{os.path.dirname(__file__)}/test_files/data'
     qsprdatapath = f'{os.path.dirname(__file__)}/test_files/qspr/data'
 
@@ -71,6 +76,25 @@ class PathMixIn:
 
 
 class DataSets(PathMixIn):
+    """
+    Mix-in class that provides a small and large testing data set and some common preparation
+    settings to use in tests.
+
+    Attributes:
+        df_large (pd.DataFrame): a large data frame with 1000 rows to create sample QSPR datasets from
+        df_small (pd.DataFrame): a small data frame with 10 rows to create sample QSPR datasets from
+        feature_sets (list): a list of feature sets that can be used to create combinations of descriptor calculators
+        descriptor_calculators (list): a list of interesting feature set combinations as descriptor calculators (either 1 or 2 sets at the same time)
+        splits (list): a list with common train-test split settings
+        feature_standardizers (list): a list with common feature standardizers
+        feature_filters (list): a list with common feature filters
+        data_filters (list): a list with common data filters
+        preparation_grid (list): a list of all combinations of preparation settings that can be each used in `QSPRDataset.prepareDataset()`, this is good for testing all possible combinations of preparation settings, note that this can take a long time to evaluate and can generate a lot of unnecessary tests
+        default_preparation (dict): a dictionary with default preparation settings that can be used in `QSPRDataset.prepareDataset()`, this is good for just quick testing with a prepared dataset that uses all prepare features
+
+    """
+
+    # raw data frames that can be wrapped into QSPR datasets
     df_large = pd.read_csv(
         f'{PathMixIn.datapath}/test_data_large.tsv',
         sep='\t')
@@ -78,31 +102,109 @@ class DataSets(PathMixIn):
         f'{PathMixIn.datapath}/test_data.tsv',
         sep='\t').sample(10)
 
+    # feature sets that can be used to create combinations of descriptor calculators
+    feature_sets = [
+        FingerprintSet(
+            fingerprint_type="MorganFP",
+            radius=3,
+            nBits=1024
+        ),
+        rdkit_descs(),
+        DrugExPhyschem()
+    ]
+    # interesting feature set combinations as descriptor calculators (either 1 or 2 sets at the same time)
+    descriptor_calculators = [
+        DescriptorsCalculator(sets) for sets in itertools.combinations(
+        feature_sets, 1
+    )] + [
+        DescriptorsCalculator(sets) for sets in itertools.combinations(
+        feature_sets, 2
+    )]
+
+    # lists with common preparation settings
+    splits = [
+        None,
+        randomsplit(0.1),
+        scaffoldsplit(test_fraction=0.1)
+    ]
+    feature_standardizers = [
+        None,
+        StandardScaler(),
+        MinMaxScaler(),
+        SKLearnStandardizer(scaler=StandardScaler()),
+        SKLearnStandardizer(scaler=MinMaxScaler())
+    ]
+    feature_filters = [
+        None,
+        BorutaFilter(max_iter=3, alpha=0.5),
+        lowVarianceFilter(0.05),
+        highCorrelationFilter(0.8)
+    ]
+    data_filters = [
+        None,
+        CategoryFilter(
+            name="moka_ionState7.4",
+            values=["cationic"]
+        ),
+    ]
+
+    # grid of all combinations of the above preparation settings (passed to prepareDataset)
+    preparation_grid = itertools.product(
+        descriptor_calculators,
+        splits,
+        feature_standardizers,
+        feature_filters,
+        data_filters
+    )
+
+    # for slimmer tests, only use a reasonable subset of the preparation grid
+    default_preparation = {
+        "feature_calculator": DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]),
+        "split": randomsplit(0.1),
+        "feature_standardizer": StandardScaler(),
+        "feature_filters": [
+            lowVarianceFilter(0.05),
+            highCorrelationFilter(0.8)
+        ],
+    }
+
+    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None,
+                             preparation_settings=None):
+        dataset = self.create_dataset(
+            self.df_large,
+            name=name,
+            task=task,
+            target_prop=target_prop,
+            th=th
+        )
+        if preparation_settings:
+            return dataset.prepareDataset(
+                **preparation_settings,
+            )
+        else:
+            return dataset
+
+    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None,
+                             preparation_settings=None):
+        dataset = self.create_dataset(
+            self.df_small,
+            name=name,
+            task=task,
+            target_prop=target_prop,
+            th=th
+        )
+        if preparation_settings:
+            return dataset.prepareDataset(
+                **preparation_settings,
+            )
+        else:
+            return dataset
+
     def create_dataset(self, df, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
         return QSPRDataset(
             name, target_prop=target_prop, task=task, df=df,
             store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE, th=th)
-
-    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
-        return self.create_dataset(self.df_small, name, task=task, target_prop=target_prop, th=th)
-
-    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None):
-        return self.create_dataset(self.df_large, name, task=task, target_prop=target_prop, th=th)
-
-
-class StopWatch:
-
-    def __init__(self):
-        self.start = time.perf_counter()
-
-    def reset(self):
-        self.start = time.perf_counter()
-
-    def stop(self, msg='Time it took: '):
-        ret = time.perf_counter() - self.start
-        print(msg + str(ret))
-        self.reset()
-        return ret
 
 
 class TestDataSetCreationSerialization(DataSets, TestCase):
@@ -243,9 +345,52 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         check_regression(dataset_new)
 
-
+def get_name(thing):
+    return str(None) if thing is None else thing.__class__.__name__
 class TestDataSetPreparation(DataSets, TestCase):
-    sets = [
+
+    @parameterized.expand(
+        [
+            2 * ["_".join(get_name(i) for i in x)] + list(x)
+            for x in list(DataSets.preparation_grid)
+        ]
+    )
+    def test_prep_combinations(
+            self,
+            _,
+            name,
+            feature_calculator,
+            split,
+            feature_standardizer,
+            feature_filter,
+            data_filter
+        ):
+        dataset = self.create_small_dataset(name=name)
+        if split and hasattr(split, "setDataSet"):
+            split.setDataSet(dataset)
+        dataset.prepareDataset(
+            feature_calculator=feature_calculator,
+            split=split if split else None,
+            feature_standardizer=feature_standardizer if feature_standardizer else None,
+            feature_filters=[feature_filter] if feature_filter else None,
+            datafilters=[data_filter] if data_filter else None,
+        )
+        dataset.save()
+        dataset = QSPRDataset.fromFile(dataset.storePath)
+        self.assertEqual(dataset.name, name)
+        self.assertEqual(dataset.task, ModelTasks.REGRESSION)
+        self.assertEqual(dataset.targetProperty, "CL")
+        self.assertIsInstance(dataset.descriptorCalculator, feature_calculator.__class__)
+        if feature_standardizer is not None:
+            self.assertIsInstance(dataset.feature_standardizer, SKLearnStandardizer)
+        else:
+            self.assertIsNone(dataset.feature_standardizer)
+
+        for fold in dataset.createFolds():
+            self.assertIsInstance(fold, tuple)
+
+    # a list of all descriptors that will be tested in the test below
+    descriptor_sets = [
         rdkit_descs(),
         DrugExPhyschem(),
         PredictorDesc(
@@ -272,51 +417,51 @@ class TestDataSetPreparation(DataSets, TestCase):
         Mold2(),
         PaDEL(),
     ]
-
     @parameterized.expand(
-        [(f"{desc_set}_{ModelTasks.CLASSIFICATION}", desc_set, ModelTasks.CLASSIFICATION) for desc_set in sets] +
-        [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set, ModelTasks.REGRESSION) for desc_set in sets]
+        [(f"{desc_set}_{ModelTasks.CLASSIFICATION}", desc_set, ModelTasks.CLASSIFICATION) for desc_set in descriptor_sets] +
+        [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set, ModelTasks.REGRESSION) for desc_set in descriptor_sets]
     )
-    def test_preparation(self, _, desc_set, task):
-        ds_name = f"{desc_set}_{task}_{datetime.now()}"
-        logging.debug(f"Testing data set: {ds_name}")
-        dataset = QSPRDataset(
-            ds_name, "CL", df=self.df_large,
-            store_dir=self.qsprdatapath, task=task, th=[0, 1, 10, 1200]
-            if task == ModelTasks.CLASSIFICATION else None, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+    def test_descriptors_all(self, _, desc_set, task):
         np.random.seed(42)
-        descriptor_sets = [
-            desc_set
-        ]
-        dataset.prepareDataset(
-            feature_calculator=DescriptorsCalculator(descriptor_sets),
-            split=randomsplit(0.1),
-            datafilters=[
-                CategoryFilter(
-                    name="moka_ionState7.4",
-                    values=["cationic"])],
-            feature_filters=[lowVarianceFilter(0.05),
-                             highCorrelationFilter(0.8)])
 
-        # test some basics
+        # get the data set
+        ds_name = f"{desc_set}_{task}_{datetime.now()}" # unique name to avoid conflicts
+        logging.debug(f"Testing data set: {ds_name}")
+        dataset = self.create_large_dataset(
+            name=ds_name,
+            task=task,
+            th=[0, 1, 10, 1200] if task == ModelTasks.CLASSIFICATION else None
+        )
+
+        # run the preparation
+        descriptor_sets = [desc_set]
+        preparation = dict()
+        preparation.update(self.default_preparation)
+        preparation['feature_calculator'] = DescriptorsCalculator(descriptor_sets)
+        dataset.prepareDataset(**preparation)
+
+        # test some basic consistency rules on the resulting features
         expected_length = sum([len(x.descriptors) for x in descriptor_sets if x in dataset.descriptorCalculator])
         features = dataset.getFeatures(concat=True)
         self.assertEqual(features.shape[0], len(dataset))
         self.assertEqual(features.shape[1], expected_length)
 
-        # save to file and check if it can be loaded
+        # save to file and check if it can be loaded and the features are still there and correct
         dataset.save()
-        ds = QSPRDataset.fromFile(dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-        if ds.task == ModelTasks.CLASSIFICATION:
-            self.assertEqual(ds.targetProperty, "CL_class")
-        self.assertTrue(ds.task == task)
-        self.assertTrue(ds.descriptorCalculator)
+        ds_loaded = QSPRDataset.fromFile(dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        if ds_loaded.task == ModelTasks.CLASSIFICATION:
+            self.assertEqual(ds_loaded.targetProperty, "CL_class")
+        self.assertTrue(ds_loaded.task == task)
+        self.assertTrue(ds_loaded.descriptorCalculator)
         self.assertTrue(
             isinstance(
-                ds.descriptorCalculator,
+                ds_loaded.descriptorCalculator,
                 DescriptorsCalculator))
-        features = dataset.getFeatures(concat=True)
-        self.assertEqual(features.shape[0], len(dataset))
+        for descset in ds_loaded.descriptorCalculator.descsets:
+            self.assertTrue(isinstance(descset, DescriptorSet))
+        self.assertTrue(len(ds_loaded.descriptorCalculator.descsets) == len(descriptor_sets))
+        features = ds_loaded.getFeatures(concat=True)
+        self.assertEqual(features.shape[0], len(ds_loaded))
         self.assertEqual(features.shape[1], expected_length)
 
 
