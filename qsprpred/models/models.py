@@ -104,16 +104,10 @@ class QSPRsklearn(QSPRModel):
         y, y_ind = self.data.getTargetPropertiesValues()
 
         # initialize arrays for predictions
-        if self.data.isMultiTask():
-            if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
-                cvs = np.zeros((y.shape[0], len(self.data.targetProperties)))
-            else:
-                cvs = [np.zeros((y.shape[0], self.data.nClasses(prop))) for prop in self.data.targetProperties]
+        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+            cvs = np.zeros((y.shape[0], len(self.data.targetProperties)))
         else:
-            if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
-                cvs = np.zeros(y.shape[0])
-            else:
-                cvs = np.zeros((y.shape[0], self.data.nClasses(self.data.targetProperties[0])))
+            cvs = [np.zeros((y.shape[0], self.data.nClasses(prop))) for prop in self.data.targetProperties]
 
         fold_counter = np.zeros(y.shape[0])
 
@@ -136,12 +130,9 @@ class QSPRsklearn(QSPRModel):
             if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
                 cvs[idx_test] = self.model.predict(X_test)
             else:
-                if not self.data.isMultiTask():
-                    cvs[idx_test] = self.model.predict_proba(X_test)
-                else:
-                    preds = self.model.predict_proba(X_test)
-                    for idx in range(len(self.data.targetProperties)):
-                        cvs[idx][idx_test] = preds[idx]
+                preds = self.model.predict_proba(X_test)
+                for idx in range(len(self.data.targetProperties)):
+                    cvs[idx][idx_test] = preds[idx]
 
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
@@ -163,14 +154,14 @@ class QSPRsklearn(QSPRModel):
         # save crossvalidation results
         if save:
             train, test = y.add_prefix('Label_'), y_ind.add_prefix('Label_')
-            for prop in self.data.targetProperties:
-                train[prop.name], test[prop.name] = X[prop.name], X_ind[prop.name]
-                if prop.task.isClassification:
-                    train[f'Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
-                    train = pd.concat([train, pd.DataFrame(cvs).add_prefix('Prob_')], axis=1)
-                    test = pd.concat([test, pd.DataFrame(inds).add_prefix('Prob_')], axis=1)
+            for idx, prop in enumerate(self.data.targetProperties):
+                if prop.task.isClassification():
+                    train[f'{prop.name}_Prediction'], test[f'{prop.name}_Prediction'] = np.argmax(
+                        cvs[idx], axis=1), np.argmax(inds[idx], axis=1)
+                    train = pd.concat([train, pd.DataFrame(cvs).add_prefix(f'{prop.name}_ProbabilityClass_')], axis=1)
+                    test = pd.concat([test, pd.DataFrame(inds).add_prefix(f'{prop.name}_ProbabilityClass_')], axis=1)
                 else:
-                    train['Score'], test['Score'] = cvs, inds
+                    train[f'{prop.name}_Prediction'], test[f'{prop.name}_Prediction'] = cvs[:, idx], inds[:, idx]
             train['Fold'] = fold_counter
             train.to_csv(self.outPrefix + '.cv.tsv', sep='\t')
             test.to_csv(self.outPrefix + '.ind.tsv', sep='\t')
@@ -283,7 +274,7 @@ class QSPRsklearn(QSPRModel):
         print(bayesian_params)
         self.model.set_params(**bayesian_params)
 
-        y, y_ind = self.data.getTargetProperties()
+        y, y_ind = self.data.getTargetPropertiesValues()
         score_func = self.get_scoring_func(scoring)
         try:
             score = score_func(y, self.evaluate(save=False))
@@ -317,7 +308,7 @@ class QSPRsklearn(QSPRModel):
         elif callable(scoring):
             return scoring
         elif scoring is None:
-            if self.data.task == ModelTasks.REGRESSION:
+            if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
                 scorer = metrics.get_scorer('explained_variance')
             elif self.data.nClasses > 2:  # multiclass
                 scorer = metrics.get_scorer('roc_auc_ovr_weighted')
@@ -580,7 +571,7 @@ class QSPRDNN(QSPRModel):
         """
         self.model = self.loadModel(self.alg)
 
-        if self.data.task == ModelTasks.REGRESSION:
+        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
             scoring = metrics.explained_variance_score
         else:
             scoring = partial(
@@ -680,7 +671,7 @@ class QSPRDNN(QSPRModel):
 
         self.model.set_params(**bayesian_params)
 
-        y, y_ind = self.data.getTargetProperties()
+        y, y_ind = self.data.getTargetPropertiesValues()
         score_func = self.get_scoring_func(scoring)
         try:
             score = score_func(y, self.evaluate(save=False))
@@ -737,7 +728,7 @@ class QSPRDNN(QSPRModel):
         elif callable(scoring):
             return scoring
         elif scoring is None:
-            if self.data.task == ModelTasks.REGRESSION:
+            if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
                 scorer = metrics.get_scorer('explained_variance')
             elif self.data.nClasses > 2:  # multiclass
                 # Calling metrics.get_scorer('roc_auc_ovr_weighted') in this context

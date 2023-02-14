@@ -1,4 +1,5 @@
 """This module holds the base class for QSPRmodels, model types should be a subclass."""
+import copy
 import json
 import os
 import shutil
@@ -9,7 +10,7 @@ from typing import List, Type, Union
 
 import numpy as np
 import pandas as pd
-from qsprpred.data.data import MoleculeTable, QSPRDataset
+from qsprpred.data.data import MoleculeTable, QSPRDataset, TargetProperty
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
@@ -237,7 +238,8 @@ class QSPRModel(ABC):
         if os.path.exists(path):
             with open(path) as j:
                 metaInfo = json.loads(j.read())
-                metaInfo["target_props"][0]['task'] = ModelTasks(metaInfo["target_props"][0]['task'])
+                metaInfo["target_properties"] = TargetProperty.fromList(
+                    metaInfo["target_properties"], task_from_str=True)
         else:
             raise FileNotFoundError(f'Metadata file "{path}" does not exist.')
 
@@ -264,11 +266,8 @@ class QSPRModel(ABC):
         Returns:
             dict: dictionary containing the model metadata that was saved
         """
-
-        self.metaInfo['name'] = self.name
-        self.metaInfo['task'] = str(self.task)
-        self.metaInfo['th'] = self.data.th
-        self.metaInfo['target_property'] = self.targetProperty
+        self.metaInfo['target_properties'] = TargetProperty.toList(
+            copy.deepcopy(self.data.targetProperties), task_as_str=True),
         self.metaInfo['parameters_path'] = self.saveParams(self.parameters).replace(f"{self.baseDir}/", '')
         self.metaInfo['feature_calculator_path'] = self.saveDescriptorCalculator().replace(
             f"{self.baseDir}/", '') if self.featureCalculator else None
