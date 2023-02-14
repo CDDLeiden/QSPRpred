@@ -299,7 +299,7 @@ class TestDataSetPreparation(DataSets, TestCase):
                              highCorrelationFilter(0.8)])
 
         # test some basics
-        expected_length = sum([len(x.descriptors) for x in descriptor_sets])
+        expected_length = sum([len(x.descriptors) for x in descriptor_sets if x in dataset.descriptorCalculator])
         features = dataset.getFeatures(concat=True)
         self.assertEqual(features.shape[0], len(dataset))
         self.assertEqual(features.shape[1], expected_length)
@@ -315,6 +315,9 @@ class TestDataSetPreparation(DataSets, TestCase):
             isinstance(
                 ds.descriptorCalculator,
                 DescriptorsCalculator))
+        features = dataset.getFeatures(concat=True)
+        self.assertEqual(features.shape[0], len(dataset))
+        self.assertEqual(features.shape[1], expected_length)
 
 
 class TestDataSplitters(DataSets, TestCase):
