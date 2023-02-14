@@ -94,10 +94,10 @@ class ModelTestMixIn:
         themodel.evaluate()
         self.assertTrue(
             exists(
-                f'{themodel.outDir}/{themodel}.ind.tsv'))
+                f'{themodel.outDir}/{themodel.name}.ind.tsv'))
         self.assertTrue(
             exists(
-                f'{themodel.outDir}/{themodel}.cv.tsv'))
+                f'{themodel.outDir}/{themodel.name}.cv.tsv'))
 
         # train the model on all data
         themodel.fit()
