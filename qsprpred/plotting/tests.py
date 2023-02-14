@@ -10,13 +10,12 @@ from unittest import TestCase
 import pandas as pd
 from matplotlib.axes import SubplotBase
 from matplotlib.figure import Figure
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-
 from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
 from qsprpred.models.tests import ModelDataSets
-from qsprpred.plotting.classification import ROCPlot, MetricsPlot
+from qsprpred.plotting.classification import MetricsPlot, ROCPlot
 from qsprpred.plotting.regression import CorrelationPlot
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 
 class ROCPlotTest(ModelDataSets, TestCase):
@@ -31,7 +30,7 @@ class ROCPlotTest(ModelDataSets, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_roc_plot_single_data", task=ModelTasks.CLASSIFICATION, th=[50])
+        dataset = self.create_large_dataset("test_roc_plot_single_data", task=ModelTasks.SINGLECLASS, th=[50])
         model = self.get_model(dataset, "test_roc_plot_single_model")
         model.evaluate(save=True)
         model.save()
@@ -48,6 +47,7 @@ class ROCPlotTest(ModelDataSets, TestCase):
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.ind.png"))
 
+
 class MetricsPlotTest(ModelDataSets, TestCase):
 
     @staticmethod
@@ -60,7 +60,7 @@ class MetricsPlotTest(ModelDataSets, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_metrics_plot_single_data", task=ModelTasks.CLASSIFICATION, th=[50])
+        dataset = self.create_large_dataset("test_metrics_plot_single_data", task=ModelTasks.SINGLECLASS, th=[50])
         model = self.get_model(dataset, "test_metrics_plot_single_model")
         model.evaluate(save=True)
         model.save()

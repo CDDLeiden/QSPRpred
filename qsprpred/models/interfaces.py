@@ -18,7 +18,7 @@ from qsprpred.models.tasks import ModelTasks
 
 
 class QSPRModel(ABC):
-    """Model initialization, fit, cross validation and hyperparameter optimization for classifion/regression models.
+    """Model initialization, fit, cross validation and hyperparameter optimization for classification/regression models.
 
     Attributes:
         data: instance QSPRDataset
@@ -132,7 +132,7 @@ class QSPRModel(ABC):
         if os.path.exists(path):
             with open(path) as j:
                 metaInfo = json.loads(j.read())
-                metaInfo['task'] = ModelTasks(metaInfo['task'])
+                metaInfo["target_props"][0]['task'] = ModelTasks(metaInfo["target_props"][0]['task'])
         else:
             raise FileNotFoundError(f'Metadata file "{path}" does not exist.')
 

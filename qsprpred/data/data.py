@@ -760,7 +760,7 @@ class QSPRDataset(MoleculeTable):
 
     Attributes:
         targetProperties (str) : property to be predicted with QSPRmodel
-        tasks (List[ModelTask]) : regression or classification
+        tasks (List[ModelTask]) : regression or singleclass or multiclass
         df (pd.dataframe) : dataset
         X (np.ndarray/pd.DataFrame) : m x n feature matrix for cross validation, where m is
             the number of samplesand n is the number of features.
@@ -1289,6 +1289,8 @@ class QSPRDataset(MoleculeTable):
             self.feature_standardizer = feature_standardizer
             if self.fold_generator:
                 self.fold_generator = Folds(self.fold_generator.split, self.feature_standardizer)
+        else:
+            self.feature_standardizer = None
 
         # create fold generator
         if fold:
@@ -1450,17 +1452,18 @@ class QSPRDataset(MoleculeTable):
         Save feature standardizers to the metadata.
 
         Returns:
-            `list` of `str`: paths to the saved standardizers
+            `str`: paths to the saved standardizers
         """
-        if self.feature_standardizer:
-            # make sure feature standardizers are fitted before serialization
+        # make sure feature standardizers are fitted before serialization
+        if self.feature_standardizer is not None:
             self.fitFeatureStandardizer()
             path = f'{self.storePrefix}_feature_standardizer.json'
             if not hasattr(self.feature_standardizer, 'toFile'):
                 SKLearnStandardizer(self.feature_standardizer).toFile(path)
             else:
                 self.feature_standardizer.toFile(path)
-        return path
+            return path
+        return None
 
     def saveMetadata(self):
         """
@@ -1469,7 +1472,6 @@ class QSPRDataset(MoleculeTable):
         Returns:
             `str`: path to the saved metadata file
         """
-        path = self.saveFeatureStandardizer()
 
         meta_init = {
             'target_props': TargetProperty.toList(copy.deepcopy(self.targetProperties), task_as_str=True),
@@ -1477,7 +1479,7 @@ class QSPRDataset(MoleculeTable):
         }
         ret = {
             'init': meta_init,
-            'standardizer_path': path,
+            'standardizer_path': self.saveFeatureStandardizer(),
             'descriptorcalculator_path': self.descriptorCalculatorPath,
             'feature_names': list(self.featureNames) if self.featureNames is not None else None,
         }

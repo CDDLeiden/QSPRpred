@@ -11,24 +11,32 @@ from typing import List
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from sklearn.metrics import RocCurveDisplay, auc, f1_score, matthews_corrcoef, precision_score, recall_score, \
-    accuracy_score, PrecisionRecallDisplay
-from sklearn.calibration import CalibrationDisplay 
-
+from qsprpred.metrics.calibration import calibration_error
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.tasks import ModelTasks
 from qsprpred.plotting.interfaces import ModelPlot
-from qsprpred.metrics.calibration import calibration_error
+from sklearn.calibration import CalibrationDisplay
+from sklearn.metrics import (
+    PrecisionRecallDisplay,
+    RocCurveDisplay,
+    accuracy_score,
+    auc,
+    f1_score,
+    matthews_corrcoef,
+    precision_score,
+    recall_score,
+)
 
 
 class ClassifierPlot(ModelPlot, ABC):
 
     def getSupportedTasks(self):
-        return [ModelTasks.CLASSIFICATION]
+        return [ModelTasks.SINGLECLASS]
+
 
 class ROCPlot(ClassifierPlot):
 
-    def makeCV(self, model : QSPRModel):
+    def makeCV(self, model: QSPRModel):
         df = pd.read_table(self.cvPaths[model])
 
         tprs = []
@@ -89,7 +97,7 @@ class ROCPlot(ClassifierPlot):
         ax.legend(loc="lower right")
         return ax
 
-    def makeInd(self, model : QSPRModel):
+    def makeInd(self, model: QSPRModel):
         df = pd.read_table(self.indPaths[model])
         y_pred = df.Score
         y_true = df.Label
@@ -110,7 +118,7 @@ class ROCPlot(ClassifierPlot):
         ax.legend(loc="lower right")
         return ax
 
-    def make(self, validation : str = "cv", figsize:tuple = (6,6), save : bool = True, show : bool = False):
+    def make(self, validation: str = "cv", figsize: tuple = (6, 6), save: bool = True, show: bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -131,14 +139,15 @@ class ROCPlot(ClassifierPlot):
                 plt.clf()
         return axes
 
+
 class PRCPlot(ClassifierPlot):
 
-    def makeCV(self, model : QSPRModel):
+    def makeCV(self, model: QSPRModel):
         df = pd.read_table(self.cvPaths[model])
 
         y_real = []
         y_predproba = []
-        
+
         ax = plt.gca()
         for fold in df.Fold.unique():
             # get labels
@@ -156,8 +165,8 @@ class PRCPlot(ClassifierPlot):
                 lw=1,
             )
         # Linear iterpolation of PR curve is not recommended, so we don't plot "chance"
-        # https://dl.acm.org/doi/10.1145/1143844.1143874     
-           
+        # https://dl.acm.org/doi/10.1145/1143844.1143874
+
         # Plotting the average precision-recall curve over the cross validation runs
         y_real = np.concatenate(y_real)
         y_predproba = np.concatenate(y_predproba)
@@ -178,7 +187,7 @@ class PRCPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def makeInd(self, model : QSPRModel):
+    def makeInd(self, model: QSPRModel):
         df = pd.read_table(self.indPaths[model])
         y_pred = df.Score
         y_true = df.Label
@@ -190,7 +199,7 @@ class PRCPlot(ClassifierPlot):
             name="PRC",
             ax=ax,
         )
-        # 
+        #
         ax.set(
             xlim=[-0.05, 1.05],
             ylim=[-0.05, 1.05],
@@ -199,7 +208,7 @@ class PRCPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def make(self, validation : str = "cv", figsize:tuple = (6,6), save : bool = True, show : bool = False):
+    def make(self, validation: str = "cv", figsize: tuple = (6, 6), save: bool = True, show: bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -219,15 +228,16 @@ class PRCPlot(ClassifierPlot):
                 plt.show()
                 plt.clf()
         return axes
-    
+
+
 class CalibrationPlot(ClassifierPlot):
 
-    def makeCV(self, model : QSPRModel, n_bins : int = 10):
+    def makeCV(self, model: QSPRModel, n_bins: int = 10):
         df = pd.read_table(self.cvPaths[model])
 
         y_real = []
         y_predproba = []
-        
+
         ax = plt.gca()
         for fold in df.Fold.unique():
             # get labels
@@ -245,7 +255,7 @@ class CalibrationPlot(ClassifierPlot):
                 alpha=0.3,
                 lw=1,
             )
-           
+
         # Plotting the average precision-recall curve over the cross validation runs
         y_real = np.concatenate(y_real)
         y_predproba = np.concatenate(y_predproba)
@@ -267,7 +277,7 @@ class CalibrationPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def makeInd(self, model : QSPRModel, n_bins : int = 10):
+    def makeInd(self, model: QSPRModel, n_bins: int = 10):
         df = pd.read_table(self.indPaths[model])
         y_pred = df.Score
         y_true = df.Label
@@ -280,7 +290,7 @@ class CalibrationPlot(ClassifierPlot):
             name="Calibration",
             ax=ax,
         )
-        # 
+        #
         ax.set(
             xlim=[-0.05, 1.05],
             ylim=[-0.05, 1.05],
@@ -289,7 +299,8 @@ class CalibrationPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def make(self, validation : str = "cv", n_bins : int = 10, figsize:tuple = (6,6), save : bool = True, show : bool = False):
+    def make(self, validation: str = "cv", n_bins: int = 10,
+             figsize: tuple = (6, 6), save: bool = True, show: bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -310,20 +321,20 @@ class CalibrationPlot(ClassifierPlot):
                 plt.clf()
         return axes
 
+
 class MetricsPlot(ClassifierPlot):
 
     def __init__(self,
-        models : List[QSPRModel],
-        metrics : List[callable] = (
-            f1_score,
-            matthews_corrcoef,
-            precision_score,
-            recall_score,
-            accuracy_score,
-            calibration_error
-        ),
-        decision_threshold : float = 0.5)\
-        :
+                 models: List[QSPRModel],
+                 metrics: List[callable] = (
+                     f1_score,
+                     matthews_corrcoef,
+                     precision_score,
+                     recall_score,
+                     accuracy_score,
+                     calibration_error
+                 ),
+                 decision_threshold: float = 0.5):
         super().__init__(models)
         self.metrics = metrics
         self.decision = decision_threshold
@@ -338,7 +349,7 @@ class MetricsPlot(ClassifierPlot):
             'Value': []
         }
 
-    def make(self, save : bool = True, show : bool = False, filename_prefix : str = 'metrics', out_dir : str = "."):
+    def make(self, save: bool = True, show: bool = False, filename_prefix: str = 'metrics', out_dir: str = "."):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -371,7 +382,13 @@ class MetricsPlot(ClassifierPlot):
 
         df_summary = pd.DataFrame(self.summary)
         if save:
-            df_summary.to_csv(os.path.join(out_dir, f"{filename_prefix}_summary.tsv"), sep='\t', index=False, header=True)
+            df_summary.to_csv(
+                os.path.join(
+                    out_dir,
+                    f"{filename_prefix}_summary.tsv"),
+                sep='\t',
+                index=False,
+                header=True)
 
         figures = []
         for metric in df_summary.Metric.unique():
@@ -386,7 +403,14 @@ class MetricsPlot(ClassifierPlot):
             width = 0.35  # the width of the bars
 
             fig, ax = plt.subplots(figsize=(7, 10))
-            rects1 = ax.bar(x - width / 2, cv_avg.Value, width, label='CV', yerr=cv_std.Value, ecolor='black', capsize=5)
+            rects1 = ax.bar(
+                x - width / 2,
+                cv_avg.Value,
+                width,
+                label='CV',
+                yerr=cv_std.Value,
+                ecolor='black',
+                capsize=5)
             rects2 = ax.bar(x + width / 2, ind_vals.Value, width, label='Test')
 
             # Add some text for labels, title and custom x-axis tick labels, etc.

@@ -124,7 +124,7 @@ class ModelTestMixIn:
         self.assertIsInstance(predictions, np.ndarray)
         if predictor.task == ModelTasks.REGRESSION:
             self.assertIsInstance(predictions[0], numbers.Real)
-        elif predictor.task == ModelTasks.CLASSIFICATION:
+        elif predictor.task == Modeltasks.SINGLECLASS:
             self.assertIsInstance(predictions[0], numbers.Integral)
         else:
             return AssertionError(f"Unknown task: {predictor.task}")
@@ -176,8 +176,8 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
         (f"{alg_name}_{task}", task, alg_name, alg, th)
         for alg, alg_name, task, th in (
             (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
-            (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [6.5]),
-            (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [0, 1, 10, 1200]),
+            (STFullyConnected, "STFullyConnected", Modeltasks.SINGLECLASS, [6.5]),
+            (STFullyConnected, "STFullyConnected", Modeltasks.SINGLECLASS, [0, 1, 10, 1200]),
         )
     ])
     def test_base_model(self, _, task, alg_name, alg, th):
@@ -220,8 +220,8 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
         (f"{alg_name}_{task}", task, alg_name, alg, th)
         for alg, alg_name, task, th in (
             (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
-            (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [6.5]),
-            (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [0, 1, 10, 1100]),
+            (STFullyConnected, "STFullyConnected", Modeltasks.SINGLECLASS, [6.5]),
+            (STFullyConnected, "STFullyConnected", Modeltasks.SINGLECLASS, [0, 1, 10, 1100]),
         )
     ])
     def test_qsprpred_model(self, _, task, alg_name, alg, th):
@@ -282,7 +282,7 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
         self.predictor_test(f"{model_name}_{task}", model.baseDir)
 
     @parameterized.expand([
-        (alg_name, ModelTasks.CLASSIFICATION, alg_name, alg)
+        (alg_name, ModelTasks.SINGLECLASS, alg_name, alg)
         for alg, alg_name in (
             (SVC, "SVC"),
             (RandomForestClassifier, "RFC"),

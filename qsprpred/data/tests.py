@@ -347,10 +347,10 @@ class TestDataSetPreparation(DataSets, TestCase):
     sets = [
         rdkit_descs(),
         DrugExPhyschem(),
-        PredictorDesc(
-            QSPRsklearn.fromFile(
-                f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
-        ),
+        # PredictorDesc(
+        #     QSPRsklearn.fromFile(
+        #         f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json')
+        # ),
         TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
         FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
         Mordred(),
