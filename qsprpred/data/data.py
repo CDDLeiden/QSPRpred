@@ -1000,6 +1000,14 @@ class QSPRDataset(MoleculeTable):
             target_property = self.getTargetProperties([target_property], original_names=True)[0]
 
         new_prop = f"{target_property.originalName}_class"
+
+        if target_property.originalName not in self.df.columns:
+            assert new_prop in self.df.columns, "Cannot infer classification property name."
+            target_property.name = new_prop
+            logger.warning(
+                f"Target property {target_property.originalName} not in data frame. Inferring classification property name is {new_prop} and task is {target_property.task} and no changes made to data frame.")
+            return target_property
+
         if th is None:
             assert target_property.task is not ModelTasks.REGRESSION, "Cannot infer threshold values for regression task."
             th = target_property.th
