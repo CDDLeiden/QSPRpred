@@ -31,7 +31,7 @@ class ROCPlotTest(ModelDataSets, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_roc_plot_single_data", task=ModelTasks.CLASSIFICATION, th=[50])
+        dataset = self.create_large_dataset("test_roc_plot_single_data", task=ModelTasks.CLASSIFICATION, th=[50], preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_roc_plot_single_model")
         model.evaluate(save=True)
         model.save()
@@ -60,7 +60,7 @@ class MetricsPlotTest(ModelDataSets, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_metrics_plot_single_data", task=ModelTasks.CLASSIFICATION, th=[50])
+        dataset = self.create_large_dataset("test_metrics_plot_single_data", task=ModelTasks.CLASSIFICATION, th=[50], preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_metrics_plot_single_model")
         model.evaluate(save=True)
         model.save()
@@ -88,7 +88,7 @@ class CorrPlotTest(ModelDataSets, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_corr_plot_single_data")
+        dataset = self.create_large_dataset("test_corr_plot_single_data", preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_corr_plot_single_model")
         model.evaluate(save=True)
         model.save()
