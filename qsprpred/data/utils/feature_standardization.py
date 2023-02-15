@@ -17,6 +17,10 @@ class SKLearnStandardizer:
 
         self.scaler = scaler
 
+    def __str__(self):
+        """Return string representation."""
+        return f"SKLearnStandardizer_{self.scaler.__class__.__name__}"
+
     def getInstance(self):
         """Get scaler object."""
         return self.scaler
