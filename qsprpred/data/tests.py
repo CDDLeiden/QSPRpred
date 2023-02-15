@@ -779,7 +779,6 @@ class TestFeatureStandardizer(DataSets, TestCase):
                 scaled_features_fromfile),
             True)
 
-# this test case should be kept at the bottom of the file so that the simpler tests run first
 class TestDataSetPreparation(DataSets, TestCase):
     """
     Tests many possible combinations of data sets and their preparation settings.
