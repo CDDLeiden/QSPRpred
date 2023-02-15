@@ -3,6 +3,7 @@ import logging
 import numbers
 import os
 import shutil
+import types
 from os.path import exists
 from unittest import TestCase
 
@@ -126,8 +127,10 @@ class ModelTestMixIn:
         self.assertIsInstance(predictions, np.ndarray)
         if predictor.targetProperties[0].task == ModelTasks.REGRESSION:
             self.assertIsInstance(predictions[0], numbers.Real)
-        elif predictor.targetProperties[0].task.isClassification():
+        elif predictor.targetProperties[0].task == ModelTasks.MULTICLASS or isinstance(predictor.model, XGBClassifier):
             self.assertIsInstance(predictions[0], numbers.Integral)
+        elif predictor.targetProperties[0].task == ModelTasks.SINGLECLASS:
+            self.assertIsInstance(predictions[0], np.bool_)
         else:
             return AssertionError(f"Unknown task: {predictor.task}")
 
@@ -136,7 +139,11 @@ class ModelTestMixIn:
         predictions = predictor.predictMols(invalid_smiles)
         self.assertEqual(predictions.shape, (len(invalid_smiles),))
         self.assertEqual(predictions[1], None)
-        self.assertIsInstance(predictions[0], numbers.Number)
+        if predictor.targetProperties[0].task == ModelTasks.SINGLECLASS and not isinstance(
+                predictor.model, XGBClassifier):
+            self.assertIsInstance(predictions[0], np.bool_)
+        else:
+            self.assertIsInstance(predictions[0], numbers.Number)
 
 
 class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
@@ -284,16 +291,18 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
         self.predictor_test(f"{model_name}_{task}", model.baseDir)
 
     @parameterized.expand([
-        (alg_name, ModelTasks.SINGLECLASS, alg_name, alg)
+        (f"{alg_name}_{task}", task, th, alg_name, alg)
         for alg, alg_name in (
             (SVC, "SVC"),
             (RandomForestClassifier, "RFC"),
             (XGBClassifier, "XGBC"),
             (KNeighborsClassifier, "KNNC"),
             (GaussianNB, "NB")
-        )
+        ) for task, th in
+        ((ModelTasks.SINGLECLASS, [6.5]),
+         (ModelTasks.MULTICLASS, [0, 1, 10, 1100]))
     ])
-    def test_classification_basic_fit(self, _, task, model_name, model_class):
+    def test_classification_basic_fit(self, _, task, th, model_name, model_class):
         if not model_name in ["NB", "SVC"]:
             parameters = {"n_jobs": N_CPUS}
         else:
@@ -303,7 +312,7 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
             parameters.update({"probability": True})
 
         # initialize dataset
-        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": [0, 1, 10, 1100]}])
+        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": th}])
 
         # test classifier
         # initialize model for training from class
