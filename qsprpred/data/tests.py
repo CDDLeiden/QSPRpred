@@ -74,7 +74,7 @@ class PathMixIn:
             shutil.rmtree(cls.qsprdatapath)
 
 
-class DataSets(PathMixIn):
+class DataSetsMixIn(PathMixIn):
     """
     Mix-in class that provides a small and large testing data set and some common preparation
     settings to use in tests.
@@ -207,7 +207,7 @@ class DataSets(PathMixIn):
 
         return [
             2 * ["_".join(get_name(i) for i in x)] + list(x)
-            for x in DataSets.get_prep_grid()
+            for x in DataSetsMixIn.get_prep_grid()
         ]
 
     def getBigDF(self):
@@ -306,7 +306,7 @@ class DataSets(PathMixIn):
         return ret
 
 
-class TestDataSetCreationSerialization(DataSets, TestCase):
+class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
     """
     Simple tests for dataset creation and serialization under different conditions and error states.
     """
@@ -447,7 +447,7 @@ class TestDataSetCreationSerialization(DataSets, TestCase):
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         check_regression(dataset_new)
 
-class TestDataSplitters(DataSets, TestCase):
+class TestDataSplitters(DataSetsMixIn, TestCase):
     """
     Small tests to only check if the data splitters work on their own. The tests here should be used to check for all their specific parameters and edge cases.
     """
@@ -503,7 +503,7 @@ class TestDataSplitters(DataSets, TestCase):
         dataset_new.clearFiles()
 
 
-class TestFoldSplitters(DataSets, TestCase):
+class TestFoldSplitters(DataSetsMixIn, TestCase):
     """
     Small tests to only check if the fold splitters work on their own. The tests here should be used to check for all their specific parameters and edge cases.
     """
@@ -546,7 +546,7 @@ class TestFoldSplitters(DataSets, TestCase):
         self.validate_folds(dataset, more=check_min_max)
 
 
-class TestDataFilters(DataSets, TestCase):
+class TestDataFilters(DataSetsMixIn, TestCase):
     """
     Small tests to only check if the data filters work on their own. The tests here should be used to check for all their specific parameters and edge cases.
     """
@@ -613,7 +613,7 @@ class TestFeatureFilters(PathMixIn, TestCase):
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors[-1:])
 
 
-class TestDescriptorCalculation(DataSets, TestCase):
+class TestDescriptorCalculation(DataSetsMixIn, TestCase):
 
     def setUp(self):
         super().setUp()
@@ -645,7 +645,7 @@ class TestDescriptorCalculation(DataSets, TestCase):
         )
 
 
-class TestDescriptorsets(DataSets, TestCase):
+class TestDescriptorsets(DataSetsMixIn, TestCase):
 
     def setUp(self):
         super().setUp()
@@ -737,7 +737,7 @@ class TestDescriptorsets(DataSets, TestCase):
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList) + 10))
 
 
-class TestScaffolds(DataSets, TestCase):
+class TestScaffolds(DataSetsMixIn, TestCase):
 
     def setUp(self):
         super().setUp()
@@ -755,7 +755,7 @@ class TestScaffolds(DataSets, TestCase):
             self.assertTrue(isinstance(mol, Chem.rdchem.Mol))
 
 
-class TestFeatureStandardizer(DataSets, TestCase):
+class TestFeatureStandardizer(DataSetsMixIn, TestCase):
 
     def setUp(self):
         super().setUp()
@@ -779,7 +779,7 @@ class TestFeatureStandardizer(DataSets, TestCase):
                 scaled_features_fromfile),
             True)
 
-class TestDataSetPreparation(DataSets, TestCase):
+class TestDataSetPreparation(DataSetsMixIn, TestCase):
     """
     Tests many possible combinations of data sets and their preparation settings.
     """
@@ -812,7 +812,7 @@ class TestDataSetPreparation(DataSets, TestCase):
             self.assertRaises(ValueError, ds.createFolds)
 
     @parameterized.expand(
-        DataSets.get_prep_combinations()
+        DataSetsMixIn.get_prep_combinations()
     ) # add @skip("Not now...") below this line to skip these tests
     def test_prep_combinations(
             self,
@@ -826,7 +826,7 @@ class TestDataSetPreparation(DataSets, TestCase):
         ):
         """
         Tests one combination of a data set and its preparation settings. This generates a large number of parameterized tests. Use the `skip` decorator if you want to skip all these tests.
-        Note that the combinations are not exhaustive, but defined by `DataSets.get_prep_combinations()`.
+        Note that the combinations are not exhaustive, but defined by `DataSetsMixIn.get_prep_combinations()`.
         """
 
         # fetch a new data set
@@ -863,12 +863,12 @@ class TestDataSetPreparation(DataSets, TestCase):
         self.feature_consistency_checks(dataset, expected_feature_count)
 
     @parameterized.expand(
-        [(f"{desc_set}_{ModelTasks.CLASSIFICATION}", desc_set, ModelTasks.CLASSIFICATION) for desc_set in DataSets.get_all_descriptors()] +
-        [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set, ModelTasks.REGRESSION) for desc_set in DataSets.get_all_descriptors()]
+        [(f"{desc_set}_{ModelTasks.CLASSIFICATION}", desc_set, ModelTasks.CLASSIFICATION) for desc_set in DataSetsMixIn.get_all_descriptors()] +
+        [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set, ModelTasks.REGRESSION) for desc_set in DataSetsMixIn.get_all_descriptors()]
     )
     def test_descriptors_all(self, _, desc_set, task):
         """
-        Tests all available descriptor sets. Note that they are not checked with all possible settings and all possible preparations, but only with the default settings provided by `DataSets.get_default_prep()`. The list itself is defined and configured by `DataSets.get_all_descriptors()` so if you need a specific descriptor tested, add it there.
+        Tests all available descriptor sets. Note that they are not checked with all possible settings and all possible preparations, but only with the default settings provided by `DataSetsMixIn.get_default_prep()`. The list itself is defined and configured by `DataSetsMixIn.get_all_descriptors()` so if you need a specific descriptor tested, add it there.
         """
 
         np.random.seed(42)

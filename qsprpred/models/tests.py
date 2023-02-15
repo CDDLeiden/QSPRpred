@@ -21,13 +21,13 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from torch.utils.data import DataLoader, TensorDataset
 from xgboost import XGBClassifier, XGBRegressor
-from qsprpred.data.tests import DataSets
+from qsprpred.data.tests import DataSetsMixIn
 
 N_CPUS = 2
 GPUS = [idx for idx in range(torch.cuda.device_count())]
 logging.basicConfig(level=logging.DEBUG)
 
-class ModelDataSets(DataSets):
+class ModelDataSetsMixIn(DataSetsMixIn):
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
 
     def setUp(self):
@@ -103,7 +103,7 @@ class ModelTestMixIn:
         self.assertEqual(predictions[1], None)
         self.assertIsInstance(predictions[0], numbers.Number)
 
-class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
+class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @staticmethod
     def get_model(name, alg=None, dataset=None, parameters=None):
@@ -204,7 +204,7 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
         self.fit_test(model)
         self.predictor_test(alg_name, model.baseDir, QSPRDNN)
 
-class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
+class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @staticmethod
     def get_model(name, alg=None, dataset=None, parameters=None):

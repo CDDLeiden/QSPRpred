@@ -14,12 +14,12 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
-from qsprpred.models.tests import ModelDataSets
+from qsprpred.models.tests import ModelDataSetsMixIn
 from qsprpred.plotting.classification import ROCPlot, MetricsPlot
 from qsprpred.plotting.regression import CorrelationPlot
 
 
-class ROCPlotTest(ModelDataSets, TestCase):
+class ROCPlotTest(ModelDataSetsMixIn, TestCase):
 
     @staticmethod
     def get_model(dataset, name, alg=RandomForestClassifier):
@@ -48,7 +48,7 @@ class ROCPlotTest(ModelDataSets, TestCase):
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.ind.png"))
 
-class MetricsPlotTest(ModelDataSets, TestCase):
+class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
 
     @staticmethod
     def get_model(dataset, name, alg=RandomForestClassifier):
@@ -76,7 +76,7 @@ class MetricsPlotTest(ModelDataSets, TestCase):
         self.assertTrue(os.path.exists(f"{model.outDir}/metrics_f1_score.png"))
 
 
-class CorrPlotTest(ModelDataSets, TestCase):
+class CorrPlotTest(ModelDataSetsMixIn, TestCase):
 
     @staticmethod
     def get_model(dataset, name, alg=RandomForestRegressor):
