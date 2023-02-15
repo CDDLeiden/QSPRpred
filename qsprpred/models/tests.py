@@ -30,11 +30,10 @@ logging.basicConfig(level=logging.DEBUG)
 class ModelDataSets(DataSets):
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        if not os.path.exists(cls.qsprmodelspath):
-            os.makedirs(cls.qsprmodelspath)
+    def setUp(self):
+        super().setUp()
+        if not os.path.exists(self.qsprmodelspath):
+            os.makedirs(self.qsprmodelspath)
 
     @classmethod
     def clean_directories(cls):
@@ -123,7 +122,7 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
     def prep_testdata(self, task=ModelTasks.REGRESSION, th=None):
 
         # prepare test dataset
-        data = self.create_large_dataset(task=task, th=th)
+        data = self.create_large_dataset(task=task, th=th, preparation_settings=self.get_default_prep())
         data.save()
         # prepare data for torch DNN
         trainloader = DataLoader(
@@ -193,7 +192,7 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
     ])
     def test_qsprpred_model(self, _, task, alg_name, alg, th):
         # initialize dataset
-        dataset = self.create_large_dataset(task=task, th=th)
+        dataset = self.create_large_dataset(task=task, th=th, preparation_settings=self.get_default_prep())
 
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
@@ -235,7 +234,7 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
             parameters = {}
 
         # initialize dataset
-        dataset = self.create_large_dataset(task=task)
+        dataset = self.create_large_dataset(task=task, preparation_settings=self.get_default_prep())
 
         # initialize model for training from class
         model = self.get_model(
@@ -266,7 +265,7 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
             parameters.update({"probability": True})
 
         # initialize dataset
-        dataset = self.create_large_dataset(task=task, th=[0, 1, 10, 1100])
+        dataset = self.create_large_dataset(task=task, th=[0, 1, 10, 1100], preparation_settings=self.get_default_prep())
 
         # test classifier
         # initialize model for training from class
