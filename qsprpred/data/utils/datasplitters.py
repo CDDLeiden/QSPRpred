@@ -7,7 +7,8 @@ from collections import defaultdict
 
 import numpy as np
 
-from qsprpred.data.interfaces import datasplit
+from qsprpred.data.data import QSPRDataset
+from qsprpred.data.interfaces import datasplit, DataSetDependant
 from qsprpred.data.utils.scaffolds import Scaffold, Murcko
 from qsprpred.logs import logger
 from sklearn.model_selection import ShuffleSplit
@@ -27,7 +28,7 @@ class randomsplit(datasplit):
         return ShuffleSplit(1, test_size=self.test_fraction).split(X, y)
 
 
-class temporalsplit(datasplit):
+class temporalsplit(datasplit, DataSetDependant):
     """Splits dataset train and test subsets based on a threshold in time.
 
     Attributes:
@@ -36,13 +37,13 @@ class temporalsplit(datasplit):
         timecol (str): column name of column in df that contains the timepoints
     """
 
-    def __init__(self, dataset, timesplit, timeprop) -> None:
-        self.dataset = dataset
+    def __init__(self, timesplit, timeprop, dataset=None) -> None:
+        super().__init__(dataset=dataset)
         self.timesplit = timesplit
         self.timecol = timeprop
 
     def split(self, X, y):
-        df = self.dataset.getDF()
+        df = self.getDataSet().getDF()
         assert len(X) == len(df), "X and the current data in the dataset must have same length"
         indices = np.array([x for x in range(len(df))])
 
@@ -55,7 +56,7 @@ class temporalsplit(datasplit):
         return iter([(train, test)])
 
 
-class scaffoldsplit(datasplit):
+class scaffoldsplit(datasplit, DataSetDependant):
     """Splits dataset in train and test subsets based on their Murcko scaffold.
 
     Attributes:
@@ -67,26 +68,24 @@ class scaffoldsplit(datasplit):
         shuffle (bool): whether to shuffle the data or not. Defaults to True.
     """        
     def __init__(self, dataset  = None, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True) -> None:
-        self.dataset = dataset
+        super().__init__(dataset)
         self.scaffold = scaffold
         self.test_fraction = test_fraction
         self.shuffle = shuffle
 
-    def setDataSet(self, dataset):
-        self.dataset = dataset
-
     def split(self, X, y):
-        if not self.dataset:
+        dataset = self.getDataSet()
+        if not dataset:
             raise AttributeError("Dataset not set for splitter. Use 'setDataSet(dataset)' to attach it to this instance.")
 
-        self.dataset.addScaffolds([self.scaffold])
+        dataset.addScaffolds([self.scaffold])
 
         # make sure dataframe is shuffled
         if self.shuffle:
-            self.dataset.shuffle()
+            dataset.shuffle()
 
         # Find the scaffold of each smiles
-        df = self.dataset.getDF()
+        df = dataset.getDF()
         assert len(X) == len(df), "X and the current data in the dataset must have same length"
         scaffold_list = df[f"Scaffold_{self.scaffold}"]
         scaffolds = defaultdict(list)
