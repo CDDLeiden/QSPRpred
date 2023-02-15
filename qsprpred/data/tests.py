@@ -34,7 +34,7 @@ from qsprpred.data.utils.featurefilters import (
     highCorrelationFilter,
     lowVarianceFilter,
 )
-from qsprpred.data.utils.scaffolds import Murcko
+from qsprpred.data.utils.scaffolds import Murcko, BemisMurcko
 from qsprpred.logs.stopwatch import StopWatch
 from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
@@ -156,24 +156,24 @@ class DataSetsMixIn(PathMixIn):
         ]
         # interesting feature set combinations as descriptor calculators (either 1 or 2 sets at the same time)
         descriptor_calculators = [
-                                     DescriptorsCalculator(combo) for combo in itertools.combinations(
-                feature_sets, 1
-            )] + [
-                                     DescriptorsCalculator(combo) for combo in itertools.combinations(
-                feature_sets, 2
-            )]
+        DescriptorsCalculator(combo) for combo in itertools.combinations(
+            feature_sets, 1
+        )] + [
+        DescriptorsCalculator(combo) for combo in itertools.combinations(
+            feature_sets, 2
+        )]
 
         # lists with common preparation settings
         splits = [
             None,
             randomsplit(0.1),
-            scaffoldsplit(test_fraction=0.1)
+            temporalsplit(timesplit=2000,timeprop="Year of first disclosure"),
+            scaffoldsplit(test_fraction=0.1, scaffold=Murcko()),
+            scaffoldsplit(test_fraction=0.1, scaffold=BemisMurcko()),
         ]
         feature_standardizers = [
             None,
             StandardScaler(),
-            MinMaxScaler(),
-            SKLearnStandardizer(scaler=StandardScaler()),
             SKLearnStandardizer(scaler=MinMaxScaler())
         ]
         feature_filters = [
@@ -191,7 +191,8 @@ class DataSetsMixIn(PathMixIn):
         ]
 
         # grid of all combinations of the above preparation settings (passed to prepareDataset)
-        return (copy.deepcopy(combo) for combo in itertools.product(
+        return (
+        copy.deepcopy(combo) for combo in itertools.product( # deep copy to avoid conflicts resulting from operating on one instance twice
             descriptor_calculators,
             splits,
             feature_standardizers,
@@ -834,7 +835,10 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
 
         # if a split needs a dataset, give it one
         if split and hasattr(split, "setDataSet"):
+            split.setDataSet(None)
+            self.assertRaises(ValueError, split.getDataSet)
             split.setDataSet(dataset)
+            self.assertEquals(dataset, split.getDataSet())
 
         # prepare the dataset and check consistency
         dataset.prepareDataset(
