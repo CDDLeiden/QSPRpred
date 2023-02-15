@@ -132,6 +132,7 @@ class DescriptorsCalculator(Calculator):
         Args:
             descriptors: list of descriptornames with descriptorset prefix to keep
         """
+        to_remove = []
         for idx, descriptorset in enumerate(self.descsets):
             # Find all descriptors in current descriptorset
             descs_from_curr_set = [
@@ -139,17 +140,22 @@ class DescriptorsCalculator(Calculator):
                 for f in descriptors
                 if f.startswith(f"Descriptor_{descriptorset}_")
             ]
-            # if there are none to keep from current descriptors set, drop the whole set
+            # if there are none to keep from current descriptors set, skip the whole set
             if not descs_from_curr_set:
-                self.descsets.remove(descriptorset)
-            # if the set is a fingerprint, set indices to keep
-            elif descriptorset.is_fp:
+                to_remove.append(idx)
+                continue
+
+            if descriptorset.is_fp:
+                # if the set is a fingerprint, set indices to keep
                 self.descsets[idx].keepindices = [
                     f for f in descs_from_curr_set
                 ]
-            # if the set is not a fingerprint, set descriptors to keep
             else:
+                # if the set is not a fingerprint, set descriptors to keep
                 self.descsets[idx].descriptors = descs_from_curr_set
+
+        # remove all descriptorsets that are not in the list of descriptors to keep
+        self.descsets = [x for i, x in enumerate(self.descsets) if i not in to_remove]
 
     def get_len(self):
         """Return number of descriptors calculated by all descriptorsets."""
