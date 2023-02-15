@@ -755,6 +755,13 @@ class QSPRDataset(MoleculeTable):
         """Drop rows with empty target property value from the data set."""
         self.df.dropna(subset=([self.smilescol, self.targetProperty]), inplace=True)
 
+    @property
+    def hasFeatures(self):
+        """
+        Check whether the currently selected set of features is not empty.
+        """
+        return len(self.featureNames) > 0
+
     def getFeatureNames(self) -> List[str]:
         """Get current feature names for this data set.
 
@@ -780,27 +787,8 @@ class QSPRDataset(MoleculeTable):
         be empty. If descriptors are available, the resulting training matrices will be featurized.
         """
 
-        self.X = self.df
-        self.y = self.df[[self.targetProperty]]
-
-        # split data into training and independent sets if saved previously
-        if "Split_IsTrain" in self.df.columns:
-            self.X = self.df[self.df["Split_IsTrain"] == True]
-            self.X_ind = self.df[self.df["Split_IsTrain"] == False]
-            self.y = self.X[[self.targetProperty]]
-            self.y_ind = self.X_ind[[self.targetProperty]]
-        else:
-            self.X_ind = self.X.drop(self.X.index)
-            self.y_ind = self.y.drop(self.y.index)
-
-        # featurize data if descriptors are available
-        if self.hasDescriptors:
-            self.featurizeSplits()
-
-        # filter for only selected features if present
-        if self.featureNames:
-            self.X = self.X[self.featureNames]
-            self.X_ind = self.X_ind[self.featureNames]
+        self.loadDataToSplits()
+        self.featurizeSplits()
 
     def isMultiClass(self):
         """Return if model task is multi class classification."""
@@ -990,8 +978,36 @@ class QSPRDataset(MoleculeTable):
                 self.y = self.y.cat.codes
                 self.y_ind = self.y_ind.cat.codes
 
-    def featurizeSplits(self):
-        """Keep only features that will be used by the model. In our case, descriptors."""
+    def loadDataToSplits(self):
+        """
+        Loads the data frame into the train and test splits if the information is available. Otherwise, the whole data
+        set will be regarded as the training set and the test set will have zero length.
+        """
+
+        self.X = self.df
+        self.y = self.df[[self.targetProperty]]
+
+        # split data into training and independent sets if saved previously
+        if "Split_IsTrain" in self.df.columns:
+            self.X = self.df[self.df["Split_IsTrain"] == True]
+            self.X_ind = self.df[self.df["Split_IsTrain"] == False]
+            self.y = self.X[[self.targetProperty]]
+            self.y_ind = self.X_ind[[self.targetProperty]]
+        else:
+            self.X_ind = self.X.drop(self.X.index)
+            self.y_ind = self.y.drop(self.y.index)
+    def loadDescriptorsToSplits(self):
+        """
+        Loads all available descriptors into the train and test splits. If no descriptors are available, an exception
+        will be raised.
+
+        Raises:
+            ValueError: if no descriptors are available
+        """
+
+        if not self.hasDescriptors:
+            raise ValueError("No descriptors available. Cannot load descriptors to splits.")
+
         descriptors = self.getDescriptors()
         self.X = descriptors.loc[self.X.index, :]
         self.y = self.df.loc[self.y.index, [self.targetProperty]]
@@ -999,6 +1015,28 @@ class QSPRDataset(MoleculeTable):
         if self.X_ind is not None and self.y_ind is not None:
             self.X_ind = descriptors.loc[self.X_ind.index, :]
             self.y_ind = self.df.loc[self.y_ind.index, [self.targetProperty]]
+        else:
+            self.X_ind = pd.DataFrame(columns=self.X.columns)
+            self.y_ind = pd.DataFrame(columns=[self.targetProperty])
+
+    def featurizeSplits(self):
+        """
+        If the data set has descriptors, load them into the train and test splits.
+
+        If no descriptors are available, remove all features from
+        the splits They will become zero length along the feature axis (columns), but will retain their original length
+        along the sample axis (rows). This is useful for the case where the data set has no descriptors, but the user
+        wants to retain train and test splits.
+
+        """
+        if self.featureNames:
+            self.loadDescriptorsToSplits()
+            self.X = self.X[self.featureNames]
+            self.X_ind = self.X_ind[self.featureNames]
+        else:
+            self.X = self.X.drop(self.X.columns, axis=1)
+            self.X_ind = self.X_ind.drop(self.X_ind.columns, axis=1)
+
 
     def fillMissing(self, fill_value: float, columns: List[str] = None):
         """
@@ -1020,7 +1058,7 @@ class QSPRDataset(MoleculeTable):
         Args:
             feature_filters (List[Callable]): list of feature filter functions that take X feature matrix and y target vector as arguments
         """
-        if self.X is None and self.X.shape[1] == 0:
+        if not self.hasFeatures:
             raise ValueError("No features to filter")
 
         if self.X.shape[1] == 1:
@@ -1030,7 +1068,7 @@ class QSPRDataset(MoleculeTable):
             for featurefilter in feature_filters:
                 self.X = featurefilter(self.X, self.y)
 
-            self.featureNames = self.X.columns
+            self.featureNames = self.X.columns.to_list()
             if self.X_ind is not None:
                 self.X_ind = self.X_ind[self.featureNames]
             logger.info(f"Selected features: {self.featureNames}")
@@ -1151,6 +1189,16 @@ class QSPRDataset(MoleculeTable):
         """
         return Folds(self.getDefaultFoldSplit(), self.feature_standardizer)
 
+    def checkFeatures(self):
+        if not self.hasDescriptors:
+            raise ValueError("No descriptors exist in the data set. Cannot create folds.")
+        elif not self.hasFeatures:
+            raise ValueError("No features exist in the data set. Cannot create folds.")
+        elif self.X.shape[0] != self.y.shape[0]:
+            raise ValueError(f"X and y have different number of rows: {self.X.shape[0]} != {self.y.shape[0]}")
+        elif self.X.shape[0] == 0:
+            raise ValueError("X has no rows.")
+
     def createFolds(self, split: datasplit = None):
         """
         Create folds for cross validation.
@@ -1159,11 +1207,7 @@ class QSPRDataset(MoleculeTable):
             split (datasplit, optional): split to use for creating folds. Defaults to None.
         """
 
-        if self.X is None:
-            if not self.hasDescriptors:
-                raise ValueError("No training data and descriptors present. Cannot create folds.")
-            else:
-                self.restoreTrainingData()
+        self.checkFeatures()
 
         if split is None and not self.fold_generator:
             self.fold_generator = self.getDefaultFoldGenerator()
@@ -1196,6 +1240,7 @@ class QSPRDataset(MoleculeTable):
                 training models that do not require separate training and test sets (i.e. the final optimized models).
             raw (bool): If `True`, the raw feature matrices will be returned without any standardization applied.
         """
+        self.checkFeatures()
 
         if concat:
             df_X = pd.concat([self.X[self.featureNames], self.X_ind[self.featureNames]], axis=0)
