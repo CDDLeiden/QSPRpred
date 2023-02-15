@@ -37,6 +37,7 @@ from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
 from rdkit import Chem
 from rdkit.Chem import Descriptors
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 N_CPU = 2
@@ -79,18 +80,18 @@ class DataSets(PathMixIn):
         sep='\t').sample(10)
 
     def create_dataset(self, df, name="QSPRDataset_test", target_props=[
-                       {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
+                       {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}], target_imputer=None):
         return QSPRDataset(
             name, target_props=target_props, df=df,
-            store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+            store_dir=self.qsprdatapath, target_imputer=target_imputer, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
 
     def create_small_dataset(self, name="QSPRDataset_test", target_props=[
-                             {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
-        return self.create_dataset(self.df_small, name, target_props=target_props)
+                             {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}], target_imputer=None):
+        return self.create_dataset(self.df_small, name, target_props=target_props, target_imputer=target_imputer)
 
     def create_large_dataset(self, name="QSPRDataset_test", target_props=[
-                             {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
-        return self.create_dataset(self.df_large, name, target_props=target_props)
+                             {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}], target_imputer=None):
+        return self.create_dataset(self.df_large, name, target_props=target_props, target_imputer=target_imputer)
 
 
 class StopWatch:
@@ -548,6 +549,38 @@ class TestDataFilters(DataSets, TestCase):
         df_cation = only_cation(self.df_large)
         self.assertTrue(
             (df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
+
+
+class TestTargetImputation(PathMixIn, TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.descriptors = ["Descriptor_F1", "Descriptor_F2", "Descriptor_F3", "Descriptor_F4", "Descriptor_F5"]
+        self.df = pd.DataFrame(
+            data=np.array(
+                [["C", 1, 4, 2, 6, 2, 1, 2],
+                 ["C", 1, 8, 4, 2, 4, 1, 2],
+                 ["C", 1, 4, 3, 2, 5, 1, np.NaN],
+                 ["C", 1, 8, 4, 9, 8, 2, 2],
+                 ["C", 1, 4, 2, 3, 9, 2, 2],
+                 ["C", 1, 8, 4, 7, 12, 2, 2]]),
+            columns=["SMILES"] + self.descriptors + ["y", "z"]
+        )
+
+    def test_imputation(self):
+        self.dataset = QSPRDataset(
+            "TestImputation",
+            target_props=[{"name": "y", "task": ModelTasks.REGRESSION}, {"name": "z", "task": ModelTasks.REGRESSION}],
+            df=self.df,
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+            target_imputer=SimpleImputer(strategy="mean"))
+        self.assertEqual(self.dataset.targetProperties[0].originalName, "y")
+        self.assertEqual(self.dataset.targetProperties[1].originalName, "z")
+        self.assertEqual(self.dataset.targetProperties[0].name, "y_imputed")
+        self.assertEqual(self.dataset.targetProperties[1].name, "z_imputed")
+        self.assertEqual(self.dataset.df["z_imputed"].isna().sum(), 0)
 
 
 class TestFeatureFilters(PathMixIn, TestCase):

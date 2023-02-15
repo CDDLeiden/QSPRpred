@@ -787,6 +787,7 @@ class QSPRDataset(MoleculeTable):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
+        target_imputer: Callable = None
     ):
         """Construct QSPRdata, also apply transformations of output property if specified.
 
@@ -807,6 +808,7 @@ class QSPRDataset(MoleculeTable):
             chunk_size (int, optional): chunk size for parallel processing. Defaults to 50.
             drop_invalids (bool, optional): if true, invalid SMILES will be dropped. Defaults to True.
             drop_empty (bool, optional): if true, rows with empty target property will be removed.
+            target_imputer (Callable, optional): imputer for missing target property values. Defaults to None.
 
         Raises:
             ValueError: Raised if threshold given with non-classification task.
@@ -831,9 +833,13 @@ class QSPRDataset(MoleculeTable):
             self.feature_standardizer = None
         self.fold_generator = self.getDefaultFoldGenerator()
 
-        # drop rows with empty target property value
+        # drop rows with missing smiles or no target property value for all target properties
         if drop_empty:
             self.dropEmpty()
+
+        # impute missing target property values
+        if target_imputer is not None:
+            self.imputeTargetProperties(target_imputer)
 
         # populate feature matrix and target property array
         self.X = None
@@ -912,6 +918,17 @@ class QSPRDataset(MoleculeTable):
         """Drop rows with empty target property value from the data set."""
         self.df.dropna(subset=([self.smilescol]), inplace=True)
         self.df.dropna(subset=(self.targetPropertyNames), how='all', inplace=True)
+
+    def imputeTargetProperties(self, imputer):
+        """Impute missing target property values.
+
+        Args:
+            imputer: imputer object, should have a fit and transform method.
+        """
+        names = self.targetPropertyNames
+        for idx, target_prop in enumerate(self.targetProperties):
+            self.targetProperties[idx].name = f"{target_prop.name}_imputed"
+        self.df[self.targetPropertyNames] = imputer.fit_transform(self.df[names])
 
     def getFeatureNames(self) -> List[str]:
         """Get current feature names for this data set.
@@ -1245,8 +1262,8 @@ class QSPRDataset(MoleculeTable):
         feature_calculator=None,
         feature_filters=None,
         feature_standardizer=None,
-        recalculate_features=False,
-        fill_value=np.nan
+        feature_fill_value=np.nan,
+        recalculate_features=False
     ):
         """Prepare the dataset for use in QSPR model.
 
@@ -1260,7 +1277,8 @@ class QSPRDataset(MoleculeTable):
             feature_filters (list of feature filter objs): filters features
             feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator): standardizes and/or scales features
             recalculate_features (bool): recalculate features even if they are already present in the file
-            fill_value (float): value to fill missing values with, defaults to `numpy.nan`
+            targetproperties_imputation (str): imputation strategy for missing target properties
+            feature_fill_value (float): value to fill missing values with, defaults to `numpy.nan`
         """
         # apply sanitization and standardization
         if standardize:
@@ -1277,8 +1295,8 @@ class QSPRDataset(MoleculeTable):
         # Replace any NaN values in featureNames by 0
         # FIXME: this is not very good, we should probably add option to do custom
         # data imputation here or drop rows with NaNs
-        if fill_value is not None:
-            self.fillMissing(fill_value)
+        if feature_fill_value is not None:
+            self.fillMissing(feature_fill_value)
 
         # split dataset
         if split is not None:
