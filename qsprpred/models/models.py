@@ -76,7 +76,9 @@ class QSPRsklearn(QSPRModel):
         self.checkForData()
 
         X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargetPropertiesValues(concat=True).values.ravel()
+        y_all = self.data.getTargetPropertiesValues(concat=True)
+        if not self.data.isMultiTask:
+            y_all = y_all.ravel()
 
         fit_set = {'X': X_all}
 
@@ -127,7 +129,10 @@ class QSPRsklearn(QSPRModel):
                     type(self.alg).__name__ == 'PLSRegression'):
                 fit_set['Y'] = y_train.ravel()
             else:
-                fit_set['y'] = y_train.ravel()
+                if self.data.isMultiTask:
+                    fit_set['y'] = y_train
+                else:
+                    fit_set['y'] = y_train.ravel()
             self.model.fit(**fit_set)
 
             if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
@@ -154,7 +159,10 @@ class QSPRsklearn(QSPRModel):
         if type(self.model).__name__ == 'PLSRegression':
             fit_set['Y'] = y.values.ravel()
         else:
-            fit_set['y'] = y.values.ravel()
+            if self.data.isMultiTask:
+                fit_set['y'] = y
+            else:
+                fit_set['y'] = y.ravel()
 
         self.model.fit(**fit_set)
 
@@ -162,8 +170,8 @@ class QSPRsklearn(QSPRModel):
             preds = self.model.predict(X_ind)
             # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
             if preds.ndim == 1:
-                preds = preds
-            inds = preds.reshape(-1, 1)
+                preds = preds.reshape(-1, 1)
+            inds = preds
         else:
             # for the multiclass-multioutput case predict_proba returns a list of
             # arrays, otherwise a single array is returned

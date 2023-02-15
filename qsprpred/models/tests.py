@@ -22,6 +22,7 @@ from qsprpred.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.impute import SimpleImputer
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.preprocessing import StandardScaler
@@ -67,13 +68,13 @@ class ModelDataSets(DataSets):
         return dataset
 
     def create_large_dataset(self, name="QSPRDataset_test", target_props=[
-            {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
-        dataset = super().create_large_dataset(name=name, target_props=target_props)
+            {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}], target_imputer=None):
+        dataset = super().create_large_dataset(name=name, target_props=target_props, target_imputer=target_imputer)
         return self.prepare(dataset)
 
     def create_small_dataset(self, name="QSPRDataset_test", target_props=[
-            {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}]):
-        dataset = super().create_small_dataset(name=name, target_props=target_props)
+            {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}], target_imputer=None):
+        dataset = super().create_small_dataset(name=name, target_props=target_props, target_imputer=target_imputer)
         return self.prepare(dataset)
 
 
@@ -112,7 +113,7 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_calculator_path']}"))
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_standardizer_path']}"))
 
-    def predictor_test(self, model_name, base_dir, cls: QSPRModel = QSPRsklearn):
+    def predictor_test(self, model_name, base_dir, cls: QSPRModel = QSPRsklearn, n_tasks=1):
         # initialize model as predictor
         predictor = cls(name=model_name, base_dir=base_dir)
 
@@ -324,3 +325,67 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
         )
         self.fit_test(model)
         self.predictor_test(f"{model_name}_{task}", model.baseDir)
+
+    @parameterized.expand([
+        (alg_name, alg_name, alg)
+        for alg, alg_name in (
+            (RandomForestRegressor, "RFR"),
+            (KNeighborsRegressor, "KNNR"),
+        )
+    ])
+    def test_regression_multitask_fit(self, _, model_name, model_class):
+        if not model_name in ["NB", "SVC"]:
+            parameters = {"n_jobs": N_CPUS}
+        else:
+            parameters = {}
+
+        if model_name == "SVC":
+            parameters.update({"probability": True})
+
+        # initialize dataset
+        dataset = self.create_large_dataset(target_props=[{"name": "fu", "task": ModelTasks.REGRESSION}, {
+                                            "name": "CL", "task": ModelTasks.REGRESSION}],
+                                            target_imputer=SimpleImputer(strategy='mean'))
+
+        # test classifier
+        # initialize model for training from class
+        model = self.get_model(
+            name=f"{model_name}_multitask_regression",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters
+        )
+        self.fit_test(model)
+        self.predictor_test(f"{model_name}_multitask_regression", model.baseDir)
+
+    @parameterized.expand([
+        (alg_name, alg_name, alg)
+        for alg, alg_name in (
+            (RandomForestClassifier, "RFC"),
+            (KNeighborsClassifier, "KNNC"),
+        )
+    ])
+    def test_classification_multitask_fit(self, _, model_name, model_class):
+        if not model_name in ["NB", "SVC"]:
+            parameters = {"n_jobs": N_CPUS}
+        else:
+            parameters = {}
+
+        if model_name == "SVC":
+            parameters.update({"probability": True})
+
+        # initialize dataset
+        dataset = self.create_large_dataset(target_props=[{"name": "fu", "task": ModelTasks.SINGLECLASS, "th": [0.3]}, {
+                                            "name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]}],
+                                            target_imputer=SimpleImputer(strategy='mean'))
+
+        # test classifier
+        # initialize model for training from class
+        model = self.get_model(
+            name=f"{model_name}_multitask_classification",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters
+        )
+        self.fit_test(model)
+        self.predictor_test(f"{model_name}_multitask_classification", model.baseDir)
