@@ -10,12 +10,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 import torch
-from parameterized import parameterized
-from qsprpred.data.tests import DataSets
-from qsprpred.data.utils.datasplitters import randomsplit
-from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
-from qsprpred.data.utils.descriptorsets import FingerprintSet
-from qsprpred.data.utils.featurefilters import highCorrelationFilter, lowVarianceFilter
+from qsprpred.data.tests import DataSetsMixIn
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
@@ -25,7 +20,6 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC, SVR
 from torch.utils.data import DataLoader, TensorDataset
 from xgboost import XGBClassifier, XGBRegressor
@@ -37,45 +31,17 @@ logging.basicConfig(level=logging.DEBUG)
 
 class ModelDataSets(DataSets):
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
-    preparation = {
-        "feature_calculator": DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]),
-        "split": randomsplit(0.1),
-        "feature_standardizer": StandardScaler(),
-        "feature_filters": [
-            lowVarianceFilter(0.05),
-            highCorrelationFilter(0.8)
-        ],
-    }
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        if not os.path.exists(cls.qsprmodelspath):
-            os.makedirs(cls.qsprmodelspath)
+    def setUp(self):
+        super().setUp()
+        if not os.path.exists(self.qsprmodelspath):
+            os.makedirs(self.qsprmodelspath)
 
     @classmethod
     def clean_directories(cls):
         super().clean_directories()
         if os.path.exists(cls.qsprmodelspath):
             shutil.rmtree(cls.qsprmodelspath)
-
-    @staticmethod
-    def prepare(dataset):
-        dataset.prepareDataset(
-            **ModelDataSets.preparation,
-        )
-
-        return dataset
-
-    def create_large_dataset(self, name="QSPRDataset_test", target_props=[
-            {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}], target_imputer=None):
-        dataset = super().create_large_dataset(name=name, target_props=target_props, target_imputer=target_imputer)
-        return self.prepare(dataset)
-
-    def create_small_dataset(self, name="QSPRDataset_test", target_props=[
-            {"name": 'CL', "task": "ModelTasks.REGRESSION", "th": "None"}], target_imputer=None):
-        dataset = super().create_small_dataset(name=name, target_props=target_props, target_imputer=target_imputer)
-        return self.prepare(dataset)
 
 
 class ModelTestMixIn:
@@ -147,7 +113,7 @@ class ModelTestMixIn:
             self.assertIsInstance(predictions[0], numbers.Number)
 
 
-class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
+class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @staticmethod
     def get_model(name, alg=None, dataset=None, parameters=None):
@@ -166,7 +132,7 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
     def prep_testdata(self, task=ModelTasks.REGRESSION, th=None):
 
         # prepare test dataset
-        data = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": th}])
+        data = self.create_large_dataset(task=task, th=th, preparation_settings=self.get_default_prep())
         data.save()
         # prepare data for torch DNN
         trainloader = DataLoader(
@@ -236,7 +202,7 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
     ])
     def test_qsprpred_model(self, _, task, alg_name, alg, th):
         # initialize dataset
-        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": th}])
+        dataset = self.create_large_dataset(task=task, th=th, preparation_settings=self.get_default_prep())
 
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
@@ -249,7 +215,7 @@ class NeuralNet(ModelDataSets, ModelTestMixIn, TestCase):
         self.predictor_test(alg_name, model.baseDir, QSPRDNN)
 
 
-class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
+class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @staticmethod
     def get_model(name, alg=None, dataset=None, parameters=None):
@@ -279,7 +245,7 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
             parameters = {}
 
         # initialize dataset
-        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task}])
+        dataset = self.create_large_dataset(task=task, preparation_settings=self.get_default_prep())
 
         # initialize model for training from class
         model = self.get_model(
@@ -313,7 +279,9 @@ class TestQSPRsklearn(ModelDataSets, ModelTestMixIn, TestCase):
             parameters.update({"probability": True})
 
         # initialize dataset
-        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": th}])
+        dataset = self.create_large_dataset(
+            task=task, th=[0, 1, 10, 1100],
+            preparation_settings=self.get_default_prep())
 
         # test classifier
         # initialize model for training from class

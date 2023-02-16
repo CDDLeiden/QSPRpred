@@ -12,13 +12,13 @@ from matplotlib.axes import SubplotBase
 from matplotlib.figure import Figure
 from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
-from qsprpred.models.tests import ModelDataSets
+from qsprpred.models.tests import ModelDataSetsMixIn
 from qsprpred.plotting.classification import MetricsPlot, ROCPlot
 from qsprpred.plotting.regression import CorrelationPlot
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 
-class ROCPlotTest(ModelDataSets, TestCase):
+class ROCPlotTest(ModelDataSetsMixIn, TestCase):
 
     @staticmethod
     def get_model(dataset, name, alg=RandomForestClassifier):
@@ -30,7 +30,11 @@ class ROCPlotTest(ModelDataSets, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_roc_plot_single_data", task=ModelTasks.SINGLECLASS, th=[50])
+        dataset = self.create_large_dataset(
+            "test_roc_plot_single_data",
+            task=ModelTasks.CLASSIFICATION,
+            th=[50],
+            preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_roc_plot_single_model")
         model.evaluate(save=True)
         model.save()
@@ -48,7 +52,7 @@ class ROCPlotTest(ModelDataSets, TestCase):
         self.assertTrue(os.path.exists(f"{model.outPrefix}.ind.png"))
 
 
-class MetricsPlotTest(ModelDataSets, TestCase):
+class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
 
     @staticmethod
     def get_model(dataset, name, alg=RandomForestClassifier):
@@ -60,7 +64,11 @@ class MetricsPlotTest(ModelDataSets, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_metrics_plot_single_data", task=ModelTasks.SINGLECLASS, th=[50])
+        dataset = self.create_large_dataset(
+            "test_metrics_plot_single_data",
+            task=ModelTasks.CLASSIFICATION,
+            th=[50],
+            preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_metrics_plot_single_model")
         model.evaluate(save=True)
         model.save()
@@ -76,7 +84,7 @@ class MetricsPlotTest(ModelDataSets, TestCase):
         self.assertTrue(os.path.exists(f"{model.outDir}/metrics_f1_score.png"))
 
 
-class CorrPlotTest(ModelDataSets, TestCase):
+class CorrPlotTest(ModelDataSetsMixIn, TestCase):
 
     @staticmethod
     def get_model(dataset, name, alg=RandomForestRegressor):
@@ -88,7 +96,7 @@ class CorrPlotTest(ModelDataSets, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_corr_plot_single_data")
+        dataset = self.create_large_dataset("test_corr_plot_single_data", preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_corr_plot_single_model")
         model.evaluate(save=True)
         model.save()
