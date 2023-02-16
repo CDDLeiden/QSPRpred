@@ -170,9 +170,9 @@ def QSPR_dataprep(args):
 
             # data splitter
             if args.split == 'scaffold':
-                split = scaffoldsplit(mydataset, test_fraction=args.split_fraction, scaffold=Murcko())
+                split = scaffoldsplit(test_fraction=args.split_fraction, scaffold=Murcko(), dataset=mydataset)
             elif args.split == 'temporal':
-                split = temporalsplit(mydataset, timesplit=args.split_time, timeprop=args.split_timecolumn)
+                split = temporalsplit(timesplit=args.split_time, timeprop=args.split_timecolumn, dataset=mydataset)
             else:
                 split = randomsplit(test_fraction=args.split_fraction)
 

@@ -1135,6 +1135,8 @@ class QSPRDataset(MoleculeTable):
 
         # split dataset
         if split is not None:
+            if hasattr(split, "setDataSet") and not split.getDataSet():
+                split.setDataSet(self)
             self.split(split)
         else:
             self.X = self.df
