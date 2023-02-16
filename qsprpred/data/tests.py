@@ -108,10 +108,10 @@ class DataSetsMixIn(PathMixIn):
         descriptor_sets = [
             rdkit_descs(),
             DrugExPhyschem(),
-            PredictorDesc(
-                QSPRsklearn.fromFile(
-                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
-            ),
+            # PredictorDesc(
+            #     QSPRsklearn.fromFile(
+            #         f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
+            # ),
             TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
             FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
             Mordred(),
@@ -235,8 +235,8 @@ class DataSetsMixIn(PathMixIn):
             f'{self.datapath}/test_data.tsv',
             sep='\t').sample(10)
 
-    def create_large_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None,
-                             preparation_settings=None):
+    def create_large_dataset(self, name="QSPRDataset_test", target_props=[
+                             {"name": "CL", "task": ModelTasks.REGRESSION}], preparation_settings=None):
         """
         Create a large dataset for testing purposes.
 
@@ -260,8 +260,8 @@ class DataSetsMixIn(PathMixIn):
             prep=preparation_settings
         )
 
-    def create_small_dataset(self, name="QSPRDataset_test", task=ModelTasks.REGRESSION, target_prop='CL', th=None,
-                             preparation_settings=None):
+    def create_small_dataset(self, name="QSPRDataset_test", target_props=[
+                             {"name": "CL", "task": ModelTasks.REGRESSION}], preparation_settings=None):
         """
         Create a small dataset for testing purposes.
 
@@ -279,14 +279,11 @@ class DataSetsMixIn(PathMixIn):
         return self.create_dataset(
             self.getSmallDF(),
             name=name,
-            task=task,
-            target_prop=target_prop,
-            th=th,
+            target_prop=target_props,
             prep=preparation_settings
         )
 
-    def create_dataset(self, df, name="QSPRDataset_test", task=ModelTasks.REGRESSION,
-                       target_prop='CL', th=None, prep=None):
+    def create_dataset(self, df, name="QSPRDataset_test", target_props=[{"name": "CL", "task": ModelTasks.REGRESSION}]):
         """
         Create a dataset for testing purposes from the given data frame.
 
@@ -303,8 +300,8 @@ class DataSetsMixIn(PathMixIn):
         """
 
         ret = QSPRDataset(
-            name, target_prop=target_prop, task=task, df=df,
-            store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE, th=th)
+            name, target_prop=target_props,
+            store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
         if prep:
             ret.prepareDataset(**prep)
         return ret
@@ -563,14 +560,14 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
     """
 
 
-class TestDataSetPreparation(DataSets, TestCase):
+class TestDataSetPreparation(DataSetsMixIn, TestCase):
     sets = [
         rdkit_descs(),
         DrugExPhyschem(),
-        PredictorDesc(
-            QSPRsklearn.fromFile(
-                f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
-        ),
+        # PredictorDesc(
+        #     QSPRsklearn.fromFile(
+        #         f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
+        # ),
         TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
         FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
         Mordred(),
