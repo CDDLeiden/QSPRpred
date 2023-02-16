@@ -117,7 +117,7 @@ class DataSetsMixIn(PathMixIn):
         ]
         if platform.system() != "Linux":
             # FIXME: Java-based descriptors do not run on Linux
-            descriptor_sets.append([
+            descriptor_sets.extend([
                 FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
                 FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
                 FingerprintSet(fingerprint_type="CDKEStatedFP"),
