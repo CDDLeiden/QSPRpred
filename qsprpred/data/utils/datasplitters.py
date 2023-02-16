@@ -67,7 +67,7 @@ class scaffoldsplit(datasplit, DataSetDependant):
         test_fraction (float): fraction of the test set. Defaults to 0.1.
         shuffle (bool): whether to shuffle the data or not. Defaults to True.
     """        
-    def __init__(self, dataset  = None, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True) -> None:
+    def __init__(self, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True, dataset=None) -> None:
         super().__init__(dataset)
         self.scaffold = scaffold
         self.test_fraction = test_fraction
