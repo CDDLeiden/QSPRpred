@@ -64,7 +64,7 @@ class QSPRsklearn(QSPRModel):
         X_all = self.data.getFeatures(concat=True).values
         y_all = self.data.getTargetPropertiesValues(concat=True)
         if not self.data.isMultiTask:
-            y_all = y_all.ravel()
+            y_all = y_all.values.ravel()
 
         fit_set = {'X': X_all}
 
@@ -84,7 +84,6 @@ class QSPRsklearn(QSPRModel):
         arguments:
             save (bool): don't save predictions when used in bayesian optimization
         """
-
         # check if data is available
         self.checkForData()
 
@@ -148,7 +147,7 @@ class QSPRsklearn(QSPRModel):
             if self.data.isMultiTask:
                 fit_set['y'] = y
             else:
-                fit_set['y'] = y.ravel()
+                fit_set['y'] = y.values.ravel()
 
         self.model.fit(**fit_set)
 
@@ -179,7 +178,7 @@ class QSPRsklearn(QSPRModel):
                     # add probability columns to train and test set
                     train = pd.concat([train.reset_index(drop=True), pd.DataFrame(
                         cvs[idx]).add_prefix(f'{prop.name}_ProbabilityClass_')], axis=1)
-                    test = pd.concat([test, pd.DataFrame(inds[idx]).add_prefix(
+                    test = pd.concat([test.reset_index(drop=True), pd.DataFrame(inds[idx]).add_prefix(
                         f'{prop.name}_ProbabilityClass_')], axis=1)
                 else:
                     train[f'{prop.name}_Prediction'], test[f'{prop.name}_Prediction'] = cvs[:, idx], inds[:, idx]

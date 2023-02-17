@@ -227,10 +227,11 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+    """This class holds the tests for the QSPRsklearn class."""
 
     @staticmethod
     def get_model(name, alg=None, dataset=None, parameters=None):
-        # intialize dataset and model
+        """intialize dataset and model."""
         return QSPRsklearn(
             base_dir=f'{os.path.dirname(__file__)}/test_files/',
             alg=alg,
@@ -257,7 +258,9 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters = {}
 
         # initialize dataset
-        dataset = self.create_large_dataset(task=task, preparation_settings=self.get_default_prep())
+        dataset = self.create_large_dataset(
+            target_props=[{"name": 'CL', "task": task}],
+            preparation_settings=self.get_default_prep())
 
         # initialize model for training from class
         model = self.get_model(
@@ -292,7 +295,9 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters.update({"probability": True})
 
         # initialize dataset
-        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": th}])
+        dataset = self.create_large_dataset(
+            target_props=[{"name": 'CL', "task": task, "th": th}],
+            preparation_settings=self.get_default_prep())
 
         # test classifier
         # initialize model for training from class
@@ -325,7 +330,8 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         # initialize dataset
         dataset = self.create_large_dataset(target_props=[{"name": "fu", "task": ModelTasks.REGRESSION}, {
                                             "name": "CL", "task": ModelTasks.REGRESSION}],
-                                            target_imputer=SimpleImputer(strategy='mean'))
+                                            target_imputer=SimpleImputer(strategy='mean'),
+                                            preparation_settings=self.get_default_prep())
 
         # test classifier
         # initialize model for training from class
@@ -358,7 +364,8 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         # initialize dataset
         dataset = self.create_large_dataset(target_props=[{"name": "fu", "task": ModelTasks.SINGLECLASS, "th": [0.3]}, {
                                             "name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]}],
-                                            target_imputer=SimpleImputer(strategy='mean'))
+                                            target_imputer=SimpleImputer(strategy='mean'),
+                                            preparation_settings=self.get_default_prep())
 
         # test classifier
         # initialize model for training from class

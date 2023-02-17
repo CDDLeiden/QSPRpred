@@ -366,9 +366,7 @@ class QSPRModel(ABC):
 
     @abstractmethod
     def loadModel(self, alg: Union[Type, object] = None, params: dict = None):
-        """
-
-        Initialize model instance with the given parameters. If no algorithm is given, the model is loaded from file based on available metadata. If no parameters are given, they are also loaded from the available file.
+        """Initialize model instance with the given parameters. If no algorithm is given, the model is loaded from file based on available metadata. If no parameters are given, they are also loaded from the available file.
 
         Arguments:
             alg (object): algorithm class to instantiate
@@ -378,8 +376,7 @@ class QSPRModel(ABC):
 
     @abstractmethod
     def saveModel(self) -> str:
-        """
-        Save the underlying model to file.
+        """Save the underlying model to file.
 
         Returns:
             str: path to the saved model
@@ -388,8 +385,7 @@ class QSPRModel(ABC):
 
     @abstractmethod
     def predict(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
-        """
-        Make predictions for the given data matrix or `QSPRDataset`.
+        """Make predictions for the given data matrix or `QSPRDataset`.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predictions for
@@ -397,29 +393,24 @@ class QSPRModel(ABC):
         Returns:
             np.ndarray: an array of predictions, can be a 1D array for single target models or a 2D/3D array for multi-target/multi-class models
         """
-
         pass
 
     @abstractmethod
     def predictProba(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
-        """
-        Make predictions for the given data matrix or `QSPRDataset`, but use probabilities for classification models.
+        """Make predictions for the given data matrix or `QSPRDataset`, but use probabilities for classification models.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predictions for
         """
-
         pass
 
     def predictMols(self, mols: List[str], use_probas: bool = False):
-        """
-        Make predictions for the given molecules.
+        """Make predictions for the given molecules.
 
         Args:
             mols (List[str]): list of SMILES strings
             use_probas (bool): use probabilities for classification models
         """
-
         dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False)
         for targetproperty in self.targetProperties:
             dataset.addProperty(targetproperty.name, np.nan)
@@ -456,21 +447,16 @@ class QSPRModel(ABC):
 
     @classmethod
     def fromFile(cls, path):
-        """
-        Load a model from its meta file.
+        """Load a model from its meta file.
 
         Args:
             path (str): full path to the model meta file
         """
-
         name = cls.readMetadata(path)['name']
         dir_name = os.path.dirname(path).replace(f"qspr/models/{name}", "")
         return cls(name=name, base_dir=dir_name)
 
     def cleanFiles(self):
-        """
-        Clean up the model files. Removes the model directory and all its contents.
-        """
-
+        """Clean up the model files. Removes the model directory and all its contents."""
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)

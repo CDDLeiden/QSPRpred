@@ -229,7 +229,8 @@ class DataSetsMixIn(PathMixIn):
             sep='\t').sample(10)
 
     def create_large_dataset(self, name="QSPRDataset_test", target_props=[
-                             {"name": "CL", "task": ModelTasks.REGRESSION}], preparation_settings=None):
+                             {"name": "CL", "task": ModelTasks.REGRESSION}], target_imputer=None,
+                             preparation_settings=None):
         """Create a large dataset for testing purposes.
 
         Args:
@@ -244,11 +245,13 @@ class DataSetsMixIn(PathMixIn):
             self.getBigDF(),
             name=name,
             target_props=target_props,
+            target_imputer=target_imputer,
             prep=preparation_settings
         )
 
     def create_small_dataset(self, name="QSPRDataset_test", target_props=[
-                             {"name": "CL", "task": ModelTasks.REGRESSION}], preparation_settings=None):
+                             {"name": "CL", "task": ModelTasks.REGRESSION}], target_imputer=None,
+                               preparation_settings=None):
         """Create a small dataset for testing purposes.
 
         Args:
@@ -263,11 +266,12 @@ class DataSetsMixIn(PathMixIn):
             self.getSmallDF(),
             name=name,
             target_props=target_props,
+            target_imputer=target_imputer,
             prep=preparation_settings
         )
 
     def create_dataset(self, df, name="QSPRDataset_test", target_props=[
-                       {"name": "CL", "task": ModelTasks.REGRESSION}], prep=None):
+                       {"name": "CL", "task": ModelTasks.REGRESSION}], target_imputer=None, prep=None):
         """Create a dataset for testing purposes from the given data frame.
 
         Args:
@@ -281,7 +285,7 @@ class DataSetsMixIn(PathMixIn):
         """
         ret = QSPRDataset(
             name, target_props=target_props, df=df,
-            store_dir=self.qsprdatapath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+            store_dir=self.qsprdatapath, target_imputer=target_imputer, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
         if prep:
             ret.prepareDataset(**prep)
         return ret
