@@ -75,9 +75,7 @@ class QSPRModel(ABC):
         self.featureCalculator = self.data.descriptorCalculator if self.data else self.readDescriptorCalculator(os.path.join(self.baseDir, self.metaInfo['feature_calculator_path']))
 
         # initialize a standardizer instance
-        self.featureStandardizer = self.data.feature_standardizer if self.data else self.readStandardizer(os.path.join(self.baseDir, self.metaInfo['feature_standardizer_path']))
-        if self.featureStandardizer and not isinstance(self.featureStandardizer, SKLearnStandardizer):
-            self.featureStandardizer = SKLearnStandardizer(self.featureStandardizer)
+        self.featureStandardizer = self.data.feature_standardizer if self.data else self.readStandardizer(os.path.join(self.baseDir, self.metaInfo['feature_standardizer_path'])) if self.metaInfo['feature_standardizer_path'] else None
 
         # initialize a model instance with the given parameters
         self.alg = alg

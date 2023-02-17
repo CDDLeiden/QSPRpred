@@ -79,6 +79,32 @@ class MoleculeDataSet(DataSet):
     def fromFile(filename) -> 'MoleculeDataSet':
         pass
 
+
+class DataSetDependant(ABC):
+    """
+    Classes that need a data set to operate have to implement this.
+    """
+
+    def __init__(self, dataset) -> None:
+        self.dataset = dataset
+
+    def setDataSet(self, dataset : MoleculeDataSet):
+        """
+        Set the data sets.
+        """
+
+        self.dataset = dataset
+
+    @property
+    def hasDataSet(self):
+        return self.dataset is not None
+
+    def getDataSet(self):
+        if self.hasDataSet:
+            return self.dataset
+        else:
+            raise ValueError("Data set not set.")
+
 class datasplit(ABC):
     """Defines a function split a dataframe into train and test set."""
 

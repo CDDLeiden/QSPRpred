@@ -1,7 +1,7 @@
 """This module is used for calculating molecular descriptors using descriptorsets."""
 import json
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
@@ -12,15 +12,14 @@ class Calculator(ABC):
     """Calculator for molecule properties."""
 
     @abstractmethod
-    def __call__(self, mols: List[Mol]) -> pd.DataFrame:
+    def __call__(self, mols: List[Union[Mol, str]]) -> pd.DataFrame:
         """Calculate all specified descriptors for a list of rdkit mols.
 
         Args:
-            df: dataframe containing a column with SMILES
-
+            mols: list of rdkit mols or smiles strings
 
         Returns:
-            df: original dataframe with added descriptor columns
+            a numpy array with the calculated descriptors of shape (n_mols, n_descriptors)
         """
         pass
 
@@ -62,6 +61,9 @@ class DescriptorsCalculator(Calculator):
 
     __in__ = __contains__ = lambda self, x: x in self.descsets
 
+    def __str__(self):
+        return f"{self.__class__.__name__}_{'_'.join([str(x) for x in self.descsets])}"
+
     @classmethod
     def fromFile(cls, fname: str):
         """Initialize descriptorset from a json file.
@@ -74,6 +76,8 @@ class DescriptorsCalculator(Calculator):
 
         descsets = []
         for key, value in descset_dict.items():
+            if key.startswith("FingerprintSet_"):
+                key = "FingerprintSet"
             descset = get_descriptor(key, **value["settings"])
             if descset.is_fp:
                 descset.keepindices = value["keepindices"]
@@ -128,6 +132,7 @@ class DescriptorsCalculator(Calculator):
         Args:
             descriptors: list of descriptornames with descriptorset prefix to keep
         """
+        to_remove = []
         for idx, descriptorset in enumerate(self.descsets):
             # Find all descriptors in current descriptorset
             descs_from_curr_set = [
@@ -135,17 +140,22 @@ class DescriptorsCalculator(Calculator):
                 for f in descriptors
                 if f.startswith(f"Descriptor_{descriptorset}_")
             ]
-            # if there are none to keep from current descriptors set, drop the whole set
+            # if there are none to keep from current descriptors set, skip the whole set
             if not descs_from_curr_set:
-                self.descsets.remove(descriptorset)
-            # if the set is a fingerprint, set indices to keep
-            elif descriptorset.is_fp:
+                to_remove.append(idx)
+                continue
+
+            if descriptorset.is_fp:
+                # if the set is a fingerprint, set indices to keep
                 self.descsets[idx].keepindices = [
                     f for f in descs_from_curr_set
                 ]
-            # if the set is not a fingerprint, set descriptors to keep
             else:
+                # if the set is not a fingerprint, set descriptors to keep
                 self.descsets[idx].descriptors = descs_from_curr_set
+
+        # remove all descriptorsets that are not in the list of descriptors to keep
+        self.descsets = [x for i, x in enumerate(self.descsets) if i not in to_remove]
 
     def get_len(self):
         """Return number of descriptors calculated by all descriptorsets."""

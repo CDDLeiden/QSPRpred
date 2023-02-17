@@ -17,6 +17,10 @@ class SKLearnStandardizer:
 
         self.scaler = scaler
 
+    def __str__(self):
+        """Return string representation."""
+        return f"SKLearnStandardizer_{self.scaler.__class__.__name__}"
+
     def getInstance(self):
         """Get scaler object."""
         return self.scaler
@@ -76,6 +80,9 @@ def apply_feature_standardizer(feature_standardizer, X, fit=True):
         pd.DataFrame: standardized feature matrix of the same dimensions as X
         SKLearnStandardizer: (fitted) feature standardizer
     """
+    if X.shape[1] == 0:
+        raise ValueError("No features to standardize.")
+
     standardizer = feature_standardizer
     if isinstance(standardizer, SKLearnStandardizer):
         standardizer = standardizer.getInstance()
