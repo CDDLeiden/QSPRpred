@@ -83,7 +83,9 @@ class CDKFP(fingerprint):
     def __init__(self, searchDepth=7, size=1024):
         self.searchDepth = searchDepth
         self.size = size
-        self._padel = PaDEL_calculator([_fingerprints[0]])
+        fp = _fingerprints[0]()
+        fp.set_params({'size': size, 'searchDepth': searchDepth})
+        self._padel = PaDEL_calculator([fp])
 
     def getFingerprints(self, mols):
         """Return the CDK fingerprint for the input molecules.
@@ -113,7 +115,9 @@ class CDKExtendedFP(fingerprint):
     def __init__(self, searchDepth=7, size=1024):
         self.searchDepth = searchDepth
         self.size = size
-        self._padel = PaDEL_calculator([_fingerprints[1]])
+        fp = _fingerprints[1]()
+        fp.set_params({'size': size, 'searchDepth': searchDepth})
+        self._padel = PaDEL_calculator([fp])
 
     def getFingerprints(self, mols):
         """Return the CDK extended fingerprint for the input molecules.
@@ -171,7 +175,9 @@ class CDKGraphOnlyFP(fingerprint):
     def __init__(self, searchDepth=7, size=1024):
         self.searchDepth = searchDepth
         self.size = size
-        self._padel = PaDEL_calculator([_fingerprints[3]])
+        fp = _fingerprints[3]()
+        fp.set_params({'size': size, 'searchDepth': searchDepth})
+        self._padel = PaDEL_calculator([fp])
 
     def getFingerprints(self, mols):
         """Return the CDK graph only fingerprint for the input molecules.
