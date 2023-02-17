@@ -918,6 +918,18 @@ class QSPRDataset(MoleculeTable):
         """Drop rows with empty target property value from the data set."""
         self.df.dropna(subset=([self.smilescol]), inplace=True)
         self.df.dropna(subset=(self.targetPropertyNames), how='all', inplace=True)
+    
+    def imputeTargetProperties(self, imputer):
+        """Impute missing target property values.
+
+        Args:
+            imputer: imputer object, should have a fit and transform method.
+        """
+        names = self.targetPropertyNames
+        for idx, target_prop in enumerate(self.targetProperties):
+            self.targetProperties[idx].name = f"{target_prop.name}_imputed"
+        self.df[self.targetPropertyNames] = imputer.fit_transform(self.df[names])
+
 
     @property
     def hasFeatures(self):

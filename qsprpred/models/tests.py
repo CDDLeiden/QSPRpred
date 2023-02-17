@@ -10,6 +10,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 import torch
+from parameterized import parameterized
 from qsprpred.data.tests import DataSetsMixIn
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
@@ -30,22 +31,29 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class ModelDataSetsMixIn(DataSetsMixIn):
+    """This class sets up the datasets for the model tests."""
+
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
 
     def setUp(self):
+        """Set up the test environment."""
         super().setUp()
         if not os.path.exists(self.qsprmodelspath):
             os.makedirs(self.qsprmodelspath)
 
     @classmethod
     def clean_directories(cls):
+        """Clean the directories."""
         super().clean_directories()
         if os.path.exists(cls.qsprmodelspath):
             shutil.rmtree(cls.qsprmodelspath)
 
 
 class ModelTestMixIn:
+    """This class holds the tests for the QSPRmodel class."""
+
     def fit_test(self, themodel):
+        """Test model fitting, optimization and evaluation."""
         # perform bayes optimization
         fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
         mname = themodel.name.split("_")[0]
@@ -80,6 +88,7 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_standardizer_path']}"))
 
     def predictor_test(self, model_name, base_dir, cls: QSPRModel = QSPRsklearn, n_tasks=1):
+        """Test using a QSPRmodel as predictor."""
         # initialize model as predictor
         predictor = cls(name=model_name, base_dir=base_dir)
 
@@ -114,10 +123,11 @@ class ModelTestMixIn:
 
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+    """This class holds the tests for the QSPRDNN class."""
 
     @staticmethod
     def get_model(name, alg=None, dataset=None, parameters=None):
-        # intialize dataset and model
+        """Intialize dataset and model."""
         return QSPRDNN(
             base_dir=f'{os.path.dirname(__file__)}/test_files/',
             alg=alg,
@@ -130,8 +140,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
 
     def prep_testdata(self, task=ModelTasks.REGRESSION, th=None):
-
-        # prepare test dataset
+        """Prepare test dataset."""
         data = self.create_large_dataset(task=task, th=th, preparation_settings=self.get_default_prep())
         data.save()
         # prepare data for torch DNN
@@ -157,6 +166,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
     ])
     def test_base_model(self, _, task, alg_name, alg, th):
+        """Test the base DNN model."""
         # prepare test regression dataset
         is_reg = True if task == ModelTasks.REGRESSION else False
         no_features, trainloader, testloader = self.prep_testdata(task=task, th=th)
@@ -201,6 +211,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
     ])
     def test_qsprpred_model(self, _, task, alg_name, alg, th):
+        """Test the QSPRDNN model."""
         # initialize dataset
         dataset = self.create_large_dataset(task=task, th=th, preparation_settings=self.get_default_prep())
 
@@ -239,6 +250,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
     ])
     def test_regression_basic_fit(self, _, task, model_name, model_class):
+        """Test model training for regression models."""
         if not model_name in ["SVR", "PLSR"]:
             parameters = {"n_jobs": N_CPUS}
         else:
@@ -270,6 +282,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
          (ModelTasks.MULTICLASS, [0, 1, 10, 1100]))
     ])
     def test_classification_basic_fit(self, _, task, th, model_name, model_class):
+        """Test model training for classification models."""
         if not model_name in ["NB", "SVC"]:
             parameters = {"n_jobs": N_CPUS}
         else:
@@ -279,9 +292,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters.update({"probability": True})
 
         # initialize dataset
-        dataset = self.create_large_dataset(
-            task=task, th=[0, 1, 10, 1100],
-            preparation_settings=self.get_default_prep())
+        dataset = self.create_large_dataset(target_props=[{"name": 'CL', "task": task, "th": th}])
 
         # test classifier
         # initialize model for training from class
@@ -302,6 +313,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
     ])
     def test_regression_multitask_fit(self, _, model_name, model_class):
+        """Test model training for multitask regression models."""
         if not model_name in ["NB", "SVC"]:
             parameters = {"n_jobs": N_CPUS}
         else:
@@ -334,6 +346,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
     ])
     def test_classification_multitask_fit(self, _, model_name, model_class):
+        """Test model training for multitask classification models."""
         if not model_name in ["NB", "SVC"]:
             parameters = {"n_jobs": N_CPUS}
         else:
