@@ -149,7 +149,6 @@ class MoleculeTable(MoleculeDataSet):
         Returns:
             pd.DataFrame: The data frame this instance manages.
         """
-
         return self.df
 
     def _isInStore(self, name):
@@ -547,10 +546,14 @@ class MoleculeTable(MoleculeDataSet):
         self.df = self.df.sample(frac=1, random_state=random_state).reset_index(drop=True)
 
     def dropInvalids(self):
-        """Drop Invalid SMILES."""
+        """Drop Invalid SMILES.
+
+        Returns:
+            pd.Series: Mask of invalid SMILES, true if the SMILES is valid and false otherwise.
+        """
         invalid_mask = self.df[self.smilescol].apply(lambda smile: Chem.MolFromSmiles(smile) is not None)
         logger.info(
-            f"Removing invalid SMILES: {self.df[self.smilescol][invalid_mask]}"
+            f"Removing invalid SMILES: {list(self.df[self.smilescol][~invalid_mask])}"
         )
         self.df = self.df[invalid_mask].copy()
 
@@ -560,10 +563,10 @@ class MoleculeTable(MoleculeDataSet):
 class TargetProperty():
     """Target property for QSPRmodelling class.
 
-        Args:
-            name (str): name of the target property
-            task (Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS]): task type for the target property
-            th (int): threshold for the target property, only used for classification tasks
+    Args:
+        name (str): name of the target property
+        task (Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS]): task type for the target property
+        th (int): threshold for the target property, only used for classification tasks
     """
 
     def __init__(
@@ -607,7 +610,7 @@ class TargetProperty():
             return f"TargetProperty(name={self.name}, task={self.task})"
 
     def __str__(self):
-        """String identifier of the TargetProperty object."""
+        """Return string identifier of the TargetProperty object."""
         return self.name
 
     @classmethod
@@ -641,6 +644,20 @@ class TargetProperty():
             return [TargetProperty(**{k: ModelTasks[v] if k == "task" else v for k, v in d.items()}) for d in l]
         else:
             return [TargetProperty(**d) for d in l]
+
+    def getNclasses(self):
+        """Get the number of classes for the target property.
+
+        Returns:
+            int: number of classes
+        """
+        if self.task.isClassification():
+            if len(self.th) > 1:
+                return len(self.th) - 1
+            else:
+                return 2
+        else:
+            return None
 
     @staticmethod
     def toList(l: list, task_as_str: bool = False, drop_transformer: bool = True):
@@ -820,9 +837,9 @@ class QSPRDataset(MoleculeTable):
 
     @staticmethod
     def fromSDF(name, filename, smiles_prop, *args, **kwargs):
-        """
-        Create QSPRDataset from SDF file. It is currently not implemented for QSPRDataset, but you can convert
-        from 'MoleculeTable' with the 'fromMolTable' method.
+        """Create QSPRDataset from SDF file.
+
+        It is currently not implemented for QSPRDataset, but you can convert from 'MoleculeTable' with the 'fromMolTable' method.
 
         Args:
             name (str): name of the data set
@@ -1308,7 +1325,7 @@ class QSPRDataset(MoleculeTable):
             self.fold_generator = Folds(fold, self.feature_standardizer)
 
     def getDefaultFoldSplit(self):
-        """Returns the default fold split for the model task.
+        """Return the default fold split for the model task.
 
         Returns:
             datasplit (datasplit): default fold split implementation
@@ -1319,7 +1336,7 @@ class QSPRDataset(MoleculeTable):
             return StratifiedKFold(5)
 
     def getDefaultFoldGenerator(self):
-        """Returns the default fold generator. The fold generator is used to create folds for cross validation.
+        """Return the default fold generator. The fold generator is used to create folds for cross validation.
 
         Returns:
             Folds (Folds): default fold generator implementation
@@ -1426,7 +1443,7 @@ class QSPRDataset(MoleculeTable):
             return self.y, self.y_ind if self.y_ind is not None else self.y
 
     def getTargetProperties(self, names, original_names=False):
-        """Get the target properties with the given names
+        """Get the target properties with the given names.
 
         Args:
             names (List[str]): name of the target properties
@@ -1435,16 +1452,16 @@ class QSPRDataset(MoleculeTable):
         Returns:
             `TargetProperty`: target property with the given name
         """
-        return TargetProperty.selectFromList(self.targetProperties, names, original_names=True)
+        return TargetProperty.selectFromList(self.targetProperties, names, original_names=original_names)
 
     @property
     def targetPropertyNames(self):
-        """Get the names of the target properties"""
+        """Get the names of the target properties."""
         return TargetProperty.getNames(self.targetProperties)
 
     @property
     def targetPropertyOriginalNames(self):
-        """Get the original names of the target properties"""
+        """Get the original names of the target properties."""
         return TargetProperty.getOriginalNames(self.targetProperties)
 
     def loadFeatureStandardizer(self):

@@ -97,29 +97,53 @@ class ModelTestMixIn:
             f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
             sep='\t')
 
-        # predict the property
-        predictions = predictor.predictMols(df.SMILES.to_list())
-        self.assertEqual(predictions.shape, (len(df.SMILES),))
-        self.assertIsInstance(predictions, np.ndarray)
-        if predictor.targetProperties[0].task == ModelTasks.REGRESSION:
-            self.assertIsInstance(predictions[0], numbers.Real)
-        elif predictor.targetProperties[0].task == ModelTasks.MULTICLASS or isinstance(predictor.model, XGBClassifier):
-            self.assertIsInstance(predictions[0], numbers.Integral)
-        elif predictor.targetProperties[0].task == ModelTasks.SINGLECLASS:
-            self.assertIsInstance(predictions[0], np.bool_)
-        else:
-            return AssertionError(f"Unknown task: {predictor.task}")
+        def check_shape(input_smiles):
+            if predictor.targetProperties[0].task.isClassification() and use_probas:
+                if predictor.isMultiTask:
+                    self.assertEqual(len(predictions), len(predictor.targetProperties))
+                    self.assertEqual(
+                        predictions[0].shape,
+                        (len(input_smiles),
+                         predictor.targetProperties[0].getNclasses()))
+                else:
+                    self.assertEqual(
+                        predictions.shape,
+                        (len(input_smiles),
+                         predictor.targetProperties[0].getNclasses()))
+            else:
+                self.assertEqual(predictions.shape, (len(input_smiles), len(predictor.targetProperties)))
 
-        # test with an invalid smiles
-        invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
-        predictions = predictor.predictMols(invalid_smiles)
-        self.assertEqual(predictions.shape, (len(invalid_smiles),))
-        self.assertEqual(predictions[1], None)
-        if predictor.targetProperties[0].task == ModelTasks.SINGLECLASS and not isinstance(
-                predictor.model, XGBClassifier):
-            self.assertIsInstance(predictions[0], np.bool_)
-        else:
-            self.assertIsInstance(predictions[0], numbers.Number)
+        # predict the property
+        for use_probas in [True, False]:
+            predictions = predictor.predictMols(df.SMILES.to_list(), use_probas=use_probas)
+            check_shape(df.SMILES.to_list())
+            if isinstance(predictions, list):
+                for prediction in predictions:
+                    self.assertIsInstance(prediction, np.ndarray)
+            else:
+                self.assertIsInstance(predictions, np.ndarray)
+
+            singleoutput = predictions[0][0, 0] if isinstance(predictions, list) else predictions[0, 0]
+            if predictor.targetProperties[0].task == ModelTasks.REGRESSION or use_probas:
+                self.assertIsInstance(singleoutput, numbers.Real)
+            elif predictor.targetProperties[0].task == ModelTasks.MULTICLASS or isinstance(predictor.model, XGBClassifier):
+                self.assertIsInstance(singleoutput, numbers.Integral)
+            elif predictor.targetProperties[0].task == ModelTasks.SINGLECLASS:
+                self.assertIn(singleoutput, [1, 0])
+            else:
+                return AssertionError(f"Unknown task: {predictor.task}")
+
+            # test with an invalid smiles
+            invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
+            predictions = predictor.predictMols(invalid_smiles, use_probas=use_probas)
+            check_shape(invalid_smiles)
+            singleoutput = predictions[0][0, 0] if isinstance(predictions, list) else predictions[0, 0]
+            self.assertEqual(predictions[0][1, 0] if isinstance(predictions, list) else predictions[1, 0], None)
+            if predictor.targetProperties[0].task == ModelTasks.SINGLECLASS and not isinstance(
+                    predictor.model, XGBClassifier) and not use_probas:
+                self.assertIn(singleoutput, [0, 1])
+            else:
+                self.assertIsInstance(singleoutput, numbers.Number)
 
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):

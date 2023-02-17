@@ -41,8 +41,10 @@ class QSPRModel(ABC):
 
     def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None,
                  name: str = None, parameters: dict = None, autoload=True):
-        """
-        Initialize a QSPR model instance. If the model is loaded from file, the data set is not required. Note that the data set is required for fitting and optimization.
+        """Initialize a QSPR model instance.
+
+        If the model is loaded from file, the data set is not required.
+        Note that the data set is required for fitting and optimization.
 
         Args:
             base_dir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`
@@ -52,7 +54,6 @@ class QSPRModel(ABC):
             parameters (dict): dictionary of algorithm specific parameters
             autoload (bool): if True, the model is loaded from the serialized file if it exists, otherwise a new model is created
         """
-
         self.data = data
         self.name = name or alg.__class__.__name__
         self.baseDir = base_dir.rstrip('/')
@@ -89,13 +90,11 @@ class QSPRModel(ABC):
 
     def __str__(self):
         """Return the name of the model and the underlying class as the identifier."""
-
         return f"{self.name} ({self.model.__class__.__name__ if self.model else self.alg.__class__.__name__ if self.alg else 'None'})"
 
     @property
     def task(self):
-        """
-        The task of the model, taken from the data set or deserialized from file if the model is loaded without data.
+        """The task of the model, taken from the data set or deserialized from file if the model is loaded without data.
 
         Returns:
             ModelTasks: task of the model
@@ -104,47 +103,48 @@ class QSPRModel(ABC):
 
     @property
     def targetProperties(self):
-        """
-        The target property of the model, taken from the data set or deserialized from file if the model is loaded without data.
+        """Return target properties of the model, taken from the data set or deserialized from file if the model is loaded without data.
 
         Returns:
             str: target property of the model
         """
-
         return self.data.targetProperties if self.data else self.metaInfo['target_properties']
 
     @property
-    def outDir(self):
+    def isMultiTask(self):
+        """Return if model is a multitask model, taken from the data set or deserialized from file if the model is loaded without data.
+
+        Returns:
+            bool: True if model is a multitask model
         """
-        The output directory of the model, the model files are stored in this directory (`{baseDir}/qspr/models/{name}`).
+        return self.data.isMultiTask if self.data else len(self.targetProperties) > 1
+
+    @property
+    def outDir(self):
+        """Return output directory of the model, the model files are stored in this directory (`{baseDir}/qspr/models/{name}`).
 
         Returns:
             str: output directory of the model
         """
-
         os.makedirs(f'{self.baseDir}/qspr/models/{self.name}', exist_ok=True)
         return f'{self.baseDir}/qspr/models/{self.name}'
 
     @property
     def outPrefix(self):
-        """
-        The output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`).
+        """The output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`).
 
         Returns:
             str: output prefix of the model files
         """
-
         return f'{self.outDir}/{self.name}'
 
     @staticmethod
     def readParams(path):
-        """
-        Read model parameters from a JSON file.
+        """Read model parameters from a JSON file.
 
         Args:
             path (str): absolute path to the JSON file
         """
-
         with open(path, "r", encoding="utf-8") as j:
             logger.info(
                 'loading model parameters from file: %s' % path)
@@ -157,7 +157,6 @@ class QSPRModel(ABC):
         Args:
             params (dict): dictionary of model parameters
         """
-
         path = f'{self.outDir}/{self.name}_params.json'
         with open(path, "w", encoding="utf-8") as j:
             logger.info(
@@ -168,8 +167,7 @@ class QSPRModel(ABC):
 
     @staticmethod
     def readDescriptorCalculator(path):
-        """
-        Read a descriptor calculator from a JSON file.
+        """Read a descriptor calculator from a JSON file.
 
         Args:
             path (str): absolute path to the JSON file
@@ -177,26 +175,22 @@ class QSPRModel(ABC):
         Returns:
             DescriptorsCalculator: descriptor calculator instance or None if the file does not exist
         """
-
         if os.path.exists(path):
             return DescriptorsCalculator.fromFile(path)
 
     def saveDescriptorCalculator(self):
-        """
-        Save the current descriptor calculator to a JSON file. The file is stored in the output directory of the model.
+        """Save the current descriptor calculator to a JSON file. The file is stored in the output directory of the model.
 
         Returns:
             str: absolute path to the JSON file containing the descriptor calculator
         """
-
         path = f'{self.outDir}/{self.name}_descriptor_calculator.json'
         self.featureCalculator.toFile(path)
         return path
 
     @staticmethod
     def readStandardizer(path):
-        """
-        Read a feature standardizer from a JSON file. If the file does not exist, None is returned.
+        """Read a feature standardizer from a JSON file. If the file does not exist, None is returned.
 
         Args:
             path (str): absolute path to the JSON file
@@ -204,26 +198,22 @@ class QSPRModel(ABC):
         Returns:
             SKLearnStandardizer: feature standardizer instance or None if the file does not exist
         """
-
         if os.path.exists(path):
             return SKLearnStandardizer.fromFile(path)
 
     def saveStandardizer(self):
-        """
-        Save the current feature standardizer to a JSON file. The file is stored in the output directory of the model.
+        """Save the current feature standardizer to a JSON file. The file is stored in the output directory of the model.
 
         Returns:
             str: absolute path to the JSON file containing the saved feature standardizer
         """
-
         path = f'{self.outDir}/{self.name}_feature_standardizer.json'
         self.featureStandardizer.toFile(path)
         return path
 
     @classmethod
     def readMetadata(cls, path):
-        """
-        Read model metadata from a JSON file.
+        """Read model metadata from a JSON file.
 
         Args:
             path (str): absolute path to the JSON file
@@ -234,7 +224,6 @@ class QSPRModel(ABC):
         Raises:
             FileNotFoundError: if the file does not exist
         """
-
         if os.path.exists(path):
             with open(path) as j:
                 metaInfo = json.loads(j.read())
@@ -246,8 +235,7 @@ class QSPRModel(ABC):
         return metaInfo
 
     def saveMetadata(self):
-        """
-        Save model metadata to a JSON file. The file is stored in the output directory of the model.
+        """Save model metadata to a JSON file. The file is stored in the output directory of the model.
 
         Returns:
             str: absolute path to the JSON file containing the model metadata
@@ -260,8 +248,7 @@ class QSPRModel(ABC):
         return self.metaFile
 
     def save(self):
-        """
-        Save the model data, parameters, metadata and all other files to the output directory of the model.
+        """Save the model data, parameters, metadata and all other files to the output directory of the model.
 
         Returns:
             dict: dictionary containing the model metadata that was saved
@@ -277,8 +264,7 @@ class QSPRModel(ABC):
         return self.saveMetadata()
 
     def checkForData(self, exception=True):
-        """
-        Check if the model has data set.
+        """Check if the model has data set.
 
         Args:
             exception (bool): if true, an exception is raised if no data is set
@@ -286,7 +272,6 @@ class QSPRModel(ABC):
         Returns:
             bool: True if data is set, False otherwise (if exception is False)
         """
-
         hasData = self.data is not None
         if exception and not hasData:
             raise ValueError(
@@ -301,8 +286,9 @@ class QSPRModel(ABC):
 
     @abstractmethod
     def evaluate(self, save=True):
-        """Make predictions for crossvalidation and independent test set. If save is True, the predictions are saved to a file
-        in the output directory.
+        """Make predictions for crossvalidation and independent test set.
+
+        If save is True, the predictions are saved to a file in the output directory.
 
         Arguments:
             save (bool): don't save predictions when used in bayesian optimization
@@ -415,8 +401,7 @@ class QSPRModel(ABC):
         for targetproperty in self.targetProperties:
             dataset.addProperty(targetproperty.name, np.nan)
         dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False)
-        failed_mask = dataset.dropInvalids().to_list()
-        failed_indices = [idx for idx, x in enumerate(failed_mask) if not x]
+        failed_mask = dataset.dropInvalids().values
         if not self.featureCalculator:
             raise ValueError("No feature calculator set on this instance.")
         dataset.prepareDataset(
@@ -427,23 +412,24 @@ class QSPRModel(ABC):
         )
         if self.targetProperties[0].task == ModelTasks.REGRESSION or not use_probas:
             predictions = self.predict(dataset)
-            if (isclass(self.alg) and self.alg.__name__ == 'PLSRegression') or (
-                    type(self.alg).__name__ == 'PLSRegression'):
-                predictions = predictions[:, 0]
+            # always return 2D array
+            if predictions.ndim == 1:
+                predictions = predictions.reshape(-1, 1)
         else:
+            # NOTE: if a multiclass-multiouput, this will return a list of 2D arrays
             predictions = self.predictProba(dataset)
 
-        if failed_indices:
-            predictions = list(predictions)
-            ret = []
-            for idx, pred in enumerate(mols):
-                if idx in failed_indices:
-                    ret.append(None)
-                else:
-                    ret.append(predictions.pop(0))
-            return np.array(ret)
-        else:
-            return predictions
+        if any(~failed_mask):
+            # fill in the failed predictions with None
+            if isinstance(predictions, list):
+                predictions_with_invalids = [np.full((len(mols), pred.shape[1]), None) for pred in predictions]
+                for i, pred in enumerate(predictions):
+                    predictions_with_invalids[i][failed_mask, :] = pred
+            else:
+                predictions_with_invalids = np.full((len(mols), predictions.shape[1]), None)
+                predictions_with_invalids[failed_mask, :] = predictions
+            predictions = predictions_with_invalids
+        return predictions
 
     @classmethod
     def fromFile(cls, path):
