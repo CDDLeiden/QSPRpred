@@ -43,7 +43,10 @@ class QSPRsklearn(QSPRModel):
         if self.data and (type(self.model) in [SVC, SVR]):
             logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
                              Manually set this parameter if this is not desired.")
-            self.parameters.update({'max_iter': 10000})
+            if self.parameters:
+                self.parameters.update({'max_iter': 10000})
+            else:
+                self.parameters = {'max_iter': 10000}
             self.model.set_params(**self.parameters)
 
         logger.info('parameters: %s' % self.parameters)

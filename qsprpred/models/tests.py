@@ -1,15 +1,16 @@
 """This module holds the tests for functions regarding QSPR modelling."""
+import logging
 import numbers
 import os
 import shutil
-import logging
 from os.path import exists
 from unittest import TestCase
-from parameterized import parameterized
 
 import numpy as np
 import pandas as pd
 import torch
+from parameterized import parameterized
+from qsprpred.data.tests import DataSetsMixIn
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
@@ -21,11 +22,11 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from torch.utils.data import DataLoader, TensorDataset
 from xgboost import XGBClassifier, XGBRegressor
-from qsprpred.data.tests import DataSetsMixIn
 
 N_CPUS = 2
 GPUS = [idx for idx in range(torch.cuda.device_count())]
 logging.basicConfig(level=logging.DEBUG)
+
 
 class ModelDataSetsMixIn(DataSetsMixIn):
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
@@ -40,6 +41,7 @@ class ModelDataSetsMixIn(DataSetsMixIn):
         super().clean_directories()
         if os.path.exists(cls.qsprmodelspath):
             shutil.rmtree(cls.qsprmodelspath)
+
 
 class ModelTestMixIn:
     def fit_test(self, themodel):
@@ -76,7 +78,7 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_calculator_path']}"))
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_standardizer_path']}"))
 
-    def predictor_test(self, model_name, base_dir, cls : QSPRModel = QSPRsklearn):
+    def predictor_test(self, model_name, base_dir, cls: QSPRModel = QSPRsklearn):
         # initialize model as predictor
         predictor = cls(name=model_name, base_dir=base_dir)
 
@@ -102,6 +104,7 @@ class ModelTestMixIn:
         self.assertEqual(predictions.shape, (len(invalid_smiles),))
         self.assertEqual(predictions[1], None)
         self.assertIsInstance(predictions[0], numbers.Number)
+
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
@@ -141,9 +144,9 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     @parameterized.expand([
         (f"{alg_name}_{task}", task, alg_name, alg, th)
         for alg, alg_name, task, th in (
-                (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
-                (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [6.5]),
-                (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [0, 1, 10, 1200]),
+            (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
+            (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [6.5]),
+            (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [0, 1, 10, 1200]),
         )
     ])
     def test_base_model(self, _, task, alg_name, alg, th):
@@ -185,9 +188,9 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     @parameterized.expand([
         (f"{alg_name}_{task}", task, alg_name, alg, th)
         for alg, alg_name, task, th in (
-                (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
-                (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [6.5]),
-                (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [0, 1, 10, 1100]),
+            (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
+            (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [6.5]),
+            (STFullyConnected, "STFullyConnected", ModelTasks.CLASSIFICATION, [0, 1, 10, 1100]),
         )
     ])
     def test_qsprpred_model(self, _, task, alg_name, alg, th):
@@ -204,6 +207,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.fit_test(model)
         self.predictor_test(alg_name, model.baseDir, QSPRDNN)
 
+
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @staticmethod
@@ -219,19 +223,19 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand([
         (alg_name, ModelTasks.REGRESSION, alg_name, alg)
-        for alg, alg_name  in (
-        (PLSRegression, "PLSR"),
-        (SVR, "SVR"),
-        (RandomForestRegressor, "RFR"),
-        (XGBRegressor, "XGBR"),
-        (KNeighborsRegressor, "KNNR")
-    )
+        for alg, alg_name in (
+            (PLSRegression, "PLSR"),
+            (SVR, "SVR"),
+            (RandomForestRegressor, "RFR"),
+            (XGBRegressor, "XGBR"),
+            (KNeighborsRegressor, "KNNR")
+        )
     ])
     def test_regression_basic_fit(self, _, task, model_name, model_class):
         if not model_name in ["SVR", "PLSR"]:
             parameters = {"n_jobs": N_CPUS}
         else:
-            parameters = {}
+            parameters = None
 
         # initialize dataset
         dataset = self.create_large_dataset(task=task, preparation_settings=self.get_default_prep())
@@ -245,27 +249,30 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         self.fit_test(model)
         self.predictor_test(f"{model_name}_{task}", model.baseDir)
+
     @parameterized.expand([
         (alg_name, ModelTasks.CLASSIFICATION, alg_name, alg)
         for alg, alg_name in (
-                (SVC, "SVC"),
-                (RandomForestClassifier, "RFC"),
-                (XGBClassifier, "XGBC"),
-                (KNeighborsClassifier, "KNNC"),
-                (GaussianNB, "NB")
+            (SVC, "SVC"),
+            (RandomForestClassifier, "RFC"),
+            (XGBClassifier, "XGBC"),
+            (KNeighborsClassifier, "KNNC"),
+            (GaussianNB, "NB")
         )
     ])
     def test_classification_basic_fit(self, _, task, model_name, model_class):
         if not model_name in ["NB", "SVC"]:
             parameters = {"n_jobs": N_CPUS}
         else:
-            parameters = {}
+            parameters = None
 
         if model_name == "SVC":
             parameters.update({"probability": True})
 
         # initialize dataset
-        dataset = self.create_large_dataset(task=task, th=[0, 1, 10, 1100], preparation_settings=self.get_default_prep())
+        dataset = self.create_large_dataset(
+            task=task, th=[0, 1, 10, 1100],
+            preparation_settings=self.get_default_prep())
 
         # test classifier
         # initialize model for training from class
