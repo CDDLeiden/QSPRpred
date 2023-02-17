@@ -118,10 +118,11 @@ class DataSetsMixIn(PathMixIn):
         if platform.system() != "Linux":
             # FIXME: Java-based descriptors do not run on Linux
             descriptor_sets.extend([
-                FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
-                FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
+                # FIXME: some of these fingerprints are broken, uncomment when fixed
+                # FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
+                # FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
                 FingerprintSet(fingerprint_type="CDKEStatedFP"),
-                FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
+                # FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
                 FingerprintSet(fingerprint_type="CDKMACCSFP"),
                 FingerprintSet(fingerprint_type="CDKPubchemFP"),
                 FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
