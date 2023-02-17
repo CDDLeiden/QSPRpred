@@ -1133,6 +1133,9 @@ class QSPRDataset(MoleculeTable):
         Args:
             split (datasplit) : split instance orchestrating the split
         """
+        if hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and not split.hasDataSet:
+            split.setDataSet(self)
+
         folds = Folds(split)
         self.X, self.X_ind, self.y, self.y_ind, train_index, test_index = next(
             folds.iterFolds(self.df, self.df[self.targetPropertyNames]))
@@ -1327,8 +1330,6 @@ class QSPRDataset(MoleculeTable):
 
         # split dataset
         if split is not None:
-            if hasattr(split, "setDataSet") and not split.getDataSet():
-                split.setDataSet(self)
             self.split(split)
         else:
             self.X = self.df

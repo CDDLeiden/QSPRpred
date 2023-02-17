@@ -95,8 +95,12 @@ class DataSetDependant(ABC):
 
         self.dataset = dataset
 
+    @property
+    def hasDataSet(self):
+        return self.dataset is not None
+
     def getDataSet(self):
-        if self.dataset:
+        if self.hasDataSet:
             return self.dataset
         else:
             raise ValueError("Data set not set.")
