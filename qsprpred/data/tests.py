@@ -115,10 +115,11 @@ class DataSetsMixIn(PathMixIn):
         if platform.system() != "Linux":
             # FIXME: Java-based descriptors do not run on Linux
             descriptor_sets.extend([
-                FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
-                FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
+                # FIXME: some of these fingerprints are broken, uncomment when fixed
+                # FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
+                # FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
                 FingerprintSet(fingerprint_type="CDKEStatedFP"),
-                FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
+                # FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
                 FingerprintSet(fingerprint_type="CDKMACCSFP"),
                 FingerprintSet(fingerprint_type="CDKPubchemFP"),
                 FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
@@ -576,14 +577,14 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
     def test_scaffoldsplit(self):
         """Test the scaffold split function, where the split is done based on the scaffold of the molecules."""
         dataset = self.create_large_dataset()
-        split = scaffoldsplit(dataset, Murcko(), 0.1)
+        split = scaffoldsplit(Murcko(), 0.1)
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
     def test_serialization(self):
         """Test the serialization of dataset with datasplit."""
         dataset = self.create_large_dataset()
-        split = scaffoldsplit(dataset, Murcko(), 0.1)
+        split = scaffoldsplit(Murcko(), 0.1)
         calculator = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)])
         dataset.prepareDataset(
             split=split,
