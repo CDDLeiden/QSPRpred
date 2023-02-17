@@ -29,7 +29,7 @@ GPUS = [idx for idx in range(torch.cuda.device_count())]
 logging.basicConfig(level=logging.DEBUG)
 
 
-class ModelDataSets(DataSets):
+class ModelDataSetsMixIn(DataSetsMixIn):
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
 
     def setUp(self):

@@ -916,13 +916,12 @@ class QSPRDataset(MoleculeTable):
 
     def dropEmpty(self):
         """Drop rows with empty target property value from the data set."""
-        self.df.dropna(subset=([self.smilescol, self.targetProperty]), inplace=True)
+        self.df.dropna(subset=([self.smilescol]), inplace=True)
+        self.df.dropna(subset=(self.targetPropertyNames), how='all', inplace=True)
 
     @property
     def hasFeatures(self):
-        """
-        Check whether the currently selected set of features is not empty.
-        """
+        """Check whether the currently selected set of features is not empty."""
         return len(self.featureNames) > 0
 
     def getFeatureNames(self) -> List[str]:
@@ -944,12 +943,12 @@ class QSPRDataset(MoleculeTable):
         return features
 
     def restoreTrainingData(self):
-        """
-        Restore training data from the data frame. If the data frame contains a column 'Split_IsTrain',
+        """Restore training data from the data frame.
+
+        If the data frame contains a column 'Split_IsTrain',
         the data will be split into training and independent sets. Otherwise, the independent set will
         be empty. If descriptors are available, the resulting training matrices will be featurized.
         """
-
         self.loadDataToSplits()
         self.featurizeSplits()
 
@@ -1171,20 +1170,20 @@ class QSPRDataset(MoleculeTable):
                     self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
 
     def loadDataToSplits(self):
-        """
-        Loads the data frame into the train and test splits if the information is available. Otherwise, the whole data
+        """Load the data frame into the train and test splits.
+         
+        Loads only if the information is available. Otherwise, the whole data
         set will be regarded as the training set and the test set will have zero length.
         """
-
         self.X = self.df
-        self.y = self.df[[self.targetPropertyNames]]
+        self.y = self.df[self.targetPropertyNames]
 
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.X = self.df[self.df["Split_IsTrain"] == True]
             self.X_ind = self.df[self.df["Split_IsTrain"] == False]
-            self.y = self.X[[self.targetPropertyNames]]
-            self.y_ind = self.X_ind[[self.targetPropertyNames]]
+            self.y = self.X[self.targetPropertyNames]
+            self.y_ind = self.X_ind[self.targetPropertyNames]
         else:
             self.X_ind = self.X.drop(self.X.index)
             self.y_ind = self.y.drop(self.y.index)
