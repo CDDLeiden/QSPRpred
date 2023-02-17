@@ -480,13 +480,13 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     def test_scaffoldsplit(self):
         dataset = self.create_large_dataset()
-        split = scaffoldsplit(dataset, Murcko(), 0.1)
+        split = scaffoldsplit(Murcko(), 0.1)
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
     def test_serialization(self):
         dataset = self.create_large_dataset()
-        split = scaffoldsplit(dataset, Murcko(), 0.1)
+        split = scaffoldsplit(Murcko(), 0.1)
         calculator = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)])
         dataset.prepareDataset(
             split=split,
