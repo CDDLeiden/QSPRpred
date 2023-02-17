@@ -15,6 +15,7 @@ stages:
    script:
       - pytest qsprpred/data/tests.py
       - pytest qsprpred/models/tests.py
+      - pytest qsprpred/plotting/tests.py
 
 # Run tests on Python version 10 (linux image)
 test:python3.10:
@@ -32,5 +33,4 @@ pages:
       - sphinx-build -b html . public
    only:
       - main
-      - dev
       - tags
