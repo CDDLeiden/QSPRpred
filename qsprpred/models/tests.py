@@ -267,7 +267,10 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters = None
 
         if model_name == "SVC":
-            parameters.update({"probability": True})
+            if parameters is not None:
+                parameters.update({"probability": True})
+            else:
+                parameters = {"probability": True}
 
         # initialize dataset
         dataset = self.create_large_dataset(
