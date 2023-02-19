@@ -9,6 +9,7 @@ from typing import Union, Type, List
 
 import numpy as np
 import pandas as pd
+from sklearn import metrics
 
 from qsprpred.data.data import QSPRDataset, MoleculeTable
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
@@ -82,6 +83,11 @@ class QSPRModel(ABC):
         if autoload:
             self.model = self.loadModel(alg=self.alg, params=self.parameters)
 
+        # Adding scoring functions available for hyperparam optimization:
+        self._supported_scoring = [
+            'average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
+            'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
+
     def __str__(self):
         """Return the name of the model and the underlying class as the identifier."""
 
@@ -96,6 +102,16 @@ class QSPRModel(ABC):
             ModelTasks: task of the model
         """
         return self.data.task if self.data else self.metaInfo['task']
+
+    @property
+    def nClasses(self):
+        """
+        The number of classes of the model, taken from the data set or deserialized from file if the model is loaded without data.
+
+        Returns:
+            int: number of classes of the model if the task is classification, otherwise 0
+        """
+        return self.data.nClasses if self.data else self.metaInfo['nClasses']
 
     @property
     def targetProperty(self):
@@ -262,7 +278,8 @@ class QSPRModel(ABC):
 
         self.metaInfo['name'] = self.name
         self.metaInfo['task'] = str(self.task)
-        self.metaInfo['th'] = self.data.th
+        self.metaInfo['th'] = self.data.th if self.data else self.metaInfo['th']
+        self.metaInfo['nClasses'] = self.nClasses
         self.metaInfo['target_property'] = self.targetProperty
         self.metaInfo['parameters_path'] = self.saveParams(self.parameters).replace(f"{self.baseDir}/", '')
         self.metaInfo['feature_calculator_path'] = self.saveDescriptorCalculator().replace(f"{self.baseDir}/", '') if self.featureCalculator else None
@@ -430,15 +447,18 @@ class QSPRModel(ABC):
             predictions = self.predict(dataset)
             if (isclass(self.alg) and self.alg.__name__ == 'PLSRegression') or (type(self.alg).__name__ == 'PLSRegression'):
                 predictions = predictions[:, 0]
+            if self.task == ModelTasks.CLASSIFICATION:
+                predictions = predictions.astype(int)
         else:
             predictions = self.predictProba(dataset)
 
         if failed_indices:
-            predictions = list(predictions)
+            dim = 1 if len(predictions.shape) == 1 else predictions.shape[1]
             ret = []
+            predictions = list(predictions)
             for idx, pred in enumerate(mols):
                 if idx in failed_indices:
-                    ret.append(None)
+                    ret.append([np.nan] * dim if dim > 1 else np.nan)
                 else:
                     ret.append(predictions.pop(0))
             return np.array(ret)
@@ -465,3 +485,34 @@ class QSPRModel(ABC):
 
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
+
+    def get_scoring_func(self, scoring):
+        """Get scoring function from sklearn.metrics.
+
+        Args:
+            scoring (Union[str, Callable]): metric name from sklearn.metrics or
+                user-defined scoring function.
+
+        Raises:
+            ValueError: If the scoring function is currently not supported by
+                GridSearch and BayesOptimization.
+
+        Returns:
+            score_func (Callable): scorer function from sklearn.metrics (`str` as input)
+            or user-defined function (`callable` as input)
+        """
+        if all([scoring not in self._supported_scoring, isinstance(scoring, str)]):
+            raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"
+                             % (scoring, self._supported_scoring))
+        elif callable(scoring):
+            return scoring
+        elif scoring is None:
+            if self.data.task == ModelTasks.REGRESSION:
+                scorer = metrics.get_scorer('explained_variance')
+            elif self.data.nClasses > 2:  # multiclass
+                return lambda y_true, y_pred : metrics.roc_auc_score(y_true, y_pred, multi_class='ovr', average='weighted')
+            else:
+                scorer = metrics.get_scorer('roc_auc')
+        else:
+            scorer = metrics.get_scorer(scoring)
+        return scorer._score_func

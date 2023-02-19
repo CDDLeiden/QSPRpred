@@ -35,10 +35,6 @@ class QSPRsklearn(QSPRModel):
     def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None,
                  name: str = None, parameters: dict = None, autoload: bool = True):
         super().__init__(base_dir, alg, data, name, parameters, autoload)
-        # Adding scoring functions available for hyperparam optimization:
-        self._supported_scoring = [
-            'average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
-            'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
         # initialize models with defined parameters
         if self.data and (type(self.model) in [SVC, SVR]):
             logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
@@ -268,47 +264,8 @@ class QSPRsklearn(QSPRModel):
 
         y, y_ind = self.data.getTargetProperties()
         score_func = self.get_scoring_func(scoring)
-        try:
-            score = score_func(y, self.evaluate(save=False))
-        except ValueError:
-            logger.exception(
-                "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
-            score = -1
+        score = score_func(y, self.evaluate(save=False))
         return score
-
-    def get_scoring_func(self, scoring):
-        """Get scoring function from sklearn.metrics.
-
-        Args:
-            scoring (Union[str, Callable]): metric name from sklearn.metrics or
-                user-defined scoring function.
-
-        Raises:
-            ValueError: If the scoring function is currently not supported by
-                GridSearch and BayesOptimization.
-
-        Returns:
-            score_func (Callable): scorer function from sklearn.metrics (`str` as input)
-            or user-defined function (`callable` as input)
-        """
-        # TODO: to add support for more scoring functions we will need to ensure that
-        # the cross validation returns the correct input for the scoring function.
-        # It's possible to inspect that by calling `str(scorer)` and checking the attributes.
-        if all([scoring not in self._supported_scoring, isinstance(scoring, str)]):
-            raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"
-                             % (scoring, self._supported_scoring))
-        elif callable(scoring):
-            return scoring
-        elif scoring is None:
-            if self.data.task == ModelTasks.REGRESSION:
-                scorer = metrics.get_scorer('explained_variance')
-            elif self.data.nClasses > 2:  # multiclass
-                scorer = metrics.get_scorer('roc_auc_ovr_weighted')
-            else:
-                scorer = metrics.get_scorer('roc_auc')
-        else:
-            scorer = metrics.get_scorer(scoring)
-        return scorer._score_func
 
     def loadModel(self, alg: Union[Type, BaseEstimator] = None, params: dict = None):
         if alg is not None and isinstance(alg, BaseEstimator):
@@ -396,9 +353,6 @@ class QSPRDNN(QSPRModel):
         self.optimal_epochs = -1
         self.n_class = max(1, self.data.nClasses) if self.data else self.metaInfo['n_class']
         self.n_dim = self.data.X.shape[1] if self.data else self.metaInfo['n_dim']
-        self._supported_scoring = [
-            'average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
-            'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
         self.patience = patience
         self.tol = tol
 
@@ -680,12 +634,7 @@ class QSPRDNN(QSPRModel):
 
         y, y_ind = self.data.getTargetProperties()
         score_func = self.get_scoring_func(scoring)
-        try:
-            score = score_func(y, self.evaluate(save=False))
-        except ValueError:
-            logger.exception(
-                "Only one class present in y_true. ROC AUC score is not defined in that case. Score set to -1.")
-            score = -1
+        score = score_func(y, self.evaluate(save=False))
         return score
 
     def saveModel(self) -> str:
@@ -713,36 +662,3 @@ class QSPRDNN(QSPRModel):
 
         loader = self.model.get_dataloader(X)
         return self.model.predict(loader)
-
-    def get_scoring_func(self, scoring):
-        """Get scoring function from sklearn.metrics.
-
-        Args:
-            scoring (Union[str, Callable]): metric name from sklearn.metrics or
-                user-defined scoring function.
-
-        Raises:
-            ValueError: If the scoring function is currently not supported by
-                GridSearch and BayesOptimization.
-
-        Returns:
-            score_func (Callable): scorer function from sklearn.metrics (`str` as input)
-            or user-defined function (`callable` as input)
-        """
-        if all([scoring not in self._supported_scoring, isinstance(scoring, str)]):
-            raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"
-                             % (scoring, self._supported_scoring))
-        elif callable(scoring):
-            return scoring
-        elif scoring is None:
-            if self.data.task == ModelTasks.REGRESSION:
-                scorer = metrics.get_scorer('explained_variance')
-            elif self.data.nClasses > 2:  # multiclass
-                # Calling metrics.get_scorer('roc_auc_ovr_weighted') in this context
-                # raises the error `multi_class must be in ('ovo', 'ovr')` so let's avoid it
-                scorer = metrics.get_scorer('roc_auc_ovr_weighted')
-            else:
-                scorer = metrics.get_scorer('roc_auc')
-        else:
-            scorer = metrics.get_scorer(scoring)
-        return scorer._score_func
