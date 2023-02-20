@@ -191,13 +191,14 @@ class QSPRsklearn(QSPRModel):
         self.model = self.model.set_params(**grid.best_params_)
         self.save()
 
-    def bayesOptimization(self, search_space_bs, n_trials, scoring=None, n_jobs=1):
+    def bayesOptimization(self, search_space_bs, n_trials, scoring=None, th=0.5, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
         Arguments:
             search_space_gs (dict): search space for the grid search
             n_trials (int): number of trials for bayes optimization
             scoring (Optional[str, Callable]): scoring function for the optimization.
+            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
             n_jobs (int): the number of parallel trials
 
         Example of search_space_bs for scikit-learn's MLPClassifier:
@@ -225,7 +226,7 @@ class QSPRsklearn(QSPRModel):
 
         study = optuna.create_study(direction='maximize')
         logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, scoring, search_space_bs), n_trials, n_jobs=n_jobs)
+        study.optimize(lambda trial: self.objective(trial, scoring, th, search_space_bs), n_trials, n_jobs=n_jobs)
         logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         trial = study.best_trial
@@ -235,12 +236,13 @@ class QSPRsklearn(QSPRModel):
         self.model = self.model.set_params(**trial.params)
         self.save()
 
-    def objective(self, trial, scoring, search_space_bs):
+    def objective(self, trial, scoring, th, search_space_bs):
         """Objective for bayesian optimization.
 
         Arguments:
             trial (int): current trial number
             scoring (Optional[str]): scoring function for the objective.
+            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
             search_space_bs (dict): search space for bayes optimization
         """
         bayesian_params = {}
@@ -263,6 +265,8 @@ class QSPRsklearn(QSPRModel):
         self.model.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetProperties()
+        if scoring in self._needs_discrete_to_score:
+            y = np.where(y > th, 1, 0)
         score_func = self.get_scoring_func(scoring)
         score = score_func(y, self.evaluate(save=False))
         return score
@@ -516,7 +520,7 @@ class QSPRDNN(QSPRModel):
         else:
             return cvs
 
-    def gridSearch(self, search_space_gs, scoring=None, ES_val_size=0.1):
+    def gridSearch(self, search_space_gs, scoring=None, th=0.5, ES_val_size=0.1):
         """Optimization of hyperparameters using gridSearch.
 
         Arguments:
@@ -528,6 +532,7 @@ class QSPRDNN(QSPRModel):
                 neurons_hx (int) ~ number of neurons in other hidden layers
                 extra_layer (bool) ~ whether to add extra (3rd) hidden layer
             scoring (Optional[str, Callable]): scoring function for the grid search.
+            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
             ES_val_size (float): validation set size for early stopping in CV
         """
         self.model = self.loadModel(self.alg)
@@ -562,6 +567,8 @@ class QSPRDNN(QSPRModel):
                 y_pred = self.model.predict(valid_loader)
                 if self.data.nClasses == 2:
                     y_pred = y_pred[:, 1]
+                if scoring in self._needs_discrete_to_score:
+                    y = np.where(y > th, 1, 0)
                 fold_scores.append(score_func(y_test, y_pred))
             os.remove('%s_temp.log' % self.outPrefix)
             param_score = np.mean(fold_scores)
@@ -576,13 +583,14 @@ class QSPRDNN(QSPRModel):
         self.model.set_params(**self.parameters)
         self.save()
 
-    def bayesOptimization(self, search_space_bs, n_trials, scoring=None, n_jobs=1):
+    def bayesOptimization(self, search_space_bs, n_trials, scoring=None, th=0.5, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
-        arguments:
+        Arguments:
             search_space_gs (dict): search space for the grid search
             n_trials (int): number of trials for bayes optimization
             scoring (Optional[str, Callable]): scoring function for the optimization.
+            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
             n_jobs (int): the number of parallel trials
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
@@ -596,7 +604,7 @@ class QSPRDNN(QSPRModel):
 
         study = optuna.create_study(direction='maximize')
         logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, scoring, search_space_bs), n_trials, n_jobs=n_jobs)
+        study.optimize(lambda trial: self.objective(trial, scoring, th, search_space_bs), n_trials, n_jobs=n_jobs)
         logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         trial = study.best_trial
@@ -607,11 +615,13 @@ class QSPRDNN(QSPRModel):
         self.model.set_params(**self.parameters)
         self.save()
 
-    def objective(self, trial, scoring, search_space_bs):
+    def objective(self, trial, scoring, th, search_space_bs):
         """Objective for bayesian optimization.
 
-        arguments:
+        Arguments:
             trial (int): current trial number
+            scoring (Optional[str]): scoring function for the objective.
+            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
             search_space_bs (dict): search space for bayes optimization
         """
         bayesian_params = {}
@@ -633,6 +643,8 @@ class QSPRDNN(QSPRModel):
         self.model.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetProperties()
+        if scoring in self._needs_discrete_to_score:
+            y = np.where(y > th, 1, 0)
         score_func = self.get_scoring_func(scoring)
         score = score_func(y, self.evaluate(save=False))
         return score
