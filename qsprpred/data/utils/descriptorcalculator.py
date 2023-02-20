@@ -1,12 +1,10 @@
 """This module is used for calculating molecular descriptors using descriptorsets."""
 import json
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Union
 
-import numpy as np
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
-from qsprpred.logs import logger
 from rdkit.Chem.rdchem import Mol
 
 
@@ -14,15 +12,14 @@ class Calculator(ABC):
     """Calculator for molecule properties."""
 
     @abstractmethod
-    def __call__(self, mols: List[Mol]) -> pd.DataFrame:
+    def __call__(self, mols: List[Union[Mol, str]]) -> pd.DataFrame:
         """Calculate all specified descriptors for a list of rdkit mols.
 
         Args:
-            df: dataframe containing a column with SMILES
-
+            mols: list of rdkit mols or smiles strings
 
         Returns:
-            df: original dataframe with added descriptor columns
+            a numpy array with the calculated descriptors of shape (n_mols, n_descriptors)
         """
         pass
 
@@ -45,18 +42,32 @@ class Calculator(ABC):
         """
         pass
 
+    @abstractmethod
+    def keepDescriptors(self, descriptors: List[str]) -> None:
+        """Drop all descriptors/descriptorsets not in descriptor list.
 
-class descriptorsCalculator(Calculator):
+        Args:
+            descriptors: list of descriptornames to keep
+        """
+        pass
+
+
+class DescriptorsCalculator(Calculator):
     """Calculator for molecule properties."""
 
     def __init__(self, descsets: List[DescriptorSet]) -> None:
         """Set the descriptorsets to be calculated with this calculator."""
-        self.descsets = descsets
+        self.descsets = list(descsets)
+
+    __in__ = __contains__ = lambda self, x: x in self.descsets
+
+    def __str__(self):
+        return f"{self.__class__.__name__}_{'_'.join([str(x) for x in self.descsets])}"
 
     @classmethod
     def fromFile(cls, fname: str):
         """Initialize descriptorset from a json file.
-        
+
         Args:
             fname: file name of json file with descriptor names and settings
         """
@@ -65,40 +76,41 @@ class descriptorsCalculator(Calculator):
 
         descsets = []
         for key, value in descset_dict.items():
-            descset = get_descriptor(key, *value["settings"][0], **value["settings"][1])
+            if key.startswith("FingerprintSet_"):
+                key = "FingerprintSet"
+            descset = get_descriptor(key, **value["settings"])
             if descset.is_fp:
                 descset.keepindices = value["keepindices"]
             else:
                 descset.descriptors = value["descriptors"]
             descsets.append(descset)
-        return descriptorsCalculator(descsets)
+        return DescriptorsCalculator(descsets)
 
     def __call__(self, mols: List[Mol]) -> pd.DataFrame:
         """Calculate descriptors for list of mols.
-        
+
         Args:
             mols: list of rdkit mols
         """
-        valid_mols = [mol for mol in mols if not mol is None]
-        df_valid = pd.DataFrame()
+        df = pd.DataFrame()
         for descset in self.descsets:
-            values = pd.concat([descset(mol) for mol in valid_mols], ignore_index=True)
-            df_valid = pd.concat([df_valid, values.add_prefix(f"{descset}_")], axis=1)
-
-        # Add invalid mols back as rows of zero
-        df = pd.DataFrame(np.zeros((len(mols), df_valid.shape[1])), columns=df_valid.columns)
-        df.iloc[pd.notnull(mols),:] = df_valid
+            values = descset(mols)
+            values = pd.DataFrame(values, columns=descset.descriptors)
+            if descset.is_fp:
+                values.add_prefix(f"{descset.fingerprint_type}_")
+            df = pd.concat([df, values.add_prefix(f"Descriptor_{descset}_")], axis=1)
 
         # replace errors by nan values
         df = df.apply(pd.to_numeric, errors='coerce')
-        
+
         return df
 
     def toFile(self, fname: str) -> None:
-        """Save descriptorset to json file
-        
+        """Save descriptorset to json file.
+
         Args:
-            fname: file name of json file with descriptor names and settings"""
+            fname: file name of json file with descriptor names and settings
+        """
         descset_dict = {}
         for descset in self.descsets:
             if descset.is_fp:
@@ -113,7 +125,38 @@ class descriptorsCalculator(Calculator):
                 }
         with open('%s' % fname, "w") as outfile:
             json.dump(descset_dict, outfile)
-    
+
+    def keepDescriptors(self, descriptors: List[str]) -> None:
+        """Drop all descriptors/descriptorsets not in descriptor list.
+
+        Args:
+            descriptors: list of descriptornames with descriptorset prefix to keep
+        """
+        to_remove = []
+        for idx, descriptorset in enumerate(self.descsets):
+            # Find all descriptors in current descriptorset
+            descs_from_curr_set = [
+                f.replace(f"Descriptor_{descriptorset}_", "")
+                for f in descriptors
+                if f.startswith(f"Descriptor_{descriptorset}_")
+            ]
+            # if there are none to keep from current descriptors set, skip the whole set
+            if not descs_from_curr_set:
+                to_remove.append(idx)
+                continue
+
+            if descriptorset.is_fp:
+                # if the set is a fingerprint, set indices to keep
+                self.descsets[idx].keepindices = [
+                    f for f in descs_from_curr_set
+                ]
+            else:
+                # if the set is not a fingerprint, set descriptors to keep
+                self.descsets[idx].descriptors = descs_from_curr_set
+
+        # remove all descriptorsets that are not in the list of descriptors to keep
+        self.descsets = [x for i, x in enumerate(self.descsets) if i not in to_remove]
+
     def get_len(self):
         """Return number of descriptors calculated by all descriptorsets."""
         length = 0

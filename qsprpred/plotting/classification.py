@@ -4,7 +4,7 @@ classification
 Created by: Martin Sicho
 On: 16.11.22, 12:12
 """
-import os
+import os.path
 from abc import ABC
 from typing import List
 
@@ -12,32 +12,33 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.metrics import RocCurveDisplay, auc, f1_score, matthews_corrcoef, precision_score, recall_score, \
-    accuracy_score
+    accuracy_score, PrecisionRecallDisplay
+from sklearn.calibration import CalibrationDisplay 
 
 from qsprpred.models.interfaces import QSPRModel
+from qsprpred.models.tasks import ModelTasks
 from qsprpred.plotting.interfaces import ModelPlot
+from qsprpred.metrics.calibration import calibration_error
 
 
 class ClassifierPlot(ModelPlot, ABC):
 
-    def getSupportedTypes(self):
-        return ["CLS"]
+    def getSupportedTasks(self):
+        return [ModelTasks.CLASSIFICATION]
 
 class ROCPlot(ClassifierPlot):
 
     def makeCV(self, model : QSPRModel):
         df = pd.read_table(self.cvPaths[model])
 
-        fold_size = df.shape[0] // self.nFolds[model]
-        current_range = [0, fold_size + 1]
         tprs = []
         aucs = []
         mean_fpr = np.linspace(0, 1, 100)
-        fig, ax = plt.subplots()
-        for fold in range(self.nFolds[model]):
+        ax = plt.gca()
+        for fold in df.Fold.unique():
             # get labels
-            y_pred = df.Score[current_range[0]:current_range[1]]
-            y_true = df.Label[current_range[0]:current_range[1]]
+            y_pred = df.Score[df.Fold == fold]
+            y_true = df.Label[df.Fold == fold]
 
             # do plotting
             viz = RocCurveDisplay.from_predictions(
@@ -52,10 +53,6 @@ class ROCPlot(ClassifierPlot):
             interp_tpr[0] = 0.0
             tprs.append(interp_tpr)
             aucs.append(viz.roc_auc)
-
-            # move on to the next fold
-            current_range[0] = current_range[1]
-            current_range[1] = current_range[0] + fold_size if fold + 1 < (self.nFolds[model] - 1) else df.shape[0]
 
         ax.plot([0, 1], [0, 1], linestyle="--", lw=2, color="r", label="Chance", alpha=0.8)
 
@@ -90,7 +87,6 @@ class ROCPlot(ClassifierPlot):
             title=f"Receiver Operating Characteristic ({self.modelNames[model]})",
         )
         ax.legend(loc="lower right")
-
         return ax
 
     def makeInd(self, model : QSPRModel):
@@ -98,7 +94,7 @@ class ROCPlot(ClassifierPlot):
         y_pred = df.Score
         y_true = df.Label
 
-        fig, ax = plt.subplots()
+        ax = plt.gca()
         RocCurveDisplay.from_predictions(
             y_true,
             y_pred,
@@ -112,10 +108,9 @@ class ROCPlot(ClassifierPlot):
             title=f"Receiver Operating Characteristic ({self.modelNames[model]})",
         )
         ax.legend(loc="lower right")
-
         return ax
 
-    def make(self, validation : str = "cv", save : bool = True, show : bool = False):
+    def make(self, validation : str = "cv", figsize:tuple = (6,6), save : bool = True, show : bool = False):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -124,16 +119,196 @@ class ROCPlot(ClassifierPlot):
             "cv": self.makeCV,
             "ind": self.makeInd
         }
-        figures = []
+        axes = []
         for model in self.models:
-            fig = choices[validation](model)
-            figures.append(fig)
+            fig, ax = plt.subplots(figsize=figsize)
+            ax = choices[validation](model)
+            axes.append(fig)
             if save:
-                plt.savefig(f'{self.modelOuts[model]}.{validation}.png')
+                fig.savefig(f'{self.modelOuts[model]}.{validation}.png')
             if show:
                 plt.show()
                 plt.clf()
-        return figures
+        return axes
+
+class PRCPlot(ClassifierPlot):
+
+    def makeCV(self, model : QSPRModel):
+        df = pd.read_table(self.cvPaths[model])
+
+        y_real = []
+        y_predproba = []
+        
+        ax = plt.gca()
+        for fold in df.Fold.unique():
+            # get labels
+            y_pred = df.Score[df.Fold == fold]
+            y_true = df.Label[df.Fold == fold]
+            y_predproba.append(y_pred)
+            y_real.append(y_true)
+            # do plotting
+            viz = PrecisionRecallDisplay.from_predictions(
+                y_true,
+                y_pred,
+                name="PRC fold {}".format(fold + 1),
+                ax=ax,
+                alpha=0.3,
+                lw=1,
+            )
+        # Linear iterpolation of PR curve is not recommended, so we don't plot "chance"
+        # https://dl.acm.org/doi/10.1145/1143844.1143874     
+           
+        # Plotting the average precision-recall curve over the cross validation runs
+        y_real = np.concatenate(y_real)
+        y_predproba = np.concatenate(y_predproba)
+        viz = PrecisionRecallDisplay.from_predictions(
+            y_real,
+            y_predproba,
+            name="Mean PRC",
+            color="b",
+            ax=ax,
+            lw=1.2,
+            alpha=0.8,
+        )
+        ax.set(
+            xlim=[-0.05, 1.05],
+            ylim=[-0.05, 1.05],
+            title=f"Precision-Recall Curve ({self.modelNames[model]})",
+        )
+        ax.legend(loc="best")
+        return ax
+
+    def makeInd(self, model : QSPRModel):
+        df = pd.read_table(self.indPaths[model])
+        y_pred = df.Score
+        y_true = df.Label
+
+        ax = plt.gca()
+        PrecisionRecallDisplay.from_predictions(
+            y_true,
+            y_pred,
+            name="PRC",
+            ax=ax,
+        )
+        # 
+        ax.set(
+            xlim=[-0.05, 1.05],
+            ylim=[-0.05, 1.05],
+            title=f"Receiver Operating Characteristic ({self.modelNames[model]})",
+        )
+        ax.legend(loc="best")
+        return ax
+
+    def make(self, validation : str = "cv", figsize:tuple = (6,6), save : bool = True, show : bool = False):
+        """
+        Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
+        """
+
+        choices = {
+            "cv": self.makeCV,
+            "ind": self.makeInd
+        }
+        axes = []
+        for model in self.models:
+            fig, ax = plt.subplots(figsize=figsize)
+            ax = choices[validation](model)
+            axes.append(ax)
+            if save:
+                fig.savefig(f'{self.modelOuts[model]}.{validation}.png')
+            if show:
+                plt.show()
+                plt.clf()
+        return axes
+    
+class CalibrationPlot(ClassifierPlot):
+
+    def makeCV(self, model : QSPRModel, n_bins : int = 10):
+        df = pd.read_table(self.cvPaths[model])
+
+        y_real = []
+        y_predproba = []
+        
+        ax = plt.gca()
+        for fold in df.Fold.unique():
+            # get labels
+            y_pred = df.Score[df.Fold == fold]
+            y_true = df.Label[df.Fold == fold]
+            y_predproba.append(y_pred)
+            y_real.append(y_true)
+            # do plotting
+            viz = CalibrationDisplay.from_predictions(
+                y_true,
+                y_pred,
+                n_bins=n_bins,
+                name="Fold: {}".format(fold + 1),
+                ax=ax,
+                alpha=0.3,
+                lw=1,
+            )
+           
+        # Plotting the average precision-recall curve over the cross validation runs
+        y_real = np.concatenate(y_real)
+        y_predproba = np.concatenate(y_predproba)
+        viz = CalibrationDisplay.from_predictions(
+            y_real,
+            y_predproba,
+            n_bins=n_bins,
+            name="Mean",
+            color="b",
+            ax=ax,
+            lw=1.2,
+            alpha=0.8,
+        )
+        ax.set(
+            xlim=[-0.05, 1.05],
+            ylim=[-0.05, 1.05],
+            title=f"Calibration Curve ({self.modelNames[model]})",
+        )
+        ax.legend(loc="best")
+        return ax
+
+    def makeInd(self, model : QSPRModel, n_bins : int = 10):
+        df = pd.read_table(self.indPaths[model])
+        y_pred = df.Score
+        y_true = df.Label
+
+        ax = plt.gca()
+        CalibrationDisplay.from_predictions(
+            y_true,
+            y_pred,
+            n_bins=n_bins,
+            name="Calibration",
+            ax=ax,
+        )
+        # 
+        ax.set(
+            xlim=[-0.05, 1.05],
+            ylim=[-0.05, 1.05],
+            title=f"Calibration Curve ({self.modelNames[model]})",
+        )
+        ax.legend(loc="best")
+        return ax
+
+    def make(self, validation : str = "cv", n_bins : int = 10, figsize:tuple = (6,6), save : bool = True, show : bool = False):
+        """
+        Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
+        """
+
+        choices = {
+            "cv": self.makeCV,
+            "ind": self.makeInd
+        }
+        axes = []
+        for model in self.models:
+            fig, ax = plt.subplots(figsize=figsize)
+            ax = choices[validation](model, n_bins)
+            axes.append(ax)
+            if save:
+                fig.savefig(f'{self.modelOuts[model]}.{validation}.png')
+            if show:
+                plt.show()
+                plt.clf()
+        return axes
 
 class MetricsPlot(ClassifierPlot):
 
@@ -144,7 +319,8 @@ class MetricsPlot(ClassifierPlot):
             matthews_corrcoef,
             precision_score,
             recall_score,
-            accuracy_score
+            accuracy_score,
+            calibration_error
         ),
         decision_threshold : float = 0.5)\
         :
@@ -162,7 +338,7 @@ class MetricsPlot(ClassifierPlot):
             'Value': []
         }
 
-    def make(self, save : bool = True, show : bool = False, filename_prefix : str = 'metrics', save_summary_to : str = None):
+    def make(self, save : bool = True, show : bool = False, filename_prefix : str = 'metrics', out_dir : str = "."):
         """
         Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
         """
@@ -170,21 +346,17 @@ class MetricsPlot(ClassifierPlot):
         self.reset()
         for model in self.models:
             df = pd.read_table(self.cvPaths[model])
-            fold_size = df.shape[0] // self.nFolds[model]
-            current_range = [0, fold_size + 1]
-            for fold in range(self.nFolds[model]):
-                y_pred = df.Score[current_range[0]:current_range[1]]
+
+            for fold in df.Fold.unique():
+                y_pred = df.Score[df.Fold == fold]
                 y_pred_values = [1 if x > self.decision else 0 for x in y_pred]
-                y_true = df.Label[current_range[0]:current_range[1]]
+                y_true = df.Label[df.Fold == fold]
                 for metric in self.metrics:
                     val = metric(y_true, y_pred_values)
                     self.summary['Metric'].append(metric.__name__)
                     self.summary['Model'].append(self.modelNames[model])
                     self.summary['TestSet'].append(f'CV{fold + 1}')
                     self.summary['Value'].append(val)
-                # move on to the next fold
-                current_range[0] = current_range[1]
-                current_range[1] = current_range[0] + fold_size if fold + 1 < (self.nFolds[model] - 1) else df.shape[0]
 
             df = pd.read_table(self.indPaths[model])
             y_pred = df.Score
@@ -198,15 +370,15 @@ class MetricsPlot(ClassifierPlot):
                 self.summary['Value'].append(val)
 
         df_summary = pd.DataFrame(self.summary)
-        if save_summary_to is not None:
-            df_summary.to_csv(save_summary_to, sep='\t', index=False, header=True)
+        if save:
+            df_summary.to_csv(os.path.join(out_dir, f"{filename_prefix}_summary.tsv"), sep='\t', index=False, header=True)
 
         figures = []
         for metric in df_summary.Metric.unique():
             df_metric = df_summary[df_summary.Metric == metric]
-            cv_avg = df_metric[df_metric.TestSet != 'IND'].groupby('Model').aggregate(np.mean)
-            cv_std = df_metric[df_metric.TestSet != 'IND'].groupby('Model').aggregate(np.std)
-            ind_vals = df_metric[df_metric.TestSet == 'IND'].groupby('Model').aggregate(np.sum)
+            cv_avg = df_metric[df_metric.TestSet != 'IND'][['Model', 'Value']].groupby('Model').aggregate(np.mean)
+            cv_std = df_metric[df_metric.TestSet != 'IND'][['Model', 'Value']].groupby('Model').aggregate(np.std)
+            ind_vals = df_metric[df_metric.TestSet == 'IND'][['Model', 'Value']].groupby('Model').aggregate(np.sum)
 
             models = cv_avg.index
 
@@ -232,7 +404,7 @@ class MetricsPlot(ClassifierPlot):
             plt.subplots_adjust(bottom=0.4)
             plt.axhline(y=1.0, color='grey', linestyle='-', alpha=0.3)
             if save:
-                plt.savefig(f'{filename_prefix}_{metric}.png')
+                plt.savefig(os.path.join(out_dir, f"{filename_prefix}_{metric}.png"))
             if show:
                 plt.show()
                 plt.clf()

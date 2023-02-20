@@ -1,5 +1,5 @@
 import numpy as np
-from qsprpred.data.interfaces import Scorer
+from qsprpred.data.utils.descriptor_utils.interfaces import Scorer
 from rdkit.Chem import Descriptors
 from rdkit.ML.Descriptors import MoleculeDescriptors
 

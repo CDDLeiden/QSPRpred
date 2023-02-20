@@ -1,0 +1,44 @@
+# This workflow will install Python dependencies, run tests, and write documentation
+
+stages:
+   - test
+   - deploy
+
+# Install python dependencies and run python tests with pytest (output more readable than unittest)
+.test:
+   stage: test
+   before_script:
+      - python --version  # For debugging
+      - pip install pytest
+      - pip install . --no-cache-dir
+   script:
+      - pytest qsprpred/data/tests.py
+      - pytest qsprpred/models/tests.py
+      - pytest qsprpred/plotting/tests.py
+
+# Run tests on Python version 10 (linux image)
+test:python3.10:
+   extends: .test
+   image: python:3.10
+
+# Run tests on Python version 9 (linux image)
+#test:python3.9:
+#   extends: .test
+#   image: python:3.9
+
+# Write documentation on main or tagged branches
+pages:
+   stage: deploy
+   image: python:3.10
+   before_script:
+      - pip install -U sphinx
+      - pip install sphinx-rtd-theme
+   script:
+      - mkdir public
+      - sphinx-build -b html ./docs public
+   artifacts:
+      paths:
+      - public
+   only:
+      - main
+      - tags

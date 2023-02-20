@@ -22,7 +22,7 @@ class lowVarianceFilter(featurefilter):
     def __init__(self, th: float) -> None:
         self.th = th
 
-    def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
+    def __call__(self, df: pd.DataFrame, y_col : pd.DataFrame = None) -> pd.DataFrame:
 
         # scale values between 0 and 1
         colnames = df.columns
@@ -51,7 +51,7 @@ class highCorrelationFilter(featurefilter):
     def __init__(self, th: float) -> None:
         self.th = th
 
-    def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
+    def __call__(self, df: pd.DataFrame, y_col : pd.DataFrame = None) -> pd.DataFrame:
         # make absolute, because we also want to filter out large negative correlation
         correlation = np.triu(np.abs(np.corrcoef(df.values.astype(float).T)), k=1)
         high_corr = np.where(np.any(correlation > self.th, axis=0))
@@ -91,7 +91,7 @@ class BorutaFilter(featurefilter):
 
     def __init__(
         self,
-        estimator=RandomForestRegressor(n_jobs=5),
+        estimator=RandomForestRegressor(),
         n_estimators="auto",
         perc=80,
         alpha=0.05,
@@ -105,7 +105,7 @@ class BorutaFilter(featurefilter):
         self.max_iter = max_iter
         self.verbose = verbose
 
-    def __call__(self, features: pd.DataFrame, y: pd.DataFrame) -> pd.DataFrame:
+    def __call__(self, features: pd.DataFrame, y_col : pd.DataFrame = None) -> pd.DataFrame:
         feat_selector = BorutaPy(
             estimator=self.estimator,
             n_estimators=self.n_estimators,
@@ -114,7 +114,7 @@ class BorutaFilter(featurefilter):
             max_iter=self.max_iter,
             verbose=self.verbose,
         )
-        feat_selector.fit(features.values, y.values)
+        feat_selector.fit(features.values, y_col.values)
 
         selected_features = features.loc[:, feat_selector.support_]
         logger.info(
