@@ -66,7 +66,9 @@ class scaffoldsplit(datasplit, DataSetDependant):
             the abstract class `Scaffold`. Defaults to Murcko().
         test_fraction (float): fraction of the test set. Defaults to 0.1.
         shuffle (bool): whether to shuffle the data or not. Defaults to True.
-        custom_test_list (list): list of smiles to force in test set, when possible
+        custom_test_list (list): list of smiles to force in test set. To ensure addition, they need to match SMILES in
+            dataset.prepareDataset(), i.e. by default canonical SMILES. If forced test contains the totality of the
+            molecules in the dataset, the custom_test_list reverts to default None.
     """
     def __init__(self, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True, custom_test_list=None, dataset=None)\
             -> None:
