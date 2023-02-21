@@ -588,8 +588,7 @@ class TargetProperty():
         self.originalName = originalName if originalName is not None else name
         self.task = task
         if task.isClassification():
-            if th is None:
-                logger.warning(f"Threshold not specified for classification task {name}")
+            assert th is not None, f"Threshold not specified for classification task {name}"
             self.th = th
         self.transformer = transformer
 
@@ -970,13 +969,16 @@ class QSPRDataset(MoleculeTable):
         if isinstance(target_property, str):
             target_property = self.getTargetProperties([target_property], original_names=True)[0]
 
-        # if no threshold values are provided, assume already a classification target property
-        if th is None:
-            assert target_property.task.isClassification(), "TargetProperty is not a classification task, please specify threshold values."
-            assert target_property.th is not None, "TargetProperty has no threshold defined and no threshold passed, if classification precomputed, pass 'precomputed' as th."
-            logger.debug("No threshold values provided, just returning TargetProperty.")
+        # check if the column only has nan values
+        if self.df[target_property.name].isna().all():
+            logger.debug(f"Target property {target_property.name} is all nan, assuming predictor.")
             return target_property
-        
+
+        # if no threshold values are provided, use the ones specified in the TargetProperty
+        if th is None:
+            assert hasattr(target_property, 'th'), "Target property does not have a threshold attribute and no threshold specified in function args."
+            th = target_property.th
+
         new_prop = f"{target_property.originalName}_class"
 
         if th == 'precomputed':
