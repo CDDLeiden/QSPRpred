@@ -478,15 +478,19 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         # test if dates higher than 2000 are in test set
         self.assertTrue(sum(dataset.X_ind['Year of first disclosure'] > 2000) == len(dataset.X_ind))
 
-    def test_scaffoldsplit(self):
+    @parameterized.expand([
+        (Murcko(), True, None),
+        (BemisMurcko(), False, ['NCCc1ccc(O)c(O)c1','CC(C)(C)c1cnc(CSc2cnc(NC(=O)C3CCNCC3)s2)o1']),
+    ])
+    def test_scaffoldsplit(self, scaffold, shuffle, custom_test_list):
         dataset = self.create_large_dataset()
-        custom_test_list = ['NCCc1ccc(O)c(O)c1','CC(C)(C)c1cnc(CSc2cnc(NC(=O)C3CCNCC3)s2)o1']
-        split = scaffoldsplit(Murcko(), 0.1, True, custom_test_list)
+        split = scaffoldsplit(scaffold, 0.1, shuffle, custom_test_list)
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
-        # check that smiles in test_list are in the test set
-        self.assertTrue(all(smiles in dataset.X_ind[dataset.smilescol].tolist() for smiles in custom_test_list))
+        # check that smiles in custom_test_list are in the test set
+        if custom_test_list:
+            self.assertTrue(all(smiles in dataset.X_ind[dataset.smilescol].tolist() for smiles in custom_test_list))
 
     def test_serialization(self):
         dataset = self.create_large_dataset()
