@@ -66,12 +66,15 @@ class scaffoldsplit(datasplit, DataSetDependant):
             the abstract class `Scaffold`. Defaults to Murcko().
         test_fraction (float): fraction of the test set. Defaults to 0.1.
         shuffle (bool): whether to shuffle the data or not. Defaults to True.
-    """        
-    def __init__(self, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True, dataset=None) -> None:
+        custom_test_list (list): list of smiles to force in test set, when possible
+    """
+    def __init__(self, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True, custom_test_list=None, dataset=None)\
+            -> None:
         super().__init__(dataset)
         self.scaffold = scaffold
         self.test_fraction = test_fraction
         self.shuffle = shuffle
+        self.custom_test_list = custom_test_list
 
     def split(self, X, y):
         dataset = self.getDataSet()
@@ -97,9 +100,31 @@ class scaffoldsplit(datasplit, DataSetDependant):
                 logger.warning(f"Invalid scaffold skipped for: {df.iloc[idx][self.dataset.smilescol]}")
                 invalid_idx.append(idx)
 
+        # Store index of smiles that need to go to test set
+        if self.custom_test_list is not None:
+            test_idx_custom = df[df[dataset.smilescol].isin(self.custom_test_list)].index.tolist()
+
         # Fill test set with groups of smiles with the same scaffold
         max_in_test = np.ceil(len(df) * self.test_fraction)
         test_idx = []
+
+        # Start filling test with scaffold groups that contain the smiles in input list
+        if self.custom_test_list is not None:
+            for _, scaffold_idx in scaffolds.items():
+                if bool(set(scaffold_idx) & set(test_idx_custom)):
+                    test_idx.extend(scaffold_idx)
+
+        # Revert to default scaffold grouping if all molecules are placed in test set
+        if len(test_idx) > max_in_test:
+            logger.warning('Warning: Test set includes all molecules in custom_test_list but is now bigger than '
+                          'specified fraction')
+        try:
+            assert(len(test_idx) + len(invalid_idx) < len(df)), "Test set cannot contain the totality of the data"
+        except AssertionError:
+            logger.warning("Warning: Test set cannot contain the totality of the data. Ignoring custom_test_list input.")
+            test_idx = []
+
+        # Continue filling until the test fraction is reached
         for _, scaffold_idx in scaffolds.items():
             if len(test_idx) < max_in_test:
                 test_idx.extend(scaffold_idx)
