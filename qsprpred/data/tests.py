@@ -480,9 +480,13 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     def test_scaffoldsplit(self):
         dataset = self.create_large_dataset()
-        split = scaffoldsplit(Murcko(), 0.1)
+        custom_test_list = ['NCCc1ccc(O)c(O)c1','CC(C)(C)c1cnc(CSc2cnc(NC(=O)C3CCNCC3)s2)o1']
+        split = scaffoldsplit(Murcko(), 0.1, True, custom_test_list)
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
+
+        # check that smiles in test_list are in the test set
+        self.assertTrue(all(smiles in dataset.X_ind[dataset.smilescol].tolist() for smiles in test_list))
 
     def test_serialization(self):
         dataset = self.create_large_dataset()
