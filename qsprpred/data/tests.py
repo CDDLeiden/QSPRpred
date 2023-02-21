@@ -486,7 +486,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         self.validate_split(dataset)
 
         # check that smiles in test_list are in the test set
-        self.assertTrue(all(smiles in dataset.X_ind[dataset.smilescol].tolist() for smiles in test_list))
+        self.assertTrue(all(smiles in dataset.X_ind[dataset.smilescol].tolist() for smiles in custom_test_list))
 
     def test_serialization(self):
         dataset = self.create_large_dataset()
