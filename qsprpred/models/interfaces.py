@@ -16,6 +16,7 @@ from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
 from qsprpred.models.tasks import ModelTasks
+from sklearn import metrics
 
 
 class QSPRModel(ABC):
@@ -78,10 +79,8 @@ class QSPRModel(ABC):
             os.path.join(self.baseDir, self.metaInfo['feature_calculator_path']))
 
         # initialize a standardizer instance
-        self.featureStandardizer = self.data.feature_standardizer if self.data else self.readStandardizer(
-            os.path.join(self.baseDir, self.metaInfo['feature_standardizer_path']))
-        if self.featureStandardizer and not isinstance(self.featureStandardizer, SKLearnStandardizer):
-            self.featureStandardizer = SKLearnStandardizer(self.featureStandardizer)
+        self.featureStandardizer = self.data.feature_standardizer if self.data else self.readStandardizer(os.path.join(
+            self.baseDir, self.metaInfo['feature_standardizer_path'])) if self.metaInfo['feature_standardizer_path'] else None
 
         # initialize a model instance with the given parameters
         self.alg = alg
@@ -91,6 +90,40 @@ class QSPRModel(ABC):
     def __str__(self):
         """Return the name of the model and the underlying class as the identifier."""
         return f"{self.name} ({self.model.__class__.__name__ if self.model else self.alg.__class__.__name__ if self.alg else 'None'})"
+
+    # Adding scoring functions available for hyperparam optimization:
+    @property
+    def _needs_proba_to_score(self):
+        if self.task == ModelTasks.CLASSIFICATION:
+            return ['average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
+                    'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
+        elif self.task == ModelTasks.REGRESSION:
+            return []
+
+    @property
+    def _needs_discrete_to_score(self):
+        if self.task == ModelTasks.CLASSIFICATION:
+            return ['accuracy', 'balanced_accuracy', 'top_k_accuracy', 'f1', 'f1_micro',
+                    'f1_macro', 'f1_weighted', 'f1_samples', 'precision', 'precision_micro',
+                    'precision_macro', 'precision_weighted', 'precision_samples', 'recall',
+                    'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
+        elif self.task == ModelTasks.REGRESSION:
+            return []
+
+    @property
+    def _supported_scoring(self):
+        if self.task == ModelTasks.CLASSIFICATION:
+            return ['average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
+                    'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted'
+                    'accuracy', 'balanced_accuracy', 'top_k_accuracy', 'f1', 'f1_micro',
+                    'f1_macro', 'f1_weighted', 'f1_samples', 'precision', 'precision_micro',
+                    'precision_macro', 'precision_weighted', 'precision_samples', 'recall',
+                    'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
+        elif self.task == ModelTasks.REGRESSION:
+            return ['explained_variance', 'max_error', 'neg_mean_absolute_error', 'neg_mean_squared_error',
+                    'neg_root_mean_squared_error', 'neg_mean_squared_log_error', 'neg_median_absolute_error',
+                    'r2', 'neg_mean_poisson_deviance', 'neg_mean_gamma_deviance', 'neg_mean_absolute_percentage_error',
+                    'd2_absolute_error_score', 'd2_pinball_score', 'd2_tweedie_scor']
 
     @property
     def task(self):
@@ -102,8 +135,9 @@ class QSPRModel(ABC):
         return self.data.task if self.data else self.metaInfo['task']
 
     @property
-    def targetProperties(self):
-        """Return target properties of the model, taken from the data set or deserialized from file if the model is loaded without data.
+    def targetProperty(self):
+        """
+        The target property of the model, taken from the data set or deserialized from file if the model is loaded without data.
 
         Returns:
             str: target property of the model
@@ -415,6 +449,8 @@ class QSPRModel(ABC):
             # always return 2D array
             if predictions.ndim == 1:
                 predictions = predictions.reshape(-1, 1)
+            if self.targetProperties[0].task == ModelTasks.CLASSIFICATION:
+                predictions = predictions.astype(int)
         else:
             # NOTE: if a multiclass-multiouput, this will return a list of 2D arrays
             predictions = self.predictProba(dataset)
@@ -446,3 +482,35 @@ class QSPRModel(ABC):
         """Clean up the model files. Removes the model directory and all its contents."""
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
+
+    def get_scoring_func(self, scoring):
+        """Get scoring function from sklearn.metrics.
+
+        Args:
+            scoring (Union[str, Callable]): metric name from sklearn.metrics or
+                user-defined scoring function.
+
+        Raises:
+            ValueError: If the scoring function is currently not supported by
+                GridSearch and BayesOptimization.
+
+        Returns:
+            score_func (Callable): scorer function from sklearn.metrics (`str` as input)
+            or user-defined function (`callable` as input)
+        """
+        if all([scoring not in self._supported_scoring, isinstance(scoring, str)]):
+            raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"
+                             % (scoring, self._supported_scoring))
+        elif callable(scoring):
+            return scoring
+        elif scoring is None:
+            if self.data.task == ModelTasks.REGRESSION:
+                scorer = metrics.get_scorer('explained_variance')
+            elif self.data.nClasses > 2:  # multiclass
+                return lambda y_true, y_pred: metrics.roc_auc_score(
+                    y_true, y_pred, multi_class='ovr', average='weighted')
+            else:
+                scorer = metrics.get_scorer('roc_auc')
+        else:
+            scorer = metrics.get_scorer(scoring)
+        return scorer._score_func

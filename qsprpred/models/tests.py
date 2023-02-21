@@ -145,6 +145,14 @@ class ModelTestMixIn:
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
+        # test the same for classification with probabilities
+        if predictor.task == ModelTasks.CLASSIFICATION:
+            predictions = predictor.predictMols(invalid_smiles, use_probas=True)
+            self.assertEqual(predictions.shape, (len(invalid_smiles), predictor.nClasses))
+            for cls in range(predictor.nClasses):
+                self.assertIsInstance(predictions[0, 1], numbers.Real)
+                self.assertTrue(np.isnan(predictions[1, cls]))
+
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRDNN class."""
@@ -273,13 +281,20 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             (XGBRegressor, "XGBR"),
             (KNeighborsRegressor, "KNNR")
         )
+        for alg, alg_name in (
+            (PLSRegression, "PLSR"),
+            (SVR, "SVR"),
+            (RandomForestRegressor, "RFR"),
+            (XGBRegressor, "XGBR"),
+            (KNeighborsRegressor, "KNNR")
+        )
     ])
     def test_regression_basic_fit(self, _, task, model_name, model_class):
         """Test model training for regression models."""
         if not model_name in ["SVR", "PLSR"]:
             parameters = {"n_jobs": N_CPUS}
         else:
-            parameters = {}
+            parameters = None
 
         # initialize dataset
         dataset = self.create_large_dataset(
@@ -313,10 +328,13 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         if not model_name in ["NB", "SVC"]:
             parameters = {"n_jobs": N_CPUS}
         else:
-            parameters = {}
+            parameters = None
 
         if model_name == "SVC":
-            parameters.update({"probability": True})
+            if parameters is not None:
+                parameters.update({"probability": True})
+            else:
+                parameters = {"probability": True}
 
         # initialize dataset
         dataset = self.create_large_dataset(
