@@ -35,6 +35,7 @@ from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
 
@@ -59,6 +60,7 @@ def QSPRArgParser(txt=None):
                         help="properties to be predicted identifiers. Add this argument for each model to be trained \
                               e.g. for one multi-task model for CL and Fu and one single task for CL do:\
                               -pr CL Fu -pr CL")
+    parser.add_argument('-im', '--imputation', type=str, default='mean', choices=['mean', 'median', 'most_frequent'])
 
     # model type arguments
     parser.add_argument('-r', '--regression', type=str, default=None,
@@ -147,12 +149,27 @@ def QSPR_dataprep(args):
                 if reg:
                     task = ModelTasks.REGRESSION
                 else:
-                    task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
+                    if th is None:
+                        task = ModelTasks.MULTICLASS if len(df[prop].dropna().unique()) > 2 else ModelTasks.SINGLECLASS
+                        th = 'precomputed'
+                    else:
+                        task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
                 if task == ModelTasks.REGRESSION and th:
                     log.warning("Threshold argument specified with regression. Threshold will be ignored.")
                     th = None
                 log_transform = np.log if args.log_transform and args.log_transform[prop] else None
                 target_props.append({"name": prop, "task": task, "th": th, "transformer": log_transform})
+
+            # missing value imputation
+            if args.imputation is not None:
+                if args.imputation == 'mean':
+                    imputer = SimpleImputer(strategy='mean')
+                elif args.imputation == 'median':
+                    imputer = SimpleImputer(strategy='median')
+                elif args.imputation == 'most_frequent':
+                    imputer = SimpleImputer(strategy='most_frequent')
+                else:
+                    sys.exit("invalid impute arg given")
 
             mydataset = QSPRDataset(
                 f"{props_name}_{task}",
@@ -161,7 +178,8 @@ def QSPR_dataprep(args):
                 smilescol=args.smilescol,
                 n_jobs=args.ncpu,
                 store_dir=f"{args.base_dir}/qspr/data/",
-                overwrite=True)
+                overwrite=True,
+                target_imputer=imputer if args.imputation is not None else None)
 
             # data filters
             datafilters = []
@@ -213,7 +231,7 @@ def QSPR_dataprep(args):
             # prepare dataset for modelling
             mydataset.prepareDataset(feature_calculator=DescriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, feature_filters=featurefilters,
-                                     feature_standardizer=StandardScaler())
+                                     feature_standardizer=StandardScaler(), feature_fill_value=0.0)
 
             # save dataset files and fingerprints
             mydataset.save()

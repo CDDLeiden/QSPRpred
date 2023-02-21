@@ -972,10 +972,16 @@ class QSPRDataset(MoleculeTable):
 
         new_prop = f"{target_property.originalName}_class"
 
-        if target_property.originalName not in self.df.columns:
+        if target_property.originalName not in self.df.columns or self.df[target_property.originalName].isnull().all():
             assert target_property.name in self.df.columns and "_class" in target_property.name, "Cannot infer classification property name."
-            logger.warning(
-                f"Target property {target_property.originalName} not in data frame. Inferring classification property name is {target_property.name} and task is {target_property.task} and no changes made to data frame.")
+            logger.info(
+                f"Target property {target_property.originalName} not in data frame or no values in {target_property.originalName}. \
+                  Assuming predictor, inferring classification property name is {target_property.name} and task is {target_property.task} and no changes made to data frame.")
+            return target_property
+
+        if target_property.name != target_property.originalName:
+            logger.info(f"Target property {target_property.originalName} is not the same as {target_property.name}.\
+                     Assuming already converted to classification.")
             return target_property
 
         if th is None:
@@ -984,7 +990,7 @@ class QSPRDataset(MoleculeTable):
 
         if th == 'precomputed':
             self.df[new_prop] = self.df[target_property.originalName]
-            if len(self.df[new_prop].unique()) > 2:
+            if len(self.df[new_prop].dropna().unique()) > 2:
                 target_property.task = ModelTasks.MULTICLASS
             else:
                 target_property.task = ModelTasks.SINGLECLASS
@@ -1013,7 +1019,7 @@ class QSPRDataset(MoleculeTable):
         logger.info("Target property converted to classification.")
         return target_property
 
-    @staticmethod
+    @ staticmethod
     def loadMetadata(name, store_dir):
         """Load metadata from a JSON file.
 
@@ -1026,7 +1032,7 @@ class QSPRDataset(MoleculeTable):
             meta['init']['target_props'] = TargetProperty.fromList(meta['init']['target_props'], task_from_str=True)
             return meta
 
-    @staticmethod
+    @ staticmethod
     def fromFile(filename, *args, **kwargs) -> 'QSPRDataset':
         """Load QSPRDataset from the saved file directly.
 
@@ -1043,7 +1049,7 @@ class QSPRDataset(MoleculeTable):
         meta = QSPRDataset.loadMetadata(name, store_dir)
         return QSPRDataset(*args, name=name, store_dir=store_dir, **meta['init'], **kwargs)
 
-    @staticmethod
+    @ staticmethod
     def fromMolTable(
             mol_table: MoleculeTable, target_props: List[Union[TargetProperty, dict]],
             name=None, **kwargs) -> 'QSPRDataset':

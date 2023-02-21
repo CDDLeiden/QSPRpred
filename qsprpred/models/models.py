@@ -57,7 +57,6 @@ class QSPRsklearn(QSPRModel):
 
     def fit(self):
         """Build estimator model from entire data set."""
-
         # check if data is available
         self.checkForData()
 
@@ -169,7 +168,7 @@ class QSPRsklearn(QSPRModel):
 
         # save crossvalidation results
         if save:
-            train, test = y.add_prefix('Label_'), y_ind.add_prefix('Label_')
+            train, test = y.add_suffix('_Label'), y_ind.add_suffix('_Label')
             for idx, prop in enumerate(self.data.targetProperties):
                 if prop.task.isClassification():
                     # convert one-hot encoded predictions to class labels and add to train and test
@@ -186,7 +185,17 @@ class QSPRsklearn(QSPRModel):
             train.to_csv(self.outPrefix + '.cv.tsv', sep='\t')
             test.to_csv(self.outPrefix + '.ind.tsv', sep='\t')
 
-        return cvs
+        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+            return cvs
+        else:
+            # for the singleclass-multioutput case predict_proba returns a list of 2d arrays,
+            # but we only want the second column (probability of class 1)
+            if isinstance(cvs, list):
+                cvs = np.transpose([y_pred[:, 1] for y_pred in cvs])
+            else:
+                if cvs.ndim == 2:
+                    cvs = cvs[:, 1]
+            return cvs
 
     def gridSearch(self, search_space_gs, scoring=None, n_jobs=1):
         """Optimization of hyperparameters using gridSearch.
@@ -204,7 +213,7 @@ class QSPRsklearn(QSPRModel):
         if scoring is None:
             if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
                 scoring = 'explained_variance'
-            elif self.data.nClasses(self.targetProperties[0]) > 2:  # multiclass
+            elif self.data.nClasses(self.targetProperties[0]) > 2 or self.data.isMultiTask:  # multiclass
                 scoring = 'roc_auc_ovr_weighted'
             else:
                 scoring = 'roc_auc'
@@ -319,6 +328,11 @@ class QSPRsklearn(QSPRModel):
             score_func (Callable): scorer function from sklearn.metrics (`str` as input)
             or user-defined function (`callable` as input)
         """
+        assert len(set([prop.task for prop in self.data.targetProperties])
+                   ) == 1, "All target properties must have the same task. No mixed multi-task learning supported scoring."
+        if self.data.isMultiTask:
+            assert ModelTasks.MULTICLASS not in [
+                prop.task for prop in self.data.targetProperties], "Multitask learning is not supported for multiclass classification."
         # TODO: to add support for more scoring functions we will need to ensure that
         # the cross validation returns the correct input for the scoring function.
         # It's possible to inspect that by calling `str(scorer)` and checking the attributes.
@@ -330,12 +344,15 @@ class QSPRsklearn(QSPRModel):
         elif scoring is None:
             if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
                 scorer = metrics.get_scorer('explained_variance')
-            elif self.data.nClasses(self.targetProperties[0]) > 2:  # multiclass
+            elif self.data.nClasses(self.targetProperties[0]) > 2 or self.data.isMultiTask:  # multiclass
+                logger.info("Using roc_auc_ovr_weighted for multiclass or multitask classification")
                 scorer = metrics.get_scorer('roc_auc_ovr_weighted')
             else:
                 scorer = metrics.get_scorer('roc_auc')
+                logger.info("Using roc_auc for multiclass classification")
         else:
             scorer = metrics.get_scorer(scoring)
+            logger.info(f"Using scoring function {scorer._score_func}")
         return scorer._score_func
 
     def loadModel(self, alg: Union[Type, BaseEstimator] = None, params: dict = None):

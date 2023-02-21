@@ -103,10 +103,10 @@ class DataSetsMixIn(PathMixIn):
         descriptor_sets = [
             rdkit_descs(),
             DrugExPhyschem(),
-            # PredictorDesc(
-            #     QSPRsklearn.fromFile(
-            #         f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
-            # ),
+            PredictorDesc(
+                QSPRsklearn.fromFile(
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json')
+            ),
             TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
             FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
             Mordred(),
@@ -251,7 +251,7 @@ class DataSetsMixIn(PathMixIn):
 
     def create_small_dataset(self, name="QSPRDataset_test", target_props=[
                              {"name": "CL", "task": ModelTasks.REGRESSION}], target_imputer=None,
-                               preparation_settings=None):
+                             preparation_settings=None):
         """Create a small dataset for testing purposes.
 
         Args:
@@ -804,7 +804,7 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
 
     def test_PredictorDesc(self):
         # give path to saved model parameters
-        meta_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json'
+        meta_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json'
         from qsprpred.models.models import QSPRsklearn
         model = QSPRsklearn.fromFile(meta_path)
         desc_calc = DescriptorsCalculator([PredictorDesc(model)])
@@ -1036,7 +1036,6 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
                             [{"name": "CL", "task": ModelTasks.REGRESSION},
                              {"name": "fu", "task": ModelTasks.SINGLECLASS, "th": [0.3]}])
                            for desc_set in DataSetsMixIn.get_all_descriptors()])
-    @skip("Not now...")
     def test_descriptors_all(self, _, desc_set, target_props):
         """Tests all available descriptor sets.
 

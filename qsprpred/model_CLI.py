@@ -36,10 +36,10 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-gpus', '--gpus', nargs="*", default=['0'], help="List of GPUs")
 
     # model target arguments
-    parser.add_argument('-pr', '--properties', type=str, nargs='+', action='append',
-                        help="properties to be predicted identifiers. Add this argument for each model to be trained \
-                              e.g. for one multi-task model for CL and Fu and one single task for CL do:\
-                              -pr CL Fu -pr CL")
+    parser.add_argument('-dp', '--data_prefixes', type=str, nargs='*',
+                        help="Prefix of each data file to be used as input for the model,\
+                            e.g. targeti1_MULTICLASS for a file named targeti1_MULTICLASS_df.pkl")
+    parser.add_argument('-ms', '--model_suffix', type=str, help="Suffix of the model to be saved")
 
     # model type arguments
     parser.add_argument('-m', '--model_types', type=str, nargs='*',
@@ -86,10 +86,6 @@ def QSPRArgParser(txt=None):
     else:
         args = parser.parse_args()
 
-    for props in args.properties:
-        if len(props) > 1:
-            sys.exit("Multitask not yet implemented")
-
     # If no regression argument, does both regression and classification
     if args.regression is None:
         args.regression = [True, False]
@@ -129,107 +125,114 @@ def QSPR_modelling(args):
             grid_params = QSPRModel.loadParamsGrid(
                 None, args.optimization, args.model_types)
 
-    for reg in args.regression:
-        reg_abbr = 'REGRESSION' if reg else 'CLASSIFICATION'
-        for property in args.properties:
-            log.info(f"Property: {property[0]}")
+    for data_prefix in args.data_prefixes:
+        log.info(f"Data file: {data_prefix}_df.pkl")
 
-            mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{reg_abbr}_{property[0]}_df.pkl')
+        mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{data_prefix}_df.pkl')
 
-            for model_type in args.model_types:
-                print(model_type)
-                log.info(f'Model: {model_type} {reg_abbr}')
+        tasks = [prop.task for prop in mydataset.targetProperties]
+        if all(ModelTasks.REGRESSION == task for task in tasks):
+            reg = True
+        elif all(task.isClassification() for task in tasks):
+            reg = False
+        else:
+            raise ValueError("Mixed tasks not supported")
+        reg_abbr = "regression" if reg else "classification"
 
-                if model_type not in ['RF', 'XGB', 'DNN', 'SVM', 'PLS', 'NB', 'KNN']:
-                    log.warning(f'Model type {model_type} does not exist')
-                    continue
-                if model_type == 'NB' and reg:
-                    log.warning("NB with regression invalid, skipped.")
-                    continue
-                if model_type == 'PLS' and not reg:
-                    log.warning("PLS with classification invalid, skipped.")
-                    continue
+        for model_type in args.model_types:
+            print(model_type)
+            log.info(f'Model: {model_type} {reg_abbr}')
 
-                if args.parameters:
-                    try:
-                        parameters = par_dicts[par_dicts[:, 0] == model_type, 1][0]
-                        if not model_type in ["NB", "PLS", "SVM", "DNN"]:
-                            parameters = parameters.update({"n_jobs": args.ncpu})
-                    except BaseException:
-                        log.warning(f'Model type {model_type} not in parameter file, default parameter settings used.')
-                        parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs": args.ncpu}
-                else:
+            if model_type not in ['RF', 'XGB', 'DNN', 'SVM', 'PLS', 'NB', 'KNN']:
+                log.warning(f'Model type {model_type} does not exist')
+                continue
+            if model_type == 'NB' and reg:
+                log.warning("NB with regression invalid, skipped.")
+                continue
+            if model_type == 'PLS' and not reg:
+                log.warning("PLS with classification invalid, skipped.")
+                continue
+
+            if args.parameters:
+                try:
+                    parameters = par_dicts[par_dicts[:, 0] == model_type, 1][0]
+                    if not model_type in ["NB", "PLS", "SVM", "DNN"]:
+                        parameters = parameters.update({"n_jobs": args.ncpu})
+                except BaseException:
+                    log.warning(f'Model type {model_type} not in parameter file, default parameter settings used.')
                     parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs": args.ncpu}
+            else:
+                parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs": args.ncpu}
 
-                # class_weight and scale_pos_weight are only used for RF, XGB and SVM
-                if not reg:
-                    class_weight = 'balanced' if args.sample_weighing else None
-                    counts = mydataset.y.value_counts()
-                    scale_pos_weight = counts[0] / counts[1] if (
-                        args.sample_weighing and not mydataset.isMultiClass()) else 1
+            # class_weight and scale_pos_weight are only used for RF, XGB and SVM
+            if not reg:
+                class_weight = 'balanced' if args.sample_weighing else None
+                counts = mydataset.y.value_counts()
+                scale_pos_weight = counts[0] / counts[1] if (
+                    args.sample_weighing and not mydataset.isMultiClass()) else 1
 
-                alg_dict = {
-                    'RF': RandomForestRegressor() if reg else RandomForestClassifier(class_weight=class_weight),
-                    'XGB': XGBRegressor(objective='reg:squarederror') if reg else
-                    XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss',
-                                  scale_pos_weight=scale_pos_weight),
-                    'SVM': SVR() if reg else SVC(probability=True, class_weight=class_weight),
-                    'PLS': PLSRegression(),
-                    'NB': GaussianNB(),
-                    'KNN': KNeighborsRegressor() if reg else KNeighborsClassifier()}
+            alg_dict = {
+                'RF': RandomForestRegressor() if reg else RandomForestClassifier(class_weight=class_weight),
+                'XGB': XGBRegressor(objective='reg:squarederror') if reg else
+                XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss',
+                              scale_pos_weight=scale_pos_weight),
+                'SVM': SVR() if reg else SVC(probability=True, class_weight=class_weight),
+                'PLS': PLSRegression(),
+                'NB': GaussianNB(),
+                'KNN': KNeighborsRegressor() if reg else KNeighborsClassifier()}
 
-                # Create QSPR model object
-                if model_type == 'DNN':
-                    QSPRmodel = QSPRDNN(
-                        base_dir=args.base_dir,
-                        data=mydataset,
-                        parameters=parameters,
-                        name=f"{model_type}_{reg_abbr}_{property[0]}",
-                        gpus=args.gpus,
-                        patience=args.patience,
-                        tol=args.tolerance)
-                else:
-                    QSPRmodel = QSPRsklearn(
-                        args.base_dir,
-                        data=mydataset,
-                        alg=alg_dict[model_type],
-                        name=f"{model_type}_{reg_abbr}_{property[0]}",
-                        parameters=parameters)
+            # Create QSPR model object
+            if model_type == 'DNN':
+                QSPRmodel = QSPRDNN(
+                    base_dir=args.base_dir,
+                    data=mydataset,
+                    parameters=parameters,
+                    name=f"{model_type}_{data_prefix}",
+                    gpus=args.gpus,
+                    patience=args.patience,
+                    tol=args.tolerance)
+            else:
+                QSPRmodel = QSPRsklearn(
+                    args.base_dir,
+                    data=mydataset,
+                    alg=alg_dict[model_type],
+                    name=f"{model_type}_{data_prefix}",
+                    parameters=parameters)
 
-                # if desired run parameter optimization
-                if args.optimization == 'grid':
-                    search_space_gs = grid_params[grid_params[:, 0] ==
-                                                  model_type, 1][0]
-                    log.info(search_space_gs)
-                    QSPRmodel.gridSearch(search_space_gs, n_jobs=args.n_jobs)
-                elif args.optimization == 'bayes':
-                    search_space_bs = grid_params[grid_params[:, 0] ==
-                                                  model_type, 1][0]
-                    log.info(search_space_bs)
-                    if reg and model_type == "RF":
-                        if mydataset.y.min()[0] < 0 or mydataset.y_ind.min()[0] < 0:
-                            search_space_bs.update(
-                                {'criterion': ['categorical', ['squared_error']]})
-                        else:
-                            search_space_bs.update(
-                                {'criterion': ['categorical', ['squared_error', 'poisson']]})
-                    elif model_type == "RF":
+            # if desired run parameter optimization
+            if args.optimization == 'grid':
+                search_space_gs = grid_params[grid_params[:, 0] ==
+                                              model_type, 1][0]
+                log.info(search_space_gs)
+                QSPRmodel.gridSearch(search_space_gs, n_jobs=args.n_jobs)
+            elif args.optimization == 'bayes':
+                search_space_bs = grid_params[grid_params[:, 0] ==
+                                              model_type, 1][0]
+                log.info(search_space_bs)
+                if reg and model_type == "RF":
+                    if mydataset.y.min()[0] < 0 or mydataset.y_ind.min()[0] < 0:
                         search_space_bs.update(
-                            {'criterion': ['categorical', ['gini', 'entropy']]})
-                    QSPRmodel.bayesOptimization(search_space_bs, args.n_trials, n_jobs=args.n_jobs)
-
-                # initialize models from saved or default parameters
-
-                if args.model_evaluation:
-                    QSPRmodel.evaluate()
-
-                if args.save_model:
-                    if (model_type == 'DNN') and not (args.model_evaluation):
-                        log.warning(
-                            "Fit skipped: DNN can only be fitted after cross-validation for determining \
-                                     optimal number of epochs to stop training")
+                            {'criterion': ['categorical', ['squared_error']]})
                     else:
-                        QSPRmodel.fit()
+                        search_space_bs.update(
+                            {'criterion': ['categorical', ['squared_error', 'poisson']]})
+                elif model_type == "RF":
+                    search_space_bs.update(
+                        {'criterion': ['categorical', ['gini', 'entropy']]})
+                QSPRmodel.bayesOptimization(search_space_bs, args.n_trials, n_jobs=args.n_jobs)
+
+            # initialize models from saved or default parameters
+
+            if args.model_evaluation:
+                QSPRmodel.evaluate()
+
+            if args.save_model:
+                if (model_type == 'DNN') and not (args.model_evaluation):
+                    log.warning(
+                        "Fit skipped: DNN can only be fitted after cross-validation for determining \
+                                     optimal number of epochs to stop training")
+                else:
+                    QSPRmodel.fit()
 
 
 if __name__ == '__main__':
@@ -244,9 +247,9 @@ if __name__ == '__main__':
     # Backup files
     tasks = ['REG' if reg == True else 'CLS' for reg in args.regression]
     file_prefixes = [
-        f'{alg}_{task}_{property}'
+        f'{alg}_{data_prefix}'
         for alg in args.model_types
-        for task in tasks for property in args.properties]
+        for data_prefix in args.data_prefixes]
     backup_msg = backUpFiles(
         args.base_dir,
         'qspr/models',

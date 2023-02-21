@@ -387,7 +387,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
         # initialize dataset
         dataset = self.create_large_dataset(target_props=[{"name": "fu", "task": ModelTasks.SINGLECLASS, "th": [0.3]}, {
-                                            "name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]}],
+                                            "name": "CL", "task": ModelTasks.SINGLECLASS, "th": [6.5]}],
                                             target_imputer=SimpleImputer(strategy='mean'),
                                             preparation_settings=self.get_default_prep())
 
