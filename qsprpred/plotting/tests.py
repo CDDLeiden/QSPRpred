@@ -11,7 +11,7 @@ import pandas as pd
 from matplotlib.axes import SubplotBase
 from matplotlib.figure import Figure
 from qsprpred.models.models import QSPRsklearn
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from qsprpred.models.tests import ModelDataSetsMixIn
 from qsprpred.plotting.classification import MetricsPlot, ROCPlot
 from qsprpred.plotting.regression import CorrelationPlot
@@ -32,7 +32,7 @@ class ROCPlotTest(ModelDataSetsMixIn, TestCase):
     def test_plot_single(self):
         dataset = self.create_large_dataset(
             "test_roc_plot_single_data",
-            task=ModelTasks.CLASSIFICATION,
+            task=TargetTasks.CLASSIFICATION,
             th=[50],
             preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_roc_plot_single_model")
@@ -66,7 +66,7 @@ class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
     def test_plot_single(self):
         dataset = self.create_large_dataset(
             "test_metrics_plot_single_data",
-            task=ModelTasks.CLASSIFICATION,
+            task=TargetTasks.CLASSIFICATION,
             th=[50],
             preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_metrics_plot_single_model")

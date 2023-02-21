@@ -13,7 +13,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from qsprpred.metrics.calibration import calibration_error
 from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from qsprpred.plotting.interfaces import ModelPlot
 from sklearn.calibration import CalibrationDisplay
 from sklearn.metrics import (
@@ -31,7 +31,7 @@ from sklearn.metrics import (
 class ClassifierPlot(ModelPlot, ABC):
 
     def getSupportedTasks(self):
-        return [ModelTasks.SINGLECLASS]
+        return [TargetTasks.SINGLECLASS]
 
 
 class ROCPlot(ClassifierPlot):

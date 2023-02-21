@@ -22,7 +22,7 @@ from qsprpred.data.utils.smiles_standardization import (
     sanitize_smiles,
 )
 from qsprpred.logs import logger
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from rdkit import Chem
 from rdkit.Chem import PandasTools
 from sklearn.model_selection import KFold, StratifiedKFold
@@ -565,13 +565,13 @@ class TargetProperty():
 
     Args:
         name (str): name of the target property
-        task (Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS]): task type for the target property
+        task (Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS]): task type for the target property
         th (int): threshold for the target property, only used for classification tasks
     """
 
     def __init__(
             self, name: str,
-            task: Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS],
+            task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS],
             originalName: str = None,
             th: Union[List[float], str] = None,
             transformer: Callable = None):
@@ -579,7 +579,7 @@ class TargetProperty():
 
         Args:
             name (str): name of the target property
-            task (Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS]): task type for the target property
+            task (Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS]): task type for the target property
             originalName (str): original name of the target property, if not specified, the name is used
             th (Union[List[float], str]): threshold for the target property, only used for classification tasks
             transformer (Callable): function to transform the target property
@@ -625,7 +625,7 @@ class TargetProperty():
             TargetProperty: TargetProperty object
         """
         if isinstance(d["task"], str):
-            return TargetProperty(**{k: ModelTasks[v] if k == "task" else v for k, v in d.items()})
+            return TargetProperty(**{k: TargetTasks[v] if k == "task" else v for k, v in d.items()})
         else:
             return TargetProperty(**d)
 
@@ -641,7 +641,7 @@ class TargetProperty():
             List[TargetProperty]: list of TargetProperty objects
         """
         if task_from_str:
-            return [TargetProperty(**{k: ModelTasks[v] if k == "task" else v for k, v in d.items()}) for d in l]
+            return [TargetProperty(**{k: TargetTasks[v] if k == "task" else v for k, v in d.items()}) for d in l]
         else:
             return [TargetProperty(**d) for d in l]
 
@@ -769,7 +769,7 @@ class QSPRDataset(MoleculeTable):
             add_rdkit (bool, optional): if true, column with rdkit molecules will be added to df. Defaults to False.
             store_dir (str, optional): directory for saving the output data. Defaults to '.'.
             overwrite (bool, optional): if already saved data at output dir if should be overwritten. Defaults to False.
-            tasks (List[Literal[ModelTasks.REGRESSION, ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS]], optional): Defaults to ModelTasks.REGRESSION.
+            tasks (List[Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS]], optional): Defaults to TargetTasks.REGRESSION.
             target_transformer (Callable, optional): List with length of properties of Transformation(s) of target propery. Defaults to None.
             th (List[List[float]], optional): threshold for activity if classification model, if len th
                 larger than 1, these values will used for binning (in this case lower and upper
@@ -936,7 +936,7 @@ class QSPRDataset(MoleculeTable):
         """Return if model task is multi class classification."""
         if isinstance(target_prop, str):
             target_prop = self.getTargetProperties([target_prop])[0]
-        return target_prop.task == ModelTasks.MULTICLASS and self.nClasses(target_prop) > 2
+        return target_prop.task == TargetTasks.MULTICLASS and self.nClasses(target_prop) > 2
 
     def nClasses(self, target_prop: str):
         """Return number of output classes for classification."""
@@ -957,7 +957,7 @@ class QSPRDataset(MoleculeTable):
             target_property = self.getTargetProperties([target_property], original_names=True)[0]
         target_property.name = target_property.originalName
         target_property.th = None
-        target_property.task = ModelTasks.REGRESSION
+        target_property.task = TargetTasks.REGRESSION
         self.restoreTrainingData()
 
     def makeClassification(self, target_property: Union[TargetProperty, str], th: List[float] = None):
@@ -985,15 +985,15 @@ class QSPRDataset(MoleculeTable):
             return target_property
 
         if th is None:
-            assert target_property.task is not ModelTasks.REGRESSION, "Cannot infer threshold values for regression task."
+            assert target_property.task is not TargetTasks.REGRESSION, "Cannot infer threshold values for regression task."
             th = target_property.th
 
         if th == 'precomputed':
             self.df[new_prop] = self.df[target_property.originalName]
             if len(self.df[new_prop].dropna().unique()) > 2:
-                target_property.task = ModelTasks.MULTICLASS
+                target_property.task = TargetTasks.MULTICLASS
             else:
-                target_property.task = ModelTasks.SINGLECLASS
+                target_property.task = TargetTasks.SINGLECLASS
         else:
             assert len(th) > 0, "Threshold list must contain at least one value."
             if len(th) > 1:
@@ -1012,7 +1012,7 @@ class QSPRDataset(MoleculeTable):
                 self.df[new_prop] = LabelEncoder().fit_transform(self.df[f"{new_prop}_intervals"])
             else:
                 self.df[new_prop] = self.df[target_property.originalName] > th[0]
-            target_property.task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
+            target_property.task = TargetTasks.SINGLECLASS if len(th) == 1 else TargetTasks.MULTICLASS
         target_property.setThreshold(th)
         target_property.name = new_prop
         self.restoreTrainingData()
@@ -1121,7 +1121,7 @@ class QSPRDataset(MoleculeTable):
         logger.info("Total: train: %s test: %s" % (len(self.y), len(self.y_ind)))
         for prop in self.targetProperties:
             logger.info("Target property: %s" % prop.name)
-            if prop.task == ModelTasks.SINGLECLASS:
+            if prop.task == TargetTasks.SINGLECLASS:
                 logger.info(
                     "    In train: active: %s not active: %s"
                     % (sum(self.y[prop.name]), len(self.y[prop.name]) - sum(self.y[prop.name]))
@@ -1130,7 +1130,7 @@ class QSPRDataset(MoleculeTable):
                     "    In test:  active: %s not active: %s\n"
                     % (sum(self.y_ind[prop.name]), len(self.y_ind[prop.name]) - sum(self.y_ind[prop.name]))
                 )
-            if prop.task == ModelTasks.MULTICLASS:
+            if prop.task == TargetTasks.MULTICLASS:
                 logger.info("train: %s" % self.y[prop.name].value_counts())
                 logger.info("test: %s\n" % self.y_ind[prop.name].value_counts())
                 try:
@@ -1336,7 +1336,7 @@ class QSPRDataset(MoleculeTable):
         Returns:
             datasplit (datasplit): default fold split implementation
         """
-        if len(self.targetProperties) > 1 or self.targetProperties[0].task == ModelTasks.REGRESSION:
+        if len(self.targetProperties) > 1 or self.targetProperties[0].task == TargetTasks.REGRESSION:
             return KFold(5)
         else:
             return StratifiedKFold(5)

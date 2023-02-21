@@ -15,7 +15,7 @@ from qsprpred.data.tests import DataSetsMixIn
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
@@ -124,11 +124,11 @@ class ModelTestMixIn:
                 self.assertIsInstance(predictions, np.ndarray)
 
             singleoutput = predictions[0][0, 0] if isinstance(predictions, list) else predictions[0, 0]
-            if predictor.targetProperties[0].task == ModelTasks.REGRESSION or use_probas:
+            if predictor.targetProperties[0].task == TargetTasks.REGRESSION or use_probas:
                 self.assertIsInstance(singleoutput, numbers.Real)
-            elif predictor.targetProperties[0].task == ModelTasks.MULTICLASS or isinstance(predictor.model, XGBClassifier):
+            elif predictor.targetProperties[0].task == TargetTasks.MULTICLASS or isinstance(predictor.model, XGBClassifier):
                 self.assertIsInstance(singleoutput, numbers.Integral)
-            elif predictor.targetProperties[0].task == ModelTasks.SINGLECLASS:
+            elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:
                 self.assertIn(singleoutput, [1, 0])
             else:
                 return AssertionError(f"Unknown task: {predictor.task}")
@@ -139,14 +139,14 @@ class ModelTestMixIn:
             check_shape(invalid_smiles)
             singleoutput = predictions[0][0, 0] if isinstance(predictions, list) else predictions[0, 0]
             self.assertEqual(predictions[0][1, 0] if isinstance(predictions, list) else predictions[1, 0], None)
-            if predictor.targetProperties[0].task == ModelTasks.SINGLECLASS and not isinstance(
+            if predictor.targetProperties[0].task == TargetTasks.SINGLECLASS and not isinstance(
                     predictor.model, XGBClassifier) and not use_probas:
                 self.assertIn(singleoutput, [0, 1])
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
         # test the same for classification with probabilities
-        if predictor.task == ModelTasks.CLASSIFICATION:
+        if predictor.task == TargetTasks.CLASSIFICATION:
             predictions = predictor.predictMols(invalid_smiles, use_probas=True)
             self.assertEqual(predictions.shape, (len(invalid_smiles), predictor.nClasses))
             for cls in range(predictor.nClasses):
@@ -171,7 +171,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             tol=0.02
         )
 
-    def prep_testdata(self, task=ModelTasks.REGRESSION, th=None):
+    def prep_testdata(self, task=TargetTasks.REGRESSION, th=None):
         """Prepare test dataset."""
         data = self.create_large_dataset(task=task, th=th, preparation_settings=self.get_default_prep())
         data.save()
@@ -192,15 +192,15 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     @parameterized.expand([
         (f"{alg_name}_{task}", task, alg_name, alg, th)
         for alg, alg_name, task, th in (
-            (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
-            (STFullyConnected, "STFullyConnected", ModelTasks.SINGLECLASS, [6.5]),
-            (STFullyConnected, "STFullyConnected", ModelTasks.SINGLECLASS, [0, 1, 10, 1200]),
+            (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
+            (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
+            (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [0, 1, 10, 1200]),
         )
     ])
     def test_base_model(self, _, task, alg_name, alg, th):
         """Test the base DNN model."""
         # prepare test regression dataset
-        is_reg = True if task == ModelTasks.REGRESSION else False
+        is_reg = True if task == TargetTasks.REGRESSION else False
         no_features, trainloader, testloader = self.prep_testdata(task=task, th=th)
 
         # fit model with default settings
@@ -237,9 +237,9 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     @parameterized.expand([
         (f"{alg_name}_{task}", task, alg_name, alg, th)
         for alg, alg_name, task, th in (
-            (STFullyConnected, "STFullyConnected", ModelTasks.REGRESSION, None),
-            (STFullyConnected, "STFullyConnected", ModelTasks.SINGLECLASS, [6.5]),
-            (STFullyConnected, "STFullyConnected", ModelTasks.SINGLECLASS, [0, 1, 10, 1100]),
+            (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
+            (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
+            (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [0, 1, 10, 1100]),
         )
     ])
     def test_qsprpred_model(self, _, task, alg_name, alg, th):
@@ -273,7 +273,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
 
     @parameterized.expand([
-        (alg_name, ModelTasks.REGRESSION, alg_name, alg)
+        (alg_name, TargetTasks.REGRESSION, alg_name, alg)
         for alg, alg_name in (
             (PLSRegression, "PLSR"),
             (SVR, "SVR"),
@@ -320,8 +320,8 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             (KNeighborsClassifier, "KNNC"),
             (GaussianNB, "NB")
         ) for task, th in
-        ((ModelTasks.SINGLECLASS, [6.5]),
-         (ModelTasks.MULTICLASS, [0, 1, 10, 1100]))
+        ((TargetTasks.SINGLECLASS, [6.5]),
+         (TargetTasks.MULTICLASS, [0, 1, 10, 1100]))
     ])
     def test_classification_basic_fit(self, _, task, th, model_name, model_class):
         """Test model training for classification models."""
@@ -370,8 +370,8 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters.update({"probability": True})
 
         # initialize dataset
-        dataset = self.create_large_dataset(target_props=[{"name": "fu", "task": ModelTasks.REGRESSION}, {
-                                            "name": "CL", "task": ModelTasks.REGRESSION}],
+        dataset = self.create_large_dataset(target_props=[{"name": "fu", "task": TargetTasks.REGRESSION}, {
+                                            "name": "CL", "task": TargetTasks.REGRESSION}],
                                             target_imputer=SimpleImputer(strategy='mean'),
                                             preparation_settings=self.get_default_prep())
 
@@ -404,10 +404,11 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters.update({"probability": True})
 
         # initialize dataset
-        dataset = self.create_large_dataset(target_props=[{"name": "fu", "task": ModelTasks.SINGLECLASS, "th": [0.3]}, {
-                                            "name": "CL", "task": ModelTasks.SINGLECLASS, "th": [6.5]}],
-                                            target_imputer=SimpleImputer(strategy='mean'),
-                                            preparation_settings=self.get_default_prep())
+        dataset = self.create_large_dataset(
+            target_props=[{"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
+                          {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
+            target_imputer=SimpleImputer(strategy='mean'),
+            preparation_settings=self.get_default_prep())
 
         # test classifier
         # initialize model for training from class

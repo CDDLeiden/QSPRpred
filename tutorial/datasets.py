@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.sources.papyrus import Papyrus
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 
 
 def A2AR(data_dir='data'):
@@ -42,7 +42,7 @@ def A2AR(data_dir='data'):
 
     print(f"Number of samples loaded: {len(dataset.getDF())}")
     return QSPRDataset.fromMolTable(
-        dataset, [{"name": "pchembl_value_Median", "task": ModelTasks.SINGLECLASS, "th": [6.5]}])
+        dataset, [{"name": "pchembl_value_Median", "task": TargetTasks.SINGLECLASS, "th": [6.5]}])
 
 
 def Parkinsons():
@@ -88,6 +88,6 @@ def Parkinsons():
         name='tutorial_data',
         df=df,
         smilescol=smiles_col,
-        target_props=[{"name": "GABAAalpha", "task": ModelTasks.REGRESSION}],
+        target_props=[{"name": "GABAAalpha", "task": TargetTasks.REGRESSION}],
         store_dir="qspr/data"
     )

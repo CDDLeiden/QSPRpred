@@ -33,7 +33,7 @@ from qsprpred.data.utils.featurefilters import (
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
@@ -147,14 +147,15 @@ def QSPR_dataprep(args):
             for prop in props:
                 th = args.threshold[prop] if args.threshold else None
                 if reg:
-                    task = ModelTasks.REGRESSION
+                    task = TargetTasks.REGRESSION
                 else:
                     if th is None:
-                        task = ModelTasks.MULTICLASS if len(df[prop].dropna().unique()) > 2 else ModelTasks.SINGLECLASS
+                        task = TargetTasks.MULTICLASS if len(
+                            df[prop].dropna().unique()) > 2 else TargetTasks.SINGLECLASS
                         th = 'precomputed'
                     else:
-                        task = ModelTasks.SINGLECLASS if len(th) == 1 else ModelTasks.MULTICLASS
-                if task == ModelTasks.REGRESSION and th:
+                        task = TargetTasks.SINGLECLASS if len(th) == 1 else TargetTasks.MULTICLASS
+                if task == TargetTasks.REGRESSION and th:
                     log.warning("Threshold argument specified with regression. Threshold will be ignored.")
                     th = None
                 log_transform = np.log if args.log_transform and args.log_transform[prop] else None

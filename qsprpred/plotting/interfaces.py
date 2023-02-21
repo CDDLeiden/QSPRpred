@@ -13,7 +13,7 @@ from qsprpred.models.interfaces import QSPRModel
 
 class ModelPlot(ABC):
 
-    def __init__(self, models : List[QSPRModel]):
+    def __init__(self, models: List[QSPRModel]):
         self.models = models
         self.modelOuts = {model: model.outPrefix for model in self.models}
         self.modelNames = {model: model.name for model in self.models}
@@ -30,14 +30,19 @@ class ModelPlot(ABC):
         if model.task not in self.getSupportedTasks():
             raise ValueError("Unsupported model type: %s" % model.task)
         if 'model_path' in model.metaInfo['model_path'] and not os.path.exists(model.metaInfo['model_path']):
-            raise ValueError("Model output file does not exist: %s. Have you evaluated and saved the model, yet?" % model.metaInfo['model_path'])
+            raise ValueError(
+                "Model output file does not exist: %s. Have you evaluated and saved the model, yet?" %
+                model.metaInfo['model_path'])
         if not os.path.exists(cvPath):
-            raise ValueError("Model output file does not exist: %s. Have you evaluated and saved the model, yet?" % cvPath)
+            raise ValueError(
+                "Model output file does not exist: %s. Have you evaluated and saved the model, yet?" %
+                cvPath)
         if not os.path.exists(indPath):
-            raise ValueError("Model output file does not exist: %s. Have you evaluated and saved the model, yet?" % indPath)
+            raise ValueError(
+                "Model output file does not exist: %s. Have you evaluated and saved the model, yet?" %
+                indPath)
 
         return cvPath, indPath
-
 
     @abstractmethod
     def getSupportedTasks(self):
@@ -45,12 +50,12 @@ class ModelPlot(ABC):
         Get the types of models this plotter supports.
 
         Returns:
-            `list` of `ModelTasks`: list of supported `ModelTasks`
+            `list` of `TargetTasks`: list of supported `TargetTasks`
         """
         pass
 
     @abstractmethod
-    def make(self, save : bool = True, show : bool = False):
+    def make(self, save: bool = True, show: bool = False):
         """
         Make the plot. Opens a window to show the plot or returns a plot representation that can be directly shown in a notebook or saved to a file.
 

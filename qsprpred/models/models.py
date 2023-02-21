@@ -23,11 +23,11 @@ from qsprpred.data.data import QSPRDataset
 from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.neural_network import STFullyConnected
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from sklearn import metrics
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
-from sklearn.multioutput import MultiOutputClassifier, MultiOutputRegressor
+from sklearn.multitask import MultiOutputClassifier, MultiOutputRegressor
 from sklearn.svm import SVC, SVR
 
 
@@ -90,10 +90,10 @@ class QSPRsklearn(QSPRModel):
         y, y_ind = self.data.getTargetPropertiesValues()
 
         # cvs and inds are used to store the predictions for the cross validation and the independent test set
-        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+        if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
             cvs = np.zeros((y.shape[0], len(self.data.targetProperties)))
         else:
-            # cvs, inds need to be lists of arrays for multiclass-multioutput classification
+            # cvs, inds need to be lists of arrays for multiclass-multitask classification
             cvs = [np.zeros((y.shape[0], self.data.nClasses(prop))) for prop in self.data.targetProperties]
             inds = [np.zeros((y_ind.shape[0], self.data.nClasses(prop))) for prop in self.data.targetProperties]
 
@@ -118,14 +118,14 @@ class QSPRsklearn(QSPRModel):
                     fit_set['y'] = y_train.ravel()
             self.model.fit(**fit_set)
 
-            if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+            if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
                 preds = self.model.predict(X_test)
                 # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
                 if preds.ndim == 1:
                     preds = preds.reshape(-1, 1)
                 cvs[idx_test] = preds
             else:
-                # for the multiclass-multioutput case predict_proba returns a list of
+                # for the multiclass-multitask case predict_proba returns a list of
                 # arrays, otherwise a single array is returned
                 preds = self.model.predict_proba(X_test)
                 for idx in range(len(self.data.targetProperties)):
@@ -149,14 +149,14 @@ class QSPRsklearn(QSPRModel):
 
         self.model.fit(**fit_set)
 
-        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+        if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
             preds = self.model.predict(X_ind)
             # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
             if preds.ndim == 1:
                 preds = preds.reshape(-1, 1)
             inds = preds
         else:
-            # for the multiclass-multioutput case predict_proba returns a list of
+            # for the multiclass-multitask case predict_proba returns a list of
             # arrays, otherwise a single array is returned
             preds = self.model.predict_proba(X_ind)
             for idx in range(len(self.data.targetProperties)):
@@ -184,10 +184,10 @@ class QSPRsklearn(QSPRModel):
             train.to_csv(self.outPrefix + '.cv.tsv', sep='\t')
             test.to_csv(self.outPrefix + '.ind.tsv', sep='\t')
 
-        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+        if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
             return cvs
         else:
-            # for the singleclass-multioutput case predict_proba returns a list of 2d arrays,
+            # for the singleclass-multitask case predict_proba returns a list of 2d arrays,
             # but we only want the second column (probability of class 1)
             if isinstance(cvs, list):
                 cvs = np.transpose([y_pred[:, 1] for y_pred in cvs])
@@ -210,7 +210,7 @@ class QSPRsklearn(QSPRModel):
         https://scikit-learn.org/stable/modules/model_evaluation.html
         """
         if scoring is None:
-            if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+            if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
                 scoring = 'explained_variance'
             elif self.data.nClasses(self.targetProperties[0]) > 2 or self.data.isMultiTask:  # multiclass
                 scoring = 'roc_auc_ovr_weighted'
@@ -367,7 +367,7 @@ class QSPRDNN(QSPRModel):
         outDir (str): output directory of the model, the model files are stored in this directory (`{baseDir}/qspr/models/{name}`)
         outPrefix (str): output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`)
         metaFile (str): absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
-        task (ModelTasks): task of the model, taken from the data set or deserialized from file if the model is loaded without data
+        task (TargetTasks): task of the model, taken from the data set or deserialized from file if the model is loaded without data
         targetProperty (str): target property of the model, taken from the data set or deserialized from file if the model is loaded without data
         device (cuda device): cuda device
         gpus (int/ list of ints): gpu number(s) to use for model fitting
@@ -423,7 +423,7 @@ class QSPRDNN(QSPRModel):
                         n_class=self.n_class,
                         device=self.device,
                         gpus=self.gpus,
-                        is_reg=self.task == ModelTasks.REGRESSION
+                        is_reg=self.task == TargetTasks.REGRESSION
                     )
                     model.set_params(**params)
                 else:
@@ -432,7 +432,7 @@ class QSPRDNN(QSPRModel):
                         n_class=self.n_class,
                         device=self.device,
                         gpus=self.gpus,
-                        is_reg=self.task == ModelTasks.REGRESSION
+                        is_reg=self.task == TargetTasks.REGRESSION
                     )
             else:
                 model = alg
@@ -444,7 +444,7 @@ class QSPRDNN(QSPRModel):
                     n_class=self.n_class,
                     device=self.device,
                     gpus=self.gpus,
-                    is_reg=self.task == ModelTasks.REGRESSION
+                    is_reg=self.task == TargetTasks.REGRESSION
                 )
                 model.set_params(**params)
             else:
@@ -453,7 +453,7 @@ class QSPRDNN(QSPRModel):
                     n_class=self.n_class,
                     device=self.device,
                     gpus=self.gpus,
-                    is_reg=self.task == ModelTasks.REGRESSION
+                    is_reg=self.task == TargetTasks.REGRESSION
                 )
 
         # load states if available
@@ -577,7 +577,7 @@ class QSPRDNN(QSPRModel):
         """
         self.model = self.loadModel(self.alg)
 
-        if self.data.targetProperties[0].task == ModelTasks.REGRESSION:
+        if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
             scoring = metrics.explained_variance_score
         else:
             scoring = partial(
@@ -701,7 +701,7 @@ class QSPRDNN(QSPRModel):
 
     def predict(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
         scores = self.predictProba(X)
-        if self.task == ModelTasks.SINGLECLASS:
+        if self.task == TargetTasks.SINGLECLASS:
             return np.argmax(scores, axis=1)
         else:
             return scores.flatten()

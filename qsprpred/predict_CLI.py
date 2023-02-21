@@ -52,7 +52,7 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-m', '--model_types', type=str, nargs='*',
                         choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
                         default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
-                        help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
+                        help="Modeltype, defaults to run all ModelTasks, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
                              'PLS' (only with REG), 'NB' (only with CLS) 'KNN'")
     parser.add_argument('-np', '--no_preprocessing', action='store_true',
                         help="If included do not standardize and sanitize SMILES.")

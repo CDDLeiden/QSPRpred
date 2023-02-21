@@ -14,7 +14,7 @@ import torch
 from qsprpred.data.data import QSPRDataset
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.models import QSPRDNN, QSPRModel, QSPRsklearn
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.naive_bayes import GaussianNB
@@ -45,7 +45,7 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-m', '--model_types', type=str, nargs='*',
                         choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
                         default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
-                        help="Modeltype, defaults to run all modeltypes, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
+                        help="Modeltype, defaults to run all ModelTasks, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
                              'PLS' (only with REG), 'NB' (only with CLS) 'KNN'")
     parser.add_argument('-r', '--regression', type=str, default=None,
                         help="If True, only regression model, if False, only classification, default both")
@@ -131,7 +131,7 @@ def QSPR_modelling(args):
         mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{data_prefix}_df.pkl')
 
         tasks = [prop.task for prop in mydataset.targetProperties]
-        if all(ModelTasks.REGRESSION == task for task in tasks):
+        if all(TargetTasks.REGRESSION == task for task in tasks):
             reg = True
         elif all(task.isClassification() for task in tasks):
             reg = False

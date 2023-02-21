@@ -94,55 +94,68 @@ class QSPRModel(ABC):
     # Adding scoring functions available for hyperparam optimization:
     @property
     def _needs_proba_to_score(self):
-        if self.task == ModelTasks.CLASSIFICATION:
+        if self.task.isClassification():
             return ['average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
                     'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
-        elif self.task == ModelTasks.REGRESSION:
+        elif self.task.isRegresssion():
             return []
 
     @property
     def _needs_discrete_to_score(self):
-        if self.task == ModelTasks.CLASSIFICATION:
+        if self.task.isClassification():
             return ['accuracy', 'balanced_accuracy', 'top_k_accuracy', 'f1', 'f1_micro',
                     'f1_macro', 'f1_weighted', 'f1_samples', 'precision', 'precision_micro',
                     'precision_macro', 'precision_weighted', 'precision_samples', 'recall',
                     'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
-        elif self.task == ModelTasks.REGRESSION:
+        elif self.task.isRegresssion():
+            return []
+
+    @property
+    def _supports_multitask(self):
+        if self.task.isClassification():
+            if self.task == ModelTasks.MULTITASK_SINGLECLASS:
+                return ['accuracy', 'average_precision', 'f1', 'f1_micro', 'f1_macro', 'f1_weighted', 'f1_samples',
+                        'metrics.log_loss', 'precision', 'precision_micro', 'precision_macro', 'precision_weighted',
+                        'precision_samples', 'recall', 'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
+            elif self.task == ModelTasks.MULTITASK_MULTICLASS:
+                return []
+        elif self.task.isRegression:
+            return self._supported_scoring()
+        else:
             return []
 
     @property
     def _supported_scoring(self):
-        if self.task == ModelTasks.CLASSIFICATION:
+        if self.task.isClassification():
             return ['average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
                     'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted'
                     'accuracy', 'balanced_accuracy', 'top_k_accuracy', 'f1', 'f1_micro',
                     'f1_macro', 'f1_weighted', 'f1_samples', 'precision', 'precision_micro',
                     'precision_macro', 'precision_weighted', 'precision_samples', 'recall',
                     'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
-        elif self.task == ModelTasks.REGRESSION:
+        elif self.task.isRegresssion():
             return ['explained_variance', 'max_error', 'neg_mean_absolute_error', 'neg_mean_squared_error',
                     'neg_root_mean_squared_error', 'neg_mean_squared_log_error', 'neg_median_absolute_error',
                     'r2', 'neg_mean_poisson_deviance', 'neg_mean_gamma_deviance', 'neg_mean_absolute_percentage_error',
                     'd2_absolute_error_score', 'd2_pinball_score', 'd2_tweedie_scor']
 
     @property
-    def task(self):
-        """The task of the model, taken from the data set or deserialized from file if the model is loaded without data.
-
-        Returns:
-            ModelTasks: task of the model
-        """
-        return self.data.task if self.data else self.metaInfo['task']
-
-    @property
-    def targetProperty(self):
-        """
-        The target property of the model, taken from the data set or deserialized from file if the model is loaded without data.
+    def targetProperties(self):
+        """Return the target properties of the model, taken from the data set or deserialized from file if the model is loaded without data.
 
         Returns:
             str: target property of the model
         """
         return self.data.targetProperties if self.data else self.metaInfo['target_properties']
+
+    @property
+    def task(self):
+        """Return the task of the model, taken from the data set or deserialized from file if the model is loaded without data.
+
+        Returns:
+            ModelType: task of the model
+        """
+        return ModelTasks.getModelTask(self.targetProperties)
 
     @property
     def isMultiTask(self):
@@ -151,7 +164,7 @@ class QSPRModel(ABC):
         Returns:
             bool: True if model is a multitask model
         """
-        return self.data.isMultiTask if self.data else len(self.targetProperties) > 1
+        return self.task.isMultiTask()
 
     @property
     def outDir(self):
@@ -165,7 +178,7 @@ class QSPRModel(ABC):
 
     @property
     def outPrefix(self):
-        """The output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`).
+        """Return output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`).
 
         Returns:
             str: output prefix of the model files
@@ -185,8 +198,7 @@ class QSPRModel(ABC):
             return json.loads(j.read())
 
     def saveParams(self, params):
-        """
-        Save model parameters to a JSON file.
+        """Save model parameters to a JSON file.
 
         Args:
             params (dict): dictionary of model parameters
@@ -372,7 +384,7 @@ class QSPRModel(ABC):
         # select either grid or bayes optimization parameters from param array
         optim_params = optim_params[optim_params[:, 2] == optim_type, :]
 
-        # check all modeltypes to be used have parameter grid
+        # check all ModelTasks to be used have parameter grid
         model_types = [model_types] if isinstance(
             model_types, str) else model_types
 
@@ -444,12 +456,12 @@ class QSPRModel(ABC):
             feature_calculator=self.featureCalculator,
             feature_standardizer=self.featureStandardizer
         )
-        if self.targetProperties[0].task == ModelTasks.REGRESSION or not use_probas:
+        if self.task.isRegression() or not use_probas:
             predictions = self.predict(dataset)
             # always return 2D array
             if predictions.ndim == 1:
                 predictions = predictions.reshape(-1, 1)
-            if self.targetProperties[0].task == ModelTasks.CLASSIFICATION:
+            if self.task.isClassification():
                 predictions = predictions.astype(int)
         else:
             # NOTE: if a multiclass-multiouput, this will return a list of 2D arrays
@@ -504,13 +516,15 @@ class QSPRModel(ABC):
         elif callable(scoring):
             return scoring
         elif scoring is None:
-            if self.data.task == ModelTasks.REGRESSION:
+            if self.task.isRegression():
                 scorer = metrics.get_scorer('explained_variance')
-            elif self.data.nClasses > 2:  # multiclass
+            elif self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_SINGLECLASS]:
                 return lambda y_true, y_pred: metrics.roc_auc_score(
                     y_true, y_pred, multi_class='ovr', average='weighted')
-            else:
+            elif self.task in [ModelTasks.SINGLECLASS]:
                 scorer = metrics.get_scorer('roc_auc')
+            else:
+                raise ValueError("No supported scoring function for task %s" % self.task)
         else:
             scorer = metrics.get_scorer(scoring)
         return scorer._score_func

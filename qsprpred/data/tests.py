@@ -37,7 +37,7 @@ from qsprpred.data.utils.featurefilters import (
 from qsprpred.data.utils.scaffolds import BemisMurcko, Murcko
 from qsprpred.logs.stopwatch import StopWatch
 from qsprpred.models.models import QSPRsklearn
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 from sklearn.impute import SimpleImputer
@@ -229,7 +229,7 @@ class DataSetsMixIn(PathMixIn):
             sep='\t').sample(10)
 
     def create_large_dataset(self, name="QSPRDataset_test", target_props=[
-                             {"name": "CL", "task": ModelTasks.REGRESSION}], target_imputer=None,
+                             {"name": "CL", "task": TargetTasks.REGRESSION}], target_imputer=None,
                              preparation_settings=None):
         """Create a large dataset for testing purposes.
 
@@ -250,7 +250,7 @@ class DataSetsMixIn(PathMixIn):
         )
 
     def create_small_dataset(self, name="QSPRDataset_test", target_props=[
-                             {"name": "CL", "task": ModelTasks.REGRESSION}], target_imputer=None,
+                             {"name": "CL", "task": TargetTasks.REGRESSION}], target_imputer=None,
                              preparation_settings=None):
         """Create a small dataset for testing purposes.
 
@@ -271,7 +271,7 @@ class DataSetsMixIn(PathMixIn):
         )
 
     def create_dataset(self, df, name="QSPRDataset_test", target_props=[
-                       {"name": "CL", "task": ModelTasks.REGRESSION}], target_imputer=None, prep=None):
+                       {"name": "CL", "task": TargetTasks.REGRESSION}], target_imputer=None, prep=None):
         """Create a dataset for testing purposes from the given data frame.
 
         Args:
@@ -299,7 +299,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         # creation from data frame
         dataset = QSPRDataset(
             "test_defaults",
-            [{"name": "CL", "task": ModelTasks.REGRESSION}],
+            [{"name": "CL", "task": TargetTasks.REGRESSION}],
             df=self.getSmallDF(),
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
@@ -317,7 +317,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             self.assertNotIn("Notes", dataset_to_check.getProperties())
             self.assertNotIn("HBD", dataset_to_check.getProperties())
             self.assertTrue(len(self.getSmallDF()) - 1 == len(dataset_to_check))
-            self.assertEqual(dataset_to_check.targetProperties[0].task, ModelTasks.REGRESSION)
+            self.assertEqual(dataset_to_check.targetProperties[0].task, TargetTasks.REGRESSION)
             self.assertTrue(dataset_to_check.hasProperty("CL"))
             self.assertEqual(dataset_to_check.targetProperties[0].name, "CL")
             self.assertEqual(dataset_to_check.targetProperties[0].originalName, "CL")
@@ -336,7 +336,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         stopwatch.reset()
         dataset_new = QSPRDataset(
             "test_defaults",
-            [{"name": "CL", "task": ModelTasks.REGRESSION}],
+            [{"name": "CL", "task": TargetTasks.REGRESSION}],
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
@@ -349,7 +349,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         dataset_new = QSPRDataset.fromTableFile(
             "test_defaults",
             f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-            target_props=[{"name": "CL", "task": ModelTasks.REGRESSION}],
+            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
@@ -361,7 +361,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         dataset_new = QSPRDataset.fromTableFile(
             "test_defaults_new",  # new name implies HBD below should exist again
             f'{os.path.dirname(__file__)}/test_files/data/test_data.tsv',
-            target_props=[{"name": "CL", "task": ModelTasks.REGRESSION}],
+            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
@@ -375,8 +375,8 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         """Test multi-task dataset creation and functionality."""
         dataset = QSPRDataset(
             "test_multi_task",
-            [{"name": "CL", "task": ModelTasks.REGRESSION},
-             {"name": "fu", "task": ModelTasks.REGRESSION}],
+            [{"name": "CL", "task": TargetTasks.REGRESSION},
+             {"name": "fu", "task": TargetTasks.REGRESSION}],
             df=self.getSmallDF(),
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
@@ -389,8 +389,8 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             self.assertEqual(len(dataset_to_check.targetProperties), 2)
             self.assertEqual(dataset_to_check.targetProperties[0].name, "CL")
             self.assertEqual(dataset_to_check.targetProperties[1].name, "fu")
-            self.assertEqual(dataset_to_check.targetProperties[0].task, ModelTasks.REGRESSION)
-            self.assertEqual(dataset_to_check.targetProperties[1].task, ModelTasks.REGRESSION)
+            self.assertEqual(dataset_to_check.targetProperties[0].task, TargetTasks.REGRESSION)
+            self.assertEqual(dataset_to_check.targetProperties[1].task, TargetTasks.REGRESSION)
             self.assertEqual(len(dataset_to_check.X), len(dataset_to_check))
             self.assertEqual(len(dataset_to_check.y), len(dataset_to_check))
             self.assertEqual(len(dataset_to_check.y.columns), 2)
@@ -408,7 +408,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             self.assertEqual(dataset_to_check.nTasks, 1)
             self.assertEqual(len(dataset_to_check.targetProperties), 1)
             self.assertEqual(dataset_to_check.targetProperties[0].name, "CL")
-            self.assertEqual(dataset_to_check.targetProperties[0].task, ModelTasks.REGRESSION)
+            self.assertEqual(dataset_to_check.targetProperties[0].task, TargetTasks.REGRESSION)
             self.assertEqual(len(dataset_to_check.X), len(dataset_to_check))
             self.assertEqual(len(dataset_to_check.y), len(dataset_to_check))
             self.assertEqual(len(dataset_to_check.y.columns), 1)
@@ -423,15 +423,15 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             dataset.dropTask("CL")
 
         # Check the dataset after adding a task
-        dataset.addTask({"name": "fu", "task": ModelTasks.REGRESSION})
+        dataset.addTask({"name": "fu", "task": TargetTasks.REGRESSION})
         check_multiclass(dataset)
 
     def test_target_property(self):
         """Test target property creation and serialization in the context of a dataset."""
         dataset = QSPRDataset(
             "test_target_property",
-            [{"name": "CL", "task": ModelTasks.REGRESSION},
-             {"name": "fu", "task": ModelTasks.REGRESSION}],
+            [{"name": "CL", "task": TargetTasks.REGRESSION},
+             {"name": "fu", "task": TargetTasks.REGRESSION}],
             df=self.getSmallDF(),
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
@@ -452,14 +452,14 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             # Test that the dataset properties are correctly initialized
             for idx, target_prop in enumerate(dataset_to_test.targetProperties):
                 if len(ths[idx]) == 1:
-                    self.assertEqual(target_prop.task, ModelTasks.SINGLECLASS)
+                    self.assertEqual(target_prop.task, TargetTasks.SINGLECLASS)
                 else:
-                    self.assertEqual(target_prop.task, ModelTasks.MULTICLASS)
+                    self.assertEqual(target_prop.task, TargetTasks.MULTICLASS)
                 self.assertEqual(target_prop.name, f"{target_names[idx]}_class")
                 self.assertEqual(target_prop.originalName, f"{target_names[idx]}")
                 y = dataset_to_test.getTargetPropertiesValues(concat=True)
                 self.assertTrue(y.columns[idx] == target_prop.name)
-                if target_prop.task == ModelTasks.SINGLECLASS:
+                if target_prop.task == TargetTasks.SINGLECLASS:
                     self.assertEqual(y[target_prop.name].unique().shape[0], 2)
                 else:
                     self.assertEqual(y[target_prop.name].unique().shape[0], (len(ths[idx]) - 1))
@@ -485,7 +485,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
 
         def check_regression(dataset_to_check, target_names):
             for idx, target_prop in enumerate(dataset_to_check.targetProperties):
-                self.assertEqual(target_prop.task, ModelTasks.REGRESSION)
+                self.assertEqual(target_prop.task, TargetTasks.REGRESSION)
                 self.assertTrue(dataset_to_check.hasProperty(target_names[idx]))
                 self.assertEqual(target_prop.name, target_names[idx])
                 self.assertEqual(target_prop.originalName, target_names[idx])
@@ -513,28 +513,28 @@ class TestTargetProperty(TestCase):
                 self.assertEqual(targetprop.th, th)
 
         # Check the different task types
-        targetprop = TargetProperty("CL", ModelTasks.REGRESSION)
-        check_target_property(targetprop, "CL", ModelTasks.REGRESSION, "CL", None)
+        targetprop = TargetProperty("CL", TargetTasks.REGRESSION)
+        check_target_property(targetprop, "CL", TargetTasks.REGRESSION, "CL", None)
 
-        targetprop = TargetProperty("CL", ModelTasks.MULTICLASS, th=[0, 1, 10, 1200])
-        check_target_property(targetprop, "CL", ModelTasks.MULTICLASS, "CL", [0, 1, 10, 1200])
+        targetprop = TargetProperty("CL", TargetTasks.MULTICLASS, th=[0, 1, 10, 1200])
+        check_target_property(targetprop, "CL", TargetTasks.MULTICLASS, "CL", [0, 1, 10, 1200])
 
-        targetprop = TargetProperty("CL", ModelTasks.SINGLECLASS, th=[5])
-        check_target_property(targetprop, "CL", ModelTasks.SINGLECLASS, "CL", [5])
+        targetprop = TargetProperty("CL", TargetTasks.SINGLECLASS, th=[5])
+        check_target_property(targetprop, "CL", TargetTasks.SINGLECLASS, "CL", [5])
 
         # Check from dictionary creation
-        targetprop = TargetProperty.fromDict({"name": "CL", "task": ModelTasks.REGRESSION})
-        check_target_property(targetprop, "CL", ModelTasks.REGRESSION, "CL", None)
+        targetprop = TargetProperty.fromDict({"name": "CL", "task": TargetTasks.REGRESSION})
+        check_target_property(targetprop, "CL", TargetTasks.REGRESSION, "CL", None)
 
-        targetprop = TargetProperty.fromDict({"name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]})
-        check_target_property(targetprop, "CL", ModelTasks.MULTICLASS, "CL", [0, 1, 10, 1200])
+        targetprop = TargetProperty.fromDict({"name": "CL", "task": TargetTasks.MULTICLASS, "th": [0, 1, 10, 1200]})
+        check_target_property(targetprop, "CL", TargetTasks.MULTICLASS, "CL", [0, 1, 10, 1200])
 
         # Check from list creation, selection and serialization support functions
         targetprops = TargetProperty.fromList(
-            [{"name": "CL", "task": ModelTasks.REGRESSION},
-             {"name": "fu", "task": ModelTasks.REGRESSION}])
-        check_target_property(targetprops[0], "CL", ModelTasks.REGRESSION, "CL", None)
-        check_target_property(targetprops[1], "fu", ModelTasks.REGRESSION, "fu", None)
+            [{"name": "CL", "task": TargetTasks.REGRESSION},
+             {"name": "fu", "task": TargetTasks.REGRESSION}])
+        check_target_property(targetprops[0], "CL", TargetTasks.REGRESSION, "CL", None)
+        check_target_property(targetprops[1], "fu", TargetTasks.REGRESSION, "fu", None)
         self.assertEqual(TargetProperty.selectFromList(targetprops, "CL")[0], targetprops[0])
         self.assertListEqual(TargetProperty.getNames(targetprops), ["CL", "fu"])
 
@@ -542,7 +542,7 @@ class TestTargetProperty(TestCase):
         self.assertIsInstance(targetprops, list)
         self.assertIsInstance(targetprops[0], dict)
         self.assertEqual(targetprops[0]["name"], "CL")
-        self.assertEqual(targetprops[0]["task"], ModelTasks.REGRESSION)
+        self.assertEqual(targetprops[0]["task"], TargetTasks.REGRESSION)
 
 
 class TestDataSplitters(DataSetsMixIn, TestCase):
@@ -698,7 +698,7 @@ class TestTargetImputation(PathMixIn, TestCase):
         """Test the imputation of missing values in the target properties."""
         self.dataset = QSPRDataset(
             "TestImputation",
-            target_props=[{"name": "y", "task": ModelTasks.REGRESSION}, {"name": "z", "task": ModelTasks.REGRESSION}],
+            target_props=[{"name": "y", "task": TargetTasks.REGRESSION}, {"name": "z", "task": TargetTasks.REGRESSION}],
             df=self.df,
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
@@ -729,7 +729,7 @@ class TestFeatureFilters(PathMixIn, TestCase):
         )
         self.dataset = QSPRDataset(
             "TestFeatureFilters",
-            target_props=[{"name": "y", "task": ModelTasks.REGRESSION}],
+            target_props=[{"name": "y", "task": TargetTasks.REGRESSION}],
             df=self.df,
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
@@ -1017,7 +1017,7 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
         # reload the dataset and check consistency again
         dataset = QSPRDataset.fromFile(dataset.storePath)
         self.assertEqual(dataset.name, name)
-        self.assertEqual(dataset.targetProperties[0].task, ModelTasks.REGRESSION)
+        self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
         self.assertEqual(dataset.targetProperties[0].name, "CL")
         self.assertIsInstance(dataset.descriptorCalculator, feature_calculator.__class__)
         if feature_standardizer is not None:
@@ -1026,15 +1026,15 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
             self.assertIsNone(dataset.feature_standardizer)
         self.feature_consistency_checks(dataset, expected_feature_count)
 
-    @parameterized.expand([(f"{desc_set}_{ModelTasks.MULTICLASS}", desc_set,
-                            [{"name": "CL", "task": ModelTasks.MULTICLASS, "th": [0, 1, 10, 1200]}])
+    @parameterized.expand([(f"{desc_set}_{TargetTasks.MULTICLASS}", desc_set,
+                            [{"name": "CL", "task": TargetTasks.MULTICLASS, "th": [0, 1, 10, 1200]}])
                            for desc_set in DataSetsMixIn.get_all_descriptors()] +
-                          [(f"{desc_set}_{ModelTasks.REGRESSION}", desc_set,
-                            [{"name": "CL", "task": ModelTasks.REGRESSION}])
+                          [(f"{desc_set}_{TargetTasks.REGRESSION}", desc_set,
+                            [{"name": "CL", "task": TargetTasks.REGRESSION}])
                            for desc_set in DataSetsMixIn.get_all_descriptors()] +
                           [(f"{desc_set}_Multitask", desc_set,
-                            [{"name": "CL", "task": ModelTasks.REGRESSION},
-                             {"name": "fu", "task": ModelTasks.SINGLECLASS, "th": [0.3]}])
+                            [{"name": "CL", "task": TargetTasks.REGRESSION},
+                             {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]}])
                            for desc_set in DataSetsMixIn.get_all_descriptors()])
     def test_descriptors_all(self, _, desc_set, target_props):
         """Tests all available descriptor sets.

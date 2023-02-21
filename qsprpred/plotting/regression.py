@@ -9,16 +9,16 @@ from abc import ABC
 
 import pandas as pd
 from matplotlib import pyplot as plt
-from sklearn import metrics
-
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from qsprpred.plotting.interfaces import ModelPlot
+from sklearn import metrics
 
 
 class RegressionPlot(ModelPlot, ABC):
 
     def getSupportedTasks(self):
-        return [ModelTasks.REGRESSION]
+        return [TargetTasks.REGRESSION]
+
 
 class CorrelationPlot(RegressionPlot):
 
@@ -58,7 +58,10 @@ class CorrelationPlot(RegressionPlot):
                 if max_val_now > max_val:
                     max_val = max_val_now
                 pad = (max_val - min_val) * 0.1
-                plt.plot([min_val - pad, max_val + pad], [min_val - pad, max_val + pad], lw=2, linestyle='--', color='black')
+                plt.plot(
+                    [min_val - pad, max_val + pad],
+                    [min_val - pad, max_val + pad],
+                    lw=2, linestyle='--', color='black')
         plt.legend(loc='lower right')
         plt.tight_layout()
         plt.subplots_adjust(wspace=0.3, hspace=0.5)
