@@ -23,11 +23,10 @@ from qsprpred.data.data import QSPRDataset
 from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.neural_network import STFullyConnected
-from qsprpred.models.tasks import TargetTasks
+from qsprpred.models.tasks import ModelTasks, TargetTasks
 from sklearn import metrics
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
-from sklearn.multitask import MultiOutputClassifier, MultiOutputRegressor
 from sklearn.svm import SVC, SVR
 
 
@@ -37,19 +36,23 @@ class QSPRsklearn(QSPRModel):
                  name: str = None, parameters: dict = None, autoload: bool = True):
         super().__init__(base_dir, alg, data, name, parameters, autoload)
 
-        if self.data is not None:
-            assert (len(set([prop.task.isClassification() for prop in self.data.targetProperties])) ==
-                    1), "All target properties must have the same task for sklearn multi-output models."
+        if self.task == ModelTasks.MULTITASK_MIXED:
+            raise ValueError(
+                'MultiTask with a mix of classification and regression tasks is not supported for sklearn models.')
 
-            # initialize models with defined parameters
-            if (type(self.model) in [SVC, SVR]):
-                logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
-                                Manually set this parameter if this is not desired.")
-                if self.parameters:
+        if self.task == ModelTasks.MULTITASK_MULTICLASS:
+            raise NotImplementedError(
+                'At the moment there are no supported metrics for multi-task multi-class/mix multi-and-single class classification.')
+
+        # initialize models with defined parameters
+        if (type(self.model) in [SVC, SVR]):
+            logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
+                            Manually set this parameter if this is not desired.")
+            if self.parameters:
                 self.parameters.update({'max_iter': 10000})
-                else:
+            else:
                 self.parameters = {'max_iter': 10000}
-            self.model.set_params(**self.parameters)
+        self.model.set_params(**self.parameters)
 
         logger.info('parameters: %s' % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
@@ -61,7 +64,7 @@ class QSPRsklearn(QSPRModel):
 
         X_all = self.data.getFeatures(concat=True).values
         y_all = self.data.getTargetPropertiesValues(concat=True)
-        if not self.data.isMultiTask:
+        if not self.task.isMultiTask:
             y_all = y_all.values.ravel()
 
         fit_set = {'X': X_all}
@@ -90,12 +93,12 @@ class QSPRsklearn(QSPRModel):
         y, y_ind = self.data.getTargetPropertiesValues()
 
         # cvs and inds are used to store the predictions for the cross validation and the independent test set
-        if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
-            cvs = np.zeros((y.shape[0], len(self.data.targetProperties)))
+        if self.task.isRegression():
+            cvs = np.zeros((y.shape[0], self.nTargets))
         else:
             # cvs, inds need to be lists of arrays for multiclass-multitask classification
-            cvs = [np.zeros((y.shape[0], self.data.nClasses(prop))) for prop in self.data.targetProperties]
-            inds = [np.zeros((y_ind.shape[0], self.data.nClasses(prop))) for prop in self.data.targetProperties]
+            cvs = [np.zeros((y.shape[0], self.data.nClasses(prop))) for prop in self.targetProperties]
+            inds = [np.zeros((y_ind.shape[0], self.data.nClasses(prop))) for prop in self.targetProperties]
 
         fold_counter = np.zeros(y.shape[0])
 
@@ -112,13 +115,13 @@ class QSPRsklearn(QSPRModel):
                     type(self.alg).__name__ == 'PLSRegression'):
                 fit_set['Y'] = y_train.ravel()
             else:
-                if self.data.isMultiTask:
+                if self.isMultiTask:
                     fit_set['y'] = y_train
                 else:
                     fit_set['y'] = y_train.ravel()
             self.model.fit(**fit_set)
 
-            if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
+            if self.task.isRegression():
                 preds = self.model.predict(X_test)
                 # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
                 if preds.ndim == 1:
@@ -149,7 +152,7 @@ class QSPRsklearn(QSPRModel):
 
         self.model.fit(**fit_set)
 
-        if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
+        if self.task.isRegression():
             preds = self.model.predict(X_ind)
             # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
             if preds.ndim == 1:
@@ -159,8 +162,8 @@ class QSPRsklearn(QSPRModel):
             # for the multiclass-multitask case predict_proba returns a list of
             # arrays, otherwise a single array is returned
             preds = self.model.predict_proba(X_ind)
-            for idx in range(len(self.data.targetProperties)):
-                if len(self.data.targetProperties) == 1:
+            for idx in range(self.nTargets):
+                if self.nTargets == 1:
                     inds[idx] = preds
                 else:
                     inds[idx] = preds[idx]
@@ -184,7 +187,7 @@ class QSPRsklearn(QSPRModel):
             train.to_csv(self.outPrefix + '.cv.tsv', sep='\t')
             test.to_csv(self.outPrefix + '.ind.tsv', sep='\t')
 
-        if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
+        if self.task.isRegression():
             return cvs
         else:
             # for the singleclass-multitask case predict_proba returns a list of 2d arrays,
@@ -210,9 +213,9 @@ class QSPRsklearn(QSPRModel):
         https://scikit-learn.org/stable/modules/model_evaluation.html
         """
         if scoring is None:
-            if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
+            if self.task.isRegression():
                 scoring = 'explained_variance'
-            elif self.data.nClasses(self.targetProperties[0]) > 2 or self.data.isMultiTask:  # multiclass
+            elif self.task.isMultiTask or self.task == ModelTasks.MULTICLASS:  # multiclass
                 scoring = 'roc_auc_ovr_weighted'
             else:
                 scoring = 'roc_auc'
@@ -305,8 +308,6 @@ class QSPRsklearn(QSPRModel):
         self.model.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetPropertiesValues()
-        if scoring in self._needs_discrete_to_score:
-            y = np.where(y > th, 1, 0)
         score_func = self.get_scoring_func(scoring)
         score = score_func(y, self.evaluate(save=False))
         return score

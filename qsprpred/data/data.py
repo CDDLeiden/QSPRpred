@@ -970,23 +970,14 @@ class QSPRDataset(MoleculeTable):
         if isinstance(target_property, str):
             target_property = self.getTargetProperties([target_property], original_names=True)[0]
 
-        new_prop = f"{target_property.originalName}_class"
-
-        if target_property.originalName not in self.df.columns or self.df[target_property.originalName].isnull().all():
-            assert target_property.name in self.df.columns and "_class" in target_property.name, "Cannot infer classification property name."
-            logger.info(
-                f"Target property {target_property.originalName} not in data frame or no values in {target_property.originalName}. \
-                  Assuming predictor, inferring classification property name is {target_property.name} and task is {target_property.task} and no changes made to data frame.")
-            return target_property
-
-        if target_property.name != target_property.originalName:
-            logger.info(f"Target property {target_property.originalName} is not the same as {target_property.name}.\
-                     Assuming already converted to classification.")
-            return target_property
-
+        # if no threshold values are provided, assume already a classification target property
         if th is None:
-            assert target_property.task is not TargetTasks.REGRESSION, "Cannot infer threshold values for regression task."
-            th = target_property.th
+            assert target_property.task.isClassification(), "TargetProperty is not a classification task, please specify threshold values."
+            assert target_property.th is not None, "TargetProperty has no threshold defined and no threshold passed, if classification precomputed, pass 'precomputed' as th."
+            logger.debug("No threshold values provided, just returning TargetProperty.")
+            return target_property
+        
+        new_prop = f"{target_property.originalName}_class"
 
         if th == 'precomputed':
             self.df[new_prop] = self.df[target_property.originalName]

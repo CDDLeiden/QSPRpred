@@ -5,7 +5,6 @@ import os
 import shutil
 import sys
 from abc import ABC, abstractmethod
-from inspect import isclass
 from typing import List, Type, Union
 
 import numpy as np
@@ -165,6 +164,15 @@ class QSPRModel(ABC):
             bool: True if model is a multitask model
         """
         return self.task.isMultiTask()
+
+    @property
+    def nTargets(self):
+        """Return the number of target properties of the model, taken from the data set or deserialized from file if the model is loaded without data.
+
+        Returns:
+            int: number of target properties of the model
+        """
+        return len(self.data.targetProperties) if self.data else len(self.metaInfo['target_properties'])
 
     @property
     def outDir(self):
