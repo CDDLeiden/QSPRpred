@@ -3,7 +3,9 @@
 QSPRpred
 ====================
 
-QSPRpred is open-source software libary for building **Quantitative Structure Property Relationship (QSPR)** model developed by Gerard van Westen's Computational Drug Discovery group. Models developed with QSPRpred are compatible with the group's *de novo* drug design package [DrugEx](https://github.com/CDDLeiden/DrugEx).
+<img src='figures/QSPRpred_logo.jpg' width=10% align=right>
+<p align=left width=70%>
+QSPRpred is open-source software libary for building **Quantitative Structure Property Relationship (QSPR)** model developed by Gerard van Westen's Computational Drug Discovery group. Models developed with QSPRpred are compatible with the group's *de novo* drug design package <a href="https://github.com/CDDLeiden/DrugEx/">DrugEx</a>.
 
 <!-- This repository can be used for building **Quantitative Structure Property Relationship (QSPR)** models.
 It is based on the QSAR models in **Drug Explorer (DrugEx)**, a _de novo_ drug design tool based on deep learning,
@@ -32,6 +34,7 @@ python -m qsprpred.QSPR_cli -i parkinsons_pivot.tsv -pr GABAAalpha -m XGB -r tru
 
 Workflow
 ========
+![image](figures/QSPRpred_workflow.png)
 
 Current Development Team
 ========================
