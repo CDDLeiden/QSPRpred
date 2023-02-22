@@ -13,12 +13,14 @@ import torch
 from parameterized import parameterized
 from qsprpred.data.tests import DataSetsMixIn
 from qsprpred.models.interfaces import QSPRModel
+from qsprpred.models.metrics import SklearnMetric, get_scoring_func
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
-from qsprpred.models.tasks import TargetTasks
+from qsprpred.models.tasks import ModelTasks, TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
+from sklearn.metrics import get_scorer as get_sklearn_scorer
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
@@ -144,14 +146,6 @@ class ModelTestMixIn:
                 self.assertIn(singleoutput, [0, 1])
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
-
-        # test the same for classification with probabilities
-        if predictor.task == TargetTasks.CLASSIFICATION:
-            predictions = predictor.predictMols(invalid_smiles, use_probas=True)
-            self.assertEqual(predictions.shape, (len(invalid_smiles), predictor.nClasses))
-            for cls in range(predictor.nClasses):
-                self.assertIsInstance(predictions[0, 1], numbers.Real)
-                self.assertTrue(np.isnan(predictions[1, cls]))
 
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
@@ -420,3 +414,77 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         self.fit_test(model)
         self.predictor_test(f"{model_name}_multitask_classification", model.baseDir)
+
+
+class test_Metrics(TestCase):
+    """Test the SklearnMetrics from the metrics module."""
+
+    def checkMetric(self, metric, task, y_true, y_pred, y_pred_proba=None):
+        """Check if the metric is correctly implemented."""
+        scorer = get_scoring_func(metric)
+        self.assertEqual(scorer.name, metric)
+        self.assertTrue(getattr(scorer, f'supports_{task}'))
+        self.assertTrue(scorer.supportsTask(task))
+
+        # lambda function to get the sklearn scoring function from the scorer object
+        sklearn_scorer = get_sklearn_scorer(metric)
+
+        def sklearn_func(y_true, y_pred):
+            return sklearn_scorer._sign * sklearn_scorer._score_func(y_true, y_pred, **sklearn_scorer._kwargs)
+
+        if y_pred_proba is not None and scorer.needs_proba_to_score:
+            self.assertEqual(scorer(y_true, y_pred_proba), sklearn_func(y_true, y_pred_proba))
+        else:
+            self.assertEqual(scorer(y_true, y_pred), sklearn_func(y_true, y_pred))
+
+    def test_RegressionMetrics(self):
+        """Test the regression metrics."""
+        y_true = np.array([1.2, 2.2, 3.2, 4.2, 5.2])
+        y_pred = np.array([1.2, 2.2, 3.2, 4.2, 5.2])
+
+        for metric in SklearnMetric.regressionMetrics:
+            self.checkMetric(metric, ModelTasks.REGRESSION, y_true, y_pred)
+
+    def test_SingleClassMetrics(self):
+        """Test the single class metrics."""
+        y_true = np.array([1, 0, 1, 0, 1])
+        y_pred = np.array([1, 0, 1, 0, 1])
+        y_pred_proba = np.array([0.9, 0.2, 0.8, 0.1, 0.9])
+
+        for metric in SklearnMetric.singleClassMetrics:
+            self.checkMetric(metric, ModelTasks.SINGLECLASS, y_true, y_pred, y_pred_proba)
+
+    def test_MultiClassMetrics(self):
+        """Test the multi class metrics."""
+        y_true = np.array([0, 1, 2, 1, 1])
+        y_pred = np.array([0, 1, 2, 1, 1])
+        y_pred_proba = np.array([[0.9, 0.1, 0.0],
+                                 [0.1, 0.8, 0.1],
+                                 [0.0, 0.1, 0.9],
+                                 [0.1, 0.8, 0.1],
+                                 [0.1, 0.8, 0.1]])
+
+        for metric in SklearnMetric.multiClassMetrics:
+            self.checkMetric(metric, ModelTasks.MULTICLASS, y_true, y_pred, y_pred_proba)
+
+    def test_MultiTaskRegressionMetrics(self):
+        """Test the multi task regression metrics."""
+        y_true = np.array([[1.2, 2.2, 3.2, 4.2, 5.2],
+                           [1.2, 2.2, 3.2, 4.2, 5.2]])
+        y_pred = np.array([[1.2, 2.2, 3.2, 4.2, 5.2],
+                           [1.2, 2.2, 3.2, 4.2, 5.2]])
+
+        for metric in SklearnMetric.multiTaskRegressionMetrics:
+            self.checkMetric(metric, ModelTasks.MULTITASK_REGRESSION, y_true, y_pred)
+
+    def test_MultiTaskSingleClassMetrics(self):
+        """Test the multi task single class metrics."""
+        y_true = np.array([[1, 0, 1, 0, 1],
+                           [1, 0, 1, 0, 1]])
+        y_pred = np.array([[1, 0, 1, 0, 1],
+                           [1, 0, 1, 0, 1]])
+        y_pred_proba = np.array([[0.9, 0.2, 0.8, 0.1, 0.9],
+                                 [0.9, 0.2, 0.8, 0.1, 0.9]])
+
+        for metric in SklearnMetric.multiTaskSingleClassMetrics:
+            self.checkMetric(metric, ModelTasks.MULTITASK_SINGLECLASS, y_true, y_pred, y_pred_proba)

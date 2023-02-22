@@ -90,54 +90,6 @@ class QSPRModel(ABC):
         """Return the name of the model and the underlying class as the identifier."""
         return f"{self.name} ({self.model.__class__.__name__ if self.model else self.alg.__class__.__name__ if self.alg else 'None'})"
 
-    # Adding scoring functions available for hyperparam optimization:
-    @property
-    def _needs_proba_to_score(self):
-        if self.task.isClassification():
-            return ['average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
-                    'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
-        elif self.task.isRegresssion():
-            return []
-
-    @property
-    def _needs_discrete_to_score(self):
-        if self.task.isClassification():
-            return ['accuracy', 'balanced_accuracy', 'top_k_accuracy', 'f1', 'f1_micro',
-                    'f1_macro', 'f1_weighted', 'f1_samples', 'precision', 'precision_micro',
-                    'precision_macro', 'precision_weighted', 'precision_samples', 'recall',
-                    'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
-        elif self.task.isRegresssion():
-            return []
-
-    @property
-    def _supports_multitask(self):
-        if self.task.isClassification():
-            if self.task == ModelTasks.MULTITASK_SINGLECLASS:
-                return ['accuracy', 'average_precision', 'f1', 'f1_micro', 'f1_macro', 'f1_weighted', 'f1_samples',
-                        'metrics.log_loss', 'precision', 'precision_micro', 'precision_macro', 'precision_weighted',
-                        'precision_samples', 'recall', 'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
-            elif self.task == ModelTasks.MULTITASK_MULTICLASS:
-                return []
-        elif self.task.isRegression:
-            return self._supported_scoring()
-        else:
-            return []
-
-    @property
-    def _supported_scoring(self):
-        if self.task.isClassification():
-            return ['average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
-                    'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted'
-                    'accuracy', 'balanced_accuracy', 'top_k_accuracy', 'f1', 'f1_micro',
-                    'f1_macro', 'f1_weighted', 'f1_samples', 'precision', 'precision_micro',
-                    'precision_macro', 'precision_weighted', 'precision_samples', 'recall',
-                    'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
-        elif self.task.isRegresssion():
-            return ['explained_variance', 'max_error', 'neg_mean_absolute_error', 'neg_mean_squared_error',
-                    'neg_root_mean_squared_error', 'neg_mean_squared_log_error', 'neg_median_absolute_error',
-                    'r2', 'neg_mean_poisson_deviance', 'neg_mean_gamma_deviance', 'neg_mean_absolute_percentage_error',
-                    'd2_absolute_error_score', 'd2_pinball_score', 'd2_tweedie_scor']
-
     @property
     def targetProperties(self):
         """Return the target properties of the model, taken from the data set or deserialized from file if the model is loaded without data.

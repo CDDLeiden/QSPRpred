@@ -58,7 +58,7 @@ class ModelTasks(Enum):
     def getModelTask(target_properties: list):
         """Return the model type for a given list of target properties."""
         if len(target_properties) == 1:
-            return target_properties[0].task
+            return ModelTasks[target_properties[0].task.name]
         else:
             if all([target_property.task.isRegression() for target_property in target_properties]):
                 return ModelTasks.MULTITASK_REGRESSION

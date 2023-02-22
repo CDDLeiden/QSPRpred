@@ -52,7 +52,9 @@ class QSPRsklearn(QSPRModel):
                 self.parameters.update({'max_iter': 10000})
             else:
                 self.parameters = {'max_iter': 10000}
-        self.model.set_params(**self.parameters)
+
+        if self.parameters not in [None, {}]:
+            self.model.set_params(**self.parameters)
 
         logger.info('parameters: %s' % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
