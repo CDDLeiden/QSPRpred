@@ -14,8 +14,8 @@ from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
+from qsprpred.models.metrics import SklearnMetric, get_scoring_func
 from qsprpred.models.tasks import ModelTasks
-from sklearn import metrics
 
 
 class QSPRModel(ABC):
@@ -467,24 +467,25 @@ class QSPRModel(ABC):
                 GridSearch and BayesOptimization.
 
         Returns:
-            score_func (Callable): scorer function from sklearn.metrics (`str` as input)
+            score_func (Callable): scorer function from sklearn.metrics (`str` as input) wrapped in the SklearnMetric class
             or user-defined function (`callable` as input)
         """
-        if all([scoring not in self._supported_scoring, isinstance(scoring, str)]):
+        if all([scoring not in SklearnMetric.supported_metrics, isinstance(scoring, str)]):
             raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"
-                             % (scoring, self._supported_scoring))
+                             % (scoring, SklearnMetric.supported_metrics))
         elif callable(scoring):
             return scoring
         elif scoring is None:
             if self.task.isRegression():
-                scorer = metrics.get_scorer('explained_variance')
+                scorer = get_scoring_func('explained_variance')
             elif self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_SINGLECLASS]:
-                return lambda y_true, y_pred: metrics.roc_auc_score(
-                    y_true, y_pred, multi_class='ovr', average='weighted')
+                scorer = get_scoring_func('roc_auc_ovr_weighted')
             elif self.task in [ModelTasks.SINGLECLASS]:
-                scorer = metrics.get_scorer('roc_auc')
+                scorer = get_scoring_func('roc_auc')
             else:
                 raise ValueError("No supported scoring function for task %s" % self.task)
         else:
-            scorer = metrics.get_scorer(scoring)
-        return scorer._score_func
+            scorer = get_scoring_func(scoring)
+
+        assert scorer.supportsTask(self.task), "Scoring function %s does not support task %s" % (scorer, self.task)
+        return scorer
