@@ -6,7 +6,7 @@ from qsprpred.models.tasks import ModelTasks
 from sklearn import metrics
 
 
-class Metric():
+class Metric(ABC):
     """Abstract class for scoring functions."""
 
     def __init__(self, name, func):
