@@ -63,24 +63,22 @@ class Metric(ABC):
 
     @property
     @abstractmethod
-    def _needs_proba_to_score(self):
+    def needs_proba_to_score(self):
         """Return True if the scorer needs probabilities to score."""
         pass
 
     @property
     @abstractmethod
-    def _needs_discrete_to_score(self):
+    def needs_discrete_to_score(self):
         """Return True if the scorer needs discrete values to score."""
         pass
 
     @property
-    @abstractmethod
     def isClassificationMetric(self):
         """Return true if the scorer supports any type of classification tasks."""
         return self.supports_SINGLECLASS or self.supports_MULTICLASS or self.supports_MULTITASK_SINGLECLASS or self.supports_MULTITASK_MULTICLASS or self.supports_MULTITASK_MIXED
 
     @property
-    @abstractmethod
     def isRegressionMetric(self):
         """Return true if the scorer supports any type of regression tasks."""
         return self.supports_REGRESSION or self.supports_MULTITASK_REGRESSION or self.supports_MULTITASK_MIXED

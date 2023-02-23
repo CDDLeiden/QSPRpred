@@ -468,7 +468,8 @@ class QSPRModel(ABC):
 
         Returns:
             score_func (Callable): scorer function from sklearn.metrics (`str` as input) wrapped in the SklearnMetric class
-            or user-defined function (`callable` as input)
+            or user-defined function (`callable` as input, if classification metric should have an attribute `needs_proba_to_score`,
+                                      set to `True` if is needs probabilities instead of predictions). 
         """
         if all([scoring not in SklearnMetric.supported_metrics, isinstance(scoring, str)]):
             raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"

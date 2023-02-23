@@ -704,7 +704,7 @@ class QSPRDNN(QSPRModel):
 
     def predict(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
         scores = self.predictProba(X)
-        if self.task == TargetTasks.SINGLECLASS:
+        if self.task == ModelTasks.SINGLECLASS:
             return np.argmax(scores, axis=1)
         else:
             return scores.flatten()
