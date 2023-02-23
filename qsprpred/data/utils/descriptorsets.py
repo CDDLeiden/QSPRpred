@@ -525,32 +525,19 @@ class PaDEL(DescriptorSet):
 class PredictorDesc(DescriptorSet):
     """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
 
-    @staticmethod
-    def import_class(class_path):
-        """Import a class from a string path."""
-        class_name = class_path.split(".")[-1]
-        module_name = class_path.replace(f".{class_name}", "")
-        module = importlib.import_module(module_name)
-        return getattr(module, class_name)
-
-    def __init__(self, model : Union["QSPRModel", str], model_class : str = None):
+    def __init__(self, model : Union["QSPRModel", str]):
         """
         Initialize the descriptorset with a `QSPRModel` object.
 
         Args:
             model: a fitted model instance or a path to the model's meta file
         """
-        from qsprpred.models.models import QSPRModel
 
         if isinstance(model, str):
-            if model_class is not None:
-                self.modelClass = self.import_class(model_class)
-                self.model = self.modelClass.fromFile(model)
-            else:
-                raise ValueError("Model class must be specified if model is a path to meta file.")
+            from qsprpred.models.interfaces import QSPRModel
+            self.model = QSPRModel.fromFile(model)
         else:
             self.model = model
-            self.modelClass = type(model)
 
         self._descriptors = [self.model.name]
 
@@ -577,8 +564,7 @@ class PredictorDesc(DescriptorSet):
     def settings(self):
         """Return args and kwargs used to initialize the descriptorset."""
         return {
-            'model': self.model.metaFile, # FIXME: we save absolute path to meta file so this descriptor set is not really portable
-            'model_class': self.modelClass.__module__ + "." + self.modelClass.__name__
+            'model': self.model.metaFile # FIXME: we save absolute path to meta file so this descriptor set is not really portable
         }
 
     @property
