@@ -169,7 +169,7 @@ class CDKEStateFP(fingerprint):
 class CDKGraphOnlyFP(fingerprint):
     """CDK fingerprint ignoring bond orders."""
 
-    def __init__(self, searchDepth=7, size=1024):
+    def __init__(self, size=1024, searchDepth=7):
         self.size = size
         self.searchDepth = searchDepth
         fp = cdk_fps.GraphOnlyFP(size=size, searchDepth=searchDepth)
