@@ -100,24 +100,20 @@ class SklearnMetric(Metric):
                           'accuracy', 'balanced_accuracy', 'top_k_accuracy', 'f1', 'f1_micro',
                           'f1_macro', 'f1_weighted', 'precision', 'precision_micro',
                           'precision_macro', 'precision_weighted', 'recall',
-                          'recall_micro', 'recall_macro', 'recall_weighted']
+                          'recall_micro', 'recall_macro', 'recall_weighted', 'jaccard', 'jaccard_micro',
+                          'jaccard_macro', 'jaccard_weighted']
     multiClassMetrics = ['neg_log_loss', 'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted',
                          'accuracy', 'balanced_accuracy', 'top_k_accuracy', 'f1_micro', 'f1_macro', 'f1_weighted',
                          'precision_micro', 'precision_macro', 'precision_weighted', 'recall_micro', 'recall_macro',
-                         'recall_weighted']
-    multiTaskRegressionMetrics = [
-        'explained_variance',
-        'neg_mean_absolute_error',
-        'neg_mean_squared_error',
-        'neg_root_mean_squared_error',
-        'neg_mean_squared_log_error',
-        'neg_median_absolute_error',
-        'r2',
-        'neg_mean_absolute_percentage_error']
+                         'recall_weighted', 'jaccard_micro', 'jaccard_macro', 'jaccard_weighted']
+    multiTaskRegressionMetrics = ['explained_variance', 'neg_mean_absolute_error', 'neg_mean_squared_error',
+                                  'neg_root_mean_squared_error', 'neg_mean_squared_log_error',
+                                  'neg_median_absolute_error', 'r2', 'neg_mean_absolute_percentage_error']
     multiTaskSingleClassMetrics = ['accuracy', 'average_precision', 'f1_micro', 'f1_macro', 'f1_weighted',
                                    'f1_samples', 'precision_micro', 'precision_macro',
                                    'precision_weighted', 'precision_samples', 'recall_micro', 'recall_macro',
-                                   'recall_weighted', 'recall_samples']
+                                   'recall_weighted', 'recall_samples', 'jaccard_micro',
+                                   'jaccard_macro', 'jaccard_weighted', 'jaccard_samples']
     multiTaskMultiClassMetrics = []
     multiTaskMixedMetrics = []
 
