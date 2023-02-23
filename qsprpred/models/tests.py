@@ -479,12 +479,21 @@ class test_Metrics(TestCase):
 
     def test_MultiTaskSingleClassMetrics(self):
         """Test the multi task single class metrics."""
-        y_true = np.array([[1, 0, 1, 0, 1],
-                           [1, 0, 1, 0, 1]])
-        y_pred = np.array([[1, 0, 1, 0, 1],
-                           [1, 0, 1, 0, 1]])
-        y_pred_proba = np.array([[0.9, 0.2, 0.8, 0.1, 0.9],
-                                 [0.9, 0.2, 0.8, 0.1, 0.9]])
+        y_true = np.array([[1, 0],
+                           [1, 1],
+                           [1, 0],
+                           [0, 0],
+                           [1, 0]])
+        y_pred = np.array([[1, 0],
+                           [1, 1],
+                           [1, 0],
+                           [0, 0],
+                           [1, 0]])
+        y_pred_proba = np.array([[0.9, 0.6],
+                                 [0.5, 0.4],
+                                 [0.3, 0.8],
+                                 [0.7, 0.1],
+                                 [1, 0.4]])
 
         for metric in SklearnMetric.multiTaskSingleClassMetrics:
             self.checkMetric(metric, ModelTasks.MULTITASK_SINGLECLASS, y_true, y_pred, y_pred_proba)

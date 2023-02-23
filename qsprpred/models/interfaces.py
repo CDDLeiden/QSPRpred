@@ -40,7 +40,8 @@ class QSPRModel(ABC):
     """
 
     def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None,
-                 name: str = None, parameters: dict = None, autoload=True):
+                 name: str = None, parameters: dict = None, autoload=True,
+                 scoring=None):
         """Initialize a QSPR model instance.
 
         If the model is loaded from file, the data set is not required.
@@ -53,6 +54,7 @@ class QSPRModel(ABC):
             name (str): name of the model
             parameters (dict): dictionary of algorithm specific parameters
             autoload (bool): if True, the model is loaded from the serialized file if it exists, otherwise a new model is created
+            scoring (str or callable): scoring function to use for cross validation and optimization, if None, the default scoring function is used
         """
         self.data = data
         self.name = name or alg.__class__.__name__
@@ -85,6 +87,8 @@ class QSPRModel(ABC):
         self.alg = alg
         if autoload:
             self.model = self.loadModel(alg=self.alg, params=self.parameters)
+
+        self.score_func = self.get_scoring_func(scoring)
 
     def __str__(self):
         """Return the name of the model and the underlying class as the identifier."""
@@ -469,7 +473,7 @@ class QSPRModel(ABC):
         Returns:
             score_func (Callable): scorer function from sklearn.metrics (`str` as input) wrapped in the SklearnMetric class
             or user-defined function (`callable` as input, if classification metric should have an attribute `needs_proba_to_score`,
-                                      set to `True` if is needs probabilities instead of predictions). 
+                                      set to `True` if is needs probabilities instead of predictions).
         """
         if all([scoring not in SklearnMetric.supported_metrics, isinstance(scoring, str)]):
             raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"

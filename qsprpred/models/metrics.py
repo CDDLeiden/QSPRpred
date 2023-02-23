@@ -109,11 +109,12 @@ class SklearnMetric(Metric):
     multiTaskRegressionMetrics = ['explained_variance', 'neg_mean_absolute_error', 'neg_mean_squared_error',
                                   'neg_root_mean_squared_error', 'neg_mean_squared_log_error',
                                   'neg_median_absolute_error', 'r2', 'neg_mean_absolute_percentage_error']
-    multiTaskSingleClassMetrics = ['accuracy', 'average_precision', 'f1_micro', 'f1_macro', 'f1_weighted',
-                                   'f1_samples', 'precision_micro', 'precision_macro',
-                                   'precision_weighted', 'precision_samples', 'recall_micro', 'recall_macro',
-                                   'recall_weighted', 'recall_samples', 'jaccard_micro',
-                                   'jaccard_macro', 'jaccard_weighted', 'jaccard_samples']
+    multiTaskSingleClassMetrics = ['roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted',
+                                   'accuracy', 'average_precision', 'f1_micro', 'f1_macro', 'f1_weighted',
+                                   'f1_samples', 'precision_micro', 'precision_macro', 'precision_weighted',
+                                   'precision_samples', 'recall_micro', 'recall_macro', 'recall_weighted',
+                                   'recall_samples', 'jaccard_micro', 'jaccard_macro', 'jaccard_weighted',
+                                   'jaccard_samples']
     multiTaskMultiClassMetrics = []
     multiTaskMixedMetrics = []
 

@@ -85,6 +85,7 @@ class QSPRsklearn(QSPRModel):
         """Make predictions for crossvalidation and independent test set.
 
         arguments:
+            scoring (SklearnMetric): scoring metric
             save (bool): don't save predictions when used in bayesian optimization
         """
         # check if data is available
@@ -189,19 +190,22 @@ class QSPRsklearn(QSPRModel):
             train.to_csv(self.outPrefix + '.cv.tsv', sep='\t')
             test.to_csv(self.outPrefix + '.ind.tsv', sep='\t')
 
+        # Return predictions in the right format for scorer
         if self.task.isRegression():
             return cvs
         else:
-            # for the singleclass-multitask case predict_proba returns a list of 2d arrays,
-            # but we only want the second column (probability of class 1)
-            if isinstance(cvs, list):
-                cvs = np.transpose([y_pred[:, 1] for y_pred in cvs])
+            if self.score_func.needs_proba_to_score:
+                if self.task in [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]:
+                    return np.transpose([y_pred[:, 1] for y_pred in cvs])
+                else:
+                    if self.task.isMultiTask():
+                        return cvs
+                    else:
+                        return cvs[0]
             else:
-                if cvs.ndim == 2:
-                    cvs = cvs[:, 1]
-            return cvs
+                return np.transpose([np.argmax(y_pred, axis=1) for y_pred in cvs])
 
-    def gridSearch(self, search_space_gs, scoring=None, n_jobs=1):
+    def gridSearch(self, search_space_gs, n_jobs=1):
         """Optimization of hyperparameters using gridSearch.
 
         Arguments:
@@ -214,15 +218,8 @@ class QSPRsklearn(QSPRModel):
         For a list of the available scoring functions see:
         https://scikit-learn.org/stable/modules/model_evaluation.html
         """
-        if scoring is None:
-            if self.task.isRegression():
-                scoring = 'explained_variance'
-            elif self.task.isMultiTask or self.task == ModelTasks.MULTICLASS:  # multiclass
-                scoring = 'roc_auc_ovr_weighted'
-            else:
-                scoring = 'roc_auc'
         grid = GridSearchCV(self.model, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
-            (x[4], x[5]) for x in self.data.createFolds()), scoring=scoring, refit=False)
+            (x[4], x[5]) for x in self.data.createFolds()), scoring=self.score_func.scorer, refit=False)
 
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetPropertiesValues()
@@ -236,7 +233,7 @@ class QSPRsklearn(QSPRModel):
         self.model = self.model.set_params(**grid.best_params_)
         self.save()
 
-    def bayesOptimization(self, search_space_bs, n_trials, scoring=None, th=0.5, n_jobs=1):
+    def bayesOptimization(self, search_space_bs, n_trials, th=0.5, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
         Arguments:
@@ -271,7 +268,7 @@ class QSPRsklearn(QSPRModel):
 
         study = optuna.create_study(direction='maximize')
         logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, scoring, th, search_space_bs), n_trials, n_jobs=n_jobs)
+        study.optimize(lambda trial: self.objective(trial, th, search_space_bs), n_trials, n_jobs=n_jobs)
         logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         trial = study.best_trial
@@ -281,12 +278,11 @@ class QSPRsklearn(QSPRModel):
         self.model = self.model.set_params(**trial.params)
         self.save()
 
-    def objective(self, trial, scoring, th, search_space_bs):
+    def objective(self, trial, th, search_space_bs):
         """Objective for bayesian optimization.
 
         Arguments:
             trial (int): current trial number
-            scoring (Optional[str]): scoring function for the objective.
             th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
             search_space_bs (dict): search space for bayes optimization
         """
@@ -310,8 +306,7 @@ class QSPRsklearn(QSPRModel):
         self.model.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetPropertiesValues()
-        score_func = self.get_scoring_func(scoring)
-        score = score_func(y, self.evaluate(save=False))
+        score = self.score_func(y, self.evaluate(save=False))
         return score
 
     def loadModel(self, alg: Union[Type, BaseEstimator] = None, params: dict = None):
@@ -392,7 +387,20 @@ class QSPRDNN(QSPRModel):
                  gpus=DEFAULT_GPUS,
                  patience=50, tol=0
                  ):
+        """Initialize a QSPRDNN model.
 
+        Args:
+            base_dir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`
+            alg (Union[STFullyConnected, Type], optional): model class or instance. Defaults to STFullyConnected.
+            data (QSPRDataset, optional): data set used to train the model. Defaults to None.
+            name (str, optional): name of the model. Defaults to None.
+            parameters (dict, optional): dictionary of algorithm specific parameters. Defaults to None.
+            autoload (bool, optional): whether to load the model from file or not. Defaults to True.
+            device (cuda device, optional): cuda device. Defaults to DEFAULT_DEVICE.
+            gpu (int/ list of ints, optional): gpu number(s) to use for model fitting. Defaults to DEFAULT_GPUS.
+            patience (int, optional): number of epochs to wait before early stop if no progress on validiation set score. Defaults to 50.
+            tol (float, optional): minimum absolute improvement of loss necessary to count as progress on best validation score. Defaults to 0.
+        """
         super().__init__(base_dir, alg, data, name, parameters, autoload=False)
         self.device = device
         self.gpus = gpus
@@ -407,8 +415,7 @@ class QSPRDNN(QSPRModel):
             self.model = self.loadModel(alg, self.parameters)
 
     def loadModel(self, alg: Union[Type, object] = None, params: dict = None):
-        """
-        Load model from file or initialize new model
+        """Load model from file or initialize new model.
 
         Args:
             alg (Union[Type, object], optional): model class or instance. Defaults to None.
@@ -494,6 +501,7 @@ class QSPRDNN(QSPRModel):
         self.save()
 
     def saveParams(self, params):
+        """Save model parameters to file."""
         return super().saveParams(
             {
                 k: params[k] for k in params
