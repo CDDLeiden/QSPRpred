@@ -107,7 +107,8 @@ class FingerprintSet(DescriptorSet):
 
     def __call__(self, mols):
         """Calculate the fingerprint for a list of molecules."""
-        ret = self.get_fingerprint(self.iterMols(mols, to_list=True))
+        mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
+        ret = self.get_fingerprint(mols)
 
         if self.keepindices:
             ret = ret[:,self.keepindices]

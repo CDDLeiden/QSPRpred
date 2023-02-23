@@ -105,7 +105,7 @@ class CDKFP(fingerprint):
         return self.size
 
     def getKey(self):
-        return "CDK-FP"
+        return "CDKFP"
 
 
 class CDKExtendedFP(fingerprint):
@@ -134,10 +134,10 @@ class CDKExtendedFP(fingerprint):
         return 1024
 
     def getKey(self):
-        return "CDK-ExtendedFP"
+        return "CDKExtendedFP"
 
 
-class CDKEStatedFP(fingerprint):
+class CDKEStateFP(fingerprint):
     """CDK EState fingerprint."""
 
     def __init__(self):
@@ -163,7 +163,7 @@ class CDKEStatedFP(fingerprint):
         return 79
 
     def getKey(self):
-        return "CDK-EStateFP"
+        return "CDKEStateFP"
 
 
 class CDKGraphOnlyFP(fingerprint):
@@ -194,7 +194,7 @@ class CDKGraphOnlyFP(fingerprint):
         return self.size
 
     def getKey(self):
-        return "CDK-GraphOnlyFP"
+        return "CDKGraphOnlyFP"
 
 
 class CDKMACCSFP(fingerprint):
@@ -223,7 +223,7 @@ class CDKMACCSFP(fingerprint):
         return 166
 
     def getKey(self):
-        return "CDK-MACCSFP"
+        return "CDKMACCSFP"
 
 
 class CDKPubchemFP(fingerprint):
@@ -252,7 +252,7 @@ class CDKPubchemFP(fingerprint):
         return 881
 
     def getKey(self):
-        return "CDK-PubchemFP"
+        return "CDKPubchemFP"
 
 
 class CDKSubstructureFP(fingerprint):
@@ -288,7 +288,7 @@ class CDKSubstructureFP(fingerprint):
         return 307
 
     def getKey(self):
-        return "CDK-SubstructureFP"
+        return "CDKSubstructureFP"
 
 
 class CDKKlekotaRothFP(fingerprint):
@@ -321,7 +321,7 @@ class CDKKlekotaRothFP(fingerprint):
         return 4860
 
     def getKey(self):
-        return "CDK-KlekotaRothFP"
+        return "CDKKlekotaRothFP"
 
 
 class CDKAtomPairs2DFP(fingerprint):
@@ -354,7 +354,7 @@ class CDKAtomPairs2DFP(fingerprint):
         return 780
 
     def getKey(self):
-        return "CDK-AtomPairs2DFP"
+        return "CDKAtomPairs2DFP"
 
 
 class _FingerprintRetriever:
@@ -379,8 +379,8 @@ class _FingerprintRetriever:
     def get_CDKExtendedFP(self, *args, **kwargs):
         return CDKExtendedFP(*args, **kwargs)
 
-    def get_CDKEStatedFP(self, *args, **kwargs):
-        return CDKEStatedFP()
+    def get_CDKEStateFP(self, *args, **kwargs):
+        return CDKEStateFP()
 
     def get_CDKGraphOnlyFP(self, *args, **kwargs):
         return CDKGraphOnlyFP(*args, **kwargs)

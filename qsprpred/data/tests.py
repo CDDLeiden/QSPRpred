@@ -4,7 +4,6 @@ import glob
 import itertools
 import logging
 import os
-import platform
 import shutil
 from unittest import TestCase, skipIf, skip
 
@@ -114,13 +113,9 @@ class DataSetsMixIn(PathMixIn):
             FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
             Mordred(),
             Mold2(),
-        ]
-        # if platform.system() != "Linux":
-        #     # FIXME: Java-based descriptors do not run on Linux
-        descriptor_sets.extend([
             FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
             FingerprintSet(fingerprint_type="CDKExtendedFP"),
-            FingerprintSet(fingerprint_type="CDKEStatedFP"),
+            FingerprintSet(fingerprint_type="CDKEStateFP"),
             FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
             FingerprintSet(fingerprint_type="CDKMACCSFP"),
             FingerprintSet(fingerprint_type="CDKPubchemFP"),
@@ -131,7 +126,7 @@ class DataSetsMixIn(PathMixIn):
             FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
             FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
             PaDEL(),
-        ])
+        ]
 
         return descriptor_sets
 
@@ -712,9 +707,7 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
-    # # FIXME: PaDEL descriptors are not available on Linux
-    # @skipIf(platform.system() == "Linux", "PaDEL descriptors are not available on Linux")
-    def test_PaDEL(self):
+    def test_PaDEL_descriptors(self):
         desc_calc = DescriptorsCalculator([PaDEL()])
         self.dataset.addDescriptors(desc_calc)
 
@@ -723,6 +716,20 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
             (len(self.dataset), 1444))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
+
+    def test_PaDEL_fingerprints(self):
+        for fp_type, nbits in [('CDKFP', 1024), ('CDKExtendedFP', 1024), ('CDKGraphOnlyFP', 1024), ('CDKMACCSFP', 166),
+                               ('CDKPubchemFP', 881), ('CDKEStateFP', 79), ('CDKSubstructureFP', 307),
+                               ('CDKKlekotaRothFP', 4860), ('CDKAtomPairs2DFP', 780)]:
+            desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type=fp_type)])
+            dataset = copy.deepcopy(self.dataset)
+            dataset.addDescriptors(desc_calc)
+
+            self.assertEqual(
+                dataset.X.shape,
+                (len(dataset), nbits))
+            self.assertTrue(dataset.X.any().any())
+            self.assertTrue(dataset.X.any().sum() > 1)
 
     def test_DrugExPhyschem(self):
         desc_calc = DescriptorsCalculator([DrugExPhyschem()])
