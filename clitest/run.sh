@@ -43,7 +43,7 @@ python -m qsprpred.data_CLI \
 -st 2000 \
 -fe Morgan \
 -fe RDkit \
--pd ../qsprpred/data/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json \
+-pd ../qsprpred/data/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json \
 -lv 0.01 \
 -hc 0.9
 
