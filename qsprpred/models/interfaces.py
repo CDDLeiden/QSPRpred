@@ -460,7 +460,6 @@ class QSPRModel(ABC):
         Args:
             path (str): full path to the model meta file
         """
-
         meta = cls.readMetadata(path)
         model_class = import_class(meta["model_class"])
         model_name = meta["name"]

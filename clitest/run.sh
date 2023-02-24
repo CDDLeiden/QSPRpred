@@ -55,7 +55,7 @@ python -m qsprpred.model_CLI \
 -de \
 -dp CL_SINGLECLASS \
 -ncpu ${N_CPUS} \
---model_types DNN \
+--model_types RF \
 -s \
 -o ${OPTIMIZATION} \
 -ss ${SEARCH_SPACE} \
@@ -70,8 +70,6 @@ python -m qsprpred.predict_CLI \
 -de \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
--sm  ${SMILES} \
--pr CL \
--m RF \
+-mp ./qspr/models/RF_CL_SINGLECLASS/RF_CL_SINGLECLASS_meta.json \
 
 cleanup
