@@ -14,14 +14,12 @@ from qsprpred.models.tasks import TargetTasks
 
 
 def A2AR(data_dir='data'):
-    """
-    A classification dataset that contains activity data on the adenosine A2A receptor loaded from the Papyrus database
+    """A classification dataset that contains activity data on the adenosine A2A receptor loaded from the Papyrus database
     using the built-in Papyrus wrapper.
 
     Returns:
         a `QSPRDataset` instance with the loaded data
     """
-
     acc_keys = ["P29274"]  # Adenosine receptor A2A (https://www.uniprot.org/uniprotkb/P29274/entry)
     dataset_name = "A2A_LIGANDS"  # name of the file to be generated
     quality = "high"  # choose minimum quality from {"high", "medium", "low"}
@@ -37,7 +35,8 @@ def A2AR(data_dir='data'):
         acc_keys,
         quality,
         name=dataset_name,
-        use_existing=True
+        use_existing=True,
+        store_dir="qspr/data"
     )
 
     print(f"Number of samples loaded: {len(dataset.getDF())}")
@@ -46,15 +45,14 @@ def A2AR(data_dir='data'):
 
 
 def Parkinsons():
-    """
-    Parkinson's disease dataset that contains data for multiple targets related to the disease.
+    """Parkinson's disease dataset that contains data for multiple targets related to the disease.
+
     It is loaded from a CSV file into pandas `DataFrame`, which is then converted to `QSPRDataset`
     regression data set with 'GABAAalpha' activity as the target property.
 
     Returns:
         a `QSPRDataset` instance with the loaded data
     """
-
     os.makedirs('qspr/data', exist_ok=True)
 
     # Load in the data
