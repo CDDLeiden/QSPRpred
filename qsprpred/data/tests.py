@@ -724,6 +724,7 @@ class TestTargetImputation(PathMixIn, TestCase):
 
 
 class TestFeatureFilters(PathMixIn, TestCase):
+    """Tests to check if the feature filters work on their own."""
 
     def setUp(self):
         """Set up the small test Dataframe."""
@@ -809,12 +810,15 @@ class TestDescriptorCalculation(DataSetsMixIn, TestCase):
 
 
 class TestDescriptorsets(DataSetsMixIn, TestCase):
+    """Test the descriptor sets."""
 
     def setUp(self):
+        """Create the test Dataframe."""
         super().setUp()
         self.dataset = self.create_small_dataset(self.__class__.__name__)
 
     def test_PredictorDesc(self):
+        """Test the PredictorDesc descriptor set."""
         # give path to saved model parameters
         meta_path = f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json'
         from qsprpred.models.models import QSPRsklearn

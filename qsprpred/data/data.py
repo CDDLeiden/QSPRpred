@@ -821,7 +821,7 @@ class QSPRDataset(MoleculeTable):
 
     @staticmethod
     def fromTableFile(name, filename, sep="\t", *args, **kwargs):
-        """Create QSPRDataset from table file (i.e. CSV or TSV).
+        r"""Create QSPRDataset from table file (i.e. CSV or TSV).
 
         Args:
             name (str): name of the data set
@@ -976,7 +976,8 @@ class QSPRDataset(MoleculeTable):
 
         # if no threshold values are provided, use the ones specified in the TargetProperty
         if th is None:
-            assert hasattr(target_property, 'th'), "Target property does not have a threshold attribute and no threshold specified in function args."
+            assert hasattr(
+                target_property, 'th'), "Target property does not have a threshold attribute and no threshold specified in function args."
             th = target_property.th
 
         new_prop = f"{target_property.originalName}_class"
@@ -1159,7 +1160,7 @@ class QSPRDataset(MoleculeTable):
             self.y_ind = self.y.drop(self.y.index)
 
     def loadDescriptorsToSplits(self):
-        """Loads all available descriptors into the train and test splits.
+        """Load all available descriptors into the train and test splits.
 
         If no descriptors are available, an exception will be raised.
 

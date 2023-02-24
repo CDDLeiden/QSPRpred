@@ -193,6 +193,7 @@ class SklearnMetric(Metric):
 
     @staticmethod
     def scorer_func(scorer, y_true, y_pred):
+        """Return the scoring function of a sklearn scorer."""
         # From https://stackoverflow.com/questions/63943410/getting-a-scoring-function-by-name-in-scikit-learn
         return scorer._sign * scorer._score_func(y_true, y_pred, **scorer._kwargs)
 
