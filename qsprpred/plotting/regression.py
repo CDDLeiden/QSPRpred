@@ -1,9 +1,4 @@
-"""
-regression
-
-Created by: Martin Sicho
-On: 12.02.23, 18:15
-"""
+"""Module for plotting regression models."""
 import math
 from abc import ABC
 
@@ -15,16 +10,28 @@ from sklearn import metrics
 
 
 class RegressionPlot(ModelPlot, ABC):
+    """Base class for all regression plots."""
 
     def getSupportedTasks(self):
+        """Return a list of supported model tasks."""
         return [TargetTasks.REGRESSION]
 
 
 class CorrelationPlot(RegressionPlot):
+    """Class to plot the results of regression models. Plot predicted pX vs real pX."""
 
     def make(self, save: bool = True, show: bool = False, out_dir: str = ".", filename_prefix: str = "corrplot"):
-        """
-        Function to plot the results of regression models. Plot predicted pX vs real pX.
+        """Plot the results of regression models. Plot predicted pX vs real pX.
+
+        Args:
+            save (`bool`): whether to save the plot to a file
+            show (`bool`): whether to show the plot
+            out_dir (`str`): directory to save the plot to
+            filename_prefix (`str`): prefix to use for the filename
+
+        Returns:
+            ret_axes (`matplotlib.axes.Axes`): the axes of the plot
+            summary (`pandas.DataFrame`): a summary of the plot
         """
         my_cmap = ["#12517B", "#88002A"]
 
