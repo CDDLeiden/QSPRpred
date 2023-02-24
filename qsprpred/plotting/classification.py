@@ -34,11 +34,12 @@ class ClassifierPlot(ModelPlot, ABC):
 class ROCPlot(ClassifierPlot):
     """Plot of ROC-curve (receiver operating characteristic curve) for a given model."""
 
-    def makeCV(self, model: QSPRModel):
+    def makeCV(self, model: QSPRModel, property_name: str):
         """Make the plot for a given model using cross-validation data.
 
         Args:
             model (QSPRModel): the model to plot the data from.
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
 
         Returns:
            ax (matplotlib.axes.Axes): the axes object containing the plot.
@@ -51,8 +52,8 @@ class ROCPlot(ClassifierPlot):
         ax = plt.gca()
         for fold in df.Fold.unique():
             # get labels
-            y_pred = df.Score[df.Fold == fold]
-            y_true = df.Label[df.Fold == fold]
+            y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
+            y_true = df[f"{property_name}_Label"][df.Fold == fold]
 
             # do plotting
             viz = RocCurveDisplay.from_predictions(
@@ -103,18 +104,19 @@ class ROCPlot(ClassifierPlot):
         ax.legend(loc="lower right")
         return ax
 
-    def makeInd(self, model: QSPRModel):
+    def makeInd(self, model: QSPRModel, property_name: str):
         """Make the plot for a given model using independent test data.
 
         Args:
             model (QSPRModel): the model to plot the data from.
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
 
         Returns:
               ax (matplotlib.axes.Axes): the axes object containing the plot.
         """
         df = pd.read_table(self.indPaths[model])
-        y_pred = df.Score
-        y_true = df.Label
+        y_pred = df[f"{property_name}_ProbabilityClass_1"]
+        y_true = df[f"{property_name}_Label"]
 
         ax = plt.gca()
         RocCurveDisplay.from_predictions(
@@ -132,10 +134,12 @@ class ROCPlot(ClassifierPlot):
         ax.legend(loc="lower right")
         return ax
 
-    def make(self, validation: str = "cv", figsize: tuple = (6, 6), save: bool = True, show: bool = False):
+    def make(self, property_name: str, validation: str = "cv",
+             figsize: tuple = (6, 6), save: bool = True, show: bool = False):
         """Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
 
         Args:
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
             validation (str): The type of validation data to use.
                               Can be either 'cv' for cross-validation or 'ind' for independent test set.
             figsize (tuple): The size of the figure to create.
@@ -152,7 +156,7 @@ class ROCPlot(ClassifierPlot):
         axes = []
         for model in self.models:
             fig, ax = plt.subplots(figsize=figsize)
-            ax = choices[validation](model)
+            ax = choices[validation](model, property_name)
             axes.append(fig)
             if save:
                 fig.savefig(f'{self.modelOuts[model]}.{validation}.png')
@@ -165,11 +169,12 @@ class ROCPlot(ClassifierPlot):
 class PRCPlot(ClassifierPlot):
     """Plot of Precision-Recall curve for a given model."""
 
-    def makeCV(self, model: QSPRModel):
+    def makeCV(self, model: QSPRModel, property_name: str):
         """Make the plot for a given model using cross-validation data.
 
         Args:
             model (QSPRModel): the model to plot the data from.
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
 
         Returns:
            ax (matplotlib.axes.Axes): the axes object containing the plot.
@@ -182,8 +187,8 @@ class PRCPlot(ClassifierPlot):
         ax = plt.gca()
         for fold in df.Fold.unique():
             # get labels
-            y_pred = df.Score[df.Fold == fold]
-            y_true = df.Label[df.Fold == fold]
+            y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
+            y_true = df[f"{property_name}_Label"][df.Fold == fold]
             y_predproba.append(y_pred)
             y_real.append(y_true)
             # do plotting
@@ -218,18 +223,19 @@ class PRCPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def makeInd(self, model: QSPRModel):
+    def makeInd(self, model: QSPRModel, property_name: str):
         """Make the plot for a given model using independent test data.
 
         Args:
             model (QSPRModel): the model to plot the data from.
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
 
         Returns:
               ax (matplotlib.axes.Axes): the axes object containing the plot.
         """
         df = pd.read_table(self.indPaths[model])
-        y_pred = df.Score
-        y_true = df.Label
+        y_pred = df[f"{property_name}_ProbabilityClass_1"]
+        y_true = df[f"{property_name}_Label"]
 
         ax = plt.gca()
         PrecisionRecallDisplay.from_predictions(
@@ -247,10 +253,12 @@ class PRCPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def make(self, validation: str = "cv", figsize: tuple = (6, 6), save: bool = True, show: bool = False):
+    def make(self, property_name: str, validation: str = "cv",
+             figsize: tuple = (6, 6), save: bool = True, show: bool = False):
         """Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
 
         Args:
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
             validation (str): The type of validation data to use.
                               Can be either 'cv' for cross-validation or 'ind' for independent test set.
             figsize (tuple): The size of the figure to create.
@@ -267,7 +275,7 @@ class PRCPlot(ClassifierPlot):
         axes = []
         for model in self.models:
             fig, ax = plt.subplots(figsize=figsize)
-            ax = choices[validation](model)
+            ax = choices[validation](model, property_name)
             axes.append(ax)
             if save:
                 fig.savefig(f'{self.modelOuts[model]}.{validation}.png')
@@ -280,11 +288,12 @@ class PRCPlot(ClassifierPlot):
 class CalibrationPlot(ClassifierPlot):
     """Plot of calibration curve for a given model."""
 
-    def makeCV(self, model: QSPRModel, n_bins: int = 10):
+    def makeCV(self, model: QSPRModel, property_name: str, n_bins: int = 10):
         """Make the plot for a given model using cross-validation data.
 
         Args:
             model (QSPRModel): the model to plot the data from.
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
             n_bins (int): The number of bins to use for the calibration curve.
 
         Returns:
@@ -298,8 +307,8 @@ class CalibrationPlot(ClassifierPlot):
         ax = plt.gca()
         for fold in df.Fold.unique():
             # get labels
-            y_pred = df.Score[df.Fold == fold]
-            y_true = df.Label[df.Fold == fold]
+            y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
+            y_true = df[f"{property_name}_Label"][df.Fold == fold]
             y_predproba.append(y_pred)
             y_real.append(y_true)
             # do plotting
@@ -334,19 +343,20 @@ class CalibrationPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def makeInd(self, model: QSPRModel, n_bins: int = 10):
+    def makeInd(self, model: QSPRModel, property_name: str, n_bins: int = 10):
         """Make the plot for a given model using independent test data.
 
         Args:
             model (QSPRModel): the model to plot the data from.
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
             n_bins (int): The number of bins to use for the calibration curve.
 
         Returns:
             ax (matplotlib.axes.Axes): the axes object containing the plot.
         """
         df = pd.read_table(self.indPaths[model])
-        y_pred = df.Score
-        y_true = df.Label
+        y_pred = df[f"{property_name}_ProbabilityClass_1"]
+        y_true = df[f"{property_name}_Label"]
 
         ax = plt.gca()
         CalibrationDisplay.from_predictions(
@@ -365,11 +375,12 @@ class CalibrationPlot(ClassifierPlot):
         ax.legend(loc="best")
         return ax
 
-    def make(self, validation: str = "cv", n_bins: int = 10,
+    def make(self, property_name: str, validation: str = "cv", n_bins: int = 10,
              figsize: tuple = (6, 6), save: bool = True, show: bool = False):
         """Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
 
         Args:
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
             validation (str): The type of validation data to use.
                               Can be either 'cv' for cross-validation or 'ind' for independent test set.
             n_bins (int): The number of bins to use for the calibration curve.
@@ -387,7 +398,7 @@ class CalibrationPlot(ClassifierPlot):
         axes = []
         for model in self.models:
             fig, ax = plt.subplots(figsize=figsize)
-            ax = choices[validation](model, n_bins)
+            ax = choices[validation](model, property_name, n_bins)
             axes.append(ax)
             if save:
                 fig.savefig(f'{self.modelOuts[model]}.{validation}.png')
@@ -404,6 +415,7 @@ class MetricsPlot(ClassifierPlot):
             f1_score, matthews_corrcoef, precision_score, recall_score, accuracy_score, calibration_error
 
     Attributes:
+        models (list): A list of QSPRModel objects to plot the data from.
         metrics (list): A list of metrics to plot.
         decision (float): The decision threshold to use for the metrics.
         summary (dict): A dictionary containing the data to plot.
@@ -442,10 +454,12 @@ class MetricsPlot(ClassifierPlot):
             'Value': []
         }
 
-    def make(self, save: bool = True, show: bool = False, filename_prefix: str = 'metrics', out_dir: str = "."):
+    def make(self, property_name: str, save: bool = True, show: bool = False,
+             filename_prefix: str = 'metrics', out_dir: str = "."):
         """Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
 
         Args:
+            property_name (str): name of the property to plot (should correspond to the prefix of the column names in the data files).
             save (bool): Whether to save the plot to a file.
             show (bool): Whether to display the plot.
             filename_prefix (str): The prefix to use for the filename.
@@ -456,9 +470,9 @@ class MetricsPlot(ClassifierPlot):
             df = pd.read_table(self.cvPaths[model])
 
             for fold in df.Fold.unique():
-                y_pred = df.Score[df.Fold == fold]
+                y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
                 y_pred_values = [1 if x > self.decision else 0 for x in y_pred]
-                y_true = df.Label[df.Fold == fold]
+                y_true = df[f"{property_name}_Label"][df.Fold == fold]
                 for metric in self.metrics:
                     val = metric(y_true, y_pred_values)
                     self.summary['Metric'].append(metric.__name__)
@@ -467,9 +481,9 @@ class MetricsPlot(ClassifierPlot):
                     self.summary['Value'].append(val)
 
             df = pd.read_table(self.indPaths[model])
-            y_pred = df.Score
+            y_pred = df[f"{property_name}_ProbabilityClass_1"]
             y_pred_values = [1 if x > 0.5 else 0 for x in y_pred]
-            y_true = df.Label
+            y_true = df[f"{property_name}_Label"]
             for metric in self.metrics:
                 val = metric(y_true, y_pred_values)
                 self.summary['Metric'].append(metric.__name__)

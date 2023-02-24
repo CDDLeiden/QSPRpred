@@ -4,7 +4,7 @@ from abc import ABC
 
 import pandas as pd
 from matplotlib import pyplot as plt
-from qsprpred.models.tasks import TargetTasks
+from qsprpred.models.tasks import ModelTasks
 from qsprpred.plotting.interfaces import ModelPlot
 from sklearn import metrics
 
@@ -14,16 +14,18 @@ class RegressionPlot(ModelPlot, ABC):
 
     def getSupportedTasks(self):
         """Return a list of supported model tasks."""
-        return [TargetTasks.REGRESSION]
+        return [ModelTasks.REGRESSION]
 
 
 class CorrelationPlot(RegressionPlot):
     """Class to plot the results of regression models. Plot predicted pX vs real pX."""
 
-    def make(self, save: bool = True, show: bool = False, out_dir: str = ".", filename_prefix: str = "corrplot"):
+    def make(self, property_name: str, save: bool = True, show: bool = False,
+             out_dir: str = ".", filename_prefix: str = "corrplot"):
         """Plot the results of regression models. Plot predicted pX vs real pX.
 
         Args:
+            property_name (`str`): name of the property to plot (should correspond to the prefix of the column names in the data files)
             save (`bool`): whether to save the plot to a file
             show (`bool`): whether to show the plot
             out_dir (`str`): directory to save the plot to
@@ -47,19 +49,29 @@ class CorrelationPlot(RegressionPlot):
             max_val = 10
             for j, legend in enumerate(['Cross Validation', 'Independent Test']):
                 df = pd.read_table(cate[j][model])
-                plt.scatter(df.Label, df.Score, s=5, label=legend, color=my_cmap[j])
-                coef = metrics.r2_score(df.Label, df.Score)
-                rmse = metrics.mean_squared_error(df.Label, df.Score, squared=False)
+                plt.scatter(
+                    df[f"{property_name}_Label"],
+                    df[f"{property_name}_Prediction"],
+                    s=5,
+                    label=legend,
+                    color=my_cmap[j])
+                coef = metrics.r2_score(df[f"{property_name}_Label"], df[f"{property_name}_Prediction"])
+                rmse = metrics.mean_squared_error(
+                    df[f"{property_name}_Label"],
+                    df[f"{property_name}_Prediction"],
+                    squared=False)
                 summary["R2"].append(coef)
                 summary["RMSE"].append(rmse)
                 summary["Set"].append(cate_names[j])
                 summary["ModelName"].append(model.name)
 
                 plt.title(model)
-                plt.xlabel(f"Experimental {model.targetProperty}")
-                plt.ylabel(f"Predicted {model.targetProperty}")
-                min_val_now = math.floor(min(pd.concat([df.Label, df.Score])))
-                max_val_now = math.ceil(max(pd.concat([df.Label, df.Score])))
+                plt.xlabel(f"Experimental {property_name}")
+                plt.ylabel(f"Predicted {property_name}")
+                min_val_now = math.floor(
+                    min(pd.concat([df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]])))
+                max_val_now = math.ceil(
+                    max(pd.concat([df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]])))
                 if min_val_now < min_val:
                     min_val = min_val_now
                 if max_val_now > max_val:
