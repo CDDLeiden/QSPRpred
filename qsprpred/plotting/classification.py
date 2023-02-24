@@ -1,9 +1,4 @@
-"""
-classification
-
-Created by: Martin Sicho
-On: 16.11.22, 12:12
-"""
+"""Plotting functions for classification models."""
 import os.path
 from abc import ABC
 from typing import List
@@ -13,7 +8,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from qsprpred.metrics.calibration import calibration_error
 from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.tasks import TargetTasks
+from qsprpred.models.tasks import ModelTasks, TargetTasks
 from qsprpred.plotting.interfaces import ModelPlot
 from sklearn.calibration import CalibrationDisplay
 from sklearn.metrics import (
@@ -29,14 +24,25 @@ from sklearn.metrics import (
 
 
 class ClassifierPlot(ModelPlot, ABC):
+    """Base class for plots of classification models."""
 
     def getSupportedTasks(self):
-        return [TargetTasks.SINGLECLASS]
+        """Return a list of tasks supported by this plotter."""
+        return [ModelTasks.SINGLECLASS]
 
 
 class ROCPlot(ClassifierPlot):
+    """Plot of ROC-curve (receiver operating characteristic curve) for a given model."""
 
     def makeCV(self, model: QSPRModel):
+        """Make the plot for a given model using cross-validation data.
+
+        Args:
+            model (QSPRModel): the model to plot the data from.
+
+        Returns:
+           ax (matplotlib.axes.Axes): the axes object containing the plot.
+        """
         df = pd.read_table(self.cvPaths[model])
 
         tprs = []
@@ -98,6 +104,14 @@ class ROCPlot(ClassifierPlot):
         return ax
 
     def makeInd(self, model: QSPRModel):
+        """Make the plot for a given model using independent test data.
+
+        Args:
+            model (QSPRModel): the model to plot the data from.
+
+        Returns:
+              ax (matplotlib.axes.Axes): the axes object containing the plot.
+        """
         df = pd.read_table(self.indPaths[model])
         y_pred = df.Score
         y_true = df.Label
@@ -119,10 +133,18 @@ class ROCPlot(ClassifierPlot):
         return ax
 
     def make(self, validation: str = "cv", figsize: tuple = (6, 6), save: bool = True, show: bool = False):
-        """
-        Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
-        """
+        """Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
 
+        Args:
+            validation (str): The type of validation data to use.
+                              Can be either 'cv' for cross-validation or 'ind' for independent test set.
+            figsize (tuple): The size of the figure to create.
+            save (bool): Whether to save the plot to a file.
+            show (bool): Whether to display the plot.
+
+        Returns:
+            axes (list): A list of matplotlib axes objects containing the plots.
+        """
         choices = {
             "cv": self.makeCV,
             "ind": self.makeInd
@@ -141,8 +163,17 @@ class ROCPlot(ClassifierPlot):
 
 
 class PRCPlot(ClassifierPlot):
+    """Plot of Precision-Recall curve for a given model."""
 
     def makeCV(self, model: QSPRModel):
+        """Make the plot for a given model using cross-validation data.
+
+        Args:
+            model (QSPRModel): the model to plot the data from.
+
+        Returns:
+           ax (matplotlib.axes.Axes): the axes object containing the plot.
+        """
         df = pd.read_table(self.cvPaths[model])
 
         y_real = []
@@ -188,6 +219,14 @@ class PRCPlot(ClassifierPlot):
         return ax
 
     def makeInd(self, model: QSPRModel):
+        """Make the plot for a given model using independent test data.
+
+        Args:
+            model (QSPRModel): the model to plot the data from.
+
+        Returns:
+              ax (matplotlib.axes.Axes): the axes object containing the plot.
+        """
         df = pd.read_table(self.indPaths[model])
         y_pred = df.Score
         y_true = df.Label
@@ -209,10 +248,18 @@ class PRCPlot(ClassifierPlot):
         return ax
 
     def make(self, validation: str = "cv", figsize: tuple = (6, 6), save: bool = True, show: bool = False):
-        """
-        Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
-        """
+        """Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
 
+        Args:
+            validation (str): The type of validation data to use.
+                              Can be either 'cv' for cross-validation or 'ind' for independent test set.
+            figsize (tuple): The size of the figure to create.
+            save (bool): Whether to save the plot to a file.
+            show (bool): Whether to display the plot.
+
+        Returns:
+            axes (list): A list of matplotlib axes objects containing the plots.
+        """
         choices = {
             "cv": self.makeCV,
             "ind": self.makeInd
@@ -231,8 +278,18 @@ class PRCPlot(ClassifierPlot):
 
 
 class CalibrationPlot(ClassifierPlot):
+    """Plot of calibration curve for a given model."""
 
     def makeCV(self, model: QSPRModel, n_bins: int = 10):
+        """Make the plot for a given model using cross-validation data.
+
+        Args:
+            model (QSPRModel): the model to plot the data from.
+            n_bins (int): The number of bins to use for the calibration curve.
+
+        Returns:
+            ax (matplotlib.axes.Axes): the axes object containing the plot.
+        """
         df = pd.read_table(self.cvPaths[model])
 
         y_real = []
@@ -278,6 +335,15 @@ class CalibrationPlot(ClassifierPlot):
         return ax
 
     def makeInd(self, model: QSPRModel, n_bins: int = 10):
+        """Make the plot for a given model using independent test data.
+
+        Args:
+            model (QSPRModel): the model to plot the data from.
+            n_bins (int): The number of bins to use for the calibration curve.
+
+        Returns:
+            ax (matplotlib.axes.Axes): the axes object containing the plot.
+        """
         df = pd.read_table(self.indPaths[model])
         y_pred = df.Score
         y_true = df.Label
@@ -301,10 +367,19 @@ class CalibrationPlot(ClassifierPlot):
 
     def make(self, validation: str = "cv", n_bins: int = 10,
              figsize: tuple = (6, 6), save: bool = True, show: bool = False):
-        """
-        Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
-        """
+        """Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
 
+        Args:
+            validation (str): The type of validation data to use.
+                              Can be either 'cv' for cross-validation or 'ind' for independent test set.
+            n_bins (int): The number of bins to use for the calibration curve.
+            figsize (tuple): The size of the figure to create.
+            save (bool): Whether to save the plot to a file.
+            show (bool): Whether to display the plot.
+
+        Returns:
+            axes (list): A list of matplotlib axes objects containing the plots.
+        """
         choices = {
             "cv": self.makeCV,
             "ind": self.makeInd
@@ -323,6 +398,16 @@ class CalibrationPlot(ClassifierPlot):
 
 
 class MetricsPlot(ClassifierPlot):
+    """Plot of metrics for a given model.
+
+    Includes the following metrics:
+            f1_score, matthews_corrcoef, precision_score, recall_score, accuracy_score, calibration_error
+
+    Attributes:
+        metrics (list): A list of metrics to plot.
+        decision (float): The decision threshold to use for the metrics.
+        summary (dict): A dictionary containing the data to plot.
+    """
 
     def __init__(self,
                  models: List[QSPRModel],
@@ -335,6 +420,13 @@ class MetricsPlot(ClassifierPlot):
                      calibration_error
                  ),
                  decision_threshold: float = 0.5):
+        """Initialise the metrics plot.
+
+        Args:
+            models (list): A list of QSPRModel objects to plot the data from.
+            metrics (list): A list of metrics to plot.
+            decision_threshold (float): The decision threshold to use for the metrics.
+        """
         super().__init__(models)
         self.metrics = metrics
         self.decision = decision_threshold
@@ -342,6 +434,7 @@ class MetricsPlot(ClassifierPlot):
         self.reset()
 
     def reset(self):
+        """Reset the summary data."""
         self.summary = {
             'Metric': [],
             'Model': [],
@@ -350,10 +443,14 @@ class MetricsPlot(ClassifierPlot):
         }
 
     def make(self, save: bool = True, show: bool = False, filename_prefix: str = 'metrics', out_dir: str = "."):
-        """
-        Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
-        """
+        """Make the plot for a given validation type. Displays the plot and optionally saves it to a file.
 
+        Args:
+            save (bool): Whether to save the plot to a file.
+            show (bool): Whether to display the plot.
+            filename_prefix (str): The prefix to use for the filename.
+            out_dir (str): The directory to save the plot to.
+        """
         self.reset()
         for model in self.models:
             df = pd.read_table(self.cvPaths[model])
