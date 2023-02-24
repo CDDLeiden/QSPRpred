@@ -236,7 +236,7 @@ class QSPRsklearn(QSPRModel):
     def bayesOptimization(self, search_space_bs, n_trials, th=0.5, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
-        Arguments:
+        Args:
             search_space_gs (dict): search space for the grid search
             n_trials (int): number of trials for bayes optimization
             scoring (Optional[str, Callable]): scoring function for the optimization.
@@ -255,11 +255,6 @@ class QSPRsklearn(QSPRModel):
 
         Avaliable suggestion types:
         ['categorical', 'discrete_uniform', 'float', 'int', 'loguniform', 'uniform']
-
-        Note: Default `scoring=None` will use explained_variance for regression,
-        roc_auc_ovr_weighted for multiclass, and roc_auc for binary classification.
-        For a list of the available scoring functions see:
-        https://scikit-learn.org/stable/modules/model_evaluation.html
         """
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         if n_jobs > 1:
@@ -268,7 +263,7 @@ class QSPRsklearn(QSPRModel):
 
         study = optuna.create_study(direction='maximize')
         logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, th, search_space_bs), n_trials, n_jobs=n_jobs)
+        study.optimize(lambda trial: self.objective(trial, search_space_bs), n_trials, n_jobs=n_jobs)
         logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         trial = study.best_trial
@@ -278,7 +273,7 @@ class QSPRsklearn(QSPRModel):
         self.model = self.model.set_params(**trial.params)
         self.save()
 
-    def objective(self, trial, th, search_space_bs):
+    def objective(self, trial, search_space_bs):
         """Objective for bayesian optimization.
 
         Arguments:
@@ -402,12 +397,19 @@ class QSPRDNN(QSPRModel):
             tol (float, optional): minimum absolute improvement of loss necessary to count as progress on best validation score. Defaults to 0.
         """
         super().__init__(base_dir, alg, data, name, parameters, autoload=False)
+
+        if self.task.isMultiTask():
+            raise NotImplementedError(
+                'Multitask modelling is not implemented for QSPRDNN models.')
+
         self.device = device
         self.gpus = gpus
 
         self.optimal_epochs = -1
-        self.n_class = max(1, self.data.targetProperties[0].nClasses) if self.data else self.metaInfo['n_class']
-        self.n_dim = self.data.targetProperties[0].X.shape[1] if self.data else self.metaInfo['n_dim']
+        self.n_class = max(
+            1, self.data.nClasses(
+                self.data.targetProperties[0])) if self.data else self.metaInfo['n_class']
+        self.n_dim = self.data.X.shape[1] if self.data else self.metaInfo['n_dim']
         self.patience = patience
         self.tol = tol
 
@@ -433,7 +435,7 @@ class QSPRDNN(QSPRModel):
                         n_class=self.n_class,
                         device=self.device,
                         gpus=self.gpus,
-                        is_reg=self.task == TargetTasks.REGRESSION
+                        is_reg=self.task == ModelTasks.REGRESSION
                     )
                     model.set_params(**params)
                 else:
@@ -442,7 +444,7 @@ class QSPRDNN(QSPRModel):
                         n_class=self.n_class,
                         device=self.device,
                         gpus=self.gpus,
-                        is_reg=self.task == TargetTasks.REGRESSION
+                        is_reg=self.task == ModelTasks.REGRESSION
                     )
             else:
                 model = alg
@@ -454,7 +456,7 @@ class QSPRDNN(QSPRModel):
                     n_class=self.n_class,
                     device=self.device,
                     gpus=self.gpus,
-                    is_reg=self.task == TargetTasks.REGRESSION
+                    is_reg=self.task == ModelTasks.REGRESSION
                 )
                 model.set_params(**params)
             else:
@@ -463,7 +465,7 @@ class QSPRDNN(QSPRModel):
                     n_class=self.n_class,
                     device=self.device,
                     gpus=self.gpus,
-                    is_reg=self.task == TargetTasks.REGRESSION
+                    is_reg=self.task == ModelTasks.REGRESSION
                 )
 
         # load states if available
@@ -501,7 +503,14 @@ class QSPRDNN(QSPRModel):
         self.save()
 
     def saveParams(self, params):
-        """Save model parameters to file."""
+        """Save model parameters to file.
+
+        Args:
+            params (dict): model parameters
+
+        Returns:
+            params (dict): model parameters
+        """
         return super().saveParams(
             {
                 k: params[k] for k in params
@@ -513,7 +522,7 @@ class QSPRDNN(QSPRModel):
     def evaluate(self, save=True, ES_val_size=0.1):
         """Make predictions for crossvalidation and independent test set.
 
-        arguments:
+        Args:
             save (bool): wether to save the cross validation predictions
             ES_val_size (float): validation set size for early stopping in CV
         """
@@ -522,35 +531,49 @@ class QSPRDNN(QSPRModel):
         indep_loader = self.model.get_dataloader(X_ind.values)
         last_save_epochs = 0
 
+        # create array for cross validation predictions and for keeping track of the number of folds
         cvs = np.zeros((y.shape[0], max(1, self.data.nClasses(self.data.targetProperties[0]))))
         fold_counter = np.zeros(y.shape[0])
+
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
             y_train = y_train.reshape(-1, 1)
+
+            # split cross validation fold train set into train and validation set for early stopping
             X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
                 X_train, y_train, test_size=ES_val_size)
             train_loader = self.model.get_dataloader(X_train_fold, y_train_fold)
             ES_valid_loader = self.model.get_dataloader(X_val_fold, y_val_fold)
             valid_loader = self.model.get_dataloader(X_test)
+
+            # train model cross validation fold train set and use part of that train set for early stopping
             last_save_epoch = self.model.fit(
                 train_loader, ES_valid_loader, '%s_temp' %
                 self.outPrefix, self.patience, self.tol)
             last_save_epochs += last_save_epoch
             logger.info(f'cross validation fold {i}: last save epoch {last_save_epoch}')
             os.remove('%s_temp_weights.pkg' % self.outPrefix)
+
+            # save cross validation predictions on cross validation fold test set
             cvs[idx_test] = self.model.predict(valid_loader)
             fold_counter[idx_test] = i
         os.remove('%s_temp.log' % self.outPrefix)
 
         if save:
             n_folds = max(fold_counter) + 1
+
+            # save the optimal number of epochs for fitting the model as the average
+            # number of epochs from the cross-validation
             self.optimal_epochs = int(math.ceil(last_save_epochs / n_folds)) + 1
             self.model = self.model.set_params(**{"n_epochs": self.optimal_epochs})
+
+            # Fit model on all training data and predict on independent test set
             train_loader = self.model.get_dataloader(X.values, y.values)
             self.model.fit(train_loader, None, '%s_temp' % self.outPrefix, patience=-1)
             os.remove('%s_temp_weights.pkg' % self.outPrefix)
             os.remove('%s_temp.log' % self.outPrefix)
             inds = self.model.predict(indep_loader)
 
+            # save cross validation predictions and independent test set predictions
             train, test = pd.Series(
                 y.values.flatten()).to_frame(
                 name='Label'), pd.Series(
@@ -566,8 +589,16 @@ class QSPRDNN(QSPRModel):
             train.to_csv(self.outPrefix + '.cv.tsv', sep='\t')
             test.to_csv(self.outPrefix + '.ind.tsv', sep='\t')
 
-        if self.data.nClasses(self.data.targetProperties[0]) == 2:
-            return cvs[:, 1]
+        # Return predictions in the right format for scorer
+        if self.task.isClassification():
+            if self.score_func.needs_proba_to_score:
+                if self.task == ModelTasks.SINGLECLASS:
+                    return cvs[:, 1]  # if binary classification, return only the scores for the positive class
+                else:
+                    return cvs
+            else:
+                # if score function does not need probabilities, return the class with the highest score
+                return np.argmax(cvs, axis=1)
         else:
             return cvs
 
@@ -588,15 +619,6 @@ class QSPRDNN(QSPRModel):
         """
         self.model = self.loadModel(self.alg)
 
-        if self.data.targetProperties[0].task == TargetTasks.REGRESSION:
-            scoring = metrics.explained_variance_score
-        else:
-            scoring = partial(
-                metrics.roc_auc_score,
-                multi_class='ovr',
-                average='weighted') if self.data.isMultiClass() else metrics.roc_auc_score
-
-        score_func = self.get_scoring_func(scoring)
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         best_score = -np.inf
         for params in ParameterGrid(search_space_gs):
@@ -607,21 +629,34 @@ class QSPRDNN(QSPRModel):
             for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
                 y_train = y_train.reshape(-1, 1)
                 logger.info('cross validation fold ' + str(i))
+
+                # split cross-validation train set into train and validation set for early stopping
                 X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
                     X_train, y_train, test_size=ES_val_size)
                 train_loader = self.model.get_dataloader(X_train_fold, y_train_fold)
                 ES_valid_loader = self.model.get_dataloader(X_val_fold, y_val_fold)
                 valid_loader = self.model.get_dataloader(X_test)
+
+                # fit model and predict on validation set
                 self.model.set_params(**params)
                 self.model.fit(train_loader, ES_valid_loader, '%s_temp' % self.outPrefix, self.patience, self.tol)
                 os.remove('%s_temp_weights.pkg' % self.outPrefix)
                 y_pred = self.model.predict(valid_loader)
-                if self.data.nClasses(self.data.targetProperties[0]) == 2:
-                    y_pred = y_pred[:, 1]
-                if scoring in self._needs_discrete_to_score:
-                    y = np.where(y > th, 1, 0)
-                fold_scores.append(score_func(y_test, y_pred))
+
+                # tranform predictions to the right format for scorer
+                if self.task.isClassification():
+                    if self.score_func.needs_proba_to_score:
+                        if self.task == ModelTasks.SINGLECLASS:
+                            # if binary classification, return only the scores for the positive class
+                            y_pred = y_pred[:, 1]
+                    else:
+                        # if score function does not need probabilities, return the class with the highest score
+                        y_pred = np.argmax(y_pred, axis=1)
+
+                fold_scores.append(self.score_func(y_test, y_pred))
             os.remove('%s_temp.log' % self.outPrefix)
+
+            # take mean of scores over all folds and update best parameters if score is better than previous best
             param_score = np.mean(fold_scores)
             if param_score >= best_score:
                 best_params = params
@@ -674,6 +709,9 @@ class QSPRDNN(QSPRModel):
             scoring (Optional[str]): scoring function for the objective.
             th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
             search_space_bs (dict): search space for bayes optimization
+
+        Returns:
+            score (float): score of the current trial
         """
         bayesian_params = {}
 
@@ -694,23 +732,39 @@ class QSPRDNN(QSPRModel):
         self.model.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetPropertiesValues()
-        if scoring in self._needs_discrete_to_score:
-            y = np.where(y > th, 1, 0)
         score_func = self.get_scoring_func(scoring)
         score = score_func(y, self.evaluate(save=False))
         return score
 
     def saveModel(self) -> str:
+        """Save the QSPRDNN model.
+
+        Returns:
+            str: path to the saved model
+        """
         path = self.outPrefix + '_weights.pkg'
         torch.save(self.model.state_dict(), path)
         return path
 
     def save(self):
+        """Save the QSPRDNN model and meta information.
+
+        Returns:
+            str: path to the saved model
+        """
         self.metaInfo['n_dim'] = self.n_dim
         self.metaInfo['n_class'] = self.n_class
         return super().save()
 
     def predict(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+        """Predict the target property values for the given features.
+
+        Args:
+            X (Union[pd.DataFrame, np.ndarray, QSPRDataset]): features
+
+        Returns:
+            np.ndarray: predicted target property values
+        """
         scores = self.predictProba(X)
         if self.task == ModelTasks.SINGLECLASS:
             return np.argmax(scores, axis=1)
@@ -718,6 +772,14 @@ class QSPRDNN(QSPRModel):
             return scores.flatten()
 
     def predictProba(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+        """Predict the probability of target property values for the given features.
+
+        Args:
+            X (Union[pd.DataFrame, np.ndarray, QSPRDataset]): features
+
+        Returns:
+            np.ndarray: predicted probability of target property values
+        """
         if isinstance(X, QSPRDataset):
             X = X.getFeatures(raw=True, concat=True)
         if self.featureStandardizer:
