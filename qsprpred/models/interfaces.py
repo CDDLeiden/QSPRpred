@@ -14,13 +14,14 @@ from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
-from qsprpred.models.metrics import SklearnMetric, get_scoring_func
+from qsprpred.models.metrics import SklearnMetric
 from qsprpred.models.tasks import ModelTasks
 
 
 class QSPRModel(ABC):
-    """
-    The definition of the common model interface for the package. Handles model initialization, fit, cross validation and hyperparameter optimization.
+    """The definition of the common model interface for the package.
+
+        The QSPRModel handles model initialization, fit, cross validation and hyperparameter optimization.
 
     Attributes:
         name (str): name of the model
@@ -482,15 +483,15 @@ class QSPRModel(ABC):
             return scoring
         elif scoring is None:
             if self.task.isRegression():
-                scorer = get_scoring_func('explained_variance')
+                scorer = SklearnMetric.getMetric('explained_variance')
             elif self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_SINGLECLASS]:
-                scorer = get_scoring_func('roc_auc_ovr_weighted')
+                scorer = SklearnMetric.getMetric('roc_auc_ovr_weighted')
             elif self.task in [ModelTasks.SINGLECLASS]:
-                scorer = get_scoring_func('roc_auc')
+                scorer = SklearnMetric.getMetric('roc_auc')
             else:
                 raise ValueError("No supported scoring function for task %s" % self.task)
         else:
-            scorer = get_scoring_func(scoring)
+            scorer = SklearnMetric.getMetric(scoring)
 
         assert scorer.supportsTask(self.task), "Scoring function %s does not support task %s" % (scorer, self.task)
         return scorer

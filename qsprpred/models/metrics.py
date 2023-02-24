@@ -1,6 +1,7 @@
 """Wrapper for sklearn scoring functions."""
 
 from abc import ABC, abstractmethod
+from functools import partial
 
 from qsprpred.models.tasks import ModelTasks
 from sklearn import metrics
@@ -190,13 +191,14 @@ class SklearnMetric(Metric):
                 cls.regressionMetrics + cls.singleClassMetrics + cls.multiClassMetrics + cls.multiTaskRegressionMetrics +
                 cls.multiTaskSingleClassMetrics + cls.multiTaskMultiClassMetrics + cls.multiTaskMixedMetrics))
 
-
-def get_scoring_func(name):
-    """Return a scorer function object from a sklearn scorer name."""
-    scorer = metrics.get_scorer(name)
-
-    # From https://stackoverflow.com/questions/63943410/getting-a-scoring-function-by-name-in-scikit-learn
-    def scorer_func(y_true, y_pred):
+    @staticmethod
+    def scorer_func(scorer, y_true, y_pred):
+        # From https://stackoverflow.com/questions/63943410/getting-a-scoring-function-by-name-in-scikit-learn
         return scorer._sign * scorer._score_func(y_true, y_pred, **scorer._kwargs)
 
-    return SklearnMetric(name=name, func=scorer_func, scorer=scorer)
+    @staticmethod
+    def getMetric(name):
+        """Return a scorer function object from a sklearn scorer name."""
+        scorer = metrics.get_scorer(name)
+
+        return SklearnMetric(name=name, func=partial(SklearnMetric.scorer_func, scorer), scorer=scorer)

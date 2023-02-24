@@ -13,7 +13,7 @@ import torch
 from parameterized import parameterized
 from qsprpred.data.tests import DataSetsMixIn
 from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.metrics import SklearnMetric, get_scoring_func
+from qsprpred.models.metrics import SklearnMetric
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
 from qsprpred.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks, TargetTasks
@@ -257,7 +257,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @staticmethod
     def get_model(name, alg=None, dataset=None, parameters=None):
-        """intialize dataset and model."""
+        """Intialize dataset and model."""
         return QSPRsklearn(
             base_dir=f'{os.path.dirname(__file__)}/test_files/',
             alg=alg,
@@ -421,7 +421,7 @@ class test_Metrics(TestCase):
 
     def checkMetric(self, metric, task, y_true, y_pred, y_pred_proba=None):
         """Check if the metric is correctly implemented."""
-        scorer = get_scoring_func(metric)
+        scorer = SklearnMetric.getMetric(metric)
         self.assertEqual(scorer.name, metric)
         self.assertTrue(getattr(scorer, f'supports_{task}'))
         self.assertTrue(scorer.supportsTask(task))

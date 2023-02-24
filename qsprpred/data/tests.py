@@ -1,4 +1,5 @@
 """This module holds the test for functions regarding QSPR data preparation."""
+
 import copy
 import glob
 import itertools
@@ -55,11 +56,13 @@ class PathMixIn:
     qsprdatapath = f'{os.path.dirname(__file__)}/test_files/qspr/data'
 
     def setUp(self):
+        """Create the directories that are used for testing."""
         self.tearDown()
         if not os.path.exists(self.qsprdatapath):
             os.makedirs(self.qsprdatapath)
 
     def tearDown(self):
+        """Remove all files and directories that are used for testing."""
         self.clean_directories()
         if os.path.exists(self.qsprdatapath):
             shutil.rmtree(self.qsprdatapath)
@@ -70,6 +73,7 @@ class PathMixIn:
 
     @classmethod
     def clean_directories(cls):
+        """Remove the directories that are used for testing."""
         if os.path.exists(cls.qsprdatapath):
             shutil.rmtree(cls.qsprdatapath)
 

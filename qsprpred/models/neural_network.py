@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 class Base(nn.Module):
     """Base structure for all of classification/regression DNN models.
-    
+
     Mainly, it provides the general methods for training, evaluating model and
     predicting the given data.
     """
@@ -28,6 +28,15 @@ class Base(nn.Module):
         lr=1e-4,
         batch_size=256,
     ):
+        """Initialize the DNN model.
+
+        Args:
+            device (torch.device): device to run the model on
+            gpus (list): list of gpus to run the model on
+            n_epochs (int): number of epochs to train the model
+            lr (float): learning rate
+            batch_size (int): batch size
+        """
         super().__init__()
         self.n_epochs = n_epochs
         self.lr = lr
@@ -151,7 +160,7 @@ class Base(nn.Module):
                 including m X n target FloatTensor and l X n label FloatTensor
                 (m is the No. of sample, n is the No. of features, l is the
                 No. of classes or tasks)
-        
+
         Return:
             loss (float): the average loss value based on the calculation of loss
                 function with given test set.
@@ -183,12 +192,12 @@ class Base(nn.Module):
 
     def predict(self, loader):
         """Predicting the probability of each sample in the given dataset.
-        
+
         Arguments:
             loader (torch.util.data.DataLoader): data loader for test set,
                 only including m X n target FloatTensor
                 (m is the No. of sample, n is the No. of features)
-        
+
         Returns:
             score (ndarray): probability of each sample in the given dataset,
                 it is a m X l FloatTensor (m is the No. of sample, l is the
@@ -218,14 +227,14 @@ class Base(nn.Module):
         """Get parameters for this estimator.
 
         Function copied from sklearn.base_estimator!
-        
+
         Parameters:
         deep: bool, default=True
             If True, will return the parameters for this estimator and
             contained subobjects that are estimators.
 
         Returns:
-        params : dict
+        params: dict
             Parameter names mapped to their values.
         """
         out = dict()
@@ -294,10 +303,10 @@ class Base(nn.Module):
 
 class STFullyConnected(Base):
     """Single task DNN classification/regression model.
-    
+
     It contains four fully connected layers between which are dropout layer for robustness.
-    
-    Arguments:
+
+    Args:
         n_dim (int): the No. of columns (features) for input tensor
         n_class (int): the No. of columns (classes) for output tensor.
         is_reg (bool, optional): Regression model (True) or Classification model (False)
@@ -323,6 +332,22 @@ class STFullyConnected(Base):
         extra_layer=False,
         dropout_frac=0.25,
     ):
+        """Initialize the STFullyConnected model.
+
+        Args:
+            n_dim (int): the No. of columns (features) for input tensor
+            n_class (int): the No. of columns (classes) for output tensor.
+            device (str): device to run the model
+            gpus (list): list of gpu ids to run the model
+            n_epochs (int): max number of epochs
+            lr (float): neural net learning rate
+            batch_size (int): batch size
+            is_reg (bool, optional): Regression model (True) or Classification model (False)
+            neurons_h1 (int): number of neurons in first hidden layer
+            neurons_hx (int): number of neurons in other hidden layers
+            extra_layer (bool): add third hidden layer
+            dropout_frac (float): dropout fraction
+        """
         if not lr:
             lr = 1e-4 if is_reg else 1e-5
         super().__init__(
@@ -338,6 +363,7 @@ class STFullyConnected(Base):
         self.init_model()
 
     def init_model(self):
+        """Define the layers of the model."""
         self.dropout = nn.Dropout(self.dropout_frac)
         self.fc0 = nn.Linear(self.n_dim, self.neurons_h1)
         self.fc1 = nn.Linear(self.neurons_h1, self.neurons_hx)
