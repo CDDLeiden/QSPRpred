@@ -9,6 +9,7 @@ from typing import List, Type, Union
 
 import numpy as np
 import pandas as pd
+from qsprpred import VERSION
 from qsprpred.data.data import MoleculeTable, QSPRDataset, TargetProperty
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
@@ -16,6 +17,7 @@ from qsprpred.logs import logger
 from qsprpred.models import SSPACE
 from qsprpred.models.metrics import SklearnMetric
 from qsprpred.models.tasks import ModelTasks
+from qsprpred.utils.inspect import import_class
 
 
 class QSPRModel(ABC):
@@ -121,6 +123,10 @@ class QSPRModel(ABC):
             bool: True if model is a multitask model
         """
         return self.task.isMultiTask()
+
+    @property
+    def classPath(self):
+        return self.__class__.__module__ + "." + self.__class__.__name__
 
     @property
     def nTargets(self):
@@ -264,6 +270,9 @@ class QSPRModel(ABC):
         Returns:
             dict: dictionary containing the model metadata that was saved
         """
+        self.metaInfo['name'] = self.name
+        self.metaInfo['version'] = VERSION
+        self.metaInfo['model_class'] = self.classPath
         self.metaInfo['target_properties'] = TargetProperty.toList(
             copy.deepcopy(self.data.targetProperties), task_as_str=True)
         self.metaInfo['parameters_path'] = self.saveParams(self.parameters).replace(f"{self.baseDir}/", '')
@@ -451,9 +460,12 @@ class QSPRModel(ABC):
         Args:
             path (str): full path to the model meta file
         """
-        name = cls.readMetadata(path)['name']
-        dir_name = os.path.dirname(path).replace(f"qspr/models/{name}", "")
-        return cls(name=name, base_dir=dir_name)
+
+        meta = cls.readMetadata(path)
+        model_class = import_class(meta["model_class"])
+        model_name = meta["name"]
+        base_dir = os.path.dirname(path).replace(f"qspr/models/{model_name}", "")
+        return model_class(name=model_name, base_dir=base_dir)
 
     def cleanFiles(self):
         """Clean up the model files. Removes the model directory and all its contents."""
