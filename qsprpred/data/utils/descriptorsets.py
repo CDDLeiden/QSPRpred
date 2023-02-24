@@ -18,7 +18,7 @@ from PaDEL_pywrapper.descriptor import descriptors as PaDEL_descriptors
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
-from rdkit.Chem import Mol, AllChem
+from rdkit.Chem import Mol
 
 
 class DescriptorSet(ABC):

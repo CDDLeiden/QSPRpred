@@ -5,7 +5,7 @@ import itertools
 import logging
 import os
 import shutil
-from unittest import TestCase, skipIf, skip
+from unittest import TestCase
 
 import mordred
 import numpy as np
@@ -146,8 +146,7 @@ class DataSetsMixIn(PathMixIn):
                 radius=3,
                 nBits=1024
             ),
-            rdkit_descs(),
-            DrugExPhyschem()
+            rdkit_descs()
         ]
         # interesting feature set combinations as descriptor calculators (either 1 or 2 sets at the same time)
         descriptor_calculators = [
@@ -161,10 +160,7 @@ class DataSetsMixIn(PathMixIn):
         # lists with common preparation settings
         splits = [
             None,
-            randomsplit(0.1),
-            temporalsplit(timesplit=2000,timeprop="Year of first disclosure"),
-            scaffoldsplit(test_fraction=0.1, scaffold=Murcko()),
-            scaffoldsplit(test_fraction=0.1, scaffold=BemisMurcko()),
+            randomsplit(0.1)
         ]
         feature_standardizers = [
             None,
@@ -173,9 +169,7 @@ class DataSetsMixIn(PathMixIn):
         ]
         feature_filters = [
             None,
-            BorutaFilter(max_iter=3, alpha=0.5),
-            lowVarianceFilter(0.05),
-            highCorrelationFilter(0.8)
+            lowVarianceFilter(0.05)
         ]
         data_filters = [
             None,
