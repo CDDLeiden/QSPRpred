@@ -11,12 +11,14 @@ import numpy as np
 import pandas as pd
 from sklearn import metrics
 
+from qsprpred import VERSION
 from qsprpred.data.data import QSPRDataset, MoleculeTable
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
 from qsprpred.models.tasks import ModelTasks
+from qsprpred.utils.inspect import import_class
 
 
 class QSPRModel(ABC):
@@ -141,6 +143,10 @@ class QSPRModel(ABC):
             int: number of classes of the model if the task is classification, otherwise 0
         """
         return self.data.nClasses if self.data else self.metaInfo['nClasses']
+
+    @property
+    def classPath(self):
+        return self.__class__.__module__ + "." + self.__class__.__name__
 
     @property
     def targetProperty(self):
@@ -306,6 +312,8 @@ class QSPRModel(ABC):
         """
 
         self.metaInfo['name'] = self.name
+        self.metaInfo['version'] = VERSION
+        self.metaInfo['model_class'] = self.classPath
         self.metaInfo['task'] = str(self.task)
         self.metaInfo['th'] = self.data.th if self.data else self.metaInfo['th']
         self.metaInfo['nClasses'] = self.nClasses
@@ -503,9 +511,11 @@ class QSPRModel(ABC):
             path (str): full path to the model meta file
         """
 
-        name = cls.readMetadata(path)['name']
-        dir_name = os.path.dirname(path).replace(f"qspr/models/{name}", "")
-        return cls(name=name, base_dir=dir_name)
+        meta = cls.readMetadata(path)
+        model_class = import_class(meta["model_class"])
+        model_name = meta["name"]
+        base_dir = os.path.dirname(path).replace(f"qspr/models/{model_name}", "")
+        return model_class(name=model_name, base_dir=base_dir)
 
     def cleanFiles(self):
         """

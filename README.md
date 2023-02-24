@@ -3,24 +3,28 @@
 QSPRpred
 ====================
 
-This repository can be used for building **Quantitative Structure Property Relationship (QSPR)** models.
+<img src='figures/QSPRpred_logo.jpg' width=10% align=right>
+<p align=left width=70%>
+QSPRpred is open-source software libary for building **Quantitative Structure Property Relationship (QSPR)** model developed by Gerard van Westen's Computational Drug Discovery group. Models developed with QSPRpred are compatible with the group's *de novo* drug design package <a href="https://github.com/CDDLeiden/DrugEx/">DrugEx</a>.
+
+<!-- This repository can be used for building **Quantitative Structure Property Relationship (QSPR)** models.
 It is based on the QSAR models in **Drug Explorer (DrugEx)**, a _de novo_ drug design tool based on deep learning,
 originally developed by [Xuhan Liu](https://github.com/XuhanLiu/DrugEx/) & Gerard J.P. van Westen. [1,2,3] and further
 developed by [Gerard van Westen's Computational Drug Discovery group](https://github.com/CDDLeiden/DrugEx).
-Models developed with QSPRpred are compatible with the CDD DrugEx repo. 
+Models developed with QSPRpred are compatible with the CDD DrugEx repo.  -->
 
 Quick Start
 ===========
 
-### Installation
+## Installation
 
-QSPRpred can be installed with pip like so (with python >= 3.9.0):
+QSPRpred can be installed with pip like so (with python >= 3.8.0):
 
 ```bash
 pip install git+https://github.com/CDDLeiden/QSPRPred.git@main
 ```
 
-### Use
+## Use
 After installation, you will have access to various command line features, but you can also use the Python API directly. Documentation for the current version of both is available [here](https://cddleiden.github.io/QSPRpred/docs/). For a quick start, you can also check out the  [Jupyter notebook tutorials](./tutorial), which documents the use of the Python API to build different types of models. [This tutorial](./tutorial/tutorial_training.ipynb) shows how a QSAR model can be trained. [This tutorial](./tutorial/tutorial_usage.ipynb) shows how to use a QSAR model to predict the bioactivity of a set of molecules. The tutorials as well as the documentation are still work in progress, and we will be happy for any contributions where it is still lacking.
 
 To use the commandline to train the same QSAR model as in the tutorial use:
@@ -28,28 +32,16 @@ To use the commandline to train the same QSAR model as in the tutorial use:
 python -m qsprpred.QSPR_cli -i parkinsons_pivot.tsv -pr GABAAalpha -m XGB -r true -sf 0.15 -fe Morgan -s -o bayes -nt 10 -me
 ```
 
+Workflow
+========
+![image](figures/QSPRpred_workflow.png)
+
 Current Development Team
 ========================
-- S. Luukkonen
-- M. Sicho
-- H. van den Maagdenberg
-- L. Schoenmaker
-
-Acknowledgements
-================
-
-We would like to thank the following people for significant contributions:
-
-- Xuhan Liu
-  - author of the original idea to develop the DrugEx models and code, we are happy for his continuous support of the project
-
-References
-==========
-
-1. [Liu X, Ye K, van Vlijmen HWT, IJzerman AP, van Westen GJP. DrugEx v3: Scaffold-Constrained Drug Design with Graph Transformer-based Reinforcement Learning. Preprint](https://chemrxiv.org/engage/chemrxiv/article-details/61aa8b58bc299c0b30887f80)
-
-2. [Liu X, Ye K, van Vlijmen HWT, Emmerich MTM, IJzerman AP, van Westen GJP. DrugEx v2: De Novo Design of Drug Molecule by Pareto-based Multi-Objective Reinforcement Learning in Polypharmacology. Journal of cheminformatics 2021:13(1):85.](https://doi.org/10.1186/s13321-021-00561-9) 
-
-3. [Liu X, Ye K, van Vlijmen HWT, IJzerman AP, van Westen GJP. An exploration strategy improves the diversity of de novo ligands using deep reinforcement learning: a case for the adenosine A2A receptor. Journal of cheminformatics. 2019;11(1):35.](https://jcheminf.biomedcentral.com/articles/10.1186/s13321-019-0355-6)
-
-
+- [H. van den Maagdenberg](https://github.com/HellevdM)
+- [M. Sicho](https://github.com/martin-sicho)
+- [L. Schoenmaker](https://github.com/LindeSchoenmaker)
+- [O. Béquignon](https://github.com/OlivierBeq)
+- [S. Luukkonen](https://github.com/sohviluukkonen)
+- [M. Gorosiola González](https://github.com/gorostiolam)
+- [D. Araripe](https://github.com/David-Araripe)
