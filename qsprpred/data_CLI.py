@@ -46,7 +46,7 @@ def QSPRArgParser(txt=None):
     # base arguments
     parser.add_argument('-b', '--base_dir', type=str, default='.',
                         help="Base directory which contains a folder 'data' with input files")
-    parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-de', '--debug', action='store_true')
     parser.add_argument('-ran', '--random_state', type=int, default=1, help="Seed for the random state")
     parser.add_argument('-i', '--input', type=str, default='dataset.tsv',
                         help="tsv file name that contains SMILES and property value column")

@@ -30,7 +30,7 @@ def QSPRArgParser(txt=None):
     # base arguments
     parser.add_argument('-b', '--base_dir', type=str, default='.',
                         help="Base directory which contains a folder 'data' with input files")
-    parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-de', '--debug', action='store_true')
     parser.add_argument('-ran', '--random_state', type=int, default=1, help="Seed for the random state")
     parser.add_argument('-ncpu', '--ncpu', type=int, default=8, help="Number of CPUs")
     parser.add_argument('-gpus', '--gpus', nargs="*", default=['0'], help="List of GPUs")
@@ -42,7 +42,7 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-ms', '--model_suffix', type=str, help="Suffix of the model to be saved")
 
     # model type arguments
-    parser.add_argument('-m', '--model_types', type=str, nargs='*',
+    parser.add_argument('-mt', '--model_types', type=str, nargs='*',
                         choices=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
                         default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
                         help="Modeltype, defaults to run all ModelTasks, choose from: 'RF', 'XGB', 'DNN', 'SVM',\

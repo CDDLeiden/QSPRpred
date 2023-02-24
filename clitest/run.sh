@@ -31,7 +31,7 @@ export N_TRIALS=2
 ###############
 python -m qsprpred.data_CLI \
 -b ${TEST_BASE} \
--d \
+-de \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
 -sm  ${SMILES} \
@@ -52,10 +52,10 @@ python -m qsprpred.data_CLI \
 ###############
 python -m qsprpred.model_CLI \
 -b ${TEST_BASE} \
--d \
+-de \
+-dp CL_SINGLECLASS \
 -ncpu ${N_CPUS} \
--pr CL \
--m RF \
+--model_types DNN \
 -s \
 -o ${OPTIMIZATION} \
 -ss ${SEARCH_SPACE} \
@@ -67,7 +67,7 @@ python -m qsprpred.model_CLI \
 ###############
 python -m qsprpred.predict_CLI \
 -b ${TEST_BASE} \
--d \
+-de \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
 -sm  ${SMILES} \
