@@ -57,7 +57,7 @@ class Base(nn.Module):
         Training is, similar to the scikit-learn or Keras style.
         It saves the optimal value of parameters.
 
-        Arguments:
+        Args:
             train_loader (DataLoadesr): Data loader for training set,
                 including m X n target FloatTensor and m X l label FloatTensor
                 (m is the No. of sample, n is the No. of features, l is the
@@ -155,7 +155,7 @@ class Base(nn.Module):
     def evaluate(self, loader):
         """Evaluate the performance of the DNN model.
 
-        Arguments:
+        Args:
             loader (torch.util.data.DataLoader): data loader for test set,
                 including m X n target FloatTensor and l X n label FloatTensor
                 (m is the No. of sample, n is the No. of features, l is the
@@ -193,7 +193,7 @@ class Base(nn.Module):
     def predict(self, loader):
         """Predicting the probability of each sample in the given dataset.
 
-        Arguments:
+        Args:
             loader (torch.util.data.DataLoader): data loader for test set,
                 only including m X n target FloatTensor
                 (m is the No. of sample, n is the No. of features)
@@ -228,14 +228,11 @@ class Base(nn.Module):
 
         Function copied from sklearn.base_estimator!
 
-        Parameters:
-        deep: bool, default=True
-            If True, will return the parameters for this estimator and
-            contained subobjects that are estimators.
+        Args:
+            deep (bool): If True, will return the parameters for this estimator
 
         Returns:
-        params: dict
-            Parameter names mapped to their values.
+            params (dict): Parameter names mapped to their values.
         """
         out = dict()
         for key in self._get_param_names():
@@ -255,7 +252,7 @@ class Base(nn.Module):
         parameters of the form ``<component>__<parameter>`` so that it's
         possible to update each component of a nested object.
 
-        Arguments:
+        Args:
             **params : dict Estimator parameters.
 
         Returns:
@@ -290,7 +287,7 @@ class Base(nn.Module):
     def get_dataloader(self, X, y=None):
         """Convert data to tensors and get iterable over dataset with dataloader.
 
-        Arguments:
+        Args:
         X (numpy 2d array): input dataset
         y (numpy 1d column vector): output data
         """
@@ -392,7 +389,7 @@ class STFullyConnected(Base):
     def forward(self, X, istrain=False):
         """Invoke the class directly as a function.
 
-        Arguments:
+        Args:
             X (FloatTensor): m X n FloatTensor, m is the No. of samples, n is
                 the No. of features.
             istrain (bool, optional): is it invoked during training process (True) or
