@@ -711,19 +711,27 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
-    def test_PaDEL_fingerprints(self):
-        for fp_type, nbits in [('CDKFP', 1024), ('CDKExtendedFP', 1024), ('CDKGraphOnlyFP', 1024), ('CDKMACCSFP', 166),
-                               ('CDKPubchemFP', 881), ('CDKEStateFP', 79), ('CDKSubstructureFP', 307),
-                               ('CDKKlekotaRothFP', 4860), ('CDKAtomPairs2DFP', 780)]:
-            desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type=fp_type)])
-            dataset = copy.deepcopy(self.dataset)
-            dataset.addDescriptors(desc_calc)
+    @parameterized.expand([
+        ("CDKFP", 1024),
+        ("CDKExtendedFP", 1024),
+        ("CDKGraphOnlyFP", 1024),
+        ("CDKMACCSFP", 166),
+        ("CDKPubchemFP", 881),
+        ("CDKEStateFP", 79),
+        ("CDKSubstructureFP", 307),
+        ('CDKKlekotaRothFP', 4860),
+        ('CDKAtomPairs2DFP', 780)
+    ])
+    def test_PaDEL_fingerprints(self, fp_type, nbits):
+        desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type=fp_type)])
+        dataset = self.create_small_dataset(f"{self.__class__.__name__}_{fp_type}")
+        dataset.addDescriptors(desc_calc)
 
-            self.assertEqual(
-                dataset.X.shape,
-                (len(dataset), nbits))
-            self.assertTrue(dataset.X.any().any())
-            self.assertTrue(dataset.X.any().sum() > 1)
+        self.assertEqual(
+            dataset.X.shape,
+            (len(dataset), nbits))
+        self.assertTrue(dataset.X.any().any())
+        self.assertTrue(dataset.X.any().sum() > 1)
 
     def test_DrugExPhyschem(self):
         desc_calc = DescriptorsCalculator([DrugExPhyschem()])
