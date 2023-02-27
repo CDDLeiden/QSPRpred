@@ -35,8 +35,8 @@ python -m qsprpred.data_CLI \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
 -sm  ${SMILES} \
--pr  CL \
--th '{"CL":[6.5],"fu":[0,0.2,0.5,4]}' \
+-pr  CL fu \
+-th '{"CL":[6.5],"fu":[0.3]}' \
 -lt '{"CL":true,"fu":false}' \
 -sp 'time' \
 -stc 'Year of first disclosure' \
@@ -53,7 +53,7 @@ python -m qsprpred.data_CLI \
 python -m qsprpred.model_CLI \
 -b ${TEST_BASE} \
 -de \
--dp CL_SINGLECLASS \
+-dp CL_fu_SINGLECLASS \
 -ncpu ${N_CPUS} \
 --model_types RF \
 -s \
@@ -70,6 +70,7 @@ python -m qsprpred.predict_CLI \
 -de \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
--mp ./qspr/models/RF_CL_SINGLECLASS/RF_CL_SINGLECLASS_meta.json \
+-mp ./qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
+-pr
 
 cleanup

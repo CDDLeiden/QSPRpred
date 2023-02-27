@@ -33,6 +33,8 @@ def QSPRArgParser(txt=None):
                         help="Number of CPUs")
     parser.add_argument('-gpus', '--gpus', nargs="*", default=['0'],
                         help="List of GPUs")
+    parser.add_argument('-pr', '--use_probas', action='store_true',
+                        help="If included use probabilities instead of predictions for classification tasks.")
 
     # model predictions arguments
     parser.add_argument(
@@ -73,11 +75,20 @@ def QSPR_predict(args):
             continue
 
         predictor = QSPRModel.fromFile(metadata_path)
-        if predictor.task.isMultiTask():
-            log.warning(f"{predictor.name} is a multitask model. Model skipped.")
 
-        predictions = predictor.predictMols(smiles_list, use_probas=False)
-        results.update({f"preds_{predictor.name}": predictions.flatten()})
+        predictions = predictor.predictMols(smiles_list, use_probas=args.use_probas)
+        # if predictions 2d array with more than 1 column, add as separate columns
+        for idx, target in enumerate(predictor.targetProperties):
+            if args.use_probas:
+                if isinstance(predictions, list):
+                    for i in range(predictions[idx].shape[1]):
+                        results.update(
+                            {f"preds_{predictor.name}_{target.name}_class_{i}": predictions[idx][:, i].flatten()})
+                else:
+                    for i in range(predictions.shape[1]):
+                        results.update({f"preds_{predictor.name}_{target.name}_class_{i}": predictions[:, i].flatten()})
+            else:
+                results.update({f"preds_{predictor.name}_{target.name}": predictions[:, idx].flatten()})
 
     pred_path = f"{args.base_dir}/qspr/predictions/{args.output}.tsv"
     pd.DataFrame(results).to_csv(pred_path, sep="\t", index=False)
