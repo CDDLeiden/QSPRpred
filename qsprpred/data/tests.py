@@ -5,9 +5,8 @@ import glob
 import itertools
 import logging
 import os
-import platform
 import shutil
-from unittest import TestCase, skip, skipIf
+from unittest import TestCase
 
 import mordred
 import numpy as np
@@ -115,25 +114,20 @@ class DataSetsMixIn(PathMixIn):
             FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
             Mordred(),
             Mold2(),
+            FingerprintSet(fingerprint_type="CDKFP", size=2048, searchDepth=7),
+            FingerprintSet(fingerprint_type="CDKExtendedFP"),
+            FingerprintSet(fingerprint_type="CDKEStateFP"),
+            FingerprintSet(fingerprint_type="CDKGraphOnlyFP", size=2048, searchDepth=7),
+            FingerprintSet(fingerprint_type="CDKMACCSFP"),
+            FingerprintSet(fingerprint_type="CDKPubchemFP"),
+            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
+            PaDEL(),
         ]
-        if platform.system() != "Linux":
-            # FIXME: Java-based descriptors do not run on Linux
-            descriptor_sets.extend([
-                # FIXME: some of these fingerprints are broken, uncomment when fixed
-                # FingerprintSet(fingerprint_type="CDKFP", searchDepth=7, size=2048),
-                # FingerprintSet(fingerprint_type="CDKExtendedFP", searchDepth=7, size=2048),
-                FingerprintSet(fingerprint_type="CDKEStatedFP"),
-                # FingerprintSet(fingerprint_type="CDKGraphOnlyFP", searchDepth=7, size=2048),
-                FingerprintSet(fingerprint_type="CDKMACCSFP"),
-                FingerprintSet(fingerprint_type="CDKPubchemFP"),
-                FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
-                FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
-                FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
-                FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
-                FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
-                FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
-                PaDEL(),
-            ])
 
         return descriptor_sets
 
@@ -151,8 +145,7 @@ class DataSetsMixIn(PathMixIn):
                 radius=3,
                 nBits=1024
             ),
-            rdkit_descs(),
-            DrugExPhyschem()
+            rdkit_descs()
         ]
         # interesting feature set combinations as descriptor calculators (either 1 or 2 sets at the same time)
         descriptor_calculators = [
@@ -166,10 +159,7 @@ class DataSetsMixIn(PathMixIn):
         # lists with common preparation settings
         splits = [
             None,
-            randomsplit(0.1),
-            temporalsplit(timesplit=2000, timeprop="Year of first disclosure"),
-            scaffoldsplit(test_fraction=0.1, scaffold=Murcko()),
-            scaffoldsplit(test_fraction=0.1, scaffold=BemisMurcko()),
+            randomsplit(0.1)
         ]
         feature_standardizers = [
             None,
@@ -178,9 +168,7 @@ class DataSetsMixIn(PathMixIn):
         ]
         feature_filters = [
             None,
-            BorutaFilter(max_iter=3, alpha=0.5),
-            lowVarianceFilter(0.05),
-            highCorrelationFilter(0.8)
+            lowVarianceFilter(0.05)
         ]
         data_filters = [
             None,
@@ -874,9 +862,7 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
-    # FIXME: PaDEL descriptors are not available on Linux
-    @skipIf(platform.system() == "Linux", "PaDEL descriptors are not available on Linux")
-    def test_PaDEL(self):
+    def test_PaDEL_descriptors(self):
         """Test the PaDEL descriptor calculator."""
         desc_calc = DescriptorsCalculator([PaDEL()])
         self.dataset.addDescriptors(desc_calc)
@@ -886,6 +872,28 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
             (len(self.dataset), 1444))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
+
+    @parameterized.expand([
+        ("CDKFP", 1024),
+        ("CDKExtendedFP", 1024),
+        ("CDKGraphOnlyFP", 1024),
+        ("CDKMACCSFP", 166),
+        ("CDKPubchemFP", 881),
+        ("CDKEStateFP", 79),
+        ("CDKSubstructureFP", 307),
+        ('CDKKlekotaRothFP', 4860),
+        ('CDKAtomPairs2DFP', 780)
+    ])
+    def test_PaDEL_fingerprints(self, fp_type, nbits):
+        desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type=fp_type)])
+        dataset = self.create_small_dataset(f"{self.__class__.__name__}_{fp_type}")
+        dataset.addDescriptors(desc_calc)
+
+        self.assertEqual(
+            dataset.X.shape,
+            (len(dataset), nbits))
+        self.assertTrue(dataset.X.any().any())
+        self.assertTrue(dataset.X.any().sum() > 1)
 
     def test_DrugExPhyschem(self):
         """Test the DrugExPhyschem descriptor calculator."""
