@@ -14,11 +14,11 @@ from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils import fingerprints
 from Mold2_pywrapper import Mold2 as Mold2_calculator
 from PaDEL_pywrapper import PaDEL as PaDEL_calculator
-from PaDEL_pywrapper.descriptors import _descs_2D as PaDEL_2D_descriptors, descriptors as PaDEL_All_descriptors
+from PaDEL_pywrapper.descriptor import descriptors as PaDEL_descriptors
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
-from rdkit.Chem import Mol, AllChem
+from rdkit.Chem import Mol
 
 
 class DescriptorSet(ABC):
@@ -107,7 +107,8 @@ class FingerprintSet(DescriptorSet):
 
     def __call__(self, mols):
         """Calculate the fingerprint for a list of molecules."""
-        ret = self.get_fingerprint(self.iterMols(mols, to_list=True))
+        mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
+        ret = self.get_fingerprint(mols)
 
         if self.keepindices:
             ret = ret[:,self.keepindices]
@@ -467,13 +468,16 @@ class PaDEL(DescriptorSet):
 
         self._is_fp = False
 
-        # Create calculator and obtain default descriptor names
-        dummy_mol = Chem.AddHs(Chem.MolFromSmiles("CC"))
-        AllChem.EmbedMolecule(dummy_mol)  # Required for line below, since 3D descs would raise without 3D coords
-        self._name_mapping = {name: descriptor
-                              for descriptor in (PaDEL_2D_descriptors if ignore_3D else PaDEL_All_descriptors)
-                              for name in descriptor().calculate(dummy_mol)}
-
+        # Obtain default descriptor names
+        self._name_mapping = {}
+        for descriptor in PaDEL_descriptors:
+            # Skipt if desc is 3D and set to be ignored
+            if ignore_3D and descriptor.is_3D:
+                continue
+            names = descriptor.description
+            for name in descriptor.description.name:
+                self._name_mapping[name] = descriptor
+                
         # Initialize descriptors and calculator
         if descs is None:
             self.descriptors = None
@@ -481,7 +485,8 @@ class PaDEL(DescriptorSet):
             self.descriptors = descs
 
     def __call__(self, mols):
-        values = self._padel.calculate(self.iterMols(mols, to_list=True), show_banner=False, njobs=1)
+        mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
+        values = self._padel.calculate(mols, show_banner=False, njobs=1)
         intersection = list(set(self._keep).intersection(values.columns))
         values = values[intersection]
         return values
@@ -515,9 +520,6 @@ class PaDEL(DescriptorSet):
             self._keep = [name for name, desc in self._name_mapping.items() if desc in self._descriptors]
         else:
             self._keep = names
-
-    def get_names(self):
-        return self._padel.calculate([Chem.MolFromSmiles("C")], show_banner=False, njobs=1).columns.tolist()
 
     def __str__(self):
         return "PaDEL"
