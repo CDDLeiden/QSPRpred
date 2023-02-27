@@ -8,13 +8,12 @@ stages:
 .test:
    stage: test
    before_script:
-      - python --version  # For debugging
+      - python --version  # For debugging python version
       - pip install pytest
       - pip install . --no-cache-dir
+      - pip freeze # For debugging environment
    script:
-      - pytest qsprpred/data/tests.py
-      - pytest qsprpred/models/tests.py
-      - pytest qsprpred/plotting/tests.py
+      - pytest qsprpred
 
 # Run tests on Python version 10 (linux image)
 test:python3.10:
