@@ -288,6 +288,8 @@ class CDKSubstructureFP(fingerprint):
         return 307
 
     def getKey(self):
+        if self.useCounts:
+            return "CDKSubstructureFPCount"
         return "CDKSubstructureFP"
 
 
@@ -321,6 +323,8 @@ class CDKKlekotaRothFP(fingerprint):
         return 4860
 
     def getKey(self):
+        if self.useCounts:
+            return "CDKKlekotaRothFPCount"
         return "CDKKlekotaRothFP"
 
 
@@ -354,6 +358,8 @@ class CDKAtomPairs2DFP(fingerprint):
         return 780
 
     def getKey(self):
+        if self.useCounts:
+            return "CDKAtomPairs2DFPCount"
         return "CDKAtomPairs2DFP"
 
 
