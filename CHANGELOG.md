@@ -3,7 +3,7 @@ From v1.2.0 to v1.3.0
 
 ## Fixes
 
-None.
+- problems with PaDEL descriptors and fingerprints on Linux were fixed
 
 ## Changes
 
