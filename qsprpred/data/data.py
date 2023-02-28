@@ -802,7 +802,7 @@ class QSPRDataset(MoleculeTable):
             self.feature_standardizer = None
         self.fold_generator = self.getDefaultFoldGenerator()
 
-        # drop rows with missing smiles or no target property value for all target properties
+        # drop rows with missing smiles or no target property value for any of the target properties
         if drop_empty:
             self.dropEmpty()
 
