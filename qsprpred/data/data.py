@@ -768,11 +768,6 @@ class QSPRDataset(MoleculeTable):
             add_rdkit (bool, optional): if true, column with rdkit molecules will be added to df. Defaults to False.
             store_dir (str, optional): directory for saving the output data. Defaults to '.'.
             overwrite (bool, optional): if already saved data at output dir if should be overwritten. Defaults to False.
-            tasks (List[Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS]], optional): Defaults to TargetTasks.REGRESSION.
-            target_transformer (Callable, optional): List with length of properties of Transformation(s) of target propery. Defaults to None.
-            th (List[List[float]], optional): threshold for activity if classification model, if len th
-                larger than 1, these values will used for binning (in this case lower and upper
-                boundary need to be included). Defaults to None.
             n_jobs (int, optional): number of parallel jobs. If <= 0, all available cores will be used. Defaults to 1.
             chunk_size (int, optional): chunk size for parallel processing. Defaults to 50.
             drop_invalids (bool, optional): if true, invalid SMILES will be dropped. Defaults to True.
