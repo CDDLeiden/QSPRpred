@@ -360,8 +360,8 @@ class QSPRDNN(QSPRModel):
         outDir (str): output directory of the model, the model files are stored in this directory (`{baseDir}/qspr/models/{name}`)
         outPrefix (str): output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`)
         metaFile (str): absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
-        task (TargetTasks): task of the model, taken from the data set or deserialized from file if the model is loaded without data
-        targetProperty (str): target property of the model, taken from the data set or deserialized from file if the model is loaded without data
+        task (ModelTasks): task of the model, taken from the data set or deserialized from file if the model is loaded without data
+        targetProperties (list(targetProperty)): target property of the model, taken from the data set or deserialized from file if the model is loaded without data
         device (cuda device): cuda device
         gpus (int/ list of ints): gpu number(s) to use for model fitting
         patience (int): number of epochs to wait before early stop if no progress on validiation set score
@@ -766,7 +766,7 @@ class QSPRDNN(QSPRModel):
             np.ndarray: predicted target property values
         """
         scores = self.predictProba(X)
-        if self.task == ModelTasks.SINGLECLASS:
+        if self.task.isClassification():
             return np.argmax(scores, axis=1)
         else:
             return scores.flatten()
