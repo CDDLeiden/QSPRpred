@@ -100,8 +100,8 @@ class QSPRsklearn(QSPRModel):
             cvs = np.zeros((y.shape[0], self.nTargets))
         else:
             # cvs, inds need to be lists of arrays for multiclass-multitask classification
-            cvs = [np.zeros((y.shape[0], self.data.nClasses(prop))) for prop in self.targetProperties]
-            inds = [np.zeros((y_ind.shape[0], self.data.nClasses(prop))) for prop in self.targetProperties]
+            cvs = [np.zeros((y.shape[0], prop.nClasses)) for prop in self.targetProperties]
+            inds = [np.zeros((y_ind.shape[0], prop.nClasses)) for prop in self.targetProperties]
 
         fold_counter = np.zeros(y.shape[0])
 
@@ -406,9 +406,10 @@ class QSPRDNN(QSPRModel):
         self.gpus = gpus
 
         self.optimal_epochs = -1
-        self.n_class = max(
-            1, self.data.nClasses(
-                self.data.targetProperties[0])) if self.data else self.metaInfo['n_class']
+        if self.task.isRegression():
+            self.n_class = 1
+        else:
+            self.data.targetProperties[0].nClasses if self.data else self.metaInfo['n_class']
         self.n_dim = self.data.X.shape[1] if self.data else self.metaInfo['n_dim']
         self.patience = patience
         self.tol = tol
@@ -532,7 +533,10 @@ class QSPRDNN(QSPRModel):
         last_save_epochs = 0
 
         # create array for cross validation predictions and for keeping track of the number of folds
-        cvs = np.zeros((y.shape[0], max(1, self.data.nClasses(self.data.targetProperties[0]))))
+        if self.task.isRegression():
+            cvs = np.zeros((y.shape[0], 1))
+        else:
+            cvs = np.zeros((y.shape[0], self.data.targetProperties[0].nClasses))
         fold_counter = np.zeros(y.shape[0])
 
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):

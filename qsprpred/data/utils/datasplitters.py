@@ -6,10 +6,9 @@ To add a new data splitter:
 from collections import defaultdict
 
 import numpy as np
-
 from qsprpred.data.data import QSPRDataset
-from qsprpred.data.interfaces import datasplit, DataSetDependant
-from qsprpred.data.utils.scaffolds import Scaffold, Murcko
+from qsprpred.data.interfaces import DataSetDependant, datasplit
+from qsprpred.data.utils.scaffolds import Murcko, Scaffold
 from qsprpred.logs import logger
 from sklearn.model_selection import ShuffleSplit
 
@@ -70,8 +69,9 @@ class scaffoldsplit(datasplit, DataSetDependant):
             dataset.prepareDataset(), i.e. by default canonical SMILES. If forced test contains the totality of the
             molecules in the dataset, the custom_test_list reverts to default None.
     """
-    def __init__(self, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True, custom_test_list=None, dataset=None)\
-            -> None:
+
+    def __init__(self, scaffold: Scaffold = Murcko(), test_fraction=0.1,
+                 shuffle=True, custom_test_list=None, dataset=None) -> None:
         super().__init__(dataset)
         self.scaffold = scaffold
         self.test_fraction = test_fraction
@@ -81,7 +81,8 @@ class scaffoldsplit(datasplit, DataSetDependant):
     def split(self, X, y):
         dataset = self.getDataSet()
         if not dataset:
-            raise AttributeError("Dataset not set for splitter. Use 'setDataSet(dataset)' to attach it to this instance.")
+            raise AttributeError(
+                "Dataset not set for splitter. Use 'setDataSet(dataset)' to attach it to this instance.")
 
         dataset.addScaffolds([self.scaffold])
 
@@ -119,9 +120,9 @@ class scaffoldsplit(datasplit, DataSetDependant):
         # Revert to default scaffold grouping if all molecules are placed in test set
         if len(test_idx) > max_in_test:
             logger.warning('Warning: Test set includes all molecules in custom_test_list but is now bigger than '
-                          'specified fraction')
+                           'specified fraction')
         try:
-            assert(len(test_idx) + len(invalid_idx) < len(df)), "Test set cannot contain the totality of the data"
+            assert (len(test_idx) + len(invalid_idx) < len(df)), "Test set cannot contain the totality of the data"
         except AssertionError:
             logger.warning("Warning: Test set cannot contain the totality of the data. Ignoring custom_test_list input.")
             test_idx = []

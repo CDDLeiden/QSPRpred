@@ -106,12 +106,12 @@ class ModelTestMixIn:
                     self.assertEqual(
                         predictions[0].shape,
                         (len(input_smiles),
-                         predictor.targetProperties[0].getNclasses()))
+                         predictor.targetProperties[0].nClasses))
                 else:
                     self.assertEqual(
                         predictions.shape,
                         (len(input_smiles),
-                         predictor.targetProperties[0].getNclasses()))
+                         predictor.targetProperties[0].nClasses))
             else:
                 self.assertEqual(predictions.shape, (len(input_smiles), len(predictor.targetProperties)))
 

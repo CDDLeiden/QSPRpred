@@ -563,10 +563,12 @@ class MoleculeTable(MoleculeDataSet):
 class TargetProperty():
     """Target property for QSPRmodelling class.
 
-    Args:
+    Attributes:
         name (str): name of the target property
         task (Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS]): task type for the target property
         th (int): threshold for the target property, only used for classification tasks
+        nClasses (int): number of classes for the target property, only used for classification tasks
+        transformer (Callable): function to transform the target property
     """
 
     def __init__(
@@ -574,6 +576,7 @@ class TargetProperty():
             task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS],
             originalName: str = None,
             th: Union[List[float], str] = None,
+            nClasses: int = None,
             transformer: Callable = None):
         """Initialize a TargetProperty object.
 
@@ -582,6 +585,7 @@ class TargetProperty():
             task (Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS]): task type for the target property
             originalName (str): original name of the target property, if not specified, the name is used
             th (Union[List[float], str]): threshold for the target property, only used for classification tasks
+            nClasses (int): number of classes for the target property (only used if th is precomputed, otherwise it is inferred)
             transformer (Callable): function to transform the target property
         """
         self.name = name
@@ -590,16 +594,49 @@ class TargetProperty():
         if task.isClassification():
             assert th is not None, f"Threshold not specified for classification task {name}"
             self.th = th
+            if isinstance(th, str) and th == "precomputed":
+                self.nClasses = nClasses
         self.transformer = transformer
 
-    def setThreshold(self, th: Union[List[float], str]):
+    @property
+    def th(self):
         """Set the threshold for the target property.
 
         Args:
             th (Union[List[int], str]): threshold for the target property
         """
-        assert self.task.isClassification(), "Threshold can only be set for classification tasks"
-        self.th = th
+        return self._th
+
+    @th.setter
+    def th(self, th: Union[List[float], str]):
+        """Set the threshold for the target property and the number of classes if th is not precomputed."""
+        assert self.task.isClassification(), f"Threshold can only be set for classification tasks"
+        self._th = th
+        if isinstance(th, str):
+            assert th == "precomputed", f"Invalid threshold {th}"
+        else:
+            self._nClasses = len(self.th) - 1 if len(self.th) > 1 else 2
+
+    @th.deleter
+    def th(self):
+        """Delete the threshold for the target property and the number of classes."""
+        del self._th
+        del self._nClasses
+
+    @property
+    def nClasses(self):
+        """Get the number of classes for the target property."""
+        return self._nClasses
+
+    @nClasses.setter
+    def nClasses(self, nClasses: int):
+        """Set the number of classes for the target property if th is precomputed.
+
+        Args:
+            nClasses (int): number of classes
+        """
+        assert self.th == "precomputed", f"Number of classes can only be set if threshold is precomputed"
+        self._nClasses = nClasses
 
     def __repr__(self):
         """Representation of the TargetProperty object."""
@@ -644,20 +681,6 @@ class TargetProperty():
         else:
             return [TargetProperty(**d) for d in l]
 
-    def getNclasses(self):
-        """Get the number of classes for the target property.
-
-        Returns:
-            int: number of classes
-        """
-        if self.task.isClassification():
-            if len(self.th) > 1:
-                return len(self.th) - 1
-            else:
-                return 2
-        else:
-            return None
-
     @staticmethod
     def toList(l: list, task_as_str: bool = False, drop_transformer: bool = True):
         """Convert a list of TargetProperty objects to a list of dictionaries.
@@ -669,13 +692,18 @@ class TargetProperty():
         Returns:
             List[dict]: list of dictionaries containing the target property information
         """
-        target_props = [t.__dict__ for t in l]
-        if task_as_str:
-            for t in target_props:
-                t["task"] = t["task"].name
-        if drop_transformer:
-            for t in target_props:
-                t.pop("transformer")
+        target_props = []
+        for target_prop in l:
+            target_props.append({
+                "name": target_prop.name,
+                "task": target_prop.task.name if task_as_str else target_prop.task,
+                "originalName": target_prop.originalName,
+            })
+            if target_prop.task.isClassification():
+                target_props[-1].update({"th": target_prop.th, "nClasses": target_prop.nClasses})
+            if not drop_transformer:
+                target_props[-1].update({"transformer": target_prop.transformer})
+
         return target_props
 
     @staticmethod
@@ -926,21 +954,6 @@ class QSPRDataset(MoleculeTable):
         self.loadDataToSplits()
         self.featurizeSplits()
 
-    def isMultiClass(self, target_prop: Union[TargetProperty, str]):
-        """Return if model task is multi class classification."""
-        if isinstance(target_prop, str):
-            target_prop = self.getTargetProperties([target_prop])[0]
-        return target_prop.task == TargetTasks.MULTICLASS and self.nClasses(target_prop) > 2
-
-    def nClasses(self, target_prop: str):
-        """Return number of output classes for classification."""
-        if isinstance(target_prop, str):
-            target_prop = self.getTargetProperties([target_prop])[0]
-        if target_prop.task.isClassification():
-            return len(self.df[target_prop.name].unique())
-        else:
-            return 0
-
     def makeRegression(self, target_property: Union[TargetProperty, str]):
         """Switch to regression task using the given target property.
 
@@ -950,8 +963,8 @@ class QSPRDataset(MoleculeTable):
         if isinstance(target_property, str):
             target_property = self.getTargetProperties([target_property], original_names=True)[0]
         target_property.name = target_property.originalName
-        target_property.th = None
         target_property.task = TargetTasks.REGRESSION
+        del target_property.th
         self.restoreTrainingData()
 
     def makeClassification(self, target_property: Union[TargetProperty, str], th: List[float] = None):
@@ -961,6 +974,12 @@ class QSPRDataset(MoleculeTable):
             target_property (TargetProperty): Target property to use for classification or name of the target property.
             th (List[float], optional): list of threshold values. If not provided, the values will be inferred from th specified in TargetProperty. Defaults to None.
         """
+        if th is not None:
+            assert isinstance(
+                th, list) or th == "precomputed", "Threshold values should be provided as a list of floats."
+            if isinstance(th, list):
+                assert len(th) > 0, "Threshold values should be provided as a list of floats."
+
         if isinstance(target_property, str):
             target_property = self.getTargetProperties([target_property], original_names=True)[0]
 
@@ -979,10 +998,13 @@ class QSPRDataset(MoleculeTable):
 
         if th == 'precomputed':
             self.df[new_prop] = self.df[target_property.originalName]
-            if len(self.df[new_prop].dropna().unique()) > 2:
-                target_property.task = TargetTasks.MULTICLASS
-            else:
-                target_property.task = TargetTasks.SINGLECLASS
+            assert all([value is None or (type(value) in (int, bool)) or (isinstance(value, float) and value.is_integer())
+                       for value in self.df[new_prop]]), "Precomputed classification target must be integers or booleans."
+            nClasses = len(self.df[new_prop].dropna().unique())
+            target_property.task = TargetTasks.MULTICLASS if nClasses > 2 else TargetTasks.SINGLECLASS
+            target_property.th = th
+            target_property.nClasses = nClasses
+            target_property.name = new_prop
         else:
             assert len(th) > 0, "Threshold list must contain at least one value."
             if len(th) > 1:
@@ -1002,8 +1024,8 @@ class QSPRDataset(MoleculeTable):
             else:
                 self.df[new_prop] = self.df[target_property.originalName] > th[0]
             target_property.task = TargetTasks.SINGLECLASS if len(th) == 1 else TargetTasks.MULTICLASS
-        target_property.setThreshold(th)
-        target_property.name = new_prop
+            target_property.th = th
+            target_property.name = new_prop
         self.restoreTrainingData()
         logger.info("Target property converted to classification.")
         return target_property

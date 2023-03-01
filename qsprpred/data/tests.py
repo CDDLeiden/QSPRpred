@@ -433,7 +433,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         def test_bad_init(dataset_to_test):
             with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification("CL", [])
-            with self.assertRaises(TypeError):
+            with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification("CL", th=6.5)
             with self.assertRaises(AssertionError):
                 dataset_to_test.makeClassification("CL", th=[0, 2, 3])
@@ -466,9 +466,23 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         test_classification(dataset, ["CL", "fu"], [[0, 15, 30, 60], [0.3]])
         dataset.save()
 
+        # check precomputed th
+        dataset = QSPRDataset(
+            "test_target_property",
+            [{"name": "CL_class", "task": TargetTasks.MULTICLASS, "th": "precomputed"}],
+            df=dataset.df,
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+        )
+        self.assertEqual(dataset.targetProperties[0].task, TargetTasks.MULTICLASS)
+        self.assertEqual(dataset.targetProperties[0].name, "CL_class_class")
+        self.assertEqual(dataset.targetProperties[0].nClasses, 3)
+        self.assertEqual(dataset.targetProperties[0].th, "precomputed")
+
         # Check that the dataset is correctly loaded from file for classification
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
-        test_bad_init(dataset)
+        test_bad_init(dataset_new)
         test_classification(dataset_new, ["CL", "fu"], [[0, 15, 30, 60], [0.3]])
 
         # Check that the make regression method works as expected
@@ -513,6 +527,12 @@ class TestTargetProperty(TestCase):
 
         targetprop = TargetProperty("CL", TargetTasks.SINGLECLASS, th=[5])
         check_target_property(targetprop, "CL", TargetTasks.SINGLECLASS, "CL", [5])
+
+        # check with precomputed values
+        with self.assertRaises(AssertionError):
+            targetprop = TargetProperty("CL", TargetTasks.SINGLECLASS, th="precomputed")
+        targetprop = TargetProperty("CL", TargetTasks.SINGLECLASS, th="precomputed", nClasses=2)
+        check_target_property(targetprop, "CL", TargetTasks.SINGLECLASS, "CL", "precomputed")
 
         # Check from dictionary creation
         targetprop = TargetProperty.fromDict({"name": "CL", "task": TargetTasks.REGRESSION})
@@ -572,7 +592,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     @parameterized.expand([
         (Murcko(), True, None),
-        (BemisMurcko(), False, ['NCCc1ccc(O)c(O)c1', 'CC(C)(C)c1cnc(CSc2cnc(NC(=O)C3CCNCC3)s2)o1']),
+        (BemisMurcko(), False, ['NCCc1cc(O)c(O)cc1', 'CC(C)(C)c1cnc(CSc2cnc(NC(=O)C3CCNCC3)s2)o1']),
     ])
     def test_scaffoldsplit(self, scaffold, shuffle, custom_test_list):
         """Test the scaffold split function, where the split is done based on the scaffold of the molecules."""
