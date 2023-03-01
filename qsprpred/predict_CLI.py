@@ -37,13 +37,8 @@ def QSPRArgParser(txt=None):
                         help="If included use probabilities instead of predictions for classification tasks.")
 
     # model predictions arguments
-    parser.add_argument(
-        '-mp',
-        '--metadata_paths',
-        nargs="*",
-        help="Path to metadata json file for each model to be used.")
-    parser.add_argument('-np', '--no_preprocessing', action='store_true',
-                        help="If included do not standardize and sanitize SMILES.")
+    parser.add_argument('-mp', '--metadata_paths', nargs="*",
+                        help="Path to metadata json file for each model to be used.")
 
     # other
     parser.add_argument('-ng', '--no_git', action='store_true',
@@ -70,11 +65,11 @@ def QSPR_predict(args):
 
     results = {"SMILES": smiles_list}
     for metadata_path in args.metadata_paths:
-        if not os.path.exists(metadata_path):
-            log.warning(f"{metadata_path} does not exist. Model skipped.")
+        if not os.path.exists(f"{args.base_dir}/qspr/models/{metadata_path}"):
+            log.warning(f"{args.base_dir}/qspr/models/{metadata_path} does not exist. Model skipped.")
             continue
 
-        predictor = QSPRModel.fromFile(metadata_path)
+        predictor = QSPRModel.fromFile(f"{args.base_dir}/qspr/models/{metadata_path}")
 
         predictions = predictor.predictMols(smiles_list, use_probas=args.use_probas)
         # if predictions 2d array with more than 1 column, add as separate columns

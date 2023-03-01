@@ -38,7 +38,7 @@ def QSPRArgParser(txt=None):
     # model target arguments
     parser.add_argument('-dp', '--data_prefixes', type=str, nargs='*',
                         help="Prefix of each data file to be used as input for the model,\
-                            e.g. targeti1_MULTICLASS for a file named targeti1_MULTICLASS_df.pkl")
+                            e.g. target1_MULTICLASS for a file named target1_MULTICLASS_df.pkl")
     parser.add_argument('-ms', '--model_suffix', type=str, help="Suffix of the model to be saved")
 
     # model type arguments
@@ -47,8 +47,6 @@ def QSPRArgParser(txt=None):
                         default=['RF', 'XGB', 'SVM', 'PLS', 'NB', 'KNN', 'DNN'],
                         help="Modeltype, defaults to run all ModelTasks, choose from: 'RF', 'XGB', 'DNN', 'SVM',\
                              'PLS' (only with REG), 'NB' (only with CLS) 'KNN'")
-    parser.add_argument('-r', '--regression', type=str, default=None,
-                        help="If True, only regression model, if False, only classification, default both")
 
     # model settings
     parser.add_argument('-p', '--parameters', type=str, default=None,
@@ -85,16 +83,6 @@ def QSPRArgParser(txt=None):
         args = parser.parse_args(txt)
     else:
         args = parser.parse_args()
-
-    # If no regression argument, does both regression and classification
-    if args.regression is None:
-        args.regression = [True, False]
-    elif args.regression.lower() in ['true', 'reg', 'regression']:
-        args.regression = [True]
-    elif args.regression.lower() in ['false', 'cls', 'classification']:
-        args.regression = [False]
-    else:
-        sys.exit("invalid regression arg given")
 
     return args
 
@@ -245,7 +233,6 @@ if __name__ == '__main__':
     os.environ['TF_DETERMINISTIC_OPS'] = str(args.random_state)
 
     # Backup files
-    tasks = ['REG' if reg == True else 'CLS' for reg in args.regression]
     file_prefixes = [
         f'{alg}_{data_prefix}'
         for alg in args.model_types
