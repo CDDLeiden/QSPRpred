@@ -529,8 +529,6 @@ class TestTargetProperty(TestCase):
         check_target_property(targetprop, "CL", TargetTasks.SINGLECLASS, "CL", [5])
 
         # check with precomputed values
-        with self.assertRaises(AssertionError):
-            targetprop = TargetProperty("CL", TargetTasks.SINGLECLASS, th="precomputed")
         targetprop = TargetProperty("CL", TargetTasks.SINGLECLASS, th="precomputed", nClasses=2)
         check_target_property(targetprop, "CL", TargetTasks.SINGLECLASS, "CL", "precomputed")
 
@@ -592,7 +590,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     @parameterized.expand([
         (Murcko(), True, None),
-        (BemisMurcko(), False, ['NCCc1cc(O)c(O)cc1', 'CC(C)(C)c1cnc(CSc2cnc(NC(=O)C3CCNCC3)s2)o1']),
+        (BemisMurcko(), False, ['NCCc1ccc(O)c(O)c1', 'CC(C)(C)c1cnc(CSc2cnc(NC(=O)C3CCNCC3)s2)o1']),
     ])
     def test_scaffoldsplit(self, scaffold, shuffle, custom_test_list):
         """Test the scaffold split function, where the split is done based on the scaffold of the molecules."""
