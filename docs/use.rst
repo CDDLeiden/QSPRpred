@@ -79,7 +79,7 @@ can be indicated with `-sm` (default SMILES).
 ..  code-block::
 
     # input is in tutorial/data/parkinsons_pivot.tsv, setting debug flag, smiles column, random seed, number of cpu's
-        python -m qsprpred.data_CLI -b tutorial -i parkinsons_pivot.tsv -sm SMILES -d -ran 42 -ncpu 5 -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan
+        python -m qsprpred.data_CLI -b tutorial -i parkinsons_pivot.tsv -sm SMILES -de -ran 42 -ncpu 5 -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan
 
 
 Log-transform data
@@ -191,7 +191,7 @@ gpu number for training pytorch models can be set.
 ..  code-block::
 
     # Setting debug flag, random seed, number of cpu's and a specific gpu (for now multiple gpu's not possible)
-        python -m qsprpred.model_CLI -d -ran 42 -ncpu 5 -gpus [3] -dp GABAAalpha_REGRESSION NMDA_REGRESSION -mt RF -me -s
+        python -m qsprpred.model_CLI -de -ran 42 -ncpu 5 -gpus [3] -dp GABAAalpha_REGRESSION NMDA_REGRESSION -mt RF -me -s
 
 model types
 """""""""""
@@ -296,7 +296,7 @@ gpu number for prediction with pytorch models can be set.
 ..  code-block::
 
     # Setting debug flag, random seed, output file name, number of cpu's and a specific gpu (for now multiple gpu's not possible)
-        python -m qsprpred.predict_CLI -i parkinsons_pivot.tsv -mp RF_GABAAalpha_REGRESSION/RF_GABAAalpha_REGRESSION_meta.json RF_NMDA_REGRESSION/RF_NMDA_REGRESSION_meta.json -o mypredictions -d -ran 42 -ncpu 5 -gpus [3]
+        python -m qsprpred.predict_CLI -i parkinsons_pivot.tsv -mp RF_GABAAalpha_REGRESSION/RF_GABAAalpha_REGRESSION_meta.json RF_NMDA_REGRESSION/RF_NMDA_REGRESSION_meta.json -o mypredictions -de -ran 42 -ncpu 5 -gpus [3]
 
     
 Adding probability predictions
