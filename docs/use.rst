@@ -158,6 +158,20 @@ Specifically for use with a dataset from the `Papyrus dataset <https://chemrxiv.
 an option is included for filtering low quality data from the dataset (All data is removed with value 'Low' in column 'Quality').
 To apply this filter include `-lq` or `--low_quality` in your command.
 
+Multitask data
+""""""""""""""
+Multitask modelling is possible by passing multiple properties to the `-pr` argument. Furthermore, missing data can be
+imputed using the `-im` argument. You can combine any number of targets and combination of regression and classification
+tasks for the data preparation, however currently the DNN models do not support multitask modelling and only the random
+forest models and knn sklearn models are supported for multitask. The multitask sklearn modelling is only possible for 
+multiple regression task or multiple single class classification tasks. For multiple multi-class classification tasks or
+a combination of regression and classification tasks, the multitask modelling is not supported at the moment.
+
+..  code-block::
+
+    # input is in ./data/parkinsons_pivot.tsv
+        python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha NMDA -r REG -sp random -sf 0.15 -fe Morgan -im mean
+
 Model Training
 --------------
 
@@ -263,6 +277,12 @@ as third list item. The search space file should always include all models to be
 
     # Bayesian optimization
         python -m qsprpred.model_CLI -dp GABAAalpha_REGRESSION NMDA_REGRESSION -mt RF -me -s -o bayes -nt 50 -ss mysearchspace -me -s
+
+Multitask modelling
+"""""""""""""""""""
+Multitask modelling is also possible. This means that the models are trained on multiple targets at once.
+The modelling arguments are the same as for single task modelling, you just need to specifiy the a multitask
+dataset data prefix (see multitask data preparation).
 
 
 Prediction
