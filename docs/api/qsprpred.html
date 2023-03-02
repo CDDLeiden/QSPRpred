@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred package &mdash; QSPRpred 1.3.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.data package" href="qsprpred.data.html" />
+    <link rel="prev" title="Python API" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v1.3.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">qsprpred package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.metrics.html">qsprpred.metrics package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-qsprpred.about">qsprpred.about module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-qsprpred.data_CLI">qsprpred.data_CLI module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#qsprpred.data_CLI.QSPRArgParser"><code class="docutils literal notranslate"><span class="pre">QSPRArgParser()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsprpred.data_CLI.QSPR_dataprep"><code class="docutils literal notranslate"><span class="pre">QSPR_dataprep()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-qsprpred.model_CLI">qsprpred.model_CLI module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#qsprpred.model_CLI.QSPRArgParser"><code class="docutils literal notranslate"><span class="pre">QSPRArgParser()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsprpred.model_CLI.QSPR_modelling"><code class="docutils literal notranslate"><span class="pre">QSPR_modelling()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#qsprpred.predict_CLI.QSPRArgParser"><code class="docutils literal notranslate"><span class="pre">QSPRArgParser()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsprpred.predict_CLI.QSPR_predict"><code class="docutils literal notranslate"><span class="pre">QSPR_predict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Python API</a></li>
+      <li class="breadcrumb-item active">qsprpred package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-package">
+<h1>qsprpred package<a class="headerlink" href="#qsprpred-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.sources.html">qsprpred.data.sources package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.sources.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.sources.html#module-qsprpred.data.sources">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.utils.html">qsprpred.data.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.datafilters">qsprpred.data.utils.datafilters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.dataimputers">qsprpred.data.utils.dataimputers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.datasplitters">qsprpred.data.utils.datasplitters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.descriptorcalculator">qsprpred.data.utils.descriptorcalculator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.descriptorsets">qsprpred.data.utils.descriptorsets module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.feature_standardization">qsprpred.data.utils.feature_standardization module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.featurefilters">qsprpred.data.utils.featurefilters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.folds">qsprpred.data.utils.folds module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.scaffolds">qsprpred.data.utils.scaffolds module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils.smiles_standardization">qsprpred.data.utils.smiles_standardization module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.utils.html#module-qsprpred.data.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.html#module-qsprpred.data.data">qsprpred.data.data module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable"><code class="docutils literal notranslate"><span class="pre">MoleculeTable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.ParallelApplyWrapper"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.ParallelApplyWrapper</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.addDescriptors"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.addDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.addProperty"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.addProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.addScaffolds"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.addScaffolds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.apply"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.cleanMolecules"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.cleanMolecules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.clearFiles"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.clearFiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.createScaffoldGroups"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.createScaffoldGroups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.dropInvalids"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.dropInvalids()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.filter"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.filter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.fromFile"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.fromSDF"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.fromSDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.fromSMILES"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.fromSMILES()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.fromTableFile"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.fromTableFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.getDF"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.getDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.getDescriptorNames"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.getDescriptorNames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.getDescriptors"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.getDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.getProperties"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.getProperties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.getScaffoldGroups"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.getScaffoldGroups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.getScaffoldNames"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.getScaffoldNames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.getScaffolds"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.getScaffolds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.getSubset"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.getSubset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.hasDescriptors"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.hasDescriptors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.hasProperty"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.hasProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.hasScaffoldGroups"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.hasScaffoldGroups</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.hasScaffolds"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.hasScaffolds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.papply"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.papply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.reload"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.reload()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.removeProperty"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.removeProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.sanitize"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.sanitize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.save"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.shuffle"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.shuffle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.standardize"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.standardize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.transform"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset"><code class="docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.addDescriptors"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.addDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.checkFeatures"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.checkFeatures()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.createFolds"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.createFolds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.dropEmpty"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.dropEmpty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.featurizeSplits"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.featurizeSplits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.fillMissing"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.fillMissing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.filterFeatures"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.filterFeatures()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.fitFeatureStandardizer"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.fitFeatureStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.fromFile"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.fromMolTable"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.fromMolTable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.fromSDF"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.fromSDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.fromTableFile"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.fromTableFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.getDefaultFoldGenerator"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.getDefaultFoldGenerator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.getDefaultFoldSplit"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.getDefaultFoldSplit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.getFeatureNames"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.getFeatureNames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.getFeatures"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.getFeatures()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.getTargetProperties"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.getTargetProperties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.hasFeatures"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.hasFeatures</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.isMultiClass"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.isMultiClass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.loadDataToSplits"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.loadDataToSplits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.loadDescriptorsToSplits"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.loadDescriptorsToSplits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.loadFeatureStandardizer"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.loadFeatureStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.loadMetadata"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.loadMetadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.makeClassification"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.makeClassification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.makeRegression"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.makeRegression()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.nClasses"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.nClasses</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.prepareDataset"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.prepareDataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.restoreTrainingData"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.restoreTrainingData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.save"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.saveFeatureStandardizer"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.saveFeatureStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.saveMetadata"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.saveMetadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.saveSplit"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.saveSplit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.setFeatureStandardizer"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.setFeatureStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset.split"><code class="docutils literal notranslate"><span class="pre">QSPRDataset.split()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.html#module-qsprpred.data.interfaces">qsprpred.data.interfaces module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSet"><code class="docutils literal notranslate"><span class="pre">DataSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSet.addProperty"><code class="docutils literal notranslate"><span class="pre">DataSet.addProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSet.apply"><code class="docutils literal notranslate"><span class="pre">DataSet.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSet.getProperties"><code class="docutils literal notranslate"><span class="pre">DataSet.getProperties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSet.getSubset"><code class="docutils literal notranslate"><span class="pre">DataSet.getSubset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSet.removeProperty"><code class="docutils literal notranslate"><span class="pre">DataSet.removeProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSet.transform"><code class="docutils literal notranslate"><span class="pre">DataSet.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSetDependant"><code class="docutils literal notranslate"><span class="pre">DataSetDependant</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSetDependant.getDataSet"><code class="docutils literal notranslate"><span class="pre">DataSetDependant.getDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSetDependant.hasDataSet"><code class="docutils literal notranslate"><span class="pre">DataSetDependant.hasDataSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSetDependant.setDataSet"><code class="docutils literal notranslate"><span class="pre">DataSetDependant.setDataSet()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.MoleculeDataSet"><code class="docutils literal notranslate"><span class="pre">MoleculeDataSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.MoleculeDataSet.addDescriptors"><code class="docutils literal notranslate"><span class="pre">MoleculeDataSet.addDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.MoleculeDataSet.fromFile"><code class="docutils literal notranslate"><span class="pre">MoleculeDataSet.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.MoleculeDataSet.getDescriptorNames"><code class="docutils literal notranslate"><span class="pre">MoleculeDataSet.getDescriptorNames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.MoleculeDataSet.getDescriptors"><code class="docutils literal notranslate"><span class="pre">MoleculeDataSet.getDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.MoleculeDataSet.hasDescriptors"><code class="docutils literal notranslate"><span class="pre">MoleculeDataSet.hasDescriptors</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.datafilter"><code class="docutils literal notranslate"><span class="pre">datafilter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.datasplit"><code class="docutils literal notranslate"><span class="pre">datasplit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.datasplit.split"><code class="docutils literal notranslate"><span class="pre">datasplit.split()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.featurefilter"><code class="docutils literal notranslate"><span class="pre">featurefilter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.html#module-qsprpred.data.tests">qsprpred.data.tests module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn.create_dataset"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn.create_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn.create_large_dataset"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn.create_large_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn.create_small_dataset"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn.create_small_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn.getBigDF"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn.getBigDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn.getSmallDF"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn.get_all_descriptors"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn.get_all_descriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn.get_default_prep"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn.get_default_prep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn.get_prep_combinations"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn.get_prep_combinations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn.get_prep_grid"><code class="docutils literal notranslate"><span class="pre">DataSetsMixIn.get_prep_grid()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.PathMixIn"><code class="docutils literal notranslate"><span class="pre">PathMixIn</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.PathMixIn.clean_directories"><code class="docutils literal notranslate"><span class="pre">PathMixIn.clean_directories()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.PathMixIn.datapath"><code class="docutils literal notranslate"><span class="pre">PathMixIn.datapath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.PathMixIn.qsprdatapath"><code class="docutils literal notranslate"><span class="pre">PathMixIn.qsprdatapath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.PathMixIn.setUp"><code class="docutils literal notranslate"><span class="pre">PathMixIn.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.PathMixIn.tearDown"><code class="docutils literal notranslate"><span class="pre">PathMixIn.tearDown()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataFilters"><code class="docutils literal notranslate"><span class="pre">TestDataFilters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataFilters.test_Categoryfilter"><code class="docutils literal notranslate"><span class="pre">TestDataFilters.test_Categoryfilter()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetCreationSerialization"><code class="docutils literal notranslate"><span class="pre">TestDataSetCreationSerialization</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetCreationSerialization.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestDataSetCreationSerialization.test_defaults()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetCreationSerialization.test_target_property"><code class="docutils literal notranslate"><span class="pre">TestDataSetCreationSerialization.test_target_property()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.feature_consistency_checks"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.feature_consistency_checks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_00_RDkit_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_00_RDkit_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_01_DrugExPhyschem_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_01_DrugExPhyschem_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_02_PredictorDesc_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_02_PredictorDesc_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_03_TanimotoDistances_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_03_TanimotoDistances_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_04_FingerprintSet_MorganFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_04_FingerprintSet_MorganFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_05_Mordred_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_05_Mordred_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_06_Mold2_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_06_Mold2_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_07_FingerprintSet_CDKFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_07_FingerprintSet_CDKFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_08_FingerprintSet_CDKExtendedFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_08_FingerprintSet_CDKExtendedFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_09_FingerprintSet_CDKEStateFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_09_FingerprintSet_CDKEStateFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_10_FingerprintSet_CDKGraphOnlyFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_10_FingerprintSet_CDKGraphOnlyFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_11_FingerprintSet_CDKMACCSFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_11_FingerprintSet_CDKMACCSFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_12_FingerprintSet_CDKPubchemFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_12_FingerprintSet_CDKPubchemFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_13_FingerprintSet_CDKSubstructureFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_13_FingerprintSet_CDKSubstructureFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_14_FingerprintSet_CDKKlekotaRothFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_14_FingerprintSet_CDKKlekotaRothFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_15_FingerprintSet_CDKAtomPairs2DFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_15_FingerprintSet_CDKAtomPairs2DFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_16_FingerprintSet_CDKSubstructureFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_16_FingerprintSet_CDKSubstructureFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_17_FingerprintSet_CDKKlekotaRothFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_17_FingerprintSet_CDKKlekotaRothFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_18_FingerprintSet_CDKAtomPairs2DFP_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_18_FingerprintSet_CDKAtomPairs2DFP_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_19_PaDEL_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_19_PaDEL_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_20_RDkit_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_20_RDkit_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_21_DrugExPhyschem_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_21_DrugExPhyschem_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_22_PredictorDesc_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_22_PredictorDesc_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_23_TanimotoDistances_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_23_TanimotoDistances_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_24_FingerprintSet_MorganFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_24_FingerprintSet_MorganFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_25_Mordred_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_25_Mordred_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_26_Mold2_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_26_Mold2_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_27_FingerprintSet_CDKFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_27_FingerprintSet_CDKFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_28_FingerprintSet_CDKExtendedFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_28_FingerprintSet_CDKExtendedFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_29_FingerprintSet_CDKEStateFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_29_FingerprintSet_CDKEStateFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_30_FingerprintSet_CDKGraphOnlyFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_30_FingerprintSet_CDKGraphOnlyFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_31_FingerprintSet_CDKMACCSFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_31_FingerprintSet_CDKMACCSFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_32_FingerprintSet_CDKPubchemFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_32_FingerprintSet_CDKPubchemFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_33_FingerprintSet_CDKSubstructureFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_33_FingerprintSet_CDKSubstructureFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_34_FingerprintSet_CDKKlekotaRothFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_34_FingerprintSet_CDKKlekotaRothFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_35_FingerprintSet_CDKAtomPairs2DFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_35_FingerprintSet_CDKAtomPairs2DFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_36_FingerprintSet_CDKSubstructureFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_36_FingerprintSet_CDKSubstructureFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_37_FingerprintSet_CDKKlekotaRothFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_37_FingerprintSet_CDKKlekotaRothFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_38_FingerprintSet_CDKAtomPairs2DFP_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_38_FingerprintSet_CDKAtomPairs2DFP_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_descriptors_all_39_PaDEL_REGRESSION"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_descriptors_all_39_PaDEL_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_00_DescriptorsCalculator_FingerprintSet_MorganFP_None_None_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_00_DescriptorsCalculator_FingerprintSet_MorganFP_None_None_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_01_DescriptorsCalculator_FingerprintSet_MorganFP_None_None_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_01_DescriptorsCalculator_FingerprintSet_MorganFP_None_None_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_02_DescriptorsCalculator_FingerprintSet_MorganFP_None_None_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_02_DescriptorsCalculator_FingerprintSet_MorganFP_None_None_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_03_DescriptorsCalculator_FingerprintSet_MorganFP_None_None_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_03_DescriptorsCalculator_FingerprintSet_MorganFP_None_None_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_04_DescriptorsCalculator_FingerprintSet_MorganFP_None_StandardScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_04_DescriptorsCalculator_FingerprintSet_MorganFP_None_StandardScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_05_DescriptorsCalculator_FingerprintSet_MorganFP_None_StandardScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_05_DescriptorsCalculator_FingerprintSet_MorganFP_None_StandardScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_06_DescriptorsCalculator_FingerprintSet_MorganFP_None_StandardScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_06_DescriptorsCalculator_FingerprintSet_MorganFP_None_StandardScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_07_DescriptorsCalculator_FingerprintSet_MorganFP_None_StandardScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_07_DescriptorsCalculator_FingerprintSet_MorganFP_None_StandardScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_08_DescriptorsCalculator_FingerprintSet_MorganFP_None_SKLearnStandardizer_MinMaxScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_08_DescriptorsCalculator_FingerprintSet_MorganFP_None_SKLearnStandardizer_MinMaxScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_09_DescriptorsCalculator_FingerprintSet_MorganFP_None_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_09_DescriptorsCalculator_FingerprintSet_MorganFP_None_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_10_DescriptorsCalculator_FingerprintSet_MorganFP_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_10_DescriptorsCalculator_FingerprintSet_MorganFP_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_11_DescriptorsCalculator_FingerprintSet_MorganFP_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_11_DescriptorsCalculator_FingerprintSet_MorganFP_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_12_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_None_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_12_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_None_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_13_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_None_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_13_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_None_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_14_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_None_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_14_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_None_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_15_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_None_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_15_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_None_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_16_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_StandardScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_16_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_StandardScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_17_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_StandardScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_17_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_StandardScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_18_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_StandardScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_18_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_StandardScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_19_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_StandardScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_19_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_StandardScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_20_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_SKLearnStandardizer_MinMaxScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_20_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_SKLearnStandardizer_MinMaxScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_21_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_21_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_22_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_22_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_23_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_23_DescriptorsCalculator_FingerprintSet_MorganFP_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_24_DescriptorsCalculator_RDkit_None_None_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_24_DescriptorsCalculator_RDkit_None_None_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_25_DescriptorsCalculator_RDkit_None_None_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_25_DescriptorsCalculator_RDkit_None_None_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_26_DescriptorsCalculator_RDkit_None_None_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_26_DescriptorsCalculator_RDkit_None_None_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_27_DescriptorsCalculator_RDkit_None_None_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_27_DescriptorsCalculator_RDkit_None_None_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_28_DescriptorsCalculator_RDkit_None_StandardScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_28_DescriptorsCalculator_RDkit_None_StandardScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_29_DescriptorsCalculator_RDkit_None_StandardScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_29_DescriptorsCalculator_RDkit_None_StandardScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_30_DescriptorsCalculator_RDkit_None_StandardScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_30_DescriptorsCalculator_RDkit_None_StandardScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_31_DescriptorsCalculator_RDkit_None_StandardScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_31_DescriptorsCalculator_RDkit_None_StandardScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_32_DescriptorsCalculator_RDkit_None_SKLearnStandardizer_MinMaxScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_32_DescriptorsCalculator_RDkit_None_SKLearnStandardizer_MinMaxScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_33_DescriptorsCalculator_RDkit_None_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_33_DescriptorsCalculator_RDkit_None_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_34_DescriptorsCalculator_RDkit_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_34_DescriptorsCalculator_RDkit_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_35_DescriptorsCalculator_RDkit_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_35_DescriptorsCalculator_RDkit_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_36_DescriptorsCalculator_RDkit_randomsplit_None_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_36_DescriptorsCalculator_RDkit_randomsplit_None_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_37_DescriptorsCalculator_RDkit_randomsplit_None_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_37_DescriptorsCalculator_RDkit_randomsplit_None_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_38_DescriptorsCalculator_RDkit_randomsplit_None_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_38_DescriptorsCalculator_RDkit_randomsplit_None_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_39_DescriptorsCalculator_RDkit_randomsplit_None_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_39_DescriptorsCalculator_RDkit_randomsplit_None_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_40_DescriptorsCalculator_RDkit_randomsplit_StandardScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_40_DescriptorsCalculator_RDkit_randomsplit_StandardScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_41_DescriptorsCalculator_RDkit_randomsplit_StandardScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_41_DescriptorsCalculator_RDkit_randomsplit_StandardScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_42_DescriptorsCalculator_RDkit_randomsplit_StandardScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_42_DescriptorsCalculator_RDkit_randomsplit_StandardScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_43_DescriptorsCalculator_RDkit_randomsplit_StandardScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_43_DescriptorsCalculator_RDkit_randomsplit_StandardScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_44_DescriptorsCalculator_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_44_DescriptorsCalculator_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_45_DescriptorsCalculator_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_45_DescriptorsCalculator_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_46_DescriptorsCalculator_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_46_DescriptorsCalculator_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_47_DescriptorsCalculator_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_47_DescriptorsCalculator_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_48_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_None_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_48_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_None_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_49_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_None_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_49_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_None_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_50_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_None_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_50_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_None_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_51_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_None_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_51_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_None_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_52_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_StandardScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_52_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_StandardScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_53_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_StandardScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_53_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_StandardScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_54_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_StandardScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_54_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_StandardScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_55_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_StandardScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_55_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_StandardScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_56_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_SKLearnStandardizer_MinMaxScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_56_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_SKLearnStandardizer_MinMaxScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_57_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_57_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_58_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_58_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_59_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_59_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_None_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_60_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_None_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_60_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_None_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_61_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_None_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_61_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_None_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_62_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_None_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_62_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_None_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_63_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_None_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_63_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_None_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_64_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_StandardScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_64_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_StandardScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_65_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_StandardScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_65_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_StandardScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_66_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_StandardScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_66_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_StandardScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_67_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_StandardScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_67_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_StandardScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_68_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_None_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_68_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_None_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_69_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_69_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_None_CategoryFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_70_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_70_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_None()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSetPreparation.test_prep_combinations_71_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter"><code class="docutils literal notranslate"><span class="pre">TestDataSetPreparation.test_prep_combinations_71_DescriptorsCalculator_FingerprintSet_MorganFP_RDkit_randomsplit_SKLearnStandardizer_MinMaxScaler_lowVarianceFilter_CategoryFilter()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSplitters"><code class="docutils literal notranslate"><span class="pre">TestDataSplitters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSplitters.test_randomsplit"><code class="docutils literal notranslate"><span class="pre">TestDataSplitters.test_randomsplit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSplitters.test_scaffoldsplit"><code class="docutils literal notranslate"><span class="pre">TestDataSplitters.test_scaffoldsplit</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSplitters.test_scaffoldsplit_0"><code class="docutils literal notranslate"><span class="pre">TestDataSplitters.test_scaffoldsplit_0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSplitters.test_scaffoldsplit_1"><code class="docutils literal notranslate"><span class="pre">TestDataSplitters.test_scaffoldsplit_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSplitters.test_serialization"><code class="docutils literal notranslate"><span class="pre">TestDataSplitters.test_serialization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSplitters.test_temporalsplit"><code class="docutils literal notranslate"><span class="pre">TestDataSplitters.test_temporalsplit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDataSplitters.validate_split"><code class="docutils literal notranslate"><span class="pre">TestDataSplitters.validate_split()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorCalculation"><code class="docutils literal notranslate"><span class="pre">TestDescriptorCalculation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorCalculation.setUp"><code class="docutils literal notranslate"><span class="pre">TestDescriptorCalculation.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorCalculation.test_switching"><code class="docutils literal notranslate"><span class="pre">TestDescriptorCalculation.test_switching()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.setUp"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_DrugExPhyschem"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_DrugExPhyschem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_Mold2"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_Mold2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_Mordred"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_Mordred()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_descriptors"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_descriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints_0_CDKFP"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints_0_CDKFP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints_1_CDKExtendedFP"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints_1_CDKExtendedFP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints_2_CDKGraphOnlyFP"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints_2_CDKGraphOnlyFP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints_3_CDKMACCSFP"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints_3_CDKMACCSFP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints_4_CDKPubchemFP"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints_4_CDKPubchemFP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints_5_CDKEStateFP"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints_5_CDKEStateFP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints_6_CDKSubstructureFP"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints_6_CDKSubstructureFP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints_7_CDKKlekotaRothFP"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints_7_CDKKlekotaRothFP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PaDEL_fingerprints_8_CDKAtomPairs2DFP"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PaDEL_fingerprints_8_CDKAtomPairs2DFP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_PredictorDesc"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_PredictorDesc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_TanimotoDistances"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_TanimotoDistances()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_fingerprintSet"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_fingerprintSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestDescriptorsets.test_rdkit_descs"><code class="docutils literal notranslate"><span class="pre">TestDescriptorsets.test_rdkit_descs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFeatureFilters"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFeatureFilters.setUp"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFeatureFilters.test_BorutaFilter"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.test_BorutaFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFeatureFilters.test_highCorrelationFilter"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.test_highCorrelationFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFeatureFilters.test_lowVarianceFilter"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.test_lowVarianceFilter()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFeatureStandardizer"><code class="docutils literal notranslate"><span class="pre">TestFeatureStandardizer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFeatureStandardizer.setUp"><code class="docutils literal notranslate"><span class="pre">TestFeatureStandardizer.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFeatureStandardizer.test_featurestandarizer"><code class="docutils literal notranslate"><span class="pre">TestFeatureStandardizer.test_featurestandarizer()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFoldSplitters"><code class="docutils literal notranslate"><span class="pre">TestFoldSplitters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFoldSplitters.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestFoldSplitters.test_defaults()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestFoldSplitters.validate_folds"><code class="docutils literal notranslate"><span class="pre">TestFoldSplitters.validate_folds()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestScaffolds"><code class="docutils literal notranslate"><span class="pre">TestScaffolds</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestScaffolds.setUp"><code class="docutils literal notranslate"><span class="pre">TestScaffolds.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.TestScaffolds.test_scaffold_add"><code class="docutils literal notranslate"><span class="pre">TestScaffolds.test_scaffold_add()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.html#module-qsprpred.data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.logs.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.logs.html#module-qsprpred.logs.config">qsprpred.logs.config module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.config.LevelFilter"><code class="docutils literal notranslate"><span class="pre">LevelFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.config.LevelFilter.filter"><code class="docutils literal notranslate"><span class="pre">LevelFilter.filter()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.config.LevelFormatter"><code class="docutils literal notranslate"><span class="pre">LevelFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.config.LevelFormatter.format"><code class="docutils literal notranslate"><span class="pre">LevelFormatter.format()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.config.LogFileConfig"><code class="docutils literal notranslate"><span class="pre">LogFileConfig</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.config.config_logger"><code class="docutils literal notranslate"><span class="pre">config_logger()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.config.get_runid"><code class="docutils literal notranslate"><span class="pre">get_runid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.config.init_logfile"><code class="docutils literal notranslate"><span class="pre">init_logfile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.logs.html#module-qsprpred.logs.stopwatch">qsprpred.logs.stopwatch module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.stopwatch.StopWatch"><code class="docutils literal notranslate"><span class="pre">StopWatch</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.stopwatch.StopWatch.reset"><code class="docutils literal notranslate"><span class="pre">StopWatch.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.stopwatch.StopWatch.stop"><code class="docutils literal notranslate"><span class="pre">StopWatch.stop()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.logs.html#module-qsprpred.logs.utils">qsprpred.logs.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.utils.backUpFiles"><code class="docutils literal notranslate"><span class="pre">backUpFiles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.utils.backUpFilesInFolder"><code class="docutils literal notranslate"><span class="pre">backUpFilesInFolder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.utils.commit_hash"><code class="docutils literal notranslate"><span class="pre">commit_hash()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.utils.enable_file_logger"><code class="docutils literal notranslate"><span class="pre">enable_file_logger()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.utils.generateBackupDir"><code class="docutils literal notranslate"><span class="pre">generateBackupDir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.utils.generate_backup_runID"><code class="docutils literal notranslate"><span class="pre">generate_backup_runID()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.logs.html#module-qsprpred.logs">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html#qsprpred.logs.setLogger"><code class="docutils literal notranslate"><span class="pre">setLogger()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.metrics.html">qsprpred.metrics package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.metrics.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.metrics.html#module-qsprpred.metrics.calibration">qsprpred.metrics.calibration module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.metrics.html#qsprpred.metrics.calibration.calibration_error"><code class="docutils literal notranslate"><span class="pre">calibration_error()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.metrics.html#module-qsprpred.metrics">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.interfaces">qsprpred.models.interfaces module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel"><code class="docutils literal notranslate"><span class="pre">QSPRModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.bayesOptimization"><code class="docutils literal notranslate"><span class="pre">QSPRModel.bayesOptimization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.checkForData"><code class="docutils literal notranslate"><span class="pre">QSPRModel.checkForData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.classPath"><code class="docutils literal notranslate"><span class="pre">QSPRModel.classPath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.cleanFiles"><code class="docutils literal notranslate"><span class="pre">QSPRModel.cleanFiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.evaluate"><code class="docutils literal notranslate"><span class="pre">QSPRModel.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.fit"><code class="docutils literal notranslate"><span class="pre">QSPRModel.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.fromFile"><code class="docutils literal notranslate"><span class="pre">QSPRModel.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.get_scoring_func"><code class="docutils literal notranslate"><span class="pre">QSPRModel.get_scoring_func()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.gridSearch"><code class="docutils literal notranslate"><span class="pre">QSPRModel.gridSearch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.loadModel"><code class="docutils literal notranslate"><span class="pre">QSPRModel.loadModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.loadParamsGrid"><code class="docutils literal notranslate"><span class="pre">QSPRModel.loadParamsGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.nClasses"><code class="docutils literal notranslate"><span class="pre">QSPRModel.nClasses</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.outDir"><code class="docutils literal notranslate"><span class="pre">QSPRModel.outDir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.outPrefix"><code class="docutils literal notranslate"><span class="pre">QSPRModel.outPrefix</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predict"><code class="docutils literal notranslate"><span class="pre">QSPRModel.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predictMols"><code class="docutils literal notranslate"><span class="pre">QSPRModel.predictMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predictProba"><code class="docutils literal notranslate"><span class="pre">QSPRModel.predictProba()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readDescriptorCalculator"><code class="docutils literal notranslate"><span class="pre">QSPRModel.readDescriptorCalculator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readMetadata"><code class="docutils literal notranslate"><span class="pre">QSPRModel.readMetadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readParams"><code class="docutils literal notranslate"><span class="pre">QSPRModel.readParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readStandardizer"><code class="docutils literal notranslate"><span class="pre">QSPRModel.readStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.save"><code class="docutils literal notranslate"><span class="pre">QSPRModel.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveDescriptorCalculator"><code class="docutils literal notranslate"><span class="pre">QSPRModel.saveDescriptorCalculator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveMetadata"><code class="docutils literal notranslate"><span class="pre">QSPRModel.saveMetadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveModel"><code class="docutils literal notranslate"><span class="pre">QSPRModel.saveModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveParams"><code class="docutils literal notranslate"><span class="pre">QSPRModel.saveParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveStandardizer"><code class="docutils literal notranslate"><span class="pre">QSPRModel.saveStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.targetProperty"><code class="docutils literal notranslate"><span class="pre">QSPRModel.targetProperty</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.task"><code class="docutils literal notranslate"><span class="pre">QSPRModel.task</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.models">qsprpred.models.models module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN"><code class="docutils literal notranslate"><span class="pre">QSPRDNN</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.bayesOptimization"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.bayesOptimization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.evaluate"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.fit"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.gridSearch"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.gridSearch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.loadModel"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.loadModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.objective"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.objective()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.predict"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.predictProba"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.predictProba()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.save"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.saveModel"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.saveModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRDNN.saveParams"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.saveParams()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn.bayesOptimization"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn.bayesOptimization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn.evaluate"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn.fit"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn.gridSearch"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn.gridSearch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn.loadModel"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn.loadModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn.objective"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn.objective()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn.predict"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn.predictProba"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn.predictProba()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRsklearn.saveModel"><code class="docutils literal notranslate"><span class="pre">QSPRsklearn.saveModel()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.neural_network">qsprpred.models.neural_network module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.Base.evaluate"><code class="docutils literal notranslate"><span class="pre">Base.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.Base.fit"><code class="docutils literal notranslate"><span class="pre">Base.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.Base.get_dataloader"><code class="docutils literal notranslate"><span class="pre">Base.get_dataloader()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.Base.get_params"><code class="docutils literal notranslate"><span class="pre">Base.get_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.Base.predict"><code class="docutils literal notranslate"><span class="pre">Base.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.Base.set_params"><code class="docutils literal notranslate"><span class="pre">Base.set_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.STFullyConnected"><code class="docutils literal notranslate"><span class="pre">STFullyConnected</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.STFullyConnected.forward"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.STFullyConnected.init_model"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.init_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.neural_network.STFullyConnected.set_params"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.set_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.tasks">qsprpred.models.tasks module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tasks.ModelTasks"><code class="docutils literal notranslate"><span class="pre">ModelTasks</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tasks.ModelTasks.CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">ModelTasks.CLASSIFICATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tasks.ModelTasks.REGRESSION"><code class="docutils literal notranslate"><span class="pre">ModelTasks.REGRESSION</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.tests">qsprpred.models.tests module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixIn</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn.clean_directories"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixIn.clean_directories()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn.qsprmodelspath"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixIn.qsprmodelspath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn.setUp"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixIn.setUp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn"><code class="docutils literal notranslate"><span class="pre">ModelTestMixIn</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn.fit_test"><code class="docutils literal notranslate"><span class="pre">ModelTestMixIn.fit_test()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn.predictor_test"><code class="docutils literal notranslate"><span class="pre">ModelTestMixIn.predictor_test()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet"><code class="docutils literal notranslate"><span class="pre">NeuralNet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.get_model"><code class="docutils literal notranslate"><span class="pre">NeuralNet.get_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.prep_testdata"><code class="docutils literal notranslate"><span class="pre">NeuralNet.prep_testdata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.test_base_model"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_base_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.test_base_model_0_STFullyConnected_REGRESSION"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_base_model_0_STFullyConnected_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.test_base_model_1_STFullyConnected_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_base_model_1_STFullyConnected_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.test_base_model_2_STFullyConnected_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_base_model_2_STFullyConnected_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.test_qsprpred_model"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_qsprpred_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.test_qsprpred_model_0_STFullyConnected_REGRESSION"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_qsprpred_model_0_STFullyConnected_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.test_qsprpred_model_1_STFullyConnected_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_qsprpred_model_1_STFullyConnected_CLASSIFICATION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.NeuralNet.test_qsprpred_model_2_STFullyConnected_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_qsprpred_model_2_STFullyConnected_CLASSIFICATION()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.get_model"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.get_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_0_SVC_th_4"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_0_SVC_th_4()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_1_SVC_th_1"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_1_SVC_th_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_2_RFC_th_4"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_2_RFC_th_4()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_3_RFC_th_1"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_3_RFC_th_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_4_XGBC_th_4"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_4_XGBC_th_4()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_5_XGBC_th_1"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_5_XGBC_th_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_6_KNNC_th_4"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_6_KNNC_th_4()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_7_KNNC_th_1"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_7_KNNC_th_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_8_NB_th_4"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_8_NB_th_4()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_9_NB_th_1"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_classification_basic_fit_9_NB_th_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_regression_basic_fit</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_0_PLSR"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_regression_basic_fit_0_PLSR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_1_SVR"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_regression_basic_fit_1_SVR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_2_RFR"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_regression_basic_fit_2_RFR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_3_XGBR"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_regression_basic_fit_3_XGBR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_4_KNNR"><code class="docutils literal notranslate"><span class="pre">TestQSPRsklearn.test_regression_basic_fit_4_KNNR()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.plotting.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.classification">qsprpred.plotting.classification module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot"><code class="docutils literal notranslate"><span class="pre">CalibrationPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.make"><code class="docutils literal notranslate"><span class="pre">CalibrationPlot.make()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.makeCV"><code class="docutils literal notranslate"><span class="pre">CalibrationPlot.makeCV()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.makeInd"><code class="docutils literal notranslate"><span class="pre">CalibrationPlot.makeInd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot"><code class="docutils literal notranslate"><span class="pre">ClassifierPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.getSupportedTasks"><code class="docutils literal notranslate"><span class="pre">ClassifierPlot.getSupportedTasks()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot"><code class="docutils literal notranslate"><span class="pre">MetricsPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot.make"><code class="docutils literal notranslate"><span class="pre">MetricsPlot.make()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot.reset"><code class="docutils literal notranslate"><span class="pre">MetricsPlot.reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot"><code class="docutils literal notranslate"><span class="pre">PRCPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.make"><code class="docutils literal notranslate"><span class="pre">PRCPlot.make()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.makeCV"><code class="docutils literal notranslate"><span class="pre">PRCPlot.makeCV()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.makeInd"><code class="docutils literal notranslate"><span class="pre">PRCPlot.makeInd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot"><code class="docutils literal notranslate"><span class="pre">ROCPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.make"><code class="docutils literal notranslate"><span class="pre">ROCPlot.make()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.makeCV"><code class="docutils literal notranslate"><span class="pre">ROCPlot.makeCV()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.makeInd"><code class="docutils literal notranslate"><span class="pre">ROCPlot.makeInd()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.interfaces">qsprpred.plotting.interfaces module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.interfaces.ModelPlot"><code class="docutils literal notranslate"><span class="pre">ModelPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.interfaces.ModelPlot.checkModel"><code class="docutils literal notranslate"><span class="pre">ModelPlot.checkModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.interfaces.ModelPlot.getSupportedTasks"><code class="docutils literal notranslate"><span class="pre">ModelPlot.getSupportedTasks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.interfaces.ModelPlot.make"><code class="docutils literal notranslate"><span class="pre">ModelPlot.make()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.regression">qsprpred.plotting.regression module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.regression.CorrelationPlot"><code class="docutils literal notranslate"><span class="pre">CorrelationPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.regression.CorrelationPlot.make"><code class="docutils literal notranslate"><span class="pre">CorrelationPlot.make()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot"><code class="docutils literal notranslate"><span class="pre">RegressionPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot.getSupportedTasks"><code class="docutils literal notranslate"><span class="pre">RegressionPlot.getSupportedTasks()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.tests">qsprpred.plotting.tests module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest"><code class="docutils literal notranslate"><span class="pre">CorrPlotTest</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest.get_model"><code class="docutils literal notranslate"><span class="pre">CorrPlotTest.get_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest.test_plot_single"><code class="docutils literal notranslate"><span class="pre">CorrPlotTest.test_plot_single()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest"><code class="docutils literal notranslate"><span class="pre">MetricsPlotTest</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest.get_model"><code class="docutils literal notranslate"><span class="pre">MetricsPlotTest.get_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest.test_plot_single"><code class="docutils literal notranslate"><span class="pre">MetricsPlotTest.test_plot_single()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest"><code class="docutils literal notranslate"><span class="pre">ROCPlotTest</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest.get_model"><code class="docutils literal notranslate"><span class="pre">ROCPlotTest.get_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest.test_plot_single"><code class="docutils literal notranslate"><span class="pre">ROCPlotTest.test_plot_single()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.utils.html#module-qsprpred.utils.inspect">qsprpred.utils.inspect module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.inspect.import_class"><code class="docutils literal notranslate"><span class="pre">import_class()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.utils.html#module-qsprpred.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.about">
+<span id="qsprpred-about-module"></span><h2>qsprpred.about module<a class="headerlink" href="#module-qsprpred.about" title="Permalink to this heading"></a></h2>
+<p>Version of QSPRpred.</p>
+</section>
+<section id="module-qsprpred.data_CLI">
+<span id="qsprpred-data-cli-module"></span><h2>qsprpred.data_CLI module<a class="headerlink" href="#module-qsprpred.data_CLI" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.data_CLI.QSPRArgParser">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.data_CLI.</span></span><span class="sig-name descname"><span class="pre">QSPRArgParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">txt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data_CLI.html#QSPRArgParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data_CLI.QSPRArgParser" title="Permalink to this definition"></a></dt>
+<dd><p>Define and read command line arguments.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.data_CLI.QSPR_dataprep">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.data_CLI.</span></span><span class="sig-name descname"><span class="pre">QSPR_dataprep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data_CLI.html#QSPR_dataprep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data_CLI.QSPR_dataprep" title="Permalink to this definition"></a></dt>
+<dd><p>Optimize, evaluate and train estimators.</p>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.model_CLI">
+<span id="qsprpred-model-cli-module"></span><h2>qsprpred.model_CLI module<a class="headerlink" href="#module-qsprpred.model_CLI" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.model_CLI.QSPRArgParser">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.model_CLI.</span></span><span class="sig-name descname"><span class="pre">QSPRArgParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">txt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/model_CLI.html#QSPRArgParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.model_CLI.QSPRArgParser" title="Permalink to this definition"></a></dt>
+<dd><p>Define and read command line arguments.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.model_CLI.QSPR_modelling">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.model_CLI.</span></span><span class="sig-name descname"><span class="pre">QSPR_modelling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/model_CLI.html#QSPR_modelling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.model_CLI.QSPR_modelling" title="Permalink to this definition"></a></dt>
+<dd><p>Optimize, evaluate and train estimators.</p>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.predict_CLI">
+<span id="qsprpred-predict-cli-module"></span><h2>qsprpred.predict_CLI module<a class="headerlink" href="#module-qsprpred.predict_CLI" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.predict_CLI.QSPRArgParser">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.predict_CLI.</span></span><span class="sig-name descname"><span class="pre">QSPRArgParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">txt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/predict_CLI.html#QSPRArgParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.predict_CLI.QSPRArgParser" title="Permalink to this definition"></a></dt>
+<dd><p>Define and read command line arguments.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.predict_CLI.QSPR_predict">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.predict_CLI.</span></span><span class="sig-name descname"><span class="pre">QSPR_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/predict_CLI.html#QSPR_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.predict_CLI.QSPR_predict" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions with pre-trained QSPR models for a set of smiles.</p>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred" title="Permalink to this heading"></a></h2>
+<p>__init__.py</p>
+<p>Created by: Martin Sicho
+On: 06.04.22, 16:51</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.data.html" class="btn btn-neutral float-right" title="qsprpred.data package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

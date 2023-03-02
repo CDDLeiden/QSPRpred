@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.utils.descriptor_utils package &mdash; QSPRpred 1.3.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.logs package" href="qsprpred.logs.html" />
+    <link rel="prev" title="qsprpred.data.utils package" href="qsprpred.data.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v1.3.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.metrics.html">qsprpred.metrics package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.about">qsprpred.about module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Python API</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.data.html">qsprpred.data package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.data.utils.html">qsprpred.data.utils package</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.utils.descriptor_utils package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-data-utils-descriptor-utils-package">
+<h1>qsprpred.data.utils.descriptor_utils package<a class="headerlink" href="#qsprpred-data-utils-descriptor-utils-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.data.utils.descriptor_utils.drugexproperties">
+<span id="qsprpred-data-utils-descriptor-utils-drugexproperties-module"></span><h2>qsprpred.data.utils.descriptor_utils.drugexproperties module<a class="headerlink" href="#module-qsprpred.data.utils.descriptor_utils.drugexproperties" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.drugexproperties.Property">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.drugexproperties.</span></span><span class="sig-name descname"><span class="pre">Property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/drugexproperties.html#Property"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.drugexproperties.Property" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.interfaces.Scorer" title="qsprpred.data.utils.descriptor_utils.interfaces.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.drugexproperties.Property.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/drugexproperties.html#Property.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.drugexproperties.Property.getKey" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.drugexproperties.Property.getScores">
+<span class="sig-name descname"><span class="pre">getScores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/drugexproperties.html#Property.getScores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.drugexproperties.Property.getScores" title="Permalink to this definition"></a></dt>
+<dd><p>Return scores for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> – molecules to score</p></li>
+<li><p><strong>frags</strong> – input fragments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of scores for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>scores (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.utils.descriptor_utils.fingerprints">
+<span id="qsprpred-data-utils-descriptor-utils-fingerprints-module"></span><h2>qsprpred.data.utils.descriptor_utils.fingerprints module<a class="headerlink" href="#module-qsprpred.data.utils.descriptor_utils.fingerprints" title="Permalink to this heading"></a></h2>
+<p>Fingerprint classes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">CDKAtomPairs2DFP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">useCounts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKAtomPairs2DFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>CDK atom pairs and topological fingerprint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKAtomPairs2DFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the CDK atom pairs and topological fingerprint for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKAtomPairs2DFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKEStateFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">CDKEStateFP</span></span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKEStateFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKEStateFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>CDK EState fingerprint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKEStateFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKEStateFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKEStateFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the CDK extended fingerprint for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKEStateFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKEStateFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKEStateFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKEStateFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKEStateFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKExtendedFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">CDKExtendedFP</span></span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKExtendedFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKExtendedFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>CDK extended fingerprint with 25 additional ring features and isotopic masses.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKExtendedFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKExtendedFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKExtendedFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the CDK extended fingerprint for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKExtendedFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKExtendedFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKExtendedFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKExtendedFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKExtendedFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">CDKFP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">searchDepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>CDK fingerprint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the CDK fingerprint for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">CDKGraphOnlyFP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">searchDepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKGraphOnlyFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>CDK fingerprint ignoring bond orders.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKGraphOnlyFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the CDK graph only fingerprint for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKGraphOnlyFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">CDKKlekotaRothFP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">useCounts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKKlekotaRothFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>CDK Klekota &amp; Roth fingerprint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKKlekotaRothFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the CDK Klekota &amp; Roth fingerprint for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKKlekotaRothFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKMACCSFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">CDKMACCSFP</span></span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKMACCSFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKMACCSFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>CDK MACCS fingerprint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKMACCSFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKMACCSFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKMACCSFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the CDK MACCS fingerprint for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKMACCSFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKMACCSFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKMACCSFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKMACCSFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKMACCSFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKPubchemFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">CDKPubchemFP</span></span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKPubchemFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKPubchemFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>CDK PubChem fingerprint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKPubchemFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKPubchemFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKPubchemFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the CDK PubChem fingerprint for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKPubchemFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKPubchemFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKPubchemFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKPubchemFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKPubchemFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">CDKSubstructureFP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">useCounts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKSubstructureFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>CDK Substructure fingerprint.</p>
+<p>Based on SMARTS patterns for functional group classification by Christian Laggner.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKSubstructureFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the CDK Substructure fingerprint for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#CDKSubstructureFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">MorganFP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nBits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2048</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#MorganFP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">fingerprint</span></code></a></p>
+<p>Morgan fingerprint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP.getFingerprints">
+<span class="sig-name descname"><span class="pre">getFingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#MorganFP.getFingerprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP.getFingerprints" title="Permalink to this definition"></a></dt>
+<dd><p>Return the Morgan fingerprints for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">fingerprint</a> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#MorganFP.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">fingerprint</span></span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#fingerprint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Base class for fingerprints.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint.getKey">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#fingerprint.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint.getKey" title="Permalink to this definition"></a></dt>
+<dd><p>Return identifier of fingerprint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint.settings">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#fingerprint.settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.fingerprint.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return settings of fingerprint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.fingerprints.get_fingerprint">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.fingerprints.</span></span><span class="sig-name descname"><span class="pre">get_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/fingerprints.html#get_fingerprint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.fingerprints.get_fingerprint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-qsprpred.data.utils.descriptor_utils.interfaces">
+<span id="qsprpred-data-utils-descriptor-utils-interfaces-module"></span><h2>qsprpred.data.utils.descriptor_utils.interfaces module<a class="headerlink" href="#module-qsprpred.data.utils.descriptor_utils.interfaces" title="Permalink to this heading"></a></h2>
+<p>interfaces</p>
+<p>Created by: Martin Sicho
+On: 25.11.22, 13:36</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.interfaces.Scorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.interfaces.</span></span><span class="sig-name descname"><span class="pre">Scorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/interfaces.html#Scorer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.interfaces.Scorer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Used to calculate customized scores.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.interfaces.Scorer.getKey">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/interfaces.html#Scorer.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.interfaces.Scorer.getKey" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.interfaces.Scorer.getModifiedScores">
+<span class="sig-name descname"><span class="pre">getModifiedScores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scores</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/interfaces.html#Scorer.getModifiedScores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.interfaces.Scorer.getModifiedScores" title="Permalink to this definition"></a></dt>
+<dd><p>Modify the scores with the given ScoreModifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scores</strong> – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>scores</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.interfaces.Scorer.getModifier">
+<span class="sig-name descname"><span class="pre">getModifier</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/interfaces.html#Scorer.getModifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.interfaces.Scorer.getModifier" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.interfaces.Scorer.getScores">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getScores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/interfaces.html#Scorer.getScores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.interfaces.Scorer.getScores" title="Permalink to this definition"></a></dt>
+<dd><p>Return scores for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> – molecules to score</p></li>
+<li><p><strong>frags</strong> – input fragments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of scores for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>scores (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.interfaces.Scorer.setModifier">
+<span class="sig-name descname"><span class="pre">setModifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/interfaces.html#Scorer.setModifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.interfaces.Scorer.setModifier" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.utils.descriptor_utils.rdkitdescriptors">
+<span id="qsprpred-data-utils-descriptor-utils-rdkitdescriptors-module"></span><h2>qsprpred.data.utils.descriptor_utils.rdkitdescriptors module<a class="headerlink" href="#module-qsprpred.data.utils.descriptor_utils.rdkitdescriptors" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.rdkitdescriptors.RDKit_desc">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.descriptor_utils.rdkitdescriptors.</span></span><span class="sig-name descname"><span class="pre">RDKit_desc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rdkit_descriptors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_3Drdkit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/rdkitdescriptors.html#RDKit_desc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.rdkitdescriptors.RDKit_desc" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.utils.descriptor_utils.interfaces.Scorer" title="qsprpred.data.utils.descriptor_utils.interfaces.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.rdkitdescriptors.RDKit_desc.getKey">
+<span class="sig-name descname"><span class="pre">getKey</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/rdkitdescriptors.html#RDKit_desc.getKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.rdkitdescriptors.RDKit_desc.getKey" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.utils.descriptor_utils.rdkitdescriptors.RDKit_desc.getScores">
+<span class="sig-name descname"><span class="pre">getScores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/utils/descriptor_utils/rdkitdescriptors.html#RDKit_desc.getScores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.descriptor_utils.rdkitdescriptors.RDKit_desc.getScores" title="Permalink to this definition"></a></dt>
+<dd><p>Return scores for the input molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> – molecules to score</p></li>
+<li><p><strong>frags</strong> – input fragments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of scores for “mols”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>scores (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.utils.descriptor_utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.data.utils.descriptor_utils" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.data.utils.html" class="btn btn-neutral float-left" title="qsprpred.data.utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.logs.html" class="btn btn-neutral float-right" title="qsprpred.logs package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

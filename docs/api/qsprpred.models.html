@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.models package &mdash; QSPRpred 1.3.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.plotting package" href="qsprpred.plotting.html" />
+    <link rel="prev" title="qsprpred.metrics package" href="qsprpred.metrics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v1.3.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.metrics.html">qsprpred.metrics package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.about">qsprpred.about module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Python API</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+      <li class="breadcrumb-item active">qsprpred.models package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-models-package">
+<h1>qsprpred.models package<a class="headerlink" href="#qsprpred-models-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.models.interfaces">
+<span id="qsprpred-models-interfaces-module"></span><h2>qsprpred.models.interfaces module<a class="headerlink" href="#module-qsprpred.models.interfaces" title="Permalink to this heading"></a></h2>
+<p>This module holds the base class for QSPRmodels, model types should be a subclass.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.interfaces.</span></span><span class="sig-name descname"><span class="pre">QSPRModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><span class="pre">QSPRDataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>The definition of the common model interface for the package. Handles model initialization, fit, cross validation and hyperparameter optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the model</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><em>QSPRDataset</em></a>) – data set used to train the model</p></li>
+<li><p><strong>alg</strong> (<em>estimator</em>) – estimator instance or class</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary of algorithm specific parameters</p></li>
+<li><p><strong>model</strong> (<em>estimator</em>) – the underlying estimator instance, if <a class="reference internal" href="#qsprpred.models.interfaces.QSPRModel.fit" title="qsprpred.models.interfaces.QSPRModel.fit"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">fit</span></code></a> or optimization is perforemed, this model instance gets updated accordingly</p></li>
+<li><p><strong>featureCalculator</strong> (<a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator" title="qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator"><em>DescriptorsCalculator</em></a>) – feature calculator instance taken from the data set or deserialized from file if the model is loaded without data</p></li>
+<li><p><strong>featureStandardizer</strong> (<a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.feature_standardization.SKLearnStandardizer" title="qsprpred.data.utils.feature_standardization.SKLearnStandardizer"><em>SKLearnStandardizer</em></a>) – feature standardizer instance taken from the data set or deserialized from file if the model is loaded without data</p></li>
+<li><p><strong>metaInfo</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary of metadata about the model, only available after the model is saved</p></li>
+<li><p><strong>baseDir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – base directory of the model, the model files are stored in a subdirectory <code class="xref any docutils literal notranslate"><span class="pre">{baseDir}/{outDir}/</span></code></p></li>
+<li><p><strong>outDir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – output directory of the model, the model files are stored in this directory (<code class="xref any docutils literal notranslate"><span class="pre">{baseDir}/qspr/models/{name}</span></code>)</p></li>
+<li><p><strong>outPrefix</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – output prefix of the model files, the model files are stored with this prefix (i.e. <code class="xref any docutils literal notranslate"><span class="pre">{outPrefix}_meta.json</span></code>)</p></li>
+<li><p><strong>metaFile</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – absolute path to the metadata file of the model (<code class="xref any docutils literal notranslate"><span class="pre">{outPrefix}_meta.json</span></code>)</p></li>
+<li><p><strong>task</strong> (<a class="reference internal" href="#qsprpred.models.tasks.ModelTasks" title="qsprpred.models.tasks.ModelTasks"><em>ModelTasks</em></a>) – task of the model, taken from the data set or deserialized from file if the model is loaded without data</p></li>
+<li><p><strong>targetProperty</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – target property of the model, taken from the data set or deserialized from file if the model is loaded without data</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.bayesOptimization">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bayesOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_space_gs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.bayesOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.bayesOptimization" title="Permalink to this definition"></a></dt>
+<dd><p>Bayesian optimization of hyperparameters using optuna.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>search_space_gs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – search space for the grid search</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.checkForData">
+<span class="sig-name descname"><span class="pre">checkForData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.checkForData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.checkForData" title="Permalink to this definition"></a></dt>
+<dd><p>Check if the model has data set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exception</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – if true, an exception is raised if no data is set</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if data is set, False otherwise (if exception is False)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.classPath">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">classPath</span></span><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.classPath" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.cleanFiles">
+<span class="sig-name descname"><span class="pre">cleanFiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.cleanFiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.cleanFiles" title="Permalink to this definition"></a></dt>
+<dd><p>Clean up the model files. Removes the model directory and all its contents.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.evaluate">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.evaluate" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for crossvalidation and independent test set. If save is True, the predictions are saved to a file
+in the output directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>save</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – don’t save predictions when used in bayesian optimization</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.fit">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Build estimator model from the whole associated data set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.fromFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.fromFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.fromFile" title="Permalink to this definition"></a></dt>
+<dd><p>Load a model from its meta file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – full path to the model meta file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.get_scoring_func">
+<span class="sig-name descname"><span class="pre">get_scoring_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scoring</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.get_scoring_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.get_scoring_func" title="Permalink to this definition"></a></dt>
+<dd><p>Get scoring function from sklearn.metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scoring</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>Callable</em><em>]</em>) – metric name from sklearn.metrics or
+user-defined scoring function.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If the scoring function is currently not supported by
+    GridSearch and BayesOptimization.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>scorer function from sklearn.metrics (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a> as input)
+or user-defined function (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#callable" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">callable</span></code></a> as input)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>score_func (Callable)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.gridSearch">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gridSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_space_gs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.gridSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.gridSearch" title="Permalink to this definition"></a></dt>
+<dd><p>Optimization of hyperparameters using gridSearch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>search_space_gs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – search space for the grid search</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.loadModel">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loadModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Type" title="(in Python v3.9)"><span class="pre">Type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><span class="pre">object</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.loadModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.loadModel" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize model instance with the given parameters. If no algorithm is given, the model is loaded from file based on available metadata. If no parameters are given, they are also loaded from the available file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alg</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a>) – algorithm class to instantiate</p></li>
+<li><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – algorithm parameters</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.loadParamsGrid">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loadParamsGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optim_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.loadParamsGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.loadParamsGrid" title="Permalink to this definition"></a></dt>
+<dd><p>Load parameter grids for bayes or grid search parameter optimization from json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – file name of json file containing array with three columns containing modeltype,
+optimization type (grid or bayes) and model type</p></li>
+<li><p><strong>optim_type</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – optimization type (‘grid’ or ‘bayes’)</p></li>
+<li><p><strong>model_types</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – model type for hyperparameter optimization (e.g. RF)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.nClasses">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nClasses</span></span><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.nClasses" title="Permalink to this definition"></a></dt>
+<dd><p>The number of classes of the model, taken from the data set or deserialized from file if the model is loaded without data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>number of classes of the model if the task is classification, otherwise 0</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.outDir">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">outDir</span></span><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.outDir" title="Permalink to this definition"></a></dt>
+<dd><p>The output directory of the model, the model files are stored in this directory (<code class="xref any docutils literal notranslate"><span class="pre">{baseDir}/qspr/models/{name}</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>output directory of the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.outPrefix">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">outPrefix</span></span><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.outPrefix" title="Permalink to this definition"></a></dt>
+<dd><p>The output prefix of the model files, the model files are stored with this prefix (i.e. <code class="xref any docutils literal notranslate"><span class="pre">{outPrefix}_meta.json</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>output prefix of the model files</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.predict">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.predict" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for the given data matrix or <a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em><em>, </em><em>np.ndarray</em><em>, </em><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><em>QSPRDataset</em></a>) – data matrix to make predictions for</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an array of predictions, can be a 1D array for single target models or a 2D/3D array for multi-target/multi-class models</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.predictMols">
+<span class="sig-name descname"><span class="pre">predictMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.List" title="(in Python v3.9)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_probas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.predictMols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.predictMols" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for the given molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – list of SMILES strings</p></li>
+<li><p><strong>use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – use probabilities for classification models</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.predictProba">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predictProba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.predictProba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.predictProba" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for the given data matrix or <a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a>, but use probabilities for classification models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em><em>, </em><em>np.ndarray</em><em>, </em><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><em>QSPRDataset</em></a>) – data matrix to make predictions for</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.readDescriptorCalculator">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">readDescriptorCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.readDescriptorCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.readDescriptorCalculator" title="Permalink to this definition"></a></dt>
+<dd><p>Read a descriptor calculator from a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – absolute path to the JSON file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>descriptor calculator instance or None if the file does not exist</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator" title="qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator">DescriptorsCalculator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.readMetadata">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">readMetadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.readMetadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.readMetadata" title="Permalink to this definition"></a></dt>
+<dd><p>Read model metadata from a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – absolute path to the JSON file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary containing the model metadata</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#FileNotFoundError" title="(in Python v3.9)"><strong>FileNotFoundError</strong></a> – if the file does not exist</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.readParams">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">readParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.readParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.readParams" title="Permalink to this definition"></a></dt>
+<dd><p>Read model parameters from a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – absolute path to the JSON file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.readStandardizer">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">readStandardizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.readStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.readStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Read a feature standardizer from a JSON file. If the file does not exist, None is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – absolute path to the JSON file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>feature standardizer instance or None if the file does not exist</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.feature_standardization.SKLearnStandardizer" title="qsprpred.data.utils.feature_standardization.SKLearnStandardizer">SKLearnStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.save" title="Permalink to this definition"></a></dt>
+<dd><p>Save the model data, parameters, metadata and all other files to the output directory of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary containing the model metadata that was saved</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.saveDescriptorCalculator">
+<span class="sig-name descname"><span class="pre">saveDescriptorCalculator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.saveDescriptorCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.saveDescriptorCalculator" title="Permalink to this definition"></a></dt>
+<dd><p>Save the current descriptor calculator to a JSON file. The file is stored in the output directory of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>absolute path to the JSON file containing the descriptor calculator</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.saveMetadata">
+<span class="sig-name descname"><span class="pre">saveMetadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.saveMetadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.saveMetadata" title="Permalink to this definition"></a></dt>
+<dd><p>Save model metadata to a JSON file. The file is stored in the output directory of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>absolute path to the JSON file containing the model metadata</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.saveModel">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">saveModel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.saveModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.saveModel" title="Permalink to this definition"></a></dt>
+<dd><p>Save the underlying model to file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>path to the saved model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.saveParams">
+<span class="sig-name descname"><span class="pre">saveParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.saveParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.saveParams" title="Permalink to this definition"></a></dt>
+<dd><p>Save model parameters to a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary of model parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.saveStandardizer">
+<span class="sig-name descname"><span class="pre">saveStandardizer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/interfaces.html#QSPRModel.saveStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.saveStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Save the current feature standardizer to a JSON file. The file is stored in the output directory of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>absolute path to the JSON file containing the saved feature standardizer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.targetProperty">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">targetProperty</span></span><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.targetProperty" title="Permalink to this definition"></a></dt>
+<dd><p>The target property of the model, taken from the data set or deserialized from file if the model is loaded without data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>target property of the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.models.interfaces.QSPRModel.task">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">task</span></span><a class="headerlink" href="#qsprpred.models.interfaces.QSPRModel.task" title="Permalink to this definition"></a></dt>
+<dd><p>The task of the model, taken from the data set or deserialized from file if the model is loaded without data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>task of the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#qsprpred.models.tasks.ModelTasks" title="qsprpred.models.tasks.ModelTasks">ModelTasks</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models.models">
+<span id="qsprpred-models-models-module"></span><h2>qsprpred.models.models module<a class="headerlink" href="#module-qsprpred.models.models" title="Permalink to this heading"></a></h2>
+<p>Here the QSPRmodel classes can be found.</p>
+<p>At the moment there is a class for sklearn type models
+and one for a keras DNN model. To add more types a model class should be added, which
+is a sublass of the QSPRModel type.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.models.</span></span><span class="sig-name descname"><span class="pre">QSPRDNN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dir:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg:</span> <span class="pre">~qsprpred.models.neural_network.STFullyConnected</span> <span class="pre">|</span> <span class="pre">~typing.Type</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'qsprpred.models.neural_network.STFullyConnected'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">~qsprpred.data.data.QSPRDataset</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoload:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device=device(type='cuda')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus=(0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience=50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol=0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.interfaces.QSPRModel" title="qsprpred.models.interfaces.QSPRModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSPRModel</span></code></a></p>
+<p>This class holds the methods for training and fitting a Deep Neural Net QSPR model initialization.</p>
+<p>Here the model instance is created and parameters can be defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the model</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><em>QSPRDataset</em></a>) – data set used to train the model</p></li>
+<li><p><strong>alg</strong> (<em>estimator</em>) – estimator instance or class</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary of algorithm specific parameters</p></li>
+<li><p><strong>model</strong> (<em>estimator</em>) – the underlying estimator instance, if <a class="reference internal" href="#qsprpred.models.models.QSPRDNN.fit" title="qsprpred.models.models.QSPRDNN.fit"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">fit</span></code></a> or optimization is perforemed, this model instance gets updated accordingly</p></li>
+<li><p><strong>featureCalculator</strong> (<a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator" title="qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator"><em>DescriptorsCalculator</em></a>) – feature calculator instance taken from the data set or deserialized from file if the model is loaded without data</p></li>
+<li><p><strong>featureStandardizer</strong> (<a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.feature_standardization.SKLearnStandardizer" title="qsprpred.data.utils.feature_standardization.SKLearnStandardizer"><em>SKLearnStandardizer</em></a>) – feature standardizer instance taken from the data set or deserialized from file if the model is loaded without data</p></li>
+<li><p><strong>metaInfo</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary of metadata about the model, only available after the model is saved</p></li>
+<li><p><strong>baseDir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – base directory of the model, the model files are stored in a subdirectory <code class="xref any docutils literal notranslate"><span class="pre">{baseDir}/{outDir}/</span></code></p></li>
+<li><p><strong>outDir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – output directory of the model, the model files are stored in this directory (<code class="xref any docutils literal notranslate"><span class="pre">{baseDir}/qspr/models/{name}</span></code>)</p></li>
+<li><p><strong>outPrefix</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – output prefix of the model files, the model files are stored with this prefix (i.e. <code class="xref any docutils literal notranslate"><span class="pre">{outPrefix}_meta.json</span></code>)</p></li>
+<li><p><strong>metaFile</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – absolute path to the metadata file of the model (<code class="xref any docutils literal notranslate"><span class="pre">{outPrefix}_meta.json</span></code>)</p></li>
+<li><p><strong>task</strong> (<a class="reference internal" href="#qsprpred.models.tasks.ModelTasks" title="qsprpred.models.tasks.ModelTasks"><em>ModelTasks</em></a>) – task of the model, taken from the data set or deserialized from file if the model is loaded without data</p></li>
+<li><p><strong>targetProperty</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – target property of the model, taken from the data set or deserialized from file if the model is loaded without data</p></li>
+<li><p><strong>device</strong> (<em>cuda device</em>) – cuda device</p></li>
+<li><p><strong>gpus</strong> (<em>int/ list</em><em> of </em><em>ints</em>) – gpu number(s) to use for model fitting</p></li>
+<li><p><strong>patience</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of epochs to wait before early stop if no progress on validiation set score</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – minimum absolute improvement of loss necessary to count as progress on best validation score</p></li>
+<li><p><strong>n_class</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of classes</p></li>
+<li><p><strong>n_dim</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of features</p></li>
+<li><p><strong>optimal_epochs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of epochs to train the model for optimal performance</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.bayesOptimization">
+<span class="sig-name descname"><span class="pre">bayesOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_space_bs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_trials</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.bayesOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.bayesOptimization" title="Permalink to this definition"></a></dt>
+<dd><p>Bayesian optimization of hyperparameters using optuna.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_space_gs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – search space for the grid search</p></li>
+<li><p><strong>n_trials</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of trials for bayes optimization</p></li>
+<li><p><strong>scoring</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>Callable</em><em>]</em>) – scoring function for the optimization.</p></li>
+<li><p><strong>th</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – threshold for scoring if <code class="xref any docutils literal notranslate"><span class="pre">scoring</span> <span class="pre">in</span> <span class="pre">self._needs_discrete_to_score</span></code>.</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the number of parallel trials</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ES_val_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.evaluate" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for crossvalidation and independent test set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – wether to save the cross validation predictions</p></li>
+<li><p><strong>ES_val_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – validation set size for early stopping in CV</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Train model on the trainings data, determine best model using test set, save best model.</p>
+<dl class="simple">
+<dt>** IMPORTANT: evaluate should be run first, so that the average number of epochs from the cross-validation</dt><dd><p>with early stopping can be used for fitting the model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.gridSearch">
+<span class="sig-name descname"><span class="pre">gridSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_space_gs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ES_val_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.gridSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.gridSearch" title="Permalink to this definition"></a></dt>
+<dd><p>Optimization of hyperparameters using gridSearch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_space_gs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – search space for the grid search, accepted parameters are:
+lr (int) ~ learning rate for fitting
+batch_size (int) ~ batch size for fitting
+n_epochs (int) ~ max number of epochs
+neurons_h1 (int) ~ number of neurons in first hidden layer
+neurons_hx (int) ~ number of neurons in other hidden layers
+extra_layer (bool) ~ whether to add extra (3rd) hidden layer</p></li>
+<li><p><strong>scoring</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>Callable</em><em>]</em>) – scoring function for the grid search.</p></li>
+<li><p><strong>th</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – threshold for scoring if <code class="xref any docutils literal notranslate"><span class="pre">scoring</span> <span class="pre">in</span> <span class="pre">self._needs_discrete_to_score</span></code>.</p></li>
+<li><p><strong>ES_val_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – validation set size for early stopping in CV</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.loadModel">
+<span class="sig-name descname"><span class="pre">loadModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Type" title="(in Python v3.9)"><span class="pre">Type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><span class="pre">object</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.loadModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.loadModel" title="Permalink to this definition"></a></dt>
+<dd><p>Load model from file or initialize new model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alg</strong> (<em>Union</em><em>[</em><em>Type</em><em>, </em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em><em>, </em><em>optional</em>) – model class or instance. Defaults to None.</p></li>
+<li><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>, </em><em>optional</em>) – model parameters. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>model instance</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>model (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.objective">
+<span class="sig-name descname"><span class="pre">objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_space_bs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.objective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.objective" title="Permalink to this definition"></a></dt>
+<dd><p>Objective for bayesian optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trial</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – current trial number</p></li>
+<li><p><strong>scoring</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – scoring function for the objective.</p></li>
+<li><p><strong>th</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – threshold for scoring if <code class="xref any docutils literal notranslate"><span class="pre">scoring</span> <span class="pre">in</span> <span class="pre">self._needs_discrete_to_score</span></code>.</p></li>
+<li><p><strong>search_space_bs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – search space for bayes optimization</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.predict" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for the given data matrix or <a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em><em>, </em><em>np.ndarray</em><em>, </em><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><em>QSPRDataset</em></a>) – data matrix to make predictions for</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an array of predictions, can be a 1D array for single target models or a 2D/3D array for multi-target/multi-class models</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.predictProba">
+<span class="sig-name descname"><span class="pre">predictProba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.predictProba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.predictProba" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for the given data matrix or <a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a>, but use probabilities for classification models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em><em>, </em><em>np.ndarray</em><em>, </em><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><em>QSPRDataset</em></a>) – data matrix to make predictions for</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.save" title="Permalink to this definition"></a></dt>
+<dd><p>Save the model data, parameters, metadata and all other files to the output directory of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary containing the model metadata that was saved</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.saveModel">
+<span class="sig-name descname"><span class="pre">saveModel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.saveModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.saveModel" title="Permalink to this definition"></a></dt>
+<dd><p>Save the underlying model to file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>path to the saved model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRDNN.saveParams">
+<span class="sig-name descname"><span class="pre">saveParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRDNN.saveParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRDNN.saveParams" title="Permalink to this definition"></a></dt>
+<dd><p>Save model parameters to a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary of model parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.models.</span></span><span class="sig-name descname"><span class="pre">QSPRsklearn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><span class="pre">QSPRDataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.interfaces.QSPRModel" title="qsprpred.models.interfaces.QSPRModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSPRModel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn.bayesOptimization">
+<span class="sig-name descname"><span class="pre">bayesOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_space_bs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_trials</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn.bayesOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn.bayesOptimization" title="Permalink to this definition"></a></dt>
+<dd><p>Bayesian optimization of hyperparameters using optuna.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_space_gs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – search space for the grid search</p></li>
+<li><p><strong>n_trials</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of trials for bayes optimization</p></li>
+<li><p><strong>scoring</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>Callable</em><em>]</em>) – scoring function for the optimization.</p></li>
+<li><p><strong>th</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – threshold for scoring if <code class="xref any docutils literal notranslate"><span class="pre">scoring</span> <span class="pre">in</span> <span class="pre">self._needs_discrete_to_score</span></code>.</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the number of parallel trials</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example of search_space_bs for scikit-learn’s MLPClassifier:
+&gt;&gt;&gt; model = QSPRsklearn(base_dir=’.’, data=dataset,
+&gt;&gt;&gt;                     alg = MLPClassifier(), alg_name=”MLP”)
+&gt;&gt;&gt;  search_space_bs = {
+&gt;&gt;&gt;    ‘learning_rate_init’: [‘float’, 1e-5, 1e-3,],
+&gt;&gt;&gt;    ‘power_t’ : [‘discrete_uniform’, 0.2, 0.8, 0.1],
+&gt;&gt;&gt;    ‘momentum’: [‘float’, 0.0, 1.0],
+&gt;&gt;&gt; }
+&gt;&gt;&gt; model.bayesOptimization(search_space_bs=search_space_bs, n_trials=10)</p>
+<p>Avaliable suggestion types:
+[‘categorical’, ‘discrete_uniform’, ‘float’, ‘int’, ‘loguniform’, ‘uniform’]</p>
+<p>Note: Default <code class="xref any docutils literal notranslate"><span class="pre">scoring=None</span></code> will use explained_variance for regression,
+roc_auc_ovr_weighted for multiclass, and roc_auc for binary classification.
+For a list of the available scoring functions see:
+<a class="reference external" href="https://scikit-learn.org/stable/modules/model_evaluation.html">https://scikit-learn.org/stable/modules/model_evaluation.html</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn.evaluate" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for crossvalidation and independent test set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>save</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – don’t save predictions when used in bayesian optimization</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Build estimator model from entire data set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn.gridSearch">
+<span class="sig-name descname"><span class="pre">gridSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_space_gs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn.gridSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn.gridSearch" title="Permalink to this definition"></a></dt>
+<dd><p>Optimization of hyperparameters using gridSearch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_space_gs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – search space for the grid search</p></li>
+<li><p><strong>scoring</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>Callable</em><em>]</em>) – scoring function for the grid search.</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs for hyperparameter optimization</p></li>
+</ul>
+</dd>
+</dl>
+<p>Note: Default <code class="xref any docutils literal notranslate"><span class="pre">scoring=None</span></code> will use explained_variance for regression,
+roc_auc_ovr_weighted for multiclass, and roc_auc for binary classification.
+For a list of the available scoring functions see:
+<a class="reference external" href="https://scikit-learn.org/stable/modules/model_evaluation.html">https://scikit-learn.org/stable/modules/model_evaluation.html</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn.loadModel">
+<span class="sig-name descname"><span class="pre">loadModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Type" title="(in Python v3.9)"><span class="pre">Type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">BaseEstimator</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn.loadModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn.loadModel" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize model instance with the given parameters. If no algorithm is given, the model is loaded from file based on available metadata. If no parameters are given, they are also loaded from the available file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alg</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a>) – algorithm class to instantiate</p></li>
+<li><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – algorithm parameters</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn.objective">
+<span class="sig-name descname"><span class="pre">objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_space_bs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn.objective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn.objective" title="Permalink to this definition"></a></dt>
+<dd><p>Objective for bayesian optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trial</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – current trial number</p></li>
+<li><p><strong>scoring</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – scoring function for the objective.</p></li>
+<li><p><strong>th</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – threshold for scoring if <code class="xref any docutils literal notranslate"><span class="pre">scoring</span> <span class="pre">in</span> <span class="pre">self._needs_discrete_to_score</span></code>.</p></li>
+<li><p><strong>search_space_bs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – search space for bayes optimization</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn.predict" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for the given data matrix or <a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em><em>, </em><em>np.ndarray</em><em>, </em><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><em>QSPRDataset</em></a>) – data matrix to make predictions for</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an array of predictions, can be a 1D array for single target models or a 2D/3D array for multi-target/multi-class models</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn.predictProba">
+<span class="sig-name descname"><span class="pre">predictProba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn.predictProba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn.predictProba" title="Permalink to this definition"></a></dt>
+<dd><p>Make predictions for the given data matrix or <a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a>, but use probabilities for classification models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em><em>, </em><em>np.ndarray</em><em>, </em><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.QSPRDataset" title="qsprpred.data.data.QSPRDataset"><em>QSPRDataset</em></a>) – data matrix to make predictions for</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.models.QSPRsklearn.saveModel">
+<span class="sig-name descname"><span class="pre">saveModel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/models/models.html#QSPRsklearn.saveModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.models.QSPRsklearn.saveModel" title="Permalink to this definition"></a></dt>
+<dd><p>Save the underlying model to file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>path to the saved model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models.neural_network">
+<span id="qsprpred-models-neural-network-module"></span><h2>qsprpred.models.neural_network module<a class="headerlink" href="#module-qsprpred.models.neural_network" title="Permalink to this heading"></a></h2>
+<p>This module holds the base class for DNN models as well as fully connected NN subclass.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.Base">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.neural_network.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cuda')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#Base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.Base" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Base structure for all of classification/regression DNN models.</p>
+<p>Mainly, it provides the general methods for training, evaluating model and
+predicting the given data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.Base.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#Base.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.Base.evaluate" title="Permalink to this definition"></a></dt>
+<dd><p>Evaluate the performance of the DNN model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>loader</strong> (<em>torch.util.data.DataLoader</em>) – data loader for test set,
+including m X n target FloatTensor and l X n label FloatTensor
+(m is the No. of sample, n is the No. of features, l is the
+No. of classes or tasks)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>the average loss value based on the calculation of loss</dt><dd><p>function with given test set.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>loss (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.Base.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#Base.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.Base.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Training the DNN model.</p>
+<p>Training is, similar to the scikit-learn or Keras style.
+It saves the optimal value of parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_loader</strong> (<em>DataLoadesr</em>) – Data loader for training set,
+including m X n target FloatTensor and m X l label FloatTensor
+(m is the No. of sample, n is the No. of features, l is the
+No. of classes or tasks)</p></li>
+<li><p><strong>valid_loader</strong> (<em>DataLoader</em>) – Data loader for validation set.
+The data structure is as same as loader_train.</p></li>
+<li><p><strong>out</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the file path for the model file (suffix with ‘.pkg’)
+and log file (suffix with ‘.log’).</p></li>
+<li><p><strong>patience</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of epochs to wait before early stop if no progress on
+validation set score, if patience = -1,
+always train to n_epochs</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – minimum absolute improvement of loss necessary to count as
+progress on best validation score</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.Base.get_dataloader">
+<span class="sig-name descname"><span class="pre">get_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#Base.get_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.Base.get_dataloader" title="Permalink to this definition"></a></dt>
+<dd><p>Convert data to tensors and get iterable over dataset with dataloader.</p>
+<p>Arguments:
+X (numpy 2d array): input dataset
+y (numpy 1d column vector): output data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.Base.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#Base.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.Base.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>Get parameters for this estimator.</p>
+<p>Function copied from sklearn.base_estimator!</p>
+<p>Parameters:
+deep: bool, default=True</p>
+<blockquote>
+<div><p>If True, will return the parameters for this estimator and
+contained subobjects that are estimators.</p>
+</div></blockquote>
+<p>Returns:
+params : dict</p>
+<blockquote>
+<div><p>Parameter names mapped to their values.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.Base.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#Base.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.Base.predict" title="Permalink to this definition"></a></dt>
+<dd><p>Predicting the probability of each sample in the given dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>loader</strong> (<em>torch.util.data.DataLoader</em>) – data loader for test set,
+only including m X n target FloatTensor
+(m is the No. of sample, n is the No. of features)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>probability of each sample in the given dataset,</dt><dd><p>it is a m X l FloatTensor (m is the No. of sample, l is the
+No. of classes or tasks.)</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>score (ndarray)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.Base.set_params">
+<span class="sig-name descname"><span class="pre">set_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#Base.set_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.Base.set_params" title="Permalink to this definition"></a></dt>
+<dd><p>Set the parameters of this estimator.</p>
+<p>Function copied from sklearn.base_estimator!
+The method works on simple estimators as well as on nested objects
+(such as <code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>). The latter have
+parameters of the form <code class="docutils literal notranslate"><span class="pre">&lt;component&gt;__&lt;parameter&gt;</span></code> so that it’s
+possible to update each component of a nested object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**params</strong> – dict Estimator parameters.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>estimator instance</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>self</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.STFullyConnected">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.neural_network.</span></span><span class="sig-name descname"><span class="pre">STFullyConnected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cuda')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neurons_h1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neurons_hx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_frac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#STFullyConnected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.STFullyConnected" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.neural_network.Base" title="qsprpred.models.neural_network.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Single task DNN classification/regression model.</p>
+<p>It contains four fully connected layers between which are dropout layer for robustness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_dim</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the No. of columns (features) for input tensor</p></li>
+<li><p><strong>n_class</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the No. of columns (classes) for output tensor.</p></li>
+<li><p><strong>is_reg</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Regression model (True) or Classification model (False)</p></li>
+<li><p><strong>n_eopchs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – max number of epochs</p></li>
+<li><p><strong>lr</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – neural net learning rate</p></li>
+<li><p><strong>neurons_h1</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of neurons in first hidden layer</p></li>
+<li><p><strong>neurons_hx</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of neurons in other hidden layers</p></li>
+<li><p><strong>extra_layer</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – add third hidden layer</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.STFullyConnected.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">istrain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#STFullyConnected.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.STFullyConnected.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Invoke the class directly as a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>FloatTensor</em>) – m X n FloatTensor, m is the No. of samples, n is
+the No. of features.</p></li>
+<li><p><strong>istrain</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – is it invoked during training process (True) or
+just for prediction (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>m X n FloatTensor, m is the No. of samples,</dt><dd><p>n is the No. of classes</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>y (FloatTensor)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.STFullyConnected.init_model">
+<span class="sig-name descname"><span class="pre">init_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#STFullyConnected.init_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.STFullyConnected.init_model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.neural_network.STFullyConnected.set_params">
+<span class="sig-name descname"><span class="pre">set_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/neural_network.html#STFullyConnected.set_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.neural_network.STFullyConnected.set_params" title="Permalink to this definition"></a></dt>
+<dd><p>Set parameters and re-initialize model.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models.tasks">
+<span id="qsprpred-models-tasks-module"></span><h2>qsprpred.models.tasks module<a class="headerlink" href="#module-qsprpred.models.tasks" title="Permalink to this heading"></a></h2>
+<p>tasks</p>
+<p>Created by: Martin Sicho
+On: 28.11.22, 15:23</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.tasks.ModelTasks">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.tasks.</span></span><span class="sig-name descname"><span class="pre">ModelTasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tasks.html#ModelTasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tasks.ModelTasks" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/enum.html#enum.Enum" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tasks.ModelTasks.CLASSIFICATION">
+<span class="sig-name descname"><span class="pre">CLASSIFICATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CLASSIFICATION'</span></em><a class="headerlink" href="#qsprpred.models.tasks.ModelTasks.CLASSIFICATION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tasks.ModelTasks.REGRESSION">
+<span class="sig-name descname"><span class="pre">REGRESSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'REGRESSION'</span></em><a class="headerlink" href="#qsprpred.models.tasks.ModelTasks.REGRESSION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models.tests">
+<span id="qsprpred-models-tests-module"></span><h2>qsprpred.models.tests module<a class="headerlink" href="#module-qsprpred.models.tests" title="Permalink to this heading"></a></h2>
+<p>This module holds the tests for functions regarding QSPR modelling.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.tests.ModelDataSetsMixIn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.tests.</span></span><span class="sig-name descname"><span class="pre">ModelDataSetsMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#ModelDataSetsMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.ModelDataSetsMixIn" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.html#qsprpred.data.tests.DataSetsMixIn" title="qsprpred.data.tests.DataSetsMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetsMixIn</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.ModelDataSetsMixIn.clean_directories">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clean_directories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#ModelDataSetsMixIn.clean_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.ModelDataSetsMixIn.clean_directories" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tests.ModelDataSetsMixIn.qsprmodelspath">
+<span class="sig-name descname"><span class="pre">qsprmodelspath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/sichom/projects/QSPRpred/qsprpred/models/test_files/qspr/models'</span></em><a class="headerlink" href="#qsprpred.models.tests.ModelDataSetsMixIn.qsprmodelspath" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.ModelDataSetsMixIn.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#ModelDataSetsMixIn.setUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.ModelDataSetsMixIn.setUp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.tests.ModelTestMixIn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.tests.</span></span><span class="sig-name descname"><span class="pre">ModelTestMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#ModelTestMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.ModelTestMixIn" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.ModelTestMixIn.fit_test">
+<span class="sig-name descname"><span class="pre">fit_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">themodel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#ModelTestMixIn.fit_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.ModelTestMixIn.fit_test" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.ModelTestMixIn.predictor_test">
+<span class="sig-name descname"><span class="pre">predictor_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls:</span> <span class="pre">~qsprpred.models.interfaces.QSPRModel</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'qsprpred.models.models.QSPRsklearn'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#ModelTestMixIn.predictor_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.ModelTestMixIn.predictor_test" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.tests.</span></span><span class="sig-name descname"><span class="pre">NeuralNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#NeuralNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.NeuralNet" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.tests.ModelDataSetsMixIn" title="qsprpred.models.tests.ModelDataSetsMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelDataSetsMixIn</span></code></a>, <a class="reference internal" href="#qsprpred.models.tests.ModelTestMixIn" title="qsprpred.models.tests.ModelTestMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelTestMixIn</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.get_model">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#NeuralNet.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.get_model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.prep_testdata">
+<span class="sig-name descname"><span class="pre">prep_testdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ModelTasks.REGRESSION</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#NeuralNet.prep_testdata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.prep_testdata" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.test_base_model">
+<span class="sig-name descname"><span class="pre">test_base_model</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.test_base_model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.test_base_model_0_STFullyConnected_REGRESSION">
+<span class="sig-name descname"><span class="pre">test_base_model_0_STFullyConnected_REGRESSION</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.test_base_model_0_STFullyConnected_REGRESSION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.test_base_model_1_STFullyConnected_CLASSIFICATION">
+<span class="sig-name descname"><span class="pre">test_base_model_1_STFullyConnected_CLASSIFICATION</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.test_base_model_1_STFullyConnected_CLASSIFICATION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.test_base_model_2_STFullyConnected_CLASSIFICATION">
+<span class="sig-name descname"><span class="pre">test_base_model_2_STFullyConnected_CLASSIFICATION</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.test_base_model_2_STFullyConnected_CLASSIFICATION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.test_qsprpred_model">
+<span class="sig-name descname"><span class="pre">test_qsprpred_model</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.test_qsprpred_model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.test_qsprpred_model_0_STFullyConnected_REGRESSION">
+<span class="sig-name descname"><span class="pre">test_qsprpred_model_0_STFullyConnected_REGRESSION</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.test_qsprpred_model_0_STFullyConnected_REGRESSION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.test_qsprpred_model_1_STFullyConnected_CLASSIFICATION">
+<span class="sig-name descname"><span class="pre">test_qsprpred_model_1_STFullyConnected_CLASSIFICATION</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.test_qsprpred_model_1_STFullyConnected_CLASSIFICATION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.NeuralNet.test_qsprpred_model_2_STFullyConnected_CLASSIFICATION">
+<span class="sig-name descname"><span class="pre">test_qsprpred_model_2_STFullyConnected_CLASSIFICATION</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.NeuralNet.test_qsprpred_model_2_STFullyConnected_CLASSIFICATION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.tests.</span></span><span class="sig-name descname"><span class="pre">TestQSPRsklearn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestQSPRsklearn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.tests.ModelDataSetsMixIn" title="qsprpred.models.tests.ModelDataSetsMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelDataSetsMixIn</span></code></a>, <a class="reference internal" href="#qsprpred.models.tests.ModelTestMixIn" title="qsprpred.models.tests.ModelTestMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelTestMixIn</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.get_model">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestQSPRsklearn.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.get_model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_0_SVC_th_4">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_0_SVC_th_4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_0_SVC_th_4" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_1_SVC_th_1">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_1_SVC_th_1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_1_SVC_th_1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_2_RFC_th_4">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_2_RFC_th_4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_2_RFC_th_4" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_3_RFC_th_1">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_3_RFC_th_1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_3_RFC_th_1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_4_XGBC_th_4">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_4_XGBC_th_4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_4_XGBC_th_4" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_5_XGBC_th_1">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_5_XGBC_th_1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_5_XGBC_th_1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_6_KNNC_th_4">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_6_KNNC_th_4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_6_KNNC_th_4" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_7_KNNC_th_1">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_7_KNNC_th_1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_7_KNNC_th_1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_8_NB_th_4">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_8_NB_th_4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_8_NB_th_4" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_9_NB_th_1">
+<span class="sig-name descname"><span class="pre">test_classification_basic_fit_9_NB_th_1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_classification_basic_fit_9_NB_th_1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit">
+<span class="sig-name descname"><span class="pre">test_regression_basic_fit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_0_PLSR">
+<span class="sig-name descname"><span class="pre">test_regression_basic_fit_0_PLSR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_0_PLSR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_1_SVR">
+<span class="sig-name descname"><span class="pre">test_regression_basic_fit_1_SVR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_1_SVR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_2_RFR">
+<span class="sig-name descname"><span class="pre">test_regression_basic_fit_2_RFR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_2_RFR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_3_XGBR">
+<span class="sig-name descname"><span class="pre">test_regression_basic_fit_3_XGBR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_3_XGBR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_4_KNNR">
+<span class="sig-name descname"><span class="pre">test_regression_basic_fit_4_KNNR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestQSPRsklearn.test_regression_basic_fit_4_KNNR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.models" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.metrics.html" class="btn btn-neutral float-left" title="qsprpred.metrics package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.plotting.html" class="btn btn-neutral float-right" title="qsprpred.plotting package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
