@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   qsprpred.data.sources
    qsprpred.data.utils
 
 Submodules

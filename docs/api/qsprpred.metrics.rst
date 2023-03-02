@@ -1,13 +1,13 @@
-qsprpred.scorers package
+qsprpred.metrics package
 ========================
 
 Submodules
 ----------
 
-qsprpred.scorers.predictor module
----------------------------------
+qsprpred.metrics.calibration module
+-----------------------------------
 
-.. automodule:: qsprpred.scorers.predictor
+.. automodule:: qsprpred.metrics.calibration
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ qsprpred.scorers.predictor module
 Module contents
 ---------------
 
-.. automodule:: qsprpred.scorers
+.. automodule:: qsprpred.metrics
    :members:
    :undoc-members:
    :show-inheritance:

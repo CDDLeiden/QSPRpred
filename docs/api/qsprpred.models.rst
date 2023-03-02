@@ -28,6 +28,14 @@ qsprpred.models.neural\_network module
    :undoc-members:
    :show-inheritance:
 
+qsprpred.models.tasks module
+----------------------------
+
+.. automodule:: qsprpred.models.tasks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 qsprpred.models.tests module
 ----------------------------
 
