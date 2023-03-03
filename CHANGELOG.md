@@ -5,7 +5,7 @@ From v1.3.0 to v1.4.0.dev0
 
 - Not all scorers in `supported_scoring` were actually working in the multi-class case, the scorer support is now
   divided by single and multiclass support (moved to `metrics.py`, see also New Features).
-- problems with PaDEL descriptors and fingerprints on Linux were fixed
+- Instead of all smiles, only invalid smiles are now printed to the log when they are removed.
 
 ## Changes
 - To support multitask modelling, the representation of the target in the `QSPRdataset` has changed to a list of 
