@@ -817,21 +817,13 @@ class QSPRDataset(MoleculeTable):
         self.featureNames = self.getFeatureNames()
 
         # load target properties
-        self.setTargetProperties(target_props)
+        self.setTargetProperties(target_props, drop_empty, target_imputer)
 
         # load standardizers for features
         self.feature_standardizer = self.loadFeatureStandardizer()
         if not self.feature_standardizer:
             self.feature_standardizer = None
         self.fold_generator = self.getDefaultFoldGenerator()
-
-        # drop rows with missing smiles or no target property value for any of the target properties
-        if drop_empty:
-            self.dropEmpty()
-
-        # impute missing target property values
-        if target_imputer is not None:
-            self.imputeTargetProperties(target_imputer)
 
         # populate feature matrix and target property array
         self.X = None
@@ -873,7 +865,9 @@ class QSPRDataset(MoleculeTable):
         raise NotImplementedError(
             f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can convert from 'MoleculeTable' with 'fromMolTable'.")
 
-    def setTargetProperties(self, target_props: List[TargetProperty]):
+    def setTargetProperties(
+            self, target_props: List[TargetProperty],
+            drop_empty: bool = True, target_imputer: Callable = None):
         """Set list of target properties and apply transformations if specified.
 
         Args:
@@ -891,7 +885,7 @@ class QSPRDataset(MoleculeTable):
                        ), "target_props should be a list of TargetProperty objects or dictionaries to initialize TargetProperties from, not a mix."
             self.targetProperties = target_props
         assert all([prop in self.df.columns for prop in self.targetPropertyNames]
-                   ), "Not all target properties not in dataframe columns."
+                   ), "Not all target properties in dataframe columns."
 
         # transform target properties
         for target_prop in self.targetProperties:
@@ -899,6 +893,14 @@ class QSPRDataset(MoleculeTable):
                 transformed_prop = f'{target_prop.name}_transformed'
                 self.transform([target_prop.name], target_prop.transformer, addAs=[transformed_prop])
                 target_prop.name = transformed_prop
+
+        # drop rows with missing smiles or no target property value for any of the target properties
+        if drop_empty:
+            self.dropEmpty()
+
+        # impute missing target property values
+        if target_imputer is not None:
+            self.imputeTargetProperties(target_imputer)
 
         # convert classification targets to integers
         for target_prop in self.targetProperties:

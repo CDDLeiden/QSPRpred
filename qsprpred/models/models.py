@@ -409,7 +409,7 @@ class QSPRDNN(QSPRModel):
         if self.task.isRegression():
             self.n_class = 1
         else:
-            self.data.targetProperties[0].nClasses if self.data else self.metaInfo['n_class']
+            self.n_class = self.data.targetProperties[0].nClasses if self.data else self.metaInfo['n_class']
         self.n_dim = self.data.X.shape[1] if self.data else self.metaInfo['n_dim']
         self.patience = patience
         self.tol = tol

@@ -60,7 +60,7 @@ def QSPRArgParser(txt=None):
                         help="properties to be predicted identifiers. Add this argument for each model to be trained \
                               e.g. for one multi-task model for CL and Fu and one single task for CL do:\
                               -pr CL Fu -pr CL")
-    parser.add_argument('-im', '--imputation', type=str, default='mean', choices=['mean', 'median', 'most_frequent'])
+    parser.add_argument('-im', '--imputation', type=str, choices=['mean', 'median', 'most_frequent'])
 
     # model type arguments
     parser.add_argument('-r', '--regression', type=str, default=None,
@@ -190,7 +190,7 @@ def QSPR_dataprep(args):
             # data splitter
             if args.split == 'scaffold':
                 split = scaffoldsplit(test_fraction=args.split_fraction, scaffold=Murcko(), dataset=mydataset)
-            elif args.split == 'temporal':
+            elif args.split == 'time':
                 split = temporalsplit(timesplit=args.split_time, timeprop=args.split_timecolumn, dataset=mydataset)
             else:
                 split = randomsplit(test_fraction=args.split_fraction)

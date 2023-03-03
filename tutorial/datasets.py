@@ -82,7 +82,7 @@ def Parkinsons(singletask=True):
 
     # Get data in correct format and taking the mean if multiple activatie values per smiles
     df = df.pivot_table(index=[smiles_col], columns=[target_col], values=activity_col, aggfunc=np.mean).reset_index()
-    # df.to_csv('data/parkinsons_pivot.tsv', sep='\t', index=False)
+    df.to_csv('data/parkinsons_pivot.tsv', sep='\t', index=False)
 
     if singletask:
         return QSPRDataset(
