@@ -458,13 +458,16 @@ class QSPRModel(ABC):
 
         pass
 
-    def predictMols(self, mols : List[str], use_probas : bool = False):
+    def predictMols(self, mols : List[str], use_probas : bool = False,
+                    standardize: bool = True, sanitize: bool = True):
         """
         Make predictions for the given molecules.
 
         Args:
             mols (List[str]): list of SMILES strings
             use_probas (bool): use probabilities for classification models
+            standardize: apply the ChEMBL standardization pipeline to the SMILES
+            sanitize: sanitize SMILES
         """
 
         dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False)
@@ -475,8 +478,8 @@ class QSPRModel(ABC):
         if not self.featureCalculator:
             raise ValueError("No feature calculator set on this instance.")
         dataset.prepareDataset(
-            standardize=True,
-            sanitize=True,
+            standardize=standardize,
+            sanitize=sanitize,
             feature_calculator=self.featureCalculator,
             feature_standardizer=self.featureStandardizer
         )
