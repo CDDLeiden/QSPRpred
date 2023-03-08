@@ -3,6 +3,8 @@ import concurrent
 import json
 import os
 import warnings
+import pickle
+from multiprocessing import Pool
 from typing import Callable, List, Literal
 
 import numpy as np
@@ -17,7 +19,6 @@ from qsprpred.data.utils.folds import Folds
 from qsprpred.data.utils.scaffolds import Scaffold
 from qsprpred.data.utils.smiles_standardization import (
     chembl_smi_standardizer,
-    sanitize_smiles,
 )
 from qsprpred.logs import logger
 from qsprpred.models.tasks import ModelTasks
@@ -574,22 +575,34 @@ class MoleculeTable(MoleculeDataSet):
         """
         return len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
 
-    def cleanMolecules(self, standardize: bool = True, sanitize: bool = True):
-        """Standardize and or sanitize SMILES sequences."""
-        if standardize:
-            self.standardize()
-        if sanitize:
-            self.sanitize()
+    def standardizeSmiles(self, smiles_standardizer):
+        """Apply smiles_standardizer to the compounds in parallel
 
-    def standardize(self):
-        """Standardize SMILES sequences."""
+        Args:
+            smiles_standardizer (Union[str, callable]): either `chembl`, or a partial function that reads and standardizes smiles.
 
-        self.df[self.smilescol] = [chembl_smi_standardizer(smiles)[0] for smiles in self.df[self.smilescol]]
-
-    def sanitize(self):
-        """Sanitize SMILES sequences."""
-
-        self.df[self.smilescol] = [sanitize_smiles(smiles) for smiles in self.df[self.smilescol]]
+        Raises:
+            ValueError: when smiles_standardizer is not a callable or one of the predefined strings.
+        """        
+        std_jobs = self.nJobs
+        if callable(smiles_standardizer):
+            try: # Prevents weird error if the user inputs a lambda function
+                pickle.dumps(smiles_standardizer)
+            except pickle.PicklingError:
+                logger.warning("Standardizer is not pickleable. Will set n_jobs to 1")
+                std_jobs = 1
+            std_func = smiles_standardizer
+        elif smiles_standardizer.lower() == 'chembl':
+            std_func = chembl_smi_standardizer
+        else:
+            raise ValueError("Standardizer must be either 'chembl', or a callable")
+        
+        if std_jobs == 1:
+            std_smi = [std_func(smi) for smi in self.df[self.smilescol].values]
+        else:
+            with Pool(std_jobs) as pool:
+                std_smi = pool.map(std_func, self.df[self.smilescol].values)
+        self.df[self.smilescol] = std_smi
 
     def shuffle(self, random_state=None):
         """Shuffle the internal data frame."""
@@ -1093,8 +1106,7 @@ class QSPRDataset(MoleculeTable):
 
     def prepareDataset(
         self,
-        standardize=True,
-        sanitize=True,
+        smiles_standardizer='chembl',
         datafilters=None,
         split=None,
         fold=None,
@@ -1107,8 +1119,7 @@ class QSPRDataset(MoleculeTable):
         """Prepare the dataset for use in QSPR model.
 
         Arguments:
-            standardize (bool): Apply Chembl standardization pipeline to smiles
-            sanitize (bool): sanitize smiles
+            smiles_standardizer (Union[str, callable]): either `chembl`, or a partial function that reads and standardizes smiles.
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             fold (datasplitter obj): splits the train set into folds for cross validation
@@ -1119,8 +1130,7 @@ class QSPRDataset(MoleculeTable):
             fill_value (float): value to fill missing values with, defaults to `numpy.nan`
         """
         # apply sanitization and standardization
-        if standardize:
-            self.cleanMolecules(standardize, sanitize)
+        self.standardizeSmiles(smiles_standardizer)
 
         # calculate featureNames
         if feature_calculator is not None:

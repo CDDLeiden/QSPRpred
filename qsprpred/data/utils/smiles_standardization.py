@@ -2,42 +2,12 @@
 
 import re
 
-from chembl_structure_pipeline import standardizer
 from rdkit import Chem
 from rdkit.Chem.SaltRemover import SaltRemover
+from chembl_structure_pipeline import standardizer as chembl_stand
 
 
-def chembl_smi_standardizer(smi: str) -> tuple:
-    """Standardize a SMILES string.
-    
-    Returns a tuple containing 'parent smiles' and a 'bool',
-    which defaults to if the standardizer failed and false when
-    there were no errors.
-
-    Arguments:
-        smi: smiles string to be standardized with the 'chembl_structure_pipeline'.
-    
-    Returns:
-        Tuple containing the parent smiles and a bool indicating if the standardizer
-        failed. If True -> standardizer failed..
-    """
-    mol = Chem.MolFromSmiles(smi)
-    standard_mol = standardizer.standardize_mol(mol)
-    result = standardizer.get_parent_mol(
-        standard_mol
-    )  # Tuple with molecule in #0 and Boolean in #1
-    # Boolean states whether there was an exclusion flag. For more details, check:
-    # https://github.com/chembl/ChEMBL_Structure_Pipeline/wiki/Exclusion-Flag
-    parent_mol = result[0]
-    parent_smi = Chem.MolToSmiles(
-        parent_mol, kekuleSmiles=False, canonical=True, isomericSmiles=True
-    )
-    if result[1]:
-        return parent_smi, True
-    else:
-        return parent_smi, False
-
-
+# TODO: add wrapper as `old_standardization`. And deprecation warning
 def neutralize_atoms(mol):
     """Neutralize charged molecules by atom.
 
@@ -62,6 +32,19 @@ def neutralize_atoms(mol):
             atom.SetNumExplicitHs(hcount - chg)
             atom.UpdatePropertyCache()
     return mol
+
+
+def chembl_smi_standardizer(smi: str, isomericSmiles:bool=True, sanitize:bool=True) -> str:
+    try:
+        mol = Chem.MolFromSmiles(smi)
+    except:  # noqa E722
+        print('Could not parse smiles: ', smi)
+        return None
+    standard_mol = chembl_stand.standardize_mol(mol, sanitize=sanitize)
+    standard_smiles = Chem.MolToSmiles(
+        standard_mol, kekuleSmiles=False, canonical=True, isomericSmiles=isomericSmiles
+    )
+    return standard_smiles
 
 
 def sanitize_smiles(smi: str) -> str:
