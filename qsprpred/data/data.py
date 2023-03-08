@@ -19,6 +19,7 @@ from qsprpred.data.utils.folds import Folds
 from qsprpred.data.utils.scaffolds import Scaffold
 from qsprpred.data.utils.smiles_standardization import (
     chembl_smi_standardizer,
+    old_standardize_sanitize
 )
 from qsprpred.logs import logger
 from qsprpred.models.tasks import ModelTasks
@@ -579,7 +580,7 @@ class MoleculeTable(MoleculeDataSet):
         """Apply smiles_standardizer to the compounds in parallel
 
         Args:
-            smiles_standardizer (Union[str, callable]): either `chembl`, or a partial function that reads and standardizes smiles.
+            smiles_standardizer (Union[str, callable]): either `chembl`, `old`, or a partial function that reads and standardizes smiles.
 
         Raises:
             ValueError: when smiles_standardizer is not a callable or one of the predefined strings.
@@ -594,6 +595,8 @@ class MoleculeTable(MoleculeDataSet):
             std_func = smiles_standardizer
         elif smiles_standardizer.lower() == 'chembl':
             std_func = chembl_smi_standardizer
+        elif smiles_standardizer.lower() == 'old':
+            std_func = old_standardize_sanitize
         else:
             raise ValueError("Standardizer must be either 'chembl', or a callable")
         
@@ -1119,7 +1122,7 @@ class QSPRDataset(MoleculeTable):
         """Prepare the dataset for use in QSPR model.
 
         Arguments:
-            smiles_standardizer (Union[str, callable]): either `chembl`, or a partial function that reads and standardizes smiles.
+            smiles_standardizer (Union[str, callable]): either `chembl`, `old`, or a partial function that reads and standardizes smiles.
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             fold (datasplitter obj): splits the train set into folds for cross validation
