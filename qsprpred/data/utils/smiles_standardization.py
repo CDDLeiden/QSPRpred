@@ -7,7 +7,6 @@ from rdkit.Chem.SaltRemover import SaltRemover
 from chembl_structure_pipeline import standardizer as chembl_stand
 
 
-# TODO: add wrapper as `old_standardization`. And deprecation warning
 def neutralize_atoms(mol):
     """Neutralize charged molecules by atom.
 
@@ -35,6 +34,16 @@ def neutralize_atoms(mol):
 
 
 def chembl_smi_standardizer(smi: str, isomericSmiles:bool=True, sanitize:bool=True) -> str:
+    """Standardize SMILES using ChEMBL standardizer.
+
+    Args:
+        smi: SMILES string to be standardized.
+        isomericSmiles: return the isomeric smiles. Defaults to True.
+        sanitize: applies sanitization using the ChEMBL standardizer. Defaults to True.
+
+    Returns:
+        standardized SMILES string.
+    """    
     try:
         mol = Chem.MolFromSmiles(smi)
     except:  # noqa E722
