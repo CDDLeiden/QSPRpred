@@ -5,20 +5,19 @@ import shutil
 import sys
 from abc import ABC, abstractmethod
 from inspect import isclass
-from typing import Union, Type, List
+from typing import List, Type, Union
 
 import numpy as np
 import pandas as pd
-from sklearn import metrics
-
 from qsprpred import VERSION
-from qsprpred.data.data import QSPRDataset, MoleculeTable
+from qsprpred.data.data import MoleculeTable, QSPRDataset
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
 from qsprpred.models.tasks import ModelTasks
 from qsprpred.utils.inspect import import_class
+from sklearn import metrics
 
 
 class QSPRModel(ABC):
@@ -458,9 +457,9 @@ class QSPRModel(ABC):
 
         pass
 
-    def predictMols(self, mols : List[str], use_probas : bool = False,
+    def predictMols(self, mols: List[str], use_probas: bool = False,
                     standardize: bool = True, sanitize: bool = True,
-                    n_jobs: int = 1):
+                    n_jobs: int = 1, fill_value: float = np.nan):
         """
         Make predictions for the given molecules.
 
@@ -470,6 +469,7 @@ class QSPRModel(ABC):
             standardize: apply the ChEMBL standardization pipeline to the SMILES
             sanitize: sanitize SMILES
             n_jobs: Number of jobs to use for parallel processing.
+            fill_value: Value to use for missing values in the feature matrix.
         """
 
         dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False,
@@ -485,7 +485,8 @@ class QSPRModel(ABC):
             standardize=standardize,
             sanitize=sanitize,
             feature_calculator=self.featureCalculator,
-            feature_standardizer=self.featureStandardizer
+            feature_standardizer=self.featureStandardizer,
+            fill_value=fill_value
         )
         if self.task == ModelTasks.REGRESSION or not use_probas:
             predictions = self.predict(dataset)
