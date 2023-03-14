@@ -622,7 +622,7 @@ class QSPRDNN(QSPRModel):
 
         self.parameters = trial.params
         self.model = self.loadModel(self.alg, self.parameters, fromFile=False)
-        self.saveParams()
+        self.saveParams(trial.params)
 
     def objective(self, trial, scoring, th, search_space_bs):
         """Objective for bayesian optimization.
