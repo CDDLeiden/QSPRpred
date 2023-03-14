@@ -40,6 +40,11 @@ def QSPRArgParser(txt=None):
                         help="properties to be predicted identifiers. Add this argument for each model to be trained \
                               e.g. for one multi-task model for CL and Fu and one single task for CL do:\
                               -pr CL Fu -pr CL")
+    parser.add_argument('-lt', '--log_transform', type=json.loads,
+                        help='For each property if its values need to be log-tranformed. This arg only has an effect \
+                              when mode is regression, otherwise will be ignored!\
+                              This needs to be given for each property included in any of the models as follows, e.g.\
+                              -lt \'{"CL":True,"fu":False}\'. Note. no spaces and surround by single quotes')
 
     # model type arguments
     parser.add_argument('-m', '--model_types', type=str, nargs='*',
@@ -134,7 +139,10 @@ def QSPR_modelling(args):
         for property in args.properties:
             log.info(f"Property: {property[0]}")
 
-            mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{reg_abbr}_{property[0]}_df.pkl')
+            # TEMPORARY FIX: log transform not loaded from file, therefore set here
+            log_transform = np.log if args.log_transform and args.log_transform[property[0]] else None
+            mydataset = QSPRDataset.fromFile(f'{args.base_dir}/qspr/data/{reg_abbr}_{property[0]}_df.pkl',
+                                             target_transformer=log_transform)
 
             for model_type in args.model_types:
                 print(model_type)
