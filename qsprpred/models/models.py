@@ -419,10 +419,15 @@ class QSPRDNN(QSPRModel):
                 )
 
         # load states if available
-        if fromFile and 'model_path' in self.metaInfo:
-            model_path = os.path.join(self.baseDir, self.metaInfo['model_path'])
-            if os.path.exists(model_path):
-                model.load_state_dict(torch.load(model_path))
+        if fromFile:
+            if 'model_path' in self.metaInfo:
+                model_path = os.path.join(self.baseDir, self.metaInfo['model_path'])
+                if os.path.exists(model_path):
+                    model.load_state_dict(torch.load(model_path))
+                else:
+                    logger.warning(f'Model path ({model_path}) does not exist. Cannot load model weights.')
+            else:
+                logger.warning('No model path found in metadata. Cannot load model weights.')
 
         return model
 
