@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -e
 
 export PYTHONPATH=".."
@@ -72,5 +74,7 @@ python -m qsprpred.predict_CLI \
 -ncpu ${N_CPUS} \
 -mp ./qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
 -pr
+
+echo "All tests finished without errors."
 
 cleanup
