@@ -3,7 +3,6 @@ import logging
 import numbers
 import os
 import shutil
-import types
 from os.path import exists
 from unittest import TestCase
 
