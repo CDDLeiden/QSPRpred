@@ -4,7 +4,7 @@ stages:
    - test
    - deploy
 
-# Install python dependencies and run python tests with pytest (output more readable than unittest)
+# Install python dependencies and run python tests with pytest and the CLI test script
 .test:
    stage: test
    before_script:
@@ -14,18 +14,12 @@ stages:
       - pip freeze # For debugging environment
    script:
       - pytest qsprpred
+      - cd clitest && ./run.sh
 
 # Run tests on Python version 10 (linux image)
 test:python3.10:
    extends: .test
    image: python:3.10
-
-# Run CLI tests on Python version 10 (linux image)
-clitest:python3.10:
-   extends: .test
-   image: python:3.10
-   script:
-     - cd clitest && ./run.sh
 
 # Run tests on Python version 9 (linux image)
 #test:python3.9:
