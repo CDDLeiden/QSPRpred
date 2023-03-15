@@ -26,7 +26,7 @@ clitest:python3.10:
    image: python:3.10
    script:
      - cd clitest
-     - cd ./run.sh
+     - ./run.sh
 
 # Run tests on Python version 9 (linux image)
 #test:python3.9:
