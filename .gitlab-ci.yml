@@ -20,6 +20,14 @@ test:python3.10:
    extends: .test
    image: python:3.10
 
+# Run CLI tests on Python version 10 (linux image)
+clitest:python3.10:
+   extends: .test
+   image: python:3.10
+   script:
+     - cd clitest
+     - cd ./run.sh
+
 # Run tests on Python version 9 (linux image)
 #test:python3.9:
 #   extends: .test
