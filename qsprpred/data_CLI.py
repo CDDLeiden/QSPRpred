@@ -106,6 +106,8 @@ def QSPRArgParser(txt=None):
     parser.add_argument('-bf', '--boruta_filter', action='store_true', help="boruta filter with random forest")
 
     # other
+    parser.add_argument('-fv', '--fill_value', type=float, default=np.nan,
+                        help="Fill value for missing values in the calculated features")
     parser.add_argument('-ng', '--no_git', action='store_true',
                         help="If on, git hash is not retrieved")
 

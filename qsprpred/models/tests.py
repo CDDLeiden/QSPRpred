@@ -62,14 +62,14 @@ class ModelTestMixIn:
         grid_params = themodel.__class__.loadParamsGrid(fname, "bayes", mname)
         search_space_bs = grid_params[grid_params[:, 0] == mname, 1][0]
         themodel.bayesOptimization(search_space_bs=search_space_bs, n_trials=1)
-        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['parameters_path']}"))
+        self.assertTrue(exists(f"{themodel.outDir}/{themodel.name}_params.json"))
 
         # perform grid search
         themodel.cleanFiles()
         grid_params = themodel.__class__.loadParamsGrid(fname, "grid", mname)
         search_space_gs = grid_params[grid_params[:, 0] == mname, 1][0]
         themodel.gridSearch(search_space_gs=search_space_gs)
-        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['parameters_path']}"))
+        self.assertTrue(exists(f"{themodel.outDir}/{themodel.name}_params.json"))
         themodel.cleanFiles()
 
         # perform crossvalidation

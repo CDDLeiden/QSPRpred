@@ -102,7 +102,7 @@ class QSPRModel(ABC):
         """Return the target properties of the model, taken from the data set or deserialized from file if the model is loaded without data.
 
         Returns:
-            str: target property of the model
+            list(str): target properties of the model
         """
         return self.data.targetProperties if self.data else self.metaInfo['target_properties']
 
@@ -410,25 +410,39 @@ class QSPRModel(ABC):
         """
         pass
 
-    def predictMols(self, mols: List[str], use_probas: bool = False):
-        """Make predictions for the given molecules.
+    def predictMols(self, mols: List[str], use_probas: bool = False,
+                    standardize: bool = True, sanitize: bool = True,
+                    n_jobs: int = 1, fill_value: float = np.nan):
+        """
+        Make predictions for the given molecules.
 
         Args:
             mols (List[str]): list of SMILES strings
             use_probas (bool): use probabilities for classification models
+            standardize: apply the ChEMBL standardization pipeline to the SMILES
+            sanitize: sanitize SMILES
+            n_jobs: Number of jobs to use for parallel processing.
+            fill_value: Value to use for missing values in the feature matrix.
+
+        Returns:
+            np.ndarray: an array of predictions, can be a 1D array for single target models, 2D array for multi target and a list of 2D arrays for multi-target and multi-class models
         """
-        dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False)
+
+        dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False,
+                                           n_jobs=n_jobs)
         for targetproperty in self.targetProperties:
             dataset.addProperty(targetproperty.name, np.nan)
         dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False)
         failed_mask = dataset.dropInvalids().values
+
         if not self.featureCalculator:
             raise ValueError("No feature calculator set on this instance.")
         dataset.prepareDataset(
-            standardize=True,
-            sanitize=True,
+            standardize=standardize,
+            sanitize=sanitize,
             feature_calculator=self.featureCalculator,
-            feature_standardizer=self.featureStandardizer
+            feature_standardizer=self.featureStandardizer,
+            feature_fill_value=fill_value
         )
         if self.task.isRegression() or not use_probas:
             predictions = self.predict(dataset)
@@ -438,7 +452,7 @@ class QSPRModel(ABC):
             if self.task.isClassification():
                 predictions = predictions.astype(int)
         else:
-            # NOTE: if a multiclass-multiouput, this will return a list of 2D arrays
+            # NOTE: if a multiclass-multioutput, this will return a list of 2D arrays
             predictions = self.predictProba(dataset)
 
         if any(~failed_mask):

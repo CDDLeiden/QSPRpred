@@ -40,6 +40,15 @@ def QSPRArgParser(txt=None):
                         help="Prefix of each data file to be used as input for the model,\
                             e.g. target1_MULTICLASS for a file named target1_MULTICLASS_df.pkl")
     parser.add_argument('-ms', '--model_suffix', type=str, help="Suffix of the model to be saved")
+    parser.add_argument('-pr', '--properties', type=str, nargs='+', action='append',
+                        help="properties to be predicted identifiers. Add this argument for each model to be trained \
+                              e.g. for one multi-task model for CL and Fu and one single task for CL do:\
+                              -pr CL Fu -pr CL")
+    parser.add_argument('-lt', '--log_transform', type=json.loads,
+                        help='For each property if its values need to be log-transformed. This arg only has an effect \
+                              when mode is regression, otherwise will be ignored!\
+                              This needs to be given for each property included in any of the models as follows, e.g.\
+                              -lt \'{"CL":True,"fu":False}\'. Note. no spaces and surround by single quotes')
 
     # model type arguments
     parser.add_argument('-mt', '--model_types', type=str, nargs='*',

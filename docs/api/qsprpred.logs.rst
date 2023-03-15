@@ -12,6 +12,14 @@ qsprpred.logs.config module
    :undoc-members:
    :show-inheritance:
 
+qsprpred.logs.stopwatch module
+------------------------------
+
+.. automodule:: qsprpred.logs.stopwatch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 qsprpred.logs.utils module
 --------------------------
 
