@@ -25,15 +25,14 @@ clitest:python3.10:
    extends: .test
    image: python:3.10
    script:
-     - cd clitest
-     - ./run.sh
+     - cd clitest && ./run.sh
 
 # Run tests on Python version 9 (linux image)
 #test:python3.9:
 #   extends: .test
 #   image: python:3.9
 
-# Write documentation on main or tagged branches
+# Write documentation on main branch
 pages:
    stage: deploy
    image: python:3.10
@@ -48,4 +47,3 @@ pages:
       - public
    only:
       - main
-      - tags
