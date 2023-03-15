@@ -65,11 +65,12 @@ def QSPR_predict(args):
 
     results = {"SMILES": smiles_list}
     for metadata_path in args.metadata_paths:
-        if not os.path.exists(f"{args.base_dir}/qspr/models/{metadata_path}"):
-            log.warning(f"{args.base_dir}/qspr/models/{metadata_path} does not exist. Model skipped.")
+        metafile = f"{args.base_dir}/{metadata_path}"
+        if not os.path.exists(metafile):
+            log.warning(f"{args.base_dir}/{metadata_path} does not exist. Model skipped.")
             continue
 
-        predictor = QSPRModel.fromFile(f"{args.base_dir}/qspr/models/{metadata_path}")
+        predictor = QSPRModel.fromFile(metafile)
 
         predictions = predictor.predictMols(smiles_list, use_probas=args.use_probas)
         # if predictions 2d array with more than 1 column, add as separate columns
