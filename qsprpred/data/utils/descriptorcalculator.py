@@ -5,10 +5,9 @@ from typing import List, Union
 
 import numpy as np
 import pandas as pd
-from rdkit.Chem.rdchem import Mol
-
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
 from qsprpred.logs import logger
+from rdkit.Chem.rdchem import Mol
 
 
 class Calculator(ABC):
@@ -102,7 +101,7 @@ class DescriptorsCalculator(Calculator):
             if descset.is_fp:
                 values.add_prefix(f"{descset.fingerprint_type}_")
             values = values.astype(dtype)
-            if np.isinf(values).any():
+            if np.isinf(values).any().any():
                 col_names = values.columns
                 x_loc, y_loc = np.where(np.isinf(values.values))
                 inf_cols = np.take(col_names, np.unique(y_loc))
