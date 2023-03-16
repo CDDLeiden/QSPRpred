@@ -4,6 +4,7 @@ From v1.2.0 to v1.3.0
 ## Fixes
 
 - problems with PaDEL descriptors and fingerprints on Linux were fixed
+- Feature values converted to `np.float32` and then np.inf are converted to `nan` on `DescriptorsCalculator.__call__`.
 
 ## Changes
 
