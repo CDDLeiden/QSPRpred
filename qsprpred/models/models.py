@@ -88,6 +88,7 @@ class QSPRsklearn(QSPRModel):
             self.data.task == ModelTasks.REGRESSION or not self.data.isMultiClass()) else np.zeros(
             (y.shape[0],
              self.data.nClasses))
+        cvs_ids = np.array([None] * len(cvs))
 
         fold_counter = np.zeros(y.shape[0])
 
@@ -116,6 +117,7 @@ class QSPRsklearn(QSPRModel):
                 cvs[idx_test] = self.model.predict_proba(X_test)
             else:
                 cvs[idx_test] = self.model.predict_proba(X_test)[:, -1]
+            cvs_ids[idx_test] = X.iloc[idx_test].index.to_numpy()
 
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
@@ -138,16 +140,20 @@ class QSPRsklearn(QSPRModel):
             inds = self.model.predict_proba(X_ind)
         else:
             inds = self.model.predict_proba(X_ind)[:, -1]
+        inds_ids = X_ind.index.to_numpy()
 
         # save crossvalidation results
         if save:
+            index_name = self.data.getDF().index.name
+            ind_index = pd.Index(inds_ids, name=index_name)
+            cvs_index = pd.Index(cvs_ids, name=index_name)
             train, test = pd.DataFrame(
-                y.values, columns=['Label']), pd.DataFrame(
-                y_ind.values, columns=['Label'])
+                y.values, columns=['Label'], index=cvs_index), pd.DataFrame(
+                y_ind.values, columns=['Label'], index=ind_index)
             if self.data.task == ModelTasks.CLASSIFICATION and self.data.nClasses > 2:
                 train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
-                train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
-                test = pd.concat([test, pd.DataFrame(inds)], axis=1)
+                train = pd.concat([train, pd.DataFrame(cvs, index=cvs_index)], axis=1)
+                test = pd.concat([test, pd.DataFrame(inds, index=ind_index)], axis=1)
             else:
                 train['Score'], test['Score'] = cvs, inds
             train['Fold'] = fold_counter
