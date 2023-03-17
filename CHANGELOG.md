@@ -8,6 +8,7 @@ From v1.3.0 to v1.4.0.dev0
 - Instead of all smiles, only invalid smiles are now printed to the log when they are removed.
 - problems with PaDEL descriptors and fingerprints on Linux were fixed
 - Fix not re-initiating model weights during DNN training
+- Feature values converted to `np.float32` and then np.inf are converted to `nan` on `DescriptorsCalculator.__call__`.
 
 ## Changes
 - To support multitask modelling, the representation of the target in the `QSPRdataset` has changed to a list of 

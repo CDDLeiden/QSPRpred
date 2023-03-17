@@ -411,7 +411,7 @@ class QSPRModel(ABC):
         pass
 
     def predictMols(self, mols: List[str], use_probas: bool = False,
-                    standardize: bool = True, sanitize: bool = True,
+                    smiles_standardizer: Union[str, callable] = 'chembl',
                     n_jobs: int = 1, fill_value: float = np.nan):
         """
         Make predictions for the given molecules.
@@ -419,8 +419,7 @@ class QSPRModel(ABC):
         Args:
             mols (List[str]): list of SMILES strings
             use_probas (bool): use probabilities for classification models
-            standardize: apply the ChEMBL standardization pipeline to the SMILES
-            sanitize: sanitize SMILES
+            smiles_standardizer: either `chembl`, `old`, or a partial function that reads and standardizes smiles.
             n_jobs: Number of jobs to use for parallel processing.
             fill_value: Value to use for missing values in the feature matrix.
 
@@ -438,8 +437,7 @@ class QSPRModel(ABC):
         if not self.featureCalculator:
             raise ValueError("No feature calculator set on this instance.")
         dataset.prepareDataset(
-            standardize=standardize,
-            sanitize=sanitize,
+            smiles_standardizer=smiles_standardizer,
             feature_calculator=self.featureCalculator,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value

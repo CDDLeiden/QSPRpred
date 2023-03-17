@@ -3,8 +3,10 @@ import json
 from abc import ABC, abstractmethod
 from typing import List, Union
 
+import numpy as np
 import pandas as pd
 from qsprpred.data.utils.descriptorsets import DescriptorSet, get_descriptor
+from qsprpred.logs import logger
 from rdkit.Chem.rdchem import Mol
 
 
@@ -86,7 +88,7 @@ class DescriptorsCalculator(Calculator):
             descsets.append(descset)
         return DescriptorsCalculator(descsets)
 
-    def __call__(self, mols: List[Mol]) -> pd.DataFrame:
+    def __call__(self, mols: List[Mol], dtype=np.float32) -> pd.DataFrame:
         """Calculate descriptors for list of mols.
 
         Args:
@@ -98,7 +100,20 @@ class DescriptorsCalculator(Calculator):
             values = pd.DataFrame(values, columns=descset.descriptors)
             if descset.is_fp:
                 values.add_prefix(f"{descset.fingerprint_type}_")
-            df = pd.concat([df, values.add_prefix(f"Descriptor_{descset}_")], axis=1)
+            values = values.astype(dtype)
+            if np.isinf(values).any().any():
+                col_names = values.columns
+                x_loc, y_loc = np.where(np.isinf(values.values))
+                inf_cols = np.take(col_names, np.unique(y_loc))
+                logger.debug("Infinite values in dataframe at columns:"
+                             f"\n{inf_cols}"
+                             "And rows:"
+                             f"\n{np.unique(x_loc)}"
+                             )
+                # Convert absurdly high values to NaNs
+                values = values.replace([np.inf, -np.inf], np.NAN)
+            df = pd.concat([df, values.add_prefix(
+                f"Descriptor_{descset}_")], axis=1)
 
         # replace errors by nan values
         df = df.apply(pd.to_numeric, errors='coerce')
@@ -155,7 +170,8 @@ class DescriptorsCalculator(Calculator):
                 self.descsets[idx].descriptors = descs_from_curr_set
 
         # remove all descriptorsets that are not in the list of descriptors to keep
-        self.descsets = [x for i, x in enumerate(self.descsets) if i not in to_remove]
+        self.descsets = [x for i, x in enumerate(
+            self.descsets) if i not in to_remove]
 
     def get_len(self):
         """Return number of descriptors calculated by all descriptorsets."""

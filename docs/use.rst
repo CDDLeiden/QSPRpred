@@ -59,7 +59,7 @@ e.g. GABAAalpha_REGRESSION. As well as an log file and a run settings file.
 +==================================================+=======================================================+
 || {prefixes}_df.pkl                               || Dataframe                                            |
 || {prefixes}_feature_calculators.json             || re-instantiate feature calculator                    |
-|| {prefixes}_feature_standardizer_0.json          || re-instantiate feature standardizer                  |
+|| {prefixes}_feature_standardizer.json            || re-instantiate feature standardizer                  |
 || {prefixes}_meta.json                            || Meta data, also used to instantiate QSAR data object |
 || QSPRdata.json                                   || Command Line interface settings                      |
 || QSPRdata.log                                    || Log file                                             |

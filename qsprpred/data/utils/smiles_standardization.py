@@ -2,40 +2,9 @@
 
 import re
 
-from chembl_structure_pipeline import standardizer
 from rdkit import Chem
 from rdkit.Chem.SaltRemover import SaltRemover
-
-
-def chembl_smi_standardizer(smi: str) -> tuple:
-    """Standardize a SMILES string.
-    
-    Returns a tuple containing 'parent smiles' and a 'bool',
-    which defaults to if the standardizer failed and false when
-    there were no errors.
-
-    Arguments:
-        smi: smiles string to be standardized with the 'chembl_structure_pipeline'.
-    
-    Returns:
-        Tuple containing the parent smiles and a bool indicating if the standardizer
-        failed. If True -> standardizer failed..
-    """
-    mol = Chem.MolFromSmiles(smi)
-    standard_mol = standardizer.standardize_mol(mol)
-    result = standardizer.get_parent_mol(
-        standard_mol
-    )  # Tuple with molecule in #0 and Boolean in #1
-    # Boolean states whether there was an exclusion flag. For more details, check:
-    # https://github.com/chembl/ChEMBL_Structure_Pipeline/wiki/Exclusion-Flag
-    parent_mol = result[0]
-    parent_smi = Chem.MolToSmiles(
-        parent_mol, kekuleSmiles=False, canonical=True, isomericSmiles=True
-    )
-    if result[1]:
-        return parent_smi, True
-    else:
-        return parent_smi, False
+from chembl_structure_pipeline import standardizer as chembl_stand
 
 
 def neutralize_atoms(mol):
@@ -64,11 +33,36 @@ def neutralize_atoms(mol):
     return mol
 
 
-def sanitize_smiles(smi: str) -> str:
-    """Sanitize a SMILES string.
+def chembl_smi_standardizer(smi: str, isomericSmiles:bool=True, sanitize:bool=True) -> str:
+    """Standardize SMILES using ChEMBL standardizer.
 
-    Removes sulfurs, extermal molecules and salts, neutralizes charges
-    using the function `neutralize_atoms` and returns the resulting smiles.
+    Args:
+        smi: SMILES string to be standardized.
+        isomericSmiles: return the isomeric smiles. Defaults to True.
+        sanitize: applies sanitization using the ChEMBL standardizer. Defaults to True.
+
+    Returns:
+        standardized SMILES string.
+    """    
+    try:
+        mol = Chem.MolFromSmiles(smi)
+    except:  # noqa E722
+        print('Could not parse smiles: ', smi)
+        return None
+    standard_mol = chembl_stand.standardize_mol(mol, sanitize=sanitize)
+    standard_smiles = Chem.MolToSmiles(
+        standard_mol, kekuleSmiles=False, canonical=True, isomericSmiles=isomericSmiles
+    )
+    return standard_smiles
+
+
+def old_standardize_sanitize(smi: str) -> str:
+    """Adaptation of the old QSPRpred molecule standardization/sanitization.
+    
+    Standardize the rdkit mol object and gets parent molecule using
+    chembl_structure_pipeline, and applies some sanitization steps.
+    Using this function is not recommended and it will be deprecated within
+    next releases.
     
     Arguments:
         smi: single SMILES string to be sanitized.
@@ -76,50 +70,61 @@ def sanitize_smiles(smi: str) -> str:
     Returns:
         sanitized SMILES string.
     """
+    mol = Chem.MolFromSmiles(smi)
+    standard_mol = chembl_stand.standardize_mol(mol)
+    result = chembl_stand.get_parent_mol(
+        standard_mol
+    )  # Tuple with molecule in #0 and Boolean in #1
+    # Boolean states whether there was an exclusion flag. For more details, check:
+    # https://github.com/chembl/ChEMBL_Structure_Pipeline/wiki/Exclusion-Flag
+    parent_mol = result[0]
+    parent_smi = Chem.MolToSmiles(
+        parent_mol, kekuleSmiles=False, canonical=True, isomericSmiles=True
+    )
     salts = re.compile(r"\..?Cl|\..?Br|\..?Ca|\..?K|\..?Na|\..?Li|\..?Zn|/\..?Gd")
     s_acid_remover = re.compile(r"\.OS\(\=O\)\(\=O\)O")
     boron_pattern = re.compile(r"B")
     remover = SaltRemover(defnData="[Cl,Br,Ca,K,Na,Zn]")
     pattern = Chem.MolFromSmarts("[+1!h0!$([*]~[-1,-2,-3,-4]),-1!$([*]~[+1,+2,+3,+4])]")
-    mol = Chem.MolFromSmiles(smi)
+    mol = Chem.MolFromSmiles(parent_smi)
     # Removing sulfuric acid (smiles = .OS(=O)(=O)O)
-    if s_acid_remover.findall(smi):
-        smi = re.sub(s_acid_remover, "", smi)
+    if s_acid_remover.findall(parent_smi):
+        parent_smi = re.sub(s_acid_remover, "", parent_smi)
         try:
-            Chem.MolFromSmiles(smi)
+            Chem.MolFromSmiles(parent_smi)
         except:
-            print(f"{smi} could not be parsed after removing sulfuric acids!")
+            print(f"{parent_smi} could not be parsed after removing sulfuric acids!")
             return None
     # Removing external molecules by splitting on . and picking the largest smiles
-    if "." in smi:
-        smi = max(smi.split("."), key=len)
+    if "." in parent_smi:
+        parent_smi = max(parent_smi.split("."), key=len)
         try:
-            mol = Chem.MolFromSmiles(smi)
+            mol = Chem.MolFromSmiles(parent_smi)
         except:
-            print(f"Compound, ({smi}) could not be parsed!!")
+            print(f"Compound, ({parent_smi}) could not be parsed!!")
             return None
     # Trying to remove the salts
-    if salts.findall(smi):
+    if salts.findall(parent_smi):
         res, deleted = remover.StripMolWithDeleted(mol)
         # avoid neutralizing smiles with boron atoms
-        if all([res is not None, not boron_pattern.findall(smi)]):
+        if all([res is not None, not boron_pattern.findall(parent_smi)]):
             neutralize_atoms(res)
             # If it didn't remove, let's continue
             if salts.findall(Chem.MolToSmiles(res)):
-                print(f"Unable to remove salts from compound {smi}")
+                print(f"Unable to remove salts from compound {parent_smi}")
                 return None
             else:
-                smi = Chem.MolToSmiles(res)
-                mol = Chem.MolFromSmiles(smi)
+                parent_smi = Chem.MolToSmiles(res)
+                mol = Chem.MolFromSmiles(parent_smi)
     # Are the molecules charged according to the "pattern" variable?
     if mol.GetSubstructMatches(pattern):
         res, deleted = remover.StripMolWithDeleted(mol)
         # avoid neutralizing smiles with boron atoms
-        if all([res is not None, not boron_pattern.findall(smi)]):
+        if all([res is not None, not boron_pattern.findall(parent_smi)]):
             neutralize_atoms(res)
         if salts.findall(Chem.MolToSmiles(res)):
-            print(f"Unable to remove salts from compound {smi} after neutralizing")
+            print(f"Unable to remove salts from compound {parent_smi} after neutralizing")
             return None
         else:
-            smi = Chem.MolToSmiles(res)
-    return smi
+            parent_smi = Chem.MolToSmiles(res)
+    return parent_smi
