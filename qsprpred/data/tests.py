@@ -524,17 +524,17 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     @parameterized.expand([
         (Murcko(), True, None),
-        (BemisMurcko(), False, ['NCCc1ccc(O)c(O)c1','CC(C)(C)c1cnc(CSc2cnc(NC(=O)C3CCNCC3)s2)o1']),
+        (BemisMurcko(), False, ['scaffoldsplit_0','scaffoldsplit_1']),
     ])
     def test_scaffoldsplit(self, scaffold, shuffle, custom_test_list):
-        dataset = self.create_large_dataset()
+        dataset = self.create_large_dataset(name="scaffoldsplit")
         split = scaffoldsplit(scaffold, 0.1, shuffle, custom_test_list)
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
         # check that smiles in custom_test_list are in the test set
         if custom_test_list:
-            self.assertTrue(all(smiles in dataset.X_ind[dataset.smilescol].tolist() for smiles in custom_test_list))
+            self.assertTrue(all(mol_id in dataset.X_ind.index for mol_id in custom_test_list))
 
     def test_serialization(self):
         dataset = self.create_large_dataset()
@@ -545,6 +545,8 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             feature_calculator=calculator,
             feature_standardizer=StandardScaler())
         self.validate_split(dataset)
+        test_ids = dataset.X_ind.index.values
+        train_ids = dataset.y_ind.index.values
         dataset.save()
 
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
@@ -553,6 +555,8 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         self.assertTrue(dataset_new.feature_standardizer)
         self.assertTrue(dataset_new.fold_generator.featureStandardizer)
         self.assertTrue(len(dataset_new.featureNames) == 1024)
+        self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
+        self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
 
         dataset_new.clearFiles()
 
@@ -704,6 +708,7 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
     def setUp(self):
         super().setUp()
         self.dataset = self.create_small_dataset(self.__class__.__name__)
+        self.dataset.shuffle()
 
     def test_PredictorDesc(self):
         # give path to saved model parameters
@@ -809,6 +814,19 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
         desc_calc = DescriptorsCalculator([rdkit_descs(compute_3Drdkit=True)])
         self.dataset.addDescriptors(desc_calc, recalculate=True)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList) + 10))
+
+    def test_consistency(self):
+        len_prev = len(self.dataset)
+        desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)])
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(len_prev, len(self.dataset))
+        self.assertEqual(len_prev, len(self.dataset.getDescriptors()))
+        self.assertEqual(len_prev, len(self.dataset.X))
+        self.assertEqual(1000, self.dataset.getDescriptors().shape[1])
+        self.assertEqual(1000, self.dataset.X.shape[1])
+        self.assertEqual(1000, self.dataset.X_ind.shape[1])
+        self.assertEqual(1000, self.dataset.getFeatures(concat=True).shape[1])
+        self.assertEqual(len_prev, self.dataset.getFeatures(concat=True).shape[0])
 
 
 class TestScaffolds(DataSetsMixIn, TestCase):

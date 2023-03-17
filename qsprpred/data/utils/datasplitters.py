@@ -66,8 +66,7 @@ class scaffoldsplit(datasplit, DataSetDependant):
             the abstract class `Scaffold`. Defaults to Murcko().
         test_fraction (float): fraction of the test set. Defaults to 0.1.
         shuffle (bool): whether to shuffle the data or not. Defaults to True.
-        custom_test_list (list): list of smiles to force in test set. To ensure addition, they need to match SMILES in
-            dataset.prepareDataset(), i.e. by default canonical SMILES. If forced test contains the totality of the
+        custom_test_list (list): list of molecule indexes to force in test set. If forced test contains the totality of the
             molecules in the dataset, the custom_test_list reverts to default None.
     """
     def __init__(self, scaffold : Scaffold = Murcko(), test_fraction=0.1, shuffle=True, custom_test_list=None, dataset=None)\
@@ -92,19 +91,15 @@ class scaffoldsplit(datasplit, DataSetDependant):
         # Find the scaffold of each smiles
         df = dataset.getDF()
         assert len(X) == len(df), "X and the current data in the dataset must have same length"
-        scaffold_list = df[f"Scaffold_{self.scaffold}"]
+        scaffold_list = df[[f"Scaffold_{self.scaffold}"]]
         scaffolds = defaultdict(list)
         invalid_idx = []
-        for idx, scaffold in enumerate(scaffold_list):
+        for idx, scaffold in scaffold_list.itertuples():
             if scaffold:
                 scaffolds[scaffold].append(idx)
             else:
-                logger.warning(f"Invalid scaffold skipped for: {df.iloc[idx][self.dataset.smilescol]}")
+                logger.warning(f"Invalid scaffold skipped for molecule with index: {idx}")
                 invalid_idx.append(idx)
-
-        # Store index of smiles that need to go to test set
-        if self.custom_test_list is not None:
-            test_idx_custom = df[df[dataset.smilescol].isin(self.custom_test_list)].index.tolist()
 
         # Fill test set with groups of smiles with the same scaffold
         max_in_test = np.ceil(len(df) * self.test_fraction)
@@ -113,7 +108,7 @@ class scaffoldsplit(datasplit, DataSetDependant):
         # Start filling test with scaffold groups that contain the smiles in input list
         if self.custom_test_list is not None:
             for _, scaffold_idx in scaffolds.items():
-                if bool(set(scaffold_idx) & set(test_idx_custom)):
+                if bool(set(scaffold_idx) & set(self.custom_test_list)):
                     test_idx.extend(scaffold_idx)
 
         # Revert to default scaffold grouping if all molecules are placed in test set
@@ -134,4 +129,6 @@ class scaffoldsplit(datasplit, DataSetDependant):
                 break
 
         # Get train and test set indices
-        return iter([([x for x in range(len(df)) if x not in test_idx], test_idx)])
+        train_idx = [df.index.get_loc(x) for x in df.index if x not in test_idx]
+        test_idx = [df.index.get_loc(x) for x in test_idx]
+        return iter([(train_idx, test_idx)])
