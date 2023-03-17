@@ -437,6 +437,62 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         check_regression(dataset_new)
 
+    def test_indexing(self):
+        # default index
+        QSPRDataset(
+            "test_target_property",
+            "CL",
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+        )
+
+        # set index to SMILES column
+        QSPRDataset(
+            "test_target_property",
+            "CL",
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+            index_cols=["SMILES"]
+        )
+
+        # multiindex
+        QSPRDataset(
+            "test_target_property",
+            "CL",
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+            index_cols=["SMILES", "Name"]
+        )
+
+        # index with duplicates
+        self.assertRaises(ValueError, lambda : QSPRDataset(
+            "test_target_property",
+            "CL",
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+            index_cols=["moka_ionState7.4"]
+        ))
+
+        # index has nans
+        self.assertRaises(ValueError, lambda : QSPRDataset(
+            "test_target_property",
+            "CL",
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+            index_cols=["fu"]
+        ))
+
+
 class TestDataSplitters(DataSetsMixIn, TestCase):
     """
     Small tests to only check if the data splitters work on their own. The tests here should be used to check for all their specific parameters and edge cases.

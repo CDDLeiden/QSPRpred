@@ -89,6 +89,7 @@ class MoleculeTable(MoleculeDataSet):
             n_jobs: int = 1,
             chunk_size: int = 50,
             drop_invalids: bool = True,
+            index_cols: List[str] = None,
     ):
         """
 
@@ -106,10 +107,12 @@ class MoleculeTable(MoleculeDataSet):
             n_jobs (int): Number of jobs to use for parallel processing. If <= 0, all available cores will be used.
             chunk_size (int): Size of chunks to use per job in parallel processing.
             drop_invalids (bool): Drop invalid molecules from the data frame.
+            index_cols (List[str]): List of columns to use as index. If None, the index will be a custom generated ID.
         """
 
         # settings
         self.smilescol = smilescol
+        self.indexCols = index_cols
         self.includesRdkit = add_rdkit
         self.name = name
         self.descriptorCalculator = None
@@ -125,6 +128,7 @@ class MoleculeTable(MoleculeDataSet):
         self.storePath = f'{self.storePrefix}_df.pkl'
 
         # data frame initialization
+        self.df = None
         if df is not None:
             if self._isInStore('df') and not overwrite:
                 warnings.warn(
@@ -133,6 +137,12 @@ class MoleculeTable(MoleculeDataSet):
             else:
                 self.clearFiles()
                 self.df = df
+                if index_cols is not None:
+                    self.setIndex(index_cols)
+                else:
+                    df['QSPRID'] = [f"{self.name}_{i}" for i in range(len(self.df))]
+                    self.setIndex(['QSPRID'])
+
                 if self.includesRdkit:
                     PandasTools.AddMoleculeColumnToFrame(
                         self.df, smilesCol=self.smilescol, molCol='RDMol', includeFingerprints=False)
@@ -141,6 +151,7 @@ class MoleculeTable(MoleculeDataSet):
                 raise ValueError(
                     f"No data frame found in store for '{self.name}'. Are you sure this is the correct dataset? If you are creating a new data set, make sure to supply a data frame.")
             self.reload()
+        assert self.df is not None, "Unknown error in data set creation."
 
         # drop invalid columns
         if drop_invalids:
@@ -152,6 +163,17 @@ class MoleculeTable(MoleculeDataSet):
             int: Number of molecules in the data set.
         """
         return len(self.df)
+
+    def setIndex(self, cols: List[str]):
+        """
+        Set the index of the data frame.
+
+        Args:
+            cols (List[str]): List of columns to use as index.
+        """
+        self.df.set_index(cols, inplace=True, verify_integrity=True, drop=False)
+        self.df.drop(inplace=True, columns=[c for c in self.df.columns if c.startswith('Unnamed')])
+        self.indexCols = cols
 
     def getDF(self):
         """
@@ -609,7 +631,7 @@ class MoleculeTable(MoleculeDataSet):
 
     def shuffle(self, random_state=None):
         """Shuffle the internal data frame."""
-        self.df = self.df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+        self.df = self.df.sample(frac=1, random_state=random_state)
 
     def dropInvalids(self):
         """Drop Invalid SMILES."""
@@ -662,6 +684,7 @@ class QSPRDataset(MoleculeTable):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
+        index_cols: List[str] = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if specified.
 
@@ -682,11 +705,12 @@ class QSPRDataset(MoleculeTable):
             chunk_size (int, optional): chunk size for parallel processing. Defaults to 50.
             drop_invalids (bool, optional): if true, invalid SMILES will be dropped. Defaults to True.
             drop_empty (bool, optional): if true, rows with empty target property will be removed.
+            index_cols (List[str], optional): columns to be used as index in the dataframe. Defaults to `None` in which case a custom ID will be generated.
 
         Raises:
-            ValueError: Raised if thershold given with non-classification task.
+            ValueError: Raised if threshold given with non-classification task.
         """
-        super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size, drop_invalids)
+        super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size, drop_invalids, index_cols)
         self.targetProperty = target_prop
         self.originalTargetProperty = target_prop
         self.task = task
