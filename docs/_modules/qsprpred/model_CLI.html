@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.model_CLI &mdash; QSPRpred 1.3.0 documentation</title>
+  <title>qsprpred.model_CLI &mdash; QSPRpred 1.3.1 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -31,7 +31,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.0
+                v1.3.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -117,6 +117,11 @@
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;properties to be predicted identifiers. Add this argument for each model to be trained </span><span class="se">\</span>
 <span class="s2">                              e.g. for one multi-task model for CL and Fu and one single task for CL do:</span><span class="se">\</span>
 <span class="s2">                              -pr CL Fu -pr CL&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-lt&#39;</span><span class="p">,</span> <span class="s1">&#39;--log_transform&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;For each property if its values need to be log-tranformed. This arg only has an effect </span><span class="se">\</span>
+<span class="s1">                              when mode is regression, otherwise will be ignored!</span><span class="se">\</span>
+<span class="s1">                              This needs to be given for each property included in any of the models as follows, e.g.</span><span class="se">\</span>
+<span class="s1">                              -lt </span><span class="se">\&#39;</span><span class="s1">{&quot;CL&quot;:True,&quot;fu&quot;:False}</span><span class="se">\&#39;</span><span class="s1">. Note. no spaces and surround by single quotes&#39;</span><span class="p">)</span>
 
     <span class="c1"># model type arguments</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;--model_types&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span>
@@ -211,7 +216,10 @@
         <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">properties</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Property: </span><span class="si">{</span><span class="nb">property</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="n">mydataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s1">/qspr/data/</span><span class="si">{</span><span class="n">reg_abbr</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="nb">property</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">_df.pkl&#39;</span><span class="p">)</span>
+            <span class="c1"># TEMPORARY FIX: log transform not loaded from file, therefore set here</span>
+            <span class="n">log_transform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">log_transform</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">log_transform</span><span class="p">[</span><span class="nb">property</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">mydataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s1">/qspr/data/</span><span class="si">{</span><span class="n">reg_abbr</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="nb">property</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">_df.pkl&#39;</span><span class="p">,</span>
+                                             <span class="n">target_transformer</span><span class="o">=</span><span class="n">log_transform</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">model_type</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">model_types</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">model_type</span><span class="p">)</span>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.tests &mdash; QSPRpred 1.3.0 documentation</title>
+  <title>qsprpred.models.tests &mdash; QSPRpred 1.3.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -31,7 +31,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.0
+                v1.3.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -128,14 +128,14 @@
         <span class="n">grid_params</span> <span class="o">=</span> <span class="n">themodel</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;bayes&quot;</span><span class="p">,</span> <span class="n">mname</span><span class="p">)</span>
         <span class="n">search_space_bs</span> <span class="o">=</span> <span class="n">grid_params</span><span class="p">[</span><span class="n">grid_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mname</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">themodel</span><span class="o">.</span><span class="n">bayesOptimization</span><span class="p">(</span><span class="n">search_space_bs</span><span class="o">=</span><span class="n">search_space_bs</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;parameters_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_params.json&quot;</span><span class="p">))</span>
 
         <span class="c1"># perform grid search</span>
         <span class="n">themodel</span><span class="o">.</span><span class="n">cleanFiles</span><span class="p">()</span>
         <span class="n">grid_params</span> <span class="o">=</span> <span class="n">themodel</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">,</span> <span class="n">mname</span><span class="p">)</span>
         <span class="n">search_space_gs</span> <span class="o">=</span> <span class="n">grid_params</span><span class="p">[</span><span class="n">grid_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mname</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">themodel</span><span class="o">.</span><span class="n">gridSearch</span><span class="p">(</span><span class="n">search_space_gs</span><span class="o">=</span><span class="n">search_space_gs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;parameters_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_params.json&quot;</span><span class="p">))</span>
         <span class="n">themodel</span><span class="o">.</span><span class="n">cleanFiles</span><span class="p">()</span>
 
         <span class="c1"># perform crossvalidation</span>

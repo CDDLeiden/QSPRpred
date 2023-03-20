@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; QSPRpred 1.3.0 documentation</title>
+  <title>Usage &mdash; QSPRpred 1.3.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -34,7 +34,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.0
+                v1.3.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -121,37 +121,37 @@ e.g. the help message for the <code class="code docutils literal notranslate"><s
 </pre></div>
 </div>
 <p>A simple command-line workflow to prepare your dataset and train QSPR models is given below (see <a class="reference internal" href="#cli-example"><span class="std std-ref">CLI Example</span></a>).</p>
-<p>If you want more control over the inputs and outputs or want to customize QSPRpred a bit more,
-you can also use the Python API directly (see <span class="xref std std-ref">source code</span>).
-Here you can find a tutorial with a Jupyter notebook illustrating some common use cases in the project source code.</p>
+<p>If you want more control over the inputs and outputs or want to customize QSPRpred for your purpose,
+you can also use the Python API directly (see <code class="xref any docutils literal notranslate"><span class="pre">source</span> <span class="pre">code</span></code>).
+Here you can find a tutorial with a Jupyter notebook illustrating some common use cases in the project source code.
+Make sure to download the tutorial folder to follow the examples in this CLI tutorial.</p>
 </section>
 <section id="cli-example">
 <span id="id2"></span><h1>CLI Example<a class="headerlink" href="#cli-example" title="Permalink to this heading"></a></h1>
-<p>In this example, we will use the command line utilities of QSPRpred to train a QSAR model for the Adenosine A1 receptor and the
-Adenosine A2 Receptor on data from the CHEMBL 27 database.
-We use the same data from <code class="xref any docutils literal notranslate"><span class="pre">the</span> <span class="pre">DrugEx</span> <span class="pre">tutorial</span></code> here, but you first need to make sure
-that the data is in the right format. See <span class="xref std std-ref">source code</span> for an example on how to do this.
-QSPRpred assumes that all input data are saved in the data folder of the directory it is executed from.
-Input data should contain a column with molecules (represented by SMILES) and at least one column with a propery for modelling.
-Therefore, our example dataset is located in a subfolder ‘data’ of the tutorial directory.</p>
+<p>In this example, we will use the command line utilities of QSPRpred to train a QSAR model for the GABAA receptor.
+We will use the parkinsons dataset from the API tutorial.
+Make sure to first run the Parkinsons function in the tutorial/datasets.py script (see dataset preparation in the API tutorial)
+to create the tutorial/data/parkinsons_pivot.tsv file.
+QSPRpred assumes that all input data are saved in a subfolder data of the base directory..
+Input data should contain a column with SMILES sequences and at least one column with a property for modelling.
+Therefore, our example dataset ‘parkinsons_pivot.tsv’ is located in a subfolder ‘data’ of the tutorial directory.</p>
 <section id="preparing-data">
 <h2>Preparing Data<a class="headerlink" href="#preparing-data" title="Permalink to this heading"></a></h2>
 <section id="basics">
 <h3>Basics<a class="headerlink" href="#basics" title="Permalink to this heading"></a></h3>
 <p>We will now use the QSPRpred <code class="code docutils literal notranslate"><span class="pre">QSPRpred.data_CLI</span></code> script for data preparation.
-In the CLI we need to indicate which property/ies we are interested in predicting (here CHEMBL318, CHEMBL256, the columns with
-bioactivity values for Adenosine receptor A1 and Adenosine receptor A3, respectively), this should be equal to the column names containing the values to be predicted.
-These column names should also not contain any spaces.
+In the CLI we need to indicate which property/ies we are interested in predicting (here GABAAalpha),
+this should be equal to the column names (should not contain spaces) containing the values to be predicted.
 For regression models these columns should contain numerical datapoints. For categorical models either categorical data or numerical data can be used (the latter will be categorized based on the activity threshold).
 Furthermore, we should indicate how we wish to split the data to create a train and test set.
 Here we will use a random split with a test fraction of 15%. We need to calculate features that describe the molecules, here we use morgan fingerprints.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/LIGAND_RAW_small_pivot.tsv</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/parkinsons_pivot.tsv</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
 </pre></div>
 </div>
-<p>Running this command will create a subfolder ‘qspr’. The qspr/data folder should contains 8 files for
-each property (16 in total), prefixed by the property identifiers (i.e. CHEMBL318/CHEMBLE256), the model task (REG/CLS).
-As well as an log file and a run settings file.</p>
+<p>Running this command will create a subfolder ‘qspr’. The qspr/data folder should contain 4 files for
+each property, prefixed by the property identifiers (i.e. GABAAalpha), the model task (REGRESSION),
+e.g. GABAAalpha_REGRESSION. As well as a log file and a run settings file.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>File</p></th>
@@ -160,27 +160,19 @@ As well as an log file and a run settings file.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><div class="line-block">
-<div class="line">{prefixes}_QSPRdata_feature_calculators.json</div>
-<div class="line">{prefixes}_QSPRdata_feature_standardizer_0.json</div>
-<div class="line">{prefixes}_QSPRdata_meta.json</div>
-<div class="line">{prefixes}_QSPRdata_X_ind.pkl</div>
-<div class="line">{prefixes}_QSPRdata_y_ind.pkl</div>
-<div class="line">{prefixes}_QSPRdata_X.pkl</div>
-<div class="line">{prefixes}_QSPRdata_y.pkl</div>
-<div class="line">{prefixes}_QSPRdata_df.pkl</div>
+<div class="line">{prefixes}_df.pkl</div>
+<div class="line">{prefixes}_feature_calculators.json</div>
+<div class="line">{prefixes}_feature_standardizer.json</div>
+<div class="line">{prefixes}_meta.json</div>
 <div class="line">QSPRdata.json</div>
 <div class="line">QSPRdata.log</div>
 </div>
 </td>
 <td><div class="line-block">
-<div class="line">instantiate feature calculator</div>
-<div class="line">instantiate feature standardizer</div>
+<div class="line">Dataframe</div>
+<div class="line">re-instantiate feature calculator</div>
+<div class="line">re-instantiate feature standardizer</div>
 <div class="line">Meta data, also used to instantiate QSAR data object</div>
-<div class="line">Independent test set input</div>
-<div class="line">Independent test set output</div>
-<div class="line">Training set input</div>
-<div class="line">Training set output</div>
-<div class="line">Input dataframe</div>
 <div class="line">Command Line interface settings</div>
 <div class="line">Log file</div>
 </div>
@@ -194,20 +186,16 @@ As well as an log file and a run settings file.</p>
 </section>
 <section id="run-settings-arguments">
 <h3>Run settings arguments<a class="headerlink" href="#run-settings-arguments" title="Permalink to this heading"></a></h3>
-<p>Apart from the base directory and the input file, there are a few other base options that
-can be set. Including <a class="reference external" href="https://docs.python.org/3.9/using/cmdline.html#cmdoption-d" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">-d</span></code></a>, will print debug information to the log file. The random
-seed (-ran) can also be set manually (although identical results are not guaranteed while keeping
-the same random seed). Furthermore, the number of cpu’s (-ncpu) used for model training. Finally, the name of the smilescolumn
-in your dataset can be indicated with -sm.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting debug flag, smiles column, random seed, number of cpu&#39;s</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
-</pre></div>
-</div>
+<p>Apart from the the input file name, there are a few other base options that can be set.
+The base-directory can be specified using <a class="reference external" href="https://docs.python.org/3.9/using/cmdline.html#cmdoption-b" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">-b</span></code></a>. Including <a class="reference external" href="https://docs.python.org/3.9/using/cmdline.html#cmdoption-d" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">-d</span></code></a>, will print debug information to the log file. The random
+seed (-ran) can also be set manually (although identical results are not guaranteed while keeping the same random seed).
+Furthermore, the number of cpus (-ncpu) used for model training. Finally, the name of the smilescolumn in your dataset
+can be indicated with <code class="xref any docutils literal notranslate"><span class="pre">-sm</span></code> (default SMILES).</p>
 <section id="log-transform-data">
 <h4>Log-transform data<a class="headerlink" href="#log-transform-data" title="Permalink to this heading"></a></h4>
 <p>To log (-lt) transform data specific properties, indicate this in the CLI as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Log transform data for CHEMBL318</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">lt</span> <span class="s1">&#39;{&quot;CHEMBL318&quot;:true,&quot;CHEMBL256&quot;:false}&#39;</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">lt</span> <span class="s1">&#39;{&quot;GABAAalpha&quot;:true}&#39;</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
 </pre></div>
 </div>
 </section>
@@ -217,14 +205,15 @@ in your dataset can be indicated with -sm.</p>
 more options, namely a scaffold split, where the data is split into a test and train set
 randomly but keeping molecules with the same Murcko scaffold in the same set.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Scaffold split</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">scaffold</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">scaffold</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
 </pre></div>
 </div>
 <p>The third option is a temporal split, where a column needs to be indicated which holds
 information on the time each sample was observed and split based on threshold in a column.
-In this example, all samples after 2015 (in column ‘year’) make up the test set.</p>
+In this example, all samples after 2015 (in column ‘year’) make up the test set.
+NOTE: this example will not work on the example set as it does not contain a ‘year’ column.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Time split</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span>  <span class="o">-</span><span class="n">sp</span> <span class="n">time</span> <span class="o">-</span><span class="n">st</span> <span class="mi">2015</span> <span class="o">-</span><span class="n">stc</span> <span class="n">year</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span>  <span class="o">-</span><span class="n">sp</span> <span class="n">time</span> <span class="o">-</span><span class="n">st</span> <span class="mi">2015</span> <span class="o">-</span><span class="n">stc</span> <span class="n">year</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
 </pre></div>
 </div>
 </section>
@@ -237,7 +226,7 @@ When using classification, the threshold(s) for each property (that has not been
 This is set using a dictionary. In case of multi-class classification the bounderies of
 the bins need to be given. For binary classification only give 1 threshold per property.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Classification and regression</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="o">-</span><span class="n">th</span> <span class="s1">&#39;{&quot;CHEMBL318&quot;:[6.5],&quot;CHEMBL256&quot;:[0, 3, 6, 10]}&#39;</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="o">-</span><span class="n">th</span> <span class="s1">&#39;{&quot;GABAAalpha&quot;:[6.5]}&#39;</span>
 </pre></div>
 </div>
 </section>
@@ -248,7 +237,7 @@ namely Morgan fingerprints, rdkit, Mordred, Mold2 and Padel descriptors, and the
 physicochemical properties used in the QSAR models in the DrugEx papers. They can also
 be combined. For more control over the descriptorcalculator settings use the python API.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># With Morgan, RDkit, Mordred, Mold2, PaDEL and DrugEx descriptors</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="n">RDkit</span> <span class="n">Mordred</span> <span class="n">Mold2</span> <span class="n">PaDEL</span> <span class="n">DrugEx</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="n">RDkit</span> <span class="n">Mordred</span> <span class="n">Mold2</span> <span class="n">PaDEL</span> <span class="n">DrugEx</span>
 </pre></div>
 </div>
 </section>
@@ -259,7 +248,7 @@ QSPRpred, namely a high correlation filter, a low variance filter and the boruta
 The high correlation filter and low variance filter need to be set with a threshold
 for filtering.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/LIGAND_RAW_small.tsv</span>
-   <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="o">-</span><span class="n">lv</span> <span class="mf">0.1</span> <span class="o">-</span><span class="n">hc</span> <span class="mf">0.9</span> <span class="o">-</span><span class="n">bf</span>
+   <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="o">-</span><span class="n">lv</span> <span class="mf">0.1</span> <span class="o">-</span><span class="n">hc</span> <span class="mf">0.9</span> <span class="o">-</span><span class="n">bf</span>
 </pre></div>
 </div>
 </section>
@@ -278,8 +267,8 @@ To apply this filter include <code class="xref any docutils literal notranslate"
 <p>Finally, we need to indicate what models we want to train and which steps to take in the training.
 In this example, we will build regression random forest models.
 We will also evaluate the model through cross-validation (-me) and train the model on all data to save for further use (-s).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/LIGAND_RAW_small_pivot.tsv</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/parkinsons_pivot.tsv</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
 </section>
@@ -295,7 +284,7 @@ seed can also be set manually (although identical results are not guaranteed whi
 the same random seed). Furthermore, the number of cpu’s used for model training and the
 gpu number for training pytorch models can be set.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting debug flag, random seed, number of cpu&#39;s and a specific gpu (for now multiple gpu&#39;s not possible)</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">gpus</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">gpus</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
 <section id="classification-models">
@@ -305,7 +294,7 @@ The default setting is to run both, but you can run either by setting the
 regression argument to true/REG for regression or false/CLS for classification.
 Make sure you have prepared datasets for the corresponding tasks.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Training a classification model</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
 </section>
@@ -316,7 +305,7 @@ Make sure you have prepared datasets for the corresponding tasks.</p>
 ‘KNN’ (k-nearest neighbours), NB’ (Naive Bayes) and/or ‘DNN’ (pytorch fully connected neural net).
 The default is to run all the different model types.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Training a RF, SVM and PLS model</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="n">SVM</span> <span class="n">PLS</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="n">SVM</span> <span class="n">PLS</span>
 </pre></div>
 </div>
 </section>
@@ -333,14 +322,14 @@ The default is to run all the different model types.</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting some parameter values for a Random Forest and k-nearest neighbours model</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="n">KNN</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">p</span> <span class="n">myparams</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="n">KNN</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">p</span> <span class="n">myparams</span>
 </pre></div>
 </div>
 <p>Specifically for the training of the DNN model, you can set the tolerance and the patience from the CLI.
 Tolerance gives the mimimum decrease in loss needed to count as an improvement and
 patience is the number of training epochs without improvement in loss to stop the training.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting the tolerance and patience for training a DNN model</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">m</span> <span class="n">DNN</span> <span class="o">-</span><span class="n">tol</span> <span class="mf">0.02</span> <span class="o">-</span><span class="n">pat</span> <span class="mi">100</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">m</span> <span class="n">DNN</span> <span class="o">-</span><span class="n">tol</span> <span class="mf">0.02</span> <span class="o">-</span><span class="n">pat</span> <span class="mi">100</span>
 </pre></div>
 </div>
 </section>
@@ -371,7 +360,7 @@ as third list item. The search space file should always include all models to be
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bayesian optimization</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">o</span> <span class="n">bayes</span> <span class="o">-</span><span class="n">nt</span> <span class="mi">50</span> <span class="o">-</span><span class="n">ss</span> <span class="n">mysearchspace</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">o</span> <span class="n">bayes</span> <span class="o">-</span><span class="n">nt</span> <span class="mi">50</span> <span class="o">-</span><span class="n">ss</span> <span class="n">mysearchspace</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
 </section>
@@ -384,8 +373,8 @@ as third list item. The search space file should always include all models to be
 <h3>Basics<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
 <p>Here we will predict activity values for the A1 (CHEMBL318) and A3 receptor (CHEMBL256) on the SMILES in the
 dataset used in the previous examples.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/LIGAND_RAW_small_pivot.tsv</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/parkinsons_pivot.tsv</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span>
 </pre></div>
 </div>
 </section>
@@ -401,7 +390,7 @@ seed can also be set manually (although identical results are not guaranteed whi
 the same random seed). The output file name can be set. Furthermore, the number of cpu’s used for model prediction and the
 gpu number for prediction with pytorch models can be set.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting debug flag, random seed, output file name, number of cpu&#39;s and a specific gpu (for now multiple gpu&#39;s not possible)</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">o</span> <span class="n">mypredictions</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">gpus</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">o</span> <span class="n">mypredictions</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">gpus</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span>
 </pre></div>
 </div>
 </section>
@@ -410,7 +399,7 @@ gpu number for prediction with pytorch models can be set.</p>
 <p>You can also include multiple models predictions in the output file. By setting the model task and model types.
 Make sure you have right pretrained models in the qspr/models folder.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Making predictions with the RF and KNN classification models</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="n">KNN</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="n">KNN</span>
 </pre></div>
 </div>
 </section>
@@ -418,7 +407,7 @@ Make sure you have right pretrained models in the qspr/models folder.</p>
 <h3>Skip SMILES preprocessing<a class="headerlink" href="#skip-smiles-preprocessing" title="Permalink to this heading"></a></h3>
 <p>By default the SMILES strings are sanitized and standardized. By including the <code class="code docutils literal notranslate"><span class="pre">-np</span></code> flag, this step is skipped.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Do not standardize and sanitize SMILES</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">LIGAND_RAW_small_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">Smiles</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL318</span> <span class="o">-</span><span class="n">pr</span> <span class="n">CHEMBL256</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">np</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">np</span>
 </pre></div>
 </div>
 </section>

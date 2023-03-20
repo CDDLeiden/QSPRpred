@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data_CLI &mdash; QSPRpred 1.3.0 documentation</title>
+  <title>qsprpred.data_CLI &mdash; QSPRpred 1.3.1 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -31,7 +31,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.0
+                v1.3.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -181,6 +181,8 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-bf&#39;</span><span class="p">,</span> <span class="s1">&#39;--boruta_filter&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;boruta filter with random forest&quot;</span><span class="p">)</span>
 
     <span class="c1"># other</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-fv&#39;</span><span class="p">,</span> <span class="s1">&#39;--fill_value&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Fill value for missing values in the calculated features&quot;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-ng&#39;</span><span class="p">,</span> <span class="s1">&#39;--no_git&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;If on, git hash is not retrieved&quot;</span><span class="p">)</span>
 
@@ -290,7 +292,7 @@
             <span class="c1"># prepare dataset for modelling</span>
             <span class="n">mydataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="n">feature_calculator</span><span class="o">=</span><span class="n">DescriptorsCalculator</span><span class="p">(</span><span class="n">descriptorsets</span><span class="p">),</span>
                                      <span class="n">datafilters</span><span class="o">=</span><span class="n">datafilters</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span> <span class="n">feature_filters</span><span class="o">=</span><span class="n">featurefilters</span><span class="p">,</span>
-                                     <span class="n">feature_standardizer</span><span class="o">=</span><span class="n">StandardScaler</span><span class="p">())</span>
+                                     <span class="n">feature_standardizer</span><span class="o">=</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">fill_value</span><span class="p">)</span>
 
             <span class="c1"># save dataset files and fingerprints</span>
             <span class="n">mydataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>

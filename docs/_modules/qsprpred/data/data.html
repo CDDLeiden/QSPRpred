@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.data &mdash; QSPRpred 1.3.0 documentation</title>
+  <title>qsprpred.data.data &mdash; QSPRpred 1.3.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -31,7 +31,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.0
+                v1.3.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -80,6 +80,8 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -94,7 +96,7 @@
 <span class="kn">from</span> <span class="nn">qsprpred.data.utils.scaffolds</span> <span class="kn">import</span> <span class="n">Scaffold</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.utils.smiles_standardization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">chembl_smi_standardizer</span><span class="p">,</span>
-    <span class="n">sanitize_smiles</span><span class="p">,</span>
+    <span class="n">old_standardize_sanitize</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qsprpred.logs</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">qsprpred.models.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
@@ -651,22 +653,39 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;ScaffoldGroup_&quot;</span><span class="p">)])</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="MoleculeTable.cleanMolecules"><a class="viewcode-back" href="../../../api/qsprpred.data.html#qsprpred.data.data.MoleculeTable.cleanMolecules">[docs]</a>    <span class="k">def</span> <span class="nf">cleanMolecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">standardize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">sanitize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Standardize and or sanitize SMILES sequences.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">standardize</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">standardize</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">sanitize</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sanitize</span><span class="p">()</span></div>
+<div class="viewcode-block" id="MoleculeTable.standardizeSmiles"><a class="viewcode-back" href="../../../api/qsprpred.data.html#qsprpred.data.data.MoleculeTable.standardizeSmiles">[docs]</a>    <span class="k">def</span> <span class="nf">standardizeSmiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles_standardizer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply smiles_standardizer to the compounds in parallel</span>
 
-<div class="viewcode-block" id="MoleculeTable.standardize"><a class="viewcode-back" href="../../../api/qsprpred.data.html#qsprpred.data.data.MoleculeTable.standardize">[docs]</a>    <span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Standardize SMILES sequences.&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            smiles_standardizer (Union[str, callable]): either `None` to skip the standardization,</span>
+<span class="sd">                `chembl`, `old`, or a partial function that reads and standardizes smiles.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilescol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">chembl_smi_standardizer</span><span class="p">(</span><span class="n">smiles</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">smiles</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilescol</span><span class="p">]]</span></div>
-
-<div class="viewcode-block" id="MoleculeTable.sanitize"><a class="viewcode-back" href="../../../api/qsprpred.data.html#qsprpred.data.data.MoleculeTable.sanitize">[docs]</a>    <span class="k">def</span> <span class="nf">sanitize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sanitize SMILES sequences.&quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilescol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sanitize_smiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span> <span class="k">for</span> <span class="n">smiles</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilescol</span><span class="p">]]</span></div>
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: when smiles_standardizer is not a callable or one of the predefined strings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">std_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span>
+        <span class="k">if</span> <span class="n">smiles_standardizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">smiles_standardizer</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span> <span class="c1"># Prevents weird error if the user inputs a lambda function</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">smiles_standardizer</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">pickle</span><span class="o">.</span><span class="n">PicklingError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Standardizer is not pickleable. Will set n_jobs to 1&quot;</span><span class="p">)</span>
+                <span class="n">std_jobs</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">std_func</span> <span class="o">=</span> <span class="n">smiles_standardizer</span>
+        <span class="k">elif</span> <span class="n">smiles_standardizer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;chembl&#39;</span><span class="p">:</span>
+            <span class="n">std_func</span> <span class="o">=</span> <span class="n">chembl_smi_standardizer</span>
+        <span class="k">elif</span> <span class="n">smiles_standardizer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;old&#39;</span><span class="p">:</span>
+            <span class="n">std_func</span> <span class="o">=</span> <span class="n">old_standardize_sanitize</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Standardizer must be either &#39;chembl&#39;, or a callable&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">std_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">std_smi</span> <span class="o">=</span> <span class="p">[</span><span class="n">std_func</span><span class="p">(</span><span class="n">smi</span><span class="p">)</span> <span class="k">for</span> <span class="n">smi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilescol</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">std_jobs</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="n">std_smi</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">std_func</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilescol</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilescol</span><span class="p">]</span> <span class="o">=</span> <span class="n">std_smi</span></div>
 
 <div class="viewcode-block" id="MoleculeTable.shuffle"><a class="viewcode-back" href="../../../api/qsprpred.data.html#qsprpred.data.data.MoleculeTable.shuffle">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shuffle the internal data frame.&quot;&quot;&quot;</span>
@@ -1170,8 +1189,7 @@
 
 <div class="viewcode-block" id="QSPRDataset.prepareDataset"><a class="viewcode-back" href="../../../api/qsprpred.data.html#qsprpred.data.data.QSPRDataset.prepareDataset">[docs]</a>    <span class="k">def</span> <span class="nf">prepareDataset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">standardize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">sanitize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">smiles_standardizer</span><span class="o">=</span><span class="s1">&#39;chembl&#39;</span><span class="p">,</span>
         <span class="n">datafilters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">split</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1184,8 +1202,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the dataset for use in QSPR model.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            standardize (bool): Apply Chembl standardization pipeline to smiles</span>
-<span class="sd">            sanitize (bool): sanitize smiles</span>
+<span class="sd">            smiles_standardizer (Union[str, callable]): either `None` to skip the standardization,</span>
+<span class="sd">                `chembl`, `old`, or a partial function that reads and standardizes smiles.</span>
 <span class="sd">            datafilters (list of datafilter obj): filters number of rows from dataset</span>
 <span class="sd">            split (datasplitter obj): splits the dataset into train and test set</span>
 <span class="sd">            fold (datasplitter obj): splits the train set into folds for cross validation</span>
@@ -1196,8 +1214,7 @@
 <span class="sd">            fill_value (float): value to fill missing values with, defaults to `numpy.nan`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># apply sanitization and standardization</span>
-        <span class="k">if</span> <span class="n">standardize</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cleanMolecules</span><span class="p">(</span><span class="n">standardize</span><span class="p">,</span> <span class="n">sanitize</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standardizeSmiles</span><span class="p">(</span><span class="n">smiles_standardizer</span><span class="p">)</span>
 
         <span class="c1"># calculate featureNames</span>
         <span class="k">if</span> <span class="n">feature_calculator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

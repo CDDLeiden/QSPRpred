@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.utils package &mdash; QSPRpred 1.3.0 documentation</title>
+  <title>qsprpred.data.utils package &mdash; QSPRpred 1.3.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -34,7 +34,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.0
+                v1.3.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -65,7 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.about">qsprpred.about module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#qsprpred-predict-cli-module">qsprpred.predict_CLI module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
 </ul>
 </li>
@@ -1001,18 +1001,18 @@ Ref.: Bemis, G. W., &amp; Murcko, M. A. (1996). “The properties of known drugs
 <p>Functions to pre-process SMILES for QSPR modelling.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qsprpred.data.utils.smiles_standardization.chembl_smi_standardizer">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.smiles_standardization.</span></span><span class="sig-name descname"><span class="pre">chembl_smi_standardizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/utils/smiles_standardization.html#chembl_smi_standardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.smiles_standardization.chembl_smi_standardizer" title="Permalink to this definition"></a></dt>
-<dd><p>Standardize a SMILES string.</p>
-<p>Returns a tuple containing ‘parent smiles’ and a ‘bool’,
-which defaults to if the standardizer failed and false when
-there were no errors.</p>
+<span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.smiles_standardization.</span></span><span class="sig-name descname"><span class="pre">chembl_smi_standardizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">isomericSmiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/utils/smiles_standardization.html#chembl_smi_standardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.smiles_standardization.chembl_smi_standardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Standardize SMILES using ChEMBL standardizer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>smi</strong> – smiles string to be standardized with the ‘chembl_structure_pipeline’.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smi</strong> – SMILES string to be standardized.</p></li>
+<li><p><strong>isomericSmiles</strong> – return the isomeric smiles. Defaults to True.</p></li>
+<li><p><strong>sanitize</strong> – applies sanitization using the ChEMBL standardizer. Defaults to True.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Tuple containing the parent smiles and a bool indicating if the standardizer
-failed. If True -&gt; standardizer failed..</p>
+<dd class="field-even"><p>standardized SMILES string.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1037,11 +1037,13 @@ failed. If True -&gt; standardizer failed..</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="qsprpred.data.utils.smiles_standardization.sanitize_smiles">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.smiles_standardization.</span></span><span class="sig-name descname"><span class="pre">sanitize_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/utils/smiles_standardization.html#sanitize_smiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.smiles_standardization.sanitize_smiles" title="Permalink to this definition"></a></dt>
-<dd><p>Sanitize a SMILES string.</p>
-<p>Removes sulfurs, extermal molecules and salts, neutralizes charges
-using the function <a class="reference internal" href="#qsprpred.data.utils.smiles_standardization.neutralize_atoms" title="qsprpred.data.utils.smiles_standardization.neutralize_atoms"><code class="xref any py py-func docutils literal notranslate"><span class="pre">neutralize_atoms</span></code></a> and returns the resulting smiles.</p>
+<dt class="sig sig-object py" id="qsprpred.data.utils.smiles_standardization.old_standardize_sanitize">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.data.utils.smiles_standardization.</span></span><span class="sig-name descname"><span class="pre">old_standardize_sanitize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/utils/smiles_standardization.html#old_standardize_sanitize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.utils.smiles_standardization.old_standardize_sanitize" title="Permalink to this definition"></a></dt>
+<dd><p>Adaptation of the old QSPRpred molecule standardization/sanitization.</p>
+<p>Standardize the rdkit mol object and gets parent molecule using
+chembl_structure_pipeline, and applies some sanitization steps.
+Using this function is not recommended and it will be deprecated within
+next releases.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>smi</strong> – single SMILES string to be sanitized.</p>

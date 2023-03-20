@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred package &mdash; QSPRpred 1.3.0 documentation</title>
+  <title>qsprpred package &mdash; QSPRpred 1.3.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -34,7 +34,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.0
+                v1.3.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -73,11 +73,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#qsprpred.model_CLI.QSPR_modelling"><code class="docutils literal notranslate"><span class="pre">QSPR_modelling()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#qsprpred.predict_CLI.QSPRArgParser"><code class="docutils literal notranslate"><span class="pre">QSPRArgParser()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#qsprpred.predict_CLI.QSPR_predict"><code class="docutils literal notranslate"><span class="pre">QSPR_predict()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#qsprpred-predict-cli-module">qsprpred.predict_CLI module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-qsprpred">Module contents</a></li>
 </ul>
 </li>
@@ -148,7 +144,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.addProperty"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.addProperty()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.addScaffolds"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.addScaffolds()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.apply"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.apply()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.cleanMolecules"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.cleanMolecules()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.clearFiles"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.clearFiles()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.createScaffoldGroups"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.createScaffoldGroups()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.dropInvalids"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.dropInvalids()</span></code></a></li>
@@ -172,10 +167,9 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.papply"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.papply()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.reload"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.reload()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.removeProperty"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.removeProperty()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.sanitize"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.sanitize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.save"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.save()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.shuffle"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.shuffle()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.standardize"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.standardize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.standardizeSmiles"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.standardizeSmiles()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.data.MoleculeTable.transform"><code class="docutils literal notranslate"><span class="pre">MoleculeTable.transform()</span></code></a></li>
 </ul>
 </li>
@@ -776,20 +770,8 @@
 </dd></dl>
 
 </section>
-<section id="module-qsprpred.predict_CLI">
-<span id="qsprpred-predict-cli-module"></span><h2>qsprpred.predict_CLI module<a class="headerlink" href="#module-qsprpred.predict_CLI" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="qsprpred.predict_CLI.QSPRArgParser">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.predict_CLI.</span></span><span class="sig-name descname"><span class="pre">QSPRArgParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">txt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/predict_CLI.html#QSPRArgParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.predict_CLI.QSPRArgParser" title="Permalink to this definition"></a></dt>
-<dd><p>Define and read command line arguments.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qsprpred.predict_CLI.QSPR_predict">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.predict_CLI.</span></span><span class="sig-name descname"><span class="pre">QSPR_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/predict_CLI.html#QSPR_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.predict_CLI.QSPR_predict" title="Permalink to this definition"></a></dt>
-<dd><p>Make predictions with pre-trained QSPR models for a set of smiles.</p>
-</dd></dl>
-
+<section id="qsprpred-predict-cli-module">
+<h2>qsprpred.predict_CLI module<a class="headerlink" href="#qsprpred-predict-cli-module" title="Permalink to this heading"></a></h2>
 </section>
 <section id="module-qsprpred">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred" title="Permalink to this heading"></a></h2>

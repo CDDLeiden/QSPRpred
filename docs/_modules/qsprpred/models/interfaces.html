@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.interfaces &mdash; QSPRpred 1.3.0 documentation</title>
+  <title>qsprpred.models.interfaces &mdash; QSPRpred 1.3.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -31,7 +31,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.0
+                v1.3.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -82,20 +82,19 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">isclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
-
 <span class="kn">from</span> <span class="nn">qsprpred</span> <span class="kn">import</span> <span class="n">VERSION</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">MoleculeTable</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.data</span> <span class="kn">import</span> <span class="n">MoleculeTable</span><span class="p">,</span> <span class="n">QSPRDataset</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.utils.descriptorcalculator</span> <span class="kn">import</span> <span class="n">DescriptorsCalculator</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.utils.feature_standardization</span> <span class="kn">import</span> <span class="n">SKLearnStandardizer</span>
 <span class="kn">from</span> <span class="nn">qsprpred.logs</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">qsprpred.models</span> <span class="kn">import</span> <span class="n">SSPACE</span>
 <span class="kn">from</span> <span class="nn">qsprpred.models.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
 <span class="kn">from</span> <span class="nn">qsprpred.utils.inspect</span> <span class="kn">import</span> <span class="n">import_class</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
 
 
 <div class="viewcode-block" id="QSPRModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel">[docs]</a><span class="k">class</span> <span class="nc">QSPRModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -535,27 +534,34 @@
 
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="QSPRModel.predictMols"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predictMols">[docs]</a>    <span class="k">def</span> <span class="nf">predictMols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span> <span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">use_probas</span> <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="QSPRModel.predictMols"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predictMols">[docs]</a>    <span class="k">def</span> <span class="nf">predictMols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">use_probas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">smiles_standardizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;chembl&#39;</span><span class="p">,</span>
+                    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make predictions for the given molecules.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            mols (List[str]): list of SMILES strings</span>
 <span class="sd">            use_probas (bool): use probabilities for classification models</span>
+<span class="sd">            smiles_standardizer: either `chembl`, `old`, or a partial function that reads and standardizes smiles.</span>
+<span class="sd">            n_jobs: Number of jobs to use for parallel processing.</span>
+<span class="sd">            fill_value: Value to use for missing values in the feature matrix.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">MoleculeTable</span><span class="o">.</span><span class="n">fromSMILES</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">MoleculeTable</span><span class="o">.</span><span class="n">fromSMILES</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                           <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperty</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperty</span><span class="p">,</span> <span class="n">drop_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperty</span><span class="p">,</span> <span class="n">drop_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                           <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>
         <span class="n">failed_mask</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
         <span class="n">failed_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">failed_mask</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculator</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No feature calculator set on this instance.&quot;</span><span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
-            <span class="n">standardize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">sanitize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">smiles_standardizer</span><span class="o">=</span><span class="n">smiles_standardizer</span><span class="p">,</span>
             <span class="n">feature_calculator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">featureCalculator</span><span class="p">,</span>
-            <span class="n">feature_standardizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span>
+            <span class="n">feature_standardizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">,</span>
+            <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">use_probas</span><span class="p">:</span>
             <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
