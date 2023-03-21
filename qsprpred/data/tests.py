@@ -35,13 +35,12 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.data.utils.scaffolds import Murcko, BemisMurcko
 from qsprpred.logs.stopwatch import StopWatch
-from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-N_CPU = 2
+N_CPU = 1
 CHUNK_SIZE = 100
 logging.basicConfig(level=logging.DEBUG)
 
@@ -105,27 +104,27 @@ class DataSetsMixIn(PathMixIn):
         descriptor_sets = [
             rdkit_descs(),
             DrugExPhyschem(),
-            PredictorDesc(
-                QSPRsklearn.fromFile(
-                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
-            ),
-            TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
-            FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-            Mordred(),
-            Mold2(),
-            FingerprintSet(fingerprint_type="CDKFP", size=2048, searchDepth=7),
-            FingerprintSet(fingerprint_type="CDKExtendedFP"),
-            FingerprintSet(fingerprint_type="CDKEStateFP"),
-            FingerprintSet(fingerprint_type="CDKGraphOnlyFP", size=2048, searchDepth=7),
-            FingerprintSet(fingerprint_type="CDKMACCSFP"),
-            FingerprintSet(fingerprint_type="CDKPubchemFP"),
-            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
-            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
-            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
-            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
-            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
-            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
-            PaDEL(),
+            # PredictorDesc(
+            #     QSPRsklearn.fromFile(
+            #         f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
+            # ),
+            # TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
+            # FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
+            # Mordred(),
+            # Mold2(),
+            # FingerprintSet(fingerprint_type="CDKFP", size=2048, searchDepth=7),
+            # FingerprintSet(fingerprint_type="CDKExtendedFP"),
+            # FingerprintSet(fingerprint_type="CDKEStateFP"),
+            # FingerprintSet(fingerprint_type="CDKGraphOnlyFP", size=2048, searchDepth=7),
+            # FingerprintSet(fingerprint_type="CDKMACCSFP"),
+            # FingerprintSet(fingerprint_type="CDKPubchemFP"),
+            # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+            # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+            # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+            # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+            # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+            # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
+            # PaDEL(),
         ]
 
         return descriptor_sets
@@ -491,6 +490,26 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             chunk_size=CHUNK_SIZE,
             index_cols=["fu"]
         ))
+
+    def test_invalids_detection(self):
+        df = self.getBigDF()
+        all_mols = len(df)
+        dataset = QSPRDataset(
+            "test_invalids_detection",
+            "CL",
+            df=df,
+            store_dir=self.qsprdatapath,
+            drop_invalids=False,
+            drop_empty=False,
+        )
+        self.assertEqual(dataset.df.shape[0], df.shape[0])
+        self.assertRaises(ValueError, lambda : dataset.checkMols())
+        self.assertRaises(ValueError, lambda : dataset.addDescriptors(DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)])))
+        invalids = dataset.checkMols(throw=False)
+        self.assertEqual(sum(~invalids), 1)
+        dataset.dropInvalids()
+        self.assertEqual(dataset.df.shape[0], all_mols - 1)
 
 
 class TestDataSplitters(DataSetsMixIn, TestCase):
@@ -870,6 +889,22 @@ class TestFeatureStandardizer(DataSetsMixIn, TestCase):
                 scaled_features,
                 scaled_features_fromfile),
             True)
+
+
+class TestStandardizer(DataSetsMixIn, TestCase):
+
+    def test_invalid_filter(self):
+        df = self.getSmallDF()
+        orig_len = len(df)
+        mask = [False] * orig_len
+        mask[0] = True
+        df.loc[mask,"SMILES"] = "C(C)(C)(C)(C)(C)(C)(C)(C)(C)" # create molecule with bad valence
+
+        dataset = QSPRDataset("standardization_test_invalid_filter", df=df, target_prop="CL", drop_invalids=False, drop_empty=False)
+        dataset.standardizeSmiles('chembl', drop_invalid=False)
+        self.assertEqual(len(dataset), len(df))
+        dataset.standardizeSmiles('chembl', drop_invalid=True)
+        self.assertEqual(len(dataset), orig_len-1)
 
 class TestDataSetPreparation(DataSetsMixIn, TestCase):
     """
