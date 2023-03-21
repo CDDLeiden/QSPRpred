@@ -6,6 +6,8 @@ from rdkit import Chem
 from rdkit.Chem.SaltRemover import SaltRemover
 from chembl_structure_pipeline import standardizer as chembl_stand
 
+from qsprpred.logs import logger
+
 
 def neutralize_atoms(mol):
     """Neutralize charged molecules by atom.
@@ -46,14 +48,14 @@ def chembl_smi_standardizer(smi: str, isomericSmiles:bool=True, sanitize:bool=Tr
     """    
     try:
         mol = Chem.MolFromSmiles(smi)
-    except:  # noqa E722
-        print('Could not parse smiles: ', smi)
+        standard_mol = chembl_stand.standardize_mol(mol, sanitize=sanitize)
+        standard_smiles = Chem.MolToSmiles(
+            standard_mol, kekuleSmiles=False, canonical=True, isomericSmiles=isomericSmiles
+        )
+        return standard_smiles
+    except Exception as exp:  # noqa E722
+        logger.exception(f"Could not standardize SMILES: {smi} due to {exp}.")
         return None
-    standard_mol = chembl_stand.standardize_mol(mol, sanitize=sanitize)
-    standard_smiles = Chem.MolToSmiles(
-        standard_mol, kekuleSmiles=False, canonical=True, isomericSmiles=isomericSmiles
-    )
-    return standard_smiles
 
 
 def old_standardize_sanitize(smi: str) -> str:
