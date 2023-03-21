@@ -35,6 +35,7 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.data.utils.scaffolds import Murcko, BemisMurcko
 from qsprpred.logs.stopwatch import StopWatch
+from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks
 from rdkit import Chem
 from rdkit.Chem import Descriptors
@@ -104,27 +105,27 @@ class DataSetsMixIn(PathMixIn):
         descriptor_sets = [
             rdkit_descs(),
             DrugExPhyschem(),
-            # PredictorDesc(
-            #     QSPRsklearn.fromFile(
-            #         f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
-            # ),
-            # TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
-            # FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-            # Mordred(),
-            # Mold2(),
-            # FingerprintSet(fingerprint_type="CDKFP", size=2048, searchDepth=7),
-            # FingerprintSet(fingerprint_type="CDKExtendedFP"),
-            # FingerprintSet(fingerprint_type="CDKEStateFP"),
-            # FingerprintSet(fingerprint_type="CDKGraphOnlyFP", size=2048, searchDepth=7),
-            # FingerprintSet(fingerprint_type="CDKMACCSFP"),
-            # FingerprintSet(fingerprint_type="CDKPubchemFP"),
-            # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
-            # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
-            # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
-            # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
-            # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
-            # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
-            # PaDEL(),
+            PredictorDesc(
+                QSPRsklearn.fromFile(
+                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json')
+            ),
+            TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
+            FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
+            Mordred(),
+            Mold2(),
+            FingerprintSet(fingerprint_type="CDKFP", size=2048, searchDepth=7),
+            FingerprintSet(fingerprint_type="CDKExtendedFP"),
+            FingerprintSet(fingerprint_type="CDKEStateFP"),
+            FingerprintSet(fingerprint_type="CDKGraphOnlyFP", size=2048, searchDepth=7),
+            FingerprintSet(fingerprint_type="CDKMACCSFP"),
+            FingerprintSet(fingerprint_type="CDKPubchemFP"),
+            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
+            PaDEL(),
         ]
 
         return descriptor_sets
