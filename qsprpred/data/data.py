@@ -444,6 +444,13 @@ class MoleculeTable(MoleculeDataSet):
             logger.warning(f"Descriptors already exist in {self.name}. Use `recalculate=True` to overwrite them.")
             return
 
+        try:
+            self.checkMols(throw=True)
+        except Exception as exp:
+            logger.error(f"Cannot add descriptors to {self.name} because it contains one or more invalid molecules. Remove the invalid molecules from your data or try to standardize the data set first with 'standardizeSmiles()'. See the following list of invalid molecule SMILES for more information:")
+            logger.error(self.df[~self.checkMols(throw=False)][self.smilescol].to_numpy())
+            raise exp
+
         descriptors = self.apply(
             calculator,
             axis=0,
