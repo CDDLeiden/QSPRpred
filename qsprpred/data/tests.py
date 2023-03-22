@@ -41,7 +41,7 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-N_CPU = 1
+N_CPU = 2
 CHUNK_SIZE = 100
 logging.basicConfig(level=logging.DEBUG)
 
@@ -492,7 +492,8 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             index_cols=["fu"]
         ))
 
-    def test_invalids_detection(self):
+    @parameterized.expand([(1,), (N_CPU,)])
+    def test_invalids_detection(self, n_cpu):
         df = self.getBigDF()
         all_mols = len(df)
         dataset = QSPRDataset(
@@ -502,6 +503,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             store_dir=self.qsprdatapath,
             drop_invalids=False,
             drop_empty=False,
+            n_jobs=n_cpu,
         )
         self.assertEqual(dataset.df.shape[0], df.shape[0])
         self.assertRaises(ValueError, lambda : dataset.checkMols())
