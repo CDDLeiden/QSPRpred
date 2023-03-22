@@ -88,6 +88,7 @@ class QSPRsklearn(QSPRModel):
             self.data.task == ModelTasks.REGRESSION or not self.data.isMultiClass()) else np.zeros(
             (y.shape[0],
              self.data.nClasses))
+        cvs_ids = np.array([None] * len(cvs))
 
         fold_counter = np.zeros(y.shape[0])
 
@@ -116,6 +117,7 @@ class QSPRsklearn(QSPRModel):
                 cvs[idx_test] = self.model.predict_proba(X_test)
             else:
                 cvs[idx_test] = self.model.predict_proba(X_test)[:, -1]
+            cvs_ids[idx_test] = X.iloc[idx_test].index.to_numpy()
 
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
@@ -138,16 +140,20 @@ class QSPRsklearn(QSPRModel):
             inds = self.model.predict_proba(X_ind)
         else:
             inds = self.model.predict_proba(X_ind)[:, -1]
+        inds_ids = X_ind.index.to_numpy()
 
         # save crossvalidation results
         if save:
+            index_name = self.data.getDF().index.name
+            ind_index = pd.Index(inds_ids, name=index_name)
+            cvs_index = pd.Index(cvs_ids, name=index_name)
             train, test = pd.DataFrame(
-                y.values, columns=['Label']), pd.DataFrame(
-                y_ind.values, columns=['Label'])
+                y.values, columns=['Label'], index=cvs_index), pd.DataFrame(
+                y_ind.values, columns=['Label'], index=ind_index)
             if self.data.task == ModelTasks.CLASSIFICATION and self.data.nClasses > 2:
                 train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
-                train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
-                test = pd.concat([test, pd.DataFrame(inds)], axis=1)
+                train = pd.concat([train, pd.DataFrame(cvs, index=cvs_index)], axis=1)
+                test = pd.concat([test, pd.DataFrame(inds, index=ind_index)], axis=1)
             else:
                 train['Score'], test['Score'] = cvs, inds
             train['Fold'] = fold_counter
@@ -483,6 +489,7 @@ class QSPRDNN(QSPRModel):
         last_save_epochs = 0
 
         cvs = np.zeros((y.shape[0], max(1, self.data.nClasses)))
+        cvs_ids = np.array([None] * len(cvs))
         fold_counter = np.zeros(y.shape[0])
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
             crossvalmodel = self.loadModel(self.alg, evalparams, fromFile=False)
@@ -501,6 +508,7 @@ class QSPRDNN(QSPRModel):
             os.remove('%s_temp_fold%s.log' % (self.outPrefix, i))
             cvs[idx_test] = crossvalmodel.predict(valid_loader)
             fold_counter[idx_test] = i
+            cvs_ids[idx_test] = X.index.values[idx_test]
 
         if save:
             indmodel = self.loadModel(self.alg, evalparams, fromFile=False)
@@ -512,16 +520,21 @@ class QSPRDNN(QSPRModel):
             os.remove('%s_temp_ind_weights.pkg' % self.outPrefix)
             os.remove('%s_temp_ind.log' % self.outPrefix)
             inds = indmodel.predict(indep_loader)
+            inds_ids = X_ind.index.values
 
+            cv_index = pd.Index(cvs_ids, name=self.data.getDF().index.name)
+            ind_index = pd.Index(inds_ids, name=self.data.getDF().index.name)
             train, test = pd.Series(
                 y.values.flatten()).to_frame(
                 name='Label'), pd.Series(
                 y_ind.values.flatten()).to_frame(
                 name='Label')
+            train.set_index(cv_index, inplace=True)
+            test.set_index(ind_index, inplace=True)
             if self.data.task == ModelTasks.CLASSIFICATION:
                 train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
-                train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
-                test = pd.concat([test, pd.DataFrame(inds)], axis=1)
+                train = pd.concat([train, pd.DataFrame(cvs, cv_index)], axis=1)
+                test = pd.concat([test, pd.DataFrame(inds, ind_index)], axis=1)
             else:
                 train['Score'], test['Score'] = cvs, inds
             train['Fold'] = fold_counter

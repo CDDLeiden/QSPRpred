@@ -1,16 +1,16 @@
 # Change Log
-From v1.3.0 to v1.3.1
+From v1.3.1 to v1.4.0
 
 ## Fixes
-- Fix not re-initiating model weights during DNN training
-- Feature values converted to `np.float32` and then np.inf are converted to `nan` on `DescriptorsCalculator.__call__`.
+
+None.
 
 ## Changes
 
-- `QSPRDataset.prepareDataset` changed attributes from `standardize` and `sanitize` to only `standardizer`.
-  - Accepted parameters are either `chembl`, `old`, or a function that reads and standardizes smiles.
-  - None is now also supported to allow skipping smiles standardization.
-  - SMILES standardization now runs in parallel, but if the input function is not pickable, will just run on a single core.
-- `QSPRModel.predictMols` now accepts parameters `smiles_standardizer`, `n_jobs` and `fill_value`.
+- `MoleculeTable` now uses a custom index. When a `MoleculeTable` is created a new column (`QSPRID`) is added (overwritten if already present), which is then used as the index of the underlying data frame.
+  - It is possible to override this with a custom index by passing `index_cols` to the `MoleculeTable` constructor. These columns will be then used as index or a multi-index if more than one column is passed.
+  - Due to this change, `scaffoldsplit` now uses these IDs instead of unreliable SMILES strings (see documentation for the new API). 
 
 ## New Features
+
+- The index of the `MoleculeTable` can now be used to relate cross-validation and test outputs to the original molecules. Therefore, the index is now also saved in the model training outputs.
