@@ -629,13 +629,20 @@ class MoleculeTable(MoleculeDataSet):
         """Apply smiles_standardizer to the compounds in parallel
 
         Args:
+<<<<<<< HEAD
             smiles_standardizer (Union[str, callable]): either `chembl`, `old`, or a partial function that reads and standardizes smiles.
             drop_invalid (bool): whether to drop invalid SMILES from the data set. Defaults to `True`. If `False`, invalid SMILES will be retained in their original form.
+=======
+            smiles_standardizer (Union[str, callable]): either `None` to skip the standardization,
+                `chembl`, `old`, or a partial function that reads and standardizes smiles.
+>>>>>>> dev
 
         Raises:
             ValueError: when smiles_standardizer is not a callable or one of the predefined strings.
         """        
         std_jobs = self.nJobs
+        if smiles_standardizer is None:
+            return
         if callable(smiles_standardizer):
             try: # Prevents weird error if the user inputs a lambda function
                 pickle.dumps(smiles_standardizer)
