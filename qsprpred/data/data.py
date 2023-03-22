@@ -413,7 +413,7 @@ class MoleculeTable(MoleculeDataSet):
         else:
             return self.df[self.smilescol].apply(check_smiles_valid, throw=throw)
 
-    def addDescriptors(self, calculator: Calculator, recalculate=False):
+    def addDescriptors(self, calculator: Calculator, recalculate=False, fail_on_invalid=True):
         """
         Add descriptors to the data frame using a `Calculator` object.
 
@@ -421,6 +421,7 @@ class MoleculeTable(MoleculeDataSet):
             calculator (Calculator): Calculator object to use for descriptor calculation.
             recalculate (bool): Whether to recalculate descriptors even if they are already present in the data frame.
                 If `False`, existing descriptors are kept and no calculation takes place.
+            fail_on_invalid (bool): Whether to throw an exception if any molecule is invalid.
         """
 
         if recalculate:
@@ -429,12 +430,13 @@ class MoleculeTable(MoleculeDataSet):
             logger.warning(f"Descriptors already exist in {self.name}. Use `recalculate=True` to overwrite them.")
             return
 
-        try:
-            self.checkMols(throw=True)
-        except Exception as exp:
-            logger.error(f"Cannot add descriptors to {self.name} because it contains one or more invalid molecules. Remove the invalid molecules from your data or try to standardize the data set first with 'standardizeSmiles()'. See the following list of invalid molecule SMILES for more information:")
-            logger.error(self.df[~self.checkMols(throw=False)][self.smilescol].to_numpy())
-            raise exp
+        if fail_on_invalid:
+            try:
+                self.checkMols(throw=True)
+            except Exception as exp:
+                logger.error(f"Cannot add descriptors to {self.name} because it contains one or more invalid molecules. Remove the invalid molecules from your data or try to standardize the data set first with 'standardizeSmiles()'. You can also pass 'fail_on_invalid=False' to remove this exception, but the calculation might not be successful or correct. See the following list of invalid molecule SMILES for more information:")
+                logger.error(self.df[~self.checkMols(throw=False)][self.smilescol].to_numpy())
+                raise exp
 
         descriptors = self.apply(
             calculator,
