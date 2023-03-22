@@ -9,6 +9,26 @@ from chembl_structure_pipeline import standardizer as chembl_stand
 from qsprpred.logs import logger
 
 
+def check_smiles_valid(smiles, throw=True):
+    is_valid = True
+    exception = None
+    if not smiles:
+        is_valid = False
+        exception = ValueError(f"Empty molecule: {smiles}")
+    try:
+        mol = Chem.MolFromSmiles(smiles)
+        if not mol:
+            raise ValueError(f"Invalid molecule: {smiles}")
+        Chem.SanitizeMol(mol)
+    except Exception as exp:
+        is_valid = False
+        exception = exp
+
+    if exception and throw:
+        raise exception
+    else:
+        return is_valid
+
 def neutralize_atoms(mol):
     """Neutralize charged molecules by atom.
 

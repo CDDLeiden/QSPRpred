@@ -1,6 +1,7 @@
 """This module contains the QSPRDataset that holds and prepares data for modelling."""
 import concurrent
 import json
+import multiprocessing
 import os
 import warnings
 import pickle
@@ -19,11 +20,10 @@ from qsprpred.data.utils.folds import Folds
 from qsprpred.data.utils.scaffolds import Scaffold
 from qsprpred.data.utils.smiles_standardization import (
     chembl_smi_standardizer,
-    old_standardize_sanitize
+    old_standardize_sanitize, check_smiles_valid
 )
 from qsprpred.logs import logger
 from qsprpred.models.tasks import ModelTasks
-from rdkit import Chem
 from rdkit.Chem import PandasTools
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import LabelEncoder
@@ -403,30 +403,15 @@ class MoleculeTable(MoleculeDataSet):
             throw (bool): Whether to throw an exception if any molecule is invalid.
 
         Returns:
-            mask (bool): Boolean array indicating whether each molecule is valid or not.
+            mask (pd.Series): Boolean series indicating whether each molecule is valid or not.
         """
 
-        def checkMol(smiles):
-            is_valid = True
-            exception = None
-            if not smiles:
-                is_valid = False
-                exception = ValueError(f"Empty molecule: {smiles}")
-            try:
-                mol = Chem.MolFromSmiles(smiles)
-                if not mol:
-                    raise ValueError(f"Invalid molecule: {smiles}")
-                Chem.SanitizeMol(mol)
-            except Exception as exp:
-                is_valid = False
-                exception = exp
-
-            if exception and throw:
-                raise exception
-            else:
-                return is_valid
-
-        return self.df[self.smilescol].apply(checkMol)
+        if self.nJobs > 1:
+            with multiprocessing.Pool(self.nJobs) as pool:
+                mask = pool.starmap(check_smiles_valid, zip(self.df[self.smilescol], [throw] * len(self.df)))
+            return pd.Series(mask, index=self.df.index)
+        else:
+            return self.df[self.smilescol].apply(check_smiles_valid, throw=throw)
 
     def addDescriptors(self, calculator: Calculator, recalculate=False):
         """
