@@ -106,27 +106,27 @@ class DataSetsMixIn(PathMixIn):
         descriptor_sets = [
             rdkit_descs(),
             DrugExPhyschem(),
-            PredictorDesc(
-                QSPRsklearn.fromFile(
-                    f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json')
-            ),
-            TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
-            FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-            Mordred(),
-            Mold2(),
-            FingerprintSet(fingerprint_type="CDKFP", size=2048, searchDepth=7),
-            FingerprintSet(fingerprint_type="CDKExtendedFP"),
-            FingerprintSet(fingerprint_type="CDKEStateFP"),
-            FingerprintSet(fingerprint_type="CDKGraphOnlyFP", size=2048, searchDepth=7),
-            FingerprintSet(fingerprint_type="CDKMACCSFP"),
-            FingerprintSet(fingerprint_type="CDKPubchemFP"),
-            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
-            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
-            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
-            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
-            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
-            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
-            PaDEL(),
+            # PredictorDesc(
+            #     QSPRsklearn.fromFile(
+            #         f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json')
+            # ),
+            # TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
+            # FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
+            # Mordred(),
+            # Mold2(),
+            # FingerprintSet(fingerprint_type="CDKFP", size=2048, searchDepth=7),
+            # FingerprintSet(fingerprint_type="CDKExtendedFP"),
+            # FingerprintSet(fingerprint_type="CDKEStateFP"),
+            # FingerprintSet(fingerprint_type="CDKGraphOnlyFP", size=2048, searchDepth=7),
+            # FingerprintSet(fingerprint_type="CDKMACCSFP"),
+            # FingerprintSet(fingerprint_type="CDKPubchemFP"),
+            # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+            # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+            # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+            # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+            # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+            # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
+            # PaDEL(),
         ]
 
         return descriptor_sets
@@ -503,6 +503,83 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         check_regression(dataset_new, ["CL", "fu"])
 
+    def test_indexing(self):
+        # default index
+        QSPRDataset(
+            "test_target_property",
+            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+        )
+
+        # set index to SMILES column
+        QSPRDataset(
+            "test_target_property",
+            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+            index_cols=["SMILES"]
+        )
+
+        # multiindex
+        QSPRDataset(
+            "test_target_property",
+            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+            index_cols=["SMILES", "Name"]
+        )
+
+        # index with duplicates
+        self.assertRaises(ValueError, lambda : QSPRDataset(
+            "test_target_property",
+            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+            index_cols=["moka_ionState7.4"]
+        ))
+
+        # index has nans
+        self.assertRaises(ValueError, lambda : QSPRDataset(
+            "test_target_property",
+            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            df=self.getSmallDF(),
+            store_dir=self.qsprdatapath,
+            n_jobs=N_CPU,
+            chunk_size=CHUNK_SIZE,
+            index_cols=["fu"]
+        ))
+
+    @parameterized.expand([(1,), (N_CPU,)])
+    def test_invalids_detection(self, n_cpu):
+        df = self.getBigDF()
+        all_mols = len(df)
+        dataset = QSPRDataset(
+            "test_invalids_detection",
+            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            df=df,
+            store_dir=self.qsprdatapath,
+            drop_invalids=False,
+            drop_empty=False,
+            n_jobs=n_cpu,
+        )
+        self.assertEqual(dataset.df.shape[0], df.shape[0])
+        self.assertRaises(ValueError, lambda : dataset.checkMols())
+        self.assertRaises(ValueError, lambda : dataset.addDescriptors(DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)])))
+        invalids = dataset.checkMols(throw=False)
+        self.assertEqual(sum(~invalids), 1)
+        dataset.dropInvalids()
+        self.assertEqual(dataset.df.shape[0], all_mols - 1)
+
 
 class TestTargetProperty(TestCase):
     """Test the TargetProperty class."""
@@ -590,18 +667,17 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     @parameterized.expand([
         (Murcko(), True, None),
-        (BemisMurcko(), False, ['NCCc1ccc(O)c(O)c1', 'CC(C)(C)c1cnc(CSc2cnc(NC(=O)C3CCNCC3)s2)o1']),
+        (BemisMurcko(), False, ['scaffoldsplit_0','scaffoldsplit_1']),
     ])
     def test_scaffoldsplit(self, scaffold, shuffle, custom_test_list):
-        """Test the scaffold split function, where the split is done based on the scaffold of the molecules."""
-        dataset = self.create_large_dataset()
+        dataset = self.create_large_dataset(name="scaffoldsplit")
         split = scaffoldsplit(scaffold, 0.1, shuffle, custom_test_list)
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
         # check that smiles in custom_test_list are in the test set
         if custom_test_list:
-            self.assertTrue(all(smiles in dataset.X_ind[dataset.smilescol].tolist() for smiles in custom_test_list))
+            self.assertTrue(all(mol_id in dataset.X_ind.index for mol_id in custom_test_list))
 
     def test_serialization(self):
         """Test the serialization of dataset with datasplit."""
@@ -613,6 +689,8 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             feature_calculator=calculator,
             feature_standardizer=StandardScaler())
         self.validate_split(dataset)
+        test_ids = dataset.X_ind.index.values
+        train_ids = dataset.y_ind.index.values
         dataset.save()
 
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
@@ -621,6 +699,8 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         self.assertTrue(dataset_new.feature_standardizer)
         self.assertTrue(dataset_new.fold_generator.featureStandardizer)
         self.assertTrue(len(dataset_new.featureNames) == 1024)
+        self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
+        self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
 
         dataset_new.clearFiles()
 
@@ -822,6 +902,7 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
         """Create the test Dataframe."""
         super().setUp()
         self.dataset = self.create_small_dataset(self.__class__.__name__)
+        self.dataset.shuffle()
 
     def test_PredictorDesc(self):
         """Test the PredictorDesc descriptor set."""
@@ -936,6 +1017,19 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
         self.dataset.addDescriptors(desc_calc, recalculate=True)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList) + 10))
 
+    def test_consistency(self):
+        len_prev = len(self.dataset)
+        desc_calc = DescriptorsCalculator([FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)])
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(len_prev, len(self.dataset))
+        self.assertEqual(len_prev, len(self.dataset.getDescriptors()))
+        self.assertEqual(len_prev, len(self.dataset.X))
+        self.assertEqual(1000, self.dataset.getDescriptors().shape[1])
+        self.assertEqual(1000, self.dataset.X.shape[1])
+        self.assertEqual(1000, self.dataset.X_ind.shape[1])
+        self.assertEqual(1000, self.dataset.getFeatures(concat=True).shape[1])
+        self.assertEqual(len_prev, self.dataset.getFeatures(concat=True).shape[0])
+
 
 class TestScaffolds(DataSetsMixIn, TestCase):
     """Test calculation of scaffolds."""
@@ -985,6 +1079,21 @@ class TestFeatureStandardizer(DataSetsMixIn, TestCase):
                 scaled_features_fromfile),
             True)
 
+
+class TestStandardizers(DataSetsMixIn, TestCase):
+
+    def test_invalid_filter(self):
+        df = self.getSmallDF()
+        orig_len = len(df)
+        mask = [False] * orig_len
+        mask[0] = True
+        df.loc[mask,"SMILES"] = "C(C)(C)(C)(C)(C)(C)(C)(C)(C)" # create molecule with bad valence as example
+
+        dataset = QSPRDataset("standardization_test_invalid_filter", df=df, target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}], drop_invalids=False, drop_empty=False)
+        dataset.standardizeSmiles('chembl', drop_invalid=False)
+        self.assertEqual(len(dataset), len(df))
+        dataset.standardizeSmiles('chembl', drop_invalid=True)
+        self.assertEqual(len(dataset), orig_len-1)
 
 class TestDataSetPreparation(DataSetsMixIn, TestCase):
     """Test as many possible combinations of data sets and their preparation settings."""

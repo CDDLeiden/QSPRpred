@@ -427,17 +427,17 @@ class QSPRModel(ABC):
             np.ndarray: an array of predictions, can be a 1D array for single target models, 2D array for multi target and a list of 2D arrays for multi-target and multi-class models
         """
 
-        dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False,
-                                           n_jobs=n_jobs)
+        dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False, n_jobs=n_jobs)
         for targetproperty in self.targetProperties:
             dataset.addProperty(targetproperty.name, np.nan)
-        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False)
+        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False, n_jobs=n_jobs)
+        dataset.standardizeSmiles(smiles_standardizer, drop_invalid=False)
         failed_mask = dataset.dropInvalids().values
 
         if not self.featureCalculator:
             raise ValueError("No feature calculator set on this instance.")
         dataset.prepareDataset(
-            smiles_standardizer=smiles_standardizer,
+            smiles_standardizer=None,
             feature_calculator=self.featureCalculator,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value
@@ -453,15 +453,15 @@ class QSPRModel(ABC):
             # NOTE: if a multiclass-multioutput, this will return a list of 2D arrays
             predictions = self.predictProba(dataset)
 
-        if any(~failed_mask):
+        if any(failed_mask):
             # fill in the failed predictions with None
             if isinstance(predictions, list):
                 predictions_with_invalids = [np.full((len(mols), pred.shape[1]), None) for pred in predictions]
                 for i, pred in enumerate(predictions):
-                    predictions_with_invalids[i][failed_mask, :] = pred
+                    predictions_with_invalids[i][~failed_mask, :] = pred
             else:
                 predictions_with_invalids = np.full((len(mols), predictions.shape[1]), None)
-                predictions_with_invalids[failed_mask, :] = predictions
+                predictions_with_invalids[~failed_mask, :] = predictions
             predictions = predictions_with_invalids
         return predictions
 

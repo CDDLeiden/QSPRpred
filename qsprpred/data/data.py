@@ -3,11 +3,12 @@
 import concurrent
 import copy
 import json
+import multiprocessing
 import os
 import pickle
 import warnings
 from multiprocessing import Pool
-from typing import Callable, List, Literal
+from typing import Callable, List, Literal, Union
 
 import numpy as np
 import pandas as pd
@@ -21,11 +22,11 @@ from qsprpred.data.utils.folds import Folds
 from qsprpred.data.utils.scaffolds import Scaffold
 from qsprpred.data.utils.smiles_standardization import (
     chembl_smi_standardizer,
-    old_sanitize_smiles,
+    old_standardize_sanitize,
+    check_smiles_valid,
 )
-from qsprpred.logs import logger
 from qsprpred.models.tasks import TargetTasks
-from rdkit import Chem
+from qsprpred.logs import logger
 from rdkit.Chem import PandasTools
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import LabelEncoder
@@ -82,6 +83,7 @@ class MoleculeTable(MoleculeDataSet):
             n_jobs: int = 1,
             chunk_size: int = 50,
             drop_invalids: bool = True,
+            index_cols: List[str] = None,
     ):
         """Initialize a `MoleculeTable` object.
 
@@ -98,9 +100,11 @@ class MoleculeTable(MoleculeDataSet):
             n_jobs (int): Number of jobs to use for parallel processing. If <= 0, all available cores will be used.
             chunk_size (int): Size of chunks to use per job in parallel processing.
             drop_invalids (bool): Drop invalid molecules from the data frame.
+            index_cols (List[str]): List of columns to use as index. If None, the index will be a custom generated ID.
         """
         # settings
         self.smilescol = smilescol
+        self.indexCols = index_cols
         self.includesRdkit = add_rdkit
         self.name = name
         self.descriptorCalculator = None
@@ -116,6 +120,7 @@ class MoleculeTable(MoleculeDataSet):
         self.storePath = f'{self.storePrefix}_df.pkl'
 
         # data frame initialization
+        self.df = None
         if df is not None:
             if self._isInStore('df') and not overwrite:
                 warnings.warn(
@@ -124,6 +129,12 @@ class MoleculeTable(MoleculeDataSet):
             else:
                 self.clearFiles()
                 self.df = df
+                if index_cols is not None:
+                    self.setIndex(index_cols)
+                else:
+                    df['QSPRID'] = [f"{self.name}_{i}" for i in range(len(self.df))]
+                    self.setIndex(['QSPRID'])
+
                 if self.includesRdkit:
                     PandasTools.AddMoleculeColumnToFrame(
                         self.df, smilesCol=self.smilescol, molCol='RDMol', includeFingerprints=False)
@@ -132,6 +143,7 @@ class MoleculeTable(MoleculeDataSet):
                 raise ValueError(
                     f"No data frame found in store for '{self.name}'. Are you sure this is the correct dataset? If you are creating a new data set, make sure to supply a data frame.")
             self.reload()
+        assert self.df is not None, "Unknown error in data set creation."
 
         # drop invalid columns
         if drop_invalids:
@@ -144,6 +156,17 @@ class MoleculeTable(MoleculeDataSet):
             int: Number of molecules in the data set.
         """
         return len(self.df)
+
+    def setIndex(self, cols: List[str]):
+        """
+        Set the index of the data frame.
+
+        Args:
+            cols (List[str]): List of columns to use as index.
+        """
+        self.df.set_index(cols, inplace=True, verify_integrity=True, drop=False)
+        self.df.drop(inplace=True, columns=[c for c in self.df.columns if c.startswith('Unnamed')])
+        self.indexCols = cols
 
     def getDF(self):
         """Get the data frame this instance manages.
@@ -346,19 +369,47 @@ class MoleculeTable(MoleculeDataSet):
         if df_filtered is not None:
             self.df = df_filtered.copy()
 
-    def addDescriptors(self, calculator: Calculator, recalculate=False):
-        """Add descriptors to the data frame using a `Calculator` object.
+    def checkMols(self, throw=True):
+        """
+        Returns a boolean array indicating whether each molecule is valid or not. If `throw` is `True`, an exception is thrown if any molecule is invalid.
+
+        Args:
+            throw (bool): Whether to throw an exception if any molecule is invalid.
+
+        Returns:
+            mask (pd.Series): Boolean series indicating whether each molecule is valid or not.
+        """
+
+        if self.nJobs > 1:
+            with multiprocessing.Pool(self.nJobs) as pool:
+                mask = pool.starmap(check_smiles_valid, zip(self.df[self.smilescol], [throw] * len(self.df)))
+            return pd.Series(mask, index=self.df.index)
+        else:
+            return self.df[self.smilescol].apply(check_smiles_valid, throw=throw)
+
+    def addDescriptors(self, calculator: Calculator, recalculate=False, fail_on_invalid=True):
+        """
+        Add descriptors to the data frame using a `Calculator` object.
 
         Args:
             calculator (Calculator): Calculator object to use for descriptor calculation.
             recalculate (bool): Whether to recalculate descriptors even if they are already present in the data frame.
                 If `False`, existing descriptors are kept and no calculation takes place.
+            fail_on_invalid (bool): Whether to throw an exception if any molecule is invalid.
         """
         if recalculate:
             self.df.drop(self.getDescriptorNames(), axis=1, inplace=True)
         elif self.hasDescriptors:
             logger.warning(f"Descriptors already exist in {self.name}. Use `recalculate=True` to overwrite them.")
             return
+
+        if fail_on_invalid:
+            try:
+                self.checkMols(throw=True)
+            except Exception as exp:
+                logger.error(f"Cannot add descriptors to {self.name} because it contains one or more invalid molecules. Remove the invalid molecules from your data or try to standardize the data set first with 'standardizeSmiles()'. You can also pass 'fail_on_invalid=False' to remove this exception, but the calculation might not be successful or correct. See the following list of invalid molecule SMILES for more information:")
+                logger.error(self.df[~self.checkMols(throw=False)][self.smilescol].to_numpy())
+                raise exp
 
         descriptors = self.apply(
             calculator,
@@ -528,10 +579,11 @@ class MoleculeTable(MoleculeDataSet):
         """
         return len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
 
-    def standardizeSmiles(self, smiles_standardizer):
+    def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
         """Apply smiles_standardizer to the compounds in parallel
 
         Args:
+            drop_invalid (bool): whether to drop invalid SMILES from the data set. Defaults to `True`. If `False`, invalid SMILES will be retained in their original form.
             smiles_standardizer (Union[str, callable]): either `None` to skip the standardization,
                 `chembl`, `old`, or a partial function that reads and standardizes smiles.
 
@@ -561,24 +613,25 @@ class MoleculeTable(MoleculeDataSet):
             with Pool(std_jobs) as pool:
                 std_smi = pool.map(std_func, self.df[self.smilescol].values)
         self.df[self.smilescol] = std_smi
+        if drop_invalid:
+            self.dropInvalids()
 
     def shuffle(self, random_state=None):
         """Shuffle the internal data frame."""
-        self.df = self.df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+        self.df = self.df.sample(frac=1, random_state=random_state)
 
     def dropInvalids(self):
-        """Drop Invalid SMILES.
+        """
+        Drops invalid molecules from the data set.
 
         Returns:
-            pd.Series: Mask of invalid SMILES, true if the SMILES is valid and false otherwise.
+            mask (pd.Series): Boolean mask of invalid molecules in the original data set.
         """
-        invalid_mask = self.df[self.smilescol].apply(lambda smile: Chem.MolFromSmiles(smile) is not None)
-        logger.info(
-            f"Removing invalid SMILES: {list(self.df[self.smilescol][~invalid_mask])}"
-        )
-        self.df = self.df[invalid_mask].copy()
+        invalid_mask = self.checkMols(throw=False)
+        self.df.drop(self.df.index[~invalid_mask], inplace=True)
+        logger.warning(f"Dropped {invalid_mask.sum()} invalid molecules from the data set.")
 
-        return invalid_mask
+        return ~invalid_mask
 
 
 class TargetProperty():
@@ -777,7 +830,6 @@ class QSPRDataset(MoleculeTable):
 
     Attributes:
         targetProperties (str) : property to be predicted with QSPRmodel
-        tasks (List[ModelTask]) : regression or singleclass or multiclass
         df (pd.dataframe) : dataset
         X (np.ndarray/pd.DataFrame) : m x n feature matrix for cross validation, where m is
             the number of samplesand n is the number of features.
@@ -788,8 +840,6 @@ class QSPRDataset(MoleculeTable):
         y_ind (np.ndarray/pd.DataFrame) : m-l label array for independent set, where m is
             the number of samples and equals to row of X_ind, and l is the number of types.
         featureNames (list of str) : feature names
-        feature_standardizers (list of FeatureStandardizers): methods used to standardize the data features.
-        target_imputer (Callable): method used to impute missing values in the target property.
     """
 
     def __init__(
@@ -805,7 +855,8 @@ class QSPRDataset(MoleculeTable):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
-        target_imputer: Callable = None
+        target_imputer: Callable = None,
+        index_cols: List[str] = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if specified.
 
@@ -822,12 +873,12 @@ class QSPRDataset(MoleculeTable):
             drop_invalids (bool, optional): if true, invalid SMILES will be dropped. Defaults to True.
             drop_empty (bool, optional): if true, rows with empty target property will be removed.
             target_imputer (Callable, optional): imputer for missing target property values. Defaults to None.
+            index_cols (List[str], optional): columns to be used as index in the dataframe. Defaults to `None` in which case a custom ID will be generated.
 
         Raises:
             ValueError: Raised if threshold given with non-classification task.
         """
-        super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size, drop_invalids)
-
+        super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size, drop_invalids, index_cols)
         self.metaInfo = None
         try:
             self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
@@ -1298,8 +1349,7 @@ class QSPRDataset(MoleculeTable):
         """Prepare the dataset for use in QSPR model.
 
         Arguments:
-            smiles_standardizer (Union[str, callable]): either `None` to skip the standardization,
-                `chembl`, `old`, or a partial function that reads and standardizes smiles.
+            smiles_standardizer (Union[str, callable]): either `chembl`, `old`, or a partial function that reads and standardizes smiles. If `None`, no standardization will be performed. Defaults to `chembl`.
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             fold (datasplitter obj): splits the train set into folds for cross validation
@@ -1311,7 +1361,8 @@ class QSPRDataset(MoleculeTable):
             feature_fill_value (float): value to fill missing values with, defaults to `numpy.nan`
         """
         # apply sanitization and standardization
-        self.standardizeSmiles(smiles_standardizer)
+        if smiles_standardizer is not None:
+            self.standardizeSmiles(smiles_standardizer)
 
         # calculate featureNames
         if feature_calculator is not None:

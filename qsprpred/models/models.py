@@ -93,6 +93,10 @@ class QSPRsklearn(QSPRModel):
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetPropertiesValues()
 
+        # prepare arrays to store molecule ids
+        cvs_ids = np.array([None] * len(X))
+        inds_ids = X_ind.index.to_numpy()
+
         # cvs and inds are used to store the predictions for the cross validation and the independent test set
         if self.task.isRegression():
             cvs = np.zeros((y.shape[0], self.nTargets))
@@ -137,6 +141,7 @@ class QSPRsklearn(QSPRModel):
                         cvs[idx][idx_test] = preds
                     else:
                         cvs[idx][idx_test] = preds[idx]
+            cvs_ids[idx_test] = X.iloc[idx_test].index.to_numpy()
 
             logger.info('cross validation fold %s ended: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
@@ -171,16 +176,22 @@ class QSPRsklearn(QSPRModel):
 
         # save crossvalidation results
         if save:
+            index_name = self.data.getDF().index.name
+            ind_index = pd.Index(inds_ids, name=index_name)
+            cvs_index = pd.Index(cvs_ids, name=index_name)
             train, test = y.add_suffix('_Label'), y_ind.add_suffix('_Label')
+            train, test = pd.DataFrame(
+                train.values, columns=train.columns, index=cvs_index), pd.DataFrame(
+                test.values, columns=test.columns, index=ind_index)
             for idx, prop in enumerate(self.data.targetProperties):
                 if prop.task.isClassification():
                     # convert one-hot encoded predictions to class labels and add to train and test
                     train[f'{prop.name}_Prediction'], test[f'{prop.name}_Prediction'] = np.argmax(
                         cvs[idx], axis=1), np.argmax(inds[idx], axis=1)
                     # add probability columns to train and test set
-                    train = pd.concat([train.reset_index(drop=True), pd.DataFrame(
-                        cvs[idx]).add_prefix(f'{prop.name}_ProbabilityClass_')], axis=1)
-                    test = pd.concat([test.reset_index(drop=True), pd.DataFrame(inds[idx]).add_prefix(
+                    train = pd.concat([train, pd.DataFrame(
+                        cvs[idx], index=cvs_index).add_prefix(f'{prop.name}_ProbabilityClass_')], axis=1)
+                    test = pd.concat([test, pd.DataFrame(inds[idx], index=ind_index).add_prefix(
                         f'{prop.name}_ProbabilityClass_')], axis=1)
                 else:
                     train[f'{prop.name}_Prediction'], test[f'{prop.name}_Prediction'] = cvs[:, idx], inds[:, idx]
@@ -542,6 +553,10 @@ class QSPRDNN(QSPRModel):
         indep_loader = self.model.get_dataloader(X_ind.values)
         last_save_epochs = 0
 
+        # prepare arrays to store molecule ids
+        cvs_ids = np.array([None] * len(X))
+        inds_ids = X_ind.index.to_numpy()
+
         # create array for cross validation predictions and for keeping track of the number of folds
         if self.task.isRegression():
             cvs = np.zeros((y.shape[0], 1))
@@ -569,6 +584,7 @@ class QSPRDNN(QSPRModel):
             cvs[idx_test] = crossvalmodel.predict(valid_loader)
 
             fold_counter[idx_test] = i
+            cvs_ids[idx_test] = X.index.values[idx_test]
 
         if save:
             indmodel = self.loadModel(self.alg, evalparams, fromFile=False)
@@ -583,17 +599,22 @@ class QSPRDNN(QSPRModel):
             os.remove('%s_temp_ind_weights.pkg' % self.outPrefix)
             os.remove('%s_temp_ind.log' % self.outPrefix)
             inds = indmodel.predict(indep_loader)
+            inds_ids = X_ind.index.values
 
             # save cross validation predictions and independent test set predictions
+            cv_index = pd.Index(cvs_ids, name=self.data.getDF().index.name)
+            ind_index = pd.Index(inds_ids, name=self.data.getDF().index.name)
             train, test = pd.Series(
                 y.values.flatten()).to_frame(
                 name='Label'), pd.Series(
                 y_ind.values.flatten()).to_frame(
                 name='Label')
+            train.set_index(cv_index, inplace=True)
+            test.set_index(ind_index, inplace=True)
             if self.data.targetProperties[0].task.isClassification():
                 train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
-                train = pd.concat([train, pd.DataFrame(cvs)], axis=1)
-                test = pd.concat([test, pd.DataFrame(inds)], axis=1)
+                train = pd.concat([train, pd.DataFrame(cvs, cv_index)], axis=1)
+                test = pd.concat([test, pd.DataFrame(inds, ind_index)], axis=1)
             else:
                 train['Score'], test['Score'] = cvs, inds
             train['Fold'] = fold_counter
