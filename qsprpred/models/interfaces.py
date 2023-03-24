@@ -482,7 +482,7 @@ class QSPRModel(ABC):
         if not self.featureCalculator:
             raise ValueError("No feature calculator set on this instance.")
         dataset.prepareDataset(
-            smiles_standardizer=None,
+            smiles_standardizer=smiles_standardizer,
             feature_calculator=self.featureCalculator,
             feature_standardizer=self.featureStandardizer,
             fill_value=fill_value
