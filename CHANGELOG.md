@@ -19,6 +19,8 @@ From v1.3.1 to v1.4.0
 - To support multitask modelling, the representation of the target in the `QSPRdataset` has changed to a list of 
   `TargetProperty`s (see New Features). These can be automatically initizalid from dictionaries in the `QSPRdataset`
   init.
+- A `fill_value` argument was also added to the `predict_CLI` script to allow for filling missing values in the 
+  prediction data set as well. 
 
 ## New Features
 
