@@ -47,7 +47,8 @@ python -m qsprpred.data_CLI \
 -fe RDkit \
 -pd ../qsprpred/data/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json \
 -lv 0.01 \
--hc 0.9
+-hc 0.9 \
+-fv 0.0
 
 ###############
 # MODELLING #
@@ -73,7 +74,8 @@ python -m qsprpred.predict_CLI \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
 -mp ./qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
--pr
+-pr \
+-fv 0.0
 
 echo "All tests finished without errors."
 

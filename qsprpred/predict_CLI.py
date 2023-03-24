@@ -43,6 +43,8 @@ def QSPRArgParser(txt=None):
     # other
     parser.add_argument('-ng', '--no_git', action='store_true',
                         help="If on, git hash is not retrieved")
+    parser.add_argument('-fv', '--fill_value', type=float, default=np.nan,
+                        help="Fill value for missing values in the calculated features")
 
     if txt:
         args = parser.parse_args(txt)
@@ -72,7 +74,7 @@ def QSPR_predict(args):
 
         predictor = QSPRModel.fromFile(metafile)
 
-        predictions = predictor.predictMols(smiles_list, use_probas=args.use_probas, fill_value=0)
+        predictions = predictor.predictMols(smiles_list, use_probas=args.use_probas, fill_value=args.fill_value)
         # if predictions 2d array with more than 1 column, add as separate columns
         for idx, target in enumerate(predictor.targetProperties):
             if args.use_probas:
