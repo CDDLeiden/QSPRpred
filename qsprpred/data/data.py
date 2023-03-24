@@ -629,7 +629,9 @@ class MoleculeTable(MoleculeDataSet):
         """
         invalid_mask = self.checkMols(throw=False)
         self.df.drop(self.df.index[~invalid_mask], inplace=True)
-        logger.warning(f"Dropped {invalid_mask.sum()} invalid molecules from the data set.")
+        invalids = (~invalid_mask).sum()
+        if invalids > 0:
+            logger.warning(f"Dropped {invalids} invalid molecules from the data set.")
 
         return ~invalid_mask
 
