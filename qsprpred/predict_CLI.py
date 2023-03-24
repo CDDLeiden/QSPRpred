@@ -72,7 +72,7 @@ def QSPR_predict(args):
 
         predictor = QSPRModel.fromFile(metafile)
 
-        predictions = predictor.predictMols(smiles_list, use_probas=args.use_probas)
+        predictions = predictor.predictMols(smiles_list, use_probas=args.use_probas, fill_value=0)
         # if predictions 2d array with more than 1 column, add as separate columns
         for idx, target in enumerate(predictor.targetProperties):
             if args.use_probas:
