@@ -64,17 +64,19 @@ def chembl_smi_standardizer(smi: str, isomericSmiles:bool=True, sanitize:bool=Tr
         sanitize: applies sanitization using the ChEMBL standardizer. Defaults to True.
 
     Returns:
-        standardized SMILES string.
+        smiles (str): standardized SMILES string or `None` if standardization failed.
     """    
     try:
         mol = Chem.MolFromSmiles(smi)
+        if not mol:
+            raise ValueError(f"Failed to parse SMILES: {smi}")
         standard_mol = chembl_stand.standardize_mol(mol, sanitize=sanitize)
         standard_smiles = Chem.MolToSmiles(
             standard_mol, kekuleSmiles=False, canonical=True, isomericSmiles=isomericSmiles
         )
         return standard_smiles
     except Exception as exp:  # noqa E722
-        logger.exception(f"Could not standardize SMILES: {smi} due to {exp}.")
+        logger.warning(f"Could not standardize SMILES: {smi} due to: {exp}.")
         return None
 
 
