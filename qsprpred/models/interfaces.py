@@ -1,28 +1,29 @@
 """This module holds the base class for QSPRmodels, model types should be a subclass."""
+import copy
 import json
 import os
 import shutil
 import sys
 from abc import ABC, abstractmethod
-from inspect import isclass
 from typing import List, Type, Union
 
 import numpy as np
 import pandas as pd
 from qsprpred import VERSION
-from qsprpred.data.data import MoleculeTable, QSPRDataset
+from qsprpred.data.data import MoleculeTable, QSPRDataset, TargetProperty
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
+from qsprpred.models.metrics import SklearnMetric
 from qsprpred.models.tasks import ModelTasks
 from qsprpred.utils.inspect import import_class
-from sklearn import metrics
 
 
 class QSPRModel(ABC):
-    """
-    The definition of the common model interface for the package. Handles model initialization, fit, cross validation and hyperparameter optimization.
+    """The definition of the common model interface for the package.
+
+        The QSPRModel handles model initialization, fit, cross validation and hyperparameter optimization.
 
     Attributes:
         name (str): name of the model
@@ -41,9 +42,13 @@ class QSPRModel(ABC):
         targetProperty (str): target property of the model, taken from the data set or deserialized from file if the model is loaded without data
     """
 
-    def __init__(self, base_dir : str, alg = None, data : QSPRDataset = None, name : str =None, parameters : dict = None, autoload=True):
-        """
-        Initialize a QSPR model instance. If the model is loaded from file, the data set is not required. Note that the data set is required for fitting and optimization.
+    def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None,
+                 name: str = None, parameters: dict = None, autoload=True,
+                 scoring=None):
+        """Initialize a QSPR model instance.
+
+        If the model is loaded from file, the data set is not required.
+        Note that the data set is required for fitting and optimization.
 
         Args:
             base_dir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`
@@ -52,8 +57,8 @@ class QSPRModel(ABC):
             name (str): name of the model
             parameters (dict): dictionary of algorithm specific parameters
             autoload (bool): if True, the model is loaded from the serialized file if it exists, otherwise a new model is created
+            scoring (str or callable): scoring function to use for cross validation and optimization, if None, the default scoring function is used
         """
-
         self.data = data
         self.name = name or alg.__class__.__name__
         self.baseDir = base_dir.rstrip('/')
@@ -74,134 +79,101 @@ class QSPRModel(ABC):
             self.parameters = self.readParams(os.path.join(self.baseDir, self.metaInfo['parameters_path']))
 
         # initialize a feature calculator instance
-        self.featureCalculator = self.data.descriptorCalculator if self.data else self.readDescriptorCalculator(os.path.join(self.baseDir, self.metaInfo['feature_calculator_path']))
+        self.featureCalculator = self.data.descriptorCalculator if self.data else self.readDescriptorCalculator(
+            os.path.join(self.baseDir, self.metaInfo['feature_calculator_path']))
 
         # initialize a standardizer instance
-        self.featureStandardizer = self.data.feature_standardizer if self.data else self.readStandardizer(os.path.join(self.baseDir, self.metaInfo['feature_standardizer_path'])) if self.metaInfo['feature_standardizer_path'] else None
+        self.featureStandardizer = self.data.feature_standardizer if self.data else self.readStandardizer(os.path.join(
+            self.baseDir, self.metaInfo['feature_standardizer_path'])) if self.metaInfo['feature_standardizer_path'] else None
 
         # initialize a model instance with the given parameters
         self.alg = alg
         if autoload:
             self.model = self.loadModel(alg=self.alg, params=self.parameters)
 
+        self.score_func = self.get_scoring_func(scoring)
+
     def __str__(self):
         """Return the name of the model and the underlying class as the identifier."""
-
         return f"{self.name} ({self.model.__class__.__name__ if self.model else self.alg.__class__.__name__ if self.alg else 'None'})"
-    
-    # Adding scoring functions available for hyperparam optimization:
+
     @property
-    def _needs_proba_to_score(self):
-        if self.task == ModelTasks.CLASSIFICATION:
-            return ['average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
-                    'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted']
-        elif self.task == ModelTasks.REGRESSION:
-            return []
-        
-    @property
-    def _needs_discrete_to_score(self):
-        if self.task == ModelTasks.CLASSIFICATION:
-            return ['accuracy','balanced_accuracy', 'top_k_accuracy', 'f1', 'f1_micro',
-                    'f1_macro', 'f1_weighted', 'f1_samples', 'precision', 'precision_micro',
-                    'precision_macro', 'precision_weighted', 'precision_samples', 'recall',
-                    'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
-        elif self.task == ModelTasks.REGRESSION:
-            return []
-        
-    @property
-    def _supported_scoring(self):
-        if self.task == ModelTasks.CLASSIFICATION:
-            return ['average_precision', 'neg_brier_score', 'neg_log_loss', 'roc_auc',
-                    'roc_auc_ovo', 'roc_auc_ovo_weighted', 'roc_auc_ovr', 'roc_auc_ovr_weighted'
-                    'accuracy','balanced_accuracy', 'top_k_accuracy', 'f1', 'f1_micro',
-                    'f1_macro', 'f1_weighted', 'f1_samples', 'precision', 'precision_micro',
-                    'precision_macro', 'precision_weighted', 'precision_samples', 'recall',
-                    'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
-        elif self.task == ModelTasks.REGRESSION:
-            return ['explained_variance', 'max_error', 'neg_mean_absolute_error', 'neg_mean_squared_error',
-                    'neg_root_mean_squared_error', 'neg_mean_squared_log_error', 'neg_median_absolute_error',
-                    'r2', 'neg_mean_poisson_deviance', 'neg_mean_gamma_deviance', 'neg_mean_absolute_percentage_error',
-                    'd2_absolute_error_score', 'd2_pinball_score', 'd2_tweedie_scor']
+    def targetProperties(self):
+        """Return the target properties of the model, taken from the data set or deserialized from file if the model is loaded without data.
+
+        Returns:
+            list(str): target properties of the model
+        """
+        return self.data.targetProperties if self.data else self.metaInfo['target_properties']
 
     @property
     def task(self):
-        """
-        The task of the model, taken from the data set or deserialized from file if the model is loaded without data.
+        """Return the task of the model, taken from the data set or deserialized from file if the model is loaded without data.
 
         Returns:
-            ModelTasks: task of the model
+            ModelType: task of the model
         """
-        return self.data.task if self.data else self.metaInfo['task']
+        return ModelTasks.getModelTask(self.targetProperties)
 
     @property
-    def nClasses(self):
-        """
-        The number of classes of the model, taken from the data set or deserialized from file if the model is loaded without data.
+    def isMultiTask(self):
+        """Return if model is a multitask model, taken from the data set or deserialized from file if the model is loaded without data.
 
         Returns:
-            int: number of classes of the model if the task is classification, otherwise 0
+            bool: True if model is a multitask model
         """
-        return self.data.nClasses if self.data else self.metaInfo['nClasses']
+        return self.task.isMultiTask()
 
     @property
     def classPath(self):
         return self.__class__.__module__ + "." + self.__class__.__name__
 
     @property
-    def targetProperty(self):
-        """
-        The target property of the model, taken from the data set or deserialized from file if the model is loaded without data.
+    def nTargets(self):
+        """Return the number of target properties of the model, taken from the data set or deserialized from file if the model is loaded without data.
 
         Returns:
-            str: target property of the model
+            int: number of target properties of the model
         """
+        return len(self.data.targetProperties) if self.data else len(self.metaInfo['target_properties'])
 
-        return self.data.targetProperty if self.data else self.metaInfo['target_property']
     @property
     def outDir(self):
-        """
-        The output directory of the model, the model files are stored in this directory (`{baseDir}/qspr/models/{name}`).
+        """Return output directory of the model, the model files are stored in this directory (`{baseDir}/qspr/models/{name}`).
 
         Returns:
             str: output directory of the model
         """
-
         os.makedirs(f'{self.baseDir}/qspr/models/{self.name}', exist_ok=True)
         return f'{self.baseDir}/qspr/models/{self.name}'
 
     @property
     def outPrefix(self):
-        """
-        The output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`).
+        """Return output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`).
 
         Returns:
             str: output prefix of the model files
         """
-
         return f'{self.outDir}/{self.name}'
 
     @staticmethod
     def readParams(path):
-        """
-        Read model parameters from a JSON file.
+        """Read model parameters from a JSON file.
 
         Args:
             path (str): absolute path to the JSON file
         """
-
         with open(path, "r", encoding="utf-8") as j:
             logger.info(
                 'loading model parameters from file: %s' % path)
             return json.loads(j.read())
 
     def saveParams(self, params):
-        """
-        Save model parameters to a JSON file.
+        """Save model parameters to a JSON file.
 
         Args:
             params (dict): dictionary of model parameters
         """
-
         path = f'{self.outDir}/{self.name}_params.json'
         with open(path, "w", encoding="utf-8") as j:
             logger.info(
@@ -212,8 +184,7 @@ class QSPRModel(ABC):
 
     @staticmethod
     def readDescriptorCalculator(path):
-        """
-        Read a descriptor calculator from a JSON file.
+        """Read a descriptor calculator from a JSON file.
 
         Args:
             path (str): absolute path to the JSON file
@@ -221,26 +192,22 @@ class QSPRModel(ABC):
         Returns:
             DescriptorsCalculator: descriptor calculator instance or None if the file does not exist
         """
-
         if os.path.exists(path):
             return DescriptorsCalculator.fromFile(path)
 
     def saveDescriptorCalculator(self):
-        """
-        Save the current descriptor calculator to a JSON file. The file is stored in the output directory of the model.
+        """Save the current descriptor calculator to a JSON file. The file is stored in the output directory of the model.
 
         Returns:
             str: absolute path to the JSON file containing the descriptor calculator
         """
-
         path = f'{self.outDir}/{self.name}_descriptor_calculator.json'
         self.featureCalculator.toFile(path)
         return path
 
     @staticmethod
     def readStandardizer(path):
-        """
-        Read a feature standardizer from a JSON file. If the file does not exist, None is returned.
+        """Read a feature standardizer from a JSON file. If the file does not exist, None is returned.
 
         Args:
             path (str): absolute path to the JSON file
@@ -248,26 +215,22 @@ class QSPRModel(ABC):
         Returns:
             SKLearnStandardizer: feature standardizer instance or None if the file does not exist
         """
-
         if os.path.exists(path):
             return SKLearnStandardizer.fromFile(path)
 
     def saveStandardizer(self):
-        """
-        Save the current feature standardizer to a JSON file. The file is stored in the output directory of the model.
+        """Save the current feature standardizer to a JSON file. The file is stored in the output directory of the model.
 
         Returns:
             str: absolute path to the JSON file containing the saved feature standardizer
         """
-
         path = f'{self.outDir}/{self.name}_feature_standardizer.json'
         self.featureStandardizer.toFile(path)
         return path
 
     @classmethod
     def readMetadata(cls, path):
-        """
-        Read model metadata from a JSON file.
+        """Read model metadata from a JSON file.
 
         Args:
             path (str): absolute path to the JSON file
@@ -278,19 +241,18 @@ class QSPRModel(ABC):
         Raises:
             FileNotFoundError: if the file does not exist
         """
-
         if os.path.exists(path):
             with open(path) as j:
                 metaInfo = json.loads(j.read())
-                metaInfo['task'] = ModelTasks(metaInfo['task'])
+                metaInfo["target_properties"] = TargetProperty.fromList(
+                    metaInfo["target_properties"], task_from_str=True)
         else:
             raise FileNotFoundError(f'Metadata file "{path}" does not exist.')
 
         return metaInfo
 
     def saveMetadata(self):
-        """
-        Save model metadata to a JSON file. The file is stored in the output directory of the model.
+        """Save model metadata to a JSON file. The file is stored in the output directory of the model.
 
         Returns:
             str: absolute path to the JSON file containing the model metadata
@@ -303,29 +265,26 @@ class QSPRModel(ABC):
         return self.metaFile
 
     def save(self):
-        """
-        Save the model data, parameters, metadata and all other files to the output directory of the model.
+        """Save the model data, parameters, metadata and all other files to the output directory of the model.
 
         Returns:
             dict: dictionary containing the model metadata that was saved
         """
-
         self.metaInfo['name'] = self.name
         self.metaInfo['version'] = VERSION
         self.metaInfo['model_class'] = self.classPath
-        self.metaInfo['task'] = str(self.task)
-        self.metaInfo['th'] = self.data.th if self.data else self.metaInfo['th']
-        self.metaInfo['nClasses'] = self.nClasses
-        self.metaInfo['target_property'] = self.targetProperty
+        self.metaInfo['target_properties'] = TargetProperty.toList(
+            copy.deepcopy(self.data.targetProperties), task_as_str=True)
         self.metaInfo['parameters_path'] = self.saveParams(self.parameters).replace(f"{self.baseDir}/", '')
-        self.metaInfo['feature_calculator_path'] = self.saveDescriptorCalculator().replace(f"{self.baseDir}/", '') if self.featureCalculator else None
-        self.metaInfo['feature_standardizer_path'] = self.saveStandardizer().replace(f"{self.baseDir}/", '') if self.featureStandardizer else None
+        self.metaInfo['feature_calculator_path'] = self.saveDescriptorCalculator().replace(
+            f"{self.baseDir}/", '') if self.featureCalculator else None
+        self.metaInfo['feature_standardizer_path'] = self.saveStandardizer().replace(
+            f"{self.baseDir}/", '') if self.featureStandardizer else None
         self.metaInfo['model_path'] = self.saveModel().replace(f"{self.baseDir}/", '')
         return self.saveMetadata()
 
     def checkForData(self, exception=True):
-        """
-        Check if the model has data set.
+        """Check if the model has data set.
 
         Args:
             exception (bool): if true, an exception is raised if no data is set
@@ -333,10 +292,10 @@ class QSPRModel(ABC):
         Returns:
             bool: True if data is set, False otherwise (if exception is False)
         """
-
         hasData = self.data is not None
         if exception and not hasData:
-            raise ValueError('No data set specified. Make sure you initialized this model with a "QSPRDataset" instance to train on.')
+            raise ValueError(
+                'No data set specified. Make sure you initialized this model with a "QSPRDataset" instance to train on.')
 
         return hasData
 
@@ -347,8 +306,9 @@ class QSPRModel(ABC):
 
     @abstractmethod
     def evaluate(self, save=True):
-        """Make predictions for crossvalidation and independent test set. If save is True, the predictions are saved to a file
-        in the output directory.
+        """Make predictions for crossvalidation and independent test set.
+
+        If save is True, the predictions are saved to a file in the output directory.
 
         Arguments:
             save (bool): don't save predictions when used in bayesian optimization
@@ -398,7 +358,7 @@ class QSPRModel(ABC):
         # select either grid or bayes optimization parameters from param array
         optim_params = optim_params[optim_params[:, 2] == optim_type, :]
 
-        # check all modeltypes to be used have parameter grid
+        # check all ModelTasks to be used have parameter grid
         model_types = [model_types] if isinstance(
             model_types, str) else model_types
 
@@ -411,10 +371,8 @@ class QSPRModel(ABC):
         return optim_params
 
     @abstractmethod
-    def loadModel(self, alg : Union[Type, object] = None, params : dict = None):
-        """
-
-        Initialize model instance with the given parameters. If no algorithm is given, the model is loaded from file based on available metadata. If no parameters are given, they are also loaded from the available file.
+    def loadModel(self, alg: Union[Type, object] = None, params: dict = None):
+        """Initialize model instance with the given parameters. If no algorithm is given, the model is loaded from file based on available metadata. If no parameters are given, they are also loaded from the available file.
 
         Arguments:
             alg (object): algorithm class to instantiate
@@ -424,8 +382,7 @@ class QSPRModel(ABC):
 
     @abstractmethod
     def saveModel(self) -> str:
-        """
-        Save the underlying model to file.
+        """Save the underlying model to file.
 
         Returns:
             str: path to the saved model
@@ -433,9 +390,8 @@ class QSPRModel(ABC):
         pass
 
     @abstractmethod
-    def predict(self, X : Union[pd.DataFrame, np.ndarray, QSPRDataset]):
-        """
-        Make predictions for the given data matrix or `QSPRDataset`.
+    def predict(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+        """Make predictions for the given data matrix or `QSPRDataset`.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predictions for
@@ -443,18 +399,15 @@ class QSPRModel(ABC):
         Returns:
             np.ndarray: an array of predictions, can be a 1D array for single target models or a 2D/3D array for multi-target/multi-class models
         """
-
         pass
 
     @abstractmethod
-    def predictProba(self, X : Union[pd.DataFrame, np.ndarray, QSPRDataset]):
-        """
-        Make predictions for the given data matrix or `QSPRDataset`, but use probabilities for classification models.
+    def predictProba(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
+        """Make predictions for the given data matrix or `QSPRDataset`, but use probabilities for classification models.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predictions for
         """
-
         pass
 
     def predictMols(self, mols: List[str], use_probas: bool = False,
@@ -469,55 +422,56 @@ class QSPRModel(ABC):
             smiles_standardizer: either `chembl`, `old`, or a partial function that reads and standardizes smiles.
             n_jobs: Number of jobs to use for parallel processing.
             fill_value: Value to use for missing values in the feature matrix.
+
+        Returns:
+            np.ndarray: an array of predictions, can be a 1D array for single target models, 2D array for multi target and a list of 2D arrays for multi-target and multi-class models
         """
 
-        dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False,
-                                           n_jobs=n_jobs)
-        dataset.addProperty(self.targetProperty, np.nan)
-        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperty, drop_empty=False, drop_invalids=False,
-                                           n_jobs=n_jobs)
-        dataset.standardizeSmiles('chembl', drop_invalid=False)
-        failed_mask = dataset.dropInvalids().to_list()
-        failed_indices = [idx for idx,x in enumerate(failed_mask) if x]
+        dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False, n_jobs=n_jobs)
+        for targetproperty in self.targetProperties:
+            dataset.addProperty(targetproperty.name, np.nan)
+        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False, n_jobs=n_jobs)
+        dataset.standardizeSmiles(smiles_standardizer, drop_invalid=False)
+        failed_mask = dataset.dropInvalids().values
+
         if not self.featureCalculator:
             raise ValueError("No feature calculator set on this instance.")
         dataset.prepareDataset(
             smiles_standardizer=smiles_standardizer,
             feature_calculator=self.featureCalculator,
             feature_standardizer=self.featureStandardizer,
-            fill_value=fill_value
+            feature_fill_value=fill_value
         )
-        if self.task == ModelTasks.REGRESSION or not use_probas:
+        if self.task.isRegression() or not use_probas:
             predictions = self.predict(dataset)
-            if (isclass(self.alg) and self.alg.__name__ == 'PLSRegression') or (type(self.alg).__name__ == 'PLSRegression'):
-                predictions = predictions[:, 0]
-            if self.task == ModelTasks.CLASSIFICATION:
+            # always return 2D array
+            if predictions.ndim == 1:
+                predictions = predictions.reshape(-1, 1)
+            if self.task.isClassification():
                 predictions = predictions.astype(int)
         else:
+            # NOTE: if a multiclass-multioutput, this will return a list of 2D arrays
             predictions = self.predictProba(dataset)
 
-        if failed_indices:
-            dim = 1 if len(predictions.shape) == 1 else predictions.shape[1]
-            ret = []
-            predictions = list(predictions)
-            for idx, pred in enumerate(mols):
-                if idx in failed_indices:
-                    ret.append([np.nan] * dim if dim > 1 else np.nan)
-                else:
-                    ret.append(predictions.pop(0))
-            return np.array(ret)
-        else:
-            return predictions
+        if any(failed_mask):
+            # fill in the failed predictions with None
+            if isinstance(predictions, list):
+                predictions_with_invalids = [np.full((len(mols), pred.shape[1]), None) for pred in predictions]
+                for i, pred in enumerate(predictions):
+                    predictions_with_invalids[i][~failed_mask, :] = pred
+            else:
+                predictions_with_invalids = np.full((len(mols), predictions.shape[1]), None)
+                predictions_with_invalids[~failed_mask, :] = predictions
+            predictions = predictions_with_invalids
+        return predictions
 
     @classmethod
     def fromFile(cls, path):
-        """
-        Load a model from its meta file.
+        """Load a model from its meta file.
 
         Args:
             path (str): full path to the model meta file
         """
-
         meta = cls.readMetadata(path)
         model_class = import_class(meta["model_class"])
         model_name = meta["name"]
@@ -525,10 +479,7 @@ class QSPRModel(ABC):
         return model_class(name=model_name, base_dir=base_dir)
 
     def cleanFiles(self):
-        """
-        Clean up the model files. Removes the model directory and all its contents.
-        """
-
+        """Clean up the model files. Removes the model directory and all its contents."""
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
@@ -544,21 +495,26 @@ class QSPRModel(ABC):
                 GridSearch and BayesOptimization.
 
         Returns:
-            score_func (Callable): scorer function from sklearn.metrics (`str` as input)
-            or user-defined function (`callable` as input)
+            score_func (Callable): scorer function from sklearn.metrics (`str` as input) wrapped in the SklearnMetric class
+            or user-defined function (`callable` as input, if classification metric should have an attribute `needs_proba_to_score`,
+                                      set to `True` if is needs probabilities instead of predictions).
         """
-        if all([scoring not in self._supported_scoring, isinstance(scoring, str)]):
+        if all([scoring not in SklearnMetric.supported_metrics, isinstance(scoring, str)]):
             raise ValueError("Scoring function %s not supported. Supported scoring functions are: %s"
-                             % (scoring, self._supported_scoring))
+                             % (scoring, SklearnMetric.supported_metrics))
         elif callable(scoring):
             return scoring
         elif scoring is None:
-            if self.data.task == ModelTasks.REGRESSION:
-                scorer = metrics.get_scorer('explained_variance')
-            elif self.data.nClasses > 2:  # multiclass
-                return lambda y_true, y_pred : metrics.roc_auc_score(y_true, y_pred, multi_class='ovr', average='weighted')
+            if self.task.isRegression():
+                scorer = SklearnMetric.getMetric('explained_variance')
+            elif self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_SINGLECLASS]:
+                scorer = SklearnMetric.getMetric('roc_auc_ovr_weighted')
+            elif self.task in [ModelTasks.SINGLECLASS]:
+                scorer = SklearnMetric.getMetric('roc_auc')
             else:
-                scorer = metrics.get_scorer('roc_auc')
+                raise ValueError("No supported scoring function for task %s" % self.task)
         else:
-            scorer = metrics.get_scorer(scoring)
-        return scorer._score_func
+            scorer = SklearnMetric.getMetric(scoring)
+
+        assert scorer.supportsTask(self.task), "Scoring function %s does not support task %s" % (scorer, self.task)
+        return scorer

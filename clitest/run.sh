@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -e
 
 export PYTHONPATH=".."
@@ -31,31 +33,32 @@ export N_TRIALS=2
 ###############
 python -m qsprpred.data_CLI \
 -b ${TEST_BASE} \
--d \
+-de \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
 -sm  ${SMILES} \
--pr  CL \
--th '{"CL":[6.5],"fu":[0,0.2,0.5,4]}' \
+-pr  CL fu \
+-th '{"CL":[6.5],"fu":[0.3]}' \
 -lt '{"CL":true,"fu":false}' \
 -sp 'time' \
 -stc 'Year of first disclosure' \
 -st 2000 \
 -fe Morgan \
 -fe RDkit \
--pd ../qsprpred/data/test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/SVC_CLASSIFICATION_meta.json \
+-pd ../qsprpred/data/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json \
 -lv 0.01 \
--hc 0.9
+-hc 0.9 \
+-fv 0.0
 
 ###############
 # MODELLING #
 ###############
 python -m qsprpred.model_CLI \
 -b ${TEST_BASE} \
--d \
+-de \
+-dp CL_fu_SINGLECLASS \
 -ncpu ${N_CPUS} \
--pr CL \
--m RF \
+--model_types RF \
 -s \
 -o ${OPTIMIZATION} \
 -ss ${SEARCH_SPACE} \
@@ -67,11 +70,13 @@ python -m qsprpred.model_CLI \
 ###############
 python -m qsprpred.predict_CLI \
 -b ${TEST_BASE} \
--d \
+-de \
 -i ${TEST_DATA} \
 -ncpu ${N_CPUS} \
--sm  ${SMILES} \
--pr CL \
--m RF \
+-mp ./qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
+-pr \
+-fv 0.0
+
+echo "All tests finished without errors."
 
 cleanup

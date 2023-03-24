@@ -33,8 +33,9 @@ from qsprpred.data.utils.featurefilters import (
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
 
@@ -45,7 +46,7 @@ def QSPRArgParser(txt=None):
     # base arguments
     parser.add_argument('-b', '--base_dir', type=str, default='.',
                         help="Base directory which contains a folder 'data' with input files")
-    parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-de', '--debug', action='store_true')
     parser.add_argument('-ran', '--random_state', type=int, default=1, help="Seed for the random state")
     parser.add_argument('-i', '--input', type=str, default='dataset.tsv',
                         help="tsv file name that contains SMILES and property value column")
@@ -59,6 +60,7 @@ def QSPRArgParser(txt=None):
                         help="properties to be predicted identifiers. Add this argument for each model to be trained \
                               e.g. for one multi-task model for CL and Fu and one single task for CL do:\
                               -pr CL Fu -pr CL")
+    parser.add_argument('-im', '--imputation', type=str, choices=['mean', 'median', 'most_frequent'])
 
     # model type arguments
     parser.add_argument('-r', '--regression', type=str, default=None,
@@ -114,10 +116,6 @@ def QSPRArgParser(txt=None):
     else:
         args = parser.parse_args()
 
-    for props in args.properties:
-        if len(props) > 1:
-            sys.exit("Multitask not yet implemented")
-
     # If no regression argument, does both regression and classification
     if args.regression is None:
         args.regression = [True, False]
@@ -137,10 +135,9 @@ def QSPR_dataprep(args):
         os.makedirs(args.base_dir + '/qspr/data')
 
     for reg in args.regression:
-        task = ModelTasks.REGRESSION if reg else ModelTasks.CLASSIFICATION
-        reg_abbr = 'REGRESSION' if reg else 'CLASSIFICATION'
-        for property in args.properties:
-            log.info(f"Property: {property[0]} {reg_abbr}")
+        for props in args.properties:
+            props_name = '_'.join(props)
+            log.info(f"Property: {props_name}")
             try:
                 df = pd.read_csv(f'{args.base_dir}/data/{args.input}', sep='\t')
             except BaseException:
@@ -148,22 +145,44 @@ def QSPR_dataprep(args):
                 sys.exit()
 
             # prepare dataset for training QSPR model
-            th = args.threshold[property[0]] if args.threshold else None
-            if task == ModelTasks.REGRESSION and th:
-                log.warning("Threshold argument specified with regression. Threshold will be ignored.")
-                th = None
-            log_transform = np.log if args.log_transform and args.log_transform[property[0]] else None
+            target_props = []
+            for prop in props:
+                th = args.threshold[prop] if args.threshold else None
+                if reg:
+                    task = TargetTasks.REGRESSION
+                else:
+                    if th is None:
+                        task = TargetTasks.MULTICLASS if len(
+                            df[prop].dropna().unique()) > 2 else TargetTasks.SINGLECLASS
+                        th = 'precomputed'
+                    else:
+                        task = TargetTasks.SINGLECLASS if len(th) == 1 else TargetTasks.MULTICLASS
+                if task == TargetTasks.REGRESSION and th:
+                    log.warning("Threshold argument specified with regression. Threshold will be ignored.")
+                    th = None
+                log_transform = np.log if args.log_transform and args.log_transform[prop] else None
+                target_props.append({"name": prop, "task": task, "th": th, "transformer": log_transform})
+
+            # missing value imputation
+            if args.imputation is not None:
+                if args.imputation == 'mean':
+                    imputer = SimpleImputer(strategy='mean')
+                elif args.imputation == 'median':
+                    imputer = SimpleImputer(strategy='median')
+                elif args.imputation == 'most_frequent':
+                    imputer = SimpleImputer(strategy='most_frequent')
+                else:
+                    sys.exit("invalid impute arg given")
+
             mydataset = QSPRDataset(
-                f"{reg_abbr}_{property[0]}",
-                target_prop=property[0],
+                f"{props_name}_{task}",
+                target_props=target_props,
                 df=df,
                 smilescol=args.smilescol,
-                task=task,
-                th=th,
                 n_jobs=args.ncpu,
-                target_transformer=log_transform,
                 store_dir=f"{args.base_dir}/qspr/data/",
-                overwrite=True)
+                overwrite=True,
+                target_imputer=imputer if args.imputation is not None else None)
 
             # data filters
             datafilters = []
@@ -173,7 +192,7 @@ def QSPR_dataprep(args):
             # data splitter
             if args.split == 'scaffold':
                 split = scaffoldsplit(test_fraction=args.split_fraction, scaffold=Murcko(), dataset=mydataset)
-            elif args.split == 'temporal':
+            elif args.split == 'time':
                 split = temporalsplit(timesplit=args.split_time, timeprop=args.split_timecolumn, dataset=mydataset)
             else:
                 split = randomsplit(test_fraction=args.split_fraction)
@@ -215,7 +234,7 @@ def QSPR_dataprep(args):
             # prepare dataset for modelling
             mydataset.prepareDataset(feature_calculator=DescriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, feature_filters=featurefilters,
-                                     feature_standardizer=StandardScaler(), fill_value=args.fill_value)
+                                     feature_standardizer=StandardScaler(), feature_fill_value=0.0)
 
             # save dataset files and fingerprints
             mydataset.save()

@@ -4,7 +4,7 @@ stages:
    - test
    - deploy
 
-# Install python dependencies and run python tests with pytest (output more readable than unittest)
+# Install python dependencies and run python tests with pytest and the CLI test script
 .test:
    stage: test
    before_script:
@@ -14,6 +14,7 @@ stages:
       - pip freeze # For debugging environment
    script:
       - pytest qsprpred
+      - cd clitest && ./run.sh
 
 # Run tests on Python version 10 (linux image)
 test:python3.10:
@@ -25,7 +26,7 @@ test:python3.10:
 #   extends: .test
 #   image: python:3.9
 
-# Write documentation on main or tagged branches
+# Write documentation on main branch
 pages:
    stage: deploy
    image: python:3.10
@@ -40,4 +41,3 @@ pages:
       - public
    only:
       - main
-      - tags

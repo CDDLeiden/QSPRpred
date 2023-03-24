@@ -10,13 +10,12 @@ from unittest import TestCase
 import pandas as pd
 from matplotlib.axes import SubplotBase
 from matplotlib.figure import Figure
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-
 from qsprpred.models.models import QSPRsklearn
-from qsprpred.models.tasks import ModelTasks
+from qsprpred.models.tasks import TargetTasks
 from qsprpred.models.tests import ModelDataSetsMixIn
-from qsprpred.plotting.classification import ROCPlot, MetricsPlot
+from qsprpred.plotting.classification import MetricsPlot, ROCPlot
 from qsprpred.plotting.regression import CorrelationPlot
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 
 class ROCPlotTest(ModelDataSetsMixIn, TestCase):
@@ -31,7 +30,10 @@ class ROCPlotTest(ModelDataSetsMixIn, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_roc_plot_single_data", task=ModelTasks.CLASSIFICATION, th=[50], preparation_settings=self.get_default_prep())
+        dataset = self.create_large_dataset(
+            "test_roc_plot_single_data",
+            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [50]}],
+            preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_roc_plot_single_model")
         model.evaluate(save=True)
         model.save()
@@ -39,14 +41,15 @@ class ROCPlotTest(ModelDataSetsMixIn, TestCase):
         plt = ROCPlot([model])
 
         # cross validation plot
-        ax = plt.make(validation='cv')[0]
+        ax = plt.make("CL_class", validation='cv')[0]
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.cv.png"))
 
         # independent test set plot
-        ax = plt.make(validation='ind')[0]
+        ax = plt.make("CL_class", validation='ind')[0]
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.ind.png"))
+
 
 class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
 
@@ -60,7 +63,10 @@ class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
         )
 
     def test_plot_single(self):
-        dataset = self.create_large_dataset("test_metrics_plot_single_data", task=ModelTasks.CLASSIFICATION, th=[50], preparation_settings=self.get_default_prep())
+        dataset = self.create_large_dataset(
+            "test_metrics_plot_single_data",
+            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [50]}],
+            preparation_settings=self.get_default_prep())
         model = self.get_model(dataset, "test_metrics_plot_single_model")
         model.evaluate(save=True)
         model.save()
@@ -68,7 +74,7 @@ class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
         plt = MetricsPlot([model])
 
         # generate metrics plot and associated files
-        figures, summary = plt.make(out_dir=model.outDir)
+        figures, summary = plt.make("CL_class", out_dir=model.outDir)
         for fig, ax in figures:
             self.assertIsInstance(fig, Figure)
         self.assertIsInstance(summary, pd.DataFrame)
@@ -96,7 +102,7 @@ class CorrPlotTest(ModelDataSetsMixIn, TestCase):
         plt = CorrelationPlot([model])
 
         # generate metrics plot and associated files
-        axes, summary = plt.make(out_dir=model.outDir)
+        axes, summary = plt.make("CL", out_dir=model.outDir)
         self.assertIsInstance(summary, pd.DataFrame)
         for ax in axes:
             self.assertIsInstance(ax, SubplotBase)
