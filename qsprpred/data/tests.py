@@ -492,6 +492,28 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             index_cols=["fu"]
         ))
 
+    @parameterized.expand([(1,), (N_CPU,)])
+    def test_invalids_detection(self, n_cpu):
+        df = self.getBigDF()
+        all_mols = len(df)
+        dataset = QSPRDataset(
+            "test_invalids_detection",
+            "CL",
+            df=df,
+            store_dir=self.qsprdatapath,
+            drop_invalids=False,
+            drop_empty=False,
+            n_jobs=n_cpu,
+        )
+        self.assertEqual(dataset.df.shape[0], df.shape[0])
+        self.assertRaises(ValueError, lambda : dataset.checkMols())
+        self.assertRaises(ValueError, lambda : dataset.addDescriptors(DescriptorsCalculator(
+            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)])))
+        invalids = dataset.checkMols(throw=False)
+        self.assertEqual(sum(~invalids), 1)
+        dataset.dropInvalids()
+        self.assertEqual(dataset.df.shape[0], all_mols - 1)
+
 
 class TestDataSplitters(DataSetsMixIn, TestCase):
     """
@@ -870,6 +892,22 @@ class TestFeatureStandardizer(DataSetsMixIn, TestCase):
                 scaled_features,
                 scaled_features_fromfile),
             True)
+
+
+class TestStandardizer(DataSetsMixIn, TestCase):
+
+    def test_invalid_filter(self):
+        df = self.getSmallDF()
+        orig_len = len(df)
+        mask = [False] * orig_len
+        mask[0] = True
+        df.loc[mask,"SMILES"] = "C(C)(C)(C)(C)(C)(C)(C)(C)(C)" # create molecule with bad valence
+
+        dataset = QSPRDataset("standardization_test_invalid_filter", df=df, target_prop="CL", drop_invalids=False, drop_empty=False)
+        dataset.standardizeSmiles('chembl', drop_invalid=False)
+        self.assertEqual(len(dataset), len(df))
+        dataset.standardizeSmiles('chembl', drop_invalid=True)
+        self.assertEqual(len(dataset), orig_len-1)
 
 class TestDataSetPreparation(DataSetsMixIn, TestCase):
     """

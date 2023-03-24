@@ -476,8 +476,9 @@ class QSPRModel(ABC):
         dataset.addProperty(self.targetProperty, np.nan)
         dataset = QSPRDataset.fromMolTable(dataset, self.targetProperty, drop_empty=False, drop_invalids=False,
                                            n_jobs=n_jobs)
+        dataset.standardizeSmiles('chembl', drop_invalid=False)
         failed_mask = dataset.dropInvalids().to_list()
-        failed_indices = [idx for idx,x in enumerate(failed_mask) if not x]
+        failed_indices = [idx for idx,x in enumerate(failed_mask) if x]
         if not self.featureCalculator:
             raise ValueError("No feature calculator set on this instance.")
         dataset.prepareDataset(
