@@ -10,8 +10,7 @@ from Bio.Align.Applications import ClustalOmegaCommandline
 
 class ClustalMSA:
 
-    def __init__(self, email : str, out_dir : str = "."):
-        self.email = email
+    def __init__(self, out_dir : str = "."):
         self.outDir = out_dir
 
     def __call__(self, sequences: dict[str : str], **kwargs):

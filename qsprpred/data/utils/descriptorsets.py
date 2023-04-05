@@ -4,7 +4,6 @@ To add a new descriptor or fingerprint calculator:
 * Add a descriptor subclass for your descriptor calculator
 * Add a function to retrieve your descriptor by name to the descriptor retriever class
 """
-import importlib
 from abc import ABC, abstractmethod
 from typing import Optional, Union, List
 
@@ -183,7 +182,10 @@ class ProDecDescriptorSet(ProteinDescriptorSet, NeedsMSAMixIn):
         for descriptor in self.sets:
             df = df.merge(self.calculate_descriptor(self.factory, self.msa, descriptor), left_index=True, right_index=True)
 
-        self._descriptors = df.columns.tolist()
+        if not self._descriptors:
+            self._descriptors = df.columns.tolist()
+        else:
+            df.drop(columns=[col for col in df.columns if col not in self._descriptors], inplace=True)
 
         return df
 

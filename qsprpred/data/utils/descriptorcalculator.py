@@ -12,13 +12,18 @@ from qsprpred.data.utils.descriptorsets import get_descriptor, DescriptorSet, \
 from qsprpred.logs import logger
 from rdkit.Chem.rdchem import Mol
 
+from qsprpred.utils.inspect import import_class
+
+
 class DescriptorsCalculator(ABC):
     """Calculator for various descriptors of molecules."""
 
     __in__ = __contains__ = lambda self, x: x in self.descsets
 
-    def __str__(self):
-        return f"{self.__class__.__name__}_{'_'.join([str(x) for x in self.descsets])}"
+    @abstractmethod
+    def getPrefix(self) -> str:
+        """Return prefix for descriptor names of the calculator."""
+        pass
 
     def __init__(self, descsets: List[DescriptorSet]) -> None:
         """Set the descriptorsets to be calculated with this calculator."""
@@ -31,6 +36,8 @@ class DescriptorsCalculator(ABC):
 
         descsets = []
         for key, value in descset_dict.items():
+            if key == "calculator":
+                continue
             if key.startswith("FingerprintSet_"):
                 key = "FingerprintSet"
             descset = get_descriptor(key, **value["settings"])
@@ -43,6 +50,19 @@ class DescriptorsCalculator(ABC):
         return descsets
 
     @classmethod
+    def classFromFile(cls, fname: str):
+        """Initialize descriptorset from a json file.
+
+        Args:
+            fname: file name of json file with descriptor names and settings
+        """
+
+        with open(fname, "r") as infile:
+            descset_dict = json.load(infile)
+            return import_class(descset_dict["calculator"])
+
+
+    @classmethod
     def fromFile(cls, fname: str):
         """Initialize descriptorset from a json file.
 
@@ -50,8 +70,9 @@ class DescriptorsCalculator(ABC):
             fname: file name of json file with descriptor names and settings
         """
 
-        descsets = cls.loadDescriptorSets(fname)
-        return cls(descsets)
+        cl = cls.classFromFile(fname)
+        descsets = cl.loadDescriptorSets(fname)
+        return cl(descsets)
 
     @abstractmethod
     def __call__(self, *args, **kwargs) -> pd.DataFrame:
@@ -84,6 +105,8 @@ class DescriptorsCalculator(ABC):
                     "settings": descset.settings,
                     "descriptors": descset.descriptors,
                 }
+            descset_dict[descset.__str__()]["class"] = descset.__class__.__name__
+        descset_dict["calculator"] = self.__class__.__name__
         with open('%s' % fname, "w") as outfile:
             json.dump(descset_dict, outfile)
 
@@ -97,9 +120,9 @@ class DescriptorsCalculator(ABC):
         for idx, descriptorset in enumerate(self.descsets):
             # Find all descriptors in current descriptorset
             descs_from_curr_set = [
-                f.replace(f"Descriptor_{descriptorset}_", "")
+                f.replace(f"{self.getPrefix()}_{descriptorset}_", "")
                 for f in descriptors
-                if f.startswith(f"Descriptor_{descriptorset}_")
+                if f.startswith(f"{self.getPrefix()}_{descriptorset}_")
             ]
             # if there are none to keep from current descriptors set, skip the whole set
             if not descs_from_curr_set:
@@ -167,16 +190,19 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
             values = values.astype(dtype)
             values = self.treatInfs(values)
             df = pd.concat([df, values.add_prefix(
-                f"Descriptor_{descset}_")], axis=1)
+                f"{self.getPrefix()}_{descset}_")], axis=1)
 
         # replace errors by nan values
         df = df.apply(pd.to_numeric, errors='coerce')
 
         return df
 
+    def getPrefix(self) -> str:
+        return "Descriptor"
+
 class ProteinDescriptorCalculator(DescriptorsCalculator):
 
-    def __init__(self, descsets: List[ProteinDescriptorSet], msa_provider = ClustalMSA("qsprpred@example.com")) -> None:
+    def __init__(self, descsets: List[ProteinDescriptorSet], msa_provider = ClustalMSA()) -> None:
         super().__init__(descsets)
         self.msaProvider = msa_provider
 
@@ -194,7 +220,10 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
                 values.add_prefix(f"{descset.fingerprint_type}_")
             values = values.astype(dtype)
             values = self.treatInfs(values)
-            values = values.add_prefix(f"Descriptor_PCM_{descset}_")
+            values = values.add_prefix(f"{self.getPrefix()}_{descset}_")
             df = df.merge(values, left_index=True, right_index=True)
 
         return df
+
+    def getPrefix(self) -> str:
+        return "Descriptor_PCM"

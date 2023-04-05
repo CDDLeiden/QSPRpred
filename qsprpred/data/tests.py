@@ -747,7 +747,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
         dataset_new = QSPRDataset.fromFile(dataset.storePath)
         self.validate_split(dataset_new)
-        self.assertTrue(dataset_new.descriptorCalculator)
+        self.assertTrue(dataset_new.descriptorCalculators)
         self.assertTrue(dataset_new.feature_standardizer)
         self.assertTrue(dataset_new.fold_generator.featureStandardizer)
         self.assertTrue(len(dataset_new.featureNames) == 1024)
@@ -958,14 +958,15 @@ class TestPCMDescriptorCalculation(DataSetsMixIn, TestCase):
         pass
 
     def test_ProDec(self):
-        #conda install -c bioconda clustalo
+        # conda install -c bioconda clustalo
         # pip install prodec rich-msa xmltramp2
         # pip install git+https://github.com/OlivierBeq/Papyrus-scripts.git
         # pip install biopython
+        # TODO: incorporate into setup.py
         descset = ProDecDescriptorSet(sets=["Zscale Hellberg"])
         protein_feature_calculator = ProteinDescriptorCalculator(
             descsets=[descset],
-            msa_provider=ClustalMSA(email="qsprpredtest@example.com", out_dir=self.dataset.storeDir),
+            msa_provider=ClustalMSA(out_dir=self.dataset.storeDir),
         )
         self.dataset.addProteinDescriptors(calculator=protein_feature_calculator)
         self.dataset.featurizeSplits() # FIXME: make sure protein descriptors are seen as features
@@ -1249,7 +1250,7 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
         self.assertEqual(dataset.name, name)
         self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
         self.assertEqual(dataset.targetProperties[0].name, "CL")
-        self.assertIsInstance(dataset.descriptorCalculator, feature_calculator.__class__)
+        self.assertIsInstance(dataset.descriptorCalculators, feature_calculator.__class__)
         if feature_standardizer is not None:
             self.assertIsInstance(dataset.feature_standardizer, SKLearnStandardizer)
         else:
@@ -1293,7 +1294,7 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
         dataset.prepareDataset(**preparation)
 
         # test some basic consistency rules on the resulting features
-        expected_length = sum([len(x.descriptors) for x in descriptor_sets if x in dataset.descriptorCalculator])
+        expected_length = sum([len(x.descriptors) for x in descriptor_sets if x in dataset.descriptorCalculators])
         self.feature_consistency_checks(dataset, expected_length)
 
         # save to file and check if it can be loaded and the features are still there and correct
@@ -1303,11 +1304,11 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
             if ds_loaded_prop.task.isClassification():
                 self.assertEqual(ds_loaded_prop.name, f"{target_prop['name']}_class")
                 self.assertEqual(ds_loaded_prop.task, target_prop['task'])
-        self.assertTrue(ds_loaded.descriptorCalculator)
+        self.assertTrue(ds_loaded.descriptorCalculators)
         self.assertTrue(
             isinstance(
-                ds_loaded.descriptorCalculator,
+                ds_loaded.descriptorCalculators,
                 MoleculeDescriptorsCalculator))
-        for descset in ds_loaded.descriptorCalculator.descsets:
+        for descset in ds_loaded.descriptorCalculators.descsets:
             self.assertTrue(isinstance(descset, MoleculeDescriptorSet))
         self.feature_consistency_checks(dataset, expected_length)

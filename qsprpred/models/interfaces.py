@@ -79,7 +79,7 @@ class QSPRModel(ABC):
             self.parameters = self.readParams(os.path.join(self.baseDir, self.metaInfo['parameters_path']))
 
         # initialize a feature calculator instance
-        self.featureCalculator = self.data.descriptorCalculator if self.data else self.readDescriptorCalculator(
+        self.featureCalculator = self.data.descriptorCalculators if self.data else self.readDescriptorCalculator(
             os.path.join(self.baseDir, self.metaInfo['feature_calculator_path']))
 
         # initialize a standardizer instance

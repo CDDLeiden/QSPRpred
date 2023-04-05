@@ -114,14 +114,14 @@ class MoleculeTable(MoleculeDataSet):
         self.indexCols = index_cols
         self.includesRdkit = add_rdkit
         self.name = name
-        self.descriptorCalculator = None
+        self.descriptorCalculators = None
         self.nJobs = n_jobs if n_jobs > 0 else os.cpu_count()
         self.chunkSize = chunk_size
 
         # paths
         self.storeDir = store_dir.rstrip("/")
         self.storePrefix = f"{self.storeDir}/{self.name}"
-        self.descriptorCalculatorPath = f"{self.storePrefix}_feature_calculators.json"
+        self.descriptorCalculatorsPathPrefix = f"{self.storePrefix}_descriptor_calculator"
         if not os.path.exists(self.storeDir):
             raise FileNotFoundError(f"Directory '{self.storeDir}' does not exist.")
         self.storePath = f'{self.storePrefix}_df.pkl'
@@ -204,8 +204,9 @@ class MoleculeTable(MoleculeDataSet):
         self.df.to_pickle(self.storePath)
 
         # save descriptor calculator
-        if self.descriptorCalculator:
-            self.descriptorCalculator.toFile(self.descriptorCalculatorPath)
+        if self.descriptorCalculators:
+            for calc in self.descriptorCalculators:
+                calc.toFile(f"{self.descriptorCalculatorsPathPrefix}_{calc}.json")
 
         return self.storePath
 
@@ -218,8 +219,13 @@ class MoleculeTable(MoleculeDataSet):
     def reload(self):
         """Reload the data table from disk."""
         self.df = pd.read_pickle(self.storePath)
-        if os.path.exists(self.descriptorCalculatorPath):
-            self.descriptorCalculator = MoleculeDescriptorsCalculator.fromFile(self.descriptorCalculatorPath)
+        files = [f for f in os.listdir(self.storeDir) if f.endswith('.json') and f.startswith(f"{self.name}_descriptor_calculator")]
+        if files:
+            self.descriptorCalculators = []
+        for file in files:
+            path = f"{self.storeDir}/{file}"
+            if os.path.exists(path):
+                self.descriptorCalculators.append(DescriptorsCalculator.fromFile(path))
 
     @staticmethod
     def fromFile(filename, *args, **kwargs) -> 'MoleculeTable':
@@ -405,9 +411,9 @@ class MoleculeTable(MoleculeDataSet):
             fail_on_invalid (bool): Whether to throw an exception if any molecule is invalid.
         """
         if recalculate:
-            self.df.drop(self.getDescriptorNames(), axis=1, inplace=True)
-        elif self.hasDescriptors:
-            logger.warning(f"Descriptors already exist in {self.name}. Use `recalculate=True` to overwrite them.")
+            self.df.drop(self.getDescriptorNames(prefix=calculator.getPrefix()), axis=1, inplace=True)
+        elif self.getDescriptorNames(prefix=calculator.getPrefix()):
+            logger.warning(f"Molecular descriptors already exist in {self.name}. Use `recalculate=True` to overwrite them.")
             return
 
         if fail_on_invalid:
@@ -429,23 +435,34 @@ class MoleculeTable(MoleculeDataSet):
         descriptors = pd.concat(descriptors, axis=0)
         descriptors.index = self.df.index
         self.df = self.df.join(descriptors, how='left')
-        self.descriptorCalculator = calculator
+        self._update_descriptor_calculators(calculator)
 
-    def getDescriptors(self):
+    def _update_descriptor_calculators(self, calculator: DescriptorsCalculator):
+        if not self.descriptorCalculators:
+            self.descriptorCalculators = []
+        else:
+            self.descriptorCalculators = [x for x in self.descriptorCalculators if isinstance(x, MoleculeDescriptorsCalculator)]
+        self.descriptorCalculators.append(calculator)
+
+    def getDescriptors(self, prefix=None):
         """Get the subset of the data frame that contains only descriptors.
 
         Returns:
             pd.DataFrame: Data frame containing only descriptors.
         """
-        return self.df[self.getDescriptorNames()]
+        return self.df[self.getDescriptorNames(prefix=prefix)]
 
-    def getDescriptorNames(self):
+    def getDescriptorNames(self, prefix=None):
         """Get the names of the descriptors in the data frame.
 
         Returns:
             list: List of descriptor names.
         """
-        return [col for col in self.df.columns if col.startswith("Descriptor_")]
+        if not prefix:
+            prefixes = [x for x in self.descriptorCalculators] if self.descriptorCalculators else []
+        else:
+            prefixes = [prefix]
+        return [col for col in self.df.columns if any([col.startswith(prefix) for prefix in prefixes])]
 
     @property
     def hasDescriptors(self):
@@ -602,6 +619,8 @@ class MoleculeTable(MoleculeDataSet):
         descriptors = calculator(self.df[self.proteincol].unique(), sequences, **info)
 
         self.df = self.df.merge(descriptors, left_on=self.proteincol, right_index=True, how="left")
+
+        self._update_descriptor_calculators(calculator)
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
         """Apply smiles_standardizer to the compounds in parallel
@@ -1037,11 +1056,12 @@ class QSPRDataset(MoleculeTable):
             List[str]: list of feature names
         """
         features = None if not self.hasDescriptors else self.getDescriptorNames()
-        if self.descriptorCalculator:
+        if self.descriptorCalculators:
             features = []
-            for descset in self.descriptorCalculator.descsets:
-                features.extend([f"{descset}_{x}" for x in descset.descriptors])
-            features = [f"Descriptor_{f}" for f in features]
+            for calc in self.descriptorCalculators:
+                prefix = calc.getPrefix()
+                for descset in calc.descsets:
+                    features.extend([f"{prefix}_{descset}_{x}" for x in descset.descriptors])
 
         if self.metaInfo and ('feature_names' in self.metaInfo) and (self.metaInfo['feature_names'] is not None):
             features.extend([x for x in self.metaInfo['feature_names'] if x not in features])
@@ -1172,7 +1192,7 @@ class QSPRDataset(MoleculeTable):
 
         Args:
             mol_table (MoleculeTable): MoleculeTable to use as the data source
-            target_prop (str): name of the target property
+            target_props (list): list of target properties to use
             name (str, optional): name of the data set. Defaults to None.
             kwargs: additional keyword arguments to pass to the constructor
 
@@ -1183,7 +1203,7 @@ class QSPRDataset(MoleculeTable):
         name = mol_table.name if name is None else name
         return QSPRDataset(name, target_props, mol_table.getDF(), **kwargs)
 
-    def addDescriptors(self, calculator: DescriptorsCalculator, recalculate=False, featurize=True):
+    def addDescriptors(self, calculator: MoleculeDescriptorsCalculator, recalculate=False, featurize=True):
         """Add descriptors to the data set.
 
         If descriptors are already present, they will be recalculated if `recalculate` is `True`.
@@ -1191,11 +1211,28 @@ class QSPRDataset(MoleculeTable):
         converts current data matrices to pure numeric matrices of selected descriptors (features).
 
         Args:
-            calculator (DescriptorsCalculator): calculator instance to use for descriptor calculation
+            calculator (MoleculeDescriptorsCalculator): calculator instance to use for descriptor calculation
             recalculate (bool, optional): whether to recalculate descriptors if they are already present. Defaults to `False`.
             featurize (bool, optional): whether to featurize the data set after adding descriptors. Defaults to `True`.
         """
         super().addDescriptors(calculator, recalculate)
+        self.featureNames = self.getFeatureNames()
+        if featurize:
+            self.featurizeSplits()
+
+    def addProteinDescriptors(self, calculator: ProteinDescriptorCalculator, recalculate=False, featurize=True):
+        """Add protein descriptors to the data set.
+
+        If descriptors are already present, they will be recalculated if `recalculate` is `True`.
+        Featurization will be performed after adding descriptors if `featurize` is `True`. Featurazation
+        converts current data matrices to pure numeric matrices of selected descriptors (features).
+
+        Args:
+            calculator (ProteinDescriptorCalculator): calculator instance to use for descriptor calculation
+            recalculate (bool, optional): whether to recalculate descriptors if they are already present. Defaults to `False`.
+            featurize (bool, optional): whether to featurize the data set after adding descriptors. Defaults to `True`.
+        """
+        super().addProteinDescriptors(calculator, recalculate)
         self.featureNames = self.getFeatureNames()
         if featurize:
             self.featurizeSplits()
@@ -1351,8 +1388,10 @@ class QSPRDataset(MoleculeTable):
             logger.info(f"Selected features: {self.featureNames}")
 
             # update descriptor calculator
-            if self.descriptorCalculator is not None:
-                self.descriptorCalculator.keepDescriptors(self.featureNames)
+            if self.descriptorCalculators is not None:
+                for calc in self.descriptorCalculators:
+                    prefix = calc.getPrefix()
+                    calc.keepDescriptors([x for x in self.featureNames if x.startswith(prefix)])
 
     def setFeatureStandardizer(self, feature_standardizer):
         """Set feature standardizer.
@@ -1625,8 +1664,8 @@ class QSPRDataset(MoleculeTable):
         }
         ret = {
             'init': meta_init, 'standardizer_path': path.replace(
-                self.storePrefix, '') if path else None, 'descriptorcalculator_path': self.descriptorCalculatorPath.replace(
-                self.storePrefix, '') if self.descriptorCalculatorPath else None, 'feature_names': list(
+                self.storePrefix, '') if path else None, 'descriptorcalculator_path': self.descriptorCalculatorsPathPrefix.replace(
+                self.storePrefix, '') if self.descriptorCalculatorsPathPrefix else None, 'feature_names': list(
                 self.featureNames) if self.featureNames is not None else None, }
         path = f"{self.storePrefix}_meta.json"
         with open(path, 'w') as f:
