@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from qsprpred import VERSION
 from qsprpred.data.data import MoleculeTable, QSPRDataset, TargetProperty
-from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
@@ -31,7 +31,7 @@ class QSPRModel(ABC):
         alg (estimator): estimator instance or class
         parameters (dict): dictionary of algorithm specific parameters
         model (estimator): the underlying estimator instance, if `fit` or optimization is perforemed, this model instance gets updated accordingly
-        featureCalculator (DescriptorsCalculator): feature calculator instance taken from the data set or deserialized from file if the model is loaded without data
+        featureCalculator (MoleculeDescriptorsCalculator): feature calculator instance taken from the data set or deserialized from file if the model is loaded without data
         featureStandardizer (SKLearnStandardizer): feature standardizer instance taken from the data set or deserialized from file if the model is loaded without data
         metaInfo (dict): dictionary of metadata about the model, only available after the model is saved
         baseDir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`
@@ -190,10 +190,10 @@ class QSPRModel(ABC):
             path (str): absolute path to the JSON file
 
         Returns:
-            DescriptorsCalculator: descriptor calculator instance or None if the file does not exist
+            MoleculeDescriptorsCalculator: descriptor calculator instance or None if the file does not exist
         """
         if os.path.exists(path):
-            return DescriptorsCalculator.fromFile(path)
+            return MoleculeDescriptorsCalculator.fromFile(path)
 
     def saveDescriptorCalculator(self):
         """Save the current descriptor calculator to a JSON file. The file is stored in the output directory of the model.

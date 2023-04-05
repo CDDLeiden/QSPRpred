@@ -15,7 +15,7 @@ import torch
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
@@ -232,7 +232,7 @@ def QSPR_dataprep(args):
                     featurefilters.append(BorutaFilter(estimator=RandomForestClassifier(n_jobs=args.ncpu)))
 
             # prepare dataset for modelling
-            mydataset.prepareDataset(feature_calculator=DescriptorsCalculator(descriptorsets),
+            mydataset.prepareDataset(feature_calculator=MoleculeDescriptorsCalculator(descriptorsets),
                                      datafilters=datafilters, split=split, feature_filters=featurefilters,
                                      feature_standardizer=StandardScaler(), feature_fill_value=0.0)
 

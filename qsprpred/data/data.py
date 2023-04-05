@@ -13,7 +13,8 @@ from typing import Callable, List, Literal, Union
 import numpy as np
 import pandas as pd
 from qsprpred.data.interfaces import MoleculeDataSet, datasplit
-from qsprpred.data.utils.descriptorcalculator import Calculator, DescriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator, MoleculeDescriptorsCalculator, \
+    ProteinDescriptorCalculator
 from qsprpred.data.utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -77,6 +78,8 @@ class MoleculeTable(MoleculeDataSet):
             name: str,
             df: pd.DataFrame = None,
             smilescol: str = "SMILES",
+            proteincol: str = None,
+            proteinseqprovider: Callable = None,
             add_rdkit: bool = False,
             store_dir: str = '.',
             overwrite: bool = False,
@@ -94,6 +97,8 @@ class MoleculeTable(MoleculeDataSet):
             df (pd.DataFrame): Pandas dataframe containing the data. If you provide a dataframe for a dataset that already exists on disk,
             the dataframe from disk will override the supplied data frame. Set 'overwrite' to `True` to override the data frame on disk.
             smilescol (str): Name of the column containing the SMILES sequences of molecules.
+            proteincol (str): name of column in df containing the protein target identifier (usually a UniProt ID). Setting this value enables some PCM features (i.e. allows for calculation of protein descriptors).
+            proteinseqprovider (Callable): Function that takes a protein ID and returns the protein sequence. If None, no sequences are passed to protein descriptor sets.
             add_rdkit (bool): Add RDKit molecule instances to the dataframe. WARNING: This can take a lot of memory.
             store_dir (str): Directory to store the dataset files. Defaults to the current directory. If it already contains files with the same name, the existing data will be loaded.
             overwrite (bool): Overwrite existing dataset.
@@ -104,6 +109,8 @@ class MoleculeTable(MoleculeDataSet):
         """
         # settings
         self.smilescol = smilescol
+        self.proteincol = proteincol
+        self.proteinseqprovider = proteinseqprovider
         self.indexCols = index_cols
         self.includesRdkit = add_rdkit
         self.name = name
@@ -212,7 +219,7 @@ class MoleculeTable(MoleculeDataSet):
         """Reload the data table from disk."""
         self.df = pd.read_pickle(self.storePath)
         if os.path.exists(self.descriptorCalculatorPath):
-            self.descriptorCalculator = DescriptorsCalculator.fromFile(self.descriptorCalculatorPath)
+            self.descriptorCalculator = MoleculeDescriptorsCalculator.fromFile(self.descriptorCalculatorPath)
 
     @staticmethod
     def fromFile(filename, *args, **kwargs) -> 'MoleculeTable':
@@ -387,12 +394,12 @@ class MoleculeTable(MoleculeDataSet):
         else:
             return self.df[self.smilescol].apply(check_smiles_valid, throw=throw)
 
-    def addDescriptors(self, calculator: Calculator, recalculate=False, fail_on_invalid=True):
+    def addDescriptors(self, calculator: MoleculeDescriptorsCalculator, recalculate=False, fail_on_invalid=True):
         """
-        Add descriptors to the data frame using a `Calculator` object.
+        Add descriptors to the data frame using a `DescriptorsCalculator` object.
 
         Args:
-            calculator (Calculator): Calculator object to use for descriptor calculation.
+            calculator (MoleculeDescriptorsCalculator): DescriptorsCalculator object to use for descriptor calculation.
             recalculate (bool): Whether to recalculate descriptors even if they are already present in the data frame.
                 If `False`, existing descriptors are kept and no calculation takes place.
             fail_on_invalid (bool): Whether to throw an exception if any molecule is invalid.
@@ -578,6 +585,23 @@ class MoleculeTable(MoleculeDataSet):
             bool: Whether the data frame contains scaffold groups.
         """
         return len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
+
+    def addProteinDescriptors(self, calculator: ProteinDescriptorCalculator, recalculate=False):
+        """
+        Add protein descriptors to the data frame.
+
+        Args:
+            calculator (ProteinDescriptorCalculator): DescriptorsCalculator to use.
+            recalculate (bool): Whether to recalculate descriptors even if they are already present in the data frame.
+        """
+
+        if not self.proteincol:
+            raise ValueError("Protein column not set. Cannot calculate protein descriptors.")
+
+        sequences, info = self.proteinseqprovider(self.df[self.proteincol].unique().tolist()) if self.proteinseqprovider else (None, dict())
+        descriptors = calculator(self.df[self.proteincol].unique(), sequences, **info)
+
+        self.df = self.df.merge(descriptors, left_on=self.proteincol, right_index=True, how="left")
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
         """Apply smiles_standardizer to the compounds in parallel
@@ -850,6 +874,8 @@ class QSPRDataset(MoleculeTable):
         target_props: List[Union[TargetProperty, dict]],
         df: pd.DataFrame = None,
         smilescol: str = "SMILES",
+        proteincol: str = None,
+        proteinseqprovider: Callable = None,
         add_rdkit: bool = False,
         store_dir: str = '.',
         overwrite: bool = False,
@@ -867,6 +893,8 @@ class QSPRDataset(MoleculeTable):
             target_props (List[Union[TargetProperty, dict]]): target properties, names should correspond with target columnname in df
             df (pd.DataFrame, optional): input dataframe containing smiles and target property. Defaults to None.
             smilescol (str, optional): name of column in df containing SMILES. Defaults to "SMILES".
+            proteincol (str, optional): name of column in df containing the protein target identifier (usually a UniProt ID) to use for protein descriptors for PCM modelling and other protein related tasks. Defaults to None.
+            proteinseqprovider: Callable = None, optional): function that takes a 'proteincol' value and returns the appropriate protein sequence. Defaults to None.
             add_rdkit (bool, optional): if true, column with rdkit molecules will be added to df. Defaults to False.
             store_dir (str, optional): directory for saving the output data. Defaults to '.'.
             overwrite (bool, optional): if already saved data at output dir if should be overwritten. Defaults to False.
@@ -878,9 +906,9 @@ class QSPRDataset(MoleculeTable):
             index_cols (List[str], optional): columns to be used as index in the dataframe. Defaults to `None` in which case a custom ID will be generated.
 
         Raises:
-            ValueError: Raised if threshold given with non-classification task.
+            `ValueError`: Raised if threshold given with non-classification task.
         """
-        super().__init__(name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size, drop_invalids, index_cols)
+        super().__init__(name, df, smilescol, proteincol, proteinseqprovider, add_rdkit, store_dir, overwrite, n_jobs, chunk_size, drop_invalids, index_cols)
         self.metaInfo = None
         try:
             self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
@@ -1000,7 +1028,7 @@ class QSPRDataset(MoleculeTable):
     @property
     def hasFeatures(self):
         """Check whether the currently selected set of features is not empty."""
-        return len(self.featureNames) > 0
+        return self.featureNames and len(self.featureNames) > 0
 
     def getFeatureNames(self) -> List[str]:
         """Get current feature names for this data set.
@@ -1155,7 +1183,7 @@ class QSPRDataset(MoleculeTable):
         name = mol_table.name if name is None else name
         return QSPRDataset(name, target_props, mol_table.getDF(), **kwargs)
 
-    def addDescriptors(self, calculator: Calculator, recalculate=False, featurize=True):
+    def addDescriptors(self, calculator: DescriptorsCalculator, recalculate=False, featurize=True):
         """Add descriptors to the data set.
 
         If descriptors are already present, they will be recalculated if `recalculate` is `True`.
@@ -1163,7 +1191,7 @@ class QSPRDataset(MoleculeTable):
         converts current data matrices to pure numeric matrices of selected descriptors (features).
 
         Args:
-            calculator (Calculator): calculator instance to use for descriptor calculation
+            calculator (DescriptorsCalculator): calculator instance to use for descriptor calculation
             recalculate (bool, optional): whether to recalculate descriptors if they are already present. Defaults to `False`.
             featurize (bool, optional): whether to featurize the data set after adding descriptors. Defaults to `True`.
         """
@@ -1355,7 +1383,7 @@ class QSPRDataset(MoleculeTable):
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             fold (datasplitter obj): splits the train set into folds for cross validation
-            feature_calculator (Calculator): calculates features from smiles
+            feature_calculator (DescriptorsCalculator): calculates features from smiles
             feature_filters (list of feature filter objs): filters features
             feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator): standardizes and/or scales features
             recalculate_features (bool): recalculate features even if they are already present in the file

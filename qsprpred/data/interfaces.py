@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
-from qsprpred.data.utils.descriptorcalculator import Calculator
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 
 class DataSet(ABC):
     @abstractmethod
@@ -37,7 +37,7 @@ class MoleculeDataSet(DataSet):
         pass
 
     @abstractmethod
-    def addDescriptors(self, calculator : Calculator):
+    def addDescriptors(self, calculator : DescriptorsCalculator):
         """
         Add descriptors to the dataset.
 
