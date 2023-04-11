@@ -59,6 +59,12 @@ class DescriptorsCalculator(ABC):
 
         with open(fname, "r") as infile:
             descset_dict = json.load(infile)
+
+            # Assume calculator is a molecule descriptor calculator if not specified
+            # (for backwards compatibility before introduction of protein descriptor calculator)
+            if "calculator" not in descset_dict:
+                descset_dict["calculator"] = "qsprpred.data.utils.descriptorcalculator.MoleculeDescriptorsCalculator"
+
             return import_class(descset_dict["calculator"])
 
 
