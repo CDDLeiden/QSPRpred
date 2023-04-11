@@ -459,10 +459,10 @@ class MoleculeTable(MoleculeDataSet):
             list: List of descriptor names.
         """
         if not prefix:
-            prefixes = [x for x in self.descriptorCalculators] if self.descriptorCalculators else []
+            prefixes = [x.getPrefix() for x in self.descriptorCalculators] if self.descriptorCalculators else []
         else:
             prefixes = [prefix]
-        return [col for col in self.df.columns if any([col.startswith(prefix) for prefix in prefixes])]
+        return [col for col in self.df.columns if any([col.startswith(f"{prefix}_") for prefix in prefixes])]
 
     @property
     def hasDescriptors(self):
