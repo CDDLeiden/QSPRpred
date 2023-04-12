@@ -20,6 +20,9 @@ class DescriptorsCalculator(ABC):
 
     __in__ = __contains__ = lambda self, x: x in self.descsets
 
+    def __str__(self):
+        return self.getPrefix()
+
     @abstractmethod
     def getPrefix(self) -> str:
         """Return prefix for descriptor names of the calculator."""
@@ -112,7 +115,8 @@ class DescriptorsCalculator(ABC):
                     "descriptors": descset.descriptors,
                 }
             descset_dict[descset.__str__()]["class"] = descset.__class__.__name__
-        descset_dict["calculator"] = self.__class__.__name__
+        # save fully qualified class name of calculator
+        descset_dict["calculator"] = self.__class__.__module__ + "." + self.__class__.__name__
         with open('%s' % fname, "w") as outfile:
             json.dump(descset_dict, outfile)
 

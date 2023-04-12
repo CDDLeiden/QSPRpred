@@ -147,7 +147,7 @@ class ProDecDescriptorSet(ProteinDescriptorSet, NeedsMSAMixIn):
 
     def __init__(self, sets: Optional[List[str]] = None):
         super().__init__()
-        self._settings = dict()
+        self._settings = {"sets": sets}
         self.factory = prodec.ProteinDescriptors()
         self.sets = self.factory.available_descriptors if sets is None else sets
         self._descriptors = None
@@ -176,7 +176,6 @@ class ProDecDescriptorSet(ProteinDescriptorSet, NeedsMSAMixIn):
         return protein_features
 
     def __call__(self, acc_keys, sequences: dict[str: str] = None, **kwargs):
-        self._settings = dict(acc_keys=acc_keys, sequences=sequences, msa=self.msa, **kwargs)
 
         df = pd.DataFrame(index=pd.Index(acc_keys, name="ID"))
         for descriptor in self.sets:
@@ -201,6 +200,7 @@ class ProDecDescriptorSet(ProteinDescriptorSet, NeedsMSAMixIn):
     def is_fp(self):
         return False
 
+    @property
     def settings(self):
         return self._settings
 
@@ -737,6 +737,9 @@ class _DescriptorSetRetriever:
 
     def get_PredictorDesc(self, *args, **kwargs):
         return PredictorDesc(*args, **kwargs)
+
+    def get_ProDec(self, *args, **kwargs):
+        return ProDecDescriptorSet(*args, **kwargs)
 
     def get_TanimotoDistances(self, *args, **kwargs):
         return TanimotoDistances(*args, **kwargs)

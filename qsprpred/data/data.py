@@ -12,7 +12,7 @@ from typing import Callable, List, Literal, Union
 
 import numpy as np
 import pandas as pd
-from qsprpred.data.interfaces import MoleculeDataSet, datasplit
+from qsprpred.data.interfaces import MoleculeDataSet, datasplit, DataSet
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator, MoleculeDescriptorsCalculator, \
     ProteinDescriptorCalculator
 from qsprpred.data.utils.feature_standardization import (
@@ -33,9 +33,7 @@ from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import LabelEncoder
 from tqdm.auto import tqdm
 
-
-class MoleculeTable(MoleculeDataSet):
-    """Class that holds and prepares molecule data for modelling and other analyses."""
+class PandasDataSet(DataSet):
 
     class ParallelApplyWrapper:
         """A wrapper class to parallelize pandas apply functions."""
@@ -73,55 +71,17 @@ class MoleculeTable(MoleculeDataSet):
             return data.apply(self.func, raw=self.raw, axis=self.axis, result_type=self.result_type,
                               args=self.args, **self.kwargs if self.kwargs else {})
 
-    def __init__(
-            self,
-            name: str,
-            df: pd.DataFrame = None,
-            smilescol: str = "SMILES",
-            proteincol: str = None,
-            proteinseqprovider: Callable = None,
-            add_rdkit: bool = False,
-            store_dir: str = '.',
-            overwrite: bool = False,
-            n_jobs: int = 1,
-            chunk_size: int = 50,
-            drop_invalids: bool = True,
-            index_cols: List[str] = None,
-    ):
-        """Initialize a `MoleculeTable` object.
-
-        This object wraps a pandas dataframe and provides short-hand methods to prepare molecule data for modelling and analysis.
-
-        Args:
-            name (str): Name of the dataset. You can use this name to load the dataset from disk anytime and create a new instance.
-            df (pd.DataFrame): Pandas dataframe containing the data. If you provide a dataframe for a dataset that already exists on disk,
-            the dataframe from disk will override the supplied data frame. Set 'overwrite' to `True` to override the data frame on disk.
-            smilescol (str): Name of the column containing the SMILES sequences of molecules.
-            proteincol (str): name of column in df containing the protein target identifier (usually a UniProt ID). Setting this value enables some PCM features (i.e. allows for calculation of protein descriptors).
-            proteinseqprovider (Callable): Function that takes a protein ID and returns the protein sequence. If None, no sequences are passed to protein descriptor sets.
-            add_rdkit (bool): Add RDKit molecule instances to the dataframe. WARNING: This can take a lot of memory.
-            store_dir (str): Directory to store the dataset files. Defaults to the current directory. If it already contains files with the same name, the existing data will be loaded.
-            overwrite (bool): Overwrite existing dataset.
-            n_jobs (int): Number of jobs to use for parallel processing. If <= 0, all available cores will be used.
-            chunk_size (int): Size of chunks to use per job in parallel processing.
-            drop_invalids (bool): Drop invalid molecules from the data frame.
-            index_cols (List[str]): List of columns to use as index. If None, the index will be a custom generated ID.
-        """
-        # settings
-        self.smilescol = smilescol
-        self.proteincol = proteincol
-        self.proteinseqprovider = proteinseqprovider
-        self.indexCols = index_cols
-        self.includesRdkit = add_rdkit
+    def __init__(self, name, df: pd.DataFrame, store_dir=".", overwrite=False, index_cols=None, n_jobs=1, chunk_size=1000, id_prefix='QSPRID'):
         self.name = name
-        self.descriptorCalculators = None
+        self.indexCols = index_cols
+
+        # parallel settings
         self.nJobs = n_jobs if n_jobs > 0 else os.cpu_count()
         self.chunkSize = chunk_size
 
         # paths
         self.storeDir = store_dir.rstrip("/")
         self.storePrefix = f"{self.storeDir}/{self.name}"
-        self.descriptorCalculatorsPathPrefix = f"{self.storePrefix}_descriptor_calculator"
         if not os.path.exists(self.storeDir):
             raise FileNotFoundError(f"Directory '{self.storeDir}' does not exist.")
         self.storePath = f'{self.storePrefix}_df.pkl'
@@ -139,12 +99,8 @@ class MoleculeTable(MoleculeDataSet):
                 if index_cols is not None:
                     self.setIndex(index_cols)
                 else:
-                    df['QSPRID'] = [f"{self.name}_{i}" for i in range(len(self.df))]
-                    self.setIndex(['QSPRID'])
-
-                if self.includesRdkit:
-                    PandasTools.AddMoleculeColumnToFrame(
-                        self.df, smilesCol=self.smilescol, molCol='RDMol', includeFingerprints=False)
+                    df[id_prefix] = [f"{self.name}_{i}" for i in range(len(self.df))]
+                    self.setIndex([id_prefix])
         else:
             if not self._isInStore('df'):
                 raise ValueError(
@@ -152,16 +108,7 @@ class MoleculeTable(MoleculeDataSet):
             self.reload()
         assert self.df is not None, "Unknown error in data set creation."
 
-        # drop invalid columns
-        if drop_invalids:
-            self.dropInvalids()
-
     def __len__(self):
-        """Get the number of molecules in the data set.
-
-        Returns:
-            int: Number of molecules in the data set.
-        """
         return len(self.df)
 
     def setIndex(self, cols: List[str]):
@@ -173,15 +120,8 @@ class MoleculeTable(MoleculeDataSet):
         """
         self.df.set_index(cols, inplace=True, verify_integrity=True, drop=False)
         self.df.drop(inplace=True, columns=[c for c in self.df.columns if c.startswith('Unnamed')])
+        self.df.index.name = "~".join(cols)
         self.indexCols = cols
-
-    def getDF(self):
-        """Get the data frame this instance manages.
-
-        Returns:
-            pd.DataFrame: The data frame this instance manages.
-        """
-        return self.df
 
     def _isInStore(self, name):
         """Check if a pickled file with the given suffix exists.
@@ -194,86 +134,14 @@ class MoleculeTable(MoleculeDataSet):
         """
         return os.path.exists(self.storePath) and self.storePath.endswith(f'_{name}.pkl')
 
-    def save(self):
-        """Save the data frame to disk and all associated files.
+    def getProperties(self):
+        return self.df.columns
 
-        Returns:
-            str: Path to the saved data frame.
-        """
-        # save data frame
-        self.df.to_pickle(self.storePath)
+    def addProperty(self, name, data):
+        self.df[name] = data
 
-        # save descriptor calculator
-        if self.descriptorCalculators:
-            for calc in self.descriptorCalculators:
-                calc.toFile(f"{self.descriptorCalculatorsPathPrefix}_{calc}.json")
-
-        return self.storePath
-
-    def clearFiles(self):
-        """Remove all files associated with this data set from disk."""
-        for file in [f for f in os.listdir(self.storeDir) if f.endswith('.pkl') or f.endswith('.json')]:
-            if file.startswith(self.name):
-                os.remove(f'{self.storeDir}/{file}')
-
-    def reload(self):
-        """Reload the data table from disk."""
-        self.df = pd.read_pickle(self.storePath)
-        files = [f for f in os.listdir(self.storeDir) if f.endswith('.json') and f.startswith(f"{self.name}_descriptor_calculator")]
-        if files:
-            self.descriptorCalculators = []
-        for file in files:
-            path = f"{self.storeDir}/{file}"
-            if os.path.exists(path):
-                self.descriptorCalculators.append(DescriptorsCalculator.fromFile(path))
-
-    @staticmethod
-    def fromFile(filename, *args, **kwargs) -> 'MoleculeTable':
-        """Create a `MoleculeTable` instance from by providing a direct path to the pickled data frame in storage."""
-        store_dir = os.path.dirname(filename)
-        name = os.path.basename(filename).split('.')[0]
-        return MoleculeTable(name=name, store_dir=store_dir, *args, **kwargs)
-
-    @staticmethod
-    def fromSMILES(name, smiles, *args, **kwargs):
-        """Create a `MoleculeTable` instance from a list of SMILES sequences.
-
-        Args:
-            name (str): Name of the data set.
-            smiles (list): List of SMILES sequences.
-            *args: Additional arguments to pass to the `MoleculeTable` constructor.
-            **kwargs: Additional keyword arguments to pass to the `MoleculeTable` constructor.
-        """
-        smilescol = "SMILES"
-        df = pd.DataFrame({smilescol: smiles})
-        return MoleculeTable(name, df, *args, smilescol=smilescol, **kwargs)
-
-    @staticmethod
-    def fromTableFile(name, filename, sep="\t", *args, **kwargs):
-        """Create a `MoleculeTable` instance from a file containing a table of molecules (i.e. a CSV file).
-
-        Args:
-            name (str): Name of the data set.
-            filename (str): Path to the file containing the table.
-            sep (str): Separator used in the file for different columns.
-            *args: Additional arguments to pass to the `MoleculeTable` constructor.
-            **kwargs: Additional keyword arguments to pass to the `MoleculeTable` constructor.
-        """
-        return MoleculeTable(name, pd.read_table(filename, sep=sep), *args, **kwargs)
-
-    @staticmethod
-    def fromSDF(name, filename, smiles_prop, *args, **kwargs):
-        """Create a `MoleculeTable` instance from an SDF file.
-
-        Args:
-            name (str): Name of the data set.
-            filename (str): Path to the SDF file.
-            smiles_prop (str): Name of the property in the SDF file containing the SMILES sequence.
-            *args: Additional arguments to pass to the `MoleculeTable` constructor.
-            **kwargs: Additional keyword arguments to pass to the `MoleculeTable` constructor.
-        """
-        return MoleculeTable(name, PandasTools.LoadSDF(filename, molColName="RDMol"), smilescol=smiles_prop, *args, **
-                             kwargs)  # FIXME: in this case the RDKit molecule is always added, which can in most cases is an unnecessary overhead
+    def removeProperty(self, name):
+        self.df.drop(name, axis=1, inplace=True)
 
     def getSubset(self, prefix: str):
         """Get a subset of the data set by providing a prefix for the column names or a column name directly.
@@ -382,6 +250,217 @@ class MoleculeTable(MoleculeDataSet):
         if df_filtered is not None:
             self.df = df_filtered.copy()
 
+    def save(self):
+        """Save the data frame to disk and all associated files.
+
+        Returns:
+            str: Path to the saved data frame.
+        """
+        # save data frame
+        self.df.to_pickle(self.storePath)
+
+        return self.storePath
+
+    def clearFiles(self):
+        """Remove all files associated with this data set from disk."""
+        for file in [f for f in os.listdir(self.storeDir) if f.endswith('.pkl') or f.endswith('.json')]:
+            if file.startswith(self.name):
+                os.remove(f'{self.storeDir}/{file}')
+
+    def reload(self):
+        """Reload the data table from disk."""
+        self.df = pd.read_pickle(self.storePath)
+        self.indexCols = self.df.index.name.split('~')
+        assert all([col in self.df.columns for col in self.indexCols])
+
+    @staticmethod
+    def fromFile(filename, *args, **kwargs) -> 'PandasDataSet':
+        """Create a `MoleculeTable` instance from by providing a direct path to the pickled data frame in storage."""
+        store_dir = os.path.dirname(filename)
+        name = os.path.basename(filename).split('.')[0]
+        return PandasDataSet(name=name, store_dir=store_dir, *args, **kwargs)
+
+    def getDF(self):
+        """Get the data frame this instance manages.
+
+        Returns:
+            pd.DataFrame: The data frame this instance manages.
+        """
+        return self.df
+
+    def shuffle(self, random_state=None):
+        """Shuffle the internal data frame."""
+        self.df = self.df.sample(frac=1, random_state=random_state)
+
+
+class DescriptorTable(PandasDataSet):
+
+    def __init__(self, calculator, df: pd.DataFrame = None, store_dir=".", overwrite=False, key_cols=None, n_jobs=1, chunk_size=1000):
+        """Initialize a `DescriptorTable` object."""
+        super().__init__(calculator.getPrefix(), df, store_dir, overwrite, key_cols, n_jobs, chunk_size)
+        self.calculator = calculator
+
+    @property
+    def prefix(self):
+        return self.name
+
+    @property
+    def keyCols(self):
+        return self.indexCols
+
+    def getDescriptors(self):
+        return self.df[self.getDescriptorNames()]
+
+    def getDescriptorNames(self):
+        return [x for x in self.df.columns if x.startswith(f"{self.prefix}_")]
+
+    def fillMissing(self, fill_value, names):
+        columns = names if names else self.getDescriptorNames()
+        self.df[columns] = self.df[columns].fillna(fill_value)
+
+class MoleculeTable(PandasDataSet, MoleculeDataSet):
+    """Class that holds and prepares molecule data for modelling and other analyses."""
+
+    def __init__(
+            self,
+            name: str,
+            df: pd.DataFrame = None,
+            smilescol: str = "SMILES",
+            proteincol: str = None,
+            proteinseqprovider: Callable = None,
+            add_rdkit: bool = False,
+            store_dir: str = '.',
+            overwrite: bool = False,
+            n_jobs: int = 1,
+            chunk_size: int = 50,
+            drop_invalids: bool = True,
+            index_cols: List[str] = None,
+    ):
+        """Initialize a `MoleculeTable` object.
+
+        This object wraps a pandas dataframe and provides short-hand methods to prepare molecule data for modelling and analysis.
+
+        Args:
+            name (str): Name of the dataset. You can use this name to load the dataset from disk anytime and create a new instance.
+            df (pd.DataFrame): Pandas dataframe containing the data. If you provide a dataframe for a dataset that already exists on disk,
+            the dataframe from disk will override the supplied data frame. Set 'overwrite' to `True` to override the data frame on disk.
+            smilescol (str): Name of the column containing the SMILES sequences of molecules.
+            proteincol (str): name of column in df containing the protein target identifier (usually a UniProt ID). Setting this value enables some PCM features (i.e. allows for calculation of protein descriptors).
+            proteinseqprovider (Callable): Function that takes a protein ID and returns the protein sequence. If None, no sequences are passed to protein descriptor sets.
+            add_rdkit (bool): Add RDKit molecule instances to the dataframe. WARNING: This can take a lot of memory.
+            store_dir (str): Directory to store the dataset files. Defaults to the current directory. If it already contains files with the same name, the existing data will be loaded.
+            overwrite (bool): Overwrite existing dataset.
+            n_jobs (int): Number of jobs to use for parallel processing. If <= 0, all available cores will be used.
+            chunk_size (int): Size of chunks to use per job in parallel processing.
+            drop_invalids (bool): Drop invalid molecules from the data frame.
+            index_cols (List[str]): List of columns to use as index. If None, the index will be a custom generated ID.
+        """
+        self.descriptorCalculators = [] # holds all descriptor calculators
+        self.descriptors = [] # holds descriptor tables for each calculator
+        self.descriptorCalculatorsPathPrefix = None
+        super().__init__(name, df, store_dir, overwrite, index_cols, n_jobs, chunk_size)
+        if not self.descriptorCalculatorsPathPrefix:
+            self.descriptorCalculatorsPathPrefix = f"{self.storePrefix}_descriptor_calculator"
+
+        # settings
+        self.smilescol = smilescol
+        self.proteincol = proteincol
+        self.proteinseqprovider = proteinseqprovider
+        self.includesRdkit = add_rdkit
+
+        # add rdkit molecules if requested
+        if self.includesRdkit and 'RDMol' not in self.df.columns:
+            PandasTools.AddMoleculeColumnToFrame(
+                self.df, smilesCol=self.smilescol, molCol='RDMol', includeFingerprints=False)
+
+        # drop invalid columns
+        if drop_invalids:
+            self.dropInvalids()
+
+    def save(self):
+        super().save()
+
+        # save descriptor calculator
+        for idx, calc in enumerate(self.descriptorCalculators):
+            calc.toFile(f"{self.descriptorCalculatorsPathPrefix}_{calc}.json")
+            self.descriptors[idx].save()
+
+        return self.storePath
+
+    def reload(self):
+        super().reload()
+
+        # load descriptor calculators and tables
+        self.descriptorCalculatorsPathPrefix = f"{self.storePrefix}_descriptor_calculator"
+        files = [f for f in os.listdir(self.storeDir) if
+                 f.endswith('.json') and f.startswith(os.path.basename(self.descriptorCalculatorsPathPrefix))]
+        for file in files:
+            path = f"{self.storeDir}/{file}"
+            if os.path.exists(path):
+                calc = DescriptorsCalculator.fromFile(path)
+                self.descriptorCalculators.append(calc)
+                self.descriptors.append(self.loadDescriptorsTable(calc))
+
+    def loadDescriptorsTable(self, calc):
+        """Load a descriptor table from disk.
+
+        Args:
+            calc (DescriptorsCalculator): Descriptor
+
+        Returns:
+            DescriptorTable: Descriptor table.
+        """
+
+        return DescriptorTable(calc, store_dir=self.storeDir, n_jobs=self.nJobs, chunk_size=self.chunkSize)
+
+    @staticmethod
+    def fromFile(filename, *args, **kwargs) -> 'MoleculeTable':
+        """Create a `MoleculeTable` instance from by providing a direct path to the pickled data frame in storage."""
+        store_dir = os.path.dirname(filename)
+        name = os.path.basename(filename).split('.')[0]
+        return MoleculeTable(name=name, store_dir=store_dir, *args, **kwargs)
+
+    @staticmethod
+    def fromSMILES(name, smiles, *args, **kwargs):
+        """Create a `MoleculeTable` instance from a list of SMILES sequences.
+
+        Args:
+            name (str): Name of the data set.
+            smiles (list): List of SMILES sequences.
+            *args: Additional arguments to pass to the `MoleculeTable` constructor.
+            **kwargs: Additional keyword arguments to pass to the `MoleculeTable` constructor.
+        """
+        smilescol = "SMILES"
+        df = pd.DataFrame({smilescol: smiles})
+        return MoleculeTable(name, df, *args, smilescol=smilescol, **kwargs)
+
+    @staticmethod
+    def fromTableFile(name, filename, sep="\t", *args, **kwargs):
+        """Create a `MoleculeTable` instance from a file containing a table of molecules (i.e. a CSV file).
+
+        Args:
+            name (str): Name of the data set.
+            filename (str): Path to the file containing the table.
+            sep (str): Separator used in the file for different columns.
+            *args: Additional arguments to pass to the `MoleculeTable` constructor.
+            **kwargs: Additional keyword arguments to pass to the `MoleculeTable` constructor.
+        """
+        return MoleculeTable(name, pd.read_table(filename, sep=sep), *args, **kwargs)
+
+    @staticmethod
+    def fromSDF(name, filename, smiles_prop, *args, **kwargs):
+        """Create a `MoleculeTable` instance from an SDF file.
+
+        Args:
+            name (str): Name of the data set.
+            filename (str): Path to the SDF file.
+            smiles_prop (str): Name of the property in the SDF file containing the SMILES sequence.
+            *args: Additional arguments to pass to the `MoleculeTable` constructor.
+            **kwargs: Additional keyword arguments to pass to the `MoleculeTable` constructor.
+        """
+        return MoleculeTable(name, PandasTools.LoadSDF(filename, molColName="RDMol"), smilescol=smiles_prop, *args, **
+                             kwargs)  # FIXME: in this case the RDKit molecule is always added, which can in most cases is an unnecessary overhead
+
     def checkMols(self, throw=True):
         """
         Returns a boolean array indicating whether each molecule is valid or not. If `throw` is `True`, an exception is thrown if any molecule is invalid.
@@ -400,6 +479,18 @@ class MoleculeTable(MoleculeDataSet):
         else:
             return self.df[self.smilescol].apply(check_smiles_valid, throw=throw)
 
+    def dropDescriptors(self, calculator: DescriptorsCalculator):
+        to_remove = []
+        for idx, calc in enumerate(self.descriptorCalculators):
+            if calc.getPrefix() == calculator.getPrefix():
+                logger.debug(f"Removing existing descriptors with prefix '{calculator.getPrefix()}'")
+                to_remove.append(idx)
+
+        for idx in reversed(to_remove):
+            self.descriptors[idx].clearFiles()
+            self.descriptors.pop(idx)
+            self.descriptorCalculators.pop(idx)
+
     def addDescriptors(self, calculator: MoleculeDescriptorsCalculator, recalculate=False, fail_on_invalid=True):
         """
         Add descriptors to the data frame using a `DescriptorsCalculator` object.
@@ -411,7 +502,7 @@ class MoleculeTable(MoleculeDataSet):
             fail_on_invalid (bool): Whether to throw an exception if any molecule is invalid.
         """
         if recalculate:
-            self.df.drop(self.getDescriptorNames(prefix=calculator.getPrefix()), axis=1, inplace=True)
+            self.dropDescriptors(calculator)
         elif self.getDescriptorNames(prefix=calculator.getPrefix()):
             logger.warning(f"Molecular descriptors already exist in {self.name}. Use `recalculate=True` to overwrite them.")
             return
@@ -424,6 +515,7 @@ class MoleculeTable(MoleculeDataSet):
                 logger.error(self.df[~self.checkMols(throw=False)][self.smilescol].to_numpy())
                 raise exp
 
+        # get the data frame with the descriptors
         descriptors = self.apply(
             calculator,
             axis=0,
@@ -434,23 +526,39 @@ class MoleculeTable(MoleculeDataSet):
         descriptors = descriptors.to_list()
         descriptors = pd.concat(descriptors, axis=0)
         descriptors.index = self.df.index
-        self.df = self.df.join(descriptors, how='left')
-        self._update_descriptor_calculators(calculator)
+        descriptors[self.indexCols] = self.df[self.indexCols]
 
-    def _update_descriptor_calculators(self, calculator: DescriptorsCalculator):
+        # add the descriptors to the descriptor list
         if not self.descriptorCalculators:
             self.descriptorCalculators = []
-        else:
-            self.descriptorCalculators = [x for x in self.descriptorCalculators if isinstance(x, MoleculeDescriptorsCalculator)]
         self.descriptorCalculators.append(calculator)
+        self.descriptors.append(DescriptorTable(calculator, descriptors, store_dir=self.storeDir, n_jobs=self.nJobs, overwrite=True, key_cols=self.indexCols, chunk_size=self.chunkSize))
 
-    def getDescriptors(self, prefix=None):
+    def getDescriptors(self):
         """Get the subset of the data frame that contains only descriptors.
 
         Returns:
             pd.DataFrame: Data frame containing only descriptors.
         """
-        return self.df[self.getDescriptorNames(prefix=prefix)]
+
+        join_cols = set()
+        for descriptors in self.descriptors:
+            join_cols.update(set(descriptors.keyCols))
+        join_cols = list(join_cols)
+        ret = self.df[join_cols].copy()
+        ret.reset_index(drop=True, inplace=True)
+        suffixes = ('_left', '_right')
+        for descriptors in self.descriptors:
+            df_descriptors = descriptors.getDF()
+            ret = ret.merge(df_descriptors, left_on=descriptors.keyCols, how='left', right_index=True, suffixes=suffixes)
+            to_remove = []
+            for suffix in suffixes:
+                to_remove.extend([f"{x}{suffix}" for x in join_cols])
+            ret.drop(columns=to_remove, inplace=True)
+            ret[join_cols] = self.df[join_cols].copy()
+        ret.set_index(self.df.index, inplace=True)
+        ret.drop(columns=join_cols, inplace=True)
+        return ret
 
     def getDescriptorNames(self, prefix=None):
         """Get the names of the descriptors in the data frame.
@@ -462,7 +570,13 @@ class MoleculeTable(MoleculeDataSet):
             prefixes = [x.getPrefix() for x in self.descriptorCalculators] if self.descriptorCalculators else []
         else:
             prefixes = [prefix]
-        return [col for col in self.df.columns if any([col.startswith(f"{prefix}_") for prefix in prefixes])]
+
+        names = []
+        for x in self.descriptors:
+            if x.prefix in prefixes:
+                names.extend(x.getDescriptorNames())
+        return names
+
 
     @property
     def hasDescriptors(self):
@@ -612,15 +726,26 @@ class MoleculeTable(MoleculeDataSet):
             recalculate (bool): Whether to recalculate descriptors even if they are already present in the data frame.
         """
 
+        if recalculate:
+            self.dropDescriptors(calculator)
+        elif self.getDescriptorNames(prefix=calculator.getPrefix()):
+            logger.warning(f"Protein descriptors already exist in {self.name}. Use `recalculate=True` to overwrite them.")
+            return
+
         if not self.proteincol:
             raise ValueError("Protein column not set. Cannot calculate protein descriptors.")
 
         sequences, info = self.proteinseqprovider(self.df[self.proteincol].unique().tolist()) if self.proteinseqprovider else (None, dict())
         descriptors = calculator(self.df[self.proteincol].unique(), sequences, **info)
+        descriptors[self.proteincol] = descriptors.index.values
 
-        self.df = self.df.merge(descriptors, left_on=self.proteincol, right_index=True, how="left")
-
-        self._update_descriptor_calculators(calculator)
+        # add the descriptors to the descriptor list
+        if not self.descriptorCalculators:
+            self.descriptorCalculators = []
+        self.descriptorCalculators.append(calculator)
+        self.descriptors.append(
+            DescriptorTable(calculator, descriptors, store_dir=self.storeDir, n_jobs=self.nJobs, overwrite=True,
+                            key_cols=[self.proteincol], chunk_size=self.chunkSize))
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
         """Apply smiles_standardizer to the compounds in parallel
@@ -659,10 +784,6 @@ class MoleculeTable(MoleculeDataSet):
         if drop_invalid:
             self.dropInvalids()
 
-    def shuffle(self, random_state=None):
-        """Shuffle the internal data frame."""
-        self.df = self.df.sample(frac=1, random_state=random_state)
-
     def dropInvalids(self):
         """
         Drops invalid molecules from the data set.
@@ -679,7 +800,7 @@ class MoleculeTable(MoleculeDataSet):
         return ~invalid_mask
 
 
-class TargetProperty():
+class TargetProperty:
     """Target property for QSPRmodelling class.
 
     Attributes:
@@ -1047,7 +1168,7 @@ class QSPRDataset(MoleculeTable):
     @property
     def hasFeatures(self):
         """Check whether the currently selected set of features is not empty."""
-        return self.featureNames and len(self.featureNames) > 0
+        return True if (self.featureNames and len(self.featureNames) > 0) else False
 
     def getFeatureNames(self) -> List[str]:
         """Get current feature names for this data set.
@@ -1063,7 +1184,7 @@ class QSPRDataset(MoleculeTable):
                 for descset in calc.descsets:
                     features.extend([f"{prefix}_{descset}_{x}" for x in descset.descriptors])
 
-        if self.metaInfo and ('feature_names' in self.metaInfo) and (self.metaInfo['feature_names'] is not None):
+        if self.metaInfo and not features and ('feature_names' in self.metaInfo) and (self.metaInfo['feature_names'] is not None):
             features.extend([x for x in self.metaInfo['feature_names'] if x not in features])
 
         return features
@@ -1362,8 +1483,8 @@ class QSPRDataset(MoleculeTable):
             fill_value (float): value to fill missing values with
             columns (List[str], optional): columns to fill missing values in. Defaults to None.
         """
-        columns = columns if columns else self.getDescriptorNames()
-        self.df[columns] = self.df[columns].fillna(fill_value)
+        for desc in self.descriptors:
+            desc.fillMissing(fill_value, columns)
         logger.warning('Missing values filled with %s' % fill_value)
 
     def filterFeatures(self, feature_filters: List[Callable]):
@@ -1409,7 +1530,7 @@ class QSPRDataset(MoleculeTable):
         datafilters=None,
         split=None,
         fold=None,
-        feature_calculator=None,
+        feature_calculators : List[Union[MoleculeDescriptorsCalculator, ProteinDescriptorCalculator]] = None,
         feature_filters=None,
         feature_standardizer=None,
         feature_fill_value=np.nan,
@@ -1422,20 +1543,25 @@ class QSPRDataset(MoleculeTable):
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             fold (datasplitter obj): splits the train set into folds for cross validation
-            feature_calculator (DescriptorsCalculator): calculates features from smiles
+            feature_calculators (List[DescriptorsCalculator]): calculate features using different information from the data set
             feature_filters (list of feature filter objs): filters features
             feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator): standardizes and/or scales features
             recalculate_features (bool): recalculate features even if they are already present in the file
-            targetproperties_imputation (str): imputation strategy for missing target properties
             feature_fill_value (float): value to fill missing values with, defaults to `numpy.nan`
         """
         # apply sanitization and standardization
         if smiles_standardizer is not None:
             self.standardizeSmiles(smiles_standardizer)
 
-        # calculate featureNames
-        if feature_calculator is not None:
-            self.addDescriptors(feature_calculator, recalculate=recalculate_features, featurize=False)
+        # calculate features
+        if feature_calculators is not None:
+            for calc in feature_calculators:
+                if isinstance(calc, MoleculeDescriptorsCalculator):
+                    self.addDescriptors(calc, recalculate=recalculate_features, featurize=False)
+                elif isinstance(calc, ProteinDescriptorCalculator):
+                    self.addProteinDescriptors(calc, recalculate=recalculate_features, featurize=False)
+                else:
+                    raise ValueError("Unknown feature calculator type: %s" % type(calc))
 
         # apply data filters
         if datafilters is not None:
@@ -1663,10 +1789,14 @@ class QSPRDataset(MoleculeTable):
             'smilescol': self.smilescol,
         }
         ret = {
-            'init': meta_init, 'standardizer_path': path.replace(
-                self.storePrefix, '') if path else None, 'descriptorcalculator_path': self.descriptorCalculatorsPathPrefix.replace(
-                self.storePrefix, '') if self.descriptorCalculatorsPathPrefix else None, 'feature_names': list(
-                self.featureNames) if self.featureNames is not None else None, }
+            'init': meta_init,
+            'standardizer_path': path.replace(
+                self.storePrefix, '') if path else None,
+            'descriptorcalculator_path': self.descriptorCalculatorsPathPrefix.replace(
+                self.storePrefix, '') if self.descriptorCalculatorsPathPrefix else None,
+            'feature_names': list(
+                self.featureNames) if self.featureNames is not None else None,
+        }
         path = f"{self.storePrefix}_meta.json"
         with open(path, 'w') as f:
             json.dump(ret, f)
