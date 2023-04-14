@@ -8,7 +8,7 @@ import pandas as pd
 
 from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
 from qsprpred.data.utils.descriptorsets import get_descriptor, DescriptorSet, \
-    ProteinDescriptorSet
+    ProteinDescriptorSet, DataFrameDescriptorSet
 from qsprpred.logs import logger
 from rdkit.Chem.rdchem import Mol
 
@@ -245,3 +245,23 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
 
         # save msa if available
         self.msaProvider.currentToFile(f"{fname}.msa")
+class CustomDescriptorsCalculator(DescriptorsCalculator):
+
+    def __init__(self, descsets: List[DataFrameDescriptorSet]) -> None:
+        super().__init__(descsets)
+
+    def getPrefix(self) -> str:
+        return "Descriptor_Custom"
+
+    def __call__(self, index, dtype=np.float32) -> pd.DataFrame:
+        df = pd.DataFrame(index=index)
+        for descset in self.descsets:
+            values = descset(index)
+            if descset.is_fp:
+                values.add_prefix(f"{descset.fingerprint_type}_")
+            values = values.astype(dtype)
+            values = self.treatInfs(values)
+            values = values.add_prefix(f"{self.getPrefix()}_{descset}_")
+            df = df.merge(values, left_index=True, right_index=True)
+
+        return df

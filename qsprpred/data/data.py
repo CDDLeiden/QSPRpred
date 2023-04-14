@@ -15,7 +15,7 @@ import pandas as pd
 from qsprpred.data.interfaces import MoleculeDataSet, datasplit, DataSet
 from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator, MoleculeDescriptorsCalculator, \
-    ProteinDescriptorCalculator
+    ProteinDescriptorCalculator, CustomDescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -495,6 +495,32 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             self.descriptors.pop(idx)
             self.descriptorCalculators.pop(idx)
 
+    def addCustomDescriptors(self, calculator: CustomDescriptorsCalculator, recalculate=False):
+        """
+        Add custom descriptors to the data frame using a `CustomDescriptorsCalculator` object.
+
+        Args:
+            calculator (CustomDescriptorsCalculator): CustomDescriptorsCalculator object to use for descriptor calculation.
+            recalculate (bool): Whether to recalculate descriptors even if they are already present in the data frame.
+                If `False`, existing descriptors are kept and no calculation takes place.
+        """
+        if recalculate:
+            self.dropDescriptors(calculator)
+        elif self.getDescriptorNames(prefix=calculator.getPrefix()):
+            logger.warning(f"Custom molecular descriptors already exist in {self.name}. Use `recalculate=True` to overwrite them.")
+            return
+
+        descriptors = calculator(self.df.index)
+        descriptors[self.indexCols] = self.df[self.indexCols]
+
+        self.attachDescriptors(calculator, descriptors, self.indexCols)
+
+    def attachDescriptors(self, calculator: DescriptorsCalculator, descriptors: pd.DataFrame, index_cols):
+        if not self.descriptorCalculators:
+            self.descriptorCalculators = []
+        self.descriptorCalculators.append(calculator)
+        self.descriptors.append(DescriptorTable(calculator, descriptors, store_dir=self.storeDir, n_jobs=self.nJobs, overwrite=True, key_cols=index_cols, chunk_size=self.chunkSize))
+
     def addDescriptors(self, calculator: MoleculeDescriptorsCalculator, recalculate=False, fail_on_invalid=True):
         """
         Add descriptors to the data frame using a `DescriptorsCalculator` object.
@@ -533,10 +559,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         descriptors[self.indexCols] = self.df[self.indexCols]
 
         # add the descriptors to the descriptor list
-        if not self.descriptorCalculators:
-            self.descriptorCalculators = []
-        self.descriptorCalculators.append(calculator)
-        self.descriptors.append(DescriptorTable(calculator, descriptors, store_dir=self.storeDir, n_jobs=self.nJobs, overwrite=True, key_cols=self.indexCols, chunk_size=self.chunkSize))
+        self.attachDescriptors(calculator, descriptors, self.indexCols)
 
     def getDescriptors(self):
         """Get the subset of the data frame that contains only descriptors.
@@ -741,12 +764,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         descriptors[self.proteincol] = descriptors.index.values
 
         # add the descriptors to the descriptor list
-        if not self.descriptorCalculators:
-            self.descriptorCalculators = []
-        self.descriptorCalculators.append(calculator)
-        self.descriptors.append(
-            DescriptorTable(calculator, descriptors, store_dir=self.storeDir, n_jobs=self.nJobs, overwrite=True,
-                            key_cols=[self.proteincol], chunk_size=self.chunkSize))
+        self.attachDescriptors(calculator, descriptors, [self.proteincol])
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
         """Apply smiles_standardizer to the compounds in parallel
@@ -1325,6 +1343,19 @@ class QSPRDataset(MoleculeTable):
         name = mol_table.name if name is None else name
         return QSPRDataset(name, target_props, mol_table.getDF(), **kwargs)
 
+    def addCustomDescriptors(self, calculator: CustomDescriptorsCalculator, recalculate=False, featurize=True):
+        """Add custom descriptors to the data set.
+
+        If descriptors are already present, they will be recalculated if `recalculate` is `True`.
+
+        Args:
+            calculator (CustomDescriptorsCalculator): calculator instance to use for descriptor calculation
+            recalculate (bool, optional): whether to recalculate descriptors if they are already present. Defaults to `False`.
+            featurize (bool, optional): whether to featurize the data set splits after adding descriptors. Defaults to `True`.
+        """
+        super().addCustomDescriptors(calculator, recalculate)
+        self.featurize(update_splits=featurize)
+
     def addDescriptors(self, calculator: MoleculeDescriptorsCalculator, recalculate=False, featurize=True):
         """Add descriptors to the data set.
 
@@ -1335,12 +1366,10 @@ class QSPRDataset(MoleculeTable):
         Args:
             calculator (MoleculeDescriptorsCalculator): calculator instance to use for descriptor calculation
             recalculate (bool, optional): whether to recalculate descriptors if they are already present. Defaults to `False`.
-            featurize (bool, optional): whether to featurize the data set after adding descriptors. Defaults to `True`.
+            featurize (bool, optional): whether to featurize the data set splits after adding descriptors. Defaults to `True`.
         """
         super().addDescriptors(calculator, recalculate)
-        self.featureNames = self.getFeatureNames()
-        if featurize:
-            self.featurizeSplits()
+        self.featurize(update_splits=featurize)
 
     def addProteinDescriptors(self, calculator: ProteinDescriptorCalculator, recalculate=False, featurize=True):
         """Add protein descriptors to the data set.
@@ -1352,11 +1381,14 @@ class QSPRDataset(MoleculeTable):
         Args:
             calculator (ProteinDescriptorCalculator): calculator instance to use for descriptor calculation
             recalculate (bool, optional): whether to recalculate descriptors if they are already present. Defaults to `False`.
-            featurize (bool, optional): whether to featurize the data set after adding descriptors. Defaults to `True`.
+            featurize (bool, optional): whether to featurize the data set splits after adding descriptors. Defaults to `True`.
         """
         super().addProteinDescriptors(calculator, recalculate)
+        self.featurize(update_splits=featurize)
+
+    def featurize(self, update_splits=True):
         self.featureNames = self.getFeatureNames()
-        if featurize:
+        if update_splits:
             self.featurizeSplits()
 
     def saveSplit(self):

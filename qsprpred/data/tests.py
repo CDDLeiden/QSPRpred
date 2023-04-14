@@ -19,7 +19,7 @@ from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
 from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
 from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator, ProteinDescriptorCalculator, \
-    DescriptorsCalculator
+    DescriptorsCalculator, CustomDescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
@@ -28,7 +28,7 @@ from qsprpred.data.utils.descriptorsets import (
     PaDEL,
     PredictorDesc,
     TanimotoDistances,
-    rdkit_descs, ProDecDescriptorSet, DescriptorSet,
+    rdkit_descs, ProDecDescriptorSet, DescriptorSet, DataFrameDescriptorSet,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (
@@ -942,16 +942,25 @@ class TestFeatureFilters(PathMixIn, TestCase):
     def setUp(self):
         """Set up the small test Dataframe."""
         super().setUp()
-        self.descriptors = ["Descriptor_F1", "Descriptor_F2", "Descriptor_F3", "Descriptor_F4", "Descriptor_F5"]
+        descriptors = ["Descriptor_F1", "Descriptor_F2", "Descriptor_F3", "Descriptor_F4", "Descriptor_F5"]
+        self.df_descriptors = pd.DataFrame(
+            data=np.array(
+                [[1, 4, 2, 6, 2],
+                 [1, 8, 4, 2, 4],
+                 [1, 4, 3, 2, 5],
+                 [1, 8, 4, 9, 8],
+                 [1, 4, 2, 3, 9],
+                 [1, 8, 4, 7, 12]]),
+            columns=descriptors)
         self.df = pd.DataFrame(
             data=np.array(
-                [["C", 1, 4, 2, 6, 2, 1],
-                 ["C", 1, 8, 4, 2, 4, 2],
-                 ["C", 1, 4, 3, 2, 5, 3],
-                 ["C", 1, 8, 4, 9, 8, 4],
-                 ["C", 1, 4, 2, 3, 9, 5],
-                 ["C", 1, 8, 4, 7, 12, 6]]),
-            columns=["SMILES"] + self.descriptors + ["y"]
+                [["C", 1],
+                 ["C", 2],
+                 ["C", 3],
+                 ["C", 4],
+                 ["C", 5],
+                 ["C", 6]]),
+            columns=["SMILES", "y"]
         )
         self.dataset = QSPRDataset(
             "TestFeatureFilters",
@@ -960,6 +969,12 @@ class TestFeatureFilters(PathMixIn, TestCase):
             store_dir=self.qsprdatapath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE)
+        self.df_descriptors.index = self.dataset.df.index
+        calculator = CustomDescriptorsCalculator([
+            DataFrameDescriptorSet(self.df_descriptors)
+        ])
+        self.dataset.addCustomDescriptors(calculator)
+        self.descriptors = self.dataset.featureNames
 
     def test_lowVarianceFilter(self):
         """Test the low variance filter, which drops features with a variance below a threshold."""

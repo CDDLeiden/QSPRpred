@@ -143,6 +143,42 @@ class ProteinDescriptorSet(DescriptorSet):
         """
         pass
 
+class DataFrameDescriptorSet(DescriptorSet):
+
+    def __init__(self, df: pd.DataFrame):
+        self._df = df
+        self._descriptors = df.columns.tolist()
+
+    def getDF(self):
+        return self._df
+
+    def getIndex(self):
+        return self._df.index
+
+    def __call__(self, index, *args, **kwargs):
+        ret = pd.DataFrame(index=index)
+        ret = ret.merge(self._df, how="left", left_index=True, right_index=True)
+        return ret[self.descriptors]
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, value):
+        self._descriptors = value
+
+    @property
+    def is_fp(self):
+        return False
+
+    def settings(self):
+        return {}
+
+    def __str__(self):
+        return "DataFrame"
+
+
 class ProDecDescriptorSet(ProteinDescriptorSet, NeedsMSAMixIn):
 
     def __init__(self, sets: Optional[List[str]] = None):
