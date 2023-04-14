@@ -8,6 +8,7 @@ stages:
 .test:
    stage: test
    before_script:
+      - apt-get -y install clustalo
       - python --version  # For debugging python version
       - pip install pytest
       - pip install . --no-cache-dir
