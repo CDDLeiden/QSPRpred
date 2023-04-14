@@ -222,11 +222,9 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
 
     def __call__(self, acc_keys, sequences: dict[str: str] = None, dtype=np.float32, **kwargs) -> pd.DataFrame:
         df = pd.DataFrame(index=acc_keys)
-        msa = None
         for descset in self.descsets:
             if hasattr(descset, "setMSA"):
-                if msa is None:
-                    msa = self.msaProvider(sequences, **kwargs)
+                msa = self.msaProvider(sequences, **kwargs)
                 descset.setMSA(msa)
             values = descset(acc_keys, sequences, **kwargs)
 
@@ -241,3 +239,9 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
 
     def getPrefix(self) -> str:
         return "Descriptor_PCM"
+
+    def toFile(self, fname: str) -> None:
+        super().toFile(fname)
+
+        # save msa if available
+        self.msaProvider.currentToFile(f"{fname}.msa")

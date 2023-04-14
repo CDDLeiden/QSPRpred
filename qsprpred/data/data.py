@@ -13,6 +13,7 @@ from typing import Callable, List, Literal, Union
 import numpy as np
 import pandas as pd
 from qsprpred.data.interfaces import MoleculeDataSet, datasplit, DataSet
+from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator, MoleculeDescriptorsCalculator, \
     ProteinDescriptorCalculator
 from qsprpred.data.utils.feature_standardization import (
@@ -398,6 +399,9 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             path = f"{self.storeDir}/{file}"
             if os.path.exists(path):
                 calc = DescriptorsCalculator.fromFile(path)
+                if isinstance(calc, ProteinDescriptorCalculator):
+                    calc.msaProvider = ClustalMSA(self.storeDir)
+                    calc.msaProvider.currentFromFile(f"{path}.msa")
                 self.descriptorCalculators.append(calc)
                 self.descriptors.append(self.loadDescriptorsTable(calc))
 
