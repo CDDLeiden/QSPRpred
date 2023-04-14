@@ -8,8 +8,11 @@ stages:
 .test:
    stage: test
    before_script:
-      - apt-get -y install clustalo
+      - wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
+      - export PATH=$PATH:$PWD
       - python --version  # For debugging python version
+      - echo "Clustalo version:"
+      - clustalo --version  # For debugging clustalo version
       - pip install pytest
       - pip install . --no-cache-dir
       - pip freeze # For debugging environment
