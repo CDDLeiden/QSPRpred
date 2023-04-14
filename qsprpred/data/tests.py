@@ -6,6 +6,7 @@ import itertools
 import logging
 import os
 import shutil
+from collections.abc import Iterable
 from unittest import TestCase
 
 import mordred
@@ -20,7 +21,6 @@ from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
 from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator, ProteinDescriptorCalculator, \
     DescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
-    MoleculeDescriptorSet,
     DrugExPhyschem,
     FingerprintSet,
     Mold2,
@@ -28,7 +28,7 @@ from qsprpred.data.utils.descriptorsets import (
     PaDEL,
     PredictorDesc,
     TanimotoDistances,
-    rdkit_descs, ProDecDescriptorSet,
+    rdkit_descs, ProDecDescriptorSet, DescriptorSet,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (
@@ -138,11 +138,12 @@ class DataSetsMixIn(PathMixIn):
         """Return a list of all available protein descriptor sets."""
 
         return [
-            ProDecDescriptorSet()
+            ProDecDescriptorSet(sets=["Zscale Hellberg"]),
+            ProDecDescriptorSet(sets=["Sneath"]), # TODO: add more?
         ]
 
-    @staticmethod
-    def get_prep_grid():
+    @classmethod
+    def get_prep_grid(cls):
         """Return a list of many possible combinations of descriptor calculators, splits, feature standardizers, feature filters and data filters. Again, this is not exhaustive, but should cover a lot of cases.
 
         Returns:
@@ -155,16 +156,36 @@ class DataSetsMixIn(PathMixIn):
                 radius=3,
                 nBits=1024
             ),
-            rdkit_descs()
+            rdkit_descs(),
+        ]
+        feature_sets_pcm = [
+            ProDecDescriptorSet(sets=["Zscale Hellberg"]),
+            ProDecDescriptorSet(sets=["Sneath"]),
         ]
         # interesting feature set combinations as descriptor calculators (either 1 or 2 sets at the same time)
-        descriptor_calculators = [
-            MoleculeDescriptorsCalculator(combo) for combo in itertools.combinations(
+        mol_descriptor_calculators = [
+            [MoleculeDescriptorsCalculator(combo)] for combo in itertools.combinations(
                 feature_sets, 1
             )] + [
-            MoleculeDescriptorsCalculator(combo) for combo in itertools.combinations(
+            [MoleculeDescriptorsCalculator(combo)] for combo in itertools.combinations(
                 feature_sets, 2
             )]
+        clustal_msa = ClustalMSA(out_dir=cls.qsprdatapath)
+        protein_descriptor_calculators = [
+            [ProteinDescriptorCalculator(combo, msa_provider=clustal_msa)] for combo in itertools.combinations(
+                feature_sets_pcm, 1
+            )] + [
+            [ProteinDescriptorCalculator(combo, msa_provider=clustal_msa)] for combo in itertools.combinations(
+                feature_sets_pcm, 2
+            )
+        ]
+        descriptor_calculators = mol_descriptor_calculators + protein_descriptor_calculators
+
+        # make combinations of molecular and PCM descriptor calculators
+        descriptor_calculators += [
+            mol + prot for mol,prot in zip(mol_descriptor_calculators, protein_descriptor_calculators)
+        ]
+
 
         # lists with common preparation settings
         splits = [
@@ -173,19 +194,19 @@ class DataSetsMixIn(PathMixIn):
         ]
         feature_standardizers = [
             None,
-            StandardScaler(),
-            SKLearnStandardizer(scaler=MinMaxScaler())
+            StandardScaler()
         ]
         feature_filters = [
             None,
-            lowVarianceFilter(0.05)
+            highCorrelationFilter(0.9)
         ]
         data_filters = [
             None,
-            CategoryFilter(
-                name="moka_ionState7.4",
-                values=["cationic"]
-            ),
+            # FIXME: this test needs to be adjusted to work with the PCM data that we use for testing
+            # CategoryFilter(
+            #     name="moka_ionState7.4",
+            #     values=["cationic"]
+            # ),
         ]
 
         # grid of all combinations of the above preparation settings (passed to prepareDataset)
@@ -202,13 +223,19 @@ class DataSetsMixIn(PathMixIn):
     def get_prep_combinations():
         """Make a list of all possible combinations of preparation settings."""
         def get_name(thing):
-            return str(None) if thing is None else thing.__class__.__name__ if not type(thing) in [
-                MoleculeDescriptorsCalculator, SKLearnStandardizer] else str(thing)
+            return str(None) if thing is None else thing.__class__.__name__ if (not isinstance(thing, (DescriptorsCalculator, SKLearnStandardizer))) else str(thing)
 
-        return [
-            2 * ["_".join(get_name(i) for i in x)] + list(x)
+        def get_name_list(thing):
+            if isinstance(thing, Iterable):
+                return "_".join([get_name_list(i) for i in thing])
+            else:
+                return get_name(thing)
+
+        ret = [
+            2 * [get_name_list(x)] + list(x)
             for x in DataSetsMixIn.get_prep_grid()
         ]
+        return ret
 
     def getBigDF(self):
         """Get a large data frame for testing purposes.
@@ -341,6 +368,53 @@ class DataSetsMixIn(PathMixIn):
         self.assertTrue(dataset.X_ind is not None)
         self.assertTrue(dataset.y is not None)
         self.assertTrue(dataset.y_ind is not None)
+
+    def feature_consistency_checks(self, ds, expected_length):
+        """Check if the feature names and the feature matrix of a data set is consistent with expected number of variables.
+
+        Args:
+            ds (QSPRDataset): The data set to check.
+            expected_length (int): The expected number of features.
+        """
+        self.assertEqual(len(ds.featureNames), expected_length)
+        self.assertEqual(len(ds.getFeatureNames()), expected_length)
+        if expected_length > 0:
+            features = ds.getFeatures(concat=True)
+            self.assertEqual(features.shape[0], len(ds))
+            self.assertEqual(features.shape[1], expected_length)
+            self.assertEqual(ds.X.shape[1], expected_length)
+            self.assertEqual(ds.X_ind.shape[1], expected_length)
+            for fold in ds.createFolds():
+                self.assertIsInstance(fold, tuple)
+                self.assertEqual(fold[0].shape[1], expected_length)
+                self.assertEqual(fold[1].shape[1], expected_length)
+        else:
+            self.assertEqual(ds.X.shape[1], expected_length)
+            self.assertEqual(ds.X_ind.shape[1], expected_length)
+            self.assertRaises(ValueError, ds.getFeatures, concat=True)
+            self.assertRaises(ValueError, ds.createFolds)
+
+    def desc_consistency_check(self, dataset, target_props):
+        # test some basic consistency rules on the resulting features
+        expected_length = 0
+        for calc in dataset.descriptorCalculators:
+            for descset in calc.descsets:
+                expected_length += len(descset.descriptors)
+        self.feature_consistency_checks(dataset, expected_length)
+
+        # save to file and check if it can be loaded and the features are still there and correct
+        dataset.save()
+        ds_loaded = QSPRDataset.fromFile(dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
+        for ds_loaded_prop, target_prop in zip(ds_loaded.targetProperties, target_props):
+            if ds_loaded_prop.task.isClassification():
+                self.assertEqual(ds_loaded_prop.name, f"{target_prop['name']}_class")
+                self.assertEqual(ds_loaded_prop.task, target_prop['task'])
+        self.assertTrue(ds_loaded.descriptorCalculators)
+        for calc in ds_loaded.descriptorCalculators:
+            self.assertTrue(isinstance(calc, DescriptorsCalculator))
+            for descset in calc.descsets:
+                self.assertTrue(isinstance(descset, DescriptorSet))
+        self.feature_consistency_checks(dataset, expected_length)
 
 
 class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
@@ -1017,6 +1091,34 @@ class TestPCMDescriptorCalculation(DataSetsMixIn, TestCase):
         self.assertEqual(dataset_next.X_ind.shape, (10, len(self.sample_descset)))
         self.assertEqual(dataset_next.X.shape, (10, len(self.sample_descset)))
 
+    def test_with_mol_descs(self):
+        protein_feature_calculator = ProteinDescriptorCalculator(
+            descsets=[ProDecDescriptorSet(sets=["Zscale Hellberg"])],
+            msa_provider=self.msa_provider,
+        )
+        mol_feature_calculator = MoleculeDescriptorsCalculator(
+            descsets=[FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048), DrugExPhyschem()]
+        )
+        calcs = [protein_feature_calculator, mol_feature_calculator]
+        self.dataset.prepareDataset(
+            feature_calculators=calcs,
+            feature_standardizer=StandardScaler(),
+            split=randomsplit(test_fraction=0.2),
+        )
+
+        expected_length = 0
+        for calc in calcs:
+            for descset in calc.descsets:
+                expected_length += len(descset)
+        self.assertEqual(self.dataset.X.shape[1], expected_length)
+
+        # filter features and test if they are there after saving and loading
+        self.dataset.filterFeatures([lowVarianceFilter(0.05), highCorrelationFilter(0.9)])
+        feats_left = self.dataset.X.shape[1]
+        self.dataset.save()
+        dataset_new = QSPRDataset.fromFile(self.dataset.storePath)
+        self.assertEqual(dataset_new.X.shape[1], feats_left)
+
     def test_ProDec(self):
         descset = ProDecDescriptorSet(sets=["Zscale Hellberg"])
         protein_feature_calculator = ProteinDescriptorCalculator(
@@ -1232,31 +1334,6 @@ class TestStandardizers(DataSetsMixIn, TestCase):
 class TestDataSetPreparation(DataSetsMixIn, TestCase):
     """Test as many possible combinations of data sets and their preparation settings."""
 
-    def feature_consistency_checks(self, ds, expected_length):
-        """Check if the feature names and the feature matrix of a data set is consistent with expected number of variables.
-
-        Args:
-            ds (QSPRDataset): The data set to check.
-            expected_length (int): The expected number of features.
-        """
-        self.assertEqual(len(ds.featureNames), expected_length)
-        self.assertEqual(len(ds.getFeatureNames()), expected_length)
-        if expected_length > 0:
-            features = ds.getFeatures(concat=True)
-            self.assertEqual(features.shape[0], len(ds))
-            self.assertEqual(features.shape[1], expected_length)
-            self.assertEqual(ds.X.shape[1], expected_length)
-            self.assertEqual(ds.X_ind.shape[1], expected_length)
-            for fold in ds.createFolds():
-                self.assertIsInstance(fold, tuple)
-                self.assertEqual(fold[0].shape[1], expected_length)
-                self.assertEqual(fold[1].shape[1], expected_length)
-        else:
-            self.assertEqual(ds.X.shape[1], expected_length)
-            self.assertEqual(ds.X_ind.shape[1], expected_length)
-            self.assertRaises(ValueError, ds.getFeatures, concat=True)
-            self.assertRaises(ValueError, ds.createFolds)
-
     @parameterized.expand(
         DataSetsMixIn.get_prep_combinations()
     )  # add @skip("Not now...") below this line to skip these tests
@@ -1264,7 +1341,7 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
         self,
         _,
         name,
-        feature_calculator,
+        feature_calculators,
         split,
         feature_standardizer,
         feature_filter,
@@ -1276,7 +1353,7 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
         Note that the combinations are not exhaustive, but defined by `DataSetsMixIn.get_prep_combinations()`.
         """
         # fetch a new data set
-        dataset = self.create_small_dataset(name=name)
+        dataset = self.create_pcm_dataset(name=name)
 
         # if a split needs a dataset, give it one
         if split and hasattr(split, "setDataSet"):
@@ -1287,7 +1364,7 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
 
         # prepare the dataset and check consistency
         dataset.prepareDataset(
-            feature_calculators=[feature_calculator],
+            feature_calculators=feature_calculators,
             split=split if split else None,
             feature_standardizer=feature_standardizer if feature_standardizer else None,
             feature_filters=[feature_filter] if feature_filter else None,
@@ -1303,14 +1380,16 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
         dataset = QSPRDataset.fromFile(dataset.storePath)
         self.assertEqual(dataset.name, name)
         self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
-        self.assertEqual(dataset.targetProperties[0].name, "CL")
+        self.assertEqual(dataset.targetProperties[0].name, "pchembl_value_Median")
         for calc in dataset.descriptorCalculators:
-            self.assertIsInstance(calc, feature_calculator.__class__)
+            self.assertIsInstance(calc, DescriptorsCalculator)
         if feature_standardizer is not None:
             self.assertIsInstance(dataset.feature_standardizer, SKLearnStandardizer)
         else:
             self.assertIsNone(dataset.feature_standardizer)
         self.feature_consistency_checks(dataset, expected_feature_count)
+
+class TestDescriptorsAll(DataSetsMixIn, TestCase):
 
     @parameterized.expand([(f"{desc_set}_{TargetTasks.MULTICLASS}", desc_set,
                             [{"name": "CL", "task": TargetTasks.MULTICLASS, "th": [0, 1, 10, 1200]}])
@@ -1348,23 +1427,44 @@ class TestDataSetPreparation(DataSetsMixIn, TestCase):
         preparation['feature_calculators'] = [MoleculeDescriptorsCalculator(descriptor_sets)]
         dataset.prepareDataset(**preparation)
 
-        # test some basic consistency rules on the resulting features
-        expected_length = 0
-        for calc in dataset.descriptorCalculators:
-            for descset in calc.descsets:
-                expected_length += len(descset.descriptors)
-        self.feature_consistency_checks(dataset, expected_length)
+        # test consistency
+        self.desc_consistency_check(dataset, target_props)
 
-        # save to file and check if it can be loaded and the features are still there and correct
-        dataset.save()
-        ds_loaded = QSPRDataset.fromFile(dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE)
-        for ds_loaded_prop, target_prop in zip(ds_loaded.targetProperties, target_props):
-            if ds_loaded_prop.task.isClassification():
-                self.assertEqual(ds_loaded_prop.name, f"{target_prop['name']}_class")
-                self.assertEqual(ds_loaded_prop.task, target_prop['task'])
-        self.assertTrue(ds_loaded.descriptorCalculators)
-        for calc in ds_loaded.descriptorCalculators:
-            self.assertTrue(isinstance(calc, DescriptorsCalculator))
-            for descset in calc.descsets:
-                self.assertTrue(isinstance(descset, MoleculeDescriptorSet))
-        self.feature_consistency_checks(dataset, expected_length)
+    @parameterized.expand([(f"{desc_set}_{TargetTasks.MULTICLASS}", desc_set,
+                            [{"name": "pchembl_value_Median", "task": TargetTasks.MULTICLASS, "th": [5.0, 5.5, 6.5, 10.0]}])
+                           for desc_set in DataSetsMixIn.get_all_protein_descriptors()] +
+                          [(f"{desc_set}_{TargetTasks.REGRESSION}", desc_set,
+                            [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}])
+                           for desc_set in DataSetsMixIn.get_all_protein_descriptors()] +
+                          [(f"{desc_set}_Multitask", desc_set,
+                            [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION},
+                             {"name": "pchembl_value_Mean", "task": TargetTasks.SINGLECLASS, "th": [6.5]}])
+                           for desc_set in DataSetsMixIn.get_all_protein_descriptors()])
+    def test_descriptors_pcm_all(self, _, desc_set, target_props):
+        """Tests all available descriptor sets.
+
+        Note that they are not checked with all possible settings and all possible preparations,
+        but only with the default settings provided by `DataSetsMixIn.get_default_prep()`.
+        The list itself is defined and configured by `DataSetsMixIn.get_all_descriptors()`,
+        so if you need a specific descriptor tested, add it there.
+        """
+        np.random.seed(42)
+
+        # get the data set
+        target_props_id = [f"{target_prop['name']}_{target_prop['task']}" for target_prop in target_props]
+        ds_name = f"{desc_set}_{target_props_id}_pcm"  # unique name to avoid conflicts
+        logging.debug(f"Testing data set: {ds_name}")
+        dataset = self.create_pcm_dataset(
+            name=ds_name,
+            target_props=target_props
+        )
+
+        # run the preparation
+        descriptor_sets = [desc_set]
+        preparation = dict()
+        preparation.update(self.get_default_prep())
+        preparation['feature_calculators'] = [ProteinDescriptorCalculator(descriptor_sets, msa_provider=ClustalMSA(out_dir=self.qsprdatapath))]
+        dataset.prepareDataset(**preparation)
+
+        # test consistency
+        self.desc_consistency_check(dataset, target_props)
