@@ -11,7 +11,9 @@ import numpy as np
 import pandas as pd
 from qsprpred import VERSION
 from qsprpred.data.data import MoleculeTable, QSPRDataset, TargetProperty
-from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
+from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
+from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator, ProteinDescriptorCalculator, \
+    DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
@@ -31,7 +33,7 @@ class QSPRModel(ABC):
         alg (estimator): estimator instance or class
         parameters (dict): dictionary of algorithm specific parameters
         model (estimator): the underlying estimator instance, if `fit` or optimization is perforemed, this model instance gets updated accordingly
-        featureCalculator (MoleculeDescriptorsCalculator): feature calculator instance taken from the data set or deserialized from file if the model is loaded without data
+        featureCalculators (MoleculeDescriptorsCalculator): feature calculator instance taken from the data set or deserialized from file if the model is loaded without data
         featureStandardizer (SKLearnStandardizer): feature standardizer instance taken from the data set or deserialized from file if the model is loaded without data
         metaInfo (dict): dictionary of metadata about the model, only available after the model is saved
         baseDir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`
@@ -79,8 +81,8 @@ class QSPRModel(ABC):
             self.parameters = self.readParams(os.path.join(self.baseDir, self.metaInfo['parameters_path']))
 
         # initialize a feature calculator instance
-        self.featureCalculator = self.data.descriptorCalculators if self.data else self.readDescriptorCalculator(
-            os.path.join(self.baseDir, self.metaInfo['feature_calculator_path']))
+        self.featureCalculators = self.data.descriptorCalculators if self.data else self.readDescriptorCalculators(
+            [os.path.join(self.baseDir, path) for path in self.metaInfo['feature_calculator_paths']])
 
         # initialize a standardizer instance
         self.featureStandardizer = self.data.feature_standardizer if self.data else self.readStandardizer(os.path.join(
@@ -183,27 +185,39 @@ class QSPRModel(ABC):
         return path
 
     @staticmethod
-    def readDescriptorCalculator(path):
-        """Read a descriptor calculator from a JSON file.
+    def readDescriptorCalculators(paths):
+        """Read a descriptor calculators from a JSON file.
 
         Args:
-            path (str): absolute path to the JSON file
+            paths (List[str]): absolute path to the JSON file
 
         Returns:
-            MoleculeDescriptorsCalculator: descriptor calculator instance or None if the file does not exist
+            List[DescriptorsCalculator]: descriptor calculator instance or None if the file does not exist
         """
-        if os.path.exists(path):
-            return MoleculeDescriptorsCalculator.fromFile(path)
+        calcs = []
+        for path in paths:
+            if os.path.exists(path):
+                calc = DescriptorsCalculator.fromFile(path)
+                if isinstance(calc, ProteinDescriptorCalculator):
+                    calc.msaProvider = ClustalMSA(out_dir=os.path.dirname(path))
+                    calc.msaProvider.currentFromFile(f"{path}.msa")
+                calcs.append(calc)
+            else:
+                raise  FileNotFoundError(f"Descriptor calculator file '{path}' not found.")
+        return calcs
 
-    def saveDescriptorCalculator(self):
+    def saveDescriptorCalculators(self):
         """Save the current descriptor calculator to a JSON file. The file is stored in the output directory of the model.
 
         Returns:
             str: absolute path to the JSON file containing the descriptor calculator
         """
-        path = f'{self.outDir}/{self.name}_descriptor_calculator.json'
-        self.featureCalculator.toFile(path)
-        return path
+        paths = []
+        for calc in self.featureCalculators:
+            path = f'{self.outDir}/{self.name}_descriptor_calculator_{calc}.json'
+            calc.toFile(path)
+            paths.append(path)
+        return paths
 
     @staticmethod
     def readStandardizer(path):
@@ -276,8 +290,8 @@ class QSPRModel(ABC):
         self.metaInfo['target_properties'] = TargetProperty.toList(
             copy.deepcopy(self.data.targetProperties), task_as_str=True)
         self.metaInfo['parameters_path'] = self.saveParams(self.parameters).replace(f"{self.baseDir}/", '')
-        self.metaInfo['feature_calculator_path'] = self.saveDescriptorCalculator().replace(
-            f"{self.baseDir}/", '') if self.featureCalculator else None
+        self.metaInfo['feature_calculator_paths'] = [x.replace(
+            f"{self.baseDir}/", '') for x in self.saveDescriptorCalculators()] if self.featureCalculators else None
         self.metaInfo['feature_standardizer_path'] = self.saveStandardizer().replace(
             f"{self.baseDir}/", '') if self.featureStandardizer else None
         self.metaInfo['model_path'] = self.saveModel().replace(f"{self.baseDir}/", '')
@@ -412,7 +426,7 @@ class QSPRModel(ABC):
 
     def predictMols(self, mols: List[str], use_probas: bool = False,
                     smiles_standardizer: Union[str, callable] = 'chembl',
-                    n_jobs: int = 1, fill_value: float = np.nan):
+                    n_jobs: int = 1, fill_value: float = np.nan, protein_id : str = None):
         """
         Make predictions for the given molecules.
 
@@ -422,23 +436,32 @@ class QSPRModel(ABC):
             smiles_standardizer: either `chembl`, `old`, or a partial function that reads and standardizes smiles.
             n_jobs: Number of jobs to use for parallel processing.
             fill_value: Value to use for missing values in the feature matrix.
+            protein_id: Protein identifier of the target we want to predict on if this is a PCM model.
 
         Returns:
             np.ndarray: an array of predictions, can be a 1D array for single target models, 2D array for multi target and a list of 2D arrays for multi-target and multi-class models
         """
 
+        if not self.featureCalculators:
+            raise ValueError("No feature calculator set on this instance.")
+        for calc in self.featureCalculators:
+            if isinstance(calc, ProteinDescriptorCalculator) and not protein_id:
+                raise ValueError("This is a PCM model, please provide a protein id to predict the molecules on.")
+            if isinstance(calc, ProteinDescriptorCalculator) and protein_id not in calc.msaProvider.current.keys():
+                raise ValueError(f"Protein id {protein_id} not found in the available MSA, cannot calculate PCM descriptors. Options are: {list(calc.msaProvider.current.keys())}.")
+
         dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False, n_jobs=n_jobs)
         for targetproperty in self.targetProperties:
             dataset.addProperty(targetproperty.name, np.nan)
-        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False, n_jobs=n_jobs)
+        if protein_id:
+            dataset.addProperty("protein_id", protein_id)
+        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False, n_jobs=n_jobs, proteincol="protein_id")
         dataset.standardizeSmiles(smiles_standardizer, drop_invalid=False)
         failed_mask = dataset.dropInvalids().values
 
-        if not self.featureCalculator:
-            raise ValueError("No feature calculator set on this instance.")
         dataset.prepareDataset(
             smiles_standardizer=None,
-            feature_calculators=[self.featureCalculator],
+            feature_calculators=self.featureCalculators,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value
         )
