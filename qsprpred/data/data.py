@@ -547,15 +547,12 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         join_cols = list(join_cols)
         ret = self.df[join_cols].copy()
         ret.reset_index(drop=True, inplace=True)
-        suffixes = ('_left', '_right')
         for descriptors in self.descriptors:
             df_descriptors = descriptors.getDF()
-            ret = ret.merge(df_descriptors, left_on=descriptors.keyCols, how='left', right_index=True, suffixes=suffixes)
-            to_remove = []
-            for suffix in suffixes:
-                to_remove.extend([f"{x}{suffix}" for x in join_cols])
-            ret.drop(columns=to_remove, inplace=True)
-            ret[join_cols] = self.df[join_cols].copy()
+            ret = ret.merge(df_descriptors, left_on=descriptors.keyCols, how='left', right_index=True, suffixes=('_left', '_right'))
+            for x in descriptors.keyCols:
+                ret.drop(columns=[f"{x}_right"], inplace=True)
+                ret.rename(columns={f"{x}_left": x}, inplace=True)
         ret.set_index(self.df.index, inplace=True)
         ret.drop(columns=join_cols, inplace=True)
         return ret
