@@ -41,9 +41,10 @@ class DescriptorsCalculator(ABC):
         for key, value in descset_dict.items():
             if key == "calculator":
                 continue
-            if key.startswith("FingerprintSet_"):
-                key = "FingerprintSet"
-            descset = get_descriptor(key, **value["settings"])
+            name = value["name"]
+            if name.startswith("FingerprintSet_"):
+                name = "FingerprintSet"
+            descset = get_descriptor(name, **value["settings"])
             if descset.is_fp:
                 descset.keepindices = value["keepindices"]
             else:
@@ -103,18 +104,21 @@ class DescriptorsCalculator(ABC):
             fname: file name of json file with descriptor names and settings
         """
         descset_dict = {}
-        for descset in self.descsets:
+        for idx,descset in enumerate(self.descsets):
+            idx = str(idx)
             if descset.is_fp:
-                descset_dict[descset.__str__()] = {
+                descset_dict[idx] = {
+                    "name" : str(descset),
                     "settings": descset.settings,
                     "keepindices": descset.keepindices,
                 }
             else:
-                descset_dict[descset.__str__()] = {
+                descset_dict[idx] = {
+                    "name": str(descset),
                     "settings": descset.settings,
                     "descriptors": descset.descriptors,
                 }
-            descset_dict[descset.__str__()]["class"] = descset.__class__.__name__
+            descset_dict[idx]["class"] = descset.__class__.__name__
         # save fully qualified class name of calculator
         descset_dict["calculator"] = self.__class__.__module__ + "." + self.__class__.__name__
         with open('%s' % fname, "w") as outfile:
@@ -132,7 +136,7 @@ class DescriptorsCalculator(ABC):
             descs_from_curr_set = [
                 f.replace(f"{self.getPrefix()}_{descriptorset}_", "")
                 for f in descriptors
-                if f.startswith(f"{self.getPrefix()}_{descriptorset}_")
+                if f.startswith(f"{self.getPrefix()}_{descriptorset}_") and (f.replace(f"{self.getPrefix()}_{descriptorset}_", "") in descriptorset.descriptors)
             ]
             # if there are none to keep from current descriptors set, skip the whole set
             if not descs_from_curr_set:
