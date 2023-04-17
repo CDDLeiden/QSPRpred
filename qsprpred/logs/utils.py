@@ -114,6 +114,11 @@ def backUpFiles(base_dir: str, folder: str, output_prefixes: tuple, cp_suffix=No
             message = backUpFilesInFolder(
                 dir, backup_id, output_prefixes, output_extensions=(
                     'json', 'log'), cp_suffix=cp_suffix)
+
+        if folder == 'qspr/predictions':
+            message = backUpFilesInFolder(
+                dir, backup_id, output_prefixes, output_extensions=(
+                    'json', 'log'), cp_suffix=cp_suffix)
         return message
     else:
         return ''

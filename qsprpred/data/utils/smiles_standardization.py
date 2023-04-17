@@ -6,6 +6,28 @@ from rdkit import Chem
 from rdkit.Chem.SaltRemover import SaltRemover
 from chembl_structure_pipeline import standardizer as chembl_stand
 
+from qsprpred.logs import logger
+
+
+def check_smiles_valid(smiles, throw=True):
+    is_valid = True
+    exception = None
+    if not smiles:
+        is_valid = False
+        exception = ValueError(f"Empty molecule: {smiles}")
+    try:
+        mol = Chem.MolFromSmiles(smiles)
+        if not mol:
+            raise ValueError(f"Invalid molecule: {smiles}")
+        Chem.SanitizeMol(mol)
+    except Exception as exp:
+        is_valid = False
+        exception = exp
+
+    if exception and throw:
+        raise exception
+    else:
+        return is_valid
 
 def neutralize_atoms(mol):
     """Neutralize charged molecules by atom.
@@ -42,18 +64,20 @@ def chembl_smi_standardizer(smi: str, isomericSmiles:bool=True, sanitize:bool=Tr
         sanitize: applies sanitization using the ChEMBL standardizer. Defaults to True.
 
     Returns:
-        standardized SMILES string.
+        smiles (str): standardized SMILES string or `None` if standardization failed.
     """    
     try:
         mol = Chem.MolFromSmiles(smi)
-    except:  # noqa E722
-        print('Could not parse smiles: ', smi)
+        if not mol:
+            raise ValueError(f"Failed to parse SMILES: {smi}")
+        standard_mol = chembl_stand.standardize_mol(mol, sanitize=sanitize)
+        standard_smiles = Chem.MolToSmiles(
+            standard_mol, kekuleSmiles=False, canonical=True, isomericSmiles=isomericSmiles
+        )
+        return standard_smiles
+    except Exception as exp:  # noqa E722
+        logger.warning(f"Could not standardize SMILES: {smi} due to: {exp}.")
         return None
-    standard_mol = chembl_stand.standardize_mol(mol, sanitize=sanitize)
-    standard_smiles = Chem.MolToSmiles(
-        standard_mol, kekuleSmiles=False, canonical=True, isomericSmiles=isomericSmiles
-    )
-    return standard_smiles
 
 
 def old_standardize_sanitize(smi: str) -> str:
