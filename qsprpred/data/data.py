@@ -72,7 +72,7 @@ class PandasDataSet(DataSet):
             return data.apply(self.func, raw=self.raw, axis=self.axis, result_type=self.result_type,
                               args=self.args, **self.kwargs if self.kwargs else {})
 
-    def __init__(self, name, df: pd.DataFrame, store_dir=".", overwrite=False, index_cols=None, n_jobs=1, chunk_size=1000, id_prefix='QSPRID'):
+    def __init__(self, name, df: pd.DataFrame = None, store_dir=".", overwrite=False, index_cols=None, n_jobs=1, chunk_size=1000, id_prefix='QSPRID'):
         self.name = name
         self.indexCols = index_cols
 
