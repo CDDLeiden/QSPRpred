@@ -14,3 +14,4 @@ None.
 ## New Features
 
 - The index of the `MoleculeTable` can now be used to relate cross-validation and test outputs to the original molecules. Therefore, the index is now also saved in the model training outputs.
+- the `Papyrus.getData()` method now accepts `activity_types` parameter to select a list of activity types to get.
