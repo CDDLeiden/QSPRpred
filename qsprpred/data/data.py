@@ -1559,11 +1559,11 @@ class QSPRDataset(MoleculeTable):
 
     def prepareDataset(
         self,
-        smiles_standardizer='chembl',
+        smiles_standardizer : Union[str, Callable, None] = 'chembl',
         datafilters=None,
         split=None,
         fold=None,
-        feature_calculators : List[Union[MoleculeDescriptorsCalculator, ProteinDescriptorCalculator]] = None,
+        feature_calculators : List[DescriptorsCalculator] = None,
         feature_filters=None,
         feature_standardizer=None,
         feature_fill_value=np.nan,
@@ -1572,7 +1572,7 @@ class QSPRDataset(MoleculeTable):
         """Prepare the dataset for use in QSPR model.
 
         Arguments:
-            smiles_standardizer (Union[str, callable]): either `chembl`, `old`, or a partial function that reads and standardizes smiles. If `None`, no standardization will be performed. Defaults to `chembl`.
+            smiles_standardizer (Union[str, Callable]): either `chembl`, `old`, or a partial function that reads and standardizes smiles. If `None`, no standardization will be performed. Defaults to `chembl`.
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             fold (datasplitter obj): splits the train set into folds for cross validation
