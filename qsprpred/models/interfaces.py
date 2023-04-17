@@ -460,8 +460,8 @@ class QSPRModel(ABC):
         failed_mask = dataset.dropInvalids().values
 
         dataset.prepareDataset(
-            smiles_standardizer=None,
-            feature_calculators=self.featureCalculators,
+            smiles_standardizer=smiles_standardizer,
+            feature_calculator=self.featureCalculators,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value
         )

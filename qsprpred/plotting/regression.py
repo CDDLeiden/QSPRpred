@@ -2,6 +2,7 @@
 import math
 from abc import ABC
 
+import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from qsprpred.models.tasks import ModelTasks
@@ -21,7 +22,7 @@ class CorrelationPlot(RegressionPlot):
     """Class to plot the results of regression models. Plot predicted pX vs real pX."""
 
     def make(self, property_name: str, save: bool = True, show: bool = False,
-             out_dir: str = ".", filename_prefix: str = "corrplot"):
+             out_dir: str = ".", filename_prefix: str = "corrplot", ncol=1):
         """Plot the results of regression models. Plot predicted pX vs real pX.
 
         Args:
@@ -30,6 +31,7 @@ class CorrelationPlot(RegressionPlot):
             show (`bool`): whether to show the plot
             out_dir (`str`): directory to save the plot to
             filename_prefix (`str`): prefix to use for the filename
+            ncol (`int`): number of columns when plotting multiple models
 
         Returns:
             ret_axes (`matplotlib.axes.Axes`): the axes of the plot
@@ -37,16 +39,18 @@ class CorrelationPlot(RegressionPlot):
         """
         my_cmap = ["#12517B", "#88002A"]
 
-        plt.figure(figsize=(5, 5))
+        l = len(self.models)
+        nrow = math.ceil(l/ncol)
+        plt.figure(figsize=(5*ncol, 5*nrow))
         cate = [self.cvPaths, self.indPaths]
         cate_names = ["cv", "ind"]
         ret_axes = []
         summary = {"ModelName": [], "R2": [], "RMSE": [], "Set": []}
         for m, model in enumerate(self.models):
-            ax = plt.subplot(1, len(self.models), m + 1)
+            ax = plt.subplot(nrow, ncol, m + 1)
             ret_axes.append(ax)
-            min_val = 0
-            max_val = 10
+            min_val = np.inf
+            max_val = -np.inf
             for j, legend in enumerate(['Cross Validation', 'Independent Test']):
                 df = pd.read_table(cate[j][model])
                 plt.scatter(

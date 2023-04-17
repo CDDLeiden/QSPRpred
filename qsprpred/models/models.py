@@ -512,7 +512,10 @@ class QSPRDNN(QSPRModel):
         X_all = self.data.getFeatures(concat=True).values
         y_all = self.data.getTargetPropertiesValues(concat=True).values
 
-        self.parameters.update({"n_epochs": self.optimal_epochs})
+        if self.parameters:
+            self.parameters.update({"n_epochs": self.optimal_epochs})
+        else:
+            self.parameters = {"n_epochs": self.optimal_epochs}
         self.model = self.loadModel(self.alg, self.parameters, fromFile=fromFile)
         train_loader = self.model.get_dataloader(X_all, y_all)
 
@@ -602,21 +605,23 @@ class QSPRDNN(QSPRModel):
             inds_ids = X_ind.index.values
 
             # save cross validation predictions and independent test set predictions
-            cv_index = pd.Index(cvs_ids, name=self.data.getDF().index.name)
+            cvs_index = pd.Index(cvs_ids, name=self.data.getDF().index.name)
             ind_index = pd.Index(inds_ids, name=self.data.getDF().index.name)
-            train, test = pd.Series(
-                y.values.flatten()).to_frame(
-                name='Label'), pd.Series(
-                y_ind.values.flatten()).to_frame(
-                name='Label')
-            train.set_index(cv_index, inplace=True)
-            test.set_index(ind_index, inplace=True)
-            if self.data.targetProperties[0].task.isClassification():
-                train['Score'], test['Score'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
-                train = pd.concat([train, pd.DataFrame(cvs, cv_index)], axis=1)
-                test = pd.concat([test, pd.DataFrame(inds, ind_index)], axis=1)
-            else:
-                train['Score'], test['Score'] = cvs, inds
+            train, test = y.add_suffix('_Label'), y_ind.add_suffix('_Label')
+            train, test = pd.DataFrame(
+                train.values, columns=train.columns, index=cvs_index), pd.DataFrame(
+                test.values, columns=test.columns, index=ind_index)
+            for idx, prop in enumerate(self.data.targetProperties):
+                if prop.task.isClassification():
+                    train[f'{prop.name}_Prediction'], test[f'{prop.name}_Prediction'] = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
+                    # add probability columns to train and test set
+                    # FIXME: this will not work for multiclass classification
+                    train = pd.concat([train, pd.DataFrame(
+                        cvs, index=cvs_index).add_prefix(f'{prop.name}_ProbabilityClass_')], axis=1)
+                    test = pd.concat([test, pd.DataFrame(inds, index=ind_index).add_prefix(
+                        f'{prop.name}_ProbabilityClass_')], axis=1)
+                else:
+                    train[f'{prop.name}_Prediction'], test[f'{prop.name}_Prediction'] = cvs[:, idx], inds[:, idx]
             train['Fold'] = fold_counter
             train.to_csv(self.outPrefix + '.cv.tsv', sep='\t')
             test.to_csv(self.outPrefix + '.ind.tsv', sep='\t')
