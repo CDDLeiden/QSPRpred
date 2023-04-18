@@ -1324,7 +1324,7 @@ class QSPRDataset(MoleculeTable):
         meta = QSPRDataset.loadMetadata(name, store_dir)
         return QSPRDataset(*args, name=name, store_dir=store_dir, **meta['init'], **kwargs)
 
-    @ staticmethod
+    @staticmethod
     def fromMolTable(
             mol_table: MoleculeTable, target_props: List[Union[TargetProperty, dict]],
             name=None, **kwargs) -> 'QSPRDataset':
@@ -1341,7 +1341,10 @@ class QSPRDataset(MoleculeTable):
         """
         kwargs['store_dir'] = mol_table.storeDir if 'store_dir' not in kwargs else kwargs['store_dir']
         name = mol_table.name if name is None else name
-        return QSPRDataset(name, target_props, mol_table.getDF(), **kwargs)
+        ds = QSPRDataset(name, target_props, mol_table.getDF(), **kwargs)
+        ds.descriptorCalculators = mol_table.descriptorCalculators
+        ds.descriptors = mol_table.descriptors
+        return ds
 
     def addCustomDescriptors(self, calculator: CustomDescriptorsCalculator, recalculate=False, featurize=True):
         """Add custom descriptors to the data set.
