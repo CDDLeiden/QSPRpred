@@ -461,7 +461,7 @@ class QSPRModel(ABC):
 
         dataset.prepareDataset(
             smiles_standardizer=smiles_standardizer,
-            feature_calculator=self.featureCalculators,
+            feature_calculators=self.featureCalculators,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value
         )
