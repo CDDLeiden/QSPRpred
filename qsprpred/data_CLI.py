@@ -232,7 +232,7 @@ def QSPR_dataprep(args):
                     featurefilters.append(BorutaFilter(estimator=RandomForestClassifier(n_jobs=args.ncpu)))
 
             # prepare dataset for modelling
-            mydataset.prepareDataset(feature_calculator=MoleculeDescriptorsCalculator(descriptorsets),
+            mydataset.prepareDataset(feature_calculators=[MoleculeDescriptorsCalculator(descriptorsets)],
                                      datafilters=datafilters, split=split, feature_filters=featurefilters,
                                      feature_standardizer=StandardScaler(), feature_fill_value=0.0)
 
