@@ -14,6 +14,7 @@ stages:
       - echo "Clustalo version:"
       - clustalo --version  # For debugging clustalo version
       - pip install pytest
+      - pip install jupyterlab
       - pip install . --no-cache-dir
       - pip freeze # For debugging environment
    script:
