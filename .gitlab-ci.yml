@@ -19,6 +19,7 @@ stages:
    script:
       - pytest qsprpred
       - cd clitest && ./run.sh
+      - cd ../tutorial && ./run_all.sh
 
 # Run tests on Python version 10 (linux image)
 test:python3.10:
