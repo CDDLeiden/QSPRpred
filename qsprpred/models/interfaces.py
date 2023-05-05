@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from qsprpred import VERSION
 from qsprpred.data.data import MoleculeTable, QSPRDataset, TargetProperty
-from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
 from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator, ProteinDescriptorCalculator, \
     DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
@@ -197,10 +196,13 @@ class QSPRModel(ABC):
         calcs = []
         for path in paths:
             if os.path.exists(path):
-                calc = DescriptorsCalculator.fromFile(path)
-                if isinstance(calc, ProteinDescriptorCalculator):
-                    calc.msaProvider = ClustalMSA(out_dir=os.path.dirname(path))
-                    calc.msaProvider.currentFromFile(f"{path}.msa")
+                data = json.load(open(path, "r", encoding="utf-8"))
+                if not "calculator" in data:
+                    calc_cls = "qsprpred.data.utils.descriptorcalculator.MoleculeDescriptorsCalculator"
+                else:
+                    calc_cls = data["calculator"]
+                calc_cls = import_class(calc_cls)
+                calc = calc_cls.fromFile(path)
                 calcs.append(calc)
             else:
                 raise  FileNotFoundError(f"Descriptor calculator file '{path}' not found.")

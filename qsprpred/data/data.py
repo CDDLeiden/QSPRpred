@@ -13,7 +13,6 @@ from typing import Callable, List, Literal, Union
 import numpy as np
 import pandas as pd
 from qsprpred.data.interfaces import MoleculeDataSet, datasplit, DataSet
-from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
 from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator, MoleculeDescriptorsCalculator, \
     ProteinDescriptorCalculator, CustomDescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import (
@@ -33,6 +32,9 @@ from rdkit.Chem import PandasTools
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import LabelEncoder
 from tqdm.auto import tqdm
+
+from qsprpred.utils.inspect import import_class
+
 
 class PandasDataSet(DataSet):
 
@@ -398,10 +400,13 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         for file in files:
             path = f"{self.storeDir}/{file}"
             if os.path.exists(path):
-                calc = DescriptorsCalculator.fromFile(path)
-                if isinstance(calc, ProteinDescriptorCalculator):
-                    calc.msaProvider = ClustalMSA(self.storeDir)
-                    calc.msaProvider.currentFromFile(f"{path}.msa")
+                data = json.load(open(path, "r", encoding="utf-8"))
+                if not "calculator" in data:
+                    calc_cls = "qsprpred.data.utils.descriptorcalculator.MoleculeDescriptorsCalculator"
+                else:
+                    calc_cls = data["calculator"]
+                calc_cls = import_class(calc_cls)
+                calc = calc_cls.fromFile(path)
                 self.descriptorCalculators.append(calc)
                 self.descriptors.append(self.loadDescriptorsTable(calc))
 

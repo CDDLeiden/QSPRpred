@@ -244,7 +244,15 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
         super().toFile(fname)
 
         # save msa if available
-        self.msaProvider.currentToFile(f"{fname}.msa")
+        self.msaProvider.toFile(f"{fname}.msaprovider")
+
+    @classmethod
+    def fromFile(cls, fname: str) -> None:
+        ret = super().fromFile(fname)
+        msa_provider_cls = json.load(open(f"{fname}.msaprovider", "r"))["class"]
+        msa_provider_cls = import_class(msa_provider_cls)
+        ret.msaProvider = msa_provider_cls.fromFile(f"{fname}.msaprovider")
+        return ret
 class CustomDescriptorsCalculator(DescriptorsCalculator):
 
     def __init__(self, descsets: List[DataFrameDescriptorSet]) -> None:
