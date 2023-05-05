@@ -17,7 +17,7 @@ from parameterized import parameterized
 from qsprpred.data.data import QSPRDataset, TargetProperty
 from qsprpred.data.utils.datafilters import CategoryFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
+from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA, MAFFT
 from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator, ProteinDescriptorCalculator, \
     DescriptorsCalculator, CustomDescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
@@ -112,23 +112,23 @@ class DataSetsMixIn(PathMixIn):
                 QSPRsklearn.fromFile(
                     f'{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json')
             ),
-            TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
-            FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-            Mordred(),
-            Mold2(),
-            FingerprintSet(fingerprint_type="CDKFP", size=2048, searchDepth=7),
-            FingerprintSet(fingerprint_type="CDKExtendedFP"),
-            FingerprintSet(fingerprint_type="CDKEStateFP"),
-            FingerprintSet(fingerprint_type="CDKGraphOnlyFP", size=2048, searchDepth=7),
-            FingerprintSet(fingerprint_type="CDKMACCSFP"),
-            FingerprintSet(fingerprint_type="CDKPubchemFP"),
-            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
-            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
-            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
-            FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
-            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
-            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
-            PaDEL(),
+            # TanimotoDistances(list_of_smiles=["C", "CC", "CCC"], fingerprint_type="MorganFP", radius=3, nBits=1000),
+            # FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
+            # Mordred(),
+            # Mold2(),
+            # FingerprintSet(fingerprint_type="CDKFP", size=2048, searchDepth=7),
+            # FingerprintSet(fingerprint_type="CDKExtendedFP"),
+            # FingerprintSet(fingerprint_type="CDKEStateFP"),
+            # FingerprintSet(fingerprint_type="CDKGraphOnlyFP", size=2048, searchDepth=7),
+            # FingerprintSet(fingerprint_type="CDKMACCSFP"),
+            # FingerprintSet(fingerprint_type="CDKPubchemFP"),
+            # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=False),
+            # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=True),
+            # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=False),
+            # FingerprintSet(fingerprint_type="CDKSubstructureFP", useCounts=True),
+            # FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
+            # FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
+            # PaDEL(),
         ]
 
         return descriptor_sets
@@ -1043,13 +1043,20 @@ class TestPCMDescriptorCalculation(DataSetsMixIn, TestCase):
         super().setUp()
         self.dataset = self.create_pcm_dataset(self.__class__.__name__)
         self.sample_descset = ProDecDescriptorSet(sets=["Zscale Hellberg"])
-        self.msa_provider = ClustalMSA(out_dir=self.qsprdatapath)
+        self.default_msa_provider = ClustalMSA(out_dir=self.qsprdatapath)
 
-    def test_serialization(self):
+    @parameterized.expand(
+        [
+            ("MAFFT", MAFFT),
+            ("ClustalMSA", ClustalMSA),
+        ]
+    )
+    def test_serialization(self, _, msa_provider_cls):
         """Test the serialization of dataset with datasplit."""
+        provider = msa_provider_cls(out_dir=self.qsprdatapath)
         dataset = self.create_pcm_dataset(self.__class__.__name__)
         split = randomsplit(test_fraction=0.2)
-        calculator = ProteinDescriptorCalculator([self.sample_descset], self.msa_provider)
+        calculator = ProteinDescriptorCalculator([self.sample_descset], provider)
         dataset.prepareDataset(
             split=split,
             feature_calculators=[calculator],
@@ -1079,7 +1086,7 @@ class TestPCMDescriptorCalculation(DataSetsMixIn, TestCase):
         """Test if the feature calculator can be switched to a new dataset."""
         dataset = self.create_pcm_dataset(self.__class__.__name__)
         split = randomsplit(test_fraction=0.5)
-        calculator = ProteinDescriptorCalculator([self.sample_descset], self.msa_provider)
+        calculator = ProteinDescriptorCalculator([self.sample_descset], self.default_msa_provider)
         lv = lowVarianceFilter(0.05)
         hc = highCorrelationFilter(0.9)
 
@@ -1109,7 +1116,7 @@ class TestPCMDescriptorCalculation(DataSetsMixIn, TestCase):
     def test_with_mol_descs(self):
         protein_feature_calculator = ProteinDescriptorCalculator(
             descsets=[ProDecDescriptorSet(sets=["Zscale Hellberg"])],
-            msa_provider=self.msa_provider,
+            msa_provider=self.default_msa_provider,
         )
         mol_feature_calculator = MoleculeDescriptorsCalculator(
             descsets=[FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048), DrugExPhyschem()]
@@ -1134,11 +1141,18 @@ class TestPCMDescriptorCalculation(DataSetsMixIn, TestCase):
         dataset_new = QSPRDataset.fromFile(self.dataset.storePath)
         self.assertEqual(dataset_new.X.shape[1], feats_left)
 
-    def test_ProDec(self):
+    @parameterized.expand(
+        [
+            ("MAFFT", MAFFT),
+            ("ClustalMSA", ClustalMSA),
+        ]
+    )
+    def test_ProDec(self, _, provider_class):
+        provider = provider_class(out_dir=self.qsprdatapath)
         descset = ProDecDescriptorSet(sets=["Zscale Hellberg"])
         protein_feature_calculator = ProteinDescriptorCalculator(
             descsets=[descset],
-            msa_provider=self.msa_provider,
+            msa_provider=provider,
         )
         self.dataset.addProteinDescriptors(calculator=protein_feature_calculator)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(descset)))

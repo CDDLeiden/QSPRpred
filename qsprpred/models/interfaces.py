@@ -449,7 +449,7 @@ class QSPRModel(ABC):
         for calc in self.featureCalculators:
             if isinstance(calc, ProteinDescriptorCalculator) and not protein_id:
                 raise ValueError("This is a PCM model, please provide a protein id to predict the molecules on.")
-            if isinstance(calc, ProteinDescriptorCalculator) and protein_id not in calc.msaProvider.current.keys():
+            if isinstance(calc, ProteinDescriptorCalculator) and calc.msaProvider and protein_id not in calc.msaProvider.current.keys():
                 raise ValueError(f"Protein id {protein_id} not found in the available MSA, cannot calculate PCM descriptors. Options are: {list(calc.msaProvider.current.keys())}.")
 
         dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False, n_jobs=n_jobs)
