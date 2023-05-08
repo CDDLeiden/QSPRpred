@@ -121,7 +121,6 @@ def AR_PCM(data_dir='data'):
     dataset_name = "AR_LIGANDS"  # name of the file to be generated
     quality = "high"  # choose minimum quality from {"high", "medium", "low"}
     papyrus_version = '05.6'  # Papyrus database version
-    data_dir = "data"
 
     papyrus = Papyrus(
         data_dir=data_dir,
