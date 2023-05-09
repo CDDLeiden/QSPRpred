@@ -7,11 +7,11 @@ import os.path
 import random
 import sys
 from datetime import datetime
+from importlib.util import find_spec
 
 import numpy as np
 import optuna
 import pandas as pd
-import torch
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
@@ -246,7 +246,9 @@ if __name__ == '__main__':
     # Set random seeds
     random.seed(args.random_state)
     np.random.seed(args.random_state)
-    torch.manual_seed(args.random_state)
+    if find_spec('torch') is not None:
+        import torch
+        torch.manual_seed(args.random_state)
     os.environ['TF_DETERMINISTIC_OPS'] = str(args.random_state)
 
     # Backup files
