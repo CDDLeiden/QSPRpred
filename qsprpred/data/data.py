@@ -305,7 +305,7 @@ class DescriptorTable(PandasDataSet):
 
     @property
     def prefix(self):
-        return self.name
+        return self.calculator.getPrefix()
 
     @property
     def keyCols(self):
@@ -492,7 +492,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         to_remove = []
         for idx, calc in enumerate(self.descriptorCalculators):
             if calc.getPrefix() == calculator.getPrefix():
-                logger.debug(f"Removing existing descriptors with prefix '{calculator.getPrefix()}'")
+                logger.debug(f"Removing existing descriptors with prefix '{self.name}_{calculator.getPrefix()}'")
                 to_remove.append(idx)
 
         for idx in reversed(to_remove):
@@ -596,13 +596,13 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             list: List of descriptor names.
         """
         if not prefix:
-            prefixes = [x.getPrefix() for x in self.descriptorCalculators] if self.descriptorCalculators else []
+            prefixes = [f"{self.name}_{x.getPrefix()}" for x in self.descriptorCalculators] if self.descriptorCalculators else []
         else:
-            prefixes = [prefix]
+            prefixes = [f"{self.name}_{prefix}"]
 
         names = []
         for x in self.descriptors:
-            if x.prefix in prefixes:
+            if f"{self.name}_{x.prefix}" in prefixes:
                 names.extend(x.getDescriptorNames())
         return names
 
