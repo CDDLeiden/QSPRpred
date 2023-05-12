@@ -11,12 +11,12 @@ import sys
 from datetime import datetime
 from inspect import isclass
 from typing import Type, Union
+from importlib.util import find_spec
 
 import numpy as np
 import optuna
 import pandas as pd
 import sklearn_json as skljson
-import torch
 from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
 from qsprpred.data.data import QSPRDataset
 from qsprpred.logs import logger
@@ -27,6 +27,8 @@ from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV, ParameterGrid, train_test_split
 from sklearn.svm import SVC, SVR
 
+if find_spec('torch') is not None:
+    import torch
 
 class QSPRsklearn(QSPRModel):
 
