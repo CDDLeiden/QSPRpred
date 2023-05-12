@@ -8,6 +8,8 @@ import os
 from pathlib import Path
 from typing import List, Union
 
+import pandas as pd
+import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
 from qsprpred.data.data import MoleculeTable
@@ -105,3 +107,19 @@ class Papyrus:
             papyrus_dir=self.data_dir,
         )
         return MoleculeTable.fromTableFile(name, path, store_dir=output_dir)
+
+    def getProteinData(self, acc_keys: List[str], output_dir: str = None, name : str = None,
+            use_existing : bool = True):
+        self.download()
+        output_dir = output_dir or self.data_dir
+        if not os.path.exists(output_dir):
+            raise ValueError(f"Output directory '{output_dir}' does not exist.")
+        path = os.path.join(output_dir, f"{name or os.path.basename(output_dir)}.tsv")
+        if os.path.exists(path) and use_existing:
+            return pd.read_table(path)
+        else:
+            protein_data = papyrus_scripts.read_protein_set(version=self.version)
+            protein_data["accession"] = protein_data["target_id"].apply(lambda x: x.split("_")[0])
+            targets = protein_data[protein_data.accession.isin(acc_keys)]
+            targets.to_csv(path, sep="\t", header=True, index=False)
+            return targets

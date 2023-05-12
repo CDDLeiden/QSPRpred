@@ -11,6 +11,9 @@ import pandas as pd
 import torch
 from parameterized import parameterized
 from qsprpred.data.tests import DataSetsMixIn
+from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
+from qsprpred.data.utils.descriptorcalculator import ProteinDescriptorCalculator
+from qsprpred.data.utils.descriptorsets import ProDecDescriptorSet
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.metrics import SklearnMetric
 from qsprpred.models.models import QSPRDNN, QSPRsklearn
@@ -85,10 +88,10 @@ class ModelTestMixIn:
         self.assertTrue(exists(themodel.metaFile))
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['model_path']}"))
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['parameters_path']}"))
-        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_calculator_path']}"))
+        self.assertTrue(all(exists(f"{themodel.baseDir}/{x}") for x in themodel.metaInfo['feature_calculator_paths']))
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_standardizer_path']}"))
 
-    def predictor_test(self, model_name, base_dir, cls: QSPRModel = QSPRsklearn, n_tasks=1):
+    def predictor_test(self, model_name, base_dir, cls: QSPRModel = QSPRsklearn, protein_id=None):
         """Test using a QSPRmodel as predictor."""
         # initialize model as predictor
         predictor = cls(name=model_name, base_dir=base_dir)
@@ -116,7 +119,7 @@ class ModelTestMixIn:
 
         # predict the property
         for use_probas in [True, False]:
-            predictions = predictor.predictMols(df.SMILES.to_list(), use_probas=use_probas)
+            predictions = predictor.predictMols(df.SMILES.to_list(), use_probas=use_probas, protein_id=protein_id)
             check_shape(df.SMILES.to_list())
             if isinstance(predictions, list):
                 for prediction in predictions:
@@ -136,7 +139,7 @@ class ModelTestMixIn:
 
             # test with an invalid smiles
             invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
-            predictions = predictor.predictMols(invalid_smiles, use_probas=use_probas)
+            predictions = predictor.predictMols(invalid_smiles, use_probas=use_probas, protein_id=protein_id)
             check_shape(invalid_smiles)
             singleoutput = predictions[0][0, 0] if isinstance(predictions, list) else predictions[0, 0]
             self.assertEqual(predictions[0][1, 0] if isinstance(predictions, list) else predictions[1, 0], None)
@@ -255,6 +258,54 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.predictor_test(alg_name, model.baseDir, QSPRDNN)
 
 
+class TestPCM(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+
+    @staticmethod
+    def get_model(name, alg=None, dataset=None, parameters=None):
+        """Intialize dataset and model."""
+        return QSPRsklearn(
+            base_dir=f'{os.path.dirname(__file__)}/test_files/',
+            alg=alg,
+            data=dataset,
+            name=name,
+            parameters=parameters
+        )
+
+    @parameterized.expand([
+        (alg_name, TargetTasks.REGRESSION, alg_name, alg)
+        for alg, alg_name in (
+                (PLSRegression, "PLSR"),
+                (SVR, "SVR"),
+                (XGBRegressor, "XGBR"),
+        )
+    ])
+    def test_regression_basic_fit_pcm(self, _, task, model_name, model_class):
+        """Test model training for regression models."""
+        if not model_name in ["SVR", "PLSR"]:
+            parameters = {"n_jobs": N_CPUS}
+        else:
+            parameters = None
+
+        # initialize dataset
+        prep = self.get_default_prep()
+        prep["feature_calculators"] = prep["feature_calculators"] + [
+            ProteinDescriptorCalculator(descsets=[ProDecDescriptorSet(sets=["Sneath"])], msa_provider=ClustalMSA(self.qsprdatapath))]
+        dataset = self.create_pcm_dataset(
+            name=f"{model_name}_{task}_pcm",
+            target_props=[{"name": 'pchembl_value_Median', "task": task}],
+            preparation_settings=prep
+        )
+
+        # initialize model for training from class
+        model = self.get_model(
+            name=f"{model_name}_{task}",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters
+        )
+        self.fit_test(model)
+        self.predictor_test(f"{model_name}_{task}", model.baseDir, protein_id=dataset.getDF()['accession'].iloc[0])
+
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRsklearn class."""
 
@@ -271,13 +322,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand([
         (alg_name, TargetTasks.REGRESSION, alg_name, alg)
-        for alg, alg_name in (
-            (PLSRegression, "PLSR"),
-            (SVR, "SVR"),
-            (RandomForestRegressor, "RFR"),
-            (XGBRegressor, "XGBR"),
-            (KNeighborsRegressor, "KNNR")
-        )
         for alg, alg_name in (
             (PLSRegression, "PLSR"),
             (SVR, "SVR"),
