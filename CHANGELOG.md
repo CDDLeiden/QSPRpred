@@ -25,6 +25,7 @@ From v1.3.1 to v1.4.0
 ## New Features
 
 - The index of the `MoleculeTable` can now be used to relate cross-validation and test outputs to the original molecules. Therefore, the index is now also saved in the model training outputs.
+- the `Papyrus.getData()` method now accepts `activity_types` parameter to select a list of activity types to get.
 - Added the `checkMols` method to `MoleculeTable` to use for indication of invalid molecules in the data.
 - Support for Sklearn Multitask modelling
 - New class abstract class `Metric`, which is an abstract base class that allows for creating custom scorers.
