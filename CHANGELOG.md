@@ -1,6 +1,6 @@
 # Change Log
 
-From v1.3.1 to v1.4.0
+From v1.3.1 to v2.0.0
 
 ## Fixes
 
@@ -19,14 +19,18 @@ From v1.3.1 to v1.4.0
 - To support multitask modelling, the representation of the target in the `QSPRdataset` has changed to a list of 
   `TargetProperty`s (see New Features). These can be automatically initizalid from dictionaries in the `QSPRdataset`
   init.
-- A `fill_value` argument was also added to the `predict_CLI` script to allow for filling missing values in the 
+- A `fill_value` argument was also added to the `predict_CLI` script to allow for filling missing values in the
   prediction data set as well.
 - ⚠️ Beware! ⚠️ `setup.py` and `setup.cfg` substituted `pyproject.toml` and `MANIFEST.in`. A lighter version of the package is now the default!!! Avoiding the optional libraries is still very rudimentary and should be on the TODO list of things to be updated before Sheffield.
 - CI scripts modified to only test the package on the full version of the package. See changes in `.gitlab-ci.yml`.
+- The way descriptors are stored in `MoleculeTable` was changed. They now reside in their own `DescriptorTable` instances that are linked to the orginal `MoleculeTable`
+  - This change was made to allow several types of descriptors to be calculated and used efficiently (facilitated by a the `DescriptorsCalculators` interface)
+  - Unfortunately, this change is not backwards compatible, so previously pickled `MoleculeTable` instances will not work with this version. There were also changes to how models handle multiple descriptor types, which also makes them incompatible with previous versions. However, this can be fixed by modifying the old JSON files as illustrated in commits 7d3f8633 and 6564f024.
 
 ## New Features
 
 - The index of the `MoleculeTable` can now be used to relate cross-validation and test outputs to the original molecules. Therefore, the index is now also saved in the model training outputs.
+- the `Papyrus.getData()` method now accepts `activity_types` parameter to select a list of activity types to get.
 - Added the `checkMols` method to `MoleculeTable` to use for indication of invalid molecules in the data.
 - Support for Sklearn Multitask modelling
 - New class abstract class `Metric`, which is an abstract base class that allows for creating custom scorers.
@@ -35,3 +39,8 @@ From v1.3.1 to v1.4.0
 - New class `TargetProperty`, to allow for multitask modelling, a `QSPRdataset` has to have the option of multiple
   targetproperties. To support this a targer property is now defined seperatly from the dataset as a `TargetProperty`
   instance, which holds the information on name,  `TargetTask` (see also Changes) and threshold of the property.
+- Support for protein descriptors was added
+  - The `MoleculeTable` now has a `addProteinDescriptors` methjod, which can be used to calculate protein descriptors by linking informaton from the table with sequencing data.
+- Support for precalculated descriptors was added with `addCustomDescriptors` method of `MoleculeTable`.
+  - It allows for adding precalculated descriptors to the `MoleculeTable` by linking the information from the table with the descriptor data.
+- The [tutorial](tutorial) was improved with more detailed sections on data preparation and PCM modelling added.

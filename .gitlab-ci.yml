@@ -9,12 +9,20 @@ stages:
    stage: test
    before_script:
       - python --version  # For debugging python version
-      - python -m pip install pytest
+      - wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
+      - wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
+      - export PATH=$PATH:$PWD/mafft-linux64/mafftdir/bin/:$PWD
+      - export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
+      - clustalo --version  # For debugging clustalo version
+      - mafft --version  # For debugging mafft version
       - python -m pip install ".[full]" --no-cache-dir
+      - python -m pip install pytest
+      - python -m pip install jupyterlab
       - python -m pip freeze # For debugging environment
    script:
       - pytest qsprpred
       - cd clitest && ./run.sh
+      - cd ../tutorial && ./run_all.sh
 
 # Run tests on Python version 10 (linux image)
 test:python3.10:

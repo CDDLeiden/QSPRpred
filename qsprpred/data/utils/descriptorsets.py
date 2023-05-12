@@ -4,12 +4,13 @@ To add a new descriptor or fingerprint calculator:
 * Add a descriptor subclass for your descriptor calculator
 * Add a function to retrieve your descriptor by name to the descriptor retriever class
 """
-import importlib
 from abc import ABC, abstractmethod
 from typing import Optional, Union, List
 from importlib.util import find_spec
 
 import numpy as np
+import pandas as pd
+import prodec
 from qsprpred.data.utils.descriptor_utils import fingerprints
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
@@ -30,6 +31,57 @@ if find_spec('mordred') is not None:
 
 
 class DescriptorSet(ABC):
+
+    __len__ = lambda self: self.get_len()
+
+    @abstractmethod
+    def __call__(self, *args, **kwargs):
+        """
+        Calculate the descriptors for a given input.
+
+        Args:
+            *args: arguments to be passed to perform the calculation
+            **kwargs: keyword arguments to be passed to perform the calculation
+
+        Returns:
+            a data frame or array of descriptor values of shape (n_inputs, n_descriptors)
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def descriptors(self):
+        """Return a list of descriptor names."""
+        pass
+
+    @descriptors.setter
+    @abstractmethod
+    def descriptors(self, value):
+        """Set the descriptor names."""
+        pass
+
+    def get_len(self):
+        """Return the number of descriptors."""
+        return len(self.descriptors)
+
+    @property
+    @abstractmethod
+    def is_fp(self):
+        """Return True if descriptorset is fingerprint."""
+        pass
+
+    @abstractmethod
+    def settings(self):
+        """Return dictionary with arguments used to initialize the descriptorset."""
+        pass
+
+    @abstractmethod
+    def __str__(self):
+        """Return string representation of the descriptorset."""
+        pass
+
+
+class MoleculeDescriptorSet(DescriptorSet):
     """Abstract base class for descriptorsets.
 
     A descriptorset is a collection of descriptors that can be calculated for a molecule.
@@ -48,12 +100,14 @@ class DescriptorSet(ABC):
         """
         pass
 
-    def iterMols(self, mols: List[Union[str, Mol]], to_list=False):
+    @staticmethod
+    def iterMols(mols: List[Union[str, Mol]], to_list=False):
         """
         Create a molecule iterator or list from RDKit molecules or SMILES.
 
         Args:
             mols: list of molecules (SMILES `str` or RDKit Mol)
+            to_list: if True, return a list instead of an iterator
 
         Returns:
             an array or data frame of descriptor values of shape (n_mols, n_descriptors)
@@ -63,39 +117,142 @@ class DescriptorSet(ABC):
             ret = list(ret)
         return ret
 
-    @property
+class NeedsMSAMixIn(ABC):
+    """Abstract base class for descriptorsets that need a multiple sequence alignment."""
+
+    def __init__(self):
+        self.msa = None
+
+    def setMSA(self, msa: dict[str : str]):
+        """
+        Set the multiple sequence alignment for the protein descriptor set.
+
+        Args:
+            msa (dict): mapping of accession keys to sequences from the multiple sequence alignment
+        """
+        self.msa = msa
+
+class ProteinDescriptorSet(DescriptorSet):
+    """
+    Abstract base class for protein descriptor sets.
+    """
+
     @abstractmethod
-    def descriptors(self):
-        """Return a list of descriptor names."""
+    def __call__(self, acc_keys, sequences : dict[str : str] = None, **kwargs):
+        """
+        Calculate the protein descriptors for a given target.
+
+        Args:
+            acc_keys: target accession keys, the resulting data frame will be indexed by these keys
+            sequences: optional list of protein sequences matched to the accession keys
+            **kwargs: additional data mapped to the accession keys, each parameter should follow the same format as the sequences (dict(str : str))
+
+        Returns:
+            a data frame of descriptor values of shape (acc_keys, n_descriptors), indexed by acc_keys
+        """
         pass
+
+class DataFrameDescriptorSet(DescriptorSet):
+
+    def __init__(self, df: pd.DataFrame):
+        self._df = df
+        self._descriptors = df.columns.tolist()
+
+    def getDF(self):
+        return self._df
+
+    def getIndex(self):
+        return self._df.index
+
+    def __call__(self, index, *args, **kwargs):
+        ret = pd.DataFrame(index=index)
+        ret = ret.merge(self._df, how="left", left_index=True, right_index=True)
+        return ret[self.descriptors]
+
+    @property
+    def descriptors(self):
+        return self._descriptors
 
     @descriptors.setter
-    @abstractmethod
     def descriptors(self, value):
-        """Set the descriptor names."""
-        pass
+        self._descriptors = value
 
-    def get_len(self):
-        """Return the number of descriptors."""
-        return len(self.descriptors)
-
-    @abstractmethod
+    @property
     def is_fp(self):
-        """Return True if descriptorset is fingerprint."""
-        pass
+        return False
 
-    @abstractmethod
     def settings(self):
-        """Return dictionary with arguments used to initialize the descriptorset."""
-        pass
+        return {}
 
-    @abstractmethod
     def __str__(self):
-        """Return string representation of the descriptorset."""
-        pass
+        return "DataFrame"
 
 
-class FingerprintSet(DescriptorSet):
+class ProDecDescriptorSet(ProteinDescriptorSet, NeedsMSAMixIn):
+
+    def __init__(self, sets: Optional[List[str]] = None):
+        super().__init__()
+        self._settings = {"sets": sets}
+        self.factory = prodec.ProteinDescriptors()
+        self.sets = self.factory.available_descriptors if sets is None else sets
+        self._descriptors = None
+
+    @staticmethod
+    def calculate_descriptor(factory, msa, descriptor):
+        """
+        Calculate a protein descriptor for given targets using given multiple sequence alignment.
+
+        Args:
+            factory (ProteinDescriptors): factory to create the descriptor
+            msa (dict): mapping of accession keys to sequences from the multiple sequence alignment
+            descriptor (str): name of the descriptor to calculate
+
+        Returns:
+            a data frame of descriptor values of shape (acc_keys, n_descriptors), indexed by acc_keys
+        """
+
+        # Get protein descriptor from ProDEC
+        prodec_descriptor = factory.get_descriptor(descriptor)
+
+        # Calculate descriptor features for aligned sequences of interest
+        protein_features = prodec_descriptor.pandas_get(msa.values(), ids=msa.keys())
+        protein_features.set_index("ID", inplace=True)
+
+        return protein_features
+
+    def __call__(self, acc_keys, sequences: dict[str: str] = None, **kwargs):
+
+        df = pd.DataFrame(index=pd.Index(acc_keys, name="ID"))
+        for descriptor in self.sets:
+            df = df.merge(self.calculate_descriptor(self.factory, self.msa, descriptor), left_index=True, right_index=True)
+
+        if not self._descriptors:
+            self._descriptors = df.columns.tolist()
+        else:
+            df.drop(columns=[col for col in df.columns if col not in self._descriptors], inplace=True)
+
+        return df
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, value):
+        self._descriptors = value
+
+    @property
+    def is_fp(self):
+        return False
+
+    @property
+    def settings(self):
+        return self._settings
+
+    def __str__(self):
+        return "ProDec"
+
+class FingerprintSet(MoleculeDescriptorSet):
     """Generic fingerprint descriptorset can be used to calculate any fingerprint type defined in descriptorutils.fingerprints."""
 
     def __init__(self, fingerprint_type, *args, **kwargs):
@@ -162,7 +319,7 @@ class FingerprintSet(DescriptorSet):
         self.keepindices(value)
 
 
-class Mordred(DescriptorSet):
+class Mordred(MoleculeDescriptorSet):
     """Descriptors from molecular descriptor calculation software Mordred.
 
     From https://github.com/mordred-descriptor/mordred.
@@ -176,7 +333,7 @@ class Mordred(DescriptorSet):
 
     def __init__(self, descs=None, version=None, ignore_3D=False, config=None):
         """
-        Initialize the descriptor with the same arguments as you would pass to `Calculator` function of Mordred.
+        Initialize the descriptor with the same arguments as you would pass to `DescriptorsCalculator` function of Mordred.
 
         With the exception of the `descs` argument which can also be a list of mordred descriptor names instead
         of a mordred descriptor module.
@@ -241,7 +398,7 @@ class Mordred(DescriptorSet):
         return "Mordred"
 
 
-class DrugExPhyschem(DescriptorSet):
+class DrugExPhyschem(MoleculeDescriptorSet):
     """
     Physciochemical properties originally used in DrugEx for QSAR modelling.
 
@@ -284,7 +441,7 @@ class DrugExPhyschem(DescriptorSet):
         return "DrugExPhyschem"
 
 
-class rdkit_descs(DescriptorSet):
+class rdkit_descs(MoleculeDescriptorSet):
     """
     Calculate RDkit descriptors.
 
@@ -323,7 +480,7 @@ class rdkit_descs(DescriptorSet):
         return "RDkit"
 
 
-class TanimotoDistances(DescriptorSet):
+class TanimotoDistances(MoleculeDescriptorSet):
     """
     Calculate Tanimoto distances to a list of SMILES sequences.
 
@@ -395,7 +552,7 @@ class TanimotoDistances(DescriptorSet):
         return "TanimotoDistances"
 
 
-class Mold2(DescriptorSet):
+class Mold2(MoleculeDescriptorSet):
     """Descriptors from molecular descriptor calculation software Mold2.
 
     From https://github.com/OlivierBeq/Mold2_pywrapper.
@@ -458,7 +615,7 @@ class Mold2(DescriptorSet):
         return "Mold2"
 
 
-class PaDEL(DescriptorSet):
+class PaDEL(MoleculeDescriptorSet):
     """Descriptors from molecular descriptor calculation software PaDEL.
 
     From https://github.com/OlivierBeq/PaDEL_pywrapper.
@@ -532,8 +689,8 @@ class PaDEL(DescriptorSet):
     def __str__(self):
         return "PaDEL"
 
-class PredictorDesc(DescriptorSet):
-    """DescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
+class PredictorDesc(MoleculeDescriptorSet):
+    """MoleculeDescriptorSet that uses a Predictor object to calculate the descriptors for a molecule."""
 
     def __init__(self, model : Union["QSPRModel", str]):
         """
@@ -625,6 +782,9 @@ class _DescriptorSetRetriever:
 
     def get_PredictorDesc(self, *args, **kwargs):
         return PredictorDesc(*args, **kwargs)
+
+    def get_ProDec(self, *args, **kwargs):
+        return ProDecDescriptorSet(*args, **kwargs)
 
     def get_TanimotoDistances(self, *args, **kwargs):
         return TanimotoDistances(*args, **kwargs)

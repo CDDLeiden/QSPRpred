@@ -160,21 +160,24 @@ class QSPRsklearn(QSPRModel):
 
         self.model.fit(**fit_set)
 
-        if self.task.isRegression():
-            preds = self.model.predict(X_ind)
-            # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
-            if preds.ndim == 1:
-                preds = preds.reshape(-1, 1)
-            inds = preds
+        if X_ind.shape[0] > 0:
+            if self.task.isRegression():
+                preds = self.model.predict(X_ind)
+                # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
+                if preds.ndim == 1:
+                    preds = preds.reshape(-1, 1)
+                inds = preds
+            else:
+                # for the multiclass-multitask case predict_proba returns a list of
+                # arrays, otherwise a single array is returned
+                preds = self.model.predict_proba(X_ind)
+                for idx in range(self.nTargets):
+                    if self.nTargets == 1:
+                        inds[idx] = preds
+                    else:
+                        inds[idx] = preds[idx]
         else:
-            # for the multiclass-multitask case predict_proba returns a list of
-            # arrays, otherwise a single array is returned
-            preds = self.model.predict_proba(X_ind)
-            for idx in range(self.nTargets):
-                if self.nTargets == 1:
-                    inds[idx] = preds
-                else:
-                    inds[idx] = preds[idx]
+            logger.warning('No independent test set available. Skipping prediction on independent test set.')
 
         # save crossvalidation results
         if save:
@@ -364,7 +367,7 @@ class QSPRDNN(QSPRModel):
         alg (estimator): estimator instance or class
         parameters (dict): dictionary of algorithm specific parameters
         model (estimator): the underlying estimator instance, if `fit` or optimization is perforemed, this model instance gets updated accordingly
-        featureCalculator (DescriptorsCalculator): feature calculator instance taken from the data set or deserialized from file if the model is loaded without data
+        featureCalculators (MoleculeDescriptorsCalculator): feature calculator instance taken from the data set or deserialized from file if the model is loaded without data
         featureStandardizer (SKLearnStandardizer): feature standardizer instance taken from the data set or deserialized from file if the model is loaded without data
         metaInfo (dict): dictionary of metadata about the model, only available after the model is saved
         baseDir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`

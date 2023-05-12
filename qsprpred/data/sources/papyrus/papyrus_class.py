@@ -6,8 +6,10 @@ On: 06.10.22, 14:28
 """
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
+import pandas as pd
+import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
 from qsprpred.data.data import MoleculeTable
@@ -64,6 +66,7 @@ class Papyrus:
             self,
             acc_keys: List[str],
             quality: str,
+            activity_types: Union[List[str], str] = 'all',
             output_dir: str = None,
             name : str = None,
             drop_duplicates: bool = False,
@@ -76,6 +79,7 @@ class Papyrus:
         Args:
             acc_keys: protein accession keys
             quality: desired minimum quality of the dataset
+            activity_types: list of activity types to include in the dataset
             output_dir: path to the directory where the data set will be stored
             name: name of the dataset (this is the prefix of the generated .tsv file)
             drop_duplicates: remove duplicates after filtering
@@ -93,6 +97,7 @@ class Papyrus:
             acc_key=acc_keys,
             quality=quality,
             outdir=output_dir,
+            activity_types=activity_types,
             prefix=name or os.path.basename(output_dir),
             drop_duplicates=drop_duplicates,
             chunk_size=chunk_size,
@@ -102,3 +107,19 @@ class Papyrus:
             papyrus_dir=self.data_dir,
         )
         return MoleculeTable.fromTableFile(name, path, store_dir=output_dir)
+
+    def getProteinData(self, acc_keys: List[str], output_dir: str = None, name : str = None,
+            use_existing : bool = True):
+        self.download()
+        output_dir = output_dir or self.data_dir
+        if not os.path.exists(output_dir):
+            raise ValueError(f"Output directory '{output_dir}' does not exist.")
+        path = os.path.join(output_dir, f"{name or os.path.basename(output_dir)}.tsv")
+        if os.path.exists(path) and use_existing:
+            return pd.read_table(path)
+        else:
+            protein_data = papyrus_scripts.read_protein_set(version=self.version)
+            protein_data["accession"] = protein_data["target_id"].apply(lambda x: x.split("_")[0])
+            targets = protein_data[protein_data.accession.isin(acc_keys)]
+            targets.to_csv(path, sep="\t", header=True, index=False)
+            return targets

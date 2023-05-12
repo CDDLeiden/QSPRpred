@@ -1,11 +1,37 @@
 """Abstract base classes for data preparation classes."""
 from abc import ABC, abstractmethod
+from typing import List, Callable
 
 import pandas as pd
 
-from qsprpred.data.utils.descriptorcalculator import Calculator
+from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 
-class DataSet(ABC):
+class StoredTable(ABC):
+    """Abstract base class for tables that are stored in a file."""
+
+    @abstractmethod
+    def save(self):
+        pass
+
+    @abstractmethod
+    def reload(self):
+        pass
+
+    @abstractmethod
+    def clearFiles(self):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def fromFile(filename) -> 'StoredTable':
+        pass
+
+class DataSet(StoredTable):
+
+    @abstractmethod
+    def __len__(self):
+        pass
+
     @abstractmethod
     def getProperties(self):
         pass
@@ -30,14 +56,14 @@ class DataSet(ABC):
     def transform(self, targets, transformers):
         pass
 
+    @abstractmethod
+    def filter(self, table_filters: List[Callable]):
+        pass
+
 class MoleculeDataSet(DataSet):
 
     @abstractmethod
-    def __len__(self):
-        pass
-
-    @abstractmethod
-    def addDescriptors(self, calculator : Calculator):
+    def addDescriptors(self, calculator : DescriptorsCalculator):
         """
         Add descriptors to the dataset.
 
@@ -73,12 +99,6 @@ class MoleculeDataSet(DataSet):
     @abstractmethod
     def hasDescriptors(self):
         pass
-
-    @staticmethod
-    @abstractmethod
-    def fromFile(filename) -> 'MoleculeDataSet':
-        pass
-
 
 class DataSetDependant(ABC):
     """

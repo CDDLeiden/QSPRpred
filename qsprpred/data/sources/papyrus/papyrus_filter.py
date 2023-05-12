@@ -1,11 +1,12 @@
 import os.path
+from typing import List, Union
 
 import pandas as pd
 from papyrus_scripts.reader import read_papyrus
-from papyrus_scripts.preprocess import keep_quality, keep_accession
+from papyrus_scripts.preprocess import keep_quality, keep_accession, keep_type
 from papyrus_scripts.preprocess import consume_chunks
 
-def papyrus_filter(acc_key: list, quality: str, outdir : str, prefix : str = None, drop_duplicates: bool = True, chunk_size : int = 1e5, use_existing : bool = True, stereo : bool = False, plusplus : bool = False, papyrus_dir : str = None):
+def papyrus_filter(acc_key: list, quality: str, outdir : str, activity_types : Union[List[str], str] = 'all', prefix : str = None, drop_duplicates: bool = True, chunk_size : int = 1e5, use_existing : bool = True, stereo : bool = False, plusplus : bool = False, papyrus_dir : str = None):
     """
     Filters the downloaded papyrus dataset for quality and accession key (UniProt) and outputs a .tsv file of all compounds fulfilling these requirements.
 
@@ -13,6 +14,7 @@ def papyrus_filter(acc_key: list, quality: str, outdir : str, prefix : str = Non
         acc_key: list of UniProt accession keys
         quality: str with minimum quality of dataset to keep
         outdir: path to the location of Papyrus data
+        activity_types: list of activity types to keep
         prefix: prefix for the output file
         drop_duplicates: boolean to drop duplicates from the final dataset
         chunk_size: integer of chunks to process one at the time
@@ -40,10 +42,11 @@ def papyrus_filter(acc_key: list, quality: str, outdir : str, prefix : str = Non
     # data filters
     filter1 = keep_quality(data=sample_data, min_quality=quality)
     filter2 = keep_accession(data=filter1, accession=acc_key)
+    filter3 = keep_type(data=filter2, activity_types=activity_types)
     print("Initialized filters.")
 
     # filter data per chunk
-    filtered_data = consume_chunks(generator=filter2)
+    filtered_data = consume_chunks(generator=filter3)
     print(f"Number of compounds:{filtered_data.shape[0]}")
 
     # filter out duplicate InChiKeys
