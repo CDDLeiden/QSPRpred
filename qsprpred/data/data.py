@@ -1736,7 +1736,7 @@ class QSPRDataset(MoleculeTable):
                 df_X,
                 fit=True
             )
-            if X_ind is not None:
+            if X_ind is not None and X_ind.shape[0] > 0:
                 X_ind, _ = apply_feature_standardizer(
                     self.feature_standardizer,
                     df_X_ind,
