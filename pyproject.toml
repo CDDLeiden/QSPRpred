@@ -1,17 +1,22 @@
 [build-system]
-requires = ["setuptools>=61.0", "setuptools-scm"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "qsprpred"
 dynamic = ["version"]
-description = "Cheminformatics package for training and testing QSAR/QSPR models"
+description = "A cheminformatics package for training and testing QSAR/QSPR models"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.7"
-license = { file = "LICENSE" }
+license = { file = "LICENSE" } # Can anybody add the license?
+keywords = ["qsar", "machine learning", "cheminformatics"]
+# authors = [{ name = "Name of the Person", email = "email of the person" }]
+# maintainers = [{ name = "Name of the Person", email = "email of the person" }]
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Operating System :: OS Independent", # We tested it on Mac and Windows as well?
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.10", # Anybody tested it on 3.11?
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3 :: Only",
@@ -49,8 +54,8 @@ full = [
 where = ["qsprpred"]
 
 [project.urls]
-# homepage = "https://github.com/tobe_updated"
-# repository = "https://github.com/tobe_updated"
+homepage = "https://github.com/CDDLeiden/QSPRPred"
+repository = "https://github.com/CDDLeiden/QSPRPred"
 # documentation = "https://readthedocs.org" # Can anybody add the link?
 
 [tool.setuptools]
