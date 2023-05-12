@@ -298,9 +298,9 @@ class PandasDataSet(DataSet):
 
 class DescriptorTable(PandasDataSet):
 
-    def __init__(self, calculator, df: pd.DataFrame = None, store_dir=".", overwrite=False, key_cols=None, n_jobs=1, chunk_size=1000):
+    def __init__(self, calculator, name_prefix : str,  df: pd.DataFrame = None, store_dir=".", overwrite=False, key_cols=None, n_jobs=1, chunk_size=1000):
         """Initialize a `DescriptorTable` object."""
-        super().__init__(calculator.getPrefix(), df, store_dir, overwrite, key_cols, n_jobs, chunk_size)
+        super().__init__(f"{name_prefix}_{calculator.getPrefix()}", df, store_dir, overwrite, key_cols, n_jobs, chunk_size)
         self.calculator = calculator
 
     @property
@@ -420,7 +420,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             DescriptorTable: Descriptor table.
         """
 
-        return DescriptorTable(calc, store_dir=self.storeDir, n_jobs=self.nJobs, chunk_size=self.chunkSize)
+        return DescriptorTable(calc, name_prefix=self.name, store_dir=self.storeDir, n_jobs=self.nJobs, chunk_size=self.chunkSize)
 
     @staticmethod
     def fromFile(filename, *args, **kwargs) -> 'MoleculeTable':
@@ -524,7 +524,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         if not self.descriptorCalculators:
             self.descriptorCalculators = []
         self.descriptorCalculators.append(calculator)
-        self.descriptors.append(DescriptorTable(calculator, descriptors, store_dir=self.storeDir, n_jobs=self.nJobs, overwrite=True, key_cols=index_cols, chunk_size=self.chunkSize))
+        self.descriptors.append(DescriptorTable(calculator, self.name, descriptors, store_dir=self.storeDir, n_jobs=self.nJobs, overwrite=True, key_cols=index_cols, chunk_size=self.chunkSize))
 
     def addDescriptors(self, calculator: MoleculeDescriptorsCalculator, recalculate=False, fail_on_invalid=True):
         """
