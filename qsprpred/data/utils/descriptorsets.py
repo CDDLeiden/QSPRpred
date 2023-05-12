@@ -7,18 +7,26 @@ To add a new descriptor or fingerprint calculator:
 import importlib
 from abc import ABC, abstractmethod
 from typing import Optional, Union, List
+from importlib.util import find_spec
 
-import mordred
 import numpy as np
-from mordred import descriptors as mordreddescriptors
 from qsprpred.data.utils.descriptor_utils import fingerprints
-from Mold2_pywrapper import Mold2 as Mold2_calculator
-from PaDEL_pywrapper import PaDEL as PaDEL_calculator
-from PaDEL_pywrapper.descriptor import descriptors as PaDEL_descriptors
 from qsprpred.data.utils.descriptor_utils.drugexproperties import Property
 from qsprpred.data.utils.descriptor_utils.rdkitdescriptors import RDKit_desc
 from rdkit import Chem, DataStructs
 from rdkit.Chem import Mol
+
+if find_spec('PaDEL_pywrapper') is not None:
+    from PaDEL_pywrapper import PaDEL as PaDEL_calculator
+    from PaDEL_pywrapper.descriptor import descriptors as PaDEL_descriptors
+
+if find_spec('Mold2_pywrapper') is not None:
+    from Mold2_pywrapper import Mold2 as Mold2_calculator
+
+if find_spec('mordred') is not None:
+    import mordred
+    from mordred import descriptors as mordreddescriptors
+
 
 
 class DescriptorSet(ABC):

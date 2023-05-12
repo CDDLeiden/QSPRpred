@@ -20,7 +20,9 @@ From v1.3.1 to v1.4.0
   `TargetProperty`s (see New Features). These can be automatically initizalid from dictionaries in the `QSPRdataset`
   init.
 - A `fill_value` argument was also added to the `predict_CLI` script to allow for filling missing values in the 
-  prediction data set as well. 
+  prediction data set as well.
+- ⚠️ Beware! ⚠️ `setup.py` and `setup.cfg` substituted `pyproject.toml` and `MANIFEST.in`. A lighter version of the package is now the default!!! Avoiding the optional libraries is still very rudimentary and should be on the TODO list of things to be updated before Sheffield.
+- CI scripts modified to only test the package on the full version of the package. See changes in `.gitlab-ci.yml`.
 
 ## New Features
 

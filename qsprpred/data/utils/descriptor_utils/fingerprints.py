@@ -1,12 +1,15 @@
 """Fingerprint classes."""
 
 from abc import ABC, abstractmethod
+from importlib.util import find_spec
 
 import numpy as np
 from rdkit import DataStructs
 from rdkit.Chem import AllChem
-from PaDEL_pywrapper import PaDEL as PaDEL_calculator
-import PaDEL_pywrapper.descriptor as cdk_fps
+
+if find_spec('PaDEL_pywrapper') is not None:
+    from PaDEL_pywrapper import PaDEL as PaDEL_calculator
+    import PaDEL_pywrapper.descriptor as cdk_fps
 
 
 class fingerprint(ABC):
