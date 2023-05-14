@@ -51,7 +51,7 @@ full = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["qsprpred"]
+where = ["."]
 
 [project.urls]
 homepage = "https://github.com/CDDLeiden/QSPRPred"
@@ -62,4 +62,4 @@ repository = "https://github.com/CDDLeiden/QSPRPred"
 include-package-data = true
 
 [tool.setuptools.dynamic]
-version = {file = "qsprpred/utils/about.py"}
+version = {file = "qsprpred/VERSION.txt"}
