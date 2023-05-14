@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -42,12 +42,14 @@ dependencies = [
 
 [project.optional-dependencies]
 deep = ["torch >= 1.7.0"]
-extra = ["mold2-pywrapper", "padel-pywrapper >= 1.0.2.post1", "Mordred"]
+extra = ["mold2-pywrapper", "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec"]
 full = [
     "torch >= 1.7.0",
     "mold2-pywrapper",
     "padel-pywrapper >= 1.0.2.post1",
     "Mordred",
+    "biopython",
+    "prodec",
 ]
 
 [tool.setuptools.packages.find]
