@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import numpy as np
 import torch
-from qsprpred import DEFAULT_DEVICE, DEFAULT_GPUS
+from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS
 from qsprpred.logs import logger
 from torch import nn, optim
 from torch.nn import functional as F

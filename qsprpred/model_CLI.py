@@ -13,7 +13,8 @@ import numpy as np
 import optuna
 from qsprpred.data.data import QSPRDataset
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
-from qsprpred.models.models import QSPRDNN, QSPRModel, QSPRsklearn
+from qsprpred.models.models import QSPRModel, QSPRsklearn
+from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.models.tasks import TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor

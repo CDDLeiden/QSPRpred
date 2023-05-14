@@ -1,3 +1,5 @@
 """Version of QSPRpred."""
+import os
 
-VERSION = "2.0.0.dev0"
+# read verson from file
+VERSION = open(os.path.join(os.path.dirname(__file__), 'VERSION.txt')).read().strip()

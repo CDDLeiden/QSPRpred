@@ -19,12 +19,10 @@ from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculat
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
-    Mold2,
-    Mordred,
-    PaDEL,
     PredictorDesc,
     rdkit_descs,
 )
+from qsprpred.extra.data.utils.descriptorsets import Mordred, Mold2, PaDEL
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
     highCorrelationFilter,
@@ -32,7 +30,8 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
-from qsprpred.models.models import QSPRDNN, QSPRsklearn
+from qsprpred.models.models import QSPRsklearn
+from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.models.tasks import TargetTasks
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
