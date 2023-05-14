@@ -2,3 +2,5 @@ recursive-include qsprpred test_files/data/*.*
 recursive-include qsprpred test_data/*.*
 recursive-include qsprpred test_files/test_predictor/qspr/models/SVC_CLASSIFICATION/*.*
 recursive-include qsprpred *.json
+recursive-include qsprpred *.txt
+recursive-include qsprpred *.md
