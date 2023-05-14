@@ -21,8 +21,10 @@ From v1.3.1 to v2.0.0
   init.
 - A `fill_value` argument was also added to the `predict_CLI` script to allow for filling missing values in the
   prediction data set as well.
-- ⚠️ Beware! ⚠️ `setup.py` and `setup.cfg` substituted `pyproject.toml` and `MANIFEST.in`. A lighter version of the package is now the default!!! Avoiding the optional libraries is still very rudimentary and should be on the TODO list of things to be updated before Sheffield.
-- CI scripts modified to only test the package on the full version of the package. See changes in `.gitlab-ci.yml`.
+- ⚠️ Beware! ⚠️ `setup.py` and `setup.cfg` were substituted with `pyproject.toml` and `MANIFEST.in`. A lighter version of the package is now the default installaton option!!!
+  - Installation options for the optional dependencies are described in README.md
+  - CI scripts were modified to test the package on the full version. See changes in `.gitlab-ci.yml`.
+  - Features using the extra dependencies were moved to `qsprpred.extra` and `qsprpred.deep` subpackages. The structure of the subpackages is the same as of the main package, so you just need to remember to use `qsprpred.extra` or `qsprpred.deep` instead of just `qsprpred` in your imports if you were using these features from the main package before. 
 - The way descriptors are stored in `MoleculeTable` was changed. They now reside in their own `DescriptorTable` instances that are linked to the orginal `MoleculeTable`
   - This change was made to allow several types of descriptors to be calculated and used efficiently (facilitated by a the `DescriptorsCalculators` interface)
   - Unfortunately, this change is not backwards compatible, so previously pickled `MoleculeTable` instances will not work with this version. There were also changes to how models handle multiple descriptor types, which also makes them incompatible with previous versions. However, this can be fixed by modifying the old JSON files as illustrated in commits 7d3f8633 and 6564f024.
@@ -39,8 +41,8 @@ From v1.3.1 to v2.0.0
 - New class `TargetProperty`, to allow for multitask modelling, a `QSPRdataset` has to have the option of multiple
   targetproperties. To support this a targer property is now defined seperatly from the dataset as a `TargetProperty`
   instance, which holds the information on name,  `TargetTask` (see also Changes) and threshold of the property.
-- Support for protein descriptors was added
-  - The `MoleculeTable` now has a `addProteinDescriptors` methjod, which can be used to calculate protein descriptors by linking informaton from the table with sequencing data.
+- Support for protein descriptors and PCM modeling was added.
+  - The `PCMDataset` class was introduced that extends `QSPRDataset` and adds the `addProteinDescriptors` method, which can be used to calculate protein descriptors by linking information from the table with sequencing data.
 - Support for precalculated descriptors was added with `addCustomDescriptors` method of `MoleculeTable`.
-  - It allows for adding precalculated descriptors to the `MoleculeTable` by linking the information from the table with the descriptor data.
+  - It allows for adding precalculated descriptors to the `MoleculeTable` by linking the information from the table with external precalculated descriptors.
 - The [tutorial](tutorial) was improved with more detailed sections on data preparation and PCM modelling added.
