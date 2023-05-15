@@ -37,8 +37,6 @@ pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[extr
 pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[full]
 ```
 
-```bash
-
 ### Multiple Sequence Alignment Provider for Protein Descriptors
 
 If you plan to optionally use QSPRPred to calculate protein descriptors for PCM, make sure to also install Clustal Omega. You can get it via `conda`:
