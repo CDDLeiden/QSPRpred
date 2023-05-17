@@ -117,6 +117,8 @@ def AR_PCM(data_dir='data'):
         a `QSPRDataset` instance with the loaded data
     """
 
+    from qsprpred.extra.data.data import PCMDataset
+
     acc_keys = ["P29274", "P29275", "P30542", "P0DMS8"]
     dataset_name = "AR_LIGANDS"  # name of the file to be generated
     quality = "high"  # choose minimum quality from {"high", "medium", "low"}
@@ -160,7 +162,7 @@ def AR_PCM(data_dir='data'):
 
         return map, info
 
-    return QSPRDataset.fromMolTable(
+    return PCMDataset.fromMolTable(
         mt,
         target_props=[
             {

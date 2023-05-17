@@ -24,11 +24,32 @@ QSPRpred can be installed with pip like so (with python >= 3.8.0):
 pip install git+https://github.com/CDDLeiden/QSPRPred.git@main
 ```
 
-If you plan to optionally use QSPRPred to calculate PCM descriptors, make sure to also install Clustal Omega. You can get it via `conda`:
+Note that this will install the basic dependencies, but not the optional dependencies. If you want to use the optional dependencies, you can install the package with the following installation options:
+
+```bash
+# include deep neural network models and their dependencies
+pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[deep] 
+
+# include extra dependencies for PCM models and extra descriptor sets from packages other than RDKit
+pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[extra]
+
+# include all optional dependencies
+pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[full]
+```
+
+### Multiple Sequence Alignment Provider for Protein Descriptors
+
+If you plan to optionally use QSPRPred to calculate protein descriptors for PCM, make sure to also install Clustal Omega. You can get it via `conda`:
 
 ```bash
 
 conda install -c bioconda clustalo
+```
+
+This is needed to provide multiple sequence alignments for the PCM descriptors. Clustal Omega does not, however, work on Windows. In that case, you can use MAFFT instead: 
+
+```bash
+conda install -c biocore mafft
 ```
 
 ## Use

@@ -11,8 +11,7 @@ import numpy as np
 import pandas as pd
 from qsprpred import VERSION
 from qsprpred.data.data import MoleculeTable, QSPRDataset, TargetProperty
-from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator, ProteinDescriptorCalculator, \
-    DescriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator, DescriptorsCalculator
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
@@ -426,38 +425,14 @@ class QSPRModel(ABC):
         """
         pass
 
-    def predictMols(self, mols: List[str], use_probas: bool = False,
-                    smiles_standardizer: Union[str, callable] = 'chembl',
-                    n_jobs: int = 1, fill_value: float = np.nan, protein_id : str = None):
-        """
-        Make predictions for the given molecules.
-
-        Args:
-            mols (List[str]): list of SMILES strings
-            use_probas (bool): use probabilities for classification models
-            smiles_standardizer: either `chembl`, `old`, or a partial function that reads and standardizes smiles.
-            n_jobs: Number of jobs to use for parallel processing.
-            fill_value: Value to use for missing values in the feature matrix.
-            protein_id: Protein identifier of the target we want to predict on if this is a PCM model.
-
-        Returns:
-            np.ndarray: an array of predictions, can be a 1D array for single target models, 2D array for multi target and a list of 2D arrays for multi-target and multi-class models
-        """
-
-        if not self.featureCalculators:
-            raise ValueError("No feature calculator set on this instance.")
-        for calc in self.featureCalculators:
-            if isinstance(calc, ProteinDescriptorCalculator) and not protein_id:
-                raise ValueError("This is a PCM model, please provide a protein id to predict the molecules on.")
-            if isinstance(calc, ProteinDescriptorCalculator) and calc.msaProvider and protein_id not in calc.msaProvider.current.keys():
-                raise ValueError(f"Protein id {protein_id} not found in the available MSA, cannot calculate PCM descriptors. Options are: {list(calc.msaProvider.current.keys())}.")
-
-        dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False, n_jobs=n_jobs)
+    def createPredictionDatasetFromMols(self, mols: List[str], smiles_standardizer: Union[str, callable] = 'chembl', n_jobs: int = 1, fill_value: float = np.nan):
+        dataset = MoleculeTable.fromSMILES(f"{self.__class__.__name__}_{hash(self)}", mols, drop_invalids=False,
+                                           n_jobs=n_jobs)
         for targetproperty in self.targetProperties:
             dataset.addProperty(targetproperty.name, np.nan)
-        if protein_id:
-            dataset.addProperty("protein_id", protein_id)
-        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False, n_jobs=n_jobs, proteincol="protein_id")
+
+        dataset = QSPRDataset.fromMolTable(dataset, self.targetProperties, drop_empty=False, drop_invalids=False,
+                                           n_jobs=n_jobs)
         dataset.standardizeSmiles(smiles_standardizer, drop_invalid=False)
         failed_mask = dataset.dropInvalids().values
 
@@ -467,6 +442,9 @@ class QSPRModel(ABC):
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value
         )
+        return dataset, failed_mask
+
+    def predictDataset(self, dataset: QSPRDataset, use_probas: bool = False):
         if self.task.isRegression() or not use_probas:
             predictions = self.predict(dataset)
             # always return 2D array
@@ -477,9 +455,11 @@ class QSPRModel(ABC):
         else:
             # NOTE: if a multiclass-multioutput, this will return a list of 2D arrays
             predictions = self.predictProba(dataset)
+        return predictions
 
+    @staticmethod
+    def handleInvalidsInPredictions(mols, predictions, failed_mask):
         if any(failed_mask):
-            # fill in the failed predictions with None
             if isinstance(predictions, list):
                 predictions_with_invalids = [np.full((len(mols), pred.shape[1]), None) for pred in predictions]
                 for i, pred in enumerate(predictions):
@@ -488,6 +468,37 @@ class QSPRModel(ABC):
                 predictions_with_invalids = np.full((len(mols), predictions.shape[1]), None)
                 predictions_with_invalids[~failed_mask, :] = predictions
             predictions = predictions_with_invalids
+        return predictions
+
+    def predictMols(self, mols: List[str], use_probas: bool = False,
+                    smiles_standardizer: Union[str, callable] = 'chembl',
+                    n_jobs: int = 1, fill_value: float = np.nan):
+        """
+        Make predictions for the given molecules.
+
+        Args:
+            mols (List[str]): list of SMILES strings
+            use_probas (bool): use probabilities for classification models
+            smiles_standardizer: either `chembl`, `old`, or a partial function that reads and standardizes smiles.
+            n_jobs: Number of jobs to use for parallel processing.
+            fill_value: Value to use for missing values in the feature matrix.
+
+        Returns:
+            np.ndarray: an array of predictions, can be a 1D array for single target models, 2D array for multi target and a list of 2D arrays for multi-target and multi-class models
+        """
+
+        if not self.featureCalculators:
+            raise ValueError("No feature calculator set on this instance.")
+
+        # create data set from mols
+        dataset, failed_mask = self.createPredictionDatasetFromMols(mols, smiles_standardizer, n_jobs, fill_value)
+
+        # make predictions for the dataset
+        predictions = self.predictDataset(dataset, use_probas)
+
+        # handle invalids
+        predictions = self.handleInvalidsInPredictions(mols, predictions, failed_mask)
+
         return predictions
 
     @classmethod

@@ -8,16 +8,11 @@ from unittest import TestCase
 
 import numpy as np
 import pandas as pd
-import torch
 from parameterized import parameterized
 from qsprpred.data.tests import DataSetsMixIn
-from qsprpred.data.utils.descriptor_utils.msa_calculator import ClustalMSA
-from qsprpred.data.utils.descriptorcalculator import ProteinDescriptorCalculator
-from qsprpred.data.utils.descriptorsets import ProDecDescriptorSet
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.metrics import SklearnMetric
-from qsprpred.models.models import QSPRDNN, QSPRsklearn
-from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks, TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -26,11 +21,9 @@ from sklearn.metrics import get_scorer as get_sklearn_scorer
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
-from torch.utils.data import DataLoader, TensorDataset
 from xgboost import XGBClassifier, XGBRegressor
 
 N_CPUS = 2
-GPUS = [idx for idx in range(torch.cuda.device_count())]
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -91,10 +84,9 @@ class ModelTestMixIn:
         self.assertTrue(all(exists(f"{themodel.baseDir}/{x}") for x in themodel.metaInfo['feature_calculator_paths']))
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_standardizer_path']}"))
 
-    def predictor_test(self, model_name, base_dir, cls: QSPRModel = QSPRsklearn, protein_id=None):
-        """Test using a QSPRmodel as predictor."""
-        # initialize model as predictor
-        predictor = cls(name=model_name, base_dir=base_dir)
+    def predictor_test(self, predictor : QSPRModel, **pred_kwargs):
+        """Test a model as predictor."""
+
 
         # load molecules to predict
         df = pd.read_csv(
@@ -119,7 +111,7 @@ class ModelTestMixIn:
 
         # predict the property
         for use_probas in [True, False]:
-            predictions = predictor.predictMols(df.SMILES.to_list(), use_probas=use_probas, protein_id=protein_id)
+            predictions = predictor.predictMols(df.SMILES.to_list(), use_probas=use_probas, **pred_kwargs)
             check_shape(df.SMILES.to_list())
             if isinstance(predictions, list):
                 for prediction in predictions:
@@ -139,7 +131,7 @@ class ModelTestMixIn:
 
             # test with an invalid smiles
             invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
-            predictions = predictor.predictMols(invalid_smiles, use_probas=use_probas, protein_id=protein_id)
+            predictions = predictor.predictMols(invalid_smiles, use_probas=use_probas, **pred_kwargs)
             check_shape(invalid_smiles)
             singleoutput = predictions[0][0, 0] if isinstance(predictions, list) else predictions[0, 0]
             self.assertEqual(predictions[0][1, 0] if isinstance(predictions, list) else predictions[1, 0], None)
@@ -149,162 +141,6 @@ class ModelTestMixIn:
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
-
-class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the QSPRDNN class."""
-
-    @staticmethod
-    def get_model(name, alg=None, dataset=None, parameters=None):
-        """Intialize dataset and model."""
-        return QSPRDNN(
-            base_dir=f'{os.path.dirname(__file__)}/test_files/',
-            alg=alg,
-            data=dataset,
-            name=name,
-            parameters=parameters,
-            gpus=GPUS,
-            patience=3,
-            tol=0.02
-        )
-
-    def prep_testdata(self, name, target_props):
-        """Prepare test dataset."""
-        data = self.create_large_dataset(name=name, target_props=target_props,
-                                         preparation_settings=self.get_default_prep())
-        data.save()
-        # prepare data for torch DNN
-        trainloader = DataLoader(
-            TensorDataset(
-                torch.Tensor(
-                    data.X.values), torch.Tensor(
-                    data.y.values)), batch_size=100)
-        testloader = DataLoader(
-            TensorDataset(
-                torch.Tensor(
-                    data.X_ind.values), torch.Tensor(
-                    data.y_ind.values)), batch_size=100)
-
-        return data.X.shape[1], trainloader, testloader
-
-    @parameterized.expand([
-        (f"{alg_name}_{task}", task, alg_name, alg, th)
-        for alg, alg_name, task, th in (
-            (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
-            (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
-            (STFullyConnected, "STFullyConnected", TargetTasks.MULTICLASS, [0, 1, 10, 1200]),
-        )
-    ])
-    def test_base_model(self, _, task, alg_name, alg, th):
-        """Test the base DNN model."""
-        # prepare test regression dataset
-        is_reg = True if task == TargetTasks.REGRESSION else False
-        no_features, trainloader, testloader = self.prep_testdata(
-            name=f"{alg_name}_{task}", target_props=[{"name": "CL", "task": task, "th": th}])
-
-        # fit model with default settings
-        model = alg(n_dim=no_features, is_reg=is_reg)
-        model.fit(
-            trainloader,
-            testloader,
-            out=f'{self.datapath}/{alg_name}_{task}',
-            patience=3)
-
-        # fit model with non-default epochs and learning rate and tolerance
-        model = alg(n_dim=no_features, n_epochs=50, lr=0.5, is_reg=is_reg)
-        model.fit(
-            trainloader,
-            testloader,
-            out=f'{self.datapath}/{alg_name}_{task}',
-            patience=3,
-            tol=0.01)
-
-        # fit model with non-default settings for model construction
-        model = alg(
-            n_dim=no_features,
-            neurons_h1=2000,
-            neurons_hx=500,
-            extra_layer=True,
-            is_reg=is_reg
-        )
-        model.fit(
-            trainloader,
-            testloader,
-            out=f'{self.datapath}/{alg_name}_{task}',
-            patience=3)
-
-    @parameterized.expand([
-        (f"{alg_name}_{task}", task, alg_name, alg, th)
-        for alg, alg_name, task, th in (
-            (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
-            (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
-            (STFullyConnected, "STFullyConnected", TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
-        )
-    ])
-    def test_qsprpred_model(self, _, task, alg_name, alg, th):
-        """Test the QSPRDNN model."""
-        # initialize dataset
-        dataset = self.create_large_dataset(
-            name=f"{alg_name}_{task}", target_props=[{"name": "CL", "task": task, "th": th}],
-            preparation_settings=self.get_default_prep())
-
-        # initialize model for training from class
-        alg_name = f"{alg_name}_{task}_th={th}"
-        model = self.get_model(
-            name=alg_name,
-            alg=alg,
-            dataset=dataset
-        )
-        self.fit_test(model)
-        self.predictor_test(alg_name, model.baseDir, QSPRDNN)
-
-
-class TestPCM(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-
-    @staticmethod
-    def get_model(name, alg=None, dataset=None, parameters=None):
-        """Intialize dataset and model."""
-        return QSPRsklearn(
-            base_dir=f'{os.path.dirname(__file__)}/test_files/',
-            alg=alg,
-            data=dataset,
-            name=name,
-            parameters=parameters
-        )
-
-    @parameterized.expand([
-        (alg_name, TargetTasks.REGRESSION, alg_name, alg)
-        for alg, alg_name in (
-                (PLSRegression, "PLSR"),
-                (SVR, "SVR"),
-                (XGBRegressor, "XGBR"),
-        )
-    ])
-    def test_regression_basic_fit_pcm(self, _, task, model_name, model_class):
-        """Test model training for regression models."""
-        if not model_name in ["SVR", "PLSR"]:
-            parameters = {"n_jobs": N_CPUS}
-        else:
-            parameters = None
-
-        # initialize dataset
-        prep = self.get_default_prep()
-        prep["feature_calculators"] = prep["feature_calculators"] + [
-            ProteinDescriptorCalculator(descsets=[ProDecDescriptorSet(sets=["Sneath"])], msa_provider=ClustalMSA(self.qsprdatapath))]
-        dataset = self.create_pcm_dataset(
-            name=f"{model_name}_{task}_pcm",
-            target_props=[{"name": 'pchembl_value_Median', "task": task}],
-            preparation_settings=prep
-        )
-
-        # initialize model for training from class
-        model = self.get_model(
-            name=f"{model_name}_{task}",
-            alg=model_class,
-            dataset=dataset,
-            parameters=parameters
-        )
-        self.fit_test(model)
-        self.predictor_test(f"{model_name}_{task}", model.baseDir, protein_id=dataset.getDF()['accession'].iloc[0])
 
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRsklearn class."""
@@ -350,7 +186,8 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters
         )
         self.fit_test(model)
-        self.predictor_test(f"{model_name}_{task}", model.baseDir)
+        predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        self.predictor_test(predictor)
 
     @parameterized.expand([
         (f"{alg_name}_{task}", task, th, alg_name, alg)
@@ -391,7 +228,8 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters
         )
         self.fit_test(model)
-        self.predictor_test(f"{model_name}_{task}", model.baseDir)
+        predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        self.predictor_test(predictor)
 
     @parameterized.expand([
         (alg_name, alg_name, alg)
@@ -425,7 +263,8 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters
         )
         self.fit_test(model)
-        self.predictor_test(f"{model_name}_multitask_regression", model.baseDir)
+        predictor = QSPRsklearn(name=f"{model_name}_multitask_regression", base_dir=model.baseDir)
+        self.predictor_test(predictor)
 
     @parameterized.expand([
         (alg_name, alg_name, alg)
@@ -460,7 +299,8 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters
         )
         self.fit_test(model)
-        self.predictor_test(f"{model_name}_multitask_classification", model.baseDir)
+        predictor = QSPRsklearn(name=f"{model_name}_multitask_classification", base_dir=model.baseDir)
+        self.predictor_test(predictor)
 
 
 class test_Metrics(TestCase):

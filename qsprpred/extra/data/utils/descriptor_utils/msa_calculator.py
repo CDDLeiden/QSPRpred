@@ -31,7 +31,7 @@ class MSAProvider(ABC):
     @abstractmethod
     def current(self):
         """
-        Returns the current alignment.
+        Returns the current alignment as a dictionary where keys are sequence IDs as `str` and values are aligned sequences as `str`.
         """
         pass
 

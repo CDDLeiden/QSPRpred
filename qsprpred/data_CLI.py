@@ -7,11 +7,11 @@ import os.path
 import random
 import sys
 from datetime import datetime
+from importlib.util import find_spec
 
 import numpy as np
 import optuna
 import pandas as pd
-import torch
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
 from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
@@ -19,12 +19,10 @@ from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculat
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
-    Mold2,
-    Mordred,
-    PaDEL,
     PredictorDesc,
     rdkit_descs,
 )
+from qsprpred.extra.data.utils.descriptorsets import Mordred, Mold2, PaDEL
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
     highCorrelationFilter,
@@ -32,7 +30,8 @@ from qsprpred.data.utils.featurefilters import (
 )
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
-from qsprpred.models.models import QSPRDNN, QSPRsklearn
+from qsprpred.models.models import QSPRsklearn
+from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.models.tasks import TargetTasks
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
@@ -246,7 +245,9 @@ if __name__ == '__main__':
     # Set random seeds
     random.seed(args.random_state)
     np.random.seed(args.random_state)
-    torch.manual_seed(args.random_state)
+    if find_spec('torch') is not None:
+        import torch
+        torch.manual_seed(args.random_state)
     os.environ['TF_DETERMINISTIC_OPS'] = str(args.random_state)
 
     # Backup files

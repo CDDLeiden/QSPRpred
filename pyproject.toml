@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qsprpred"
+dynamic = ["version"]
+description = "A cheminformatics package for training and testing QSAR/QSPR models"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.7"
+license = { file = "LICENSE" } # Can anybody add the license?
+keywords = ["qsar", "machine learning", "cheminformatics"]
+# authors = [{ name = "Name of the Person", email = "email of the person" }]
+# maintainers = [{ name = "Name of the Person", email = "email of the person" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Operating System :: OS Independent", # We tested it on Mac and Windows as well?
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10", # Anybody tested it on 3.11?
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+dependencies = [
+    "parameterized",
+    "numpy >= 1.19, <1.24.0",
+    "scikit-learn >= 1.0.2",
+    "pandas >= 1.2.2",
+    "matplotlib >= 2.0",
+    "chembl_structure_pipeline >= 1.2.0",
+    "rdkit",
+    "optuna",
+    "gitpython",
+    "xgboost",
+    "boruta",
+    "tqdm",
+    "sklearn-json @ git+https://github.com/OlivierBeq/sklearn-json.git#egg=sklearn-json",
+    "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
+]
+
+[project.optional-dependencies]
+deep = ["torch >= 1.7.0"]
+extra = ["mold2-pywrapper", "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec"]
+full = [
+    "torch >= 1.7.0",
+    "mold2-pywrapper",
+    "padel-pywrapper >= 1.0.2.post1",
+    "Mordred",
+    "biopython",
+    "prodec",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[project.urls]
+homepage = "https://github.com/CDDLeiden/QSPRPred"
+repository = "https://github.com/CDDLeiden/QSPRPred"
+# documentation = "https://readthedocs.org" # Can anybody add the link?
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "qsprpred.__version__"}
