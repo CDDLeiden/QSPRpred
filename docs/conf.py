@@ -11,12 +11,9 @@ copyright = '2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde S
 author = 'Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho'
 
 # The full version, including alpha/beta/rc tags
-import importlib.util
+import qsprpred
 
-spec = importlib.util.spec_from_file_location("qsprpred.about", "../qsprpred/about.py")
-about = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(about)
-release = about.VERSION
+release = qsprpred.VERSION
 version = f'v{release}'
 
 # -- General configuration ---------------------------------------------------

@@ -11,3 +11,4 @@ rdBase.DisableLog('rdApp.info')
 rdBase.DisableLog('rdApp.warning')
 
 __version__ = "2.0.0.dev1"
+VERSION = __version__
