@@ -6,10 +6,8 @@ On: 06.04.22, 16:51
 """
 from rdkit import rdBase
 
-from .about import VERSION
-
 rdBase.DisableLog('rdApp.error')
 rdBase.DisableLog('rdApp.info')
 rdBase.DisableLog('rdApp.warning')
 
-__version__ = VERSION
+__version__ = "2.0.0.dev1"

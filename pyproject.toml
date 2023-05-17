@@ -64,4 +64,4 @@ repository = "https://github.com/CDDLeiden/QSPRPred"
 include-package-data = true
 
 [tool.setuptools.dynamic]
-version = {file = "qsprpred/VERSION.txt"}
+version = {attr = "qsprpred.__version__"}
