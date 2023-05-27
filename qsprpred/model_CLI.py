@@ -12,9 +12,9 @@ from importlib.util import find_spec
 import numpy as np
 import optuna
 from qsprpred.data.data import QSPRDataset
+from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.models import QSPRModel, QSPRsklearn
-from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.models.tasks import TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -151,33 +151,44 @@ def QSPR_modelling(args):
                 log.warning("PLS with classification invalid, skipped.")
                 continue
 
-            if args.parameters:
-                try:
-                    parameters = par_dicts[par_dicts[:, 0] == model_type, 1][0]
-                    if not model_type in ["NB", "PLS", "SVM", "DNN"]:
-                        parameters = parameters.update({"n_jobs": args.ncpu})
-                except BaseException:
-                    log.warning(f'Model type {model_type} not in parameter file, default parameter settings used.')
-                    parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs": args.ncpu}
-            else:
-                parameters = None if model_type in ["NB", "PLS", "SVM", "DNN"] else {"n_jobs": args.ncpu}
+            alg_dict = {
+                'RF': RandomForestRegressor if reg else RandomForestClassifier,
+                'XGB': XGBRegressor if reg else XGBClassifier,
+                'SVM': SVR if reg else SVC,
+                'PLS': PLSRegression,
+                'NB': GaussianNB,
+                'KNN': KNeighborsRegressor if reg else KNeighborsClassifier}
+
+            # setting some default parameters
+            parameters = {}
+            if alg_dict[model_type] == XGBRegressor:
+                parameters['objective'] = 'reg:squarederror'
+            elif alg_dict[model_type] == XGBClassifier:
+                parameters['objective'] = 'binary:logistic'
+                parameters['use_label_encoder'] = False
+                parameters['eval_metric'] = 'logloss'
+            if alg_dict[model_type] == SVC:
+                parameters['probability'] = True
+            if not model_type in ["NB", "PLS", "SVM", "DNN"]:
+                parameters['n_jobs'] = args.ncpu
 
             # class_weight and scale_pos_weight are only used for RF, XGB and SVM
             if not reg:
                 class_weight = 'balanced' if args.sample_weighing else None
+                if alg_dict[model_type] == RandomForestClassifier or alg_dict[model_type] == SVC:
+                    parameters['class_weight'] = class_weight
                 counts = mydataset.y.value_counts()
                 scale_pos_weight = counts[0] / counts[1] if (
                     args.sample_weighing and not mydataset.isMultiClass()) else 1
+                if alg_dict[model_type] == XGBClassifier:
+                    parameters['scale_pos_weight'] = scale_pos_weight
 
-            alg_dict = {
-                'RF': RandomForestRegressor() if reg else RandomForestClassifier(class_weight=class_weight),
-                'XGB': XGBRegressor(objective='reg:squarederror') if reg else
-                XGBClassifier(objective='binary:logistic', use_label_encoder=False, eval_metric='logloss',
-                              scale_pos_weight=scale_pos_weight),
-                'SVM': SVR() if reg else SVC(probability=True, class_weight=class_weight),
-                'PLS': PLSRegression(),
-                'NB': GaussianNB(),
-                'KNN': KNeighborsRegressor() if reg else KNeighborsClassifier()}
+            # set parameters from file
+            if args.parameters:
+                try:
+                    parameters = par_dicts[par_dicts[:, 0] == model_type, 1][0]
+                except BaseException:
+                    log.warning(f'Model type {model_type} not in parameter file, default parameter settings used.')
 
             # Create QSPR model object
             if model_type == 'DNN':

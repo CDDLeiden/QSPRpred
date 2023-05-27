@@ -79,7 +79,7 @@ class ModelTestMixIn:
         # train the model on all data
         themodel.fit()
         self.assertTrue(exists(themodel.metaFile))
-        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['model_path']}"))
+        self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['estimator_path']}"))
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['parameters_path']}"))
         self.assertTrue(all(exists(f"{themodel.baseDir}/{x}") for x in themodel.metaInfo['feature_calculator_paths']))
         self.assertTrue(exists(f"{themodel.baseDir}/{themodel.metaInfo['feature_standardizer_path']}"))
@@ -122,7 +122,7 @@ class ModelTestMixIn:
             singleoutput = predictions[0][0, 0] if isinstance(predictions, list) else predictions[0, 0]
             if predictor.targetProperties[0].task == TargetTasks.REGRESSION or use_probas:
                 self.assertIsInstance(singleoutput, numbers.Real)
-            elif predictor.targetProperties[0].task == TargetTasks.MULTICLASS or isinstance(predictor.model, XGBClassifier):
+            elif predictor.targetProperties[0].task == TargetTasks.MULTICLASS or isinstance(predictor.estimator, XGBClassifier):
                 self.assertIsInstance(singleoutput, numbers.Integral)
             elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:
                 self.assertIn(singleoutput, [1, 0])
@@ -136,7 +136,7 @@ class ModelTestMixIn:
             singleoutput = predictions[0][0, 0] if isinstance(predictions, list) else predictions[0, 0]
             self.assertEqual(predictions[0][1, 0] if isinstance(predictions, list) else predictions[1, 0], None)
             if predictor.targetProperties[0].task == TargetTasks.SINGLECLASS and not isinstance(
-                    predictor.model, XGBClassifier) and not use_probas:
+                    predictor.estimator, XGBClassifier) and not use_probas:
                 self.assertIn(singleoutput, [0, 1])
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)

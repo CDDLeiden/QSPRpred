@@ -4,6 +4,7 @@ At the moment there is a class for sklearn type models
 and one for a keras DNN model. To add more types a model class should be added, which
 is a subclass of the QSPRModel type.
 """
+import os
 from datetime import datetime
 from inspect import isclass
 from typing import Type, Union
@@ -36,7 +37,7 @@ class QSPRsklearn(QSPRModel):
                 'At the moment there are no supported metrics for multi-task multi-class/mix multi-and-single class classification.')
 
         # initialize models with defined parameters
-        if (type(self.model) in [SVC, SVR]):
+        if (type(self.estimator) in [SVC, SVR]):
             logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
                             Manually set this parameter if this is not desired.")
             if self.parameters:
@@ -44,8 +45,8 @@ class QSPRsklearn(QSPRModel):
             else:
                 self.parameters = {'max_iter': 10000}
 
-        if self.parameters not in [None, {}]:
-            self.model.set_params(**self.parameters)
+        if self.parameters not in [None, {}] and hasattr(self, "estimator"):
+            self.estimator.set_params(**self.parameters)
 
         logger.info('parameters: %s' % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
@@ -62,13 +63,13 @@ class QSPRsklearn(QSPRModel):
 
         fit_set = {'X': X_all}
 
-        if type(self.model).__name__ == 'PLSRegression':
+        if type(self.estimator).__name__ == 'PLSRegression':
             fit_set['Y'] = y_all
         else:
             fit_set['y'] = y_all
 
         logger.info('Model fit started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        self.model.fit(**fit_set)
+        self.estimator.fit(**fit_set)
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         self.save()
 
@@ -117,10 +118,10 @@ class QSPRsklearn(QSPRModel):
                     fit_set['y'] = y_train
                 else:
                     fit_set['y'] = y_train.ravel()
-            self.model.fit(**fit_set)
+            self.estimator.fit(**fit_set)
 
             if self.task.isRegression():
-                preds = self.model.predict(X_test)
+                preds = self.estimator.predict(X_test)
                 # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
                 if preds.ndim == 1:
                     preds = preds.reshape(-1, 1)
@@ -128,7 +129,7 @@ class QSPRsklearn(QSPRModel):
             else:
                 # for the multiclass-multitask case predict_proba returns a list of
                 # arrays, otherwise a single array is returned
-                preds = self.model.predict_proba(X_test)
+                preds = self.estimator.predict_proba(X_test)
                 for idx in range(len(self.data.targetProperties)):
                     if len(self.data.targetProperties) == 1:
                         cvs[idx][idx_test] = preds
@@ -141,7 +142,7 @@ class QSPRsklearn(QSPRModel):
         # fitting on whole trainingset and predicting on test set
         fit_set = {'X': X}
 
-        if type(self.model).__name__ == 'PLSRegression':
+        if type(self.estimator).__name__ == 'PLSRegression':
             fit_set['Y'] = y.values.ravel()
         else:
             if self.data.isMultiTask:
@@ -149,11 +150,11 @@ class QSPRsklearn(QSPRModel):
             else:
                 fit_set['y'] = y.values.ravel()
 
-        self.model.fit(**fit_set)
+        self.estimator.fit(**fit_set)
 
         if X_ind.shape[0] > 0:
             if self.task.isRegression():
-                preds = self.model.predict(X_ind)
+                preds = self.estimator.predict(X_ind)
                 # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
                 if preds.ndim == 1:
                     preds = preds.reshape(-1, 1)
@@ -161,7 +162,7 @@ class QSPRsklearn(QSPRModel):
             else:
                 # for the multiclass-multitask case predict_proba returns a list of
                 # arrays, otherwise a single array is returned
-                preds = self.model.predict_proba(X_ind)
+                preds = self.estimator.predict_proba(X_ind)
                 for idx in range(self.nTargets):
                     if self.nTargets == 1:
                         inds[idx] = preds
@@ -223,7 +224,7 @@ class QSPRsklearn(QSPRModel):
         For a list of the available scoring functions see:
         https://scikit-learn.org/stable/modules/model_evaluation.html
         """
-        grid = GridSearchCV(self.model, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
+        grid = GridSearchCV(self.estimator, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
             (x[4], x[5]) for x in self.data.createFolds()), scoring=self.score_func.scorer, refit=False)
 
         X, X_ind = self.data.getFeatures()
@@ -235,7 +236,7 @@ class QSPRsklearn(QSPRModel):
 
         logger.info('Grid search best parameters: %s' % grid.best_params_)
         self.parameters = grid.best_params_
-        self.model = self.model.set_params(**grid.best_params_)
+        self.estimator = self.estimator.set_params(**grid.best_params_)
         self.save()
 
     def bayesOptimization(self, search_space_bs, n_trials, th=0.5, n_jobs=1):
@@ -275,7 +276,7 @@ class QSPRsklearn(QSPRModel):
 
         logger.info('Bayesian optimization best params: %s' % trial.params)
         self.parameters = trial.params
-        self.model = self.model.set_params(**trial.params)
+        self.estimator = self.estimator.set_params(**trial.params)
         self.save()
 
     def objective(self, trial, search_space_bs):
@@ -303,45 +304,54 @@ class QSPRsklearn(QSPRModel):
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
 
         print(bayesian_params)
-        self.model.set_params(**bayesian_params)
+        self.estimator.set_params(**bayesian_params)
 
         y, y_ind = self.data.getTargetPropertiesValues()
         score = self.score_func(y, self.evaluate(save=False))
         return score
 
-    def loadModel(self, alg: Union[Type, BaseEstimator] = None, params: dict = None):
-        if alg is not None and isinstance(alg, BaseEstimator):
+    def loadEstimator(self, params: dict = None):
+        if self.alg is not None:
             if params:
-                return alg.set_params(**params)
+                return self.alg(**params)
             else:
-                return alg
-        elif isclass(alg):
+                return self.alg()
+    
+    def loadEstimatorFromFile(self, params: dict = None, fallback_load: bool = True):
+        """Load estimator from file.
+        
+        Args:
+            params (dict): parameters
+            fallback_load (bool): if True, init estimator from alg and params if no estimator found at path
+        """
+        path = f'{self.outPrefix}.json'
+        if os.path.isfile(path):
+            estimator = skljson.from_json(path)
+            self.alg = estimator.__class__
             if params:
-                return alg(**params)
+                return estimator.set_params(**params)
             else:
-                return alg()
+                return estimator
+        elif fallback_load:
+            return self.loadEstimator(params)
         else:
-            model_path = f'{self.outDir}/{self.name}.json'
-            model = skljson.from_json(model_path)
-            self.alg = model.__class__
-            self.model = model
-            return model
+            raise FileNotFoundError(f'No estimator found at {path}, loading estimator from file failed.')
 
-    def saveModel(self) -> str:
-        model_path = f'{self.outDir}/{self.name}.json'
-        skljson.to_json(self.model, model_path)
-        return model_path
+    def saveEstimator(self) -> str:
+        estimator_path = f'{self.outPrefix}.json'
+        skljson.to_json(self.estimator, estimator_path)
+        return estimator_path
 
     def predict(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
         if isinstance(X, QSPRDataset):
             X = X.getFeatures(raw=True, concat=True)
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
-        return self.model.predict(X)
+        return self.estimator.predict(X)
 
     def predictProba(self, X: Union[pd.DataFrame, np.ndarray, QSPRDataset]):
         if isinstance(X, QSPRDataset):
             X = X.getFeatures(raw=True, concat=True)
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
-        return self.model.predict_proba(X)
+        return self.estimator.predict_proba(X)

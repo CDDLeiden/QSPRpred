@@ -9,20 +9,19 @@ import os
 import sys
 from datetime import datetime
 from inspect import isclass
-from typing import Union, Type
+from typing import Type, Union
 
 import numpy as np
 import optuna
 import pandas as pd
 import torch
-from sklearn.model_selection import train_test_split, ParameterGrid
-
-from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS
 from qsprpred.data.data import QSPRDataset
+from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS
 from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
+from sklearn.model_selection import ParameterGrid, train_test_split
 
 
 class QSPRDNN(QSPRModel):
@@ -85,7 +84,6 @@ class QSPRDNN(QSPRModel):
             raise NotImplementedError(
                 'Multitask modelling is not implemented for QSPRDNN models.')
 
-        self.alg = alg
         self.device = device
         self.gpus = gpus
 
@@ -99,9 +97,9 @@ class QSPRDNN(QSPRModel):
         self.tol = tol
 
         if autoload:
-            self.model = self.loadModel(alg, self.parameters)
+            self.estimator = self.loadEstimatorFromFile(self.parameters)
 
-    def loadModel(self, alg: Union[Type, object] = None, params: dict = None, fromFile=True):
+    def loadEstimator(self, params: dict = None):
         """
         Load model from file or initialize new model.
 
@@ -114,59 +112,44 @@ class QSPRDNN(QSPRModel):
             model (object): model instance
         """
         # initialize model
-        if alg is not None:
-            if isclass(alg):
-                if params:
-                    model = alg(
-                        n_dim=self.n_dim,
-                        n_class=self.n_class,
-                        device=self.device,
-                        gpus=self.gpus,
-                        is_reg=self.task == ModelTasks.REGRESSION
-                    )
-                    model.set_params(**params)
-                else:
-                    model = alg(
-                        n_dim=self.n_dim,
-                        n_class=self.n_class,
-                        device=self.device,
-                        gpus=self.gpus,
-                        is_reg=self.task == ModelTasks.REGRESSION
-                    )
-            else:
-                model = alg
-                model.set_params(**params)
-        else:
-            if params:
-                model = STFullyConnected(
-                    n_dim=self.n_dim,
-                    n_class=self.n_class,
-                    device=self.device,
-                    gpus=self.gpus,
-                    is_reg=self.task == ModelTasks.REGRESSION
-                )
-                model.set_params(**params)
-            else:
-                model = STFullyConnected(
-                    n_dim=self.n_dim,
-                    n_class=self.n_class,
-                    device=self.device,
-                    gpus=self.gpus,
-                    is_reg=self.task == ModelTasks.REGRESSION
-                )
+        estimator = self.alg(
+            n_dim=self.n_dim,
+            n_class=self.n_class,
+            device=self.device,
+            gpus=self.gpus,
+            is_reg=self.task == ModelTasks.REGRESSION
+        )
+        if params:
+            estimator.set_params(**params)
 
+        return estimator
+    
+    def loadEstimatorFromFile(self, params: dict = None, fallback_load: bool = True):
+        """Load estimator from file.
+        
+        Args:
+            params (dict): parameters
+            fallback_load (bool): if True, init estimator from alg and params if no estimator found at path
+        """
+        path = f'{self.outPrefix}_weights.pkg'
+        estimator = self.loadEstimator(params)
         # load states if available
-        if fromFile:
-            if 'model_path' in self.metaInfo:
-                model_path = os.path.join(self.baseDir, self.metaInfo['model_path'])
-                if os.path.exists(model_path):
-                    model.load_state_dict(torch.load(model_path))
-                else:
-                    logger.warning(f'Model path ({model_path}) does not exist. Cannot load model weights.')
-            else:
-                logger.warning('No model path found in metadata. Cannot load model weights.')
+        if os.path.exists(path):
+            estimator.load_state_dict(torch.load(path))
+        elif not fallback_load:
+            raise FileNotFoundError(f'No estimator found at {path}, loading estimator weights from file failed.')
+        
+        return estimator
 
-        return model
+    def saveEstimator(self) -> str:
+        """Save the QSPRDNN model.
+
+        Returns:
+            str: path to the saved model
+        """
+        path = f'{self.outPrefix}_weights.pkg'
+        torch.save(self.estimator.state_dict(), path)
+        return path
 
     def fit(self, fromFile=True):
         """Train model on the training data, determine best model using test set, save best model.
@@ -190,11 +173,11 @@ class QSPRDNN(QSPRModel):
             self.parameters.update({"n_epochs": self.optimal_epochs})
         else:
             self.parameters = {"n_epochs": self.optimal_epochs}
-        self.model = self.loadModel(self.alg, self.parameters, fromFile=fromFile)
-        train_loader = self.model.get_dataloader(X_all, y_all)
+        self.estimator = self.loadEstimator(self.parameters)
+        train_loader = self.estimator.get_dataloader(X_all, y_all)
 
         logger.info('Model fit started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        self.model.fit(train_loader, None, self.outPrefix, patience=-1)
+        self.estimator.fit(train_loader, None, self.outPrefix, patience=-1)
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         self.save()
@@ -227,7 +210,7 @@ class QSPRDNN(QSPRModel):
         evalparams = self.parameters if parameters is None else parameters
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetPropertiesValues()
-        indep_loader = self.model.get_dataloader(X_ind.values)
+        indep_loader = self.estimator.get_dataloader(X_ind.values)
         last_save_epochs = 0
 
         # prepare arrays to store molecule ids
@@ -242,7 +225,7 @@ class QSPRDNN(QSPRModel):
         fold_counter = np.zeros(y.shape[0])
 
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
-            crossvalmodel = self.loadModel(self.alg, evalparams, fromFile=False)
+            crossvalmodel = self.loadEstimator(evalparams)
             y_train = y_train.reshape(-1, 1)
 
             # split cross validation fold train set into train and validation set for early stopping
@@ -264,7 +247,7 @@ class QSPRDNN(QSPRModel):
             cvs_ids[idx_test] = X.index.values[idx_test]
 
         if save:
-            indmodel = self.loadModel(self.alg, evalparams, fromFile=False)
+            indmodel = self.loadEstimator(evalparams)
             n_folds = max(fold_counter) + 1
 
             # save the optimal number of epochs for fitting the model as the average
@@ -338,7 +321,7 @@ class QSPRDNN(QSPRModel):
             # do 5 fold cross validation and take mean prediction on validation set as score of parameter settings
             fold_scores = []
             for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
-                crossvalmodel = self.loadModel(self.alg, params, fromFile=False)
+                crossvalmodel = self.loadEstimator(params)
                 y_train = y_train.reshape(-1, 1)
                 logger.info('cross validation fold ' + str(i))
 
@@ -379,7 +362,7 @@ class QSPRDNN(QSPRModel):
         logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         self.parameters = best_params
-        self.model = self.loadModel(self.alg, best_params, fromFile=False)
+        self.estimator = self.loadEstimator(best_params)
         self.saveParams(best_params)
 
     def bayesOptimization(self, search_space_bs, n_trials, scoring=None, th=0.5, n_jobs=1):
@@ -395,7 +378,7 @@ class QSPRDNN(QSPRModel):
         print('Bayesian optimization can take a while for some hyperparameter combinations')
         # TODO add timeout function
 
-        self.model = self.loadModel(self.alg, fromFile=False)
+        self.estimator = self.loadEstimator()
 
         if n_jobs > 1:
             logger.warning("At the moment n_jobs>1 not available for bayesoptimization. n_jobs set to 1")
@@ -411,7 +394,7 @@ class QSPRDNN(QSPRModel):
         logger.info('Bayesian optimization best params: %s' % trial.params)
 
         self.parameters = trial.params
-        self.model = self.loadModel(self.alg, self.parameters, fromFile=False)
+        self.estimator = self.loadEstimator(self.parameters)
         self.saveParams(trial.params)
 
     def objective(self, trial, scoring, th, search_space_bs):
@@ -450,15 +433,6 @@ class QSPRDNN(QSPRModel):
         score = score_func(y, self.evaluate(save=False, parameters=bayesian_params))
         return score
 
-    def saveModel(self) -> str:
-        """Save the QSPRDNN model.
-
-        Returns:
-            str: path to the saved model
-        """
-        path = self.outPrefix + '_weights.pkg'
-        torch.save(self.model.state_dict(), path)
-        return path
 
     def save(self):
         """Save the QSPRDNN model and meta information.
@@ -499,5 +473,5 @@ class QSPRDNN(QSPRModel):
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
 
-        loader = self.model.get_dataloader(X)
-        return self.model.predict(loader)
+        loader = self.estimator.get_dataloader(X)
+        return self.estimator.predict(loader)

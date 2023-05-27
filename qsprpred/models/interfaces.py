@@ -11,7 +11,10 @@ import numpy as np
 import pandas as pd
 from qsprpred import VERSION
 from qsprpred.data.data import MoleculeTable, QSPRDataset, TargetProperty
-from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator, DescriptorsCalculator
+from qsprpred.data.utils.descriptorcalculator import (
+    DescriptorsCalculator,
+    MoleculeDescriptorsCalculator,
+)
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.logs import logger
 from qsprpred.models import SSPACE
@@ -28,9 +31,9 @@ class QSPRModel(ABC):
     Attributes:
         name (str): name of the model
         data (QSPRDataset): data set used to train the model
-        alg (estimator): estimator instance or class
+        alg (Type): estimator class
         parameters (dict): dictionary of algorithm specific parameters
-        model (estimator): the underlying estimator instance, if `fit` or optimization is perforemed, this model instance gets updated accordingly
+        estimator (instance of alg): the underlying estimator instance, if `fit` or optimization is performed, this instance gets updated accordingly
         featureCalculators (MoleculeDescriptorsCalculator): feature calculator instance taken from the data set or deserialized from file if the model is loaded without data
         featureStandardizer (SKLearnStandardizer): feature standardizer instance taken from the data set or deserialized from file if the model is loaded without data
         metaInfo (dict): dictionary of metadata about the model, only available after the model is saved
@@ -52,11 +55,11 @@ class QSPRModel(ABC):
 
         Args:
             base_dir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`
-            alg (estimator): estimator instance or class
+            alg (Type): estimator class
             data (QSPRDataset): data set used to train the model
             name (str): name of the model
             parameters (dict): dictionary of algorithm specific parameters
-            autoload (bool): if True, the model is loaded from the serialized file if it exists, otherwise a new model is created
+            autoload (bool): if True, the estimator is loaded from the serialized file if it exists, otherwise a new instance of alg is created
             scoring (str or callable): scoring function to use for cross validation and optimization, if None, the default scoring function is used
         """
         self.data = data
@@ -86,16 +89,16 @@ class QSPRModel(ABC):
         self.featureStandardizer = self.data.feature_standardizer if self.data else self.readStandardizer(os.path.join(
             self.baseDir, self.metaInfo['feature_standardizer_path'])) if self.metaInfo['feature_standardizer_path'] else None
 
-        # initialize a model instance with the given parameters
+        # initialize a estimator instance with the given parameters
         self.alg = alg
         if autoload:
-            self.model = self.loadModel(alg=self.alg, params=self.parameters)
+            self.estimator = self.loadEstimatorFromFile(params=self.parameters)
 
         self.score_func = self.get_scoring_func(scoring)
 
     def __str__(self):
         """Return the name of the model and the underlying class as the identifier."""
-        return f"{self.name} ({self.model.__class__.__name__ if self.model else self.alg.__class__.__name__ if self.alg else 'None'})"
+        return f"{self.name} ({self.estimator.__class__.__name__ if self.estimator else self.alg.__class__.__name__ if self.alg else 'None'})"
 
     @property
     def targetProperties(self):
@@ -295,7 +298,7 @@ class QSPRModel(ABC):
             f"{self.baseDir}/", '') for x in self.saveDescriptorCalculators()] if self.featureCalculators else None
         self.metaInfo['feature_standardizer_path'] = self.saveStandardizer().replace(
             f"{self.baseDir}/", '') if self.featureStandardizer else None
-        self.metaInfo['model_path'] = self.saveModel().replace(f"{self.baseDir}/", '')
+        self.metaInfo['estimator_path'] = self.saveEstimator().replace(f"{self.baseDir}/", '')
         return self.saveMetadata()
 
     def checkForData(self, exception=True):
@@ -386,21 +389,35 @@ class QSPRModel(ABC):
         return optim_params
 
     @abstractmethod
-    def loadModel(self, alg: Union[Type, object] = None, params: dict = None):
-        """Initialize model instance with the given parameters. If no algorithm is given, the model is loaded from file based on available metadata. If no parameters are given, they are also loaded from the available file.
+    def loadEstimator(self, params: dict = None):
+        """Initialize estimator instance with the given parameters. 
 
         Arguments:
-            alg (object): algorithm class to instantiate
             params (dict): algorithm parameters
+            
+        Returns:
+            estimator (instance of alg): path to the estimator file
+        """
+        pass
+    
+    @abstractmethod
+    def loadEstimatorFromFile(self, params):
+        """Load estimator instance from file.
+        
+        Args:
+            params (dict): algorithm parameters
+
+        Returns:
+            estimator (instance of alg): path to the estimator file
         """
         pass
 
     @abstractmethod
-    def saveModel(self) -> str:
-        """Save the underlying model to file.
+    def saveEstimator(self) -> str:
+        """Save the underlying estimator to file.
 
         Returns:
-            str: path to the saved model
+            path (str): path to the saved estimator
         """
         pass
 
