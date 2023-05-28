@@ -10,8 +10,24 @@ readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.7"
 license = { file = "LICENSE" } # Can anybody add the license?
 keywords = ["qsar", "machine learning", "cheminformatics"]
-# authors = [{ name = "Name of the Person", email = "email of the person" }]
-# maintainers = [{ name = "Name of the Person", email = "email of the person" }]
+authors = [{name = "Martin Sicho", email = "m.sicho@lacdr.leidenuniv.nl"},
+           {name = "Helle van den Maagdenberg", email = "h.w.van.den.maagdenberg@lacdr.leidenuniv.nl"},
+           {name = "David Araripe", email = "d.figueiredo.vidal@lacdr.leidenuniv.nl"},
+           {name = "Sohvi Luukkonen", email = "s.luukkonen@lacdr.leidenuniv.nl"},
+           {name = "Olivier Béquignon", email = "o.j.m.bequignon@lacdr.leidenuniv.nl"},
+           {name = "Linde Schoenmaker", email = "l.schoenmaker@lacdr.leidenuniv.nl"}, 
+           {name = "Marina Gorostiola Gonzalez", email = "m.gorostiola.gonzalez@lacdr.leidenuniv.nl"},
+           {name = "Remco van den Broek", email = "r.l.van.den.broek@umail.leidenuniv.nl"},
+           {name = "Gerard van Westen", email = "gerard@lacdr.leidenuniv.nl"}]
+maintainers = [{name = "Martin Sicho", email = "m.sicho@lacdr.leidenuniv.nl"},
+                 {name = "Helle van den Maagdenberg", email = "h.w.van.den.maagdenberg@lacdr.leidenuniv.nl"},
+                 {name = "David Araripe", email = "d.figueiredo.vidal@lacdr.leidenuniv.nl"},
+                 {name = "Sohvi Luukkonen", email = "s.luukkonen@lacdr.leidenuniv.nl"},
+                 {name = "Olivier Béquignon", email = "o.j.m.bequignon@lacdr.leidenuniv.nl"},
+                 {name = "Linde Schoenmaker", email = "l.schoenmaker@lacdr.leidenuniv.nl"}, 
+                 {name = "Marina Gorostiola Gonzalez", email = "m.gorostiola.gonzalez@lacdr.leidenuniv.nl"},
+                 {name = "Remco van den Broek", email = "r.l.van.den.broek@umail.leidenuniv.nl"},
+                 {name = "Gerard van Westen", email = "gerard@lacdr.leidenuniv.nl"}]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Operating System :: OS Independent", # We tested it on Mac and Windows as well?
