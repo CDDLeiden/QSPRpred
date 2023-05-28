@@ -23,6 +23,18 @@ from sklearn.svm import SVC, SVR
 
 
 class QSPRsklearn(QSPRModel):
+    """QSPRModel class for sklearn type models.
+
+    This class is a subclass of the QSPRModel type. It is used to create
+    QSPR models based on sklearn type models.
+    
+    Attributes:
+        estimator (sklearn model): sklearn estimator
+        parameters (dict): dictionary with parameters for the sklearn model
+        task (ModelTasks): task of the model
+        targetProperties (list): list of target properties
+        nTargets (int): number of target properties
+    """
 
     def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None,
                  name: str = None, parameters: dict = None, autoload: bool = True):

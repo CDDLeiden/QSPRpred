@@ -7,6 +7,7 @@ On: 12.05.23, 16:39
 import math
 import os
 import sys
+from copy import deepcopy
 from datetime import datetime
 from inspect import isclass
 from typing import Type, Union
@@ -117,7 +118,7 @@ class QSPRDNN(QSPRModel):
             n_class=self.n_class,
             device=self.device,
             gpus=self.gpus,
-            is_reg=self.task == ModelTasks.REGRESSION
+            is_reg=self.task == ModelTasks.REGRESSION,
         )
         if params:
             estimator.set_params(**params)
@@ -151,13 +152,11 @@ class QSPRDNN(QSPRModel):
         torch.save(self.estimator.state_dict(), path)
         return path
 
-    def fit(self, fromFile=True):
+    def fit(self):
         """Train model on the training data, determine best model using test set, save best model.
 
         ** IMPORTANT: evaluate should be run first, so that the average number of epochs from the cross-validation
                         with early stopping can be used for fitting the model.
-
-        fromFile (bool, optional): load model weights from file if exists. Defaults to True.
         """
         if self.optimal_epochs == -1:
             logger.error('Cannot fit final model without first determining the optimal number of epochs for fitting. \
@@ -169,15 +168,15 @@ class QSPRDNN(QSPRModel):
         X_all = self.data.getFeatures(concat=True).values
         y_all = self.data.getTargetPropertiesValues(concat=True).values
 
-        if self.parameters:
+        if self.parameters is not None:
             self.parameters.update({"n_epochs": self.optimal_epochs})
         else:
             self.parameters = {"n_epochs": self.optimal_epochs}
         self.estimator = self.loadEstimator(self.parameters)
-        train_loader = self.estimator.get_dataloader(X_all, y_all)
 
         logger.info('Model fit started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        self.estimator.fit(train_loader, None, self.outPrefix, patience=-1)
+        logger.info('Logging model fit to: %s.log' % self.outPrefix)
+        self.estimator.fit(X_all, y_all, log=True, log_prefix=self.outPrefix)
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         self.save()
@@ -210,7 +209,6 @@ class QSPRDNN(QSPRModel):
         evalparams = self.parameters if parameters is None else parameters
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetPropertiesValues()
-        indep_loader = self.estimator.get_dataloader(X_ind.values)
         last_save_epochs = 0
 
         # prepare arrays to store molecule ids
@@ -231,17 +229,11 @@ class QSPRDNN(QSPRModel):
             # split cross validation fold train set into train and validation set for early stopping
             X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
                 X_train, y_train, test_size=ES_val_size)
-            train_loader = crossvalmodel.get_dataloader(X_train_fold, y_train_fold)
-            ES_valid_loader = crossvalmodel.get_dataloader(X_val_fold, y_val_fold)
-            valid_loader = crossvalmodel.get_dataloader(X_test)
             last_save_epoch = crossvalmodel.fit(
-                train_loader, ES_valid_loader, '%s_temp_fold%s' %
-                (self.outPrefix, i), self.patience, self.tol)
+                X_train_fold, y_train_fold, X_val_fold, y_val_fold)
             last_save_epochs += last_save_epoch
             logger.info(f'cross validation fold {i}: last save epoch {last_save_epoch}')
-            os.remove('%s_temp_fold%s_weights.pkg' % (self.outPrefix, i))
-            os.remove('%s_temp_fold%s.log' % (self.outPrefix, i))
-            cvs[idx_test] = crossvalmodel.predict(valid_loader)
+            cvs[idx_test] = crossvalmodel.predict(X_test)
 
             fold_counter[idx_test] = i
             cvs_ids[idx_test] = X.index.values[idx_test]
@@ -254,11 +246,8 @@ class QSPRDNN(QSPRModel):
             # number of epochs from the cross-validation
             self.optimal_epochs = int(math.ceil(last_save_epochs / n_folds)) + 1
             indmodel = indmodel.set_params(**{"n_epochs": self.optimal_epochs})
-            train_loader = indmodel.get_dataloader(X.values, y.values)
-            indmodel.fit(train_loader, None, '%s_temp_ind' % self.outPrefix, patience=-1)
-            os.remove('%s_temp_ind_weights.pkg' % self.outPrefix)
-            os.remove('%s_temp_ind.log' % self.outPrefix)
-            inds = indmodel.predict(indep_loader)
+            indmodel.fit(X_train_fold, y_train_fold)
+            inds = indmodel.predict(X_ind)
             inds_ids = X_ind.index.values
 
             # save cross validation predictions and independent test set predictions
@@ -311,7 +300,6 @@ class QSPRDNN(QSPRModel):
             th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
             ES_val_size (float): validation set size for early stopping in CV
         """
-
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         best_score = -np.inf
         best_params = None
@@ -329,15 +317,9 @@ class QSPRDNN(QSPRModel):
                 X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
                     X_train, y_train, test_size=ES_val_size)
 
-                train_loader = crossvalmodel.get_dataloader(X_train_fold, y_train_fold)
-                ES_valid_loader = crossvalmodel.get_dataloader(X_val_fold, y_val_fold)
-                valid_loader = crossvalmodel.get_dataloader(X_test)
-
                 # fit model and predict on validation set
-                crossvalmodel.set_params(**params)
-                crossvalmodel.fit(train_loader, ES_valid_loader, '%s_temp' % self.outPrefix, self.patience, self.tol)
-                os.remove('%s_temp_weights.pkg' % self.outPrefix)
-                y_pred = crossvalmodel.predict(valid_loader)
+                crossvalmodel.fit(X_train_fold, y_train_fold, X_val_fold, y_val_fold)
+                y_pred = crossvalmodel.predict(X_test)
 
                 # tranform predictions to the right format for scorer
                 if self.task.isClassification():
@@ -350,7 +332,6 @@ class QSPRDNN(QSPRModel):
                         y_pred = np.argmax(y_pred, axis=1)
 
                 fold_scores.append(self.score_func(y_test, y_pred))
-            os.remove('%s_temp.log' % self.outPrefix)
 
             # take mean of scores over all folds and update the best parameters if score is better than previous best
             param_score = np.mean(fold_scores)
@@ -473,5 +454,4 @@ class QSPRDNN(QSPRModel):
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
 
-        loader = self.estimator.get_dataloader(X)
-        return self.estimator.predict(loader)
+        return self.estimator.predict(X)

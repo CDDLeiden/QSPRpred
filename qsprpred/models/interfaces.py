@@ -68,13 +68,15 @@ class QSPRModel(ABC):
 
         # load metadata and update parameters accordingly
         self.metaFile = f"{self.outPrefix}_meta.json"
-        try:
-            self.metaInfo = self.readMetadata(self.metaFile)
-        except FileNotFoundError:
-            if not self.data:
-                raise FileNotFoundError(f"Metadata file '{self.metaFile}' not found")
-            else:
+        if autoload:
+            try:
+                self.metaInfo = self.readMetadata(self.metaFile)
+            except FileNotFoundError:
+                if not self.data:
+                    raise FileNotFoundError(f"Metadata file '{self.metaFile}' not found")
                 self.metaInfo = {}
+        else:
+            self.metaInfo = {}
 
         # get parameters from metadata if available
         self.parameters = parameters
