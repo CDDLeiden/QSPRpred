@@ -5,7 +5,7 @@ import os
 import shutil
 import sys
 from abc import ABC, abstractmethod
-from typing import List, Type, Union
+from typing import Callable, List, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -338,25 +338,6 @@ class QSPRModel(ABC):
         """
         pass
 
-    @abstractmethod
-    def gridSearch(self, search_space_gs):
-        """
-        Optimization of hyperparameters using gridSearch.
-
-        Args:
-            search_space_gs (dict): search space for the grid search
-        """
-        pass
-
-    @abstractmethod
-    def bayesOptimization(self, search_space_gs):
-        """Bayesian optimization of hyperparameters using optuna.
-
-        Arguments:
-            search_space_gs (dict): search space for the grid search
-        """
-        pass
-
     @staticmethod
     def loadParamsGrid(fname, optim_type, model_types):
         """Load parameter grids for bayes or grid search parameter optimization from json file.
@@ -576,3 +557,34 @@ class QSPRModel(ABC):
 
         assert scorer.supportsTask(self.task), "Scoring function %s does not support task %s" % (scorer, self.task)
         return scorer
+
+class HyperParameterOptimization(ABC):
+    """Base class for hyperparameter optimization.
+
+    Args:
+        model (QSPRModel): model to optimize
+        score_func (Metric): scoring function to use
+        param_grid (dict): dictionary of parameters to optimize
+        best_score (float): best score found during optimization
+        best_params (dict): best parameters found during optimization
+    """
+
+    def __init__(self, scoring: Union[str, Callable], param_grid: dict):
+        """Initialize the hyperparameter optimization class.
+
+        scoring (Union[str, Callable]): metric name from sklearn.metrics or user-defined scoring function.
+        param_grid (dict): dictionary of parameters to optimize
+        """
+        self.score_func = SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
+        self.param_grid = param_grid
+        self.best_score = -np.inf
+        self.best_params = None
+
+    @ abstractmethod
+    def optimize(self, model: QSPRModel):
+        """Optimize the model hyperparameters.
+
+        Args:
+            model (QSPRModel): model to optimize
+        """
+        pass

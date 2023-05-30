@@ -5,6 +5,7 @@ and one for a keras DNN model. To add more types a model class should be added, 
 is a subclass of the QSPRModel type.
 """
 import os
+from copy import deepcopy
 from datetime import datetime
 from inspect import isclass
 from typing import Type, Union
@@ -223,111 +224,19 @@ class QSPRsklearn(QSPRModel):
             else:
                 return np.transpose([np.argmax(y_pred, axis=1) for y_pred in cvs])
 
-    def gridSearch(self, search_space_gs, n_jobs=1):
-        """Optimization of hyperparameters using gridSearch.
-
-        Arguments:
-            search_space_gs (dict): search space for the grid search
-            scoring (Optional[str, Callable]): scoring function for the grid search.
-            n_jobs (int): number of jobs for hyperparameter optimization
-
-        Note: Default `scoring=None` will use explained_variance for regression,
-        roc_auc_ovr_weighted for multiclass, and roc_auc for binary classification.
-        For a list of the available scoring functions see:
-        https://scikit-learn.org/stable/modules/model_evaluation.html
-        """
-        grid = GridSearchCV(self.estimator, search_space_gs, n_jobs=n_jobs, verbose=1, cv=(
-            (x[4], x[5]) for x in self.data.createFolds()), scoring=self.score_func.scorer, refit=False)
-
-        X, X_ind = self.data.getFeatures()
-        y, y_ind = self.data.getTargetPropertiesValues()
-        fit_set = {'X': X, 'y': y.iloc[:, 0].values.ravel()}
-        logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        grid.fit(**fit_set)
-        logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-        logger.info('Grid search best parameters: %s' % grid.best_params_)
-        self.parameters = grid.best_params_
-        self.estimator = self.estimator.set_params(**grid.best_params_)
-        self.save()
-
-    def bayesOptimization(self, search_space_bs, n_trials, th=0.5, n_jobs=1):
-        """Bayesian optimization of hyperparameters using optuna.
-
-        Args:
-            search_space_gs (dict): search space for the grid search
-            n_trials (int): number of trials for bayes optimization
-            scoring (Optional[str, Callable]): scoring function for the optimization.
-            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
-            n_jobs (int): the number of parallel trials
-
-        Example of search_space_bs for scikit-learn's MLPClassifier:
-        >>> model = QSPRsklearn(base_dir='.', data=dataset,
-        >>>                     alg = MLPClassifier(), alg_name="MLP")
-        >>>  search_space_bs = {
-        >>>    'learning_rate_init': ['float', 1e-5, 1e-3,],
-        >>>    'power_t' : ['discrete_uniform', 0.2, 0.8, 0.1],
-        >>>    'momentum': ['float', 0.0, 1.0],
-        >>> }
-        >>> model.bayesOptimization(search_space_bs=search_space_bs, n_trials=10)
-
-        Avaliable suggestion types:
-        ['categorical', 'discrete_uniform', 'float', 'int', 'loguniform', 'uniform']
-        """
-        print('Bayesian optimization can take a while for some hyperparameter combinations')
-        if n_jobs > 1:
-            logger.warning("At the moment n_jobs>1 not available for bayesoptimization. n_jobs set to 1")
-            n_jobs = 1
-
-        study = optuna.create_study(direction='maximize')
-        logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, search_space_bs), n_trials, n_jobs=n_jobs)
-        logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-        trial = study.best_trial
-
-        logger.info('Bayesian optimization best params: %s' % trial.params)
-        self.parameters = trial.params
-        self.estimator = self.estimator.set_params(**trial.params)
-        self.save()
-
-    def objective(self, trial, search_space_bs):
-        """Objective for bayesian optimization.
-
-        Arguments:
-            trial (int): current trial number
-            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
-            search_space_bs (dict): search space for bayes optimization
-        """
-        bayesian_params = {}
-
-        for key, value in search_space_bs.items():
-            if value[0] == 'categorical':
-                bayesian_params[key] = trial.suggest_categorical(key, value[1])
-            elif value[0] == 'discrete_uniform':
-                bayesian_params[key] = trial.suggest_float(key, value[1], value[2], step=value[3])
-            elif value[0] == 'float':
-                bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
-            elif value[0] == 'int':
-                bayesian_params[key] = trial.suggest_int(key, value[1], value[2])
-            elif value[0] == 'loguniform':
-                bayesian_params[key] = trial.suggest_float(key, value[1], value[2], log=True)
-            elif value[0] == 'uniform':
-                bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
-
-        print(bayesian_params)
-        self.estimator.set_params(**bayesian_params)
-
-        y, y_ind = self.data.getTargetPropertiesValues()
-        score = self.score_func(y, self.evaluate(save=False))
-        return score
-
     def loadEstimator(self, params: dict = None):
-        if self.alg is not None:
-            if params:
-                return self.alg(**params)
+        """Load estimator from alg and params."""
+        if params:
+            if self.parameters is not None:
+                temp_params = deepcopy(self.parameters)
+                temp_params.update(params)
+                return self.alg(**temp_params)
             else:
-                return self.alg()
+                return self.alg(**params)
+        elif self.parameters is not None:
+            return self.alg(**self.parameters)
+        else:
+            return self.alg()
     
     def loadEstimatorFromFile(self, params: dict = None, fallback_load: bool = True):
         """Load estimator from file.

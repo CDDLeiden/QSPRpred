@@ -119,8 +119,16 @@ class QSPRDNN(QSPRModel):
             patience=self.patience,
             tol=self.tol
         )
-        if params:
-            estimator.set_params(**params)
+        
+        if params is not None:
+            if self.parameters is not None:
+                temp_params = deepcopy(self.parameters)
+                temp_params.update(params)
+                estimator.set_params(**temp_params)
+            else:
+                estimator.set_params(**params)
+        elif self.parameters is not None:
+            estimator.set_params(**self.parameters)
 
         return estimator
     
@@ -284,68 +292,7 @@ class QSPRDNN(QSPRModel):
         else:
             return cvs
 
-    def gridSearch(self, search_space_gs, scoring=None, th=0.5, ES_val_size=0.1):
-        """Optimization of hyperparameters using gridSearch.
 
-        Arguments:
-            search_space_gs (dict): search space for the grid search, accepted parameters are:
-                lr (int) ~ learning rate for fitting
-                batch_size (int) ~ batch size for fitting
-                n_epochs (int) ~ max number of epochs
-                neurons_h1 (int) ~ number of neurons in first hidden layer
-                neurons_hx (int) ~ number of neurons in other hidden layers
-                extra_layer (bool) ~ whether to add extra (3rd) hidden layer
-            scoring (Optional[str, Callable]): scoring function for the grid search.
-            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
-            ES_val_size (float): validation set size for early stopping in CV
-        """
-        logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        best_score = -np.inf
-        best_params = None
-        for params in ParameterGrid(search_space_gs):
-            logger.info(params)
-
-            # do 5 fold cross validation and take mean prediction on validation set as score of parameter settings
-            fold_scores = []
-            for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
-                crossvalmodel = self.loadEstimator(params)
-                y_train = y_train.reshape(-1, 1)
-                logger.info('cross validation fold ' + str(i))
-
-                # split cross-validation train set into train and validation set for early stopping
-                X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
-                    X_train, y_train, test_size=ES_val_size)
-
-                # fit model and predict on validation set
-                crossvalmodel.fit(X_train_fold, y_train_fold, X_val_fold, y_val_fold)
-                y_pred = crossvalmodel.predict(X_test)
-
-                # tranform predictions to the right format for scorer
-                if self.task.isClassification():
-                    if self.score_func.needs_proba_to_score:
-                        if self.task == ModelTasks.SINGLECLASS:
-                            # if binary classification, return only the scores for the positive class
-                            y_pred = y_pred[:, 1]
-                    else:
-                        # if score function does not need probabilities, return the class with the highest score
-                        y_pred = np.argmax(y_pred, axis=1)
-
-                fold_scores.append(self.score_func(y_test, y_pred))
-
-            # take mean of scores over all folds and update the best parameters if score is better than previous best
-            param_score = np.mean(fold_scores)
-            if param_score >= best_score:
-                best_params = params
-                best_score = param_score
-
-        logger.info('Grid search best parameters: %s' % best_params)
-        logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-        self.parameters = best_params
-        self.estimator = self.loadEstimator(best_params)
-        self.saveParams(best_params)
-
-    def bayesOptimization(self, search_space_bs, n_trials, scoring=None, th=0.5, n_jobs=1):
         """Bayesian optimization of hyperparameters using optuna.
 
         Arguments:
@@ -412,7 +359,6 @@ class QSPRDNN(QSPRModel):
         score_func = self.get_scoring_func(scoring)
         score = score_func(y, self.evaluate(save=False, parameters=bayesian_params))
         return score
-
 
     def save(self):
         """Save the QSPRDNN model and meta information.

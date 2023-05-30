@@ -15,6 +15,10 @@ from qsprpred.data.data import QSPRDataset
 from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.models import QSPRModel, QSPRsklearn
+from qsprpred.models.param_optimization import (
+    GridSearchOptimization,
+    OptunaOptimization,
+)
 from qsprpred.models.tasks import TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -213,7 +217,9 @@ def QSPR_modelling(args):
                 search_space_gs = grid_params[grid_params[:, 0] ==
                                               model_type, 1][0]
                 log.info(search_space_gs)
-                QSPRmodel.gridSearch(search_space_gs, n_jobs=args.n_jobs)
+                gridsearcher = GridSearchOptimization(scoring = QSPRmodel.score_func, param_grid=search_space_gs)
+                best_params = gridsearcher.optimize(QSPRmodel)
+                QSPRmodel.saveParams(best_params)
             elif args.optimization == 'bayes':
                 search_space_bs = grid_params[grid_params[:, 0] ==
                                               model_type, 1][0]
@@ -228,7 +234,10 @@ def QSPR_modelling(args):
                 elif model_type == "RF":
                     search_space_bs.update(
                         {'criterion': ['categorical', ['gini', 'entropy']]})
-                QSPRmodel.bayesOptimization(search_space_bs, args.n_trials, n_jobs=args.n_jobs)
+                bayesoptimizer = OptunaOptimization(scoring = QSPRmodel.score_func, param_grid=search_space_bs,
+                                                    n_trials=args.n_trials, n_jobs=args.n_jobs)
+                best_params = bayesoptimizer.optimize(QSPRmodel)
+                QSPRmodel.saveParams(best_params)
 
             # initialize models from saved or default parameters
 
