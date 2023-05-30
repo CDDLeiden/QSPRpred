@@ -10,7 +10,7 @@ import sys
 from copy import deepcopy
 from datetime import datetime
 from inspect import isclass
-from typing import Type, Union
+from typing import Optional, Type, Union
 
 import numpy as np
 import optuna
@@ -57,9 +57,9 @@ class QSPRDNN(QSPRModel):
     def __init__(self,
                  base_dir: str,
                  alg: Union[STFullyConnected, Type] = STFullyConnected,
-                 data: QSPRDataset = None,
-                 name: str = None,
-                 parameters: dict = None,
+                 data: Optional[QSPRDataset] = None,
+                 name: Optional[str] = None,
+                 parameters: Optional[dict] = None,
                  autoload: bool = True,
                  device=DEFAULT_DEVICE,
                  gpus=DEFAULT_GPUS,
@@ -79,26 +79,18 @@ class QSPRDNN(QSPRModel):
             patience (int, optional): number of epochs to wait before early stop if no progress on validiation set score. Defaults to 50.
             tol (float, optional): minimum absolute improvement of loss necessary to count as progress on best validation score. Defaults to 0.
         """
-        super().__init__(base_dir, alg, data, name, parameters, autoload=False)
+        self.device = device
+        self.gpus = gpus
+        self.patience = patience
+        self.tol = tol
+        
+        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload)
 
         if self.task.isMultiTask():
             raise NotImplementedError(
                 'Multitask modelling is not implemented for QSPRDNN models.')
 
-        self.device = device
-        self.gpus = gpus
-
-        self.optimal_epochs = -1
-        if self.task.isRegression():
-            self.n_class = 1
-        else:
-            self.n_class = self.data.targetProperties[0].nClasses if self.data else self.metaInfo['n_class']
-        self.n_dim = self.data.X.shape[1] if self.data else self.metaInfo['n_dim']
-        self.patience = patience
-        self.tol = tol
-
-        if autoload:
-            self.estimator = self.loadEstimatorFromFile(self.parameters)
+        self.optimal_epochs = self.parameters['n_epochs'] if self.parameters is not None and 'n_epochs' in self.parameters else -1
 
     def loadEstimator(self, params: dict = None):
         """
@@ -107,11 +99,16 @@ class QSPRDNN(QSPRModel):
         Args:
             alg (Union[Type, object], optional): model class or instance. Defaults to None.
             params (dict, optional): model parameters. Defaults to None.
-            fromFile (bool, optional): load model weights from file if exists. Defaults to True.
 
         Returns:
             model (object): model instance
         """
+        if self.task.isRegression():
+            self.n_class = 1
+        else:
+            self.n_class = self.data.targetProperties[0].nClasses if self.data else self.metaInfo['n_class']
+        self.n_dim = self.data.X.shape[1] if self.data else self.metaInfo['n_dim']
+        
         # initialize model
         estimator = self.alg(
             n_dim=self.n_dim,
@@ -119,6 +116,8 @@ class QSPRDNN(QSPRModel):
             device=self.device,
             gpus=self.gpus,
             is_reg=self.task == ModelTasks.REGRESSION,
+            patience=self.patience,
+            tol=self.tol
         )
         if params:
             estimator.set_params(**params)

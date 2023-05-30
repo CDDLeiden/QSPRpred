@@ -77,6 +77,9 @@ class QSPRModel(ABC):
                 self.metaInfo = {}
         else:
             self.metaInfo = {}
+            if self.data is None:
+                raise ValueError("No data set specified. Make sure you initialized this model with a 'QSPRDataset' "
+                                  "instance to train on. Or if you want to load a model from file, set 'autoload' to True.")
 
         # get parameters from metadata if available
         self.parameters = parameters
