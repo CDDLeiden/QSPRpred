@@ -32,7 +32,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Operating System :: OS Independent", # We tested it on Mac and Windows as well?
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10", # Anybody tested it on 3.11?
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3 :: Only",
