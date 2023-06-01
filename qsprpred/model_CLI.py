@@ -14,11 +14,11 @@ import optuna
 from qsprpred.data.data import QSPRDataset
 from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
-from qsprpred.models.models import QSPRModel, QSPRsklearn
-from qsprpred.models.param_optimization import (
+from qsprpred.models.hyperparam_optimization import (
     GridSearchOptimization,
     OptunaOptimization,
 )
+from qsprpred.models.models import QSPRModel, QSPRsklearn
 from qsprpred.models.tasks import TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor

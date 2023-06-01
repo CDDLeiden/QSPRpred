@@ -10,13 +10,13 @@ import numpy as np
 import pandas as pd
 from parameterized import parameterized
 from qsprpred.data.tests import DataSetsMixIn
-from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.metrics import SklearnMetric
-from qsprpred.models.models import QSPRsklearn
-from qsprpred.models.param_optimization import (
+from qsprpred.models.hyperparam_optimization import (
     GridSearchOptimization,
     OptunaOptimization,
 )
+from qsprpred.models.interfaces import QSPRModel
+from qsprpred.models.metrics import SklearnMetric
+from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks, TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
