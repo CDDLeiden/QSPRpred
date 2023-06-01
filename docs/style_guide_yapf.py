@@ -19,23 +19,26 @@ We try to adhere to PEP 8 (https://peps.python.org/pep-0008/#introduction) and d
 
 # external imports
 import numpy
-from rdkit import Chem
-
 # imports from the package itself
 from qsprpred import __version__
 from qsprpred.data import QSPRDataset
+from rdkit import Chem
+
 #
 # three spaces between imports and code definitions
 #
 module_variable = "String literal"
 
+
 def function():
     """An example function without arguments."""
     # space after docstring
-    example_variable = f"{module_variable + 'x'}_y" # acceptable to use apostrophes here
-    
+    example_variable = f"{module_variable + 'x'}_y"  # acceptable to use apostrophes here
+
     for x in example_variable:
         print(x)
+
+
 #
 # two spaces between definitions in modules
 class ExampleClass:
@@ -47,31 +50,32 @@ class ExampleClass:
         shortName (str): static class attribute
         someAttribute (str): some class attribute set in init
     """
-    
-    shortName = "Some short name." # static members
+
+    shortName = "Some short name."  # static members
+
     # one space between class definitions
     class ClassInClass:
         """Example"""
-        
+
         pass
-    
+
     @staticmethod
     def staticMethod():
         """Example static method."""
-        
+
         pass
-    
+
     @classmethod
     def classMethod(cls):
         """Example class method"""
-        
+
         pass
-    
+
     def __init__(self):
         """The init"""
-        
+
         self.someAttribute = "Value"
-    
+
     def randomExampleMethod(self, arg_one, arg_two):
         """Just a method on a class.
         
@@ -84,8 +88,5 @@ class ExampleClass:
         Returns:
             stuff (str): some stuff
         """
-        
+
         return "stuff"
-        
-    
-    

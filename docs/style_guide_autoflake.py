@@ -19,11 +19,11 @@ We try to adhere to PEP 8 (https://peps.python.org/pep-0008/#introduction) and d
 
 # external imports
 import numpy
-from rdkit import Chem
-
 # imports from the package itself
 from qsprpred import __version__
 from qsprpred.data import QSPRDataset
+from rdkit import Chem
+
 #
 # three spaces between imports and code definitions
 #
@@ -53,19 +53,16 @@ class ExampleClass:
     class ClassInClass:
         """Example"""
         
-        pass
     
     @staticmethod
     def staticMethod():
         """Example static method."""
         
-        pass
     
     @classmethod
     def classMethod(cls):
         """Example class method"""
         
-        pass
     
     def __init__(self):
         """The init"""
