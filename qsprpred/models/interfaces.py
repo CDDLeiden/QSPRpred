@@ -103,7 +103,7 @@ class QSPRModel(ABC):
 
     def __str__(self):
         """Return the name of the model and the underlying class as the identifier."""
-        return f"{self.name} ({self.estimator.__class__.__name__ if self.estimator else self.alg.__class__.__name__ if self.alg else 'None'})"
+        return f"{self.name} ({self.estimator.__class__.__name__ if self.estimator is not None else self.alg.__class__.__name__ if self.alg is not None else 'None'})"
 
     @property
     def targetProperties(self):
