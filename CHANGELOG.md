@@ -9,6 +9,7 @@ From v1.3.1 to v2.0.0
   divided by single and multiclass support (moved to `metrics.py`, see also New Features).
 - Instead of all smiles, only invalid smiles are now printed to the log when they are removed.
 - problems with PaDEL descriptors and fingerprints on Linux were fixed
+- fixed a serialization issue with `DataFrameDescriptorSet` 
 
 ## Changes
 
@@ -28,6 +29,8 @@ From v1.3.1 to v2.0.0
 - The way descriptors are stored in `MoleculeTable` was changed. They now reside in their own `DescriptorTable` instances that are linked to the orginal `MoleculeTable`
   - This change was made to allow several types of descriptors to be calculated and used efficiently (facilitated by a the `DescriptorsCalculators` interface)
   - Unfortunately, this change is not backwards compatible, so previously pickled `MoleculeTable` instances will not work with this version. There were also changes to how models handle multiple descriptor types, which also makes them incompatible with previous versions. However, this can be fixed by modifying the old JSON files as illustrated in commits 7d3f8633 and 6564f024.
+- 'LowVarianceFilter` now includes boundary in the filtered features, e.g. if threshold is 0.1, also features that
+  have a variance of 0.1 will be removed.
 
 ## New Features
 
