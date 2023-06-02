@@ -29,7 +29,7 @@ class lowVarianceFilter(featurefilter):
         data_scaled = MinMaxScaler().fit_transform(X=df.values)
         variance = data_scaled.var(axis=0, ddof=1)
 
-        low_var_cols = np.where(variance < self.th)[0]
+        low_var_cols = np.where(variance <= self.th)[0]
 
         # drop from both the minmax scaled descriptors df and the original dataframe
         df = df.drop(list(colnames[low_var_cols]), axis=1)
