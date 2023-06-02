@@ -133,8 +133,11 @@ class GridSearchOptimization(HyperParameterOptimization):
             # do 5 fold cross validation and take mean prediction on validation set as score of parameter settings
             y, y_ind = model.data.getTargetPropertiesValues()
             score = self.score_func(y, model.evaluate(save=False, parameters=params))
+            logger.info('Score: %s' % score)
             if score > self.best_score:
                 self.best_score = score
                 self.best_params = params
         
+        logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        logger.info('Grid search best params: %s with score: %s' % (self.best_params, self.best_score))
         return self.best_params
