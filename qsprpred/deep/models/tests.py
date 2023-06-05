@@ -12,7 +12,7 @@ from parameterized import parameterized
 from torch.utils.data import DataLoader, TensorDataset
 
 from qsprpred.deep.models.models import QSPRDNN
-from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.deep.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import TargetTasks
 from qsprpred.models.tests import ModelDataSetsMixIn, ModelTestMixIn
 

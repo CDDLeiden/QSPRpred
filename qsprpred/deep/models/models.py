@@ -21,7 +21,7 @@ from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS
 from qsprpred.data.data import QSPRDataset
 from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.deep.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
 
 
