@@ -15,77 +15,80 @@ We try to adhere to PEP 8 (https://peps.python.org/pep-0008/#introduction) and d
     - class method and attribute names (own style: mixedCase, deviation from PEP 8)
     - other variable names (pep 8: lowercase, with words separated by underscores as necessary to improve readability.)
     - function names (pep 8: lowercase, with words separated by underscores as necessary to improve readability.)
+- White spaces
+    - 4 spaces for indentation
+    - two spaces between module member definitions
+    - one space between class member definitions
+- Type hints
+    - use type hint built-in functionality as introduced in Python 3.9 and later (https://docs.python.org/3/library/typing.html)
+
+Example:
+
+    Some of these rules can be enforced automatically with Autoflake by running the following on your files:
+
+        $ black --line-length 88 style_guide.py
+        $ isort --profile black style_guide.py
+
 """
 
-# external imports
 import numpy
+from qsprpred import __version__
+from qsprpred.data.data import QSPRDataset
 from rdkit import Chem
 
-# imports from the package itself
-from qsprpred import __version__
-from qsprpred.data import QSPRDataset
-#
-# three spaces between imports and code definitions
-#
 module_variable = "String literal"
+
 
 def function():
     """An example function without arguments."""
     # space after docstring
-    example_variable = f"{module_variable + 'x'}_y" # acceptable to use apostrophes here
-    
+    example_variable = (
+        f"{module_variable + 'x'}_y"  # acceptable to use apostrophes here
+    )
+
     for x in example_variable:
         print(x)
-#
-# two spaces between definitions in modules
+
+
 class ExampleClass:
     """Simple example class.
-    
+
     This class shows style patterns for classes. If a class has static/class members they should be at the top followed by built-in overrides like __init__ or __contains__. All instance specific methods follow after.
-    
+
     Attributes:
         shortName (str): static class attribute
         someAttribute (str): some class attribute set in init
     """
-    
-    shortName = "Some short name." # static members
-    # one space between class definitions
+
+    shortName = "Some short name."  # static members
+
     class ClassInClass:
         """Example"""
-        
-        pass
-    
+
     @staticmethod
     def staticMethod():
         """Example static method."""
-        
-        pass
-    
+
     @classmethod
     def classMethod(cls):
         """Example class method"""
-        
-        pass
-    
+
     def __init__(self):
         """The init"""
-        
+
         self.someAttribute = "Value"
-    
+
     def randomExampleMethod(self, arg_one, arg_two):
         """Just a method on a class.
-        
+
         Nothing to see here.
-        
+
         Args:
             arg_one (str): first argument
             arg_two (str): second argument
-        
+
         Returns:
             stuff (str): some stuff
         """
-        
+
         return "stuff"
-        
-    
-    
