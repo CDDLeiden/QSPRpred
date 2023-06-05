@@ -3,7 +3,7 @@
 We try to adhere to PEP 8 (https://peps.python.org/pep-0008/#introduction) and diverge
 where we think is appropriate. Summary of the implemented and enforced rules:
 
-- Maximum line length (pep8: 79 characters, but we use 88). Also enforced for docstrings.
+- Maximum line length (pep8: 79 characters, but we use 88). Docstrings are included.
 - Use double quotes for strings.
 - Imports inside the package should be relative rather than absolute.
 - Comments/documentation
