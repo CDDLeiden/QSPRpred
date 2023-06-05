@@ -46,7 +46,7 @@ from qsprpred import __version__
 from rdkit import Chem
 
 from .data.data import (  # use relative imports for modules inside the package
-    QSPRDataset, # enforece line length
+    QSPRDataset,
 )
 
 module_variable = "String literal"
