@@ -35,8 +35,11 @@ Example:
 
 import numpy
 from qsprpred import __version__
-from .data.data import QSPRDataset # use relative imports for modules inside the package
 from rdkit import Chem
+
+from .data.data import (  # use relative imports for modules inside the package
+    QSPRDataset, # enforece line length
+)
 
 module_variable = "String literal"
 
@@ -85,7 +88,9 @@ class ExampleClass:
 
         self.someAttribute = "Value"
 
-    def randomExampleMethod(self, arg_one : dict[str , float], arg_two : list[str | float]) -> str:
+    def randomExampleMethod(
+        self, arg_one: dict[str, float], arg_two: list[str | float]
+    ) -> str:
         """Just a method on a class.
 
         Nothing to see here.
