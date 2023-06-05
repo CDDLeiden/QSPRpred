@@ -41,7 +41,7 @@ module_variable = "String literal"
 
 def function():
     """An example function without arguments."""
-    # space after docstring
+
     example_variable = (
         f"{module_variable + 'x'}_y"  # acceptable to use apostrophes here
     )
