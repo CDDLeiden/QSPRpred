@@ -4,6 +4,7 @@ We try to adhere to PEP 8 (https://peps.python.org/pep-0008/#introduction) and d
 
 - Maximum line length (pep8: 79 characters, but we use 88).
 - Use double quotes for strings.
+- Imports inside the package should be relative rather than absolute.
 - Comments/documentation
     - Write docstrings for all (not just public!) modules, functions, classes, and methods.
     - Use the Google docstring format (https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
@@ -19,6 +20,7 @@ We try to adhere to PEP 8 (https://peps.python.org/pep-0008/#introduction) and d
     - 4 spaces for indentation
     - two spaces between module member definitions
     - one space between class member definitions
+    - no spaces between code or comments in function and method bodies
 - Type hints
     - use type hint built-in functionality as introduced in Python 3.9 and later (https://docs.python.org/3/library/typing.html)
 
@@ -33,20 +35,26 @@ Example:
 
 import numpy
 from qsprpred import __version__
-from qsprpred.data.data import QSPRDataset
+from .data.data import QSPRDataset # use relative imports for modules inside the package
 from rdkit import Chem
 
 module_variable = "String literal"
 
 
 def function():
-    """An example function without arguments."""
+    """An example function without arguments. Note the use of comments to divide the function into logical blocks, not spaces."""
 
+    # example for cycle and variable definition
     example_variable = (
         f"{module_variable + 'x'}_y"  # acceptable to use apostrophes here
     )
     for x in example_variable:
         print(x)
+    # another code block that just defines some variables and prints them
+    a = 1
+    b = 2
+    c = 3
+    print(a, b, c)
 
 
 class ExampleClass:
