@@ -137,7 +137,6 @@ be combined. For more control over the descriptorcalculator settings use the pyt
 ..  code-block::
 
     # With Morgan, RDkit, Mordred, Mold2, PaDEL and DrugEx descriptors
-        ### note Mold2 does not work!!!!!!!!!
         python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan RDkit Mordred Mold2 PaDEL DrugEx
 
 Feature filtering

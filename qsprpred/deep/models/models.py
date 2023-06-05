@@ -9,20 +9,21 @@ import os
 import sys
 from copy import deepcopy
 from datetime import datetime
-from inspect import isclass
 from typing import Optional, Type, Union
 
 import numpy as np
 import optuna
 import pandas as pd
 import torch
+
+from qsprpred.deep import SSPACE
 from qsprpred.data.data import QSPRDataset
 from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS
 from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.deep.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
-from sklearn.model_selection import ParameterGrid, train_test_split
+from sklearn.model_selection import train_test_split
 
 
 class QSPRDNN(QSPRModel):
@@ -91,6 +92,10 @@ class QSPRDNN(QSPRModel):
                 'Multitask modelling is not implemented for QSPRDNN models.')
 
         self.optimal_epochs = self.parameters['n_epochs'] if self.parameters is not None and 'n_epochs' in self.parameters else -1
+
+    @classmethod
+    def getDefaultParamsGrid(cls):
+        return SSPACE
 
     def loadEstimator(self, params: dict = None):
         """

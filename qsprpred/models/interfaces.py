@@ -338,8 +338,12 @@ class QSPRModel(ABC):
         """
         pass
 
-    @staticmethod
-    def loadParamsGrid(fname, optim_type, model_types):
+    @classmethod
+    def getDefaultParamsGrid(cls):
+        return SSPACE
+
+    @classmethod
+    def loadParamsGrid(cls, fname, optim_type, model_types):
         """Load parameter grids for bayes or grid search parameter optimization from json file.
 
         Arguments:
@@ -356,7 +360,7 @@ class QSPRModel(ABC):
                 logger.error("Search space file (%s) not found" % fname)
                 sys.exit()
         else:
-            with open(SSPACE) as json_file:
+            with open(cls.getDefaultParamsGrid()) as json_file:
                 optim_params = np.array(json.load(json_file), dtype=object)
 
         # select either grid or bayes optimization parameters from param array
