@@ -14,14 +14,25 @@ import pandas as pd
 from parameterized import parameterized
 from qsprpred.data.data import QSPRDataset, TargetProperty
 from qsprpred.data.utils.datafilters import CategoryFilter
-from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
-from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator, DescriptorsCalculator, CustomDescriptorsCalculator
+from qsprpred.data.utils.datasplitters import (
+    ManualSplit,
+    randomsplit,
+    scaffoldsplit,
+    temporalsplit,
+)
+from qsprpred.data.utils.descriptorcalculator import (
+    CustomDescriptorsCalculator,
+    DescriptorsCalculator,
+    MoleculeDescriptorsCalculator,
+)
 from qsprpred.data.utils.descriptorsets import (
+    DataFrameDescriptorSet,
+    DescriptorSet,
     DrugExPhyschem,
     FingerprintSet,
     PredictorDesc,
     TanimotoDistances,
-    rdkit_descs, DescriptorSet, DataFrameDescriptorSet,
+    rdkit_descs,
 )
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import (
@@ -677,7 +688,18 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     The tests here should be used to check for all their specific parameters and edge cases.
     """
+    def test_manualsplit(self):
+        """Test the manual split function, where the split is done manually."""
+        dataset = self.create_large_dataset()
 
+        # Add extra column to the data frame to use for splitting
+        dataset.df["split"] = "train"
+        dataset.df.loc[dataset.df.sample(frac=0.1).index, "split"] = "test"
+        
+        split = ManualSplit(dataset.df["split"], "train", "test")
+        dataset.prepareDataset(split=split)
+        self.validate_split(dataset)
+    
     def test_randomsplit(self):
         """Test the random split function, where the split is done randomly."""
         dataset = self.create_large_dataset()

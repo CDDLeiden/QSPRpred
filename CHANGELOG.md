@@ -32,12 +32,11 @@ From v1.3.1 to v2.0.0
 - The way descriptors are stored in `MoleculeTable` was changed. They now reside in their own `DescriptorTable` instances that are linked to the orginal `MoleculeTable`
   - This change was made to allow several types of descriptors to be calculated and used efficiently (facilitated by a the `DescriptorsCalculators` interface)
   - Unfortunately, this change is not backwards compatible, so previously pickled `MoleculeTable` instances will not work with this version. There were also changes to how models handle multiple descriptor types, which also makes them incompatible with previous versions. However, this can be fixed by modifying the old JSON files as illustrated in commits 7d3f8633 and 6564f024.
->>>>>>> CHANGELOG.md
 - 'LowVarianceFilter` now includes boundary in the filtered features, e.g. if threshold is 0.1, also features that
   have a variance of 0.1 will be removed.
 
 ## New Features
-
+- New feature split `ManualSplit` for splitting data by a user-defined column
 - The index of the `MoleculeTable` can now be used to relate cross-validation and test outputs to the original molecules. Therefore, the index is now also saved in the model training outputs.
 - the `Papyrus.getData()` method now accepts `activity_types` parameter to select a list of activity types to get.
 - Added the `checkMols` method to `MoleculeTable` to use for indication of invalid molecules in the data.
