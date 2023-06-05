@@ -395,7 +395,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         for file in files:
             path = f"{self.storeDir}/{file}"
             if os.path.exists(path):
-                data = json.load(open(path, "r", encoding="utf-8"))
+                with open(path, "r", encoding="utf-8") as fh: # file handle
+                    data = json.load(fh)
                 if not "calculator" in data:
                     calc_cls = "qsprpred.data.utils.descriptorcalculator.MoleculeDescriptorsCalculator"
                 else:
