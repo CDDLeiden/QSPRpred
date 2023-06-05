@@ -78,14 +78,14 @@ class ExampleClass:
 
         self.someAttribute = "Value"
 
-    def randomExampleMethod(self, arg_one, arg_two):
+    def randomExampleMethod(self, arg_one : dict[str , float], arg_two : list[str | float]) -> str:
         """Just a method on a class.
 
         Nothing to see here.
 
         Args:
-            arg_one (str): first argument
-            arg_two (str): second argument
+            arg_one (str): first argument, a dictionary with string keys and float values
+            arg_two (str): second argument, a list of strings or floats
 
         Returns:
             stuff (str): some stuff
