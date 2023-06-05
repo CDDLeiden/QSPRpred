@@ -45,7 +45,6 @@ def function():
     example_variable = (
         f"{module_variable + 'x'}_y"  # acceptable to use apostrophes here
     )
-
     for x in example_variable:
         print(x)
 
