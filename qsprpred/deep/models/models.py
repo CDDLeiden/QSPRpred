@@ -297,38 +297,6 @@ class QSPRDNN(QSPRModel):
         else:
             return cvs
 
-
-        """Bayesian optimization of hyperparameters using optuna.
-
-        Arguments:
-            search_space_gs (dict): search space for the grid search
-            n_trials (int): number of trials for bayes optimization
-            scoring (Optional[str, Callable]): scoring function for the optimization.
-            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
-            n_jobs (int): the number of parallel trials
-        """
-        print('Bayesian optimization can take a while for some hyperparameter combinations')
-        # TODO add timeout function
-
-        self.estimator = self.loadEstimator()
-
-        if n_jobs > 1:
-            logger.warning("At the moment n_jobs>1 not available for bayesoptimization. n_jobs set to 1")
-            n_jobs = 1
-
-        study = optuna.create_study(direction='maximize')
-        logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, scoring, th, search_space_bs), n_trials, n_jobs=n_jobs)
-        logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-        trial = study.best_trial
-
-        logger.info('Bayesian optimization best params: %s' % trial.params)
-
-        self.parameters = trial.params
-        self.estimator = self.loadEstimator(self.parameters)
-        self.saveParams(trial.params)
-
     def objective(self, trial, scoring, th, search_space_bs):
         """Objective for bayesian optimization.
 
