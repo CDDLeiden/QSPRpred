@@ -38,8 +38,9 @@ class QSPRsklearn(QSPRModel):
     """
 
     def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None,
-                 name: str = None, parameters: dict = None, autoload: bool = True):
-        super().__init__(base_dir, alg, data, name, parameters, autoload)
+                 name: str = None, parameters: dict = None, autoload: bool = True,
+                 scoring=None):
+        super().__init__(base_dir, alg, data, name, parameters, autoload, scoring)
 
         if self.task == ModelTasks.MULTITASK_MIXED:
             raise ValueError(
