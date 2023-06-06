@@ -9,8 +9,6 @@ from unittest import TestCase
 
 import torch
 from parameterized import parameterized
-from torch.utils.data import DataLoader, TensorDataset
-
 from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.deep.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import TargetTasks
@@ -21,6 +19,7 @@ GPUS = [idx for idx in range(torch.cuda.device_count())]
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRDNN class."""
+    
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
 
     @property
@@ -40,25 +39,6 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             patience=3,
             tol=0.02
         )
-
-    def prep_testdata(self, name, target_props):
-        """Prepare test dataset."""
-        data = self.create_large_dataset(name=name, target_props=target_props,
-                                         preparation_settings=self.get_default_prep())
-        data.save()
-        # prepare data for torch DNN
-        trainloader = DataLoader(
-            TensorDataset(
-                torch.Tensor(
-                    data.X.values), torch.Tensor(
-                    data.y.values)), batch_size=100)
-        testloader = DataLoader(
-            TensorDataset(
-                torch.Tensor(
-                    data.X_ind.values), torch.Tensor(
-                    data.y_ind.values)), batch_size=100)
-
-        return data.X.shape[1], trainloader, testloader
 
     # @parameterized.expand([
     #     (f"{alg_name}_{task}", task, alg_name, alg, th)

@@ -12,6 +12,10 @@ From v1.3.1 to v2.0.0
 - fixed a serialization issue with `DataFrameDescriptorSet` 
 
 ## Changes
+
+- Hyperparameter optimization moved to a separate class from `QSPRModel.bayesOptimization` and `QSPRModel.gridSearch` to `OptunaOptimization` and `GridSearchOptimization` in the new module `qsprpred.models.param_optimzation` with a base clase `HyperParameterOptimization` in `qsprpred.models.interfaces`.
+- ⚠️ Important! ⚠️ `QSPRModel` attribute `model` now called `estimator`, which is always an instance of `alg`, while `alg` may no longer be an instance but only a Type.
+- Converting input data for `qsprpred.models.neural_network.Base` to dataloaders now executed in the `fit` and `predict` functions instead of in the `qspred.deep.models.QSPRDNN` class.
 - `MoleculeTable` now uses a custom index. When a `MoleculeTable` is created a new column (`QSPRID`) is added (overwritten if already present), which is then used as the index of the underlying data frame.
   - It is possible to override this with a custom index by passing `index_cols` to the `MoleculeTable` constructor. These columns will be then used as index or a multi-index if more than one column is passed.
   - Due to this change, `scaffoldsplit` now uses these IDs instead of unreliable SMILES strings (see documentation for the new API). 
@@ -21,7 +25,7 @@ From v1.3.1 to v2.0.0
   init.
 - A `fill_value` argument was also added to the `predict_CLI` script to allow for filling missing values in the
   prediction data set as well.
-- ⚠️ Beware! ⚠️ `setup.py` and `setup.cfg` were substituted with `pyproject.toml` and `MANIFEST.in`. A lighter version of the package is now the default installaton option!!!
+- ⚠️ Important! ⚠️ `setup.py` and `setup.cfg` were substituted with `pyproject.toml` and `MANIFEST.in`. A lighter version of the package is now the default installation option!!!
   - Installation options for the optional dependencies are described in README.md
   - CI scripts were modified to test the package on the full version. See changes in `.gitlab-ci.yml`.
   - Features using the extra dependencies were moved to `qsprpred.extra` and `qsprpred.deep` subpackages. The structure of the subpackages is the same as of the main package, so you just need to remember to use `qsprpred.extra` or `qsprpred.deep` instead of just `qsprpred` in your imports if you were using these features from the main package before. 

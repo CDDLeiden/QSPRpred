@@ -27,20 +27,27 @@ class Base(nn.Module):
         n_epochs=1000,
         lr=1e-4,
         batch_size=256,
+        patience=50,
+        tol=0
     ):
         """Initialize the DNN model.
 
         Args:
             device (torch.device): device to run the model on
             gpus (list): list of gpus to run the model on
-            n_epochs (int): number of epochs to train the model
+            n_epochs (int): (maximum) number of epochs to train the model
             lr (float): learning rate
             batch_size (int): batch size
+            patience (int): number of epochs to wait before early stop if no progress on validation set score, 
+                            if patience = -1, always train to n_epochs
+            tol (float): minimum absolute improvement of loss necessary to count as progress on best validation score
         """
         super().__init__()
         self.n_epochs = n_epochs
         self.lr = lr
         self.batch_size = batch_size
+        self.patience = patience
+        self.tol = tol
         if device.type == "cuda":
             self.device = torch.device(f"cuda:{gpus[0]}")
         else:
@@ -51,27 +58,29 @@ class Base(nn.Module):
                 f"At the moment multiple gpus is not possible: running DNN on gpu: {gpus[0]}."
             )
 
-    def fit(self, train_loader, valid_loader, out, patience=50, tol=0):
+    def fit(self, X_train, y_train, X_valid=None, y_valid=None, log=False, log_prefix=None):
         """Training the DNN model.
 
         Training is, similar to the scikit-learn or Keras style.
         It saves the optimal value of parameters.
 
         Args:
-            train_loader (DataLoadesr): Data loader for training set,
-                including m X n target FloatTensor and m X l label FloatTensor
-                (m is the No. of sample, n is the No. of features, l is the
-                No. of classes or tasks)
-            valid_loader (DataLoader): Data loader for validation set.
-                The data structure is as same as loader_train.
-            out (str): the file path for the model file (suffix with '.pkg')
-                and log file (suffix with '.log').
-            patience (int): number of epochs to wait before early stop if no progress on
-                validation set score, if patience = -1,
-                always train to n_epochs
-            tol (float): minimum absolute improvement of loss necessary to count as
-                progress on best validation score
+            X_train (np.ndarray or pd.Dataframe): training data (m X n), m is the No. of samples, n is the No. of features
+            y_train (np.ndarray or pd.Dataframe): training target (m X l), m is the No. of samples, l is the No. of classes or tasks
+            X_valid (np.ndarray or pd.Dataframe): validation data (m X n), m is the No. of samples, n is the No. of features
+            y_valid (np.ndarray or pd.Dataframe): validation target (m X l), m is the No. of samples, l is the No. of classes or tasks
+            log (bool): whether to log the training process to {self.log_prefix}.log
+            log_prefix (str): prefix for the log file if log is True
         """
+        train_loader = self.get_dataloader(X_train, y_train)
+
+        # if validation data is provided, use early stopping
+        if X_valid is not None and y_valid is not None:
+            valid_loader = self.get_dataloader(X_valid, y_valid)
+            patience = self.patience
+        else:
+            patience = -1
+        
         if "optim" in self.__dict__:
             optimizer = self.optim
         else:
@@ -80,9 +89,10 @@ class Base(nn.Module):
         # record the minimum loss value based on the calculation of the
         # loss function by the current epoch
         best_loss = np.inf
-        # record the epoch when optimal model is saved.
-        last_save = 0
-        log = open(out + ".log", "a")
+        best_weights = self.state_dict() 
+        last_save = 0 # record the epoch when optimal model is saved.
+        if log:
+            log_file = open(log_prefix + ".log", "a")
         for epoch in range(self.n_epochs):
             t0 = time.time()
             # decrease learning rate over the epochs
@@ -102,12 +112,6 @@ class Base(nn.Module):
                 else:
                     yb, y_ = yb[ix], y_[ix]
 
-                # weighting in original drugex v2 code, but was specific to data there
-                # wb = torch.Tensor(yb.size()).to(utils.dev)
-                # wb[yb == 3.99] = 0.1
-                # wb[yb != 3.99] = 1
-                # loss += self.criterion(y_ * wb, yb * wb).item()
-
                 # loss function calculation based on predicted tensor and label tensor
                 if self.n_class > 1:
                     loss = self.criterion(y_, yb.long())
@@ -117,39 +121,34 @@ class Base(nn.Module):
                 loss.backward()
                 optimizer.step()
             if patience == -1:
-                print(
-                    "[Epoch: %d/%d] %.1fs loss_train: %f"
-                    % (epoch, self.n_epochs, time.time() - t0, loss.item()),
-                    file=log,
-                )
+                if log:
+                    print("[Epoch: %d/%d] %.1fs loss_train: %f" % (epoch, self.n_epochs, time.time() - t0, loss.item()),
+                        file=log_file)
             else:
                 # loss value on validation set based on which optimal model is saved.
                 loss_valid = self.evaluate(valid_loader)
-                print(
-                    "[Epoch: %d/%d] %.1fs loss_train: %f loss_valid: %f"
-                    % (epoch, self.n_epochs, time.time() - t0, loss.item(), loss_valid),
-                    file=log,
-                )
-                if loss_valid + tol < best_loss:
-                    torch.save(self.state_dict(), out + "_weights.pkg")
+                if log:
                     print(
-                        "[Performance] loss_valid is improved from %f to %f, Save model to %s"
-                        % (best_loss, loss_valid, out + "_weights.pkg"),
-                        file=log,
-                    )
+                        "[Epoch: %d/%d] %.1fs loss_train: %f loss_valid: %f"
+                        % (epoch, self.n_epochs, time.time() - t0, loss.item(), loss_valid), file=log_file)
+                if loss_valid + self.tol < best_loss:
+                    best_weights = self.state_dict()
+                    if log:
+                        print("[Performance] loss_valid is improved from %f to %f"
+                            % (best_loss, loss_valid), file=log_file)
                     best_loss = loss_valid
                     last_save = epoch
                 else:
-                    print("[Performance] loss_valid is not improved.", file=log)
-                    # early stopping, if the performance on validation is not improved
-                    # in 100 epochs. The model training will stop in order to save time.
-                    if epoch - last_save > patience:
+                    if log:
+                        print("[Performance] loss_valid is not improved.", file=log_file)
+                    if epoch - last_save > patience: # early stop
                         break
         if patience == -1:
-            torch.save(self.state_dict(), out + "_weights.pkg")
-        print("Neural net fitting completed.", file=log)
-        log.close()
-        self.load_state_dict(torch.load(out + "_weights.pkg"))
+            best_weights = self.state_dict()
+        if log:
+            print("Neural net fitting completed.", file=log_file)
+            log_file.close()
+        self.load_state_dict(best_weights)
         return last_save
 
     def evaluate(self, loader):
@@ -190,19 +189,19 @@ class Base(nn.Module):
         loss = loss / len(loader)
         return loss
 
-    def predict(self, loader):
+    def predict(self, X_test):
         """Predicting the probability of each sample in the given dataset.
 
         Args:
-            loader (torch.util.data.DataLoader): data loader for test set,
-                only including m X n target FloatTensor
-                (m is the No. of sample, n is the No. of features)
+            X_test (ndarray): m X n target array (m is the No. of sample,
+                              n is the No. of features)
 
         Returns:
             score (ndarray): probability of each sample in the given dataset,
                 it is a m X l FloatTensor (m is the No. of sample, l is the
                 No. of classes or tasks.)
         """
+        loader = self.get_dataloader(X_test)
         score = []
         for Xb in loader:
             Xb = Xb.to(self.device)
@@ -213,8 +212,10 @@ class Base(nn.Module):
 
     @classmethod
     def _get_param_names(cls):
-        # function copy from sklearn.base_estimator
-        # get the class parameter names
+        """Get the class parameter names.
+
+        Function copied from sklearn.base_estimator!
+        """
         init_signature = inspect.signature(cls.__init__)
         parameters = [
             p
@@ -291,6 +292,12 @@ class Base(nn.Module):
         X (numpy 2d array): input dataset
         y (numpy 1d column vector): output data
         """
+        # if pandas dataframe is provided, convert it to numpy array
+        if hasattr(X, "values"):
+            X = X.values
+        if y is not None and hasattr(y, "values"):
+            y = y.values
+        
         if y is None:
             tensordataset = torch.Tensor(X)
         else:
@@ -307,7 +314,7 @@ class STFullyConnected(Base):
         n_dim (int): the No. of columns (features) for input tensor
         n_class (int): the No. of columns (classes) for output tensor.
         is_reg (bool, optional): Regression model (True) or Classification model (False)
-        n_eopchs (int): max number of epochs
+        n_epochs (int): max number of epochs
         lr (float): neural net learning rate
         neurons_h1 (int): number of neurons in first hidden layer
         neurons_hx (int): number of neurons in other hidden layers
@@ -323,6 +330,8 @@ class STFullyConnected(Base):
         n_epochs=1000,
         lr=None,
         batch_size=256,
+        patience=50,
+        tol=0,
         is_reg=True,
         neurons_h1=4000,
         neurons_hx=1000,
@@ -339,6 +348,8 @@ class STFullyConnected(Base):
             n_epochs (int): max number of epochs
             lr (float): neural net learning rate
             batch_size (int): batch size
+            patience (int): number of epochs to wait before early stop if no progress on validation set score, if patience = -1, always train to n_epochs
+            tol (float): minimum absolute improvement of loss necessary to count as progress on best validation score
             is_reg (bool, optional): Regression model (True) or Classification model (False)
             neurons_h1 (int): number of neurons in first hidden layer
             neurons_hx (int): number of neurons in other hidden layers
@@ -348,7 +359,7 @@ class STFullyConnected(Base):
         if not lr:
             lr = 1e-4 if is_reg else 1e-5
         super().__init__(
-            device=device, gpus=gpus, n_epochs=n_epochs, lr=lr, batch_size=batch_size
+            device=device, gpus=gpus, n_epochs=n_epochs, lr=lr, batch_size=batch_size, patience=patience, tol=tol
         )
         self.n_dim = n_dim
         self.is_reg = is_reg
@@ -413,95 +424,3 @@ class STFullyConnected(Base):
         else:
             y = self.activation(self.fc3(y))
         return y
-
-
-# TODO: implement multi-task DNN
-# class MTFullyConnected(Base):
-#     """Multi-task DNN classification/regression model. It contains four fully connected layers
-#     between which are dropout layer for robustness.
-#     Arguments:
-#         n_dim (int): the No. of columns (features) for input tensor
-#         n_task (int): the No. of columns (tasks) for output tensor.
-#         is_reg (bool, optional): Regression model (True) or Classification model (False)
-#     """
-
-#     def __init__(self, n_dim, n_task, is_reg=False):
-#         super(MTFullyConnected, self).__init__()
-#         self.n_task = n_task
-#         self.dropout = nn.Dropout(0.25)
-#         self.fc0 = nn.Linear(n_dim, 4000)
-#         self.fc1 = nn.Linear(4000, 2000)
-#         self.fc2 = nn.Linear(2000, 1000)
-#         self.output = nn.Linear(1000, n_task)
-#         self.is_reg = is_reg
-#         if is_reg:
-#             # loss function for regression
-#             self.criterion = nn.MSELoss()
-#         else:
-#             # loss function and activation function of output layer for multiple classification
-#             self.criterion = nn.BCELoss()
-#             self.activation = nn.Sigmoid()
-#         self.to(self.dev)
-
-#     def forward(self, X, istrain=False):
-#         """Invoke the class directly as a function
-#         Arguments:
-#             X (FloatTensor): m X n FloatTensor, m is the No. of samples, n is the No. of features.
-#             istrain (bool, optional): is it invoked during training process (True)
-#                 or just for prediction (False)
-#         Return:
-#             y (FloatTensor): m X l FloatTensor, m is the No. of samples, n is the No. of tasks
-#         """
-#         y = F.relu(self.fc0(X))
-#         if istrain:
-#             y = self.dropout(y)
-#         y = F.relu(self.fc1(y))
-#         if istrain:
-#             y = self.dropout(y)
-#         y = F.relu(self.fc2(y))
-#         if istrain:
-#             y = self.dropout(y)
-#         if self.is_reg:
-#             y = self.output(y)
-#         else:
-#             y = self.activation(self.output(y))
-#         return y
-
-# TODO: Is this model useful?
-# class Discriminator(Base):
-#     """A CNN for text classification
-#     architecture: Embedding >> Convolution >> Max-pooling >> Softmax
-#     """
-
-#     def __init__(self, vocab_size, emb_dim, filter_sizes, num_filters, dropout=0.25):
-#         super(Discriminator, self).__init__()
-#         self.emb = nn.Embedding(vocab_size, emb_dim)
-#         self.convs = nn.ModuleList([
-#             nn.Conv2d(1, n, (f, emb_dim)) for (n, f) in zip(num_filters, filter_sizes)
-#         ])
-#         self.highway = nn.Linear(sum(num_filters), sum(num_filters))
-#         self.dropout = nn.Dropout(p=dropout)
-#         self.lin = nn.Linear(sum(num_filters), 1)
-#         self.sigmoid = nn.Sigmoid()
-#         self.init_parameters()
-
-#         self.to(self.dev)
-#         self.optim = torch.optim.Adam(filter(lambda p: p.requires_grad, self.parameters()))
-
-#     def forward(self, x):
-#         """
-#         Args:
-#             x: (batch_size * seq_len)
-#         """
-#         emb = self.emb(x).unsqueeze(1)  # batch_size * 1 * seq_len * emb_dim
-#         convs = [F.relu(conv(emb)).squeeze(3) for conv in self.convs]  # [batch_size * num_filter * length]
-#         pools = [F.max_pool1d(conv, conv.size(2)).squeeze(2) for conv in convs]  # [batch_size * num_filter]
-#         pred = torch.cat(pools, 1)  # batch_size * num_filters_sum
-#         highway = self.highway(pred)
-#         pred = highway.sigmoid() * F.relu(highway) + (1. - highway.sigmoid()) * pred
-#         pred = self.sigmoid(self.lin(self.dropout(pred)))
-#         return pred
-
-#     def init_parameters(self):
-#         for param in self.parameters():
-#             param.data.uniform_(-0.05, 0.05)

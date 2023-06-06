@@ -7,22 +7,23 @@ On: 12.05.23, 16:39
 import math
 import os
 import sys
+from copy import deepcopy
 from datetime import datetime
-from inspect import isclass
-from typing import Union, Type
+from typing import Optional, Type, Union
 
 import numpy as np
 import optuna
 import pandas as pd
 import torch
-from sklearn.model_selection import train_test_split, ParameterGrid
 
-from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
+from qsprpred.deep import SSPACE
 from qsprpred.data.data import QSPRDataset
+from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS
 from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
 from qsprpred.deep.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
+from sklearn.model_selection import train_test_split
 
 
 class QSPRDNN(QSPRModel):
@@ -57,10 +58,11 @@ class QSPRDNN(QSPRModel):
     def __init__(self,
                  base_dir: str,
                  alg: Union[STFullyConnected, Type] = STFullyConnected,
-                 data: QSPRDataset = None,
-                 name: str = None,
-                 parameters: dict = None,
+                 data: Optional[QSPRDataset] = None,
+                 name: Optional[str] = None,
+                 parameters: Optional[dict] = None,
                  autoload: bool = True,
+                 scoring: Optional[Union[str, callable]] = None,
                  device=DEFAULT_DEVICE,
                  gpus=DEFAULT_GPUS,
                  patience=50, tol=0
@@ -74,111 +76,101 @@ class QSPRDNN(QSPRModel):
             name (str, optional): name of the model. Defaults to None.
             parameters (dict, optional): dictionary of algorithm specific parameters. Defaults to None.
             autoload (bool, optional): whether to load the model from file or not. Defaults to True.
+            scoring (Optional[str, callable], optional): scoring function for the model. Defaults to None, in which case the default scoring function for the task is used.
             device (cuda device, optional): cuda device. Defaults to DEFAULT_DEVICE.
             gpu (int/ list of ints, optional): gpu number(s) to use for model fitting. Defaults to DEFAULT_GPUS.
             patience (int, optional): number of epochs to wait before early stop if no progress on validiation set score. Defaults to 50.
             tol (float, optional): minimum absolute improvement of loss necessary to count as progress on best validation score. Defaults to 0.
         """
-        super().__init__(base_dir, alg, data, name, parameters, autoload=False)
+        self.device = device
+        self.gpus = gpus
+        self.patience = patience
+        self.tol = tol
+        
+        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload, scoring=scoring)
 
         if self.task.isMultiTask():
             raise NotImplementedError(
                 'Multitask modelling is not implemented for QSPRDNN models.')
 
-        self.alg = alg
-        self.device = device
-        self.gpus = gpus
-
-        self.optimal_epochs = -1
-        if self.task.isRegression():
-            self.n_class = 1
-        else:
-            self.n_class = self.data.targetProperties[0].nClasses if self.data else self.metaInfo['n_class']
-        self.n_dim = self.data.X.shape[1] if self.data else self.metaInfo['n_dim']
-        self.patience = patience
-        self.tol = tol
-
-        if autoload:
-            self.model = self.loadModel(alg, self.parameters)
+        self.optimal_epochs = self.parameters['n_epochs'] if self.parameters is not None and 'n_epochs' in self.parameters else -1
 
     @classmethod
     def getDefaultParamsGrid(cls):
         return SSPACE
 
-    def loadModel(self, alg: Union[Type, object] = None, params: dict = None, fromFile=True):
+    def loadEstimator(self, params: dict = None):
         """
         Load model from file or initialize new model.
 
         Args:
             alg (Union[Type, object], optional): model class or instance. Defaults to None.
             params (dict, optional): model parameters. Defaults to None.
-            fromFile (bool, optional): load model weights from file if exists. Defaults to True.
 
         Returns:
             model (object): model instance
         """
-        # initialize model
-        if alg is not None:
-            if isclass(alg):
-                if params:
-                    model = alg(
-                        n_dim=self.n_dim,
-                        n_class=self.n_class,
-                        device=self.device,
-                        gpus=self.gpus,
-                        is_reg=self.task == ModelTasks.REGRESSION
-                    )
-                    model.set_params(**params)
-                else:
-                    model = alg(
-                        n_dim=self.n_dim,
-                        n_class=self.n_class,
-                        device=self.device,
-                        gpus=self.gpus,
-                        is_reg=self.task == ModelTasks.REGRESSION
-                    )
-            else:
-                model = alg
-                model.set_params(**params)
+        if self.task.isRegression():
+            self.n_class = 1
         else:
-            if params:
-                model = STFullyConnected(
-                    n_dim=self.n_dim,
-                    n_class=self.n_class,
-                    device=self.device,
-                    gpus=self.gpus,
-                    is_reg=self.task == ModelTasks.REGRESSION
-                )
-                model.set_params(**params)
+            self.n_class = self.data.targetProperties[0].nClasses if self.data else self.metaInfo['n_class']
+        self.n_dim = self.data.X.shape[1] if self.data else self.metaInfo['n_dim']
+        
+        # initialize model
+        estimator = self.alg(
+            n_dim=self.n_dim,
+            n_class=self.n_class,
+            device=self.device,
+            gpus=self.gpus,
+            is_reg=self.task == ModelTasks.REGRESSION,
+            patience=self.patience,
+            tol=self.tol
+        )
+        
+        if params is not None:
+            if self.parameters is not None:
+                temp_params = deepcopy(self.parameters)
+                temp_params.update(params)
+                estimator.set_params(**temp_params)
             else:
-                model = STFullyConnected(
-                    n_dim=self.n_dim,
-                    n_class=self.n_class,
-                    device=self.device,
-                    gpus=self.gpus,
-                    is_reg=self.task == ModelTasks.REGRESSION
-                )
+                estimator.set_params(**params)
+        elif self.parameters is not None:
+            estimator.set_params(**self.parameters)
 
+        return estimator
+    
+    def loadEstimatorFromFile(self, params: dict = None, fallback_load: bool = True):
+        """Load estimator from file.
+        
+        Args:
+            params (dict): parameters
+            fallback_load (bool): if True, init estimator from alg and params if no estimator found at path
+        """
+        path = f'{self.outPrefix}_weights.pkg'
+        estimator = self.loadEstimator(params)
         # load states if available
-        if fromFile:
-            if 'model_path' in self.metaInfo:
-                model_path = os.path.join(self.baseDir, self.metaInfo['model_path'])
-                if os.path.exists(model_path):
-                    model.load_state_dict(torch.load(model_path))
-                else:
-                    logger.warning(f'Model path ({model_path}) does not exist. Cannot load model weights.')
-            else:
-                logger.warning('No model path found in metadata. Cannot load model weights.')
+        if os.path.exists(path):
+            estimator.load_state_dict(torch.load(path))
+        elif not fallback_load:
+            raise FileNotFoundError(f'No estimator found at {path}, loading estimator weights from file failed.')
+        
+        return estimator
 
-        return model
+    def saveEstimator(self) -> str:
+        """Save the QSPRDNN model.
 
-    def fit(self, fromFile=True):
+        Returns:
+            str: path to the saved model
+        """
+        path = f'{self.outPrefix}_weights.pkg'
+        torch.save(self.estimator.state_dict(), path)
+        return path
+
+    def fit(self):
         """Train model on the training data, determine best model using test set, save best model.
 
         ** IMPORTANT: evaluate should be run first, so that the average number of epochs from the cross-validation
                         with early stopping can be used for fitting the model.
-
-        fromFile (bool, optional): load model weights from file if exists. Defaults to True.
         """
         if self.optimal_epochs == -1:
             logger.error('Cannot fit final model without first determining the optimal number of epochs for fitting. \
@@ -190,15 +182,15 @@ class QSPRDNN(QSPRModel):
         X_all = self.data.getFeatures(concat=True).values
         y_all = self.data.getTargetPropertiesValues(concat=True).values
 
-        if self.parameters:
+        if self.parameters is not None:
             self.parameters.update({"n_epochs": self.optimal_epochs})
         else:
             self.parameters = {"n_epochs": self.optimal_epochs}
-        self.model = self.loadModel(self.alg, self.parameters, fromFile=fromFile)
-        train_loader = self.model.get_dataloader(X_all, y_all)
+        self.estimator = self.loadEstimator(self.parameters)
 
         logger.info('Model fit started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        self.model.fit(train_loader, None, self.outPrefix, patience=-1)
+        logger.info('Logging model fit to: %s.log' % self.outPrefix)
+        self.estimator.fit(X_all, y_all, log=True, log_prefix=self.outPrefix)
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         self.save()
@@ -231,7 +223,6 @@ class QSPRDNN(QSPRModel):
         evalparams = self.parameters if parameters is None else parameters
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetPropertiesValues()
-        indep_loader = self.model.get_dataloader(X_ind.values)
         last_save_epochs = 0
 
         # prepare arrays to store molecule ids
@@ -246,40 +237,31 @@ class QSPRDNN(QSPRModel):
         fold_counter = np.zeros(y.shape[0])
 
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
-            crossvalmodel = self.loadModel(self.alg, evalparams, fromFile=False)
+            crossvalmodel = self.loadEstimator(evalparams)
             y_train = y_train.reshape(-1, 1)
 
             # split cross validation fold train set into train and validation set for early stopping
             X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
                 X_train, y_train, test_size=ES_val_size)
-            train_loader = crossvalmodel.get_dataloader(X_train_fold, y_train_fold)
-            ES_valid_loader = crossvalmodel.get_dataloader(X_val_fold, y_val_fold)
-            valid_loader = crossvalmodel.get_dataloader(X_test)
             last_save_epoch = crossvalmodel.fit(
-                train_loader, ES_valid_loader, '%s_temp_fold%s' %
-                (self.outPrefix, i), self.patience, self.tol)
+                X_train_fold, y_train_fold, X_val_fold, y_val_fold)
             last_save_epochs += last_save_epoch
             logger.info(f'cross validation fold {i}: last save epoch {last_save_epoch}')
-            os.remove('%s_temp_fold%s_weights.pkg' % (self.outPrefix, i))
-            os.remove('%s_temp_fold%s.log' % (self.outPrefix, i))
-            cvs[idx_test] = crossvalmodel.predict(valid_loader)
+            cvs[idx_test] = crossvalmodel.predict(X_test)
 
             fold_counter[idx_test] = i
             cvs_ids[idx_test] = X.index.values[idx_test]
 
         if save:
-            indmodel = self.loadModel(self.alg, evalparams, fromFile=False)
+            indmodel = self.loadEstimator(evalparams)
             n_folds = max(fold_counter) + 1
 
             # save the optimal number of epochs for fitting the model as the average
             # number of epochs from the cross-validation
             self.optimal_epochs = int(math.ceil(last_save_epochs / n_folds)) + 1
             indmodel = indmodel.set_params(**{"n_epochs": self.optimal_epochs})
-            train_loader = indmodel.get_dataloader(X.values, y.values)
-            indmodel.fit(train_loader, None, '%s_temp_ind' % self.outPrefix, patience=-1)
-            os.remove('%s_temp_ind_weights.pkg' % self.outPrefix)
-            os.remove('%s_temp_ind.log' % self.outPrefix)
-            inds = indmodel.predict(indep_loader)
+            indmodel.fit(X_train_fold, y_train_fold)
+            inds = indmodel.predict(X_ind)
             inds_ids = X_ind.index.values
 
             # save cross validation predictions and independent test set predictions
@@ -317,107 +299,6 @@ class QSPRDNN(QSPRModel):
         else:
             return cvs
 
-    def gridSearch(self, search_space_gs, scoring=None, th=0.5, ES_val_size=0.1):
-        """Optimization of hyperparameters using gridSearch.
-
-        Arguments:
-            search_space_gs (dict): search space for the grid search, accepted parameters are:
-                lr (int) ~ learning rate for fitting
-                batch_size (int) ~ batch size for fitting
-                n_epochs (int) ~ max number of epochs
-                neurons_h1 (int) ~ number of neurons in first hidden layer
-                neurons_hx (int) ~ number of neurons in other hidden layers
-                extra_layer (bool) ~ whether to add extra (3rd) hidden layer
-            scoring (Optional[str, Callable]): scoring function for the grid search.
-            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
-            ES_val_size (float): validation set size for early stopping in CV
-        """
-
-        logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        best_score = -np.inf
-        best_params = None
-        for params in ParameterGrid(search_space_gs):
-            logger.info(params)
-
-            # do 5 fold cross validation and take mean prediction on validation set as score of parameter settings
-            fold_scores = []
-            for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(self.data.createFolds()):
-                crossvalmodel = self.loadModel(self.alg, params, fromFile=False)
-                y_train = y_train.reshape(-1, 1)
-                logger.info('cross validation fold ' + str(i))
-
-                # split cross-validation train set into train and validation set for early stopping
-                X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
-                    X_train, y_train, test_size=ES_val_size)
-
-                train_loader = crossvalmodel.get_dataloader(X_train_fold, y_train_fold)
-                ES_valid_loader = crossvalmodel.get_dataloader(X_val_fold, y_val_fold)
-                valid_loader = crossvalmodel.get_dataloader(X_test)
-
-                # fit model and predict on validation set
-                crossvalmodel.set_params(**params)
-                crossvalmodel.fit(train_loader, ES_valid_loader, '%s_temp' % self.outPrefix, self.patience, self.tol)
-                os.remove('%s_temp_weights.pkg' % self.outPrefix)
-                y_pred = crossvalmodel.predict(valid_loader)
-
-                # tranform predictions to the right format for scorer
-                if self.task.isClassification():
-                    if self.score_func.needs_proba_to_score:
-                        if self.task == ModelTasks.SINGLECLASS:
-                            # if binary classification, return only the scores for the positive class
-                            y_pred = y_pred[:, 1]
-                    else:
-                        # if score function does not need probabilities, return the class with the highest score
-                        y_pred = np.argmax(y_pred, axis=1)
-
-                fold_scores.append(self.score_func(y_test, y_pred))
-            os.remove('%s_temp.log' % self.outPrefix)
-
-            # take mean of scores over all folds and update the best parameters if score is better than previous best
-            param_score = np.mean(fold_scores)
-            if param_score >= best_score:
-                best_params = params
-                best_score = param_score
-
-        logger.info('Grid search best parameters: %s' % best_params)
-        logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-        self.parameters = best_params
-        self.model = self.loadModel(self.alg, best_params, fromFile=False)
-        self.saveParams(best_params)
-
-    def bayesOptimization(self, search_space_bs, n_trials, scoring=None, th=0.5, n_jobs=1):
-        """Bayesian optimization of hyperparameters using optuna.
-
-        Arguments:
-            search_space_gs (dict): search space for the grid search
-            n_trials (int): number of trials for bayes optimization
-            scoring (Optional[str, Callable]): scoring function for the optimization.
-            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
-            n_jobs (int): the number of parallel trials
-        """
-        print('Bayesian optimization can take a while for some hyperparameter combinations')
-        # TODO add timeout function
-
-        self.model = self.loadModel(self.alg, fromFile=False)
-
-        if n_jobs > 1:
-            logger.warning("At the moment n_jobs>1 not available for bayesoptimization. n_jobs set to 1")
-            n_jobs = 1
-
-        study = optuna.create_study(direction='maximize')
-        logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, scoring, th, search_space_bs), n_trials, n_jobs=n_jobs)
-        logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-        trial = study.best_trial
-
-        logger.info('Bayesian optimization best params: %s' % trial.params)
-
-        self.parameters = trial.params
-        self.model = self.loadModel(self.alg, self.parameters, fromFile=False)
-        self.saveParams(trial.params)
-
     def objective(self, trial, scoring, th, search_space_bs):
         """Objective for bayesian optimization.
 
@@ -453,16 +334,6 @@ class QSPRDNN(QSPRModel):
         score_func = self.get_scoring_func(scoring)
         score = score_func(y, self.evaluate(save=False, parameters=bayesian_params))
         return score
-
-    def saveModel(self) -> str:
-        """Save the QSPRDNN model.
-
-        Returns:
-            str: path to the saved model
-        """
-        path = self.outPrefix + '_weights.pkg'
-        torch.save(self.model.state_dict(), path)
-        return path
 
     def save(self):
         """Save the QSPRDNN model and meta information.
@@ -503,5 +374,4 @@ class QSPRDNN(QSPRModel):
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
 
-        loader = self.model.get_dataloader(X)
-        return self.model.predict(loader)
+        return self.estimator.predict(X)
