@@ -30,7 +30,28 @@ where we think is appropriate. Summary of the implemented and enforced rules:
 - Type hints
     - use type hint built-in functionality as introduced in Python 3.9 and later
       (https://docs.python.org/3/library/typing.html)
-
+- Code formatting
+    - Use yapf for code formatting. See the style configuration under [tool.yapf] in 
+      pyproject.toml. You can run yapf on your files with the following command:
+        `$ yapf --style pyproject.toml -i <path/to/file>`
+    - Use isort for sorting imports. See the style configuration under [tool.isort] in
+      pyproject.toml. You can run isort on your files with the following command:
+        `$ isort --profile black <path/to/file>`
+    - Use Ruff for linting. Some of the rules are suitable for automatic fixing. For 
+      doing this, run the following command:
+        `$ ruff --fix <path/to/file>`
+    - Our current list of rules is under [tool.ruff] in pyproject.toml, and is an 
+      adaptation of the configuration file from the Pandas project.
+- Dev contributions
+    - Use pre-commit hooks to automatically check and fix your code. See the
+      .pre-commit-config.yaml file for the list of hooks. This will require an 
+      environment with the correct `[dev]` dependencies installed. These can be 
+      installed through the command `$ pip install -e .[dev]`.
+    - To install the pre-commit hooks, run the following command:
+        `$ pre-commit install`
+    - To run the pre-commit hooks on all files, run the following command:
+        `$ pre-commit run --all-files`
+        
 Example:
 
     Some of these rules can be enforced automatically with Autoflake
@@ -38,12 +59,12 @@ Example:
 
         $ black --line-length 88 style_guide.py
         $ isort --profile black style_guide.py
-
 """
 
 import numpy
-from qsprpred import __version__
 from rdkit import Chem
+
+from qsprpred import __version__
 
 from .data.data import (  # use relative imports for modules inside the package
     QSPRDataset,
