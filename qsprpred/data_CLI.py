@@ -14,7 +14,12 @@ import optuna
 import pandas as pd
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
-from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit, temporalsplit
+from qsprpred.data.utils.datasplitters import (
+    ManualSplit,
+    randomsplit,
+    scaffoldsplit,
+    temporalsplit,
+)
 from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
 from qsprpred.data.utils.descriptorsets import (
     DrugExPhyschem,
@@ -29,9 +34,10 @@ from qsprpred.data.utils.featurefilters import (
     lowVarianceFilter,
 )
 from qsprpred.data.utils.scaffolds import Murcko
+from qsprpred.deep.models.models import QSPRDNN
+from qsprpred.extra.data.utils.descriptorsets import Mold2, Mordred, PaDEL
 from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
 from qsprpred.models.models import QSPRsklearn
-from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.models.tasks import TargetTasks
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
@@ -81,7 +87,11 @@ def QSPRArgParser(txt=None):
                               -lt \'{"CL":True,"fu":False}\'. Note. no spaces and surround by single quotes')
 
     # Data set split arguments
-    parser.add_argument('-sp', '--split', type=str, choices=['random', 'time', 'scaffold'], default='random')
+    parser.add_argument('-sp', '--split', type=str, choices=['random', 'time', 'scaffold', 'manual'], default='random',
+                        help="Split type (Randomsplit, scaffoldsplit, manualsplit and temporalsplit)."
+                        "If manualsplit is chosen, a column 'datasplit' with values 'train' and 'test' is required."
+                        "If scaffoldsplit or temporalsplit is chosen, you can specify the split_fraction with -sf."
+                        "If temporalsplit is chosen, you can specify the split_time with -st and the split_timecolumn with -stc.")
     parser.add_argument('-sf', '--split_fraction', type=float, default=0.1,
                         help="Fraction of the dataset used as test set. Used for randomsplit and scaffoldsplit")
     parser.add_argument('-st', '--split_time', type=float, default=2015,
@@ -193,6 +203,11 @@ def QSPR_dataprep(args):
                 split = scaffoldsplit(test_fraction=args.split_fraction, scaffold=Murcko(), dataset=mydataset)
             elif args.split == 'time':
                 split = temporalsplit(timesplit=args.split_time, timeprop=args.split_timecolumn, dataset=mydataset)
+            elif args.split == 'manual':
+                if "datasplit" not in df.columns:
+                    raise ValueError("No datasplit column found in dataset."
+                                     "Please add a column 'datasplit' with values 'train' and 'test' if using manual split.")
+                split = ManualSplit(splitcol=df["datasplit"], trainval="train", testval="test")
             else:
                 split = randomsplit(test_fraction=args.split_fraction)
 
