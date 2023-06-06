@@ -245,7 +245,7 @@ class ExtendedValenceSignature(MoleculeDescriptorSet):
     DOI: 10.1021/ci020345w
     """
     def __init__(self, depth: int | list[int]):
-        """Initialize a PaDEL calculator
+        """Initialize a ExtendedValenceSignature calculator
 
         Args:
             depth: depth of the signature
