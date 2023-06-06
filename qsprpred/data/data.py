@@ -143,6 +143,9 @@ class PandasDataSet(DataSet):
     def addProperty(self, name, data):
         self.df[name] = data
 
+    def getProperty(self, name):
+        return self.df[name]
+
     def removeProperty(self, name):
         self.df.drop(name, axis=1, inplace=True)
 
@@ -1368,11 +1371,12 @@ class QSPRDataset(MoleculeTable):
         # save metadata
         self.saveMetadata()
 
-    def split(self, split: datasplit):
+    def split(self, split: datasplit, featurize: bool = False):
         """Split dataset into train and test set.
 
         Args:
             split (datasplit) : split instance orchestrating the split
+            featurize (bool): whether to featurize the data set splits after splitting. Defaults to `True`.
         """
         if hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and not split.hasDataSet:
             split.setDataSet(self)
@@ -1412,6 +1416,9 @@ class QSPRDataset(MoleculeTable):
                 if self.y[prop.name].dtype.name == "category":
                     self.y[prop.name] = self.y[prop.name].cat.codes
                     self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
+
+        if featurize:
+            self.featurizeSplits()
 
     def loadDataToSplits(self):
         """Load the data frame into the train and test splits.
