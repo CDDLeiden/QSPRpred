@@ -6,6 +6,7 @@ To add a new data splitter:
 from collections import defaultdict
 
 import numpy as np
+import pandas as pd
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.interfaces import DataSetDependant, datasplit
 from qsprpred.data.utils.scaffolds import Murcko, Scaffold
@@ -13,6 +14,32 @@ from qsprpred.logs import logger
 from sklearn.model_selection import ShuffleSplit
 
 
+class ManualSplit(datasplit):
+    """Splits dataset in train and test subsets based on a column in the dataframe.
+
+    Args:
+        splitcol (pd.Series): pandas series that contains the split information
+        trainval (str): value in splitcol that will be used for training
+        testval (str): value in splitcol that will be used for testing
+
+    Raises:
+        ValueError: if there are more values in splitcol than trainval and testval 
+    """
+
+    def __init__(self, splitcol: pd.Series, trainval:str, testval:str) -> None:
+        self.splitcol = splitcol.reset_index(drop=True)
+        self.trainval = trainval
+        self.testval = testval
+        
+        # check if only trainval and testval are present in splitcol
+        if not set(splitcol.unique()).issubset({trainval, testval}):
+            raise ValueError("There are more values in splitcol than trainval and testval")
+    
+    def split(self, X, y):
+        train = self.splitcol[self.splitcol == self.trainval].index.values
+        test = self.splitcol[self.splitcol == self.testval].index.values
+        return iter([(train, test)])
+        
 class randomsplit(datasplit):
     """Splits dataset in random train and test subsets.
 
