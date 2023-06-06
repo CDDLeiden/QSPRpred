@@ -131,7 +131,7 @@ Feature calculation
 """""""""""""""""""
 There are seven different descriptor sets that can be calculated at the moment,
 namely Morgan fingerprints, rdkit, Mordred, Mold2 and Padel descriptors, the
-physicochemical properties used in the QSAR models in the DrugEx papers, and
+physicochemical properties used in the QSAR models in the DrugEx papers from Liu et al., and
 the SMILES based signatures of extended valence. They can also
 be combined. For more control over the descriptorcalculator settings use the python API.
 
