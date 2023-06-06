@@ -17,11 +17,11 @@ import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split, ParameterGrid
 
-from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS
+from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
 from qsprpred.data.data import QSPRDataset
 from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.deep.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
 
 
@@ -100,6 +100,10 @@ class QSPRDNN(QSPRModel):
 
         if autoload:
             self.model = self.loadModel(alg, self.parameters)
+
+    @classmethod
+    def getDefaultParamsGrid(cls):
+        return SSPACE
 
     def loadModel(self, alg: Union[Type, object] = None, params: dict = None, fromFile=True):
         """
