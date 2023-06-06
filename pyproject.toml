@@ -63,6 +63,7 @@ full = [
     "torch >= 1.7.0",
     "mold2-pywrapper",
     "padel-pywrapper >= 1.0.2.post1",
+    "Signature-pywrapper",
     "Mordred",
     "biopython",
     "prodec",

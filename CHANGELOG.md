@@ -31,6 +31,7 @@ From v1.3.1 to v2.0.0
   - Unfortunately, this change is not backwards compatible, so previously pickled `MoleculeTable` instances will not work with this version. There were also changes to how models handle multiple descriptor types, which also makes them incompatible with previous versions. However, this can be fixed by modifying the old JSON files as illustrated in commits 7d3f8633 and 6564f024.
 - 'LowVarianceFilter` now includes boundary in the filtered features, e.g. if threshold is 0.1, also features that
   have a variance of 0.1 will be removed.
+- Added the ExtendedValenceSignature molecular descriptor based on Jean-Loup Faulon's work.
 
 ## New Features
 

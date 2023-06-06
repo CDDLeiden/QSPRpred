@@ -22,7 +22,7 @@ from qsprpred.data.utils.descriptorsets import (
     PredictorDesc,
     rdkit_descs,
 )
-from qsprpred.extra.data.utils.descriptorsets import Mordred, Mold2, PaDEL
+from qsprpred.extra.data.utils.descriptorsets import Mordred, Mold2, PaDEL, ExtendedValenceSignature
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
     highCorrelationFilter,
@@ -91,7 +91,7 @@ def QSPRArgParser(txt=None):
 
     # features to calculate
     parser.add_argument('-fe', '--features', type=str, choices=['Morgan', 'RDkit', 'Mordred', 'Mold2',
-                                                                'PaDEL', 'DrugEx'],
+                                                                'PaDEL', 'DrugEx', 'Signature'],
                         nargs='*')
     parser.add_argument('-pd', '--predictor_descs', type=str, nargs='+',
                         help="It is also possible to use a QSPRpred model(s) as molecular feature(s). Give\
@@ -210,6 +210,8 @@ def QSPR_dataprep(args):
                 descriptorsets.append(PaDEL())
             if 'DrugEx' in args.features:
                 descriptorsets.append(DrugExPhyschem())
+            if 'Signature' in args.features:
+                descriptorsets.append(ExtendedValenceSignature(depth=1))
             if args.predictor_descs:
                 for predictor_path in args.predictor_descs:
                     # load in predictor from files

@@ -12,6 +12,7 @@ import pandas as pd
 import prodec
 from Mold2_pywrapper import Mold2 as Mold2_calculator
 from PaDEL_pywrapper import descriptors as PaDEL_descriptors, PaDEL as PaDEL_calculator
+from Signature_pywrapper import Signature as Signature_calculator
 from mordred import descriptors as mordreddescriptors
 from rdkit import Chem
 
@@ -233,6 +234,62 @@ class PaDEL(MoleculeDescriptorSet):
 
     def __str__(self):
         return "PaDEL"
+
+
+class ExtendedValenceSignature(MoleculeDescriptorSet):
+    """SMILES signature based on extended valence sequence from
+
+    The Signature Molecular Descriptor. 1. Using Extended Valence Sequences in QSAR and QSPR Studies
+    Jean-Loup Faulon, Donald P. Visco, and Ramdas S. Pophale
+    Journal of Chemical Information and Computer Sciences 2003 43 (3), 707-720
+    DOI: 10.1021/ci020345w
+    """
+    def __init__(self, depth: int | list[int]):
+        """Initialize a PaDEL calculator
+
+        Args:
+            depth: depth of the signature
+        """
+        self._depth = depth
+        self._is_fp = False
+        self._signature = Signature_calculator()
+        self._descriptors = []
+        self._descriptors_init = False # Flag initialization of descriptors after first calculation
+        self.no_parallelization = True # Force calculator to be single process
+
+    def __call__(self, mols):
+        mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
+        values = self._signature.calculate(mols, depth=self._depth, show_banner=False, njobs=1).fillna(0)
+        if not self._descriptors_init:
+            self._descriptors = values.columns.tolist()
+            self._descriptors_init = True
+        else:
+            intersection = list(set(self._descriptors).intersection(values.columns))
+            values = values[intersection]
+        return values
+
+    @property
+    def is_fp(self):
+        return self._is_fp
+
+    @property
+    def settings(self):
+        return {'depth': self._depth}
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, names: Optional[List[str]] = None):
+        if names is None:
+            self._descriptors = []
+        else:
+            self._descriptors = names
+            self._descriptors_init = True
+
+    def __str__(self):
+        return "ExtendedValenceSignature"
 
 
 class ProteinDescriptorSet(DescriptorSet):
