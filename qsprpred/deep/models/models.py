@@ -9,20 +9,21 @@ import os
 import sys
 from copy import deepcopy
 from datetime import datetime
-from inspect import isclass
 from typing import Optional, Type, Union
 
 import numpy as np
 import optuna
 import pandas as pd
 import torch
+
+from qsprpred.deep import SSPACE
 from qsprpred.data.data import QSPRDataset
 from qsprpred.deep import DEFAULT_DEVICE, DEFAULT_GPUS
 from qsprpred.logs import logger
 from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.deep.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import ModelTasks
-from sklearn.model_selection import ParameterGrid, train_test_split
+from sklearn.model_selection import train_test_split
 
 
 class QSPRDNN(QSPRModel):
@@ -93,6 +94,10 @@ class QSPRDNN(QSPRModel):
                 'Multitask modelling is not implemented for QSPRDNN models.')
 
         self.optimal_epochs = self.parameters['n_epochs'] if self.parameters is not None and 'n_epochs' in self.parameters else -1
+
+    @classmethod
+    def getDefaultParamsGrid(cls):
+        return SSPACE
 
     def loadEstimator(self, params: dict = None):
         """
@@ -293,38 +298,6 @@ class QSPRDNN(QSPRModel):
                 return np.argmax(cvs, axis=1)
         else:
             return cvs
-
-
-        """Bayesian optimization of hyperparameters using optuna.
-
-        Arguments:
-            search_space_gs (dict): search space for the grid search
-            n_trials (int): number of trials for bayes optimization
-            scoring (Optional[str, Callable]): scoring function for the optimization.
-            th (float): threshold for scoring if `scoring in self._needs_discrete_to_score`.
-            n_jobs (int): the number of parallel trials
-        """
-        print('Bayesian optimization can take a while for some hyperparameter combinations')
-        # TODO add timeout function
-
-        self.estimator = self.loadEstimator()
-
-        if n_jobs > 1:
-            logger.warning("At the moment n_jobs>1 not available for bayesoptimization. n_jobs set to 1")
-            n_jobs = 1
-
-        study = optuna.create_study(direction='maximize')
-        logger.info('Bayesian optimization started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        study.optimize(lambda trial: self.objective(trial, scoring, th, search_space_bs), n_trials, n_jobs=n_jobs)
-        logger.info('Bayesian optimization ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-        trial = study.best_trial
-
-        logger.info('Bayesian optimization best params: %s' % trial.params)
-
-        self.parameters = trial.params
-        self.estimator = self.loadEstimator(self.parameters)
-        self.saveParams(trial.params)
 
     def objective(self, trial, scoring, th, search_space_bs):
         """Objective for bayesian optimization.

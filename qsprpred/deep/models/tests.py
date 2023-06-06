@@ -10,7 +10,7 @@ from unittest import TestCase
 import torch
 from parameterized import parameterized
 from qsprpred.deep.models.models import QSPRDNN
-from qsprpred.models.neural_network import STFullyConnected
+from qsprpred.deep.models.neural_network import STFullyConnected
 from qsprpred.models.tasks import TargetTasks
 from qsprpred.models.tests import ModelDataSetsMixIn, ModelTestMixIn
 
@@ -21,6 +21,10 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRDNN class."""
     
     qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
+
+    @property
+    def gridFile(self):
+        return f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
 
     @staticmethod
     def get_model(name, alg=None, dataset=None, parameters=None):

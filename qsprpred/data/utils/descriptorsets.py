@@ -56,6 +56,7 @@ class DescriptorSet(ABC):
         """Return True if descriptorset is fingerprint."""
         pass
 
+    @property
     @abstractmethod
     def settings(self):
         """Return dictionary with arguments used to initialize the descriptorset."""
@@ -133,6 +134,7 @@ class DataFrameDescriptorSet(DescriptorSet):
     def is_fp(self):
         return False
 
+    @property
     def settings(self):
         return {}
 
