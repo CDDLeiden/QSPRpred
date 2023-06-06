@@ -48,3 +48,4 @@ From v1.3.1 to v2.0.0
 - Support for precalculated descriptors was added with `addCustomDescriptors` method of `MoleculeTable`.
   - It allows for adding precalculated descriptors to the `MoleculeTable` by linking the information from the table with external precalculated descriptors.
 - The [tutorial](tutorial) was improved with more detailed sections on data preparation and PCM modelling added.
+- We agreed on and adopted a style guide for contributions to the package. This is described and exemplified in the [example file](docs/style_guide.py). This is also supported by several development tools that were configured to check and automatically format the code. Instructions are included in the example file as well.
