@@ -1,14 +1,14 @@
 """Abstract base classes for data preparation classes."""
 from abc import ABC, abstractmethod
-from typing import List, Callable
+from typing import Callable, List
 
 import pandas as pd
 
-from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
+from .utils.descriptorcalculator import DescriptorsCalculator
+
 
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
-
     @abstractmethod
     def save(self):
         pass
@@ -23,11 +23,18 @@ class StoredTable(ABC):
 
     @staticmethod
     @abstractmethod
-    def fromFile(filename) -> 'StoredTable':
-        pass
+    def fromFile(filename: str) -> "StoredTable":
+        """Load a `StoredTable` object from a file.
+
+        Args:
+            filename (str): The name of the file to load the object from.
+
+        Returns:
+            The `StoredTable` object itself.
+        """
+
 
 class DataSet(StoredTable):
-
     @abstractmethod
     def __len__(self):
         pass
@@ -45,7 +52,7 @@ class DataSet(StoredTable):
         pass
 
     @abstractmethod
-    def getSubset(self, prefix : str):
+    def getSubset(self, prefix: str):
         pass
 
     @abstractmethod
@@ -60,74 +67,67 @@ class DataSet(StoredTable):
     def filter(self, table_filters: List[Callable]):
         pass
 
-class MoleculeDataSet(DataSet):
 
+class MoleculeDataSet(DataSet):
     @abstractmethod
-    def addDescriptors(self, calculator : DescriptorsCalculator):
+    def addDescriptors(self, calculator: DescriptorsCalculator):
         """
         Add descriptors to the dataset.
 
         Args:
-            calculator: The descriptor calculator class wrapping the descriptors to calculate.
-        Returns:
-            `None`
+            calculator (DescriptorsCalculator): An instance of the
+                `DescriptorsCalculator` class that wraps the descriptors to be
+                calculated.
         """
-        pass
 
     @abstractmethod
-    def getDescriptors(self):
+    def getDescriptors(self) -> pd.DataFrame:
         """
         Get the table of descriptors that are currently in the dataset.
 
         Returns:
-            a `DataFrame` with the descriptors
+            a pd.DataFrame with the descriptors
         """
 
-        pass
-
     @abstractmethod
-    def getDescriptorNames(self):
+    def getDescriptorNames(self) -> list[str]:
         """
         Get the names of the descriptors that are currently in the dataset.
 
         Returns:
             a `list` of descriptor names
         """
-        pass
 
     @property
     @abstractmethod
     def hasDescriptors(self):
         pass
 
-class DataSetDependant(ABC):
-    """
-    Classes that need a data set to operate have to implement this.
-    """
 
+class DataSetDependant:  # Note: this shouldn't be ABC; no abstract methods defined
+    """Classes that need a data set to operate have to implement this."""
     def __init__(self, dataset) -> None:
-        self.dataset = dataset
+        self.dataSet = dataset
 
-    def setDataSet(self, dataset : MoleculeDataSet):
+    def setDataSet(self, dataset: MoleculeDataSet):
         """
         Set the data sets.
         """
-
-        self.dataset = dataset
+        self.dataSet = dataset
 
     @property
     def hasDataSet(self):
-        return self.dataset is not None
+        return self.dataSet is not None
 
     def getDataSet(self):
         if self.hasDataSet:
-            return self.dataset
+            return self.dataSet
         else:
             raise ValueError("Data set not set.")
 
-class datasplit(ABC):
-    """Defines a function split a dataframe into train and test set."""
 
+class DataSplit(ABC):
+    """Defines a function split a dataframe into train and test set."""
     @abstractmethod
     def split(self, X, y):
         """
@@ -138,38 +138,37 @@ class datasplit(ABC):
             y (Series): the target variable
 
         Returns:
-            an iterator over the generated subsets represented as a tuple of (train_indices, test_indices) where
-            the indices are the row indices of the input data matrix X
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix X
         """
-        pass
 
-class datafilter(ABC):
+
+class DataFilter(ABC):
     """Filter out some rows from a dataframe."""
-
     @abstractmethod
-    def __call__(self, df):
+    def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
         """Filter out some rows from a dataframe.
 
         Args:
-            df: pandas dataframe to filter
+            df (pd.DataFrame): dataframe to be filtered
 
         Returns:
-            df: filtered pandas dataframe
+            The filtered pd.DataFrame
         """
-        pass
 
-class featurefilter(ABC):
+
+class FeatureFilter(ABC):
     """Filter out uninformative featureNames from a dataframe."""
-
     @abstractmethod
-    def __call__(self, df, y_col : pd.DataFrame = None):
+    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None):
         """Filter out uninformative features from a dataframe.
-        
-        Args:
-            df: pandas dataframe to filter
-            y_col: output variable column name if the method requires it
-        Returns:
-            df: filtered pandas dataframe
-        """
-        pass
 
+        Args:
+            df (pd.DataFrame): dataframe to be filtered
+            y_col (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
+
+        Returns:
+            The filtered pd.DataFrame
+        """
