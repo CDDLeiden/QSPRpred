@@ -1,29 +1,28 @@
 """Different filters to select features from trainingset.
 
 To add a new feature filters:
-* Add a featurefilter subclass for your new filter
+* Add a FeatureFilter subclass for your new filter
 """
 import numpy as np
 import pandas as pd
 from boruta import BorutaPy
-from qsprpred.data.interfaces import featurefilter
-from qsprpred.logs import logger
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler
 
+from ...logs import logger
+from ..interfaces import FeatureFilter
 
-class lowVarianceFilter(featurefilter):
-    """Remove features with a variance lower than a given threshold after MinMax scaling.
-    
+
+class lowVarianceFilter(FeatureFilter):
+    """Remove features with variance lower than a given threshold after MinMax scaling.
+
     Attributes:
         th (float): threshold for removing features
     """
-
     def __init__(self, th: float) -> None:
         self.th = th
 
-    def __call__(self, df: pd.DataFrame, y_col : pd.DataFrame = None) -> pd.DataFrame:
-
+    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None) -> pd.DataFrame:
         # scale values between 0 and 1
         colnames = df.columns
         data_scaled = MinMaxScaler().fit_transform(X=df.values)
@@ -41,17 +40,16 @@ class lowVarianceFilter(featurefilter):
         return df
 
 
-class highCorrelationFilter(featurefilter):
+class highCorrelationFilter(FeatureFilter):
     """Remove features with correlation higher than a given threshold.
-    
+
     Attributes:
         th (float): threshold for correlation
     """
-    
     def __init__(self, th: float) -> None:
         self.th = th
 
-    def __call__(self, df: pd.DataFrame, y_col : pd.DataFrame = None) -> pd.DataFrame:
+    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None) -> pd.DataFrame:
         # make absolute, because we also want to filter out large negative correlation
         correlation = np.triu(np.abs(np.corrcoef(df.values.astype(float).T)), k=1)
         high_corr = np.where(np.any(correlation > self.th, axis=0))
@@ -65,9 +63,9 @@ class highCorrelationFilter(featurefilter):
         return df
 
 
-class BorutaFilter(featurefilter):
-    """Boruta filter from BorutaPy: find all features carrying information for prediction.
-    
+class BorutaFilter(FeatureFilter):
+    """Boruta filter from BorutaPy: feature selection based on Random Forest predictors.
+
     Attributes:
         estimator (object): A supervised learning estimator, with a 'fit' method that
             returns the feature_importances attribute. Important features must
@@ -88,7 +86,6 @@ class BorutaFilter(featurefilter):
         verbose (int): Controls verbosity of output.
 
     """
-
     def __init__(
         self,
         estimator=RandomForestRegressor(),
@@ -99,26 +96,29 @@ class BorutaFilter(featurefilter):
         verbose=2,
     ):
         self.estimator = estimator
-        self.n_estimators = n_estimators
+        self.nEstimators = n_estimators
         self.perc = perc
         self.alpha = alpha
-        self.max_iter = max_iter
+        self.maxIter = max_iter
         self.verbose = verbose
 
-    def __call__(self, features: pd.DataFrame, y_col : pd.DataFrame = None) -> pd.DataFrame:
+    def __call__(
+        self, features: pd.DataFrame, y_col: pd.DataFrame = None
+    ) -> pd.DataFrame:
         feat_selector = BorutaPy(
             estimator=self.estimator,
-            n_estimators=self.n_estimators,
+            n_estimators=self.nEstimators,
             perc=self.perc,
             alpha=self.alpha,
-            max_iter=self.max_iter,
+            max_iter=self.maxIter,
             verbose=self.verbose,
         )
         feat_selector.fit(features.values, y_col.values)
 
         selected_features = features.loc[:, feat_selector.support_]
         logger.info(
-            f"Number of columns dropped Boruta filter: {features.shape[1] - selected_features.shape[1]}"
+            "Number of columns dropped Boruta filter: "
+            f"{features.shape[1] - selected_features.shape[1]}"
         )
         logger.info(f"Number of columns left: {selected_features.shape[1]}")
 
