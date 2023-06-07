@@ -141,7 +141,7 @@ known_first_party = 'qsprpred'
 
  ignore = [
    # we decided on having relative rather than absolute imports
-   "TID252"
+   "TID252",
    # module level import not at top of file
    "E402",
    # do not assign a lambda expression, use a def
