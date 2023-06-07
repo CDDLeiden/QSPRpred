@@ -7,7 +7,7 @@ from functools import partial
 
 import pandas as pd
 
-from ....qsprpred.logs import logger
+from ...logs import logger
 from ..data.interfaces import DataFilter
 
 

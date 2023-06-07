@@ -2,7 +2,7 @@ import numpy as np
 from rdkit.Chem import Descriptors
 from rdkit.ML.Descriptors import MoleculeDescriptors
 
-from qsprpred.data.utils.descriptor_utils.interfaces import Scorer
+from ..descriptor_utils.interfaces import Scorer
 
 
 class RdkitDescriptors(Scorer):

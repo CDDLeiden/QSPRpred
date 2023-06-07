@@ -7,12 +7,8 @@ import pandas as pd
 from rdkit.Chem.rdchem import Mol
 
 from ....qsprpred.logs import logger
-from ....qsprpred.utils.inspect import import_class
-from ...data.utils.descriptorsets import (
-    DataFrameDescriptorSet,
-    DescriptorSet,
-    get_descriptor,
-)
+from ...utils.inspect import import_class
+from .descriptorsets import DataFrameDescriptorSet, DescriptorSet, get_descriptor
 
 
 class DescriptorsCalculator(ABC):

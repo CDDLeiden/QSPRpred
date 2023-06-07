@@ -9,9 +9,9 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import ShuffleSplit
 
-from ....qsprpred.logs import logger
-from ...data.interfaces import DataSetDependant, DataSplit
-from ..utils.scaffolds import Murcko, Scaffold
+from ...logs import logger
+from ..interfaces import DataSetDependant, DataSplit
+from .scaffolds import Murcko, Scaffold
 
 
 class ManualSplit(DataSplit):
