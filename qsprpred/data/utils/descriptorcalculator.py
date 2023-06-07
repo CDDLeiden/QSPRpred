@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from rdkit.Chem.rdchem import Mol
 
-from ....qsprpred.logs import logger
+from ...logs import logger
 from ...utils.inspect import import_class
 from .descriptorsets import DataFrameDescriptorSet, DescriptorSet, get_descriptor
 
