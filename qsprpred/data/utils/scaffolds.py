@@ -81,7 +81,7 @@ class BemisMurcko(Scaffold):
         self.removeTerminalAtoms = remove_terminal_atoms
 
     @staticmethod
-    def find_terminal_atoms(mol):
+    def findTerminalAtoms(mol):
         res = []
 
         for a in mol.GetAtoms():
@@ -125,13 +125,13 @@ class BemisMurcko(Scaffold):
 
         # as long as there are terminal atoms, remove them
         if self.removeTerminalAtoms:
-            terminal_atoms = self.find_terminal_atoms(rw_mol)
+            terminal_atoms = self.findTerminalAtoms(rw_mol)
             while terminal_atoms:
                 for a in terminal_atoms:
                     for b in a.GetBonds():
                         rw_mol.RemoveBond(b.GetBeginAtomIdx(), b.GetEndAtomIdx())
                     rw_mol.RemoveAtom(a.GetIdx())
-                terminal_atoms = self.find_terminal_atoms(rw_mol)
+                terminal_atoms = self.findTerminalAtoms(rw_mol)
             return Chem.MolToSmiles(rw_mol.GetMol())
 
     def __str__(self):
