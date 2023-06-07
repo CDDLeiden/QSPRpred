@@ -30,6 +30,9 @@ class DescriptorsCalculator(ABC):
     def __init__(self, descsets: List[DescriptorSet]) -> None:
         """Set the descriptorsets to be calculated with this calculator."""
         self.descsets = list(descsets)
+        self.no_parallelization = any((hasattr(descset, 'no_parallelization') and
+                                       getattr(descset, 'no_parallelization') is True)
+                                      for descset in descsets)
 
     @classmethod
     def loadDescriptorSets(cls, fname: str) -> List[DescriptorSet]:

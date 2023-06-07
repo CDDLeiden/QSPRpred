@@ -454,6 +454,10 @@ class _DescriptorSetRetriever:
         from qsprpred.extra.data.utils.descriptorsets import PaDEL
         return PaDEL(*args, **kwargs)
 
+    def get_ExtendedValenceSignature(self, *args, **kwargs):
+        from qsprpred.extra.data.utils.descriptorsets import ExtendedValenceSignature
+        return ExtendedValenceSignature(*args, **kwargs)
+
     def get_RDkit(self, *args, **kwargs):
         return rdkit_descs(*args, **kwargs)
 

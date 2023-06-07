@@ -103,7 +103,7 @@ class QSPRModel(ABC):
 
     def __str__(self):
         """Return the name of the model and the underlying class as the identifier."""
-        return f"{self.name} ({self.estimator.__class__.__name__ if self.estimator else self.alg.__class__.__name__ if self.alg else 'None'})"
+        return f"{self.name} ({self.estimator.__class__.__name__ if self.estimator is not None else self.alg.__class__.__name__ if self.alg is not None else 'None'})"
 
     @property
     def targetProperties(self):
@@ -203,7 +203,8 @@ class QSPRModel(ABC):
         calcs = []
         for path in paths:
             if os.path.exists(path):
-                data = json.load(open(path, "r", encoding="utf-8"))
+                with open(path, "r", encoding="utf-8") as fh: # file handle
+                    data = json.load(fh)
                 if not "calculator" in data:
                     calc_cls = "qsprpred.data.utils.descriptorcalculator.MoleculeDescriptorsCalculator"
                 else:
@@ -338,8 +339,12 @@ class QSPRModel(ABC):
         """
         pass
 
-    @staticmethod
-    def loadParamsGrid(fname, optim_type, model_types):
+    @classmethod
+    def getDefaultParamsGrid(cls):
+        return SSPACE
+
+    @classmethod
+    def loadParamsGrid(cls, fname, optim_type, model_types):
         """Load parameter grids for bayes or grid search parameter optimization from json file.
 
         Arguments:
@@ -356,7 +361,7 @@ class QSPRModel(ABC):
                 logger.error("Search space file (%s) not found" % fname)
                 sys.exit()
         else:
-            with open(SSPACE) as json_file:
+            with open(cls.getDefaultParamsGrid()) as json_file:
                 optim_params = np.array(json.load(json_file), dtype=object)
 
         # select either grid or bayes optimization parameters from param array

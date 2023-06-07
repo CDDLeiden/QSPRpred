@@ -13,6 +13,9 @@ From v1.3.1 to v2.0.0
 
 ## Changes
 
+- Hyperparameter optimization moved to a separate class from `QSPRModel.bayesOptimization` and `QSPRModel.gridSearch` to `OptunaOptimization` and `GridSearchOptimization` in the new module `qsprpred.models.param_optimzation` with a base clase `HyperParameterOptimization` in `qsprpred.models.interfaces`.
+- ⚠️ Important! ⚠️ `QSPRModel` attribute `model` now called `estimator`, which is always an instance of `alg`, while `alg` may no longer be an instance but only a Type.
+- Converting input data for `qsprpred.models.neural_network.Base` to dataloaders now executed in the `fit` and `predict` functions instead of in the `qspred.deep.models.QSPRDNN` class.
 - `MoleculeTable` now uses a custom index. When a `MoleculeTable` is created a new column (`QSPRID`) is added (overwritten if already present), which is then used as the index of the underlying data frame.
   - It is possible to override this with a custom index by passing `index_cols` to the `MoleculeTable` constructor. These columns will be then used as index or a multi-index if more than one column is passed.
   - Due to this change, `scaffoldsplit` now uses these IDs instead of unreliable SMILES strings (see documentation for the new API). 
@@ -22,7 +25,7 @@ From v1.3.1 to v2.0.0
   init.
 - A `fill_value` argument was also added to the `predict_CLI` script to allow for filling missing values in the
   prediction data set as well.
-- ⚠️ Beware! ⚠️ `setup.py` and `setup.cfg` were substituted with `pyproject.toml` and `MANIFEST.in`. A lighter version of the package is now the default installaton option!!!
+- ⚠️ Important! ⚠️ `setup.py` and `setup.cfg` were substituted with `pyproject.toml` and `MANIFEST.in`. A lighter version of the package is now the default installation option!!!
   - Installation options for the optional dependencies are described in README.md
   - CI scripts were modified to test the package on the full version. See changes in `.gitlab-ci.yml`.
   - Features using the extra dependencies were moved to `qsprpred.extra` and `qsprpred.deep` subpackages. The structure of the subpackages is the same as of the main package, so you just need to remember to use `qsprpred.extra` or `qsprpred.deep` instead of just `qsprpred` in your imports if you were using these features from the main package before. 
@@ -31,9 +34,10 @@ From v1.3.1 to v2.0.0
   - Unfortunately, this change is not backwards compatible, so previously pickled `MoleculeTable` instances will not work with this version. There were also changes to how models handle multiple descriptor types, which also makes them incompatible with previous versions. However, this can be fixed by modifying the old JSON files as illustrated in commits 7d3f8633 and 6564f024.
 - 'LowVarianceFilter` now includes boundary in the filtered features, e.g. if threshold is 0.1, also features that
   have a variance of 0.1 will be removed.
+- Added the ExtendedValenceSignature molecular descriptor based on Jean-Loup Faulon's work.
 
 ## New Features
-
+- New feature split `ManualSplit` for splitting data by a user-defined column
 - The index of the `MoleculeTable` can now be used to relate cross-validation and test outputs to the original molecules. Therefore, the index is now also saved in the model training outputs.
 - the `Papyrus.getData()` method now accepts `activity_types` parameter to select a list of activity types to get.
 - Added the `checkMols` method to `MoleculeTable` to use for indication of invalid molecules in the data.
@@ -49,3 +53,4 @@ From v1.3.1 to v2.0.0
 - Support for precalculated descriptors was added with `addCustomDescriptors` method of `MoleculeTable`.
   - It allows for adding precalculated descriptors to the `MoleculeTable` by linking the information from the table with external precalculated descriptors.
 - The [tutorial](tutorial) was improved with more detailed sections on data preparation and PCM modelling added.
+- We agreed on and adopted a style guide for contributions to the package. This is described and exemplified in the [example file](docs/style_guide.py). This is also supported by several development tools that were configured to check and automatically format the code. Instructions are included in the example file as well.

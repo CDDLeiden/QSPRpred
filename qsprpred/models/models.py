@@ -38,8 +38,9 @@ class QSPRsklearn(QSPRModel):
     """
 
     def __init__(self, base_dir: str, alg=None, data: QSPRDataset = None,
-                 name: str = None, parameters: dict = None, autoload: bool = True):
-        super().__init__(base_dir, alg, data, name, parameters, autoload)
+                 name: str = None, parameters: dict = None, autoload: bool = True,
+                 scoring=None):
+        super().__init__(base_dir, alg, data, name, parameters, autoload, scoring)
 
         if self.task == ModelTasks.MULTITASK_MIXED:
             raise ValueError(
@@ -86,13 +87,15 @@ class QSPRsklearn(QSPRModel):
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         self.save()
 
-    def evaluate(self, save=True):
+    def evaluate(self, save=True, parameters=None):
         """Make predictions for crossvalidation and independent test set.
 
         arguments:
-            scoring (SklearnMetric): scoring metric
             save (bool): don't save predictions when used in bayesian optimization
+            parameters (dict): model parameters, if None, the parameters from the model are used
         """
+        evalparams = self.parameters if parameters is None else parameters
+        
         # check if data is available
         self.checkForData()
 
@@ -116,6 +119,8 @@ class QSPRsklearn(QSPRModel):
 
         # cross validation
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(folds):
+            crossvalmodel = self.loadEstimator(evalparams)
+            
             logger.info('cross validation fold %s started: %s' % (i, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
             fold_counter[idx_test] = i
@@ -131,10 +136,10 @@ class QSPRsklearn(QSPRModel):
                     fit_set['y'] = y_train
                 else:
                     fit_set['y'] = y_train.ravel()
-            self.estimator.fit(**fit_set)
+            crossvalmodel.fit(**fit_set)
 
             if self.task.isRegression():
-                preds = self.estimator.predict(X_test)
+                preds = crossvalmodel.predict(X_test)
                 # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
                 if preds.ndim == 1:
                     preds = preds.reshape(-1, 1)
@@ -142,7 +147,7 @@ class QSPRsklearn(QSPRModel):
             else:
                 # for the multiclass-multitask case predict_proba returns a list of
                 # arrays, otherwise a single array is returned
-                preds = self.estimator.predict_proba(X_test)
+                preds = crossvalmodel.predict_proba(X_test)
                 for idx in range(len(self.data.targetProperties)):
                     if len(self.data.targetProperties) == 1:
                         cvs[idx][idx_test] = preds
@@ -163,11 +168,12 @@ class QSPRsklearn(QSPRModel):
             else:
                 fit_set['y'] = y.values.ravel()
 
-        self.estimator.fit(**fit_set)
+        indmodel = self.loadEstimator(evalparams)
+        indmodel.fit(**fit_set)
 
         if X_ind.shape[0] > 0:
             if self.task.isRegression():
-                preds = self.estimator.predict(X_ind)
+                preds = indmodel.predict(X_ind)
                 # some sklearn regression models return 1d arrays and others 2d arrays (e.g. PLSRegression)
                 if preds.ndim == 1:
                     preds = preds.reshape(-1, 1)
@@ -175,7 +181,7 @@ class QSPRsklearn(QSPRModel):
             else:
                 # for the multiclass-multitask case predict_proba returns a list of
                 # arrays, otherwise a single array is returned
-                preds = self.estimator.predict_proba(X_ind)
+                preds = indmodel.predict_proba(X_ind)
                 for idx in range(self.nTargets):
                     if self.nTargets == 1:
                         inds[idx] = preds
@@ -183,7 +189,7 @@ class QSPRsklearn(QSPRModel):
                         inds[idx] = preds[idx]
         else:
             logger.warning('No independent test set available. Skipping prediction on independent test set.')
-
+            
         # save crossvalidation results
         if save:
             index_name = self.data.getDF().index.name

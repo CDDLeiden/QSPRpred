@@ -1,0 +1,12 @@
+[
+["DNN", {"lr": [1e-6, 1e-4, 1e-3, 1e-2],
+         "neurons_h1" : [1000, 2000, 4000],
+         "neurons_hx" : [200, 1000, 2000],
+         "extra_layer" : [true, false],
+         "dropout_frac": [0.3, 0,5, 0.8]}, "grid"],
+["DNN", {"lr": ["uniform", 1e-6, 1e-2],
+        "neurons_h1" : ["int", 200, 4000],
+        "neurons_hx" : ["int", 200, 2000],
+        "extra_layer": ["categorical", [true, false]],
+        "dropout_frac": ["uniform", 0.2, 0.9]}, "bayes"]
+]

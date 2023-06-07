@@ -10,13 +10,13 @@ import numpy as np
 import pandas as pd
 from parameterized import parameterized
 from qsprpred.data.tests import DataSetsMixIn
-from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.metrics import SklearnMetric
-from qsprpred.models.models import QSPRsklearn
-from qsprpred.models.param_optimization import (
+from qsprpred.models.hyperparam_optimization import (
     GridSearchOptimization,
     OptunaOptimization,
 )
+from qsprpred.models.interfaces import QSPRModel
+from qsprpred.models.metrics import SklearnMetric
+from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import ModelTasks, TargetTasks
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -53,22 +53,25 @@ class ModelDataSetsMixIn(DataSetsMixIn):
 class ModelTestMixIn:
     """This class holds the tests for the QSPRmodel class."""
 
+    @property
+    def gridFile(self):
+        return f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
+
+    def getParamGrid(self, model, grid):
+        mname = model.name.split("_")[0]
+        grid_params = model.__class__.loadParamsGrid(self.gridFile, grid, mname)
+        return grid_params[grid_params[:, 0] == mname, 1][0]
+
     def fit_test(self, themodel):
         """Test model fitting, optimization and evaluation."""
         # perform bayes optimization
-        fname = f'{os.path.dirname(__file__)}/test_files/search_space_test.json'
-        mname = themodel.name.split("_")[0]
-        grid_params = themodel.__class__.loadParamsGrid(fname, "bayes", mname)
-        search_space_bs = grid_params[grid_params[:, 0] == mname, 1][0]
+        search_space_bs = self.getParamGrid(themodel, "bayes")
         bayesoptimizer = OptunaOptimization(scoring = themodel.score_func, param_grid=search_space_bs, n_trials=1)
         best_params = bayesoptimizer.optimize(themodel)
         themodel.saveParams(best_params)
         self.assertTrue(exists(f"{themodel.outDir}/{themodel.name}_params.json"))
-
         # perform grid search
-        themodel.cleanFiles()
-        grid_params = themodel.__class__.loadParamsGrid(fname, "grid", mname)
-        search_space_gs = grid_params[grid_params[:, 0] == mname, 1][0]
+        search_space_gs = self.getParamGrid(themodel, "grid")
         gridsearcher = GridSearchOptimization(scoring = themodel.score_func, param_grid=search_space_gs)
         best_params = gridsearcher.optimize(themodel)
         themodel.saveParams(best_params)
