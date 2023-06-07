@@ -53,7 +53,6 @@ class ModelDataSetsMixIn(DataSetsMixIn):
 
 class ModelTestMixIn:
     """This class holds the tests for the QSPRmodel class."""
-
     @property
     def gridFile(self):
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
@@ -163,18 +162,17 @@ class ModelTestMixIn:
                 self.assertIsInstance(predictions, np.ndarray)
 
             singleoutput = (
-                predictions[0][0, 0]
-                if isinstance(predictions, list) else predictions[0, 0]
+                predictions[0][0,
+                               0] if isinstance(predictions, list) else predictions[0,
+                                                                                    0]
             )
             if (
-                    predictor.targetProperties[0].task == TargetTasks.REGRESSION or
-                    use_probas
+                predictor.targetProperties[0].task == TargetTasks.REGRESSION or
+                use_probas
             ):
                 self.assertIsInstance(singleoutput, numbers.Real)
-            elif predictor.targetProperties[
-                0].task == TargetTasks.MULTICLASS or isinstance(
-                predictor.estimator, XGBClassifier
-            ):
+            elif predictor.targetProperties[0].task == TargetTasks.MULTICLASS \
+                    or isinstance(predictor.estimator, XGBClassifier):
                 self.assertIsInstance(singleoutput, numbers.Integral)
             elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:
                 self.assertIn(singleoutput, [1, 0])
@@ -187,18 +185,19 @@ class ModelTestMixIn:
             )
             check_shape(invalid_smiles)
             singleoutput = (
-                predictions[0][0, 0]
-                if isinstance(predictions, list) else predictions[0, 0]
+                predictions[0][0,
+                               0] if isinstance(predictions, list) else predictions[0,
+                                                                                    0]
             )
             self.assertEqual(
-                predictions[0][1, 0]
-                if isinstance(predictions, list) else predictions[1, 0],
+                predictions[0][1,
+                               0] if isinstance(predictions, list) else predictions[1,
+                                                                                    0],
                 None,
             )
             if (
-                    predictor.targetProperties[0].task == TargetTasks.SINGLECLASS and
-                    not isinstance(predictor.estimator,
-                                   XGBClassifier) and not use_probas
+                predictor.targetProperties[0].task == TargetTasks.SINGLECLASS and
+                not isinstance(predictor.estimator, XGBClassifier) and not use_probas
             ):
                 self.assertIn(singleoutput, [0, 1])
             else:
@@ -207,13 +206,12 @@ class ModelTestMixIn:
 
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRsklearn class."""
-
     @staticmethod
     def getModel(
-            name: str,
-            alg: Type = None,
-            dataset: QSPRDataset = None,
-            parameters: dict = None,
+        name: str,
+        alg: Type = None,
+        dataset: QSPRDataset = None,
+        parameters: dict = None,
     ):
         """Create a QSPRsklearn model.
 
@@ -406,7 +404,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 class TestMetrics(TestCase):
     """Test the SklearnMetrics from the metrics module."""
-
     def checkMetric(self, metric, task, y_true, y_pred, y_pred_proba=None):
         """Check if the metric is correctly implemented."""
         scorer = SklearnMetric.getMetric(metric)
