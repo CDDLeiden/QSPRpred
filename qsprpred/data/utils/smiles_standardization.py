@@ -2,11 +2,11 @@
 
 import re
 
+from chembl_structure_pipeline import standardizer as chembl_stand
 from rdkit import Chem
 from rdkit.Chem.SaltRemover import SaltRemover
-from chembl_structure_pipeline import standardizer as chembl_stand
 
-from qsprpred.logs import logger
+from ...logs import logger
 
 
 def check_smiles_valid(smiles, throw=True):
@@ -29,15 +29,16 @@ def check_smiles_valid(smiles, throw=True):
     else:
         return is_valid
 
+
 def neutralize_atoms(mol):
     """Neutralize charged molecules by atom.
 
     From https://www.rdkit.org/docs/Cookbook.html, adapted from
     https://baoilleach.blogspot.com/2019/12/no-charge-simple-approach-to.html
-    
+
     Arguments:
         mol: rdkit molecule to be neutralized
-    
+
     Returns:
         mol: neutralized rdkit mol
     """
@@ -55,7 +56,9 @@ def neutralize_atoms(mol):
     return mol
 
 
-def chembl_smi_standardizer(smi: str, isomericSmiles:bool=True, sanitize:bool=True) -> str:
+def chembl_smi_standardizer(
+    smi: str, isomericSmiles: bool = True, sanitize: bool = True
+) -> str:
     """Standardize SMILES using ChEMBL standardizer.
 
     Args:
@@ -65,29 +68,32 @@ def chembl_smi_standardizer(smi: str, isomericSmiles:bool=True, sanitize:bool=Tr
 
     Returns:
         smiles (str): standardized SMILES string or `None` if standardization failed.
-    """    
+    """
     try:
         mol = Chem.MolFromSmiles(smi)
         if not mol:
             raise ValueError(f"Failed to parse SMILES: {smi}")
         standard_mol = chembl_stand.standardize_mol(mol, sanitize=sanitize)
         standard_smiles = Chem.MolToSmiles(
-            standard_mol, kekuleSmiles=False, canonical=True, isomericSmiles=isomericSmiles
+            standard_mol,
+            kekuleSmiles=False,
+            canonical=True,
+            isomericSmiles=isomericSmiles,
         )
         return standard_smiles
-    except Exception as exp:  # noqa E722
+    except Exception as exp:  # E722
         logger.warning(f"Could not standardize SMILES: {smi} due to: {exp}.")
         return None
 
 
 def old_standardize_sanitize(smi: str) -> str:
     """Adaptation of the old QSPRpred molecule standardization/sanitization.
-    
+
     Standardize the rdkit mol object and gets parent molecule using
     chembl_structure_pipeline, and applies some sanitization steps.
     Using this function is not recommended and it will be deprecated within
     next releases.
-    
+
     Arguments:
         smi: single SMILES string to be sanitized.
 
@@ -116,7 +122,7 @@ def old_standardize_sanitize(smi: str) -> str:
         parent_smi = re.sub(s_acid_remover, "", parent_smi)
         try:
             Chem.MolFromSmiles(parent_smi)
-        except:
+        except:  # noqa: 722
             print(f"{parent_smi} could not be parsed after removing sulfuric acids!")
             return None
     # Removing external molecules by splitting on . and picking the largest smiles
@@ -124,7 +130,7 @@ def old_standardize_sanitize(smi: str) -> str:
         parent_smi = max(parent_smi.split("."), key=len)
         try:
             mol = Chem.MolFromSmiles(parent_smi)
-        except:
+        except:  # noqa: 722
             print(f"Compound, ({parent_smi}) could not be parsed!!")
             return None
     # Trying to remove the salts
@@ -147,7 +153,9 @@ def old_standardize_sanitize(smi: str) -> str:
         if all([res is not None, not boron_pattern.findall(parent_smi)]):
             neutralize_atoms(res)
         if salts.findall(Chem.MolToSmiles(res)):
-            print(f"Unable to remove salts from compound {parent_smi} after neutralizing")
+            print(
+                f"Unable to remove salts from compound {parent_smi} after neutralizing"
+            )
             return None
         else:
             parent_smi = Chem.MolToSmiles(res)
