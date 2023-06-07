@@ -5,4 +5,4 @@ Created by: Martin Sicho
 On: 04.10.22, 16:19
 """
 
-from .papyrus_class import Papyrus
+from .papyrus_class import Papyrus # noqa: F401
