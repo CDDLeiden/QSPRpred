@@ -149,7 +149,7 @@ class FingerprintSet(MoleculeDescriptorSet):
         """
         self._isFP = True
         self.fingerprintType = fingerprint_type
-        self.getFingerprint = fingerprints.getFingerprint(
+        self.getFingerprint = fingerprints.get_fingerprint(
             self.fingerprintType, *args, **kwargs
         )
 
@@ -319,7 +319,7 @@ class TanimotoDistances(MoleculeDescriptorSet):
         self._isFP = False
 
         # intialize fingerprint calculator
-        self.getFingerprint = fingerprints.getFingerprint(
+        self.getFingerprint = fingerprints.get_fingerprint(
             self.fingerprintType, *self._args, **self._kwargs
         )
         self.calculate_fingerprints(list_of_smiles)
@@ -505,6 +505,6 @@ class _DescriptorSetRetriever:
         return TanimotoDistances(*args, **kwargs)
 
 
-def getDescriptor(desc_type: str, *args, **kwargs):
+def get_descriptor(desc_type: str, *args, **kwargs):
     """Wrapper to get a descriptorfunction from _DescriptorSetRetriever."""
-    return _DescriptorSetRetriever().get_descriptor(desc_type, *args, **kwargs)
+    return _DescriptorSetRetriever().getDescriptor(desc_type, *args, **kwargs)

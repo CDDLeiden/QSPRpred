@@ -152,5 +152,5 @@ AVAIL_FPS = [
 ]
 
 
-def getFingerprint(fp_type: str, *args, **kwargs):
+def get_fingerprint(fp_type: str, *args, **kwargs):
     return _FingerprintRetriever().getFingerprint(fp_type, *args, **kwargs)
