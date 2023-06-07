@@ -7,9 +7,8 @@ from rdkit import DataStructs
 from rdkit.Chem import AllChem
 
 
-class fingerprint(ABC):
+class Fingerprint(ABC):
     """Base class for fingerprints."""
-
     def __call__(self, mols):
         """Actual call method.
 
@@ -24,22 +23,18 @@ class fingerprint(ABC):
     @abstractmethod
     def settings(self):
         """Return settings of fingerprint."""
-        pass
 
     @abstractmethod
     def __len__(self):
         """Return length of fingerprint."""
-        pass
 
     @abstractmethod
     def getKey(self):
         """Return identifier of fingerprint."""
-        pass
 
 
-class MorganFP(fingerprint):
+class MorganFP(Fingerprint):
     """Morgan fingerprint."""
-
     def __init__(self, radius=2, nBits=2048):
         self.radius = radius
         self.nBits = nBits
@@ -57,7 +52,9 @@ class MorganFP(fingerprint):
 
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
-            fp = AllChem.GetMorganFingerprintAsBitVect(mol, self.radius, nBits=self.nBits)
+            fp = AllChem.GetMorganFingerprintAsBitVect(
+                mol, self.radius, nBits=self.nBits
+            )
             np_fp = np.zeros(len(fp))
             convertFP(fp, np_fp)
             ret[idx] = np_fp
@@ -78,55 +75,82 @@ class MorganFP(fingerprint):
 class _FingerprintRetriever:
     """Based on recipe 8.21 of the book "Python Cookbook".
 
-    To support a new type of fingerprint, just add a function "get_fingerprintname(self, *args, **kwargs)".
+    To support a new type of fingerprint, just add a function
+    `getFingerprintName(self, *args, **kwargs)`.
     """
-
-    def get_fingerprint(self, fp_type, *args, **kwargs):
-        method_name = "get_" + fp_type
+    def getFingerprint(self, fp_type, *args, **kwargs):
+        if fp_type.lower() == "fingerprint":
+            raise Exception("Please specify the type of fingerprint you want to use.")
+        method_name = "get" + fp_type
         method = getattr(self, method_name)
         if method is None:
             raise Exception(f"{fp_type} is not a supported descriptor set type.")
         return method(*args, **kwargs)
 
-    def get_MorganFP(self, *args, **kwargs):
+    def getMorganFP(self, *args, **kwargs):
         return MorganFP(*args, **kwargs)
 
-    def get_CDKFP(self, *args, **kwargs):
+    def getCDKFP(self, *args, **kwargs):
         from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKFP
+
         return CDKFP(*args, **kwargs)
 
-    def get_CDKExtendedFP(self, *args, **kwargs):
-        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKExtendedFP
+    def getCDKExtendedFP(self, *args, **kwargs):
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import (
+            CDKExtendedFP,
+        )
+
         return CDKExtendedFP(*args, **kwargs)
 
-    def get_CDKEStateFP(self, *args, **kwargs):
+    def getCDKEStateFP(self, *args, **kwargs):
         from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKEStateFP
+
         return CDKEStateFP()
 
-    def get_CDKGraphOnlyFP(self, *args, **kwargs):
-        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKGraphOnlyFP
+    def getCDKGraphOnlyFP(self, *args, **kwargs):
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import (
+            CDKGraphOnlyFP,
+        )
+
         return CDKGraphOnlyFP(*args, **kwargs)
 
-    def get_CDKMACCSFP(self, *args, **kwargs):
+    def getCDKMACCSFP(self, *args, **kwargs):
         from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKMACCSFP
+
         return CDKMACCSFP()
 
-    def get_CDKPubchemFP(self, *args, **kwargs):
+    def getCDKPubchemFP(self, *args, **kwargs):
         from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKPubchemFP
+
         return CDKPubchemFP()
 
-    def get_CDKSubstructureFP(self, *args, **kwargs):
-        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKSubstructureFP
+    def getCDKSubstructureFP(self, *args, **kwargs):
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import (
+            CDKSubstructureFP,
+        )
+
         return CDKSubstructureFP(*args, **kwargs)
 
-    def get_CDKKlekotaRothFP(self, *args, **kwargs):
-        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKKlekotaRothFP
+    def getCDKKlekotaRothFP(self, *args, **kwargs):
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import (
+            CDKKlekotaRothFP,
+        )
+
         return CDKKlekotaRothFP(*args, **kwargs)
 
-    def get_CDKAtomPairs2DFP(self, *args, **kwargs):
-        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKAtomPairs2DFP
+    def getCDKAtomPairs2DFP(self, *args, **kwargs):
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import (
+            CDKAtomPairs2DFP,
+        )
+
         return CDKAtomPairs2DFP(*args, **kwargs)
 
 
-def get_fingerprint(fp_type: str, *args, **kwargs):
-    return _FingerprintRetriever().get_fingerprint(fp_type, *args, **kwargs)
+AVAIL_FPS = [
+    m.lstrip("get")
+    for m in dir(_FingerprintRetriever) if m.startswith("get") and m != "getFingerprint"
+]
+
+
+def getFingerprint(fp_type: str, *args, **kwargs):
+    return _FingerprintRetriever().getFingerprint(fp_type, *args, **kwargs)
