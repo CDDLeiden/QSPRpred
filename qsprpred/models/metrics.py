@@ -6,7 +6,7 @@ from typing import Callable, Iterable
 
 from sklearn import metrics
 
-from qsprpred.models.tasks import ModelTasks
+from .tasks import ModelTasks
 
 
 class Metric(ABC):

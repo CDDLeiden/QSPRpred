@@ -20,15 +20,15 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from qsprpred.data.tests import DataSetsMixIn
-from qsprpred.models.hyperparam_optimization import (
+from ..data.tests import DataSetsMixIn
+from ..models.hyperparam_optimization import (
     GridSearchOptimization,
     OptunaOptimization,
 )
-from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.metrics import SklearnMetric
-from qsprpred.models.models import QSPRsklearn
-from qsprpred.models.tasks import ModelTasks, TargetTasks
+from ..models.interfaces import QSPRModel
+from ..models.metrics import SklearnMetric
+from ..models.models import QSPRsklearn
+from ..models.tasks import ModelTasks, TargetTasks
 
 N_CPUS = 2
 logging.basicConfig(level=logging.DEBUG)

@@ -6,8 +6,8 @@ from typing import Callable, Iterable
 import numpy as np
 from sklearn.model_selection import ParameterGrid
 
-from qsprpred.logs import logger
-from qsprpred.models.interfaces import HyperParameterOptimization, QSPRModel
+from ..logs import logger
+from ..models.interfaces import HyperParameterOptimization, QSPRModel
 
 
 class OptunaOptimization(HyperParameterOptimization):

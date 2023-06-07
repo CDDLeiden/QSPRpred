@@ -11,14 +11,14 @@ from typing import Callable, Iterable, List, Type, Union
 import numpy as np
 import pandas as pd
 
-from qsprpred import VERSION
-from qsprpred.data.data import MoleculeTable, QSPRDataset, TargetProperty
-from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
-from qsprpred.logs import logger
-from qsprpred.models import SSPACE
-from qsprpred.models.metrics import SklearnMetric
-from qsprpred.models.tasks import ModelTasks
-from qsprpred.utils.inspect import import_class
+from .. import VERSION
+from ..data.data import MoleculeTable, QSPRDataset, TargetProperty
+from ..data.utils.feature_standardization import SKLearnStandardizer
+from ..logs import logger
+from ..models import SSPACE
+from ..models.metrics import SklearnMetric
+from ..models.tasks import ModelTasks
+from ..utils.inspect import import_class
 
 
 class QSPRModel(ABC):

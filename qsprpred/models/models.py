@@ -16,10 +16,10 @@ import pandas as pd
 import sklearn_json as skljson
 from sklearn.svm import SVC, SVR
 
-from qsprpred.data.data import QSPRDataset
-from qsprpred.logs import logger
-from qsprpred.models.interfaces import QSPRModel
-from qsprpred.models.tasks import ModelTasks
+from ..data.data import QSPRDataset
+from ..logs import logger
+from ..models.interfaces import QSPRModel
+from ..models.tasks import ModelTasks
 
 
 class QSPRsklearn(QSPRModel):
