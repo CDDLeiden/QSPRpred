@@ -24,7 +24,7 @@ from qsprpred.models.tests import ModelDataSetsMixIn, ModelTestMixIn, N_CPUS
 class ModelDataSetsMixInExtras(ModelDataSetsMixIn, DataSetsMixInExtras):
     """This class holds the tests for testing models in extras."""
 
-    qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
+    qsprModelsPath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
 
 
 
@@ -79,6 +79,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             dataset=dataset,
             parameters=parameters
         )
-        self.fit_test(model)
+        self.fitTest(model)
         predictor = QSPRsklearnPCM(name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir)
-        self.predictor_test(predictor, protein_id=dataset.getDF()['accession'].iloc[0])
+        self.predictorTest(predictor, protein_id=dataset.getDF()['accession'].iloc[0])
