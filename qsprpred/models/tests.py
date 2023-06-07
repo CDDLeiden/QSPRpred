@@ -171,8 +171,10 @@ class ModelTestMixIn:
                 use_probas
             ):
                 self.assertIsInstance(singleoutput, numbers.Real)
-            elif predictor.targetProperties[0].task == TargetTasks.MULTICLASS \
-                    or isinstance(predictor.estimator, XGBClassifier):
+            elif predictor.targetProperties[
+                0].task == TargetTasks.MULTICLASS or isinstance(
+                    predictor.estimator, XGBClassifier
+                ):
                 self.assertIsInstance(singleoutput, numbers.Integral)
             elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:
                 self.assertIn(singleoutput, [1, 0])
