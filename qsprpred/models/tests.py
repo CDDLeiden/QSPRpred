@@ -21,10 +21,7 @@ from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 from ..data.tests import DataSetsMixIn
-from ..models.hyperparam_optimization import (
-    GridSearchOptimization,
-    OptunaOptimization,
-)
+from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
 from ..models.models import QSPRsklearn
