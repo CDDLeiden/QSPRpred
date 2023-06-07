@@ -20,6 +20,7 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
+from ..data.data import QSPRDataset
 from ..data.tests import DataSetsMixIn
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
@@ -211,7 +212,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     def getModel(
         name: str,
         alg: Type = None,
-        dataset: "QSPRDataset" = None,
+        dataset: QSPRDataset = None,
         parameters: dict = None,
     ):
         """Create a QSPRsklearn model.
