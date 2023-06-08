@@ -182,6 +182,14 @@ class QSPRModel(ABC):
         Args:
             params (dict): dictionary of model parameters
         """
+        # update parameters with new values and reload estimator
+        if self.parameters is not None:
+            self.parameters.update(params)
+        else:
+            self.parameters = params  
+        self.estimator = self.loadEstimator()
+        
+        # save parameters to file
         path = f'{self.outDir}/{self.name}_params.json'
         with open(path, "w", encoding="utf-8") as j:
             logger.info(
