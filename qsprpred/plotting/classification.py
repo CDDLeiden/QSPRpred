@@ -28,7 +28,7 @@ class ClassifierPlot(ModelPlot, ABC):
 
     def getSupportedTasks(self):
         """Return a list of tasks supported by this plotter."""
-        return [ModelTasks.SINGLECLASS]
+        return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
 
 
 class ROCPlot(ClassifierPlot):

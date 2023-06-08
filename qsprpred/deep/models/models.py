@@ -62,6 +62,7 @@ class QSPRDNN(QSPRModel):
                  name: Optional[str] = None,
                  parameters: Optional[dict] = None,
                  autoload: bool = True,
+                 scoring: Optional[Union[str, callable]] = None,
                  device=DEFAULT_DEVICE,
                  gpus=DEFAULT_GPUS,
                  patience=50, tol=0
@@ -75,6 +76,7 @@ class QSPRDNN(QSPRModel):
             name (str, optional): name of the model. Defaults to None.
             parameters (dict, optional): dictionary of algorithm specific parameters. Defaults to None.
             autoload (bool, optional): whether to load the model from file or not. Defaults to True.
+            scoring (Optional[str, callable], optional): scoring function for the model. Defaults to None, in which case the default scoring function for the task is used.
             device (cuda device, optional): cuda device. Defaults to DEFAULT_DEVICE.
             gpu (int/ list of ints, optional): gpu number(s) to use for model fitting. Defaults to DEFAULT_GPUS.
             patience (int, optional): number of epochs to wait before early stop if no progress on validiation set score. Defaults to 50.
@@ -85,7 +87,7 @@ class QSPRDNN(QSPRModel):
         self.patience = patience
         self.tol = tol
         
-        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload)
+        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload, scoring=scoring)
 
         if self.task.isMultiTask():
             raise NotImplementedError(

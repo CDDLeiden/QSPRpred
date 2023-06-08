@@ -51,7 +51,8 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
     @classmethod
     def fromFile(cls, fname: str) -> None:
         ret = super().fromFile(fname)
-        msa_provider_cls = json.load(open(f"{fname}.msaprovider", "r"))["class"]
+        with open(f"{fname}.msaprovider", "r") as fh: # file handle
+            msa_provider_cls = json.load(fh)["class"]
         msa_provider_cls = import_class(msa_provider_cls)
         ret.msaProvider = msa_provider_cls.fromFile(f"{fname}.msaprovider")
         return ret

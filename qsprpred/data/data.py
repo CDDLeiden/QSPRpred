@@ -175,7 +175,8 @@ class PandasDataSet(DataSet):
         """
         n_cpus = self.nJobs
         chunk_size = self.chunkSize
-        if n_cpus and n_cpus > 1:
+        if n_cpus and n_cpus > 1 and not (
+                hasattr(func, 'no_parallelization') and getattr(func, 'no_parallelization') is True):
             return self.papply(func, func_args, func_kwargs, axis, raw, result_type, subset, n_cpus, chunk_size)
         else:
             df_sub = self.df[subset if subset else self.df.columns]
@@ -398,7 +399,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         for file in files:
             path = f"{self.storeDir}/{file}"
             if os.path.exists(path):
-                data = json.load(open(path, "r", encoding="utf-8"))
+                with open(path, "r", encoding="utf-8") as fh: # file handle
+                    data = json.load(fh)
                 if not "calculator" in data:
                     calc_cls = "qsprpred.data.utils.descriptorcalculator.MoleculeDescriptorsCalculator"
                 else:

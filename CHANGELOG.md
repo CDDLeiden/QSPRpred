@@ -34,6 +34,7 @@ From v1.3.1 to v2.0.0
   - Unfortunately, this change is not backwards compatible, so previously pickled `MoleculeTable` instances will not work with this version. There were also changes to how models handle multiple descriptor types, which also makes them incompatible with previous versions. However, this can be fixed by modifying the old JSON files as illustrated in commits 7d3f8633 and 6564f024.
 - 'LowVarianceFilter` now includes boundary in the filtered features, e.g. if threshold is 0.1, also features that
   have a variance of 0.1 will be removed.
+- Added the ExtendedValenceSignature molecular descriptor based on Jean-Loup Faulon's work.
 
 ## New Features
 - New feature split `ManualSplit` for splitting data by a user-defined column
@@ -52,3 +53,4 @@ From v1.3.1 to v2.0.0
 - Support for precalculated descriptors was added with `addCustomDescriptors` method of `MoleculeTable`.
   - It allows for adding precalculated descriptors to the `MoleculeTable` by linking the information from the table with external precalculated descriptors.
 - The [tutorial](tutorial) was improved with more detailed sections on data preparation and PCM modelling added.
+- We agreed on and adopted a style guide for contributions to the package. This is described and exemplified in the [example file](docs/style_guide.py). This is also supported by several development tools that were configured to check and automatically format the code. Instructions are included in the example file as well.

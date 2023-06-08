@@ -24,7 +24,8 @@ from qsprpred.extra.data.utils.datasplitters import LeaveTargetsOut, TemporalPer
     StratifiedPerTarget
 from qsprpred.extra.data.utils.descriptor_utils.msa_calculator import ClustalMSA, MAFFT
 from qsprpred.extra.data.utils.descriptorcalculator import ProteinDescriptorCalculator
-from qsprpred.extra.data.utils.descriptorsets import Mordred, Mold2, PaDEL, ProDecDescriptorSet
+from qsprpred.extra.data.utils.descriptorsets import Mordred, Mold2, PaDEL, ProDecDescriptorSet, \
+    ExtendedValenceSignature
 from qsprpred.models.tasks import TargetTasks
 
 
@@ -50,6 +51,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
             FingerprintSet(fingerprint_type="CDKKlekotaRothFP", useCounts=False),
             FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", useCounts=True),
             PaDEL(),
+            ExtendedValenceSignature(1)
         ]
 
     @staticmethod
@@ -192,6 +194,14 @@ class TestDescriptorsetsExtra(DataSetsMixInExtras, TestCase):
         self.assertEqual(
             self.dataset.X.shape,
             (len(self.dataset), len(mordred.Calculator(mordreddescriptors).descriptors)))
+        self.assertTrue(self.dataset.X.any().any())
+        self.assertTrue(self.dataset.X.any().sum() > 1)
+
+    def test_ExtendedValenceSignature(self):
+        """Test the SMILES based signature descriptor calculator."""
+        desc_calc = MoleculeDescriptorsCalculator([ExtendedValenceSignature(1)])
+        self.dataset.addDescriptors(desc_calc, recalculate=True)
+        self.assertTrue(self.dataset.X.shape[1] > 0)
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 

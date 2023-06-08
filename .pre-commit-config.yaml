@@ -1,0 +1,17 @@
+minimum_pre_commit_version: 2.15.0
+exclude: ^LICENSES/|\.(html|csv|svg)$
+repos:
+-   repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.270
+    hooks:
+    -   id: ruff
+-   repo: https://github.com/google/yapf
+    rev: v0.33.0
+    hooks:
+    -   id: yapf
+        # run recursively, in-place, in parallel, style defined in pyproject.toml
+        args: ["-r", "-i", "-p", "--style pyproject.toml"]
+-   repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+    -   id: isort
