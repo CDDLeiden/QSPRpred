@@ -68,13 +68,11 @@ class ModelTestMixIn:
         search_space_bs = self.getParamGrid(themodel, "bayes")
         bayesoptimizer = OptunaOptimization(scoring = themodel.score_func, param_grid=search_space_bs, n_trials=1)
         best_params = bayesoptimizer.optimize(themodel)
-        themodel.saveParams(best_params)
         self.assertTrue(exists(f"{themodel.outDir}/{themodel.name}_params.json"))
         # perform grid search
         search_space_gs = self.getParamGrid(themodel, "grid")
         gridsearcher = GridSearchOptimization(scoring = themodel.score_func, param_grid=search_space_gs)
         best_params = gridsearcher.optimize(themodel)
-        themodel.saveParams(best_params)
         self.assertTrue(exists(f"{themodel.outDir}/{themodel.name}_params.json"))
         themodel.cleanFiles()
 
