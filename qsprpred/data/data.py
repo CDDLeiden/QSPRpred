@@ -1376,7 +1376,7 @@ class QSPRDataset(MoleculeTable):
 
         Args:
             split (datasplit) : split instance orchestrating the split
-            featurize (bool): whether to featurize the data set splits after splitting. Defaults to `True`.
+            featurize (bool): whether to featurize the data set splits after splitting. Defaults to `False`.
         """
         if hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and not split.hasDataSet:
             split.setDataSet(self)
