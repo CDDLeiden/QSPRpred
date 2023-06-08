@@ -50,15 +50,6 @@ class QSPRsklearn(QSPRModel):
             raise NotImplementedError(
                 'At the moment there are no supported metrics for multi-task multi-class/mix multi-and-single class classification.')
 
-        # initialize models with defined parameters
-        if (type(self.estimator) in [SVC, SVR]):
-            logger.warning("parameter max_iter set to 10000 to avoid training getting stuck. \
-                            Manually set this parameter if this is not desired.")
-            if self.parameters:
-                self.parameters.update({'max_iter': 10000})
-            else:
-                self.parameters = {'max_iter': 10000}
-
         if self.parameters not in [None, {}] and hasattr(self, "estimator"):
             self.estimator.set_params(**self.parameters)
 
