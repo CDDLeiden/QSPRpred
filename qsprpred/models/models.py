@@ -78,14 +78,16 @@ class QSPRsklearn(QSPRModel):
         logger.info('Model fit ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         self.save()
 
-    def evaluate(self, save=True, parameters=None):
+    def evaluate(self, save=True, parameters=None, score_func=None):
         """Make predictions for crossvalidation and independent test set.
 
         arguments:
             save (bool): don't save predictions when used in bayesian optimization
             parameters (dict): model parameters, if None, the parameters from the model are used
+            score_func (Metric): metric to use for scoring, if None, the metric from the model is used
         """
         evalparams = self.parameters if parameters is None else parameters
+        score_func = self.scoring if score_func is None else score_func
         
         # check if data is available
         self.checkForData()
@@ -210,7 +212,7 @@ class QSPRsklearn(QSPRModel):
         if self.task.isRegression():
             return cvs
         else:
-            if self.score_func.needs_proba_to_score:
+            if score_func.needs_proba_to_score:
                 if self.task in [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]:
                     return np.transpose([y_pred[:, 1] for y_pred in cvs])
                 else:

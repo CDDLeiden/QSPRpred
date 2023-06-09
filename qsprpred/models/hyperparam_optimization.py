@@ -104,7 +104,7 @@ class OptunaOptimization(HyperParameterOptimization):
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
 
         y, y_ind = model.data.getTargetPropertiesValues()
-        score = self.score_func(y, model.evaluate(save=False, parameters=bayesian_params))
+        score = self.score_func(y, model.evaluate(save=False, parameters=bayesian_params, score_func=self.score_func))
         return score
 
 
@@ -138,7 +138,7 @@ class GridSearchOptimization(HyperParameterOptimization):
 
             # do 5 fold cross validation and take mean prediction on validation set as score of parameter settings
             y, y_ind = model.data.getTargetPropertiesValues()
-            score = self.score_func(y, model.evaluate(save=False, parameters=params))
+            score = self.score_func(y, model.evaluate(save=False, parameters=params, score_func=self.score_func))
             logger.info('Score: %s' % score)
             if score > self.best_score:
                 self.best_score = score

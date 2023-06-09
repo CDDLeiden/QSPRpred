@@ -176,7 +176,8 @@ class SklearnMetric(Metric):
         return self.name in ['accuracy', 'balanced_accuracy', 'f1', 'f1_micro',
                              'f1_macro', 'f1_weighted', 'f1_samples', 'precision', 'precision_micro',
                              'precision_macro', 'precision_weighted', 'precision_samples', 'recall',
-                             'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples']
+                             'recall_micro', 'recall_macro', 'recall_weighted', 'recall_samples',
+                             'matthews_corrcoef']
 
     def supportsTask(self, task: ModelTasks):
         """Return true if the scorer supports the given task."""
