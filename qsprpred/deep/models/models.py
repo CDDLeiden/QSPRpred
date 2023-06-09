@@ -58,7 +58,7 @@ class QSPRDNN(QSPRModel):
     def __init__(self,
                  base_dir: str,
                  alg: STFullyConnected | Type = STFullyConnected,
-                 data: Optional[QSPRDataset | None = None,
+                 data: Optional[QSPRDataset | None] = None,
                  name: str | None = None,
                  parameters: dict | None = None,
                  autoload: bool = True,
