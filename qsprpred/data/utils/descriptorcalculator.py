@@ -1,6 +1,7 @@
 """This module is used for calculating molecular descriptors using descriptorsets."""
 import json
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -9,6 +10,9 @@ from rdkit.Chem.rdchem import Mol
 from ...logs import logger
 from ...utils.inspect import import_class
 from .descriptorsets import get_descriptor
+
+if TYPE_CHECKING:
+    from .descriptorsets import DataFrameDescriptorSet, DescriptorSet
 
 
 class DescriptorsCalculator(ABC):
@@ -23,12 +27,12 @@ class DescriptorsCalculator(ABC):
     def getPrefix(self) -> str:
         """Return prefix for descriptor names of the calculator."""
 
-    def __init__(self, descsets: list["DescriptorSet"]) -> None:  # noqa: F821
+    def __init__(self, descsets: list["DescriptorSet"]) -> None:
         """Set the descriptorsets to be calculated with this calculator."""
         self.descSets = list(descsets)
 
     @classmethod
-    def loadDescriptorSets(cls, fname: str) -> list["DescriptorSet"]:  # noqa: F821
+    def loadDescriptorSets(cls, fname: str) -> list["DescriptorSet"]:
         """Loads the descriptor sets from a json file.
 
         Args:
@@ -227,7 +231,7 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
 
 class CustomDescriptorsCalculator(DescriptorsCalculator):
     """Calculator for custom descriptors."""
-    def __init__(self, descsets: list["DataFrameDescriptorSet"]) -> None:  # noqa: F821
+    def __init__(self, descsets: list["DataFrameDescriptorSet"]) -> None:
         """Initialize calculator.
 
         Args:
