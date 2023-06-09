@@ -366,7 +366,12 @@ class PandasDataSet(DataSet):
         pickled data frame in storage."""
         store_dir = os.path.dirname(filename)
         name = os.path.basename(filename).split(".")[0]
-        return PandasDataSet(name, *args, store_dir=store_dir, **kwargs)
+        return PandasDataSet(
+            name=name,
+            store_dir=store_dir,
+            *args,  # noqa: B026 # FIXME: this is a bug in flake8...
+            **kwargs
+        )
 
     def getDF(self):
         """Get the data frame this instance manages.
@@ -553,7 +558,12 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         pickled data frame in storage."""
         store_dir = os.path.dirname(filename)
         name = os.path.basename(filename).split(".")[0]
-        return MoleculeTable(name, *args, store_dir=store_dir, **kwargs)
+        return MoleculeTable(
+            name=name,
+            store_dir=store_dir,
+            *args,  # noqa: B026 # FIXME: this is a bug in flake8...
+            **kwargs
+        )
 
     @staticmethod
     def fromSMILES(name, smiles, *args, **kwargs):
@@ -602,8 +612,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         return MoleculeTable(
             name,
             PandasTools.LoadSDF(filename, molColName="RDMol"),
-            *args,
             smilescol=smiles_prop,
+            *args,  # noqa: B026 # FIXME: this is a bug in flake8...
             **kwargs,
         )
 
@@ -1383,7 +1393,12 @@ class QSPRDataset(MoleculeTable):
         Returns:
             QSPRDataset: `QSPRDataset` object
         """
-        return QSPRDataset(name, *args, df=pd.read_table(filename, sep=sep), **kwargs)
+        return QSPRDataset(
+            name,
+            df=pd.read_table(filename, sep=sep),
+            *args,  # noqa: B026 # FIXME: this is a bug in flake8...
+            **kwargs
+        )
 
     @staticmethod
     def fromSDF(name, filename, smiles_prop, *args, **kwargs):
@@ -1493,7 +1508,7 @@ class QSPRDataset(MoleculeTable):
             features = []
             for calc in self.descriptorCalculators:
                 prefix = calc.getPrefix()
-                for descset in calc.descsets:
+                for descset in calc.descSets:
                     features.extend(
                         [f"{prefix}_{descset}_{x}" for x in descset.descriptors]
                     )
