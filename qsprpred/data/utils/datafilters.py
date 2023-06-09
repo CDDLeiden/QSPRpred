@@ -7,8 +7,8 @@ from functools import partial
 
 import pandas as pd
 
+from ...data.interfaces import DataFilter
 from ...logs import logger
-from ..data.interfaces import DataFilter
 
 
 class CategoryFilter(DataFilter):
