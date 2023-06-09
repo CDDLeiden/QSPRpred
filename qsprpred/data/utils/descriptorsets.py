@@ -264,7 +264,7 @@ class RDKitDescs(MoleculeDescriptorSet):
         # TODO: RdkitDescriptors probably needs refactoring; see definition
         self._calculator = RdkitDescriptors(rdkit_descriptors, compute_3Drdkit)
         self._descriptors = self._calculator.descriptors
-        self.compute_3Drdkit = compute_3Drdkit
+        self.compute3Drdkit = compute_3Drdkit
 
     def __call__(self, mols):
         return self._calculator.getScores(self.iterMols(mols, to_list=True))
@@ -277,7 +277,7 @@ class RDKitDescs(MoleculeDescriptorSet):
     def settings(self):
         return {
             "rdkit_descriptors": self.descriptors,
-            "compute_3Drdkit": self.compute_3Drdkit,
+            "compute_3Drdkit": self.compute3Drdkit,
         }
 
     @property

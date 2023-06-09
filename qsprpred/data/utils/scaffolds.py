@@ -29,6 +29,7 @@ class Scaffold(ABC):
 
 
 class Murcko(Scaffold):
+    """Class for calculating Murcko scaffolds of a given molecule."""
     def __call__(self, mol):
         """
         Calculate the Murcko scaffold for a molecule.
