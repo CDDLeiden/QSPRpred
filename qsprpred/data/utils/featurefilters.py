@@ -13,7 +13,7 @@ from ...logs import logger
 from ..interfaces import FeatureFilter
 
 
-class lowVarianceFilter(FeatureFilter):
+class LowVarianceFilter(FeatureFilter):
     """Remove features with variance lower than a given threshold after MinMax scaling.
 
     Attributes:
@@ -40,7 +40,7 @@ class lowVarianceFilter(FeatureFilter):
         return df
 
 
-class highCorrelationFilter(FeatureFilter):
+class HighCorrelationFilter(FeatureFilter):
     """Remove features with correlation higher than a given threshold.
 
     Attributes:
