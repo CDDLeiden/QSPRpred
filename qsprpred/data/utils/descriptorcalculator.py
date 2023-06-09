@@ -1,7 +1,6 @@
 """This module is used for calculating molecular descriptors using descriptorsets."""
 import json
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -10,9 +9,6 @@ from rdkit.Chem.rdchem import Mol
 from ...logs import logger
 from ...utils.inspect import import_class
 from .descriptorsets import get_descriptor
-
-if TYPE_CHECKING:
-    from .descriptorsets import DataFrameDescriptorSet, DescriptorSet
 
 
 class DescriptorsCalculator(ABC):
@@ -27,12 +23,12 @@ class DescriptorsCalculator(ABC):
     def getPrefix(self) -> str:
         """Return prefix for descriptor names of the calculator."""
 
-    def __init__(self, descsets: list["DescriptorSet"]) -> None:
+    def __init__(self, descsets: list["DescriptorSet"]) -> None:  # noqa: F821
         """Set the descriptorsets to be calculated with this calculator."""
         self.descSets = list(descsets)
 
     @classmethod
-    def loadDescriptorSets(cls, fname: str) -> list["DescriptorSet"]:
+    def loadDescriptorSets(cls, fname: str) -> list["DescriptorSet"]:  # noqa: F821
         """Loads the descriptor sets from a json file.
 
         Args:
@@ -52,7 +48,7 @@ class DescriptorsCalculator(ABC):
             if name.startswith("FingerprintSet_"):
                 name = "FingerprintSet"
             descset = get_descriptor(name, **value["settings"])
-            if descset.is_fp:
+            if descset.isFP:
                 descset.keepindices = value["keepindices"]
             else:
                 descset.descriptors = value["descriptors"]
@@ -117,7 +113,7 @@ class DescriptorsCalculator(ABC):
         descset_dict = {}
         for idx, descset in enumerate(self.descSets):
             idx = str(idx)
-            if descset.is_fp:
+            if descset.isFP:
                 descset_dict[idx] = {
                     "name": str(descset),
                     "settings": descset.settings,
@@ -159,7 +155,7 @@ class DescriptorsCalculator(ABC):
                 to_remove.append(idx)
                 continue
 
-            if descriptorset.is_fp:
+            if descriptorset.isFP:
                 # if the set is a fingerprint, set indices to keep
                 self.descSets[idx].keepindices = list(descs_from_curr_set)
             else:
@@ -213,7 +209,7 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
         for descset in self.descSets:
             values = descset(mols)
             values = pd.DataFrame(values, columns=descset.descriptors)
-            if descset.is_fp:
+            if descset.isFP:
                 values.add_prefix(f"{descset.fingerprint_type}_")
             values = values.astype(dtype)
             values = self.treatInfs(values)
@@ -231,7 +227,7 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
 
 class CustomDescriptorsCalculator(DescriptorsCalculator):
     """Calculator for custom descriptors."""
-    def __init__(self, descsets: list["DataFrameDescriptorSet"]) -> None:
+    def __init__(self, descsets: list["DataFrameDescriptorSet"]) -> None:  # noqa: F821
         """Initialize calculator.
 
         Args:
@@ -246,7 +242,7 @@ class CustomDescriptorsCalculator(DescriptorsCalculator):
         df = pd.DataFrame(index=index)
         for descset in self.descSets:
             values = descset(index)
-            if descset.is_fp:
+            if descset.isFP:
                 values.add_prefix(f"{descset.fingerprint_type}_")
             values = values.astype(dtype)
             values = self.treatInfs(values)
