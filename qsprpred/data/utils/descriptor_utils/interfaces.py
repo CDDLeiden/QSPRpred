@@ -9,7 +9,6 @@ from abc import ABC, abstractmethod
 
 class Scorer(ABC):
     """Used to calculate customized scores."""
-
     def __init__(self, modifier=None):
         self.modifier = modifier
 
@@ -24,7 +23,6 @@ class Scorer(ABC):
         Returns:
             scores (list): `list` of scores for "mols"
         """
-        pass
 
     def __call__(self, mols, frags=None):
         """Actual call method. Modifies the scores before returning them.
