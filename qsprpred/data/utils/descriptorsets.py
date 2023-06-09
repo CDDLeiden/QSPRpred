@@ -12,8 +12,8 @@ from rdkit import Chem, DataStructs
 from rdkit.Chem import Mol
 
 from ...models.interfaces import QSPRModel
-from .descriptor_utils import fingerprints
 from .descriptor_utils.drugexproperties import Property
+from .descriptor_utils.fingerprints import get_fingerprint
 from .descriptor_utils.rdkitdescriptors import RdkitDescriptors
 
 
@@ -149,9 +149,7 @@ class FingerprintSet(MoleculeDescriptorSet):
         """
         self._isFP = True
         self.fingerprintType = fingerprint_type
-        self.getFingerprint = fingerprints.get_fingerprint(
-            self.fingerprintType, *args, **kwargs
-        )
+        self.getFingerprint = get_fingerprint(self.fingerprintType, *args, **kwargs)
 
         self._keepindices = None
 
@@ -319,7 +317,7 @@ class TanimotoDistances(MoleculeDescriptorSet):
         self._isFP = False
 
         # intialize fingerprint calculator
-        self.getFingerprint = fingerprints.get_fingerprint(
+        self.getFingerprint = get_fingerprint(
             self.fingerprintType, *self._args, **self._kwargs
         )
         self.calculate_fingerprints(list_of_smiles)

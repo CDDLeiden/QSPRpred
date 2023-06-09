@@ -210,7 +210,7 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
             values = descset(mols)
             values = pd.DataFrame(values, columns=descset.descriptors)
             if descset.isFP:
-                values.add_prefix(f"{descset.fingerprint_type}_")
+                values.add_prefix(f"{descset.fingerprintType}_")
             values = values.astype(dtype)
             values = self.treatInfs(values)
             df = pd.concat(
@@ -243,7 +243,7 @@ class CustomDescriptorsCalculator(DescriptorsCalculator):
         for descset in self.descSets:
             values = descset(index)
             if descset.isFP:
-                values.add_prefix(f"{descset.fingerprint_type}_")
+                values.add_prefix(f"{descset.fingerprintType}_")
             values = values.astype(dtype)
             values = self.treatInfs(values)
             values = values.add_prefix(f"{self.getPrefix()}_{descset}_")
