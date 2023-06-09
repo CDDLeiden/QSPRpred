@@ -426,7 +426,6 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
     def setUp(self):
         super().setUp()
         self.dataset = self.create_pcm_dataset(f"{self.__class__.__name__}_test")
-        self.dataset.shuffle()
         self.dataset.addProteinDescriptors(
             calculator=ProteinDescriptorCalculator(
                 descsets=[ProDecDescriptorSet(sets=["Zscale Hellberg"])],
@@ -441,7 +440,7 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
 
     def testLeaveTargetOut(self):
         target = self.dataset.getProteinKeys()[0:2]
-        splitter = LeaveTargetsOut(dataset=self.dataset, targets=target)
+        splitter = LeaveTargetsOut(targets=target)
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
         train, test = train.index, test.index
@@ -453,7 +452,7 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
 
     def testStratifiedPerTarget(self):
         randsplitter = randomsplit(0.2)
-        splitter = StratifiedPerTarget(dataset=self.dataset, splitter=randsplitter)
+        splitter = StratifiedPerTarget(splitter=randsplitter)
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
         test_targets = self.dataset.getProperty(self.dataset.proteincol).loc[test.index]
@@ -465,7 +464,6 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
         year_col = "Year"
         year = 2015
         splitter = TemporalPerTarget(
-            dataset=self.dataset,
             year_col=year_col,
             split_years={key: year for key in self.dataset.getProteinKeys()}
         )
@@ -476,7 +474,7 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
 
     def testPerTargetScaffoldSplit(self):
         scaffsplit = scaffoldsplit()
-        splitter = StratifiedPerTarget(dataset=self.dataset, splitter=scaffsplit)
+        splitter = StratifiedPerTarget(splitter=scaffsplit)
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
         test_targets = self.dataset.getProperty(self.dataset.proteincol).loc[test.index]

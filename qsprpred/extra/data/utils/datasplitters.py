@@ -13,12 +13,12 @@ from qsprpred.extra.data.data import PCMDataset
 
 class LeaveTargetsOut(datasplit, DataSetDependant):
 
-    def __init__(self, dataset: PCMDataset, targets: list[str]):
+    def __init__(self, targets: list[str], dataset: PCMDataset = None):
         """Creates a leave target out splitter.
 
         Args:
-            dataset (PCMDataset): a `PCMDataset` instance to split
             targets (list): the identifiers of the targets to leave out as test set
+            dataset (PCMDataset): a `PCMDataset` instance to split
         """
 
         super().__init__(dataset)
@@ -40,13 +40,13 @@ class LeaveTargetsOut(datasplit, DataSetDependant):
 class StratifiedPerTarget(datasplit, DataSetDependant):
     """Splits dataset in train and test subsets based on the specified splitter."""
 
-    def __init__(self, dataset: PCMDataset, splitter: datasplit = None, splitters: dict[str, datasplit] = None):
+    def __init__(self, splitter: datasplit = None, splitters: dict[str, datasplit] = None, dataset: PCMDataset = None):
         """Creates a split that is consistent across targets.
 
         Args:
-            dataset (PCMDataset): a `PCMDataset` instance to split
             splitter: a `datasplit` instance to split the target subsets of the dataset
             splitters (dict[str, datasplit]): a dictionary with target keys as keys and splitters to use on each protein target as values
+            dataset (PCMDataset): a `PCMDataset` instance to split
         """
         super().__init__(dataset)
         self.splitter = splitter
@@ -76,18 +76,19 @@ class StratifiedPerTarget(datasplit, DataSetDependant):
             train.extend(indices[df.index.isin(ds_target.X.index)])
             test.extend(indices[df.index.isin(ds_target.X_ind.index)])
 
+        assert len(set(train)) + len(set(test)) == len(ds), "Train and test set do not cover the whole dataset!"
         return iter([(train, test)])
 
 
 class TemporalPerTarget(datasplit, DataSetDependant):
 
-    def __init__(self, dataset: PCMDataset, year_col: str, split_years: dict[str, int]):
+    def __init__(self, year_col: str, split_years: dict[str, int], dataset: PCMDataset = None):
         """Creates a temporal split that is consistent across targets.
 
         Args:
-            dataset (PCMDataset): a `PCMDataset` instance to split
             year_col (str): the name of the column in the dataframe that contains the year information
             split_years (dict[str,int]): a dictionary with target keys as keys and split years as values
+            dataset (PCMDataset): a `PCMDataset` instance to split
         """
         super().__init__(dataset)
         self.splitYears = split_years
@@ -101,4 +102,4 @@ class TemporalPerTarget(datasplit, DataSetDependant):
             )
             for target, year in self.splitYears.items()
         }
-        return StratifiedPerTarget(self.getDataSet(), splitters=splitters).split(X, y)
+        return StratifiedPerTarget(dataset=self.getDataSet(), splitters=splitters).split(X, y)
