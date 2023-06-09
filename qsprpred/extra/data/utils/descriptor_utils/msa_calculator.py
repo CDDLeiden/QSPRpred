@@ -5,6 +5,7 @@ Created by: Martin Sicho
 On: 05.04.23, 12:34
 """
 import json
+import os.path
 from abc import ABC, abstractmethod
 
 import Bio
@@ -107,20 +108,21 @@ class BioPythonMSA(MSAProvider, ABC):
     def fromFile(cls, fname: str) -> 'MSAProvider':
         with open(fname, 'r') as f:
             data = json.load(f)
-
         ret = cls(data["out_dir"], data["fname"])
-        ret.currentFromFile(data["current"])
+        current_path = f"{os.path.dirname(fname)}/{data['current']}"
+        ret.currentFromFile(current_path)
         return ret
 
     def toFile(self, fname: str):
+        current_path = f"{os.path.basename(fname)}.msa"
         with open(fname, 'w') as f:
             json.dump({
                 "out_dir": self.outDir,
                 "fname": self.fname,
-                "current": f"{fname}.msa",
+                "current": current_path,
                 "class": f"{self.__class__.__module__}.{self.__class__.__name__}"
             }, f)
-        self.currentToFile(f"{fname}.msa")
+        self.currentToFile(os.path.join(os.path.dirname(fname), current_path))
 
     def parseSequences(self, sequences, **kwargs):
         """
