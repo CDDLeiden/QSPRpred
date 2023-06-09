@@ -1,6 +1,7 @@
 """This module is used for calculating molecular descriptors using descriptorsets."""
 import json
 from abc import ABC, abstractmethod
+from types import TypeVar
 
 import numpy as np
 import pandas as pd
@@ -8,7 +9,10 @@ from rdkit.Chem.rdchem import Mol
 
 from ...logs import logger
 from ...utils.inspect import import_class
-from .descriptorsets import DataFrameDescriptorSet, DescriptorSet, get_descriptor
+from .descriptorsets import get_descriptor
+
+DataFrameDescriptorSet = TypeVar("DataFrameDescriptorSet")
+DescriptorSet = TypeVar("DescriptorSet")
 
 
 class DescriptorsCalculator(ABC):
