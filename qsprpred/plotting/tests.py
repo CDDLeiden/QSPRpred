@@ -25,7 +25,7 @@ class ROCPlotTest(ModelDataSetsMixIn, TestCase):
         return QSPRsklearn(
             name=name,
             data=dataset,
-            base_dir=os.path.dirname(ROCPlotTest.qsprmodelspath.replace("qspr/models", "")),
+            base_dir=os.path.dirname(ROCPlotTest.qsprModelsPath.replace("qspr/models", "")),
             alg=alg,
         )
 
@@ -58,7 +58,7 @@ class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
         return QSPRsklearn(
             name=name,
             data=dataset,
-            base_dir=os.path.dirname(ROCPlotTest.qsprmodelspath.replace("qspr/models", "")),
+            base_dir=os.path.dirname(ROCPlotTest.qsprModelsPath.replace("qspr/models", "")),
             alg=alg,
         )
 
@@ -89,7 +89,7 @@ class CorrPlotTest(ModelDataSetsMixIn, TestCase):
         return QSPRsklearn(
             name=name,
             data=dataset,
-            base_dir=os.path.dirname(ROCPlotTest.qsprmodelspath.replace("qspr/models", "")),
+            base_dir=os.path.dirname(ROCPlotTest.qsprModelsPath.replace("qspr/models", "")),
             alg=alg,
         )
 
