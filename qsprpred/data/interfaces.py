@@ -4,8 +4,6 @@ from typing import Callable, List
 
 import pandas as pd
 
-from .utils.descriptorcalculator import DescriptorsCalculator
-
 
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
@@ -70,7 +68,7 @@ class DataSet(StoredTable):
 
 class MoleculeDataSet(DataSet):
     @abstractmethod
-    def addDescriptors(self, calculator: DescriptorsCalculator):
+    def addDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
         """
         Add descriptors to the dataset.
 
