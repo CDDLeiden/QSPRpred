@@ -53,12 +53,12 @@ class OptunaOptimization(HyperParameterOptimization):
         self.best_score = -np.inf
         self.best_params = None
 
-    def optimize(self, model: QSPRModel, set_params=True):
+    def optimize(self, model: QSPRModel, save_params=True):
         """Bayesian optimization of hyperparameters using optuna.
 
         Args:
             model (`QSPRModel`): the model to optimize
-            set_params (`bool`): whether to set the best parameters to the model after optimization
+            save_params (`bool`): whether to set and save the best parameters to the model after optimization
         """
         import optuna
         logger.info('Bayesian optimization can take a while for some hyperparameter combinations')
@@ -74,9 +74,9 @@ class OptunaOptimization(HyperParameterOptimization):
 
         self.best_score = trial.value
         self.best_params = trial.params
-        
-        if set_params:
-            model.setParams(self.best_params)
+
+        if save_params:
+            model.saveParams(self.best_params)
         
         return self.best_params
     
@@ -125,12 +125,12 @@ class GridSearchOptimization(HyperParameterOptimization):
         """
         super().__init__(scoring, param_grid)
 
-    def optimize(self, model: QSPRModel, set_params=True):
+    def optimize(self, model: QSPRModel, save_params=True):
         """Optimize the hyperparameters of the model.
 
         Args:
             model (`QSPRModel`): the model to optimize
-            set_params (bool): whether to set the best parameters to the model after optimization
+            save_params (bool): whether to set and save the best parameters to the model after optimization
         """
         logger.info('Grid search started: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         for params in ParameterGrid(self.param_grid):
@@ -147,7 +147,7 @@ class GridSearchOptimization(HyperParameterOptimization):
         logger.info('Grid search ended: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         logger.info('Grid search best params: %s with score: %s' % (self.best_params, self.best_score))
         
-        if set_params:
-            model.setParams(self.best_params)
+        if save_params:
+            model.saveParams(self.best_params)
 
         return self.best_params
