@@ -13,7 +13,6 @@ import pandas as pd
 
 from .. import VERSION
 from ..data.data import MoleculeTable, QSPRDataset, TargetProperty
-from ..data.utils.descriptorcalculator import DescriptorsCalculator
 from ..data.utils.feature_standardization import SKLearnStandardizer
 from ..logs import logger
 from ..models import SSPACE
@@ -82,7 +81,9 @@ class QSPRModel(ABC):
             return json.loads(j.read())
 
     @staticmethod
-    def readDescriptorCalculators(paths: list[str]) -> list[DescriptorsCalculator]:
+    def readDescriptorCalculators(
+        paths: list[str],
+    ) -> list["DescriptorsCalculator"]:  # noqa: F821
         """Read a descriptor calculators from a JSON file.
 
         Args:
