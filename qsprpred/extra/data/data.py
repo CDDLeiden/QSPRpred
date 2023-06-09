@@ -73,6 +73,24 @@ class PCMDataset(QSPRDataset):
         self.proteincol = proteincol
         self.proteinseqprovider = proteinseqprovider
 
+    def getProteinKeys(self) -> list[str]:
+        """Return a list of keys identifying the proteins in the data frame.
+
+        Returns:
+            keys (list): List of protein keys.
+        """
+        return self.df[self.proteincol].unique().tolist()
+
+    def getProteinSequences(self) -> dict[str, str]:
+        """Return a dictionary of protein sequences for the proteins in the data frame.
+
+        Returns:
+            sequences (dict): Dictionary of protein sequences.
+        """
+        if not self.proteinseqprovider:
+            raise ValueError("Protein sequence provider not set. Cannot get protein sequences.")
+        return self.proteinseqprovider(self.getProteinKeys())
+
     def addProteinDescriptors(self, calculator: ProteinDescriptorCalculator, recalculate=False, featurize=True):
         """
         Add protein descriptors to the data frame.
