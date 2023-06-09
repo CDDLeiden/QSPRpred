@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from rdkit import DataStructs
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, MACCSkeys
 
 
 class fingerprint(ABC):
@@ -74,6 +74,38 @@ class MorganFP(fingerprint):
     def getKey(self):
         return "MorganFP"
 
+class RDkitMACCSFP(fingerprint):
+    """RDkits implementation of MACCS keys fingerprint."""
+
+    def getFingerprints(self, mols):
+        """Return the MACCS fingerprints for the input molecules.
+
+        Args:
+            mols: molecules to obtain the fingerprint of
+
+        Returns:
+            fingerprint (list): `list` of fingerprints for "mols"
+        """
+        convertFP = DataStructs.ConvertToNumpyArray
+
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = MACCSkeys.GenMACCSKeys(mol)
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+
+        return ret
+
+    @property
+    def settings(self):
+        return {}
+
+    def __len__(self):
+        return 167
+
+    def getKey(self):
+        return "RDKitMACCSFP"
 
 class _FingerprintRetriever:
     """Based on recipe 8.21 of the book "Python Cookbook".
@@ -90,6 +122,9 @@ class _FingerprintRetriever:
 
     def get_MorganFP(self, *args, **kwargs):
         return MorganFP(*args, **kwargs)
+    
+    def get_RDKitMACCSFP(self, *args, **kwargs):
+        return RDkitMACCSFP(*args, **kwargs)
 
     def get_CDKFP(self, *args, **kwargs):
         from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKFP
