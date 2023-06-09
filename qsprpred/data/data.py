@@ -8,7 +8,7 @@ import os
 import pickle
 import warnings
 from multiprocessing import Pool
-from typing import Callable, List, Literal, Union
+from typing import TYPE_CHECKING, Callable, List, Literal, Union
 
 import numpy as np
 import pandas as pd
@@ -18,11 +18,6 @@ from sklearn.preprocessing import LabelEncoder
 from tqdm.auto import tqdm
 
 from qsprpred.data.interfaces import DataSet, DataSplit, MoleculeDataSet
-from qsprpred.data.utils.descriptorcalculator import (
-    CustomDescriptorsCalculator,
-    DescriptorsCalculator,
-    MoleculeDescriptorsCalculator,
-)
 
 from ..logs import logger
 from ..models.tasks import TargetTasks
@@ -38,6 +33,13 @@ from .utils.smiles_standardization import (
     chembl_smi_standardizer,
     old_standardize_sanitize,
 )
+
+if TYPE_CHECKING:
+    from qsprpred.data.utils.descriptorcalculator import (
+        CustomDescriptorsCalculator,
+        DescriptorsCalculator,
+        MoleculeDescriptorsCalculator,
+    )
 
 
 class PandasDataSet(DataSet):
@@ -636,7 +638,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         else:
             return self.df[self.smilescol].apply(check_smiles_valid, throw=throw)
 
-    def dropDescriptors(self, calculator: DescriptorsCalculator):
+    def dropDescriptors(self, calculator: "DescriptorsCalculator"):
         to_remove = []
         for idx, calc in enumerate(self.descriptorCalculators):
             if calc.getPrefix() == calculator.getPrefix():
@@ -652,7 +654,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             self.descriptorCalculators.pop(idx)
 
     def addCustomDescriptors(
-        self, calculator: CustomDescriptorsCalculator, recalculate=False
+        self, calculator: "CustomDescriptorsCalculator", recalculate=False
     ):
         """
         Add custom descriptors to the data frame using a `CustomDescriptorsCalculator`
@@ -680,7 +682,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         self.attachDescriptors(calculator, descriptors, self.indexCols)
 
     def attachDescriptors(
-        self, calculator: DescriptorsCalculator, descriptors: pd.DataFrame, index_cols
+        self, calculator: "DescriptorsCalculator", descriptors: pd.DataFrame, index_cols
     ):
         if not self.descriptorCalculators:
             self.descriptorCalculators = []
@@ -700,7 +702,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
 
     def addDescriptors(
         self,
-        calculator: MoleculeDescriptorsCalculator,
+        calculator: "MoleculeDescriptorsCalculator",
         recalculate=False,
         fail_on_invalid=True,
     ):
@@ -1691,7 +1693,7 @@ class QSPRDataset(MoleculeTable):
 
     def addCustomDescriptors(
         self,
-        calculator: CustomDescriptorsCalculator,
+        calculator: "CustomDescriptorsCalculator",
         recalculate=False,
         featurize=True
     ):
@@ -1713,7 +1715,7 @@ class QSPRDataset(MoleculeTable):
 
     def addDescriptors(
         self,
-        calculator: MoleculeDescriptorsCalculator,
+        calculator: "MoleculeDescriptorsCalculator",
         recalculate=False,
         featurize=True,
     ):
@@ -1925,22 +1927,23 @@ class QSPRDataset(MoleculeTable):
 
     def addFeatures(
         self,
-        feature_calculators: List[DescriptorsCalculator] = None,
+        feature_calculators: List["DescriptorsCalculator"] = None,
         recalulate=False
     ):
         for calc in feature_calculators:
-            if isinstance(calc, MoleculeDescriptorsCalculator):
+            # we avoid isinstance() here to avoid circular imports
+            if calc.__class__.__name__ == "MoleculeDescriptorsCalculator":
                 self.addDescriptors(calc, recalculate=recalulate, featurize=False)
             else:
                 raise ValueError("Unknown feature calculator type: %s" % type(calc))
 
     def prepareDataset(
         self,
-        smiles_standardizer: Union[str, Callable, None] = "chembl",
+        smiles_standardizer: str | Callable | None = "chembl",
         datafilters=None,
         split=None,
         fold=None,
-        feature_calculators: List[DescriptorsCalculator] = None,
+        feature_calculators: list["DescriptorsCalculator"] = None,
         feature_filters=None,
         feature_standardizer=None,
         feature_fill_value=np.nan,
