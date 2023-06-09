@@ -1,8 +1,8 @@
 """Here the QSPRmodel classes can be found.
 
-At the moment there is a class for sklearn type models
-and one for a keras DNN model. To add more types a model class should be added, which
-is a subclass of the QSPRModel type.
+At the moment there is a class for sklearn type models. However, one for a pytorch DNN
+model can be fount in `qsprpred.deep`. To add more types a model class implementing
+the `QSPRModel` interface can be added.
 """
 
 import os
