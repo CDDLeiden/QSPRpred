@@ -24,7 +24,8 @@ class Papyrus:
             version : str = 'latest',
             descriptors : list = tuple(),
             stereo : bool = False,
-            disk_margin : float = 0.01
+            plus_only: bool = True,
+            disk_margin : float = 0.01,
     ):
         """
         Create new instance of Papyrus dataset. See `papyrus_filter` and `Papyrus.download` and `Papyrus.getData` for more details.
@@ -41,7 +42,7 @@ class Papyrus:
         self.descriptors = descriptors
         self.stereo = stereo
         self.nostereo = not self.stereo
-        self.plusplus = not self.stereo
+        self.plusplus = plus_only
         self.disk_margin = disk_margin
 
     def download(self):
@@ -60,6 +61,7 @@ class Papyrus:
             stereo=self.stereo,
             nostereo=self.nostereo,
             disk_margin=self.disk_margin,
+            only_pp=self.plusplus,
         )
 
     def getData(

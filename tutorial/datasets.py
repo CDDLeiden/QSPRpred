@@ -29,7 +29,8 @@ def A2AR(data_dir='data'):
     papyrus = Papyrus(
         data_dir=data_dir,
         stereo=False,
-        version=papyrus_version
+        version=papyrus_version,
+        plus_only=True,
     )
 
     dataset = papyrus.getData(
@@ -127,7 +128,8 @@ def AR_PCM(data_dir='data'):
     papyrus = Papyrus(
         data_dir=data_dir,
         stereo=False,
-        version=papyrus_version
+        version=papyrus_version,
+        plus_only=True,
     )
 
     mt = papyrus.getData(
