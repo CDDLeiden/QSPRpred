@@ -183,7 +183,7 @@ def QSPR_modelling(args):
                     parameters['class_weight'] = class_weight
                 counts = mydataset.y.value_counts()
                 scale_pos_weight = counts[0] / counts[1] if (
-                    args.sample_weighing and not mydataset.isMultiClass()) else 1
+                    args.sample_weighing and len(tasks)==1 and not tasks[0].isMultiClass()) else 1
                 if alg_dict[model_type] == XGBClassifier:
                     parameters['scale_pos_weight'] = scale_pos_weight
 
