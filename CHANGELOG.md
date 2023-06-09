@@ -10,6 +10,7 @@ From v1.3.1 to v2.0.0
 - Instead of all smiles, only invalid smiles are now printed to the log when they are removed.
 - problems with PaDEL descriptors and fingerprints on Linux were fixed
 - fixed serialization issues with `DataFrameDescriptorSet` and saving and loading of MSA for PCM descriptor calculations 
+- the Papyrus adapter was fixed so that the quality and data set filtering options work properly (before only high quality Papyrus++ data was fetched no matter the options)
 
 ## Changes
 
