@@ -57,12 +57,12 @@ class QSPRDNN(QSPRModel):
 
     def __init__(self,
                  base_dir: str,
-                 alg: STFullyConnected | Type = STFullyConnected,
-                 data: Optional[QSPRDataset | None = None,
-                 name: str | None = None,
-                 parameters: dict | None = None,
+                 alg: Union[STFullyConnected, Type] = STFullyConnected,
+                 data: Optional[QSPRDataset] = None,
+                 name: Optional[str] = None,
+                 parameters: Optional[dict] = None,
                  autoload: bool = True,
-                 scoring: str | callable | None = None,
+                 scoring: Optional[Union[str, callable]] = None,
                  device=DEFAULT_DEVICE,
                  gpus=DEFAULT_GPUS,
                  patience=50, tol=0
