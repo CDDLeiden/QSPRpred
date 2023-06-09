@@ -1463,6 +1463,12 @@ class QSPRDataset(MoleculeTable):
             self.X_ind = pd.DataFrame(columns=self.X.columns)
             self.y_ind = pd.DataFrame(columns=[self.targetPropertyNames])
 
+        # shuffle the training and test sets
+        self.X = self.X.sample(frac=1)
+        self.X_ind = self.X_ind.sample(frac=1)
+        self.y = self.y.loc[self.X.index, :]
+        self.y_ind = self.y_ind.loc[self.X_ind.index, :]
+
     def featurizeSplits(self):
         """If the data set has descriptors, load them into the train and test splits.
 
