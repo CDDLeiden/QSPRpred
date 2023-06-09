@@ -9,7 +9,7 @@ From v1.3.1 to v2.0.0
   divided by single and multiclass support (moved to `metrics.py`, see also New Features).
 - Instead of all smiles, only invalid smiles are now printed to the log when they are removed.
 - problems with PaDEL descriptors and fingerprints on Linux were fixed
-- fixed a serialization issue with `DataFrameDescriptorSet` 
+- fixed serialization issues with `DataFrameDescriptorSet` and saving and loading of MSA for PCM descriptor calculations 
 
 ## Changes
 
