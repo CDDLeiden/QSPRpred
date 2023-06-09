@@ -35,6 +35,7 @@ From v1.3.1 to v2.0.0
 - 'LowVarianceFilter` now includes boundary in the filtered features, e.g. if threshold is 0.1, also features that
   have a variance of 0.1 will be removed.
 - Added the ExtendedValenceSignature molecular descriptor based on Jean-Loup Faulon's work.
+- removed default parameter setting scikit-learn SVC and SVR `max_iter` 10000.
 
 ## New Features
 - New feature split `ManualSplit` for splitting data by a user-defined column
