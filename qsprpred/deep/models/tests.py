@@ -11,11 +11,11 @@ from unittest import TestCase
 import torch
 from parameterized import parameterized
 
-from qsprpred.data.data import QSPRDataset
-from qsprpred.deep.models.models import QSPRDNN
-from qsprpred.deep.models.neural_network import STFullyConnected
-from qsprpred.models.tasks import TargetTasks
-from qsprpred.models.tests import ModelDataSetsMixIn, ModelTestMixIn
+from ...data.data import QSPRDataset
+from ...deep.models.models import QSPRDNN
+from ...deep.models.neural_network import STFullyConnected
+from ...models.tasks import TargetTasks
+from ...models.tests import ModelDataSetsMixIn, ModelTestMixIn
 
 GPUS = list(range(torch.cuda.device_count()))
 
