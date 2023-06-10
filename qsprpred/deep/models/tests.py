@@ -20,7 +20,7 @@ GPUS = [idx for idx in range(torch.cuda.device_count())]
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRDNN class."""
     
-    qsprmodelspath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
+    qsprModelsPath = f'{os.path.dirname(__file__)}/test_files/qspr/models'
 
     @property
     def gridFile(self):
@@ -108,6 +108,6 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg=alg,
             dataset=dataset
         )
-        self.fit_test(model)
+        self.fitTest(model)
         predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)
-        self.predictor_test(predictor)
+        self.predictorTest(predictor)
