@@ -11,7 +11,7 @@
 *.gzip
 *.tar.gz
 *.out
-/**/test_files/*
+/**/test_files/qspr/
 
 ### Python template
 # Byte-compiled / optimized / DLL files
