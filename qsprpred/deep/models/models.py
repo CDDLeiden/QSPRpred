@@ -212,15 +212,17 @@ class QSPRDNN(QSPRModel):
             }
         )
 
-    def evaluate(self, save=True, ES_val_size=0.1, parameters=None):
+    def evaluate(self, save=True, ES_val_size=0.1, parameters=None, score_func=None):
         """Make predictions for crossvalidation and independent test set.
 
         Args:
             save (bool): wether to save the cross validation predictions
             ES_val_size (float): validation set size for early stopping in CV
             parameters (dict): model parameters, if None, the parameters from the model are used
+            score_func (Metric): scoring function for the model, if None, the default scoring function for the task is used
         """
         evalparams = self.parameters if parameters is None else parameters
+        score_func = self.score_func if score_func is None else score_func
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetPropertiesValues()
         last_save_epochs = 0

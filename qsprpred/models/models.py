@@ -87,7 +87,7 @@ class QSPRsklearn(QSPRModel):
             score_func (Metric): metric to use for scoring, if None, the metric from the model is used
         """
         evalparams = self.parameters if parameters is None else parameters
-        score_func = self.scoring if score_func is None else score_func
+        score_func = self.score_func if score_func is None else score_func
         
         # check if data is available
         self.checkForData()
