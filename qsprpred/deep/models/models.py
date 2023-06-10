@@ -288,7 +288,7 @@ class QSPRDNN(QSPRModel):
 
         # Return predictions in the right format for scorer
         if self.task.isClassification():
-            if self.score_func.needs_proba_to_score:
+            if self.scoreFunc.needsProbasToScore:
                 if self.task == ModelTasks.SINGLECLASS:
                     return cvs[:, 1]  # if binary classification, return only the scores for the positive class
                 else:
@@ -331,7 +331,7 @@ class QSPRDNN(QSPRModel):
         if scoring is not None and scoring.needs_discrete_to_score:
             y = np.where(y > th, 1, 0)
 
-        score_func = self.get_scoring_func(scoring)
+        score_func = self.getScoringFunction(scoring)
         score = score_func(y, self.evaluate(save=False, parameters=bayesian_params))
         return score
 
