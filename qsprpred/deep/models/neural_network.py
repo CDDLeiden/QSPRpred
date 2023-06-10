@@ -147,7 +147,7 @@ class Base(nn.Module):
             loss = None
             # decrease learning rate over the epochs
             for param_group in optimizer.param_groups:
-                param_group["lr"] = self.lr * (1 - 1 / self.n_epochs) ** (epoch * 10)
+                param_group["lr"] = self.lr * (1 - 1 / self.n_epochs)**(epoch * 10)
             for i, (Xb, yb) in enumerate(train_loader):
                 # Batch of target tenor and label tensor
                 Xb, yb = Xb.to(self.device), yb.to(self.device)
