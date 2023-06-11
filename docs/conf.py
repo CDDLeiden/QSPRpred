@@ -36,7 +36,9 @@ intersphinx_mapping = {'python': ('https://docs.python.org/3.9', None)}
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
-    "private-members": False
+    "private-members": False,
+    "show-inheritance": True,
+    "inherited-members": True,
 }
 
 # napoleon settings
@@ -82,3 +84,5 @@ html_domain_indices = True
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
 default_role = 'any'
+
+autoclass_content = 'both'

@@ -51,14 +51,9 @@ where we think is appropriate. Summary of the implemented and enforced rules:
         `$ pre-commit install`
     - To run the pre-commit hooks on all files, run the following command:
         `$ pre-commit run --all-files`
-        
-Example:
-
-    Some of these rules can be enforced automatically with Autoflake
-    by running the following on your files:
-
-        $ black --line-length 88 style_guide.py
-        $ isort --profile black style_guide.py
+    - The `style.sh` script in the root directory of the repository can also be used to
+    autoformat files on demand, i.e.:
+        `$ ./style.sh qsprpred/data/*.py`
 """
 
 import numpy

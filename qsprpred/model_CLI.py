@@ -217,7 +217,7 @@ def QSPR_modelling(args):
                 search_space_gs = grid_params[grid_params[:, 0] ==
                                               model_type, 1][0]
                 log.info(search_space_gs)
-                gridsearcher = GridSearchOptimization(scoring = QSPRmodel.score_func, param_grid=search_space_gs)
+                gridsearcher = GridSearchOptimization(scoring = QSPRmodel.scoreFunc, param_grid=search_space_gs)
                 best_params = gridsearcher.optimize(QSPRmodel)
                 QSPRmodel.saveParams(best_params)
             elif args.optimization == 'bayes':
@@ -234,7 +234,7 @@ def QSPR_modelling(args):
                 elif model_type == "RF":
                     search_space_bs.update(
                         {'criterion': ['categorical', ['gini', 'entropy']]})
-                bayesoptimizer = OptunaOptimization(scoring = QSPRmodel.score_func, param_grid=search_space_bs,
+                bayesoptimizer = OptunaOptimization(scoring = QSPRmodel.scoreFunc, param_grid=search_space_bs,
                                                     n_trials=args.n_trials, n_jobs=args.n_jobs)
                 best_params = bayesoptimizer.optimize(QSPRmodel)
                 QSPRmodel.saveParams(best_params)
