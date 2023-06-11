@@ -461,8 +461,8 @@ class _DescriptorSetRetriever:
         return PredictorDesc(*args, **kwargs)
 
     def get_ProDec(self, *args, **kwargs):
-        from qsprpred.extra.data.utils.descriptorsets import ProDecDescriptorSet
-        return ProDecDescriptorSet(*args, **kwargs)
+        from qsprpred.extra.data.utils.descriptorsets import ProDec
+        return ProDec(*args, **kwargs)
 
     def get_TanimotoDistances(self, *args, **kwargs):
         return TanimotoDistances(*args, **kwargs)

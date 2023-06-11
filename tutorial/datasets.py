@@ -117,7 +117,7 @@ def AR_PCM(data_dir='data'):
         a `QSPRDataset` instance with the loaded data
     """
 
-    from qsprpred.extra.data.data import PCMDataset
+    from qsprpred.extra.data.data import PCMDataSet
 
     acc_keys = ["P29274", "P29275", "P30542", "P0DMS8"]
     dataset_name = "AR_LIGANDS"  # name of the file to be generated
@@ -162,7 +162,7 @@ def AR_PCM(data_dir='data'):
 
         return map, info
 
-    return PCMDataset.fromMolTable(
+    return PCMDataSet.fromMolTable(
         mt,
         target_props=[
             {
@@ -171,6 +171,6 @@ def AR_PCM(data_dir='data'):
                 "th": [6.5]
             }
         ],
-        proteincol="accession",
-        proteinseqprovider=sequence_provider,
+        protein_col="accession",
+        protein_seq_provider=sequence_provider,
     )
