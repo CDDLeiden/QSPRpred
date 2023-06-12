@@ -4,15 +4,20 @@ fingerprints
 Created by: Martin Sicho
 On: 12.05.23, 16:25
 """
-from PaDEL_pywrapper import descriptor as cdk_fps, PaDEL as PaDEL_calculator
+from PaDEL_pywrapper import PaDEL as PaDEL_calculator
+from PaDEL_pywrapper import descriptor as cdk_fps
 
-from qsprpred.data.utils.descriptor_utils.fingerprints import fingerprint
+from ....data.utils.descriptor_utils.fingerprints import Fingerprint
 
 
-class CDKFP(fingerprint):
-    """CDK fingerprint."""
+class CDKFP(Fingerprint):
+    """Class for calculating CDK fingerprint.
 
-    def __init__(self, size=1024, searchDepth=7):
+    Attributes:
+        size (int): Number of bits in the CDK fingerprints (ignored for others)
+        searchDepth (int): Search depth for the CDK fingerprints (ignored for others)
+    """
+    def __init__(self, size: int = 1024, searchDepth: int = 7):
         self.size = size
         self.searchDepth = searchDepth
         fp = cdk_fps.FP(size=size, searchDepth=searchDepth)
@@ -40,9 +45,8 @@ class CDKFP(fingerprint):
         return "CDKFP"
 
 
-class CDKExtendedFP(fingerprint):
+class CDKExtendedFP(Fingerprint):
     """CDK extended fingerprint with 25 additional ring features and isotopic masses."""
-
     def __init__(self):
         fp = cdk_fps.ExtendedFP
         self._padel = PaDEL_calculator([fp])
@@ -69,9 +73,8 @@ class CDKExtendedFP(fingerprint):
         return "CDKExtendedFP"
 
 
-class CDKEStateFP(fingerprint):
+class CDKEStateFP(Fingerprint):
     """CDK EState fingerprint."""
-
     def __init__(self):
         fp = cdk_fps.EStateFP
         self._padel = PaDEL_calculator([fp])
@@ -98,10 +101,14 @@ class CDKEStateFP(fingerprint):
         return "CDKEStateFP"
 
 
-class CDKGraphOnlyFP(fingerprint):
-    """CDK fingerprint ignoring bond orders."""
+class CDKGraphOnlyFP(Fingerprint):
+    """CDK fingerprint ignoring bond orders.
 
-    def __init__(self, size=1024, searchDepth=7):
+    Attributes:
+        size (int): Number of bits in the CDK fingerprints (ignored for others)
+        searchDepth (int): Search depth for the CDK fingerprints (ignored for others)
+    """
+    def __init__(self, size: int = 1024, searchDepth: int = 7):
         self.size = size
         self.searchDepth = searchDepth
         fp = cdk_fps.GraphOnlyFP(size=size, searchDepth=searchDepth)
@@ -129,9 +136,8 @@ class CDKGraphOnlyFP(fingerprint):
         return "CDKGraphOnlyFP"
 
 
-class CDKMACCSFP(fingerprint):
+class CDKMACCSFP(Fingerprint):
     """CDK MACCS fingerprint."""
-
     def __init__(self):
         fp = cdk_fps.MACCSFP
         self._padel = PaDEL_calculator([fp])
@@ -158,9 +164,8 @@ class CDKMACCSFP(fingerprint):
         return "CDKMACCSFP"
 
 
-class CDKPubchemFP(fingerprint):
+class CDKPubchemFP(Fingerprint):
     """CDK PubChem fingerprint."""
-
     def __init__(self):
         fp = cdk_fps.PubchemFP
         self._padel = PaDEL_calculator([fp])
@@ -187,12 +192,14 @@ class CDKPubchemFP(fingerprint):
         return "CDKPubchemFP"
 
 
-class CDKSubstructureFP(fingerprint):
+class CDKSubstructureFP(Fingerprint):
     """CDK Substructure fingerprint.
 
     Based on SMARTS patterns for functional group classification by Christian Laggner.
-    """
 
+    Attributes:
+        useCounts (bool): If True, use the count version of the fingerprint.
+    """
     def __init__(self, useCounts: bool = False):
         self.useCounts = useCounts
         if useCounts:
@@ -214,7 +221,7 @@ class CDKSubstructureFP(fingerprint):
 
     @property
     def settings(self):
-        return {'useCounts': self.useCounts}
+        return {"useCounts": self.useCounts}
 
     def __len__(self):
         return 307
@@ -225,9 +232,12 @@ class CDKSubstructureFP(fingerprint):
         return "CDKSubstructureFP"
 
 
-class CDKKlekotaRothFP(fingerprint):
-    """CDK Klekota & Roth fingerprint."""
+class CDKKlekotaRothFP(Fingerprint):
+    """CDK Klekota & Roth fingerprint.
 
+    Attributes:
+        useCounts (bool): If True, use the count version of the fingerprint.
+    """
     def __init__(self, useCounts: bool = False):
         self.useCounts = useCounts
         if useCounts:
@@ -249,7 +259,7 @@ class CDKKlekotaRothFP(fingerprint):
 
     @property
     def settings(self):
-        return {'useCounts': self.useCounts}
+        return {"useCounts": self.useCounts}
 
     def __len__(self):
         return 4860
@@ -260,9 +270,8 @@ class CDKKlekotaRothFP(fingerprint):
         return "CDKKlekotaRothFP"
 
 
-class CDKAtomPairs2DFP(fingerprint):
+class CDKAtomPairs2DFP(Fingerprint):
     """CDK atom pairs and topological fingerprint."""
-
     def __init__(self, useCounts: bool = False):
         self.useCounts = useCounts
         if useCounts:
@@ -272,7 +281,8 @@ class CDKAtomPairs2DFP(fingerprint):
         self._padel = PaDEL_calculator([fp])
 
     def getFingerprints(self, mols):
-        """Return the CDK atom pairs and topological fingerprint for the input molecules.
+        """Return the CDK atom pairs and topological fingerprint for the input
+        molecules.
 
         Args:
             mols: molecules to obtain the fingerprint of
@@ -284,7 +294,7 @@ class CDKAtomPairs2DFP(fingerprint):
 
     @property
     def settings(self):
-        return {'useCounts': self.useCounts}
+        return {"useCounts": self.useCounts}
 
     def __len__(self):
         return 780
