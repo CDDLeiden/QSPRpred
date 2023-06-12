@@ -9,14 +9,17 @@ class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
     @abstractmethod
     def save(self):
+        """Save the table to a file."""
         pass
 
     @abstractmethod
     def reload(self):
+        """Reload the table from a file."""
         pass
 
     @abstractmethod
     def clearFiles(self):
+        """Delete the files associated with the table."""
         pass
 
     @staticmethod
@@ -39,22 +42,51 @@ class DataSet(StoredTable):
 
     @abstractmethod
     def getProperties(self):
+        """Get the properties of the dataset."""
         pass
 
     @abstractmethod
-    def addProperty(self, name, data):
+    def addProperty(self, name: str, data: list):
+        """Add a property to the dataset.
+
+        Args:
+            name (str): The name of the property.
+            data (list): The data of the property.
+        """
         pass
 
     @abstractmethod
-    def removeProperty(self, name):
+    def removeProperty(self, name: str):
+        """Remove a property from the dataset.
+
+        Args:
+            name (str): The name of the property.
+        """
         pass
 
     @abstractmethod
     def getSubset(self, prefix: str):
+        """Get a subset of the dataset.
+
+        Args:
+            prefix (str): The prefix of the subset.
+        """
         pass
 
     @abstractmethod
-    def apply(self, func, func_args=None, func_kwargs=None, *args, **kwargs):
+    def apply(self,
+              func: callable,
+              func_args: list = None,
+              func_kwargs: dict = None,
+              *args,
+              **kwargs):
+        """Apply a function to the dataset.
+
+        Args:
+            func (callable): The function to apply.
+            func_args (list, optional): The positional arguments of the function.
+            func_kwargs (dict, optional): The keyword arguments of the function.
+        """
         pass
 
     @abstractmethod
@@ -63,6 +95,11 @@ class DataSet(StoredTable):
 
     @abstractmethod
     def filter(self, table_filters: List[Callable]):
+        """Filter the dataset.
+
+        Args:
+            table_filters (List[Callable]): The filters to apply.
+        """
         pass
 
 
