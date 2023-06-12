@@ -10,10 +10,10 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
-from qsprpred.extra.data.utils.descriptor_utils.msa_calculator import ClustalMSA
-from qsprpred.extra.data.utils.descriptorsets import ProteinDescriptorSet
-from qsprpred.utils.inspect import import_class
+from ....data.utils.descriptorcalculator import DescriptorsCalculator
+from ....utils.inspect import import_class
+from .descriptor_utils.msa_calculator import ClustalMSA
+from .descriptorsets import ProteinDescriptorSet
 
 
 class ProteinDescriptorCalculator(DescriptorsCalculator):
