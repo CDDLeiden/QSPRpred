@@ -13,28 +13,24 @@ import pandas as pd
 from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred.data.tests import (
+from qsprpred.models.tasks import TargetTasks
+
+from ...data.tests import (
     CHUNK_SIZE,
     N_CPU,
     DataPrepTestMixIn,
     DataSetsMixIn,
     TestDescriptorInDataMixIn,
 )
-from qsprpred.data.utils.datasplitters import RandomSplit
-from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
-from qsprpred.data.utils.descriptorsets import DrugExPhyschem, FingerprintSet
-from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
-from qsprpred.data.utils.featurefilters import HighCorrelationFilter, LowVarianceFilter
-from qsprpred.extra.data.data import PCMDataset
-from qsprpred.extra.data.utils.descriptor_utils.msa_calculator import MAFFT, ClustalMSA
-from qsprpred.extra.data.utils.descriptorcalculator import ProteinDescriptorCalculator
-from qsprpred.extra.data.utils.descriptorsets import (
-    Mold2,
-    Mordred,
-    PaDEL,
-    ProDecDescriptorSet,
-)
-from qsprpred.models.tasks import TargetTasks
+from ...data.utils.datasplitters import RandomSplit
+from ...data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
+from ...data.utils.descriptorsets import DrugExPhyschem, FingerprintSet
+from ...data.utils.feature_standardization import SKLearnStandardizer
+from ...data.utils.featurefilters import HighCorrelationFilter, LowVarianceFilter
+from ..data.data import PCMDataset
+from ..data.utils.descriptor_utils.msa_calculator import MAFFT, ClustalMSA
+from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
+from ..data.utils.descriptorsets import Mold2, Mordred, PaDEL, ProDecDescriptorSet
 
 
 class DataSetsMixInExtras(DataSetsMixIn):
