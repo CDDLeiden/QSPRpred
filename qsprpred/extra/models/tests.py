@@ -13,13 +13,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from qsprpred.extra.data.tests import DataSetsMixInExtras
-from qsprpred.extra.data.utils.descriptor_utils.msa_calculator import ClustalMSA
-from qsprpred.extra.data.utils.descriptorcalculator import ProteinDescriptorCalculator
-from qsprpred.extra.data.utils.descriptorsets import ProDecDescriptorSet
-from qsprpred.extra.models.pcm import QSPRsklearnPCM
-from qsprpred.models.tasks import TargetTasks
-from qsprpred.models.tests import N_CPUS, ModelDataSetsMixIn, ModelTestMixIn
+from ...models.tasks import TargetTasks
+from ...models.tests import N_CPUS, ModelDataSetsMixIn, ModelTestMixIn
+from ..data.tests import DataSetsMixInExtras
+from ..data.utils.descriptor_utils.msa_calculator import ClustalMSA
+from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
+from ..data.utils.descriptorsets import ProDecDescriptorSet
+from ..models.pcm import QSPRsklearnPCM
 
 
 class ModelDataSetsMixInExtras(ModelDataSetsMixIn, DataSetsMixInExtras):
