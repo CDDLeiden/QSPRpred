@@ -358,7 +358,7 @@ class DescriptorCheckMixIn:
         # test some basic consistency rules on the resulting features
         expected_length = 0
         for calc in dataset.descriptorCalculators:
-            for descset in calc.descsets:
+            for descset in calc.descSets:
                 expected_length += len(descset.descriptors)
         self.feature_consistency_checks(dataset, expected_length)
 
@@ -376,7 +376,7 @@ class DescriptorCheckMixIn:
         self.assertTrue(ds_loaded.descriptorCalculators)
         for calc in ds_loaded.descriptorCalculators:
             self.assertTrue(isinstance(calc, DescriptorsCalculator))
-            for descset in calc.descsets:
+            for descset in calc.descSets:
                 self.assertTrue(isinstance(descset, DescriptorSet))
         self.feature_consistency_checks(dataset, expected_length)
 
@@ -1138,7 +1138,7 @@ class TestDescriptorCalculation(DataSetsMixIn, TestCase):
     def test_switching(self):
         """Test if the feature calculator can be switched to a new dataset."""
         feature_calculator = MoleculeDescriptorsCalculator(
-            descsets=[
+            desc_sets=[
                 FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
                 DrugExPhyschem(),
             ]

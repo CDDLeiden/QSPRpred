@@ -23,9 +23,9 @@ class DescriptorsCalculator(ABC):
     def getPrefix(self) -> str:
         """Return prefix for descriptor names of the calculator."""
 
-    def __init__(self, descsets: list["DescriptorSet"]) -> None:  # noqa: F821
+    def __init__(self, desc_sets: list["DescriptorSet"]) -> None:  # noqa: F821
         """Set the descriptorsets to be calculated with this calculator."""
-        self.descSets = list(descsets)
+        self.descSets = list(desc_sets)
 
     @classmethod
     def loadDescriptorSets(cls, fname: str) -> list["DescriptorSet"]:  # noqa: F821
@@ -40,7 +40,7 @@ class DescriptorsCalculator(ABC):
         with open(fname, "r") as infile:
             descset_dict = json.load(infile)
 
-        descsets = []
+        desc_sets = []
         for key, value in descset_dict.items():
             if key == "calculator":
                 continue
@@ -52,9 +52,9 @@ class DescriptorsCalculator(ABC):
                 descset.keepindices = value["keepindices"]
             else:
                 descset.descriptors = value["descriptors"]
-            descsets.append(descset)
+            desc_sets.append(descset)
 
-        return descsets
+        return desc_sets
 
     @classmethod
     def classFromFile(cls, fname: str):
@@ -85,8 +85,8 @@ class DescriptorsCalculator(ABC):
         """
 
         cl = cls.classFromFile(fname)
-        descsets = cl.loadDescriptorSets(fname)
-        return cl(descsets)
+        desc_sets = cl.loadDescriptorSets(fname)
+        return cl(desc_sets)
 
     @abstractmethod
     def __call__(self, *args, **kwargs) -> pd.DataFrame:
@@ -227,13 +227,13 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
 
 class CustomDescriptorsCalculator(DescriptorsCalculator):
     """Calculator for custom descriptors."""
-    def __init__(self, descsets: list["DataFrameDescriptorSet"]) -> None:  # noqa: F821
+    def __init__(self, desc_sets: list["DataFrameDescriptorSet"]) -> None:  # noqa: F821
         """Initialize calculator.
 
         Args:
-            descsets (list[DataFrameDescriptorSet]): list of descriptorsets
+            desc_sets (list[DataFrameDescriptorSet]): list of descriptorsets
         """
-        super().__init__(descsets)
+        super().__init__(desc_sets)
 
     def getPrefix(self) -> str:
         return "Descriptor_Custom"

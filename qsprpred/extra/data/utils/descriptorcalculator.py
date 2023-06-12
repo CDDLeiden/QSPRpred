@@ -17,14 +17,21 @@ from qsprpred.utils.inspect import import_class
 
 
 class ProteinDescriptorCalculator(DescriptorsCalculator):
-
-    def __init__(self, descsets: List[ProteinDescriptorSet], msa_provider = ClustalMSA()) -> None:
-        super().__init__(descsets)
+    def __init__(
+        self, desc_sets: List[ProteinDescriptorSet], msa_provider=ClustalMSA()
+    ) -> None:
+        super().__init__(desc_sets)
         self.msaProvider = msa_provider
 
-    def __call__(self, acc_keys, sequences: dict[str: str] = None, dtype=np.float32, **kwargs) -> pd.DataFrame:
+    def __call__(
+        self,
+        acc_keys,
+        sequences: dict[str:str] = None,
+        dtype=np.float32,
+        **kwargs
+    ) -> pd.DataFrame:
         df = pd.DataFrame(index=acc_keys)
-        for descset in self.descsets:
+        for descset in self.desc_sets:
             if hasattr(descset, "setMSA"):
                 msa = self.msaProvider(sequences, **kwargs)
                 descset.setMSA(msa)

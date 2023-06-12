@@ -319,11 +319,11 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
 
     def test_with_mol_descs(self):
         protein_feature_calculator = ProteinDescriptorCalculator(
-            descsets=[ProDecDescriptorSet(sets=["Zscale Hellberg"])],
+            desc_sets=[ProDecDescriptorSet(sets=["Zscale Hellberg"])],
             msa_provider=self.default_msa_provider,
         )
         mol_feature_calculator = MoleculeDescriptorsCalculator(
-            descsets=[
+            desc_sets=[
                 FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
                 DrugExPhyschem(),
             ]
@@ -337,7 +337,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
 
         expected_length = 0
         for calc in calcs:
-            for descset in calc.descsets:
+            for descset in calc.descSets:
                 expected_length += len(descset)
         self.assertEqual(self.dataset.X.shape[1], expected_length)
 
@@ -359,7 +359,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         provider = provider_class(out_dir=self.qsprdatapath)
         descset = ProDecDescriptorSet(sets=["Zscale Hellberg"])
         protein_feature_calculator = ProteinDescriptorCalculator(
-            descsets=[descset],
+            desc_sets=[descset],
             msa_provider=provider,
         )
         self.dataset.addProteinDescriptors(calculator=protein_feature_calculator)
@@ -450,7 +450,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
     def get_calculators(self, desc_sets):
         return [
             ProteinDescriptorCalculator(
-                descsets=desc_sets, msa_provider=self.default_msa_provider
+                desc_sets=desc_sets, msa_provider=self.default_msa_provider
             )
         ]
 
