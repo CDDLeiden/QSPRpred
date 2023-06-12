@@ -483,7 +483,7 @@ class _DescriptorSetRetriever:
 
         return PaDEL(*args, **kwargs)
 
-    def getRDKit(self, *args, **kwargs):
+    def getRDkit(self, *args, **kwargs):
         """Wrapper to get rdkit descriptors."""
         return RDKitDescs(*args, **kwargs)
 
