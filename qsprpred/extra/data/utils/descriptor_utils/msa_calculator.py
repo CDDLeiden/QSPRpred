@@ -202,10 +202,7 @@ class MAFFT(BioPythonMSA):
             sequences: dictionary of sequences to align, keys are sequence IDs (i.e.
                 accession keys) and values are sequences themselves
             **kwargs: additional arguments to be passed to the alignment algorithm, can
-                also just be metadata to be stored with the alignment
-
-        """
-
+                also just be metadata to be stored with the alignment"""
         # if no sequences are provided, return current alignment
         if not sequences:
             return self.current

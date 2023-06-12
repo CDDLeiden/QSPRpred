@@ -5,7 +5,6 @@ Created by: Martin Sicho
 On: 12.05.23, 17:10
 """
 import json
-from typing import List
 
 import numpy as np
 import pandas as pd
@@ -17,9 +16,25 @@ from .descriptorsets import ProteinDescriptorSet
 
 
 class ProteinDescriptorCalculator(DescriptorsCalculator):
+    """Class for calculating protein descriptors.
+
+    Arguments:
+        desc_sets (list[ProteinDescriptorSet]): a list of protein descriptor sets to
+            calculate protein descriptors.
+        msa_provider(ClustalMSA): a provider of multiple sequence alignment (MSA)
+            functionality. Defaults to ClustalMSA().
+    """
     def __init__(
-        self, desc_sets: List[ProteinDescriptorSet], msa_provider=ClustalMSA()
+        self, desc_sets: list[ProteinDescriptorSet], msa_provider=ClustalMSA()
     ) -> None:
+        """Initialize the protein descriptor calculator.
+
+        Args:
+            desc_sets (list[ProteinDescriptorSet]): a list of protein descriptor sets to
+                calculate protein descriptors.
+            msa_provider (ClustalMSA): a provide of multiple sequence alignment
+                functionality. Defaults to ClustalMSA().
+        """
         super().__init__(desc_sets)
         self.msaProvider = msa_provider
 

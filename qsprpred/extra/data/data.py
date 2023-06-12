@@ -19,6 +19,46 @@ from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
 
 
 class PCMDataset(QSPRDataset):
+    """Construct QSPRdata, also apply transformations of output property if
+    specified.
+
+    arguments:
+        name (str): data name, used in saving the data
+        proteincol (str, optional): name of column in df containing the protein target
+            identifier (usually a UniProt ID) to use for protein descriptors for PCM
+            modelling and other protein related tasks. Defaults to None.
+        proteinseqprovider: Callable = None, optional): function that takes a
+            "proteincol" value and returns the appropriate protein sequence.
+            Defaults to None.
+        target_props (List[Union[TargetProperty, dict]]): target properties, names
+            should correspond with target columnname in df
+        df (pd.DataFrame, optional): input dataframe containing smiles and target
+            property. Defaults to None.
+        smilescol (str, optional): name of column in df containing SMILES.
+            Defaults to "SMILES".
+        add_rdkit (bool, optional): if true, column with rdkit molecules will be
+            added to df. Defaults to False.
+        store_dir (str, optional): directory for saving the output data.
+            Defaults to '.'.
+        overwrite (bool, optional): if already saved data at output dir if should be
+            overwritten. Defaults to False.
+        n_jobs (int, optional): number of parallel jobs. If <= 0, all available
+            cores will be used. Defaults to 1.
+        chunk_size (int, optional): chunk size for parallel processing.
+            Defaults to 50.
+        drop_invalids (bool, optional): if true, invalid SMILES will be dropped.
+            Defaults to True.
+        drop_empty (bool, optional): if true, rows with empty target property will
+            be removed.
+        target_imputer (Callable, optional): imputer for missing target property
+            values. Defaults to None.
+        index_cols (List[str], optional): columns to be used as index in the
+            dataframe. Defaults to `None` in which case a custom ID will be
+            generated.
+
+    Raises:
+        `ValueError`: Raised if threshold given with non-classification task.
+    """
     def __init__(
         self,
         name: str,
