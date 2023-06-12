@@ -16,7 +16,7 @@ from PaDEL_pywrapper import PaDEL as PaDEL_calculator
 from PaDEL_pywrapper import descriptors as PaDEL_descriptors
 from rdkit import Chem
 
-from qsprpred.data.utils.descriptorsets import DescriptorSet, MoleculeDescriptorSet
+from ....data.utils.descriptorsets import DescriptorSet, MoleculeDescriptorSet
 
 
 class Mordred(MoleculeDescriptorSet):
