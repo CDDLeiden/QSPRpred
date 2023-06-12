@@ -9,35 +9,36 @@ from abc import ABC, abstractmethod
 
 import Bio
 import Bio.SeqIO as Bio_SeqIO
-from Bio.Align.Applications import ClustalOmegaCommandline
-from Bio.Align.Applications import MafftCommandline
+from Bio.Align.Applications import ClustalOmegaCommandline, MafftCommandline
 
-from qsprpred.logs import logger
+from .....logs import logger
+
 
 class MSAProvider(ABC):
-
+    """Class to provide multiple sequence alignment functionality."""
     @abstractmethod
-    def __call__(self, sequences: dict[str : str], **kwargs):
+    def __call__(self, sequences: dict[str:str], **kwargs):
         """
         Aligns the sequences and returns the alignment.
 
         Args:
-            sequences: dictionary of sequences to align, keys are sequence IDs (i.e. accession keys) and values are sequences themselves
-            **kwargs: additional arguments to be passed to the alignment algorithm, can also just be metadata to be stored with the alignment
+            sequences: dictionary of sequences to align, keys are sequence IDs (i.e.
+                accession keys) and values are sequences themselves.
+            **kwargs: additional arguments to be passed to the alignment algorithm, can
+                also just be metadata to be stored with the alignment
         """
-        pass
 
     @property
     @abstractmethod
     def current(self):
         """
-        Returns the current alignment as a dictionary where keys are sequence IDs as `str` and values are aligned sequences as `str`.
+        Returns the current alignment as a dictionary where keys are sequence IDs as
+        `str` and values are aligned sequences as `str`.
         """
-        pass
 
     @classmethod
     @abstractmethod
-    def fromFile(cls, fname : str) -> 'MSAProvider':
+    def fromFile(cls, fname: str) -> "MSAProvider":
         """
         Creates an MSA provider object from a JSON file.
 
@@ -47,39 +48,40 @@ class MSAProvider(ABC):
         Returns:
             the loaded alignment as a dictionary
         """
-        pass
 
     @abstractmethod
-    def toFile(self, fname : str):
+    def toFile(self, fname: str):
         """
         Saves the MSA provider to a JSON file.
 
         Args:
             fname: file name of the JSON file to save the provider to
         """
-        pass
+
 
 class BioPythonMSA(MSAProvider, ABC):
-    """
-    Common functionality for MSA providers using BioPython command line wrappers.
-    """
+    """Common functionality for MSA providers using BioPython command line wrappers.
 
-    def __init__(self, out_dir : str = ".", fname : str = "alignment.aln-fasta.fasta"):
+    Attributes:
+        outDir (str): directory to save the alignment to.
+        fname (str): file name of the alignment file.
+    """
+    def __init__(self, out_dir: str = ".", fname: str = "alignment.aln-fasta.fasta"):
         self.outDir = out_dir
-        self.fname = fname
-        self.cache = dict()
+        self.fName = fname
+        self.cache = {}
         self._current = None
 
-    def getFromCache(self, target_ids : list[str]):
+    def getFromCache(self, target_ids: list[str]):
         key = "~".join(target_ids)
         if key in self.cache:
             return self.cache[key]
 
-    def saveToCache(self, target_ids : list[str], alignment : dict[str : str]):
+    def saveToCache(self, target_ids: list[str], alignment: dict[str:str]):
         key = "~".join(target_ids)
         self.cache[key] = alignment
 
-    def currentToFile(self, fname : str):
+    def currentToFile(self, fname: str):
         """
         Saves the current alignment to a JSON file.
         """
@@ -89,11 +91,8 @@ class BioPythonMSA(MSAProvider, ABC):
         else:
             logger.warning("No current alignment to save. File not created.")
 
-    def currentFromFile(self, fname : str):
-        """
-        Loads the alignment from a JSON file.
-        """
-
+    def currentFromFile(self, fname: str):
+        """Loads the alignment from a JSON file."""
         with open(fname, "r") as f:
             self._current = json.load(f)
             self.saveToCache(sorted(self.current.keys()), self.current)
@@ -104,8 +103,16 @@ class BioPythonMSA(MSAProvider, ABC):
         return self._current
 
     @classmethod
-    def fromFile(cls, fname: str) -> 'MSAProvider':
-        with open(fname, 'r') as f:
+    def fromFile(cls, fname: str) -> "MSAProvider":
+        """Loads a MSA provider from a JSON file.
+
+        Args:
+            fname (str): file name of the JSON file to load the provider from
+
+        Returns:
+            MSAProvider: a MSA provider object
+        """
+        with open(fname, "r") as f:
             data = json.load(f)
 
         ret = cls(data["out_dir"], data["fname"])
@@ -113,18 +120,22 @@ class BioPythonMSA(MSAProvider, ABC):
         return ret
 
     def toFile(self, fname: str):
-        with open(fname, 'w') as f:
-            json.dump({
-                "out_dir": self.outDir,
-                "fname": self.fname,
-                "current": f"{fname}.msa",
-                "class": f"{self.__class__.__module__}.{self.__class__.__name__}"
-            }, f)
+        with open(fname, "w") as f:
+            json.dump(
+                {
+                    "out_dir": self.outDir,
+                    "fname": self.fName,
+                    "current": f"{fname}.msa",
+                    "class": f"{self.__class__.__module__}.{self.__class__.__name__}",
+                },
+                f,
+            )
         self.currentToFile(f"{fname}.msa")
 
     def parseSequences(self, sequences, **kwargs):
         """
-        Create object with sequences and the passed metadata. Save the sequences to a file that will serve as input to the command line tools.
+        Create object with sequences and the passed metadata. Save the sequences to a
+        file that will serve as input to the command line tools.
 
         Args:
             sequences: sequences to align
@@ -142,7 +153,7 @@ class BioPythonMSA(MSAProvider, ABC):
                     seq=Bio.Seq.Seq(sequences[target_id]),
                     id=target_id,
                     name=target_id,
-                    description=" ".join([f"{k}={v}" for k, v in kwargs.items()])
+                    description=" ".join([f"{k}={v}" for k, v in kwargs.items()]),
                 )
             )
             target_ids.append(target_id)
@@ -150,7 +161,7 @@ class BioPythonMSA(MSAProvider, ABC):
         # Write sequences as .fasta file
         return sequences_path, Bio_SeqIO.write(records, sequences_path, "fasta")
 
-    def parseAlignment(self, sequences: dict[str: str]):
+    def parseAlignment(self, sequences: dict[str:str]):
         """
         Parse the alignment from the output file of the alignment algorithm.
 
@@ -161,27 +172,37 @@ class BioPythonMSA(MSAProvider, ABC):
             the aligned sequences mapped to their IDs
         """
 
-        alignment = {tid: seq for tid, seq in zip(sequences.keys(), [str(seq.seq) for seq in
-                                                                     Bio.SeqIO.parse(f"{self.outDir}/{self.fname}",
-                                                                                     "fasta")])}
+        alignment = dict(
+            zip(
+                sequences.keys(),
+                [
+                    str(seq.seq)
+                    for seq in Bio.SeqIO.parse(f"{self.outDir}/{self.fName}", "fasta")
+                ],
+            )
+        )
         self.saveToCache(sorted(sequences.keys()), alignment)
         self._current = alignment
         return alignment
 
+
 class MAFFT(BioPythonMSA):
     """
-    Multiple sequence alignment provider using the MAFFT cross-platform program (https://mafft.cbrc.jp/alignment/software/).
-    Uses the BioPython wrapper (https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline).
+    Multiple sequence alignment provider using the MAFFT cross-platform program:
+    - https://mafft.cbrc.jp/alignment/software/
 
+    Uses the BioPython wrapper:
+    https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline
     """
-
-    def __call__(self, sequences: dict[str: str], **kwargs):
+    def __call__(self, sequences: dict[str:str], **kwargs):
         """
         MSA with MAFFT and BioPython.
 
         Args:
-            sequences: dictionary of sequences to align, keys are sequence IDs (i.e. accession keys) and values are sequences themselves
-            **kwargs: additional arguments to be passed to the alignment algorithm, can also just be metadata to be stored with the alignment
+            sequences: dictionary of sequences to align, keys are sequence IDs (i.e.
+                accession keys) and values are sequences themselves
+            **kwargs: additional arguments to be passed to the alignment algorithm, can
+                also just be metadata to be stored with the alignment
 
         """
 
@@ -206,15 +227,14 @@ class MAFFT(BioPythonMSA):
             clustalout=False,
         )
         stdout, stderr = cmd()
-        with open(f"{self.outDir}/{self.fname}", "w") as handle:
+        with open(f"{self.outDir}/{self.fName}", "w") as handle:
             handle.write(stdout)
 
         return self.parseAlignment(sequences)
 
 
 class ClustalMSA(BioPythonMSA):
-
-    def __call__(self, sequences: dict[str : str], **kwargs):
+    def __call__(self, sequences: dict[str:str], **kwargs):
         # if no sequences are provided, return current alignment
         if not sequences:
             return self.current
@@ -240,6 +260,3 @@ class ClustalMSA(BioPythonMSA):
         clustal_omega_cline()
 
         return self.parseAlignment(sequences)
-
-
-
