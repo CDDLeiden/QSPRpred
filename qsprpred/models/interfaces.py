@@ -182,6 +182,9 @@ class QSPRModel(ABC):
         Args:
             params (dict): dictionary of model parameters
         """
+        self.setParams(params)
+        
+        # save parameters to file
         path = f'{self.outDir}/{self.name}_params.json'
         with open(path, "w", encoding="utf-8") as j:
             logger.info(
@@ -189,6 +192,17 @@ class QSPRModel(ABC):
             j.write(json.dumps(params, indent=4))
 
         return path
+    
+    def setParams(self, params):
+        """Set model parameters.
+
+        Args:
+            params (dict): dictionary of model parameters
+        """
+        if self.parameters is not None:
+            self.parameters.update(params)
+        else:
+            self.parameters = params
 
     @staticmethod
     def readDescriptorCalculators(paths):

@@ -10,5 +10,5 @@ rdBase.DisableLog('rdApp.error')
 rdBase.DisableLog('rdApp.info')
 rdBase.DisableLog('rdApp.warning')
 
-__version__ = "2.0.0.dev2"
+__version__ = "2.0.0.dev3"
 VERSION = __version__

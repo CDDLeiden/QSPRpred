@@ -14,12 +14,14 @@ from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
 from qsprpred.data.tests import DataSetsMixIn, N_CPU, CHUNK_SIZE, DataPrepTestMixIn, TestDescriptorInDataMixIn
-from qsprpred.data.utils.datasplitters import randomsplit
+from qsprpred.data.utils.datasplitters import randomsplit, scaffoldsplit
 from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
-from qsprpred.data.utils.descriptorsets import FingerprintSet, DrugExPhyschem
+from qsprpred.data.utils.descriptorsets import FingerprintSet, DrugExPhyschem, rdkit_descs
 from qsprpred.data.utils.feature_standardization import SKLearnStandardizer
 from qsprpred.data.utils.featurefilters import lowVarianceFilter, highCorrelationFilter
 from qsprpred.extra.data.data import PCMDataset
+from qsprpred.extra.data.utils.datasplitters import LeaveTargetsOut, TemporalPerTarget, \
+    StratifiedPerTarget
 from qsprpred.extra.data.utils.descriptor_utils.msa_calculator import ClustalMSA, MAFFT
 from qsprpred.extra.data.utils.descriptorcalculator import ProteinDescriptorCalculator
 from qsprpred.extra.data.utils.descriptorsets import Mordred, Mold2, PaDEL, ProDecDescriptorSet, \
@@ -67,13 +69,12 @@ class DataSetsMixInExtras(DataSetsMixIn):
             ProDecDescriptorSet(sets=["Zscale Hellberg"]),
             ProDecDescriptorSet(sets=["Sneath"]),
         ]
-        clustal_msa = ClustalMSA(out_dir=cls.qsprdatapath)
         protein_descriptor_calculators = [
-                                             [ProteinDescriptorCalculator(combo, msa_provider=clustal_msa)] for combo in
+                                             [ProteinDescriptorCalculator(combo, msa_provider=cls.getMSAProvider())] for combo in
                                              itertools.combinations(
                                                  feature_sets_pcm, 1
                                              )] + [
-                                             [ProteinDescriptorCalculator(combo, msa_provider=clustal_msa)] for combo in
+                                             [ProteinDescriptorCalculator(combo, msa_provider=cls.getMSAProvider())] for combo in
                                              itertools.combinations(
                                                  feature_sets_pcm, 2
                                              )
@@ -105,6 +106,10 @@ class DataSetsMixInExtras(DataSetsMixIn):
             }
 
         return lambda acc_keys: ({acc: map[acc] for acc in acc_keys}, {acc: kwargs_map[acc] for acc in acc_keys})
+
+    @classmethod
+    def getMSAProvider(cls):
+        return ClustalMSA(out_dir=cls.qsprdatapath)
 
     def create_pcm_dataset(self, name="QSPRDataset_test_pcm", target_props=[
         {"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}], target_imputer=None,
@@ -207,7 +212,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         super().setUp()
         self.dataset = self.create_pcm_dataset(self.__class__.__name__)
         self.sample_descset = ProDecDescriptorSet(sets=["Zscale Hellberg"])
-        self.default_msa_provider = ClustalMSA(out_dir=self.qsprdatapath)
+        self.default_msa_provider = self.getMSAProvider()
 
     @parameterized.expand(
         [
@@ -382,7 +387,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
 
     def setUp(self):
         super().setUp()
-        self.default_msa_provider = ClustalMSA(out_dir=self.qsprdatapath)
+        self.default_msa_provider = self.getMSAProvider()
 
     def get_calculators(self, desc_sets):
         return [ProteinDescriptorCalculator(descsets=desc_sets, msa_provider=self.default_msa_provider)]
@@ -414,3 +419,64 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
         )
 
         self.check_desc_in_dataset(dataset, desc_set, self.get_default_prep(), target_props)
+
+
+class TestSplitsPCM(DataSetsMixInExtras, TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.dataset = self.create_pcm_dataset(f"{self.__class__.__name__}_test")
+        self.dataset.addProteinDescriptors(
+            calculator=ProteinDescriptorCalculator(
+                descsets=[ProDecDescriptorSet(sets=["Zscale Hellberg"])],
+                msa_provider=self.getMSAProvider()
+            )
+        )
+        self.dataset.addDescriptors(
+            calculator=MoleculeDescriptorsCalculator(
+                descsets=[rdkit_descs()]
+            )
+        )
+
+    def testLeaveTargetOut(self):
+        target = self.dataset.getProteinKeys()[0:2]
+        splitter = LeaveTargetsOut(targets=target)
+        self.dataset.split(splitter, featurize=True)
+        train, test = self.dataset.getFeatures()
+        train, test = train.index, test.index
+        test_targets = self.dataset.getProperty(self.dataset.proteincol).loc[test]
+        train_targets = self.dataset.getProperty(self.dataset.proteincol).loc[train]
+        self.assertEqual(len(test_targets), len(test))
+        self.assertEqual(len(train_targets), len(train))
+        self.assertTrue(set(test_targets.unique()).isdisjoint(set(train_targets.unique())))
+
+    def testStratifiedPerTarget(self):
+        randsplitter = randomsplit(0.2)
+        splitter = StratifiedPerTarget(splitter=randsplitter)
+        self.dataset.split(splitter, featurize=True)
+        train, test = self.dataset.getFeatures()
+        test_targets = self.dataset.getProperty(self.dataset.proteincol).loc[test.index]
+        # check that all targets are present in the test set just once
+        # (implied by the stratification on this particular dataset)
+        self.assertEqual(len(test_targets), len(self.dataset.getProteinKeys()))
+
+    def testPerTargetTemporal(self):
+        year_col = "Year"
+        year = 2015
+        splitter = TemporalPerTarget(
+            year_col=year_col,
+            split_years={key: year for key in self.dataset.getProteinKeys()}
+        )
+        self.dataset.split(splitter, featurize=True)
+        train, test = self.dataset.getFeatures()
+        self.assertTrue(self.dataset.getDF()[year_col].loc[train.index].max() <= year)
+        self.assertTrue(self.dataset.getDF()[year_col].loc[test.index].min() > year)
+
+    def testPerTargetScaffoldSplit(self):
+        scaffsplit = scaffoldsplit()
+        splitter = StratifiedPerTarget(splitter=scaffsplit)
+        self.dataset.split(splitter, featurize=True)
+        train, test = self.dataset.getFeatures()
+        test_targets = self.dataset.getProperty(self.dataset.proteincol).loc[test.index]
+        # check that all targets are present in the test set at least once, very crude check
+        self.assertEqual(len(test_targets.unique()), len(self.dataset.getProteinKeys()))

@@ -9,7 +9,9 @@ From v1.3.1 to v2.0.0
   divided by single and multiclass support (moved to `metrics.py`, see also New Features).
 - Instead of all smiles, only invalid smiles are now printed to the log when they are removed.
 - problems with PaDEL descriptors and fingerprints on Linux were fixed
-- fixed a serialization issue with `DataFrameDescriptorSet` 
+- fixed serialization issues with `DataFrameDescriptorSet` and saving and loading of MSA for PCM descriptor calculations 
+- the Papyrus adapter was fixed so that the quality and data set filtering options work properly (before only high quality Papyrus++ data was fetched no matter the options)
+- previously, in some cases cross-validation splits might not have been shuffled during hyperparameter optimization and evaluation on cross-validation folds (this might have resulted in suboptimal cross-validation performance and bad choices of hyperparameters), a fix was made in b029e78009d1fa7fdc694e388f244eb0ee1d8cc0
 
 ## Changes
 
@@ -35,6 +37,7 @@ From v1.3.1 to v2.0.0
 - 'LowVarianceFilter` now includes boundary in the filtered features, e.g. if threshold is 0.1, also features that
   have a variance of 0.1 will be removed.
 - Added the ExtendedValenceSignature molecular descriptor based on Jean-Loup Faulon's work.
+- removed default parameter setting scikit-learn SVC and SVR `max_iter` 10000.
 
 ## New Features
 - New feature split `ManualSplit` for splitting data by a user-defined column

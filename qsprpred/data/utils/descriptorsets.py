@@ -109,15 +109,17 @@ class DataFrameDescriptorSet(DescriptorSet):
 
     def __init__(self, df: pd.DataFrame):
         self._df = df
-        self._descriptors = df.columns.tolist()
+        self._descriptors = df.columns.tolist() if df is not None else []
 
     def getDF(self):
         return self._df
 
     def getIndex(self):
-        return self._df.index
+        return self._df.index if self._df is not None else None
 
     def __call__(self, index, *args, **kwargs):
+        if self._df is None:
+            raise ValueError("No dataframe set.")
         ret = pd.DataFrame(index=index)
         ret = ret.merge(self._df, how="left", left_index=True, right_index=True)
         return ret[self.descriptors]
@@ -136,7 +138,7 @@ class DataFrameDescriptorSet(DescriptorSet):
 
     @property
     def settings(self):
-        return {}
+        return {"df": None}
 
     def __str__(self):
         return "DataFrame"
@@ -470,6 +472,9 @@ class _DescriptorSetRetriever:
 
     def get_TanimotoDistances(self, *args, **kwargs):
         return TanimotoDistances(*args, **kwargs)
+
+    def get_DataFrame(self, *args, **kwargs):
+        return DataFrameDescriptorSet(*args, **kwargs)
 
 
 def get_descriptor(desc_type: str, *args, **kwargs):
