@@ -46,7 +46,7 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
         **kwargs
     ) -> pd.DataFrame:
         df = pd.DataFrame(index=acc_keys)
-        for descset in self.desc_sets:
+        for descset in self.descSets:
             if hasattr(descset, "setMSA"):
                 msa = self.msaProvider(sequences, **kwargs)
                 descset.setMSA(msa)
