@@ -1,36 +1,10 @@
 """Fingerprint classes."""
 
-from abc import ABC, abstractmethod
-
 import numpy as np
 from rdkit import DataStructs
 from rdkit.Chem import AllChem
 
-
-class Fingerprint(ABC):
-    """Base class for fingerprints."""
-    def __call__(self, mols):
-        """Actual call method.
-
-        Args:
-            mols: molecules to obtain the fingerprints of
-
-        Returns:
-            fingerprint (list): `list` of fingerprints for "mols"
-        """
-        return self.getFingerprints(mols)
-
-    @abstractmethod
-    def settings(self):
-        """Return settings of fingerprint."""
-
-    @abstractmethod
-    def __len__(self):
-        """Return length of fingerprint."""
-
-    @abstractmethod
-    def getKey(self):
-        """Return identifier of fingerprint."""
+from .interfaces import Fingerprint
 
 
 class MorganFP(Fingerprint):

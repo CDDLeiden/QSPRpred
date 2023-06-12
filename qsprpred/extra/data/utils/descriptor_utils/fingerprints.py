@@ -7,7 +7,7 @@ On: 12.05.23, 16:25
 from PaDEL_pywrapper import PaDEL as PaDEL_calculator
 from PaDEL_pywrapper import descriptor as cdk_fps
 
-from ....data.utils.descriptor_utils.fingerprints import Fingerprint
+from qsprpred.data.utils.descriptor_utils.interfaces import Fingerprint
 
 
 class CDKFP(Fingerprint):
