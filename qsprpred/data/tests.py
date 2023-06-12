@@ -878,7 +878,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
     @parameterized.expand(
         [
             (Murcko(), True, None),
-            (BemisMurcko(), False, ["scaffoldsplit_0", "scaffoldsplit_1"]),
+            (BemisMurcko(), False, ["ScaffoldSplit_0", "ScaffoldSplit_1"]),
         ]
     )
     def test_ScaffoldSplit(self, scaffold, shuffle, custom_test_list):
