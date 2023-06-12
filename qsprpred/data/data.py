@@ -1835,8 +1835,8 @@ class QSPRDataset(MoleculeTable):
 
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
-            self.X = self.df[self.df["Split_IsTrain"] is True]
-            self.X_ind = self.df[self.df["Split_IsTrain"] is False]
+            self.X = self.df.query("Split_IsTrain")
+            self.X_ind = self.df.query("~Split_IsTrain")
             self.y = self.X[self.targetPropertyNames]
             self.y_ind = self.X_ind[self.targetPropertyNames]
         else:
