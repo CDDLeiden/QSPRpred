@@ -2045,7 +2045,7 @@ class QSPRDataset(MoleculeTable):
     def addFeatures(
         self,
         feature_calculators: List["DescriptorsCalculator"] = None,  # noqa: F821
-        recalulate: bool = False
+        recalculate: bool = False
     ):
         """Add features to the data set.
 
@@ -2058,7 +2058,7 @@ class QSPRDataset(MoleculeTable):
         for calc in feature_calculators:
             # we avoid isinstance() here to avoid circular imports
             if calc.__class__.__name__ == "MoleculeDescriptorsCalculator":
-                self.addDescriptors(calc, recalculate=recalulate, featurize=False)
+                self.addDescriptors(calc, recalculate=recalculate, featurize=False)
             else:
                 raise ValueError("Unknown feature calculator type: %s" % type(calc))
 
@@ -2100,7 +2100,7 @@ class QSPRDataset(MoleculeTable):
 
         # calculate features
         if feature_calculators is not None:
-            self.addFeatures(feature_calculators, recalulate=recalculate_features)
+            self.addFeatures(feature_calculators, recalculate=recalculate_features)
 
         # apply data filters
         if datafilters is not None:

@@ -116,11 +116,11 @@ class PCMDataset(QSPRDataset):
             ds.descriptorCalculators = mol_table.descriptorCalculators
         return ds
 
-    def addFeatures(self, feature_calculators : List[DescriptorsCalculator] = None, recalulate=False):
+    def addFeatures(self, feature_calculators : List[DescriptorsCalculator] = None, recalculate=False):
         for calc in feature_calculators:
             if isinstance(calc, MoleculeDescriptorsCalculator):
-                self.addDescriptors(calc, recalculate=recalulate, featurize=False)
+                self.addDescriptors(calc, recalculate=recalculate, featurize=False)
             elif isinstance(calc, ProteinDescriptorCalculator):
-                self.addProteinDescriptors(calc, recalculate=recalulate, featurize=False)
+                self.addProteinDescriptors(calc, recalculate=recalculate, featurize=False)
             else:
                 raise ValueError("Unknown feature calculator type: %s" % type(calc))
