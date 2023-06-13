@@ -66,7 +66,7 @@ class Mordred(MoleculeDescriptorSet):
         return self._mordred.pandas(self.iterMols(mols), quiet=True, nproc=1).values
 
     @property
-    def is_fp(self):
+    def isFP(self):
         return self._is_fp
 
     @property
