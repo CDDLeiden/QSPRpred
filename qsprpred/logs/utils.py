@@ -88,7 +88,16 @@ def generate_backup_runID(path="."):
     return runid
 
 
-def generateBackupDir(root, backup_id):
+def generate_backup_dir(root: str, backup_id: int):
+    """Generates backup directory for files to be overwritten.
+
+    Args:
+        root (str): the root directory
+        backup_id (int): the ID of the backup
+
+    Returns:
+        new_dir: the path to the new backup directory
+    """
     new_dir = os.path.join(
         root, f"{BACKUP_DIR_FOLDER_PREFIX}_{str(backup_id).zfill(5)}"
     )
@@ -97,9 +106,28 @@ def generateBackupDir(root, backup_id):
     return new_dir
 
 
-def backUpFilesInFolder(
-    _dir, backup_id, output_prefixes, output_extensions="dummy", cp_suffix=None
+def backup_files_in_folder(
+    _dir: str,
+    backup_id: int,
+    output_prefixes,
+    output_extensions="dummy",
+    cp_suffix=None
 ):
+    """Backs up files in a specified directory to a backup directory.
+
+    Args:
+        _dir (str): The directory path where the files to be backed up are located.
+        backup_id (int): The ID of the backup.
+        output_prefixes (str): The prefix of the output files to be backed up.
+        output_extensions (str, optional): The extension of the output files to be
+            backed up. Defaults to "dummy".
+        cp_suffix (list of str, optional): The suffix of the files to be copied instead
+            of moved. Defaults to None.
+
+    Returns:
+        str: A message indicating which files were backed up and where they
+            were moved/copied.
+    """
     message = ""
     existing_files = os.listdir(_dir)
     if cp_suffix and all(
@@ -109,7 +137,7 @@ def backUpFilesInFolder(
         return message
     for _file in existing_files:
         if _file.startswith(output_prefixes) or _file.endswith(output_extensions):
-            backup_dir = generateBackupDir(_dir, backup_id)
+            backup_dir = generate_backup_dir(_dir, backup_id)
             backup_log = open(os.path.join(backup_dir, "backuplog.log"), "w")
             if cp_suffix is not None and any(
                 _file.split(".")[0].endswith(suff) for suff in cp_suffix
@@ -134,12 +162,12 @@ def backUpFilesInFolder(
     return message
 
 
-def backUpFiles(base_dir: str, folder: str, output_prefixes: tuple, cp_suffix=None):
+def backup_files(base_dir: str, folder: str, output_prefixes: tuple, cp_suffix=None):
     dir = base_dir + "/" + folder
     if os.path.exists(dir):
         backup_id = generate_backup_runID(dir)
         if folder in "qspr/data":
-            message = backUpFilesInFolder(
+            message = backup_files_in_folder(
                 dir,
                 backup_id,
                 output_prefixes,
@@ -147,7 +175,7 @@ def backUpFiles(base_dir: str, folder: str, output_prefixes: tuple, cp_suffix=No
                 cp_suffix=cp_suffix,
             )
         if folder == "qspr/models":
-            message = backUpFilesInFolder(
+            message = backup_files_in_folder(
                 dir,
                 backup_id,
                 output_prefixes,
@@ -156,7 +184,7 @@ def backUpFiles(base_dir: str, folder: str, output_prefixes: tuple, cp_suffix=No
             )
 
         if folder == "qspr/predictions":
-            message = backUpFilesInFolder(
+            message = backup_files_in_folder(
                 dir,
                 backup_id,
                 output_prefixes,
