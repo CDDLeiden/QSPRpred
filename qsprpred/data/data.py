@@ -7,8 +7,9 @@ import multiprocessing
 import os
 import pickle
 import warnings
+from collections.abc import Callable
 from multiprocessing import Pool
-from typing import Callable, List, Literal, Union
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -142,12 +143,12 @@ class PandasDataSet(DataSet):
     def __len__(self):
         return len(self.df)
 
-    def setIndex(self, cols: List[str]):
+    def setIndex(self, cols: list[str]):
         """
         Set the index of the data frame.
 
         Args:
-            cols (List[str]): List of columns to use as index.
+            cols (list[str]): list of columns to use as index.
         """
         self.df.set_index(cols, inplace=True, verify_integrity=True, drop=False)
         self.df.drop(
@@ -213,7 +214,7 @@ class PandasDataSet(DataSet):
                 each row/column as a Series to the function.
             result_type (str): Whether to expand the result of the function to columns
                 or to leave it as a Series.
-            subset (list): List of column names if only a subset of the data should be
+            subset (list): list of column names if only a subset of the data should be
                 used (reduces memory consumption).
         """
         n_cpus = self.nJobs
@@ -265,7 +266,7 @@ class PandasDataSet(DataSet):
                 each row/column as a Series to the function.
             result_type (str): Whether to expand the result of the function to columns
                 or to leave it as a Series.
-            subset (list): List of column names if only a subset of the data should be
+            subset (list): list of column names if only a subset of the data should be
                 used (reduces memory consumption).
             n_cpus (int): Number of CPUs to use for parallelization.
             chunk_size (int): Number of rows to process in each chunk.
@@ -307,7 +308,7 @@ class PandasDataSet(DataSet):
         original data frame.
 
         Args:
-            targets (list): List of column names to transform.
+            targets (list): list of column names to transform.
             transformer (callable): Function that transforms the data in target columns
                 to a new representation.
             addAs (list): If `True`, the transformed data is added to the original data
@@ -321,7 +322,7 @@ class PandasDataSet(DataSet):
             self.df[addAs] = ret
         return ret
 
-    def filter(self, table_filters: List[Callable]):
+    def filter(self, table_filters: list[Callable]):
         """Filter the data frame using a list of filters.
 
         Each filter is a function that takes the data frame and returns a
@@ -442,7 +443,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         n_jobs: int = 1,
         chunk_size: int = 50,
         drop_invalids: bool = True,
-        index_cols: List[str] = None,
+        index_cols: list[str] = None,
     ):
         """Initialize a `MoleculeTable` object.
 
@@ -468,7 +469,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 available cores will be used.
             chunk_size (int): Size of chunks to use per job in parallel processing.
             drop_invalids (bool): Drop invalid molecules from the data frame.
-            index_cols (List[str]): List of columns to use as index. If None, the index
+            index_cols (list[str]): list of columns to use as index. If None, the index
                 will be a custom generated ID."""
         self.descriptorCalculators = []  # holds all descriptor calculators
         self.descriptors = []  # holds descriptor tables for each calculator
@@ -571,7 +572,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
 
         Args:
             name (str): Name of the data set.
-            smiles (list): List of SMILES sequences.
+            smiles (list): list of SMILES sequences.
             *args: Additional arguments to pass to the `MoleculeTable` constructor.
             **kwargs: Additional keyword arguments to pass to the `MoleculeTable`
                 constructor.
@@ -581,7 +582,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         return MoleculeTable(name, df, *args, smilescol=smilescol, **kwargs)
 
     @staticmethod
-    def fromTableFile(name, filename, sep="\t", *args, **kwargs):
+    def fromTableFile(name: str, filename: str, sep="\t", *args, **kwargs):
         """Create a `MoleculeTable` instance from a file containing a table of molecules
         (i.e. a CSV file).
 
@@ -596,7 +597,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         return MoleculeTable(name, pd.read_table(filename, sep=sep), *args, **kwargs)
 
     @staticmethod
-    def fromSDF(name, filename, smiles_prop, *args, **kwargs):
+    def fromSDF(name: str, filename: str, smiles_prop, *args, **kwargs):
         """Create a `MoleculeTable` instance from an SDF file.
 
         Args:
@@ -617,7 +618,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             **kwargs,
         )
 
-    def checkMols(self, throw=True):
+    def checkMols(self, throw: bool = True):
         """
         Returns a boolean array indicating whether each molecule is valid or not.
         If `throw` is `True`, an exception is thrown if any molecule is invalid.
@@ -658,7 +659,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
     def addCustomDescriptors(
         self,
         calculator: "CustomDescriptorsCalculator",  # noqa: F821
-        recalculate=False
+        recalculate: bool = False
     ):
         """
         Add custom descriptors to the data frame using a `CustomDescriptorsCalculator`
@@ -797,7 +798,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         """Get the names of the descriptors in the data frame.
 
         Returns:
-            list: List of descriptor names.
+            list: list of descriptor names.
         """
         if not prefix:
             prefixes = (
@@ -822,7 +823,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         """Get names of all properties/variables saved in the data frame (all columns).
 
         Returns:
-            list: List of property names.
+            list: list of property names.
         """
         return self.df.columns
 
@@ -842,7 +843,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
 
         Args:
             name (str): Name of the property.
-            data (list): List of property values.
+            data (list): list of property values.
         """
         self.df[name] = data
 
@@ -861,7 +862,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         return scaffold(mol[0])
 
     def addScaffolds(
-        self, scaffolds: List[Scaffold], add_rdkit_scaffold=False, recalculate=False
+        self, scaffolds: list[Scaffold], add_rdkit_scaffold=False, recalculate=False
     ):
         """Add scaffolds to the data frame.
 
@@ -870,7 +871,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         the RDKit scaffold of the corresponding molecule.
 
         Args:
-            scaffolds (list): List of `Scaffold` calculators.
+            scaffolds (list): list of `Scaffold` calculators.
             add_rdkit_scaffold (bool): Whether to add the RDKit scaffold of the molecule
                 as a new column.
             recalculate (bool): Whether to recalculate scaffolds even if they are
@@ -958,7 +959,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             mol_per_group (int): Number of molecules per scaffold group.
 
         Returns:
-            list: List of scaffold groups.
+            list: list of scaffold groups.
         """
         return self.df[self.df.columns[self.df.columns.str.startswith(
             f"ScaffoldGroup_{scaffold_name}_{mol_per_group}"
@@ -976,16 +977,18 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             > 0
         )
 
-    def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
+    def standardizeSmiles(
+        self, smiles_standardizer: str | Callable, drop_invalid: bool = True
+    ):
         """Apply smiles_standardizer to the compounds in parallel
 
         Args:
+            smiles_standardizer (): either `None` to skip the
+                standardization, `chembl`, `old`, or a partial function that reads
+                and standardizes smiles.
             drop_invalid (bool): whether to drop invalid SMILES from the data set.
                 Defaults to `True`. If `False`, invalid SMILES will be retained in
                 their original form.
-            smiles_standardizer (Union[str, callable]): either `None` to skip the
-                standardization, `chembl`, `old`, or a partial function that reads
-                and standardizes smiles.
 
         Raises:
             ValueError: when smiles_standardizer is not a callable or one of the
@@ -1045,7 +1048,7 @@ class TargetProperty:
         th (int): threshold for the target property, only used for classification tasks
         nClasses (int): number of classes for the target property, only used for
             classification tasks
-        transformer (Callable): function to transform the target property
+        transformer (callable): function to transform the target property
     """
     def __init__(
         self,
@@ -1053,7 +1056,7 @@ class TargetProperty:
         task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
                       TargetTasks.MULTICLASS],
         originalName: str = None,
-        th: Union[List[float], str] = None,
+        th: list[float] | str = None,
         nClasses: int = None,
         transformer: Callable = None,
     ):
@@ -1066,11 +1069,11 @@ class TargetProperty:
               TargetTasks.MULTICLASS]): task type for the target property
             originalName (str): original name of the target property, if not specified,
                 the name is used
-            th (Union[List[float], str]): threshold for the target property, only used
+            th (list[float] | str): threshold for the target property, only used
                 for classification tasks
             nClasses (int): number of classes for the target property (only used if th
                 is precomputed, otherwise it is inferred)
-            transformer (Callable): function to transform the target property
+            transformer (callable): function to transform the target property
         """
         self.name = name
         self.originalName = originalName if originalName is not None else name
@@ -1089,12 +1092,12 @@ class TargetProperty:
         """Set the threshold for the target property.
 
         Args:
-            th (Union[List[int], str]): threshold for the target property
+            th (Union[list[int], str]): threshold for the target property
         """
         return self._th
 
     @th.setter
-    def th(self, th: Union[List[float], str]):
+    def th(self, th: list[float] | str):
         """Set the threshold for the target property and the number of classes if th is
         not precomputed."""
         assert (
@@ -1171,7 +1174,7 @@ class TargetProperty:
             task_from_str (bool): whether to convert the task from a string
 
         Returns:
-            List[TargetProperty]: list of TargetProperty objects
+            list[TargetProperty]: list of TargetProperty objects
         """
         if task_from_str:
             return [
@@ -1194,7 +1197,7 @@ class TargetProperty:
             task_as_str (bool): whether to convert the task to a string
 
         Returns:
-            List[dict]: list of dictionaries containing the target property information
+            list[dict]: list of dictionaries containing the target property information
         """
         target_props = []
         for target_prop in _list:
@@ -1229,7 +1232,7 @@ class TargetProperty:
                 properties
 
         Returns:
-            List[TargetProperty]: list of TargetProperty objects
+            list[TargetProperty]: list of TargetProperty objects
         """
         if original_names:
             return [t for t in _list if t.originalName in names]
@@ -1243,7 +1246,7 @@ class TargetProperty:
             _list (list): list of TargetProperty objects
 
         Returns:
-            List[str]: list of names of the target properties
+            list[str]: list of names of the target properties
         """
         return [t.name for t in _list]
 
@@ -1256,7 +1259,7 @@ class TargetProperty:
             _list (list): list of TargetProperty objects
 
         Returns:
-            List[str]: list of original names of the target properties
+            list[str]: list of original names of the target properties
         """
         return [t.originalName for t in _list]
 
@@ -1285,7 +1288,7 @@ class QSPRDataset(MoleculeTable):
     def __init__(
         self,
         name: str,
-        target_props: List[Union[TargetProperty, dict]],
+        target_props: list[TargetProperty | dict],
         df: pd.DataFrame = None,
         smilescol: str = "SMILES",
         add_rdkit: bool = False,
@@ -1296,14 +1299,14 @@ class QSPRDataset(MoleculeTable):
         drop_invalids: bool = True,
         drop_empty: bool = True,
         target_imputer: Callable = None,
-        index_cols: List[str] = None,
+        index_cols: list[str] = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if
         specified.
 
         Args:
             name (str): data name, used in saving the data
-            target_props (List[Union[TargetProperty, dict]]): target properties, names
+            target_props (list[TargetProperty | dict]): target properties, names
                 should correspond with target columnname in df
             df (pd.DataFrame, optional): input dataframe containing smiles and target
                 property. Defaults to None.
@@ -1312,7 +1315,7 @@ class QSPRDataset(MoleculeTable):
             proteincol (str, optional): name of column in df containing the protein
                 target identifier (usually a UniProt ID) to use for protein descriptors
                 for PCM modelling and other protein related tasks. Defaults to None.
-            proteinseqprovider: Callable = None, optional): function that takes a
+            proteinseqprovider: callable = None, optional): function that takes a
                 'proteincol' value and returns the appropriate protein sequence.
                 Defaults to None.
             add_rdkit (bool, optional): if true, column with rdkit molecules will be
@@ -1329,9 +1332,9 @@ class QSPRDataset(MoleculeTable):
                 Defaults to True.
             drop_empty (bool, optional): if true, rows with empty target property will
                 be removed.
-            target_imputer (Callable, optional): imputer for missing target property
+            target_imputer (callable, optional): imputer for missing target property
                 values. Defaults to None.
-            index_cols (List[str], optional): columns to be used as index in the
+            index_cols (list[str], optional): columns to be used as index in the
                 dataframe. Defaults to `None` in which case a custom ID will be
                 generated.
 
@@ -1381,7 +1384,7 @@ class QSPRDataset(MoleculeTable):
         )
 
     @staticmethod
-    def fromTableFile(name, filename, sep="\t", *args, **kwargs):
+    def fromTableFile(name, filename: str, sep="\t", *args, **kwargs):
         r"""Create QSPRDataset from table file (i.e. CSV or TSV).
 
         Args:
@@ -1421,14 +1424,14 @@ class QSPRDataset(MoleculeTable):
 
     def setTargetProperties(
         self,
-        target_props: List[TargetProperty],
+        target_props: list[TargetProperty],
         drop_empty: bool = True,
         target_imputer: Callable = None,
     ):
         """Set list of target properties and apply transformations if specified.
 
         Args:
-            target_props (List[TargetProperty]): list of target properties
+            target_props (list[TargetProperty]): list of target properties
         """
         # check target properties validity
         assert isinstance(target_props, list), (
@@ -1497,11 +1500,11 @@ class QSPRDataset(MoleculeTable):
         """Check whether the currently selected set of features is not empty."""
         return True if (self.featureNames and len(self.featureNames) > 0) else False
 
-    def getFeatureNames(self) -> List[str]:
+    def getFeatureNames(self) -> list[str]:
         """Get current feature names for this data set.
 
         Returns:
-            List[str]: list of feature names
+            list[str]: list of feature names
         """
         features = None if not self.hasDescriptors else self.getDescriptorNames()
         if self.descriptorCalculators:
@@ -1535,7 +1538,7 @@ class QSPRDataset(MoleculeTable):
         self.loadDataToSplits()
         self.featurizeSplits()
 
-    def makeRegression(self, target_property: Union[TargetProperty, str]):
+    def makeRegression(self, target_property: TargetProperty | str):
         """Switch to regression task using the given target property.
 
         Args:
@@ -1551,14 +1554,14 @@ class QSPRDataset(MoleculeTable):
         self.restoreTrainingData()
 
     def makeClassification(
-        self, target_property: Union[TargetProperty, str], th: List[float] = None
+        self, target_property: TargetProperty | str, th: list[float] = None
     ):
         """Switch to classification task using the given threshold values.
 
         Args:
             target_property (TargetProperty): Target property to use for classification
                 or name of the target property.
-            th (List[float], optional): list of threshold values. If not provided, the
+            th (list[float], optional): list of threshold values. If not provided, the
                 values will be inferred from th specified in TargetProperty.
                 Defaults to None.
         """
@@ -1658,7 +1661,7 @@ class QSPRDataset(MoleculeTable):
             return meta
 
     @staticmethod
-    def fromFile(filename, *args, **kwargs) -> "QSPRDataset":
+    def fromFile(filename: str, *args, **kwargs) -> "QSPRDataset":
         """Load QSPRDataset from the saved file directly.
 
         Args:
@@ -1679,7 +1682,7 @@ class QSPRDataset(MoleculeTable):
     @staticmethod
     def fromMolTable(
         mol_table: MoleculeTable,
-        target_props: List[Union[TargetProperty, dict]],
+        target_props: list[TargetProperty | dict],
         name=None,
         **kwargs,
     ) -> "QSPRDataset":
@@ -1884,23 +1887,23 @@ class QSPRDataset(MoleculeTable):
             self.X = self.X.drop(self.X.columns, axis=1)
             self.X_ind = self.X_ind.drop(self.X_ind.columns, axis=1)
 
-    def fillMissing(self, fill_value: float, columns: List[str] = None):
+    def fillMissing(self, fill_value: float, columns: list[str] = None):
         """Fill missing values in the data set with a given value.
 
         Args:
             fill_value (float): value to fill missing values with
-            columns (List[str], optional): columns to fill missing values in.
+            columns (list[str], optional): columns to fill missing values in.
                 Defaults to None.
         """
         for desc in self.descriptors:
             desc.fillMissing(fill_value, columns)
         logger.warning("Missing values filled with %s" % fill_value)
 
-    def filterFeatures(self, feature_filters: List[Callable]):
+    def filterFeatures(self, feature_filters: list[Callable]):
         """Filter features in the data set.
 
         Args:
-            feature_filters (List[Callable]): list of feature filter functions that take
+            feature_filters (list[callable]): list of feature filter functions that take
                 X feature matrix and y target vector as arguments
         """
         if not self.hasFeatures:
@@ -1930,7 +1933,7 @@ class QSPRDataset(MoleculeTable):
         """Set feature standardizer.
 
         Args:
-            feature_standardizer (Union[SKLearnStandardizer, BaseEstimator]): feature
+            feature_standardizer (SKLearnStandardizer | BaseEstimator): feature
                 standardizer
         """
         if not hasattr(feature_standardizer, "toFile"):
@@ -1939,7 +1942,7 @@ class QSPRDataset(MoleculeTable):
 
     def addFeatures(
         self,
-        feature_calculators: List["DescriptorsCalculator"] = None,  # noqa: F821
+        feature_calculators: list["DescriptorsCalculator"] = None,  # noqa: F821
         recalulate=False
     ):
         for calc in feature_calculators:
@@ -1964,14 +1967,14 @@ class QSPRDataset(MoleculeTable):
         """Prepare the dataset for use in QSPR model.
 
         Arguments:
-            smiles_standardizer (Union[str, Callable]): either `chembl`, `old`, or a
+            smiles_standardizer (str | Callable): either `chembl`, `old`, or a
                 partial function that reads and standardizes smiles. If `None`, no
                 standardization will be performed. Defaults to `chembl`.
             datafilters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             fold (datasplitter obj): splits the train set into folds for
                 cross validation
-            feature_calculators (List[DescriptorsCalculator]): calculate features using
+            feature_calculators (list[DescriptorsCalculator]): calculate features using
                 different information from the data set
             feature_filters (list of feature filter objs): filters features
             feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator):
@@ -2178,7 +2181,7 @@ class QSPRDataset(MoleculeTable):
         """Get the target properties with the given names.
 
         Args:
-            names (List[str]): name of the target properties
+            names (list[str]): name of the target properties
             original_names (bool): if `True`, use the original names of the target
                 properties
 
@@ -2295,7 +2298,7 @@ class QSPRDataset(MoleculeTable):
         self.targetProperties = [tp for tp in self.targetProperties if tp.name != task]
         self.restoreTrainingData()
 
-    def addTask(self, task: Union[TargetProperty, dict]):
+    def addTask(self, task: TargetProperty | dict):
         """Add a task to the dataset.
 
         Args:

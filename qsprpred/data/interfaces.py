@@ -1,6 +1,6 @@
 """Abstract base classes for data preparation classes."""
 from abc import ABC, abstractmethod
-from typing import Callable, List
+from typing import Callable
 
 import pandas as pd
 
@@ -62,7 +62,7 @@ class DataSet(StoredTable):
         pass
 
     @abstractmethod
-    def filter(self, table_filters: List[Callable]):
+    def filter(self, table_filters: list[Callable]):
         pass
 
 
