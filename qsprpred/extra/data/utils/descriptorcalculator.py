@@ -52,7 +52,7 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
                 descset.setMSA(msa)
             values = descset(acc_keys, sequences, **kwargs)
 
-            if descset.is_fp:
+            if descset.isFP:
                 values.add_prefix(f"{descset.fingerprint_type}_")
             values = values.astype(dtype)
             values = self.treatInfs(values)
