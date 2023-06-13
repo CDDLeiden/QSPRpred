@@ -4,7 +4,7 @@ data
 Created by: Martin Sicho
 On: 12.05.23, 17:14
 """
-from typing import Callable, List, Union
+from typing import Callable
 
 import pandas as pd
 
@@ -30,7 +30,7 @@ class PCMDataset(QSPRDataset):
         proteinseqprovider: Callable = None, optional): function that takes a
             "proteincol" value and returns the appropriate protein sequence.
             Defaults to None.
-        target_props (List[Union[TargetProperty, dict]]): target properties, names
+        target_props (list[TargetProperty, dict]): target properties, names
             should correspond with target columnname in df
         df (pd.DataFrame, optional): input dataframe containing smiles and target
             property. Defaults to None.
@@ -52,7 +52,7 @@ class PCMDataset(QSPRDataset):
             be removed.
         target_imputer (Callable, optional): imputer for missing target property
             values. Defaults to None.
-        index_cols (List[str], optional): columns to be used as index in the
+        index_cols (list[str], optional): columns to be used as index in the
             dataframe. Defaults to `None` in which case a custom ID will be
             generated.
 
@@ -63,7 +63,7 @@ class PCMDataset(QSPRDataset):
         self,
         name: str,
         proteincol,
-        target_props: List[Union[TargetProperty, dict]],
+        target_props: list[TargetProperty | dict],
         df: pd.DataFrame = None,
         smilescol: str = "SMILES",
         proteinseqprovider: Callable = None,
@@ -75,7 +75,7 @@ class PCMDataset(QSPRDataset):
         drop_invalids: bool = True,
         drop_empty: bool = True,
         target_imputer: Callable = None,
-        index_cols: List[str] = None,
+        index_cols: list[str] = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if
         specified.
@@ -88,7 +88,7 @@ class PCMDataset(QSPRDataset):
             proteinseqprovider: Callable = None, optional): function that takes a
                 "proteincol" value and returns the appropriate protein sequence.
                 Defaults to None.
-            target_props (List[Union[TargetProperty, dict]]): target properties, names
+            target_props (list[TargetProperty | dict]): target properties, names
                 should correspond with target columnname in df
             df (pd.DataFrame, optional): input dataframe containing smiles and target
                 property. Defaults to None.
@@ -110,7 +110,7 @@ class PCMDataset(QSPRDataset):
                 be removed.
             target_imputer (Callable, optional): imputer for missing target property
                 values. Defaults to None.
-            index_cols (List[str], optional): columns to be used as index in the
+            index_cols (list[str], optional): columns to be used as index in the
                 dataframe. Defaults to `None` in which case a custom ID will be
                 generated.
 
@@ -188,7 +188,7 @@ class PCMDataset(QSPRDataset):
     def fromMolTable(
         mol_table: MoleculeTable,
         proteincol,
-        target_props: List[Union[TargetProperty, dict]],
+        target_props: list[TargetProperty | dict],
         name=None,
         **kwargs,
     ):
@@ -206,7 +206,7 @@ class PCMDataset(QSPRDataset):
 
     def addFeatures(
         self,
-        feature_calculators: List[DescriptorsCalculator] = None,
+        feature_calculators: list[DescriptorsCalculator] = None,
         recalulate=False
     ):
         for calc in feature_calculators:

@@ -5,7 +5,6 @@ Created by: Martin Sicho
 On: 12.05.23, 16:25
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 import mordred
 import pandas as pd
@@ -39,7 +38,7 @@ class Mordred(MoleculeDescriptorSet):
         descriptor names instead of a mordred descriptor module.
 
         Args:
-            descs: List of Mordred descriptor names, a Mordred descriptor module or None
+            descs: list of Mordred descriptor names, a Mordred descriptor module or None
                 for all mordred descriptors.
             version (str): version of mordred.
             ignore_3D (bool): ignore 3D information.
@@ -93,7 +92,7 @@ class Mordred(MoleculeDescriptorSet):
         descriptors.
 
         Args:
-            names: List of Mordred descriptor names.
+            names: list of Mordred descriptor names.
         """
         calc = mordred.Calculator(mordreddescriptors)
         self._mordred = mordred.Calculator(
@@ -118,7 +117,7 @@ class Mold2(MoleculeDescriptorSet):
     Arguments:
         descs: names of Mold2 descriptors to be calculated (e.g. D001)
     """
-    def __init__(self, descs: Optional[List[str]] = None):
+    def __init__(self, descs: list[str] | None = None):
         """Initialize a PaDEL calculator.
 
         Args:
@@ -152,7 +151,7 @@ class Mold2(MoleculeDescriptorSet):
         return self._descriptors
 
     @descriptors.setter
-    def descriptors(self, names: Optional[List[str]] = None):
+    def descriptors(self, names: list[str] | None = None):
         if names is None:
             self._descriptors = self._default_descs[:]
             self._keepindices = list(range(len(self._descriptors)))
@@ -186,7 +185,7 @@ class PaDEL(MoleculeDescriptorSet):
         descs: list of PaDEL descriptor short names
         ignore_3D (bool): skip 3D descriptor calculation
     """
-    def __init__(self, descs: Optional[List[str]] = None, ignore_3D: bool = True):
+    def __init__(self, descs: list[str] | None = None, ignore_3D: bool = True):
         """Initialize a PaDEL calculator
 
         Args:
@@ -233,7 +232,7 @@ class PaDEL(MoleculeDescriptorSet):
         return self._keep
 
     @descriptors.setter
-    def descriptors(self, names: Optional[List[str]] = None):
+    def descriptors(self, names: list[str] | None = None):
         # From name to PaDEL descriptor sub-classes
         if names is None:
             self._descriptors = list(set(self._name_mapping.values()))
@@ -310,7 +309,7 @@ class NeedsMSAMixIn(ABC):  # FIXME - Inherit ABC but no abstract method # noqa: 
 
 
 class ProDecDescriptorSet(ProteinDescriptorSet, NeedsMSAMixIn):
-    def __init__(self, sets: Optional[List[str]] = None):
+    def __init__(self, sets: list[str] | None = None):
         super().__init__()
         self._settings = {"sets": sets}
         self.factory = prodec.ProteinDescriptors()

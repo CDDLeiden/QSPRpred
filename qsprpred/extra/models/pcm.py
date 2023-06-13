@@ -5,7 +5,7 @@ Created by: Martin Sicho
 On: 12.05.23, 23:15
 """
 from abc import ABC
-from typing import List, Union
+from typing import Callable
 
 import numpy as np
 
@@ -19,9 +19,9 @@ from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
 class ModelPCM(QSPRModel, ABC):
     def createPredictionDatasetFromMols(
         self,
-        mols: List[str],
+        mols: list[str],
         protein_id: str,
-        smiles_standardizer: Union[str, callable] = "chembl",
+        smiles_standardizer: str | Callable = "chembl",
         n_jobs: int = 1,
         fill_value: float = np.nan,
     ):
@@ -57,10 +57,10 @@ class ModelPCM(QSPRModel, ABC):
 
     def predictMols(
         self,
-        mols: List[str],
+        mols: list[str],
         protein_id: str,
         use_probas: bool = False,
-        smiles_standardizer: Union[str, callable] = "chembl",
+        smiles_standardizer: str | Callable = "chembl",
         n_jobs: int = 1,
         fill_value: float = np.nan,
     ):

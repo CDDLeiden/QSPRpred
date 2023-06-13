@@ -3,7 +3,6 @@ import os
 from bisect import bisect
 from datetime import datetime
 from logging import config
-from typing import Dict
 
 # Maximum runid is 9999
 MAX_ID = 10000
@@ -23,7 +22,7 @@ class LevelFilter(logging.Filter):
 # Adapted from https://stackoverflow.com/a/68154386
 class LevelFormatter(logging.Formatter):
     """LoggingFormatter used to specifiy the formatting per level"""
-    def __init__(self, formats: Dict[int, str], **kwargs):
+    def __init__(self, formats: dict[int, str], **kwargs):
         super().__init__()
 
         if "fmt" in kwargs:
