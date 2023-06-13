@@ -33,13 +33,13 @@ from qsprpred.data.utils.descriptorsets import (
 )
 from qsprpred.data.utils.featurefilters import (
     BorutaFilter,
-    highCorrelationFilter,
-    lowVarianceFilter,
+    HighCorrelationFilter,
+    LowVarianceFilter,
 )
 from qsprpred.data.utils.scaffolds import Murcko
 from qsprpred.deep.models.models import QSPRDNN
 from qsprpred.extra.data.utils.descriptorsets import Mold2, Mordred, PaDEL
-from qsprpred.logs.utils import backUpFiles, commit_hash, enable_file_logger
+from qsprpred.logs.utils import backup_files, commit_hash, enable_file_logger
 from qsprpred.models.models import QSPRsklearn
 from qsprpred.models.tasks import TargetTasks
 
@@ -390,9 +390,9 @@ def QSPR_dataprep(args):
             # feature filters
             featurefilters = []
             if args.low_variability:
-                featurefilters.append(lowVarianceFilter(th=args.low_variability))
+                featurefilters.append(LowVarianceFilter(th=args.low_variability))
             if args.high_correlation:
-                featurefilters.append(highCorrelationFilter(th=args.high_correlation))
+                featurefilters.append(HighCorrelationFilter(th=args.high_correlation))
             if args.boruta_filter:
                 if args.regression:
                     featurefilters.append(
@@ -436,7 +436,7 @@ if __name__ == "__main__":
     file_prefixes = [
         f"{property}_{task}" for task in tasks for property in args.properties
     ]
-    backup_msg = backUpFiles(
+    backup_msg = backup_files(
         args.base_dir,
         "qspr/data",
         tuple(file_prefixes),
