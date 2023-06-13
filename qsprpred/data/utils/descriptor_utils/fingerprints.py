@@ -2,16 +2,18 @@
 
 import numpy as np
 from rdkit import DataStructs
-from rdkit.Chem import AllChem
+from rdkit.Avalon import pyAvalonTools
+from rdkit.Chem import AllChem, rdMolDescriptors, rdmolops
 
 from .interfaces import Fingerprint
 
 
 class MorganFP(Fingerprint):
     """Morgan fingerprint."""
-    def __init__(self, radius=2, nBits=2048):
+    def __init__(self, radius=2, nBits=2048, **kwargs):
         self.radius = radius
         self.nBits = nBits
+        self.kwargs = kwargs
 
     def getFingerprints(self, mols):
         """Return the Morgan fingerprints for the input molecules.
@@ -23,16 +25,14 @@ class MorganFP(Fingerprint):
             fingerprint (list): `list` of fingerprints for "mols"
         """
         convertFP = DataStructs.ConvertToNumpyArray
-
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
             fp = AllChem.GetMorganFingerprintAsBitVect(
-                mol, self.radius, nBits=self.nBits
+                mol, self.radius, nBits=self.nBits, **self.kwargs
             )
             np_fp = np.zeros(len(fp))
             convertFP(fp, np_fp)
             ret[idx] = np_fp
-
         return ret
 
     @property
@@ -44,6 +44,210 @@ class MorganFP(Fingerprint):
 
     def getKey(self):
         return "MorganFP"
+
+
+class MaccsFP(Fingerprint):
+    def __init__(self, nBits=167, **kwargs):
+        self.nBits = nBits
+        self.kwargs = kwargs
+
+    def getFingerprints(self, mols):
+        convertFP = DataStructs.ConvertToNumpyArray
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = rdMolDescriptors.GetMACCSKeysFingerprint(mol, **self.kwargs)
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+        return ret
+
+    @property
+    def settings(self):
+        return {"nBits": self.nBits}
+
+    def __len__(self):
+        return self.nBits
+
+    def getKey(self):
+        return "MACCSFP"
+
+
+class AvalonFP(Fingerprint):
+    def __init__(self, nBits=1024, **kwargs):
+        self.nBits = nBits
+        self.kwargs = kwargs
+
+    def getFingerprints(self, mols):
+        convertFP = DataStructs.ConvertToNumpyArray
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = pyAvalonTools.GetAvalonFP(mol, nBits=self.nBits, **self.kwargs)
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+        return ret
+
+    @property
+    def settings(self):
+        return {"nBits": self.nBits}
+
+    def __len__(self):
+        return self.nBits
+
+    def getKey(self):
+        return "AvalonFP"
+
+
+class TopologicalFP(Fingerprint):
+    def __init__(self, nBits=2048, **kwargs):
+        self.nBits = nBits
+        self.kwargs = kwargs
+
+    def getFingerprints(self, mols):
+        convertFP = DataStructs.ConvertToNumpyArray
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = rdMolDescriptors.GetHashedTopologicalTorsionFingerprintAsBitVect(
+                mol, nBits=self.nBits, **self.kwargs
+            )
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+        return ret
+
+    @property
+    def settings(self):
+        return {"nBits": self.nBits}
+
+    def __len__(self):
+        return self.nBits
+
+    def getKey(self):
+        return "TopologicalFP"
+
+
+class AtomPairFP(Fingerprint):
+    def __init__(self, nBits=2048, **kwargs):
+        self.nBits = nBits
+        self.kwargs = kwargs
+
+    def getFingerprints(self, mols):
+        convertFP = DataStructs.ConvertToNumpyArray
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = rdMolDescriptors.GetHashedAtomPairFingerprintAsBitVect(
+                mol, nBits=self.nBits, **self.kwargs
+            )
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+        return ret
+
+    @property
+    def settings(self):
+        return {"nBits": self.nBits}
+
+    def __len__(self):
+        return self.nBits
+
+    def getKey(self):
+        return "AtomPairFP"
+
+
+class RDKitFP(Fingerprint):
+    def __init__(self, minPath=1, maxPath=7, nBits=2048, **kwargs):
+        self.minPath = minPath
+        self.maxPath = maxPath
+        self.nBits = nBits
+        self.kwargs = kwargs
+
+    def getFingerprints(self, mols):
+        convertFP = DataStructs.ConvertToNumpyArray
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = rdmolops.RDKFingerprint(
+                mol,
+                minPath=self.minPath,
+                maxPath=self.maxPath,
+                fpSize=self.nBits,
+                **self.kwargs
+            )
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+        return ret
+
+    @property
+    def settings(self):
+        return {"minPath": self.minPath, "maxPath": self.maxPath, "nBits": self.nBits}
+
+    def __len__(self):
+        return self.nBits
+
+    def getKey(self):
+        return "RDKitFP"
+
+
+class PatternFP(Fingerprint):
+    def __init__(self, nBits=2048, **kwargs):
+        self.nBits = nBits
+        self.kwargs = kwargs
+
+    def getFingerprints(self, mols):
+        convertFP = DataStructs.ConvertToNumpyArray
+
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = rdmolops.PatternFingerprint(mol, fpSize=self.nBits, **self.kwargs)
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+
+        return ret
+
+    @property
+    def settings(self):
+        return {"nBits": self.nBits}
+
+    def __len__(self):
+        return self.nBits
+
+    def getKey(self):
+        return "PatternFP"
+
+
+class LayeredFP(Fingerprint):
+    def __init__(self, minPath=1, maxPath=7, nBits=2048, **kwargs):
+        self.minPath = minPath
+        self.maxPath = maxPath
+        self.nBits = nBits
+        self.kwargs = kwargs
+
+    def getFingerprints(self, mols):
+        convertFP = DataStructs.ConvertToNumpyArray
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = rdmolops.LayeredFingerprint(
+                mol,
+                minPath=self.minPath,
+                maxPath=self.maxPath,
+                fpSize=self.nBits,
+                **self.kwargs
+            )
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+        return ret
+
+    @property
+    def settings(self):
+        return {"minPath": self.minPath, "maxPath": self.maxPath, "nBits": self.nBits}
+
+    def __len__(self):
+        return self.nBits
+
+    def getKey(self):
+        return "LayeredFP"
 
 
 class _FingerprintRetriever:
@@ -63,6 +267,27 @@ class _FingerprintRetriever:
 
     def getMorganFP(self, *args, **kwargs):
         return MorganFP(*args, **kwargs)
+
+    def getMaccsFP(self, *args, **kwargs):
+        return MaccsFP(*args, **kwargs)
+
+    def getAvalonFP(self, *args, **kwargs):
+        return AvalonFP(*args, **kwargs)
+
+    def getTopologicalFP(self, *args, **kwargs):
+        return TopologicalFP(*args, **kwargs)
+
+    def getAtomPairFP(self, *args, **kwargs):
+        return AtomPairFP(*args, **kwargs)
+
+    def getRDKitFP(self, *args, **kwargs):
+        return RDKitFP(*args, **kwargs)
+
+    def getPatternFP(self, *args, **kwargs):
+        return PatternFP(*args, **kwargs)
+
+    def getLayeredFP(self, *args, **kwargs):
+        return LayeredFP(*args, **kwargs)
 
     def getCDKFP(self, *args, **kwargs):
         from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKFP
