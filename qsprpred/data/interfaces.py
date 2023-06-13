@@ -9,15 +9,15 @@ class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
     @abstractmethod
     def save(self):
-        pass
+        """Save the table to a file."""
 
     @abstractmethod
     def reload(self):
-        pass
+        """Reload the table from a file."""
 
     @abstractmethod
     def clearFiles(self):
-        pass
+        """Delete the files associated with the table."""
 
     @staticmethod
     @abstractmethod
@@ -39,23 +39,49 @@ class DataSet(StoredTable):
 
     @abstractmethod
     def getProperties(self):
-        pass
+        """Get the properties of the dataset."""
 
     @abstractmethod
-    def addProperty(self, name, data):
-        pass
+    def addProperty(self, name: str, data: list):
+        """Add a property to the dataset.
+
+        Args:
+            name (str): The name of the property.
+            data (list): The data of the property.
+        """
 
     @abstractmethod
-    def removeProperty(self, name):
-        pass
+    def removeProperty(self, name: str):
+        """Remove a property from the dataset.
+
+        Args:
+            name (str): The name of the property.
+        """
 
     @abstractmethod
     def getSubset(self, prefix: str):
-        pass
+        """Get a subset of the dataset.
+
+        Args:
+            prefix (str): The prefix of the subset.
+        """
 
     @abstractmethod
-    def apply(self, func, func_args=None, func_kwargs=None, *args, **kwargs):
-        pass
+    def apply(
+        self,
+        func: callable,
+        func_args: list = None,
+        func_kwargs: dict = None,
+        *args,
+        **kwargs
+    ):
+        """Apply a function to the dataset.
+
+        Args:
+            func (callable): The function to apply.
+            func_args (list, optional): The positional arguments of the function.
+            func_kwargs (dict, optional): The keyword arguments of the function.
+        """
 
     @abstractmethod
     def transform(self, targets, transformers):
@@ -63,7 +89,11 @@ class DataSet(StoredTable):
 
     @abstractmethod
     def filter(self, table_filters: list[Callable]):
-        pass
+        """Filter the dataset.
+
+        Args:
+            table_filters (List[Callable]): The filters to apply.
+        """
 
 
 class MoleculeDataSet(DataSet):
@@ -99,7 +129,7 @@ class MoleculeDataSet(DataSet):
     @property
     @abstractmethod
     def hasDescriptors(self):
-        pass
+        """Indicates if the dataset has descriptors."""
 
 
 class DataSetDependant:  # Note: this shouldn't be ABC; no abstract methods defined

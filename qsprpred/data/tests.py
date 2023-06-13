@@ -17,19 +17,19 @@ from rdkit.Chem import Descriptors
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-from ..data.utils.datafilters import CategoryFilter
-from ..data.utils.datasplitters import (
+from .utils.datafilters import CategoryFilter
+from .utils.datasplitters import (
     ManualSplit,
     RandomSplit,
     ScaffoldSplit,
     TemporalSplit,
 )
-from ..data.utils.descriptorcalculator import (
+from .utils.descriptorcalculator import (
     CustomDescriptorsCalculator,
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
-from ..data.utils.descriptorsets import (
+from .utils.descriptorsets import (
     DataFrameDescriptorSet,
     DescriptorSet,
     DrugExPhyschem,
@@ -38,13 +38,13 @@ from ..data.utils.descriptorsets import (
     RDKitDescs,
     TanimotoDistances,
 )
-from ..data.utils.feature_standardization import SKLearnStandardizer
-from ..data.utils.featurefilters import (
+from .utils.feature_standardization import SKLearnStandardizer
+from .utils.featurefilters import (
     BorutaFilter,
     HighCorrelationFilter,
     LowVarianceFilter,
 )
-from ..data.utils.scaffolds import BemisMurcko, Murcko
+from .utils.scaffolds import BemisMurcko, Murcko
 from ..logs.stopwatch import StopWatch
 from ..models.models import QSPRsklearn
 from ..models.tasks import TargetTasks
@@ -1254,6 +1254,7 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
         )
 
     def test_consistency(self):
+        """Test if the descriptor calculator is consistent with the dataset."""
         len_prev = len(self.dataset)
         desc_calc = MoleculeDescriptorsCalculator(
             [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]
@@ -1320,7 +1321,9 @@ class TestFeatureStandardizer(DataSetsMixIn, TestCase):
 
 
 class TestStandardizers(DataSetsMixIn, TestCase):
+    """Test the standardizers."""
     def test_invalid_filter(self):
+        """Test the invalid filter."""
         df = self.getSmallDF()
         orig_len = len(df)
         mask = [False] * orig_len
@@ -1345,6 +1348,7 @@ class TestStandardizers(DataSetsMixIn, TestCase):
 
 
 class DataPrepTestMixIn(DescriptorCheckMixIn):
+    """Mixin for testing data preparation."""
     def check_prep(
         self,
         dataset,
@@ -1355,6 +1359,7 @@ class DataPrepTestMixIn(DescriptorCheckMixIn):
         data_filter,
         expected_target_props,
     ):
+        """Check the consistency of the dataset after preparation."""
         name = dataset.name
 
         # if a split needs a dataset, give it one
@@ -1428,7 +1433,9 @@ class TestDataSetPreparation(DataSetsMixIn, DataPrepTestMixIn, TestCase):
 
 
 class TestDescriptorInDataMixIn(DescriptorCheckMixIn):
+    """Mixin for testing descriptor sets in data sets."""
     def get_ds_name(self, desc_set, target_props):
+        """Get a unique name for a data set."""
         target_props_id = [
             f"{target_prop['name']}_{target_prop['task']}"
             for target_prop in target_props
@@ -1436,9 +1443,11 @@ class TestDescriptorInDataMixIn(DescriptorCheckMixIn):
         return f"{desc_set}_{target_props_id}"
 
     def get_calculators(self, desc_sets):
+        """Get the calculators for a descriptor set."""
         return [MoleculeDescriptorsCalculator(desc_sets)]
 
     def check_desc_in_dataset(self, dataset, desc_set, prep_combo, target_props):
+        """Check if a descriptor set is in a data set."""
         # run the preparation
         logging.debug(f"Testing descriptor set: {desc_set} in data set: {dataset.name}")
         descriptor_sets = [desc_set]
@@ -1452,6 +1461,7 @@ class TestDescriptorInDataMixIn(DescriptorCheckMixIn):
 
 
 class TestDescriptorsAll(DataSetsMixIn, TestDescriptorInDataMixIn, TestCase):
+    """Test all descriptor sets in all data sets."""
     @parameterized.expand(
         [
             (
