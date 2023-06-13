@@ -125,7 +125,7 @@ class Mold2(MoleculeDescriptorSet):
         return values
 
     @property
-    def is_fp(self):
+    def isFP(self):
         return self._is_fp
 
     @property
@@ -202,7 +202,7 @@ class PaDEL(MoleculeDescriptorSet):
         return values
 
     @property
-    def is_fp(self):
+    def isFP(self):
         return self._is_fp
 
     @property
@@ -326,7 +326,7 @@ class ProDecDescriptorSet(ProteinDescriptorSet, NeedsMSAMixIn):
         self._descriptors = value
 
     @property
-    def is_fp(self):
+    def isFP(self):
         return False
 
     @property
