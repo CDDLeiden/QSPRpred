@@ -145,9 +145,12 @@ class QSPRModel(ABC):
         return predictions
 
     @classmethod
-    def getDefaultParamsGrid(cls) -> str:
+    def getDefaultParamsGrid(cls) -> list:
         """Get the path to the file with default search grid parameter settings
         for some predefined estimator types.
+
+        Returns:
+            list: list of default parameter grids
         """
         return SSPACE
 
