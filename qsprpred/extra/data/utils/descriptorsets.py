@@ -84,7 +84,7 @@ class Mordred(MoleculeDescriptorSet):
         return {
             "descs": self.descriptors,
             "version": self.version,
-            "ignore_3D": self.ignore_3D,
+            "ignore_3D": self.ignore3D,
             "config": self.config,
         }
 
@@ -106,7 +106,7 @@ class Mordred(MoleculeDescriptorSet):
         self._mordred = mordred.Calculator(
             [d for d in calc.descriptors if str(d) in names],
             version=self.version,
-            ignore_3D=self.ignore_3D,
+            ignore_3D=self.ignore3D,
             config=self.config,
         )
         self._descriptors = names
