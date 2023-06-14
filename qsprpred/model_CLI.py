@@ -18,15 +18,12 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from qsprpred.data.data import QSPRDataset
-from qsprpred.deep.models.models import QSPRDNN
-from qsprpred.logs.utils import backup_files, commit_hash, enable_file_logger
-from qsprpred.models.hyperparam_optimization import (
-    GridSearchOptimization,
-    OptunaOptimization,
-)
-from qsprpred.models.models import QSPRModel, QSPRsklearn
-from qsprpred.models.tasks import TargetTasks
+from .data.data import QSPRDataset
+from .deep.models.models import QSPRDNN
+from .logs.utils import backup_files, commit_hash, enable_file_logger
+from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
+from .models.models import QSPRModel, QSPRsklearn
+from .models.tasks import TargetTasks
 
 
 def QSPRArgParser(txt=None):

@@ -12,8 +12,8 @@ import numpy as np
 import optuna
 import pandas as pd
 
-from qsprpred.logs.utils import backup_files, commit_hash, enable_file_logger
-from qsprpred.models.interfaces import QSPRModel
+from .logs.utils import backup_files, commit_hash, enable_file_logger
+from .models.interfaces import QSPRModel
 
 
 def QSPRArgParser(txt=None):

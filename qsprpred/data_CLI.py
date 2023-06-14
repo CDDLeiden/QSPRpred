@@ -16,32 +16,32 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred.data.data import QSPRDataset
-from qsprpred.data.utils.datafilters import papyrusLowQualityFilter
-from qsprpred.data.utils.datasplitters import (
+from .data.data import QSPRDataset
+from .data.utils.datafilters import papyrusLowQualityFilter
+from .data.utils.datasplitters import (
     ManualSplit,
     RandomSplit,
     ScaffoldSplit,
     TemporalSplit,
 )
-from qsprpred.data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
-from qsprpred.data.utils.descriptorsets import (
+from .data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
+from .data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
     PredictorDesc,
     RDKitDescs,
 )
-from qsprpred.data.utils.featurefilters import (
+from .data.utils.featurefilters import (
     BorutaFilter,
     HighCorrelationFilter,
     LowVarianceFilter,
 )
-from qsprpred.data.utils.scaffolds import Murcko
-from qsprpred.deep.models.models import QSPRDNN
-from qsprpred.extra.data.utils.descriptorsets import Mold2, Mordred, PaDEL
-from qsprpred.logs.utils import backup_files, commit_hash, enable_file_logger
-from qsprpred.models.models import QSPRsklearn
-from qsprpred.models.tasks import TargetTasks
+from .data.utils.scaffolds import Murcko
+from .deep.models.models import QSPRDNN
+from .extra.data.utils.descriptorsets import Mold2, Mordred, PaDEL
+from .logs.utils import backup_files, commit_hash, enable_file_logger
+from .models.models import QSPRsklearn
+from .models.tasks import TargetTasks
 
 
 def QSPRArgParser(txt=None):
