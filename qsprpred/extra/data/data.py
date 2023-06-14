@@ -212,22 +212,22 @@ class PCMDataSet(QSPRDataset):
     def addFeatures(
         self,
         feature_calculators: list[DescriptorsCalculator] | None = None,
-        recalulate: bool = False
+        recalculate: bool = False
     ):
         """Add features to the feature matrix.
 
         Args:
             feature_calculators (list[DescriptorsCalculator], optional):
                 list of feature calculators to use. Defaults to `None` in which case
-            recalulate:
+            recalculate:
                 whether to recalculate features even if they are already present
         """
         for calc in feature_calculators:
             if isinstance(calc, MoleculeDescriptorsCalculator):
-                self.addDescriptors(calc, recalculate=recalulate, featurize=False)
+                self.addDescriptors(calc, recalculate=recalculate, featurize=False)
             elif isinstance(calc, ProteinDescriptorCalculator):
                 self.addProteinDescriptors(
-                    calc, recalculate=recalulate, featurize=False
+                    calc, recalculate=recalculate, featurize=False
                 )
             else:
                 raise ValueError("Unknown feature calculator type: %s" % type(calc))
