@@ -15,7 +15,7 @@ from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
 from ...data.data import TargetProperty
-from ...data.interfaces import datasplit
+from ...data.interfaces import DataSplit
 from ...data.tests import (
     CHUNK_SIZE,
     N_CPU,
@@ -447,7 +447,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepTestMixIn, TestCase
         _,
         name: str,
         feature_calculators: list[DescriptorsCalculator],
-        split: datasplit,
+        split: DataSplit,
         feature_standardizer: SKLearnStandardizer,
         feature_filter: Callable,
         data_filter: Callable,
@@ -461,7 +461,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepTestMixIn, TestCase
             name (str): Name of the dataset.
             feature_calculators (list[DescriptorsCalculator]):
                 List of feature calculators.
-            split (datasplit): Splitting strategy.
+            split (DataSplit): Splitting strategy.
             feature_standardizer (SKLearnStandardizer): Feature standardizer.
             feature_filter (Callable): Feature filter.
             data_filter (Callable): Data filter.
