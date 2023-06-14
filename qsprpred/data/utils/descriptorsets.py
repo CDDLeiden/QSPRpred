@@ -494,9 +494,9 @@ class _DescriptorSetRetriever:
     def getProDec(self, *args, **kwargs):
         """Wrapper to get protein descriptorsfrom prodec - depends on optional
         dependency."""
-        from qsprpred.extra.data.utils.descriptorsets import ProDecDescriptorSet
+        from qsprpred.extra.data.utils.descriptorsets import ProDec
 
-        return ProDecDescriptorSet(*args, **kwargs)
+        return ProDec(*args, **kwargs)
 
     def getTanimotoDistances(self, *args, **kwargs):
         """Wrapper to get bulk tanimoto distances."""

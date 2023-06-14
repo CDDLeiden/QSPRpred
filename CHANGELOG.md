@@ -48,7 +48,7 @@ From v1.3.1 to v2.0.0
   targetproperties. To support this a targer property is now defined seperatly from the dataset as a `TargetProperty`
   instance, which holds the information on name,  `TargetTask` (see also Changes) and threshold of the property.
 - Support for protein descriptors and PCM modeling was added.
-  - The `PCMDataset` class was introduced that extends `QSPRDataset` and adds the `addProteinDescriptors` method, which can be used to calculate protein descriptors by linking information from the table with sequencing data.
+  - The `PCMDataSet` class was introduced that extends `QSPRDataset` and adds the `addProteinDescriptors` method, which can be used to calculate protein descriptors by linking information from the table with sequencing data.
 - Support for precalculated descriptors was added with `addCustomDescriptors` method of `MoleculeTable`.
   - It allows for adding precalculated descriptors to the `MoleculeTable` by linking the information from the table with external precalculated descriptors.
 - The [tutorial](tutorial) was improved with more detailed sections on data preparation and PCM modelling added.
