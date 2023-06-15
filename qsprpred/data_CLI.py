@@ -73,7 +73,7 @@ def QSPRArgParser(txt=None):
     # model target arguments
     parser.add_argument(
         "-sm",
-        "--smilescol",
+        "--smiles_col",
         type=str,
         default="SMILES",
         help="Name of the column in the dataset\
@@ -307,7 +307,7 @@ def QSPR_dataprep(args):
                 f"{props_name}_{task}",
                 target_props=target_props,
                 df=df,
-                smilescol=args.smilescol,
+                smiles_col=args.smilescol,
                 n_jobs=args.ncpu,
                 store_dir=f"{args.base_dir}/qspr/data/",
                 overwrite=True,

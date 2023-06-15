@@ -89,7 +89,7 @@ def Parkinsons(singletask=True):
         return QSPRDataset(
             name='tutorial_data',
             df=df,
-            smilescol=smiles_col,
+            smiles_col=smiles_col,
             target_props=[{"name": "GABAAalpha", "task": TargetTasks.REGRESSION}],
             store_dir="qspr/data"
         )
@@ -103,7 +103,7 @@ def Parkinsons(singletask=True):
         return QSPRDataset(
             name='tutorial_data',
             df=df,
-            smilescol=smiles_col,
+            smiles_col=smiles_col,
             target_props=target_props,
             store_dir="qspr/data",
             target_imputer=SimpleImputer(strategy='mean'),

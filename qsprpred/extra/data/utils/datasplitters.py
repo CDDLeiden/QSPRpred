@@ -70,7 +70,7 @@ class StratifiedPerTarget(DataSplit, DataSetDependant):
             ds_target = QSPRDataset(
                 name=f"{target}_scaff_split_{hash(self)}",
                 df=df_target,
-                smilescol=ds.smilescol,
+                smiles_col=ds.smilescol,
                 target_props=ds.targetProperties,
                 index_cols=ds.indexCols,
             )

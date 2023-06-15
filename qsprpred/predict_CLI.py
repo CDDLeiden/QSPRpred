@@ -43,7 +43,7 @@ def QSPRArgParser(txt=None):
     )
     parser.add_argument(
         "-sm",
-        "--smilescol",
+        "--smiles_col",
         type=str,
         default="SMILES",
         help="SMILES column name in input file.",

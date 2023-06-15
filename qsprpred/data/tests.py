@@ -780,7 +780,7 @@ class TestTargetProperty(TestCase):
 
         # check with precomputed values
         targetprop = TargetProperty(
-            "CL", TargetTasks.SINGLECLASS, th="precomputed", nClasses=2
+            "CL", TargetTasks.SINGLECLASS, th="precomputed", n_classes=2
         )
         check_target_property(
             targetprop, "CL", TargetTasks.SINGLECLASS, "CL", "precomputed"

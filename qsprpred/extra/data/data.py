@@ -97,7 +97,7 @@ class PCMDataSet(QSPRDataset):
         super().__init__(
             name,
             df=df,
-            smilescol=smiles_col,
+            smiles_col=smiles_col,
             add_rdkit=add_rdkit,
             store_dir=store_dir,
             overwrite=overwrite,

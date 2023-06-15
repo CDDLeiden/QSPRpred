@@ -517,7 +517,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         self,
         name: str,
         df: pd.DataFrame = None,
-        smilescol: str = "SMILES",
+        smiles_col: str = "SMILES",
         add_rdkit: bool = False,
         store_dir: str = ".",
         overwrite: bool = False,
@@ -538,7 +538,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 dataframe for a dataset that already exists on disk,
             the dataframe from disk will override the supplied data frame. Set
                 'overwrite' to `True` to override the data frame on disk.
-            smilescol (str): Name of the column containing the SMILES sequences
+            smiles_col (str): Name of the column containing the SMILES sequences
                 of molecules.
             add_rdkit (bool): Add RDKit molecule instances to the dataframe.
                 WARNING: This can take a lot of memory.
@@ -561,7 +561,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 f"{self.storePrefix}_descriptor_calculator"
             )
         # settings
-        self.smilescol = smilescol
+        self.smilescol = smiles_col
         self.includesRdkit = add_rdkit
         # add rdkit molecules if requested
         if self.includesRdkit and "RDMol" not in self.df.columns:
@@ -663,7 +663,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         """
         smilescol = "SMILES"
         df = pd.DataFrame({smilescol: smiles})
-        return MoleculeTable(name, df, *args, smilescol=smilescol, **kwargs)
+        return MoleculeTable(name, df, *args, smiles_col=smilescol, **kwargs)
 
     @staticmethod
     def fromTableFile(name: str, filename: str, sep="\t", *args, **kwargs):
@@ -697,7 +697,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         return MoleculeTable(
             name,
             PandasTools.LoadSDF(filename, molColName="RDMol"),
-            smilescol=smiles_prop,
+            smiles_col=smiles_prop,
             *args,  # noqa: B026 # FIXME: this is a bug in flake8...
             **kwargs,
         )
@@ -1153,9 +1153,9 @@ class TargetProperty:
         name: str,
         task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
                       TargetTasks.MULTICLASS],
-        originalName: str = None,
+        original_name: str = None,
         th: list[float] | str = None,
-        nClasses: int = None,
+        n_classes: int = None,
         transformer: Callable = None,
     ):
         """Initialize a TargetProperty object.
@@ -1165,16 +1165,16 @@ class TargetProperty:
             task (Literal[TargetTasks.REGRESSION,
               TargetTasks.SINGLECLASS,
               TargetTasks.MULTICLASS]): task type for the target property
-            originalName (str): original name of the target property, if not specified,
+            original_name (str): original name of the target property, if not specified,
                 the name is used
             th (list[float] | str): threshold for the target property, only used
                 for classification tasks
-            nClasses (int): number of classes for the target property (only used if th
+            n_classes (int): number of classes for the target property (only used if th
                 is precomputed, otherwise it is inferred)
             transformer (Callable): function to transform the target property
         """
         self.name = name
-        self.originalName = originalName if originalName is not None else name
+        self.originalName = original_name if original_name is not None else name
         self.task = task
         if task.isClassification():
             assert (
@@ -1182,7 +1182,7 @@ class TargetProperty:
             ), f"Threshold not specified for classification task {name}"
             self.th = th
             if isinstance(th, str) and th == "precomputed":
-                self.nClasses = nClasses
+                self.nClasses = n_classes
         self.transformer = transformer
 
     @property
@@ -1303,14 +1303,14 @@ class TargetProperty:
                 {
                     "name": target_prop.name,
                     "task": target_prop.task.name if task_as_str else target_prop.task,
-                    "originalName": target_prop.originalName,
+                    "original_name": target_prop.originalName,
                 }
             )
             if target_prop.task.isClassification():
                 target_props[-1].update(
                     {
                         "th": target_prop.th,
-                        "nClasses": target_prop.nClasses
+                        "n_classes": target_prop.nClasses
                     }
                 )
             if not drop_transformer:
@@ -1387,7 +1387,7 @@ class QSPRDataset(MoleculeTable):
         name: str,
         target_props: list[TargetProperty | dict],
         df: pd.DataFrame = None,
-        smilescol: str = "SMILES",
+        smiles_col: str = "SMILES",
         add_rdkit: bool = False,
         store_dir: str = ".",
         overwrite: bool = False,
@@ -1407,7 +1407,7 @@ class QSPRDataset(MoleculeTable):
                 should correspond with target columnname in df
             df (pd.DataFrame, optional): input dataframe containing smiles and target
                 property. Defaults to None.
-            smilescol (str, optional): name of column in df containing SMILES.
+            smiles_col (str, optional): name of column in df containing SMILES.
                 Defaults to "SMILES".
             add_rdkit (bool, optional): if true, column with rdkit molecules will be
                 added to df. Defaults to False.
@@ -1433,7 +1433,7 @@ class QSPRDataset(MoleculeTable):
             `ValueError`: Raised if threshold given with non-classification task.
         """
         super().__init__(
-            name, df, smilescol, add_rdkit, store_dir, overwrite, n_jobs, chunk_size,
+            name, df, smiles_col, add_rdkit, store_dir, overwrite, n_jobs, chunk_size,
             drop_invalids, index_cols
         )
         self.metaInfo = None
@@ -2356,7 +2356,7 @@ class QSPRDataset(MoleculeTable):
                 TargetProperty.toList(
                     copy.deepcopy(self.targetProperties), task_as_str=True
                 ),
-            "smilescol":
+            "smiles_col":
                 self.smilescol,
         }
         ret = {
