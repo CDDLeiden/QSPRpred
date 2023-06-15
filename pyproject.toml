@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "A cheminformatics package for training and testing QSAR/QSPR models"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.7"
-license = { file = "LICENSE" } # Can anybody add the license?
+license = { file = "LICENSE" }
 keywords = ["qsar", "machine learning", "cheminformatics"]
 authors = [{name = "Helle van den Maagdenberg", email = "h.w.van.den.maagdenberg@lacdr.leidenuniv.nl"},
            {name = "Linde Schoenmaker", email = "l.schoenmaker@lacdr.leidenuniv.nl"},
@@ -60,7 +60,7 @@ deep = ["torch >= 1.7.0"]
 extra = ["mold2-pywrapper", "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper"]
 full = [
     "torch >= 1.7.0",
-    "mold2-pywrapper == 0.0.3.post1",
+    "mold2-pywrapper",
     "padel-pywrapper >= 1.0.2.post1",
     "Signature-pywrapper",
     "Mordred",
