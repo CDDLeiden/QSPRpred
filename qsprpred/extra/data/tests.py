@@ -111,23 +111,26 @@ class DataSetsMixInExtras(DataSetsMixIn):
             ProDec(sets=["Sneath"]),
         ]
         protein_descriptor_calculators = [
-             [ProteinDescriptorCalculator(
-                 combo,
-                 msa_provider=cls.getMSAProvider())
+             [
+                 ProteinDescriptorCalculator(
+                    combo,
+                    msa_provider=cls.getMSAProvider())
              ] for combo in
              itertools.combinations(
                  feature_sets_pcm, 1
              )] + [
-             [ProteinDescriptorCalculator(
-                 combo,
-                 msa_provider=cls.getMSAProvider())
+             [
+                 ProteinDescriptorCalculator(
+                    combo,
+                    msa_provider=cls.getMSAProvider()
+                 )
              ] for combo in
              itertools.combinations(
                  feature_sets_pcm, 2
              )
          ]
-        descriptor_calculators = mol_descriptor_calculators \
-                                 + protein_descriptor_calculators
+        descriptor_calculators = \
+            mol_descriptor_calculators + protein_descriptor_calculators
         # make combinations of molecular and PCM descriptor calculators
         descriptor_calculators += [
             mol + prot for mol, prot in
@@ -162,10 +165,10 @@ class DataSetsMixInExtras(DataSetsMixIn):
                 function that provides sequences for given accessions
         """
         df_seq = self.getPCMTargetsDF()
-        map = {}
+        mapper = {}
         kwargs_map = {}
         for i, row in df_seq.iterrows():
-            map[row["accession"]] = row["Sequence"]
+            mapper[row["accession"]] = row["Sequence"]
             kwargs_map[row["accession"]] = {
                 "Classification": row["Classification"],
                 "Organism": row["Organism"],
@@ -174,7 +177,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
 
         return lambda acc_keys: (
             {
-                acc: map[acc]
+                acc: mapper[acc]
                 for acc in acc_keys
             },
             {
@@ -197,7 +200,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
                     "task": TargetTasks.REGRESSION
                 }
             ],
-            target_imputer: Callable | None = None,
+            target_imputer: Callable[[pd.Series], pd.Series] | None = None,
             preparation_settings: dict | None = None,
             protein_col: str = "accession",
     ):
@@ -208,7 +211,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
                 name of the dataset. Defaults to "QSPRDataset_test".
             target_props (list[TargetProperty] | list[dict], optional):
                 target properties.
-            target_imputer (Callable | None, optional):
+            target_imputer (Callable[pd.Series, pd.Series] | None, optional):
                 target imputer. Defaults to `None`.
             preparation_settings (dict | None, optional):
                 preparation settings. Defaults to None.
@@ -304,9 +307,11 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
         """Test the SMILES based signature descriptor calculator."""
         desc_calc = MoleculeDescriptorsCalculator([ExtendedValenceSignature(1)])
         self.dataset.addDescriptors(desc_calc, recalculate=True)
+        self.dataset.featurize()
         self.assertTrue(self.dataset.X.shape[1] > 0)
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
+
 
 class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
     """Test the calculation of protein descriptors.
@@ -645,8 +650,8 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
         train, test = train.index, test.index
-        test_targets = self.dataset.getProperty(self.dataset.proteincol).loc[test]
-        train_targets = self.dataset.getProperty(self.dataset.proteincol).loc[train]
+        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test]
+        train_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[train]
         self.assertEqual(len(test_targets), len(test))
         self.assertEqual(len(train_targets), len(train))
         self.assertTrue(
@@ -658,7 +663,7 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
         splitter = StratifiedPerTarget(splitter=randsplitter)
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
-        test_targets = self.dataset.getProperty(self.dataset.proteincol).loc[test.index]
+        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
         # check that all targets are present in the test set just once
         # (implied by the stratification on this particular dataset)
         self.assertEqual(len(test_targets), len(self.dataset.getProteinKeys()))
@@ -680,7 +685,7 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
         splitter = StratifiedPerTarget(splitter=scaffsplit)
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
-        test_targets = self.dataset.getProperty(self.dataset.proteincol).loc[test.index]
+        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
         # check that all targets are present in the test set at least once,
         # very crude check
         self.assertEqual(len(test_targets.unique()), len(self.dataset.getProteinKeys()))

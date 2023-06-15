@@ -221,7 +221,6 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
             )
         # replace errors by nan values
         df = df.apply(pd.to_numeric, errors="coerce")
-
         return df
 
     def getPrefix(self) -> str:

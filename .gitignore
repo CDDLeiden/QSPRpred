@@ -4,7 +4,6 @@
 !.gitlab-ci.yml
 !.pre-commit-config.yaml
 /build/
-/base_test/
 /docs/_build
 *.pkg
 *.tgz

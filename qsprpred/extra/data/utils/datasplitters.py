@@ -32,7 +32,7 @@ class LeaveTargetsOut(DataSplit, DataSetDependant):
         for target in self.targets:
             assert target in ds_targets, f"Target key '{target}' not in dataset!"
             ds_targets.remove(target)
-        mask = ds.getProperty(ds.proteincol).isin(ds_targets).values
+        mask = ds.getProperty(ds.proteinCol).isin(ds_targets).values
         indices = np.array([x for x in range(len(ds))])
         train = indices[mask]
         test = indices[~mask]
@@ -66,7 +66,7 @@ class StratifiedPerTarget(DataSplit, DataSetDependant):
         indices = np.array([x for x in range(len(ds))])
         for target in ds.getProteinKeys():
             splitter = self.splitter if self.splitter is not None else self.splitters[target]
-            df_target = df[df[ds.proteincol] == target]
+            df_target = df[df[ds.proteinCol] == target]
             ds_target = QSPRDataset(
                 name=f"{target}_scaff_split_{hash(self)}",
                 df=df_target,

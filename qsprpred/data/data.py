@@ -210,6 +210,17 @@ class PandasDataSet(DataSet):
         return os.path.exists(self.storePath
                              ) and self.storePath.endswith(f"_{name}.pkl")
 
+    def getProperty(self, name: str) -> list:
+        """Get a property of the data set.
+
+        Args:
+            name (str): Name of the property to get.
+
+        Returns:
+            list: List of values for the property.
+        """
+        return self.df[name].tolist()
+
     def getProperties(self):
         """Get the properties of the data set.
 
@@ -1579,7 +1590,6 @@ class QSPRDataset(MoleculeTable):
                     features.extend(
                         [f"{prefix}_{descset}_{x}" for x in descset.descriptors]
                     )
-
         if (
             self.metaInfo and not features and ("feature_names" in self.metaInfo) and
             (self.metaInfo["feature_names"] is not None)
@@ -1587,7 +1597,6 @@ class QSPRDataset(MoleculeTable):
             features.extend(
                 [x for x in self.metaInfo["feature_names"] if x not in features]
             )
-
         return features
 
     def restoreTrainingData(self):

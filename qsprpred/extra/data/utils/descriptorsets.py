@@ -300,7 +300,7 @@ class ExtendedValenceSignature(MoleculeDescriptorSet):
         # Flag initialization of descriptors after first calculation
         self._descriptors_init = False
         # Force calculator to be single process
-        self.no_parallelization = True
+        self.noParallelization = True
 
     def __call__(self, mols):
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
@@ -319,7 +319,7 @@ class ExtendedValenceSignature(MoleculeDescriptorSet):
         return values
 
     @property
-    def is_fp(self):
+    def isFP(self):
         return self._is_fp
 
     @property
