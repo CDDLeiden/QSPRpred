@@ -106,7 +106,7 @@ def QSPR_predict(args):
         sys.exit()
 
     # standardize and sanitize smiles
-    smiles_list = df[args.smilescol].tolist()
+    smiles_list = df[args.smiles_col].tolist()
 
     results = {"SMILES": smiles_list}
     for metadata_path in args.metadata_paths:

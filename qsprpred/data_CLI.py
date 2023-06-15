@@ -36,10 +36,8 @@ from .data.utils.featurefilters import (
     HighCorrelationFilter,
     LowVarianceFilter,
 )
-from .extra.data.utils.descriptorsets import Mordred, Mold2, PaDEL, ExtendedValenceSignature
 from .data.utils.scaffolds import Murcko
 from .deep.models.models import QSPRDNN
-from .extra.data.utils.descriptorsets import Mold2, Mordred, PaDEL
 from .logs.utils import backup_files, commit_hash, enable_file_logger
 from .models.models import QSPRsklearn
 from .models.tasks import TargetTasks
@@ -181,7 +179,11 @@ def QSPRArgParser(txt=None):
         "-fe",
         "--features",
         type=str,
-        choices=["Morgan", "RDkit", "Mordred", "Mold2", "PaDEL", "DrugEx"],
+        choices=[
+            "Morgan", "RDkit", "Mordred", "Mold2", "PaDEL", "DrugEx", "Signature"
+            "MaccsFP", "AvalonFP", "TopologicalFP", "AtomPairFP", "RDKitFP",
+            "PatternFP", "LayeredFP"
+        ],
         nargs="*",
     )
     parser.add_argument(
@@ -307,7 +309,7 @@ def QSPR_dataprep(args):
                 f"{props_name}_{task}",
                 target_props=target_props,
                 df=df,
-                smiles_col=args.smilescol,
+                smiles_col=args.smiles_col,
                 n_jobs=args.ncpu,
                 store_dir=f"{args.base_dir}/qspr/data/",
                 overwrite=True,
@@ -344,6 +346,15 @@ def QSPR_dataprep(args):
                 split = RandomSplit(test_fraction=args.split_fraction)
             # feature calculator
             descriptorsets = []
+            # Avoid importing optional dependencies if not needed
+            f_arr = np.array(args.features)
+            if np.isin(["Mordred", "Mold2", "PaDEL", "Signature"], f_arr).any():
+                from .extra.data.utils.descriptorsets import (
+                    ExtendedValenceSignature,
+                    Mold2,
+                    Mordred,
+                    PaDEL,
+                )
             if "Morgan" in args.features:
                 descriptorsets.append(
                     FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048)
@@ -358,8 +369,24 @@ def QSPR_dataprep(args):
                 descriptorsets.append(PaDEL())
             if "DrugEx" in args.features:
                 descriptorsets.append(DrugExPhyschem())
-            if 'Signature' in args.features:
+            if "Signature" in args.features:
                 descriptorsets.append(ExtendedValenceSignature(depth=1))
+            if "MaccsFP" in args.features:
+                descriptorsets.append(FingerprintSet(fingerprint_type="MACCS"))
+            if "AtomPairFP" in args.features:
+                descriptorsets.append(FingerprintSet(fingerprint_type="AtomPairFP"))
+            if "TopologicalFP" in args.features:
+                descriptorsets.append(
+                    FingerprintSet(fingerprint_type="TopologicalTorsionFP")
+                )
+            if "AvalonFP" in args.features:
+                descriptorsets.append(FingerprintSet(fingerprint_type="AvalonFP"))
+            if "RDKitFP" in args.features:
+                descriptorsets.append(FingerprintSet(fingerprint_type="RDKitFP"))
+            if "PatternFP" in args.features:
+                descriptorsets.append(FingerprintSet(fingerprint_type="PatternFP"))
+            if "LayeredFP" in args.features:
+                descriptorsets.append(FingerprintSet(fingerprint_type="LayeredFP"))
             if args.predictor_descs:
                 for predictor_path in args.predictor_descs:
                     # load in predictor from files
