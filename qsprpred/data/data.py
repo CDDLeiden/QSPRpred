@@ -210,16 +210,16 @@ class PandasDataSet(DataSet):
         return os.path.exists(self.storePath
                              ) and self.storePath.endswith(f"_{name}.pkl")
 
-    def getProperty(self, name: str) -> list:
+    def getProperty(self, name: str) -> pd.Series:
         """Get a property of the data set.
 
         Args:
             name (str): Name of the property to get.
 
         Returns:
-            list: List of values for the property.
+            pd.Series: List of values for the property.
         """
-        return self.df[name].tolist()
+        return self.df[name]
 
     def getProperties(self):
         """Get the properties of the data set.
