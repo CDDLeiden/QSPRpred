@@ -8,13 +8,12 @@ from typing import Iterable
 import numpy as np
 
 from qsprpred.data.data import QSPRDataset
-from qsprpred.data.interfaces import DataSplit, DataSetDependant
+from qsprpred.data.interfaces import DataSetDependant, DataSplit
 from qsprpred.data.utils.datasplitters import TemporalSplit
 from qsprpred.extra.data.data import PCMDataSet
 
 
 class LeaveTargetsOut(DataSplit, DataSetDependant):
-
     def __init__(self, targets: list[str], dataset: PCMDataSet = None):
         """Creates a leave target out splitter.
 
@@ -33,7 +32,7 @@ class LeaveTargetsOut(DataSplit, DataSetDependant):
             assert target in ds_targets, f"Target key '{target}' not in dataset!"
             ds_targets.remove(target)
         mask = ds.getProperty(ds.proteinCol).isin(ds_targets).values
-        indices = np.array([x for x in range(len(ds))])
+        indices = np.array(list(range(len(ds))))
         train = indices[mask]
         test = indices[~mask]
         return iter([(train, test)])
@@ -41,13 +40,18 @@ class LeaveTargetsOut(DataSplit, DataSetDependant):
 
 class StratifiedPerTarget(DataSplit, DataSetDependant):
     """Splits dataset in train and test subsets based on the specified splitter."""
-
-    def __init__(self, splitter: DataSplit = None, splitters: dict[str, DataSplit] = None, dataset: PCMDataSet = None):
+    def __init__(
+        self,
+        splitter: DataSplit = None,
+        splitters: dict[str, DataSplit] = None,
+        dataset: PCMDataSet = None
+    ):
         """Creates a split that is consistent across targets.
 
         Args:
             splitter: a `datasplit` instance to split the target subsets of the dataset
-            splitters (dict[str, datasplit]): a dictionary with target keys as keys and splitters to use on each protein target as values
+            splitters (dict[str, datasplit]): a dictionary with target keys as keys and
+                splitters to use on each protein target as values
             dataset (PCMDataset): a `PCMDataset` instance to split
         """
         super().__init__(dataset)
@@ -63,14 +67,15 @@ class StratifiedPerTarget(DataSplit, DataSetDependant):
         df = ds.getDF()
         train = []
         test = []
-        indices = np.array([x for x in range(len(ds))])
+        indices = np.array(list(range(len(ds))))
         for target in ds.getProteinKeys():
-            splitter = self.splitter if self.splitter is not None else self.splitters[target]
+            splitter = self.splitter if self.splitter is not None else self.splitters[
+                target]
             df_target = df[df[ds.proteinCol] == target]
             ds_target = QSPRDataset(
                 name=f"{target}_scaff_split_{hash(self)}",
                 df=df_target,
-                smiles_col=ds.smilescol,
+                smiles_col=ds.smilesCol,
                 target_props=ds.targetProperties,
                 index_cols=ds.indexCols,
             )
@@ -84,24 +89,19 @@ class StratifiedPerTarget(DataSplit, DataSetDependant):
 
 
 class TemporalPerTarget(DataSplit, DataSetDependant):
-
     def __init__(
-            self,
-            year_col: str,
-            split_years:
-            dict[str, int],
-            dataset: PCMDataSet = None
+        self, year_col: str, split_years: dict[str, int], dataset: PCMDataSet = None
     ):
         """Creates a temporal split that is consistent across targets.
 
         Args:
-            year_col (str): 
-                the name of the column in the dataframe that 
+            year_col (str):
+                the name of the column in the dataframe that
                 contains the year information
-            split_years (dict[str,int]): 
-                a dictionary with target keys as keys 
+            split_years (dict[str,int]):
+                a dictionary with target keys as keys
                 and split years as values
-            dataset (PCMDataset): 
+            dataset (PCMDataset):
                 a `PCMDataset` instance to split
         """
         super().__init__(dataset)
@@ -110,12 +110,9 @@ class TemporalPerTarget(DataSplit, DataSetDependant):
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
         splitters = {
-            target: TemporalSplit(
-                timeprop=self.yearCol,
-                timesplit=self.splitYears[target]
-            )
+            target:
+                TemporalSplit(timeprop=self.yearCol, timesplit=self.splitYears[target])
             for target, year in self.splitYears.items()
         }
-        return StratifiedPerTarget(
-            dataset=self.getDataSet(),
-            splitters=splitters).split(X, y)
+        return StratifiedPerTarget(dataset=self.getDataSet(),
+                                   splitters=splitters).split(X, y)

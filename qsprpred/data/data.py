@@ -285,16 +285,10 @@ class PandasDataSet(DataSet):
         n_cpus = self.nJobs
         chunk_size = self.chunkSize
         if n_cpus and n_cpus > 1 and not (
-                hasattr(func, 'noParallelization') and getattr(func, 'noParallelization') is True):
+            hasattr(func, "noParallelization") and func.noParallelization is True
+        ):
             return self.papply(
-                func,
-                func_args,
-                func_kwargs,
-                axis,
-                raw,
-                result_type,
-                subset,
-                n_cpus,
+                func, func_args, func_kwargs, axis, raw, result_type, subset, n_cpus,
                 chunk_size
             )
         else:
@@ -561,13 +555,13 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 f"{self.storePrefix}_descriptor_calculator"
             )
         # settings
-        self.smilescol = smiles_col
+        self.smilesCol = smiles_col
         self.includesRdkit = add_rdkit
         # add rdkit molecules if requested
         if self.includesRdkit and "RDMol" not in self.df.columns:
             PandasTools.AddMoleculeColumnToFrame(
                 self.df,
-                smilesCol=self.smilescol,
+                smilesCol=self.smilesCol,
                 molCol="RDMol",
                 includeFingerprints=False,
             )
@@ -600,11 +594,13 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         for file in files:
             path = f"{self.storeDir}/{file}"
             if os.path.exists(path):
-                with open(path, "r", encoding="utf-8") as fh: # file handle
+                with open(path, "r", encoding="utf-8") as fh:  # file handle
                     data = json.load(fh)
-                if not "calculator" in data:
-                    calc_cls = "qsprpred.data.utils.descriptorcalculator." \
-                               "MoleculeDescriptorsCalculator"
+                if "calculator" not in data:
+                    calc_cls = (
+                        "qsprpred.data.utils.descriptorcalculator."
+                        "MoleculeDescriptorsCalculator"
+                    )
                 else:
                     calc_cls = data["calculator"]
                 calc_cls = import_class(calc_cls)
@@ -717,11 +713,11 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             with multiprocessing.Pool(self.nJobs) as pool:
                 mask = pool.starmap(
                     check_smiles_valid,
-                    zip(self.df[self.smilescol], [throw] * len(self.df))
+                    zip(self.df[self.smilesCol], [throw] * len(self.df))
                 )
             return pd.Series(mask, index=self.df.index)
         else:
-            return self.df[self.smilescol].apply(check_smiles_valid, throw=throw)
+            return self.df[self.smilesCol].apply(check_smiles_valid, throw=throw)
 
     def dropDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
         """Drop descriptors from the data frame that were calculated using a specific
@@ -843,12 +839,12 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                     "SMILES for more information:"
                 )
                 logger.error(
-                    self.df[~self.checkMols(throw=False)][self.smilescol].to_numpy()
+                    self.df[~self.checkMols(throw=False)][self.smilesCol].to_numpy()
                 )
                 raise exp
         # get the data frame with the descriptors
         descriptors = self.apply(
-            calculator, axis=0, subset=[self.smilescol], result_type="reduce"
+            calculator, axis=0, subset=[self.smilesCol], result_type="reduce"
         )
         descriptors = descriptors.to_list()
         descriptors = pd.concat(descriptors, axis=0)
@@ -980,7 +976,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             self.df[f"Scaffold_{scaffold}"] = self.apply(
                 self._scaffold_calculator,
                 func_args=(scaffold, ),
-                subset=[self.smilescol],
+                subset=[self.smilesCol],
                 axis=1,
                 raw=True
             )
@@ -1111,11 +1107,11 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         else:
             raise ValueError("Standardizer must be either 'chembl', or a callable")
         if std_jobs == 1:
-            std_smi = [std_func(smi) for smi in self.df[self.smilescol].values]
+            std_smi = [std_func(smi) for smi in self.df[self.smilesCol].values]
         else:
             with Pool(std_jobs) as pool:
-                std_smi = pool.map(std_func, self.df[self.smilescol].values)
-        self.df[self.smilescol] = std_smi
+                std_smi = pool.map(std_func, self.df[self.smilesCol].values)
+        self.df[self.smilesCol] = std_smi
         if drop_invalid:
             self.dropInvalids()
 
@@ -1556,7 +1552,7 @@ class QSPRDataset(MoleculeTable):
 
     def dropEmpty(self):
         """Drop rows with empty target property value from the data set."""
-        self.df.dropna(subset=([self.smilescol]), inplace=True)
+        self.df.dropna(subset=([self.smilesCol]), inplace=True)
         self.df.dropna(subset=(self.targetPropertyNames), how="all", inplace=True)
 
     def imputeTargetProperties(self, imputer: Callable):
@@ -2357,7 +2353,7 @@ class QSPRDataset(MoleculeTable):
                     copy.deepcopy(self.targetProperties), task_as_str=True
                 ),
             "smiles_col":
-                self.smilescol,
+                self.smilesCol,
         }
         ret = {
             "init":

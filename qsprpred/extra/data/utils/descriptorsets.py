@@ -17,8 +17,8 @@ from Mold2_pywrapper import Mold2 as Mold2_calculator
 from mordred import descriptors as Mordred_descriptors
 from PaDEL_pywrapper import PaDEL as PaDELCalculator
 from PaDEL_pywrapper import descriptors as PaDEL_descriptors
-from Signature_pywrapper import Signature as Signature_calculator
 from rdkit import Chem
+from Signature_pywrapper import Signature as Signature_calculator
 
 from ....data.utils.descriptorsets import DescriptorSet, MoleculeDescriptorSet
 
@@ -294,7 +294,7 @@ class ExtendedValenceSignature(MoleculeDescriptorSet):
             depth: depth of the signature
         """
         self._depth = depth
-        self._is_fp = False
+        self._isFP = False
         self._signature = Signature_calculator()
         self._descriptors = []
         # Flag initialization of descriptors after first calculation
@@ -305,10 +305,7 @@ class ExtendedValenceSignature(MoleculeDescriptorSet):
     def __call__(self, mols):
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
         values = self._signature.calculate(
-            mols,
-            depth=self._depth,
-            show_banner=False,
-            njobs=1
+            mols, depth=self._depth, show_banner=False, njobs=1
         ).fillna(0)
         if not self._descriptors_init:
             self._descriptors = values.columns.tolist()
@@ -320,11 +317,11 @@ class ExtendedValenceSignature(MoleculeDescriptorSet):
 
     @property
     def isFP(self):
-        return self._is_fp
+        return self._isFP
 
     @property
     def settings(self):
-        return {'depth': self._depth}
+        return {"depth": self._depth}
 
     @property
     def descriptors(self):
