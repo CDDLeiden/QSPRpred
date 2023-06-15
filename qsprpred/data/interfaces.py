@@ -1,6 +1,6 @@
 """Abstract base classes for data preparation classes."""
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, Iterable
 
 import pandas as pd
 
@@ -157,7 +157,7 @@ class DataSetDependant:  # Note: this shouldn't be ABC; no abstract methods defi
 class DataSplit(ABC):
     """Defines a function split a dataframe into train and test set."""
     @abstractmethod
-    def split(self, X, y):
+    def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
         """
         Split the given data into multiple subsets.
 

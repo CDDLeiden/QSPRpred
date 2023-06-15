@@ -112,11 +112,29 @@ class PCMDataSet(QSPRDataset):
         self.proteinCol = protein_col
         self.proteinSeqProvider = protein_seq_provider
 
+    def getProteinKeys(self) -> list[str]:
+        """Return a list of keys identifying the proteins in the data frame.
+
+        Returns:
+            keys (list): List of protein keys.
+        """
+        return self.df[self.proteinCol].unique().tolist()
+
+    def getProteinSequences(self) -> dict[str, str]:
+        """Return a dictionary of protein sequences for the proteins in the data frame.
+
+        Returns:
+            sequences (dict): Dictionary of protein sequences.
+        """
+        if not self.proteinSeqProvider:
+            raise ValueError("Protein sequence provider not set. Cannot get protein sequences.")
+        return self.proteinSeqProvider(self.getProteinKeys())
+
     def addProteinDescriptors(
-        self,
-        calculator: ProteinDescriptorCalculator,
-        recalculate: bool = False,
-        featurize: bool = True
+            self,
+            calculator: ProteinDescriptorCalculator,
+            recalculate=False,
+            featurize=True
     ):
         """
         Add protein descriptors to the data frame.
@@ -151,7 +169,6 @@ class PCMDataSet(QSPRDataset):
         )
         descriptors = calculator(self.df[self.proteinCol].unique(), sequences, **info)
         descriptors[self.proteinCol] = descriptors.index.values
-
         # add the descriptors to the descriptor list
         self.attachDescriptors(calculator, descriptors, [self.proteinCol])
         self.featurize(update_splits=featurize)

@@ -40,7 +40,6 @@ class ManualSplit(DataSplit):
         self.splitCol = splitcol.reset_index(drop=True)
         self.trainVal = trainval
         self.testVal = testval
-
         # check if only trainval and testval are present in splitcol
         if not set(splitcol.unique()).issubset({trainval, testval}):
             raise ValueError(
@@ -70,17 +69,17 @@ class TemporalSplit(DataSplit, DataSetDependant):
     """Splits dataset train and test subsets based on a threshold in time.
 
     Attributes:
-        dataset (QSPRDataset): dataset that this splitter will be acting on
-        timesplit(float): time point after which sample to test set
-        timecol (str): name of the column within the dataframe with timepoints
+        dataSet (QSPRDataset): dataset that this splitter will be acting on
+        timeSplit(float): time point after which sample to test set
+        timeCol (str): name of the column within the dataframe with timepoints
     """
     def __init__(self, timesplit, timeprop, dataset=None) -> None:
         """Initialize a TemporalSplit object.
 
-        Attributes:
+        Args:
             dataset (QSPRDataset): dataset that this splitter will be acting on
             timesplit(float): time point after which sample to test set
-            timecol (str): name of the column within the dataframe with timepoints
+            timeprop (str): name of the column within the dataframe with timepoints
         """
         super().__init__(dataset=dataset)
         self.timeSplit = timesplit
@@ -92,10 +91,8 @@ class TemporalSplit(DataSplit, DataSetDependant):
             df
         ), "X and the current data in the dataset must have same length"
         indices = np.array(list(range(len(df))))
-
         mask = df[self.timeCol] > self.timeSplit
         mask = mask.values
-
         test = indices[mask]
         assert len(test) > 0, "No test samples found"
         train = indices[~mask]
@@ -106,13 +103,13 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
     """Splits dataset in train and test subsets based on their Murcko scaffold.
 
     Attributes:
-        dataset: QSPRDataset object.
+        dataSet: QSPRDataset object.
         scaffold (qsprpred.data.utils.scaffolds.Scaffold()): `Murcko()` and
             `BemisMurcko()` are currently available, other types can be added through
             the abstract class `Scaffold`. Defaults to Murcko().
-        test_fraction (float): fraction of the test set. Defaults to 0.1.
+        testFraction (float): fraction of the test set. Defaults to 0.1.
         shuffle (bool): whether to shuffle the data or not. Defaults to True.
-        custom_test_list (list): list of molecule indexes to force in test set. If
+        customTestList (list): list of molecule indexes to force in test set. If
             forced test contains the totality of the molecules in the dataset, the
             custom_test_list reverts to default None.
     """
@@ -137,13 +134,10 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
                 "Dataset not set for splitter. Use 'setDataSet(dataset)' to attach it "
                 "to this instance."
             )
-
         dataset.addScaffolds([self.scaffold])
-
         # make sure dataframe is shuffled
         if self.shuffle:
             dataset.shuffle()
-
         # Find the scaffold of each smiles
         df = dataset.getDF()
         assert len(X) == len(
@@ -160,17 +154,14 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
                     f"Invalid scaffold skipped for molecule with index: {idx}"
                 )
                 invalid_idx.append(idx)
-
         # Fill test set with groups of smiles with the same scaffold
         max_in_test = np.ceil(len(df) * self.testFraction)
         test_idx = []
-
         # Start filling test with scaffold groups that contain the smiles in input list
         if self.customTestList is not None:
             for _, scaffold_idx in scaffolds.items():
                 if bool(set(scaffold_idx) & set(self.customTestList)):
                     test_idx.extend(scaffold_idx)
-
         # Revert to default scaffold grouping if all molecules are placed in test set
         if len(test_idx) > max_in_test:
             logger.warning(
@@ -187,14 +178,12 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
                 "Ignoring custom_test_list input."
             )
             test_idx = []
-
         # Continue filling until the test fraction is reached
         for _, scaffold_idx in scaffolds.items():
             if len(test_idx) < max_in_test:
                 test_idx.extend(scaffold_idx)
             else:
                 break
-
         # Get train and test set indices
         train_idx = [df.index.get_loc(x) for x in df.index if x not in test_idx]
         test_idx = [df.index.get_loc(x) for x in test_idx]

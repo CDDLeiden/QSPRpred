@@ -7,7 +7,7 @@ import pandas as pd
 
 from ....data.utils.descriptorcalculator import DescriptorsCalculator
 from ....utils.inspect import import_class
-from .descriptor_utils.msa_calculator import ClustalMSA
+from .descriptor_utils.msa_calculator import ClustalMSA, MSAProvider
 from .descriptorsets import ProteinDescriptorSet
 
 
@@ -21,15 +21,17 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
             functionality. Defaults to ClustalMSA().
     """
     def __init__(
-        self, desc_sets: list[ProteinDescriptorSet], msa_provider=ClustalMSA()
+        self,
+            desc_sets: list[ProteinDescriptorSet],
+            msa_provider: MSAProvider = ClustalMSA()
     ) -> None:
         """Initialize the protein descriptor calculator.
 
         Args:
             desc_sets (list[ProteinDescriptorSet]): a list of protein descriptor sets to
                 calculate protein descriptors.
-            msa_provider (ClustalMSA): a provide of multiple sequence alignment
-                functionality. Defaults to ClustalMSA().
+            msa_provider (MSAProvider): a provide of multiple sequence alignment
+                functionality. Defaults to `ClustalMSA`.
         """
         super().__init__(desc_sets)
         self.msaProvider = msa_provider
@@ -106,7 +108,8 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
         """
 
         ret = super().fromFile(fname)
-        msa_provider_cls = json.load(open(f"{fname}.msaprovider", "r"))["class"]
+        with open(f"{fname}.msaprovider", "r") as fh: # file handle
+            msa_provider_cls = json.load(fh)["class"]
         msa_provider_cls = import_class(msa_provider_cls)
         ret.msaProvider = msa_provider_cls.fromFile(f"{fname}.msaprovider")
         return ret

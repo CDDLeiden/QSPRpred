@@ -7,6 +7,7 @@ such as `ProDec`.
 """
 
 import json
+import os.path
 from abc import ABC, abstractmethod
 
 import Bio
@@ -164,26 +165,42 @@ class BioPythonMSA(MSAProvider, ABC):
         return self._current
 
     @classmethod
-    def fromFile(cls, fname: str) -> "BioPythonMSA":
+    def fromFile(cls, fname: str) -> dict[str:str]:
+        """Creates an MSA provider object from a JSON file.
+
+
+        Args:
+            fname (str):
+                file name of the JSON file to load the provider from
+
+        Returns:
+            provider (dict[str:str]):
+                Current MSA
+
+        """
         with open(fname, "r") as f:
             data = json.load(f)
-
         ret = cls(data["out_dir"], data["fname"])
-        ret.currentFromFile(data["current"])
+        current_path = f"{os.path.dirname(fname)}/{data['current']}"
+        ret.currentFromFile(current_path)
         return ret
 
-    def toFile(self, fname: str) -> str:
-        with open(fname, "w") as f:
-            json.dump(
-                {
-                    "out_dir": self.outDir,
-                    "fname": self.fName,
-                    "current": f"{fname}.msa",
-                    "class": f"{self.__class__.__module__}.{self.__class__.__name__}",
-                },
-                f,
-            )
-        self.currentToFile(f"{fname}.msa")
+    def toFile(self, fname: str):
+        """Saves the MSA provider to a JSON file.
+
+        Args:
+            fname (str):
+                file name of the JSON file to save the provider to
+        """
+        current_path = f"{os.path.basename(fname)}.msa"
+        with open(fname, 'w') as f:
+            json.dump({
+                "out_dir": self.outDir,
+                "fname": self.fName,
+                "current": current_path,
+                "class": f"{self.__class__.__module__}.{self.__class__.__name__}"
+            }, f)
+        self.currentToFile(os.path.join(os.path.dirname(fname), current_path))
 
     def parseSequences(self, sequences: dict[str, str], **kwargs) -> tuple[str, int]:
         """Create object with sequences and the passed metadata.
@@ -246,8 +263,8 @@ class MAFFT(BioPythonMSA):
     - https://mafft.cbrc.jp/alignment/software/
 
     Uses the BioPython wrapper for MAFFT:
-    - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline
-    """
+    - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline 
+    """  # noqa: E501
     def __call__(self,
                  sequences: dict[str:str] | None = None,
                  **kwargs) -> dict[str, str] | None:

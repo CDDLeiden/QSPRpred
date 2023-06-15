@@ -81,7 +81,9 @@ class ModelTestMixIn:
         # perform bayes optimization
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
-            scoring=model.scoreFunc, param_grid=search_space_bs, n_trials=1
+            scoring=model.scoreFunc,
+            param_grid=search_space_bs,
+            n_trials=1
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
@@ -89,7 +91,8 @@ class ModelTestMixIn:
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
-            scoring=model.scoreFunc, param_grid=search_space_gs
+            scoring=model.scoreFunc,
+            param_grid=search_space_gs
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)

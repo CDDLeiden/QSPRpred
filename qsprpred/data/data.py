@@ -60,7 +60,7 @@ class PandasDataSet(DataSet):
         """A wrapper class to parallelize pandas apply functions."""
         def __init__(
             self,
-            func: callable,
+            func: Callable,
             func_args: list = None,
             func_kwargs: dict = None,
             axis: int = 0,
@@ -72,7 +72,7 @@ class PandasDataSet(DataSet):
             See `pandas.DataFrame.apply` for more information.
 
             Args:
-                func (callable): Function to apply to the data frame.
+                func (Callable): Function to apply to the data frame.
                 func_args (list): Positional arguments to pass to the function.
                 func_kwargs (dict): Keyword arguments to pass to the function.
                 axis (int): Axis to apply func along (0 for columns, 1 for rows).
@@ -137,18 +137,15 @@ class PandasDataSet(DataSet):
         """
         self.name = name
         self.indexCols = index_cols
-
         # parallel settings
         self.nJobs = n_jobs if n_jobs > 0 else os.cpu_count()
         self.chunkSize = chunk_size
-
         # paths
         self.storeDir = store_dir.rstrip("/")
         self.storePrefix = f"{self.storeDir}/{self.name}"
         if not os.path.exists(self.storeDir):
             raise FileNotFoundError(f"Directory '{self.storeDir}' does not exist.")
         self.storePath = f"{self.storePrefix}_df.pkl"
-
         # data frame initialization
         self.df = None
         if df is not None:
@@ -235,7 +232,6 @@ class PandasDataSet(DataSet):
         Args:
             name (str): Name of the property to remove.
         """
-        self.df.drop(name, axis=1, inplace=True)
 
     def getSubset(self, prefix: str):
         """Get a subset of the data set by providing a prefix for the column names or a
@@ -249,7 +245,7 @@ class PandasDataSet(DataSet):
 
     def apply(
         self,
-        func: callable,
+        func: Callable,
         func_args: list = None,
         func_kwargs: dict = None,
         axis: int = 0,
@@ -263,7 +259,7 @@ class PandasDataSet(DataSet):
         supports parallelization using `multiprocessing.Pool`.
 
         Args:
-            func (callable): Function to apply to the data frame.
+            func (Callable): Function to apply to the data frame.
             func_args (list): Positional arguments to pass to the function.
             func_kwargs (dict): Keyword arguments to pass to the function.
             axis (int): Axis along which the function is applied
@@ -277,7 +273,8 @@ class PandasDataSet(DataSet):
         """
         n_cpus = self.nJobs
         chunk_size = self.chunkSize
-        if n_cpus and n_cpus > 1:
+        if n_cpus and n_cpus > 1 and not (
+                hasattr(func, 'noParallelization') and getattr(func, 'noParallelization') is True):
             return self.papply(
                 func,
                 func_args,
@@ -287,7 +284,7 @@ class PandasDataSet(DataSet):
                 result_type,
                 subset,
                 n_cpus,
-                chunk_size,
+                chunk_size
             )
         else:
             df_sub = self.df[subset if subset else self.df.columns]
@@ -302,7 +299,7 @@ class PandasDataSet(DataSet):
 
     def papply(
         self,
-        func: callable,
+        func: Callable,
         func_args: list = None,
         func_kwargs: dict = None,
         axis: int = 0,
@@ -315,7 +312,7 @@ class PandasDataSet(DataSet):
         """Parallelized version of `MoleculeTable.apply`.
 
         Args:
-            func (callable): Function to apply to the data frame.
+            func (Callable): Function to apply to the data frame.
             func_args (list): Positional arguments to pass to the function.
             func_kwargs (dict): Keyword arguments to pass to the function.
             axis (int): Axis along which the function is applied
@@ -356,7 +353,7 @@ class PandasDataSet(DataSet):
 
         return pd.concat(results, axis=0)
 
-    def transform(self, targets: list, transformer: callable, addAs: list = None):
+    def transform(self, targets: list, transformer: Callable, addAs: list = None):
         """Transform the data frame (or its part) using a list of transformers.
 
         Each transformer is a function that takes the data frame (or a subset of it as
@@ -368,7 +365,7 @@ class PandasDataSet(DataSet):
 
         Args:
             targets (list): list of column names to transform.
-            transformer (callable): Function that transforms the data in target columns
+            transformer (Callable): Function that transforms the data in target columns
                 to a new representation.
             addAs (list): If `True`, the transformed data is added to the original data
                 frame and the
@@ -376,7 +373,6 @@ class PandasDataSet(DataSet):
         """
         ret = self.df[targets]
         ret = transformer(ret)
-
         if addAs:
             self.df[addAs] = ret
         return ret
@@ -391,7 +387,6 @@ class PandasDataSet(DataSet):
         df_filtered = None
         for table_filter in table_filters:
             df_filtered = table_filter(self.df)
-
         if df_filtered is not None:
             self.df = df_filtered.copy()
 
@@ -403,7 +398,6 @@ class PandasDataSet(DataSet):
         """
         # save data frame
         self.df.to_pickle(self.storePath)
-
         return self.storePath
 
     def clearFiles(self):
@@ -555,11 +549,9 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             self.descriptorCalculatorsPathPrefix = (
                 f"{self.storePrefix}_descriptor_calculator"
             )
-
         # settings
         self.smilescol = smilescol
         self.includesRdkit = add_rdkit
-
         # add rdkit molecules if requested
         if self.includesRdkit and "RDMol" not in self.df.columns:
             PandasTools.AddMoleculeColumnToFrame(
@@ -569,7 +561,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 includeFingerprints=False,
             )
             self.includesRdkit = True
-
         # drop invalid columns
         if drop_invalids:
             self.dropInvalids()
@@ -577,12 +568,10 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
     def save(self):
         """Save the dataset to disk."""
         super().save()
-
         # save descriptor calculator
         for idx, calc in enumerate(self.descriptorCalculators):
             calc.toFile(f"{self.descriptorCalculatorsPathPrefix}_{calc}.json")
             self.descriptors[idx].save()
-
         return self.storePath
 
     def reload(self):
@@ -600,12 +589,11 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         for file in files:
             path = f"{self.storeDir}/{file}"
             if os.path.exists(path):
-                data = json.load(open(path, "r", encoding="utf-8"))
-                if "calculator" not in data:
-                    calc_cls = (
-                        "qsprpred.data.utils.descriptorcalculator"
-                        ".MoleculeDescriptorsCalculator"
-                    )
+                with open(path, "r", encoding="utf-8") as fh: # file handle
+                    data = json.load(fh)
+                if not "calculator" in data:
+                    calc_cls = "qsprpred.data.utils.descriptorcalculator." \
+                               "MoleculeDescriptorsCalculator"
                 else:
                     calc_cls = data["calculator"]
                 calc_cls = import_class(calc_cls)
@@ -714,7 +702,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         Returns:
             mask (pd.Series): Boolean series indicating whether each molecule is valid.
         """
-
         if self.nJobs > 1:
             with multiprocessing.Pool(self.nJobs) as pool:
                 mask = pool.starmap(
@@ -741,7 +728,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                     f"{self.name}_{calculator.getPrefix()}"
                 )
                 to_remove.append(idx)
-
         for idx in reversed(to_remove):
             self.descriptors[idx].clearFiles()
             self.descriptors.pop(idx)
@@ -771,10 +757,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 "Use `recalculate=True` to overwrite them."
             )
             return
-
         descriptors = calculator(self.df.index)
         descriptors[self.indexCols] = self.df[self.indexCols]
-
         self.attachDescriptors(calculator, descriptors, self.indexCols)
 
     def attachDescriptors(
@@ -851,7 +835,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                     self.df[~self.checkMols(throw=False)][self.smilescol].to_numpy()
                 )
                 raise exp
-
         # get the data frame with the descriptors
         descriptors = self.apply(
             calculator, axis=0, subset=[self.smilescol], result_type="reduce"
@@ -860,7 +843,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         descriptors = pd.concat(descriptors, axis=0)
         descriptors.index = self.df.index
         descriptors[self.indexCols] = self.df[self.indexCols]
-
         # add the descriptors to the descriptor list
         self.attachDescriptors(calculator, descriptors, self.indexCols)
 
@@ -870,7 +852,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         Returns:
             pd.DataFrame: Data frame containing only descriptors.
         """
-
         join_cols = set()
         for descriptors in self.descriptors:
             join_cols.update(set(descriptors.keyCols))
@@ -910,7 +891,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             )
         else:
             prefixes = [f"{self.name}_{prefix}"]
-
         names = []
         for x in self.descriptors:
             if f"{self.name}_{x.prefix}" in prefixes:
@@ -986,7 +966,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         for scaffold in scaffolds:
             if not recalculate and f"Scaffold_{scaffold}" in self.df.columns:
                 continue
-
             self.df[f"Scaffold_{scaffold}"] = self.apply(
                 self._scaffold_calculator,
                 func_args=(scaffold, ),
@@ -1120,7 +1099,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             std_func = old_standardize_sanitize
         else:
             raise ValueError("Standardizer must be either 'chembl', or a callable")
-
         if std_jobs == 1:
             std_smi = [std_func(smi) for smi in self.df[self.smilescol].values]
         else:
@@ -1143,7 +1121,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         invalids = (~invalid_mask).sum()
         if invalids > 0:
             logger.warning(f"Dropped {invalids} invalid molecules from the data set.")
-
         return ~invalid_mask
 
 
@@ -1158,7 +1135,7 @@ class TargetProperty:
         th (int): threshold for the target property, only used for classification tasks
         nClasses (int): number of classes for the target property, only used for
             classification tasks
-        transformer (callable): function to transform the target property
+        transformer (Callable): function to transform the target property
     """
     def __init__(
         self,
@@ -1183,7 +1160,7 @@ class TargetProperty:
                 for classification tasks
             nClasses (int): number of classes for the target property (only used if th
                 is precomputed, otherwise it is inferred)
-            transformer (callable): function to transform the target property
+            transformer (Callable): function to transform the target property
         """
         self.name = name
         self.originalName = originalName if originalName is not None else name
@@ -1327,7 +1304,6 @@ class TargetProperty:
                 )
             if not drop_transformer:
                 target_props[-1].update({"transformer": target_prop.transformer})
-
         return target_props
 
     @staticmethod
@@ -1422,12 +1398,6 @@ class QSPRDataset(MoleculeTable):
                 property. Defaults to None.
             smilescol (str, optional): name of column in df containing SMILES.
                 Defaults to "SMILES".
-            proteincol (str, optional): name of column in df containing the protein
-                target identifier (usually a UniProt ID) to use for protein descriptors
-                for PCM modelling and other protein related tasks. Defaults to None.
-            proteinseqprovider: callable = None, optional): function that takes a
-                'proteincol' value and returns the appropriate protein sequence.
-                Defaults to None.
             add_rdkit (bool, optional): if true, column with rdkit molecules will be
                 added to df. Defaults to False.
             store_dir (str, optional): directory for saving the output data.
@@ -1442,7 +1412,7 @@ class QSPRDataset(MoleculeTable):
                 Defaults to True.
             drop_empty (bool, optional): if true, rows with empty target property will
                 be removed.
-            target_imputer (callable, optional): imputer for missing target property
+            target_imputer (Callable, optional): imputer for missing target property
                 values. Defaults to None.
             index_cols (list[str], optional): columns to be used as index in the
                 dataframe. Defaults to `None` in which case a custom ID will be
@@ -1463,23 +1433,19 @@ class QSPRDataset(MoleculeTable):
 
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
-
         # load target properties
         self.setTargetProperties(target_props, drop_empty, target_imputer)
-
         # load standardizers for features
         self.feature_standardizer = self.loadFeatureStandardizer()
         if not self.feature_standardizer:
             self.feature_standardizer = None
         self.fold_generator = self.getDefaultFoldGenerator()
-
         # populate feature matrix and target property array
         self.X = None
         self.y = None
         self.X_ind = None
         self.y_ind = None
         self.restoreTrainingData()
-
         logger.info(
             f"Dataset '{self.name}' created for target "
             f"targetProperties: '{self.targetProperties}'."
@@ -1555,7 +1521,6 @@ class QSPRDataset(MoleculeTable):
         assert all(
             prop in self.df.columns for prop in self.targetPropertyNames
         ), "Not all target properties in dataframe columns."
-
         # transform target properties
         for target_prop in self.targetProperties:
             if target_prop.transformer is not None:
@@ -1566,16 +1531,13 @@ class QSPRDataset(MoleculeTable):
                     addAs=[transformed_prop],
                 )
                 target_prop.name = transformed_prop
-
         # drop rows with missing smiles/no target property for any of
         # the target properties
         if drop_empty:
             self.dropEmpty()
-
         # impute missing target property values
         if target_imputer is not None:
             self.imputeTargetProperties(target_imputer)
-
         # convert classification targets to integers
         for target_prop in self.targetProperties:
             if target_prop.task.isClassification():
@@ -1586,11 +1548,11 @@ class QSPRDataset(MoleculeTable):
         self.df.dropna(subset=([self.smilescol]), inplace=True)
         self.df.dropna(subset=(self.targetPropertyNames), how="all", inplace=True)
 
-    def imputeTargetProperties(self, imputer: callable):
+    def imputeTargetProperties(self, imputer: Callable):
         """Impute missing target property values.
 
         Args:
-            imputer (callable): imputer object, should have a fit and transform method.
+            imputer (Callable): imputer object, should have a fit and transform method.
         """
         names = self.targetPropertyNames
         for idx, target_prop in enumerate(self.targetProperties):
@@ -1879,18 +1841,26 @@ class QSPRDataset(MoleculeTable):
         # save metadata
         self.saveMetadata()
 
-    def split(self, split: DataSplit):
+    def split(self, split: DataSplit, featurize: bool = False):
         """Split dataset into train and test set.
 
+        You can either split tha data frame itself or you can set `featurize` to `True`
+        if you want to use feature matrices instead of the raw data frame.
+
         Args:
-            split (DataSplit) : split instance orchestrating the split
+            split (DataSplit) :
+                split instance orchestrating the split
+            featurize (bool):
+                whether to featurize the data set splits after splitting.
+                Defaults to `False`.
+
         """
         if (
             hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and
             not split.hasDataSet
         ):
             split.setDataSet(self)
-
+        # split the data into train and test
         folds = Folds(split)
         self.X, self.X_ind, self.y, self.y_ind, train_index, test_index = next(
             folds.iterFolds(self.df, self.df[self.targetPropertyNames])
@@ -1899,7 +1869,7 @@ class QSPRDataset(MoleculeTable):
         self.X_ind = self.df.iloc[test_index, :]
         self.y = self.df.iloc[train_index, :][self.targetPropertyNames]
         self.y_ind = self.df.iloc[test_index, :][self.targetPropertyNames]
-
+        # select target properties
         logger.info("Total: train: %s test: %s" % (len(self.y), len(self.y_ind)))
         for prop in self.targetProperties:
             logger.info("Target property: %s" % prop.name)
@@ -1932,6 +1902,9 @@ class QSPRDataset(MoleculeTable):
                 if self.y[prop.name].dtype.name == "category":
                     self.y[prop.name] = self.y[prop.name].cat.codes
                     self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
+        # convert splits to features if required
+        if featurize:
+            self.featurizeSplits()
 
     def loadDataToSplits(self):
         """Load the data frame into the train and test splits.
@@ -1976,6 +1949,12 @@ class QSPRDataset(MoleculeTable):
             self.X_ind = pd.DataFrame(columns=self.X.columns)
             self.y_ind = pd.DataFrame(columns=[self.targetPropertyNames])
 
+        # shuffle the training and test sets
+        self.X = self.X.sample(frac=1)
+        self.X_ind = self.X_ind.sample(frac=1)
+        self.y = self.y.loc[self.X.index, :]
+        self.y_ind = self.y_ind.loc[self.X_ind.index, :]
+
     def featurizeSplits(self):
         """If the data set has descriptors, load them into the train and test splits.
 
@@ -2009,7 +1988,7 @@ class QSPRDataset(MoleculeTable):
         """Filter features in the data set.
 
         Args:
-            feature_filters (list[callable]): list of feature filter functions that take
+            feature_filters (list[Callable]): list of feature filter functions that take
                 X feature matrix and y target vector as arguments
         """
         if not self.hasFeatures:

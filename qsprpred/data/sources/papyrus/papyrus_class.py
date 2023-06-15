@@ -35,6 +35,7 @@ class Papyrus:
         descriptors: str | list[str] | None = "all",
         stereo: bool = False,
         disk_margin: float = 0.01,
+        plus_only: bool = True,
     ):
         """Create new instance of Papyrus dataset. See `papyrus_filter` and
         `Papyrus.download` and `Papyrus.getData` for more details.
@@ -45,23 +46,22 @@ class Papyrus:
             descriptors (str, list, None): descriptors to download if not already present
             stereo (str): include stereochemistry in the database
             disk_margin (float): the disk space margin to leave free
+            plus_only (bool): use only plusplus version, only high quality data
         """
         self.dataDir = data_dir
         self.version = version
         self.descriptors = descriptors
         self.stereo = stereo
         self.nostereo = not self.stereo
-        self.plusplus = not self.stereo
+        self.plusplus = plus_only
         self.diskMargin = disk_margin
 
     def download(self):
         """Download Papyrus database with the required information.
-        Only newly requested data is downloaded.
 
-        Returns:
-            `None`
+        Only newly requested data is downloaded. Remove the files if you want to
+        reload the data completely.
         """
-
         os.makedirs(self.dataDir, exist_ok=True)
         download_papyrus(
             outdir=self.dataDir,
@@ -70,6 +70,7 @@ class Papyrus:
             stereo=self.stereo,
             nostereo=self.nostereo,
             disk_margin=self.diskMargin,
+            only_pp=self.plusplus,
         )
 
     def getData(
@@ -82,7 +83,7 @@ class Papyrus:
         drop_duplicates: bool = False,
         chunk_size: int = 1e5,
         use_existing: bool = True,
-    ):
+    ) -> MoleculeTable:
         """Get the data from the Papyrus database as a `DataSetTSV` instance.
 
         Args:
@@ -98,7 +99,6 @@ class Papyrus:
         Returns:
             MolculeTable: the filtered data set
         """
-
         self.download()
         output_dir = output_dir or self.dataDir
         if not os.path.exists(output_dir):
@@ -124,7 +124,7 @@ class Papyrus:
         output_dir: str = None,
         name: str = None,
         use_existing: bool = True,
-    ):
+    ) -> pd.DataFrame:
         """Get the protein data from the Papyrus database.
 
         Args:

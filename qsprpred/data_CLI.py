@@ -36,6 +36,7 @@ from .data.utils.featurefilters import (
     HighCorrelationFilter,
     LowVarianceFilter,
 )
+from .extra.data.utils.descriptorsets import Mordred, Mold2, PaDEL, ExtendedValenceSignature
 from .data.utils.scaffolds import Murcko
 from .deep.models.models import QSPRDNN
 from .extra.data.utils.descriptorsets import Mold2, Mordred, PaDEL
@@ -49,7 +50,6 @@ def QSPRArgParser(txt=None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-
     # base arguments
     parser.add_argument(
         "-b",
@@ -70,7 +70,6 @@ def QSPRArgParser(txt=None):
         help="tsv file name that contains SMILES and property value column",
     )
     parser.add_argument("-ncpu", "--ncpu", type=int, default=8, help="Number of CPUs")
-
     # model target arguments
     parser.add_argument(
         "-sm",
@@ -95,7 +94,6 @@ def QSPRArgParser(txt=None):
     parser.add_argument(
         "-im", "--imputation", type=str, choices=["mean", "median", "most_frequent"]
     )
-
     # model type arguments
     parser.add_argument(
         "-r",
@@ -119,7 +117,6 @@ def QSPRArgParser(txt=None):
             "by single quotes"
         ),
     )
-
     # Data pre-processing arguments
     parser.add_argument(
         "-lq",
@@ -140,7 +137,6 @@ def QSPRArgParser(txt=None):
             "surround by single quotes"
         ),
     )
-
     # Data set split arguments
     parser.add_argument(
         "-sp",
@@ -180,7 +176,6 @@ def QSPRArgParser(txt=None):
         default="Year",
         help="Temporal split time column. Used for temporal split.",
     )
-
     # features to calculate
     parser.add_argument(
         "-fe",
@@ -200,7 +195,6 @@ def QSPRArgParser(txt=None):
             "base_directory."
         ),
     )
-
     # feature filters
     parser.add_argument(
         "-lv",
@@ -224,7 +218,6 @@ def QSPRArgParser(txt=None):
         action="store_true",
         help="boruta filter with random forest",
     )
-
     # other
     parser.add_argument(
         "-fv",
@@ -236,12 +229,10 @@ def QSPRArgParser(txt=None):
     parser.add_argument(
         "-ng", "--no_git", action="store_true", help="If on, git hash is not retrieved"
     )
-
     if txt:
         args = parser.parse_args(txt)
     else:
         args = parser.parse_args()
-
     # If no regression argument, does both regression and classification
     if args.regression is None:
         args.regression = [True, False]
@@ -251,7 +242,6 @@ def QSPRArgParser(txt=None):
         args.regression = [False]
     else:
         sys.exit("invalid regression arg given")
-
     return args
 
 
@@ -259,7 +249,6 @@ def QSPR_dataprep(args):
     """Optimize, evaluate and train estimators."""
     if not os.path.exists(args.base_dir + "/qspr/data"):
         os.makedirs(args.base_dir + "/qspr/data")
-
     for reg in args.regression:
         for props in args.properties:
             props_name = "_".join(props)
@@ -269,7 +258,6 @@ def QSPR_dataprep(args):
             except BaseException:
                 log.error(f"Dataset file ({args.base_dir}/data/{args.input}) not found")
                 sys.exit()
-
             # prepare dataset for training QSPR model
             target_props = []
             for prop in props:
@@ -305,7 +293,6 @@ def QSPR_dataprep(args):
                         "transformer": log_transform
                     }
                 )
-
             # missing value imputation
             if args.imputation is not None:
                 if args.imputation == "mean":
@@ -316,7 +303,6 @@ def QSPR_dataprep(args):
                     imputer = SimpleImputer(strategy="most_frequent")
                 else:
                     sys.exit("invalid impute arg given")
-
             mydataset = QSPRDataset(
                 f"{props_name}_{task}",
                 target_props=target_props,
@@ -327,12 +313,10 @@ def QSPR_dataprep(args):
                 overwrite=True,
                 target_imputer=imputer if args.imputation is not None else None,
             )
-
             # data filters
             datafilters = []
             if args.low_quality:
                 datafilters.append(papyrusLowQualityFilter())
-
             # data splitter
             if args.split == "scaffold":
                 split = ScaffoldSplit(
@@ -358,7 +342,6 @@ def QSPR_dataprep(args):
                 )
             else:
                 split = RandomSplit(test_fraction=args.split_fraction)
-
             # feature calculator
             descriptorsets = []
             if "Morgan" in args.features:
@@ -375,6 +358,8 @@ def QSPR_dataprep(args):
                 descriptorsets.append(PaDEL())
             if "DrugEx" in args.features:
                 descriptorsets.append(DrugExPhyschem())
+            if 'Signature' in args.features:
+                descriptorsets.append(ExtendedValenceSignature(depth=1))
             if args.predictor_descs:
                 for predictor_path in args.predictor_descs:
                     # load in predictor from files
@@ -386,7 +371,6 @@ def QSPR_dataprep(args):
                         descriptorsets.append(
                             PredictorDesc(QSPRsklearn.fromFile(predictor_path))
                         )
-
             # feature filters
             featurefilters = []
             if args.low_variability:
@@ -404,7 +388,6 @@ def QSPR_dataprep(args):
                             estimator=RandomForestClassifier(n_jobs=args.ncpu)
                         )
                     )
-
             # prepare dataset for modelling
             mydataset.prepareDataset(
                 feature_calculators=[MoleculeDescriptorsCalculator(descriptorsets)],

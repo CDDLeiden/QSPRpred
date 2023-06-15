@@ -342,8 +342,9 @@ def QSPR_modelling(args):
                 )
                 best_params = gridsearcher.optimize(QSPRmodel)
                 QSPRmodel.saveParams(best_params)
-            elif args.optimization == "bayes":
-                search_space_bs = grid_params[grid_params[:, 0] == model_type, 1][0]
+            elif args.optimization == 'bayes':
+                search_space_bs = grid_params[grid_params[:, 0] ==
+                                              model_type, 1][0]
                 log.info(search_space_bs)
                 if reg and model_type == "RF":
                     if mydataset.y.min()[0] < 0 or mydataset.y_ind.min()[0] < 0:
@@ -368,7 +369,6 @@ def QSPR_modelling(args):
                     n_jobs=args.n_jobs,
                 )
                 best_params = bayesoptimizer.optimize(QSPRmodel)
-                QSPRmodel.saveParams(best_params)
 
             # initialize models from saved or default parameters
 

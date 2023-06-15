@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Callable, Iterable
 
 import numpy as np
+import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
 from ..logs import logger
@@ -112,7 +113,7 @@ class OptunaOptimization(HyperParameterOptimization):
         self.bestParams = trial.params
         return self.bestParams
 
-    def objective(self, trial, model: QSPRModel) -> float:
+    def objective(self, trial : optuna.trial.Trial, model: QSPRModel) -> float:
         """Objective for bayesian optimization.
 
         Arguments:
@@ -165,11 +166,12 @@ class GridSearchOptimization(HyperParameterOptimization):
         """
         super().__init__(scoring, param_grid)
 
-    def optimize(self, model: QSPRModel) -> dict:
+    def optimize(self, model: QSPRModel, save_params: bool = True) -> dict:
         """Optimize the hyperparameters of the model.
 
         Args:
             model (QSPRModel): the model to optimize
+            save_params (bool): whether to set and save the best parameters to the model after optimization
 
         Returns:
             dict: best parameters found during optimization
@@ -193,4 +195,7 @@ class GridSearchOptimization(HyperParameterOptimization):
             "Grid search best params: %s with score: %s" %
             (self.bestScore, self.bestScore)
         )
+        # save the best parameters to the model if requested
+        if save_params:
+            model.saveParams(self.bestParams)
         return self.bestParams

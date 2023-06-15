@@ -413,10 +413,23 @@ class QSPRModel(ABC):
             str: absolute path to the JSON file
         """
         path = f"{self.outDir}/{self.name}_params.json"
+        self.setParams(params)
+        # save parameters to file
         with open(path, "w", encoding="utf-8") as j:
             logger.info("saving model parameters to file: %s" % path)
             j.write(json.dumps(params, indent=4))
         return path
+    
+    def setParams(self, params):
+        """Set model parameters.
+
+        Args:
+            params (dict): dictionary of model parameters
+        """
+        if self.parameters is not None:
+            self.parameters.update(params)
+        else:
+            self.parameters = params
 
     def saveDescriptorCalculators(self) -> list[str]:
         """Save the current descriptor calculator to a JSON file.
