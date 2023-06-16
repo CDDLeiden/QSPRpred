@@ -60,7 +60,7 @@ deep = ["torch >= 1.7.0"]
 extra = ["mold2-pywrapper", "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper"]
 full = [
     "torch >= 1.7.0",
-    "mold2-pywrapper",
+    "mold2-pywrapper == 0.0.3.post1",
     "padel-pywrapper >= 1.0.2.post1",
     "Signature-pywrapper",
     "Mordred",
