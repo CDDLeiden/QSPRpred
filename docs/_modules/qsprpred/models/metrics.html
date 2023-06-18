@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.models.metrics &mdash; QSPRpred 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v2.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">qsprpred</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.models.metrics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.models.metrics</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Wrapper for sklearn scoring functions.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span>
+
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
+
+<span class="kn">from</span> <span class="nn">.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
+
+
+<div class="viewcode-block" id="Metric"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.metrics.Metric">[docs]</a><span class="k">class</span> <span class="nc">Metric</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract class for scoring functions.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the scoring function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the scoring function.</span>
+<span class="sd">            func (Callable[[Iterable, Iterable], float]): Scoring function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">func</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the score.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            y_true (Iterable): True values.</span>
+<span class="sd">            y_pred (Iterable): Predicted values.</span>
+<span class="sd">            *args: Additional arguments.</span>
+<span class="sd">            **kwargs: Additional keyword arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">supports_REGRESSION</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports regression tasks.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">supports_SINGLECLASS</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports single class classification tasks.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">supports_MULTICLASS</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports multi class classification tasks.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">supports_MULTITASK_REGRESSION</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports multi task regression tasks.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">supports_MULTITASK_SINGLECLASS</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports</span>
+<span class="sd">        multi task single class classification tasks.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">supports_MULTITASK_MULTICLASS</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports</span>
+<span class="sd">        multi task multi class classification tasks.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">supports_MULTITASK_MIXED</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports multi task mixed tasks.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">needsProbasToScore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if the scorer needs probabilities to score.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">needsDiscreteToScore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if the scorer needs discrete values to score.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isClassificationMetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports any type of classification tasks.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">supports_SINGLECLASS</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">supports_MULTICLASS</span> <span class="ow">or</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">supports_MULTITASK_SINGLECLASS</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">supports_MULTITASK_MULTICLASS</span> <span class="ow">or</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">supports_MULTITASK_MIXED</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isRegressionMetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports any type of regression tasks.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">supports_REGRESSION</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">supports_MULTITASK_REGRESSION</span> <span class="ow">or</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">supports_MULTITASK_MIXED</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+
+
+<div class="viewcode-block" id="SklearnMetric"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.metrics.SklearnMetric">[docs]</a><span class="k">class</span> <span class="nc">SklearnMetric</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper for sklearn scoring functions.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        scorer: Sklearn scorer object.</span>
+<span class="sd">        regressionMetrics: List of regression metrics.</span>
+<span class="sd">        singleClassMetrics: List of single class classification metrics.</span>
+<span class="sd">        multiClassMetrics: List of multi class classification metrics.</span>
+<span class="sd">        multiTaskRegressionMetrics: List of multi task regression metrics.</span>
+<span class="sd">        multiTaskSingleClassMetrics:</span>
+<span class="sd">            List of multi task single class classification metrics.</span>
+<span class="sd">        multiTaskMultiClassMetrics:</span>
+<span class="sd">             List of multi task multi class classification metrics.</span>
+<span class="sd">        multiTaskMixedMetrics: List of multi task mixed metrics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">regressionMetrics</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;explained_variance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;max_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_absolute_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_squared_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_root_mean_squared_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_squared_log_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_median_absolute_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;r2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_poisson_deviance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_gamma_deviance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_absolute_percentage_error&quot;</span><span class="p">,</span>
+    <span class="p">]</span>  <span class="c1"># &#39;d2_absolute_error_score&#39;,&#39;d2_pinball_score&#39;, &#39;d2_tweedie_scor&#39;</span>
+    <span class="n">singleClassMetrics</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;average_precision&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_brier_score&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_log_loss&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovo_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovr_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;balanced_accuracy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;top_k_accuracy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_weighted&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">multiClassMetrics</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;neg_log_loss&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovo_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovr_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;balanced_accuracy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;top_k_accuracy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_weighted&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">multiTaskRegressionMetrics</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;explained_variance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_absolute_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_squared_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_root_mean_squared_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_squared_log_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_median_absolute_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;r2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;neg_mean_absolute_percentage_error&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">multiTaskSingleClassMetrics</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovo_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc_ovr_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;average_precision&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1_samples&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precision_samples&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall_samples&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_micro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_macro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_weighted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jaccard_samples&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">multiTaskMultiClassMetrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">multiTaskMixedMetrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">scorer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the scoring function.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scorer</span> <span class="o">=</span> <span class="n">scorer</span>  <span class="c1"># Sklearn scorer object</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call the scoring function.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supports_REGRESSION</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports regression tasks.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressionMetrics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supports_SINGLECLASS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports single class classification tasks.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">singleClassMetrics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supports_MULTICLASS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports multi class classification tasks.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiClassMetrics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supports_MULTITASK_REGRESSION</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports multi task regression tasks.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiTaskRegressionMetrics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supports_MULTITASK_SINGLECLASS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports</span>
+<span class="sd">        multi task single class classification tasks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiTaskSingleClassMetrics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supports_MULTITASK_MULTICLASS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports multitask multiclass</span>
+<span class="sd">        (or a mix of multiclass/single class) classification tasks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiTaskMultiClassMetrics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supports_MULTITASK_MIXED</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports</span>
+<span class="sd">        multi task mixed regression/classification tasks.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiTaskMixedMetrics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">needsProbasToScore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if the scorer needs probabilities to score.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;average_precision&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;neg_brier_score&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;neg_log_loss&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;roc_auc_ovo_weighted&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;roc_auc_ovr_weighted&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;top_k_accuracy&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">needsDiscreteToScore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if the scorer needs discrete values to score.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;balanced_accuracy&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f1_micro&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f1_macro&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f1_weighted&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f1_samples&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;precision_micro&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;precision_macro&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;precision_weighted&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;precision_samples&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;recall_micro&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;recall_macro&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;recall_weighted&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;recall_samples&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+<div class="viewcode-block" id="SklearnMetric.supportsTask"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.metrics.SklearnMetric.supportsTask">[docs]</a>    <span class="k">def</span> <span class="nf">supportsTask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">ModelTasks</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if the scorer supports the given task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;supports_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supportedMetrics</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of all supported metrics.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">regressionMetrics</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="n">singleClassMetrics</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="n">multiClassMetrics</span> <span class="o">+</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">multiTaskRegressionMetrics</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="n">multiTaskSingleClassMetrics</span> <span class="o">+</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">multiTaskMultiClassMetrics</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="n">multiTaskMixedMetrics</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="SklearnMetric.scorerFunc"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.metrics.SklearnMetric.scorerFunc">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">scorerFunc</span><span class="p">(</span><span class="n">scorer</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the scoring function of a sklearn scorer.&quot;&quot;&quot;</span>
+        <span class="c1"># From https://stackoverflow.com/questions/63943410/getting-a-scoring-function-by-name-in-scikit-learn</span>
+        <span class="k">return</span> <span class="n">scorer</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="n">scorer</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">**</span><span class="n">scorer</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SklearnMetric.getMetric"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.metrics.SklearnMetric.getMetric">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getMetric</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a scorer function object from a sklearn scorer name.&quot;&quot;&quot;</span>
+        <span class="n">scorer</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_scorer</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">SklearnMetric</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">SklearnMetric</span><span class="o">.</span><span class="n">scorerFunc</span><span class="p">,</span> <span class="n">scorer</span><span class="p">),</span> <span class="n">scorer</span><span class="o">=</span><span class="n">scorer</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

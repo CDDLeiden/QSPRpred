@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.data.utils package &mdash; QSPRpred 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.extra.data.utils.descriptor_utils package" href="qsprpred.extra.data.utils.descriptor_utils.html" />
+    <link rel="prev" title="qsprpred.extra.data package" href="qsprpred.extra.data.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v2.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">qsprpred</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.html">qsprpred.deep package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="qsprpred.extra.html">qsprpred.extra package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.metrics.html">qsprpred.metrics package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">qsprpred</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.extra.html">qsprpred.extra package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.extra.data.html">qsprpred.extra.data package</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.data.utils package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-extra-data-utils-package">
+<h1>qsprpred.extra.data.utils package<a class="headerlink" href="#qsprpred-extra-data-utils-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html">qsprpred.extra.data.utils.descriptor_utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#module-qsprpred.extra.data.utils.descriptor_utils.fingerprints">qsprpred.extra.data.utils.descriptor_utils.fingerprints module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP"><code class="docutils literal notranslate"><span class="pre">CDKAtomPairs2DFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP.getFingerprints"><code class="docutils literal notranslate"><span class="pre">CDKAtomPairs2DFP.getFingerprints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP.getKey"><code class="docutils literal notranslate"><span class="pre">CDKAtomPairs2DFP.getKey()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKAtomPairs2DFP.settings"><code class="docutils literal notranslate"><span class="pre">CDKAtomPairs2DFP.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKEStateFP"><code class="docutils literal notranslate"><span class="pre">CDKEStateFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKEStateFP.getFingerprints"><code class="docutils literal notranslate"><span class="pre">CDKEStateFP.getFingerprints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKEStateFP.getKey"><code class="docutils literal notranslate"><span class="pre">CDKEStateFP.getKey()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKEStateFP.settings"><code class="docutils literal notranslate"><span class="pre">CDKEStateFP.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKExtendedFP"><code class="docutils literal notranslate"><span class="pre">CDKExtendedFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKExtendedFP.getFingerprints"><code class="docutils literal notranslate"><span class="pre">CDKExtendedFP.getFingerprints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKExtendedFP.getKey"><code class="docutils literal notranslate"><span class="pre">CDKExtendedFP.getKey()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKExtendedFP.settings"><code class="docutils literal notranslate"><span class="pre">CDKExtendedFP.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKFP"><code class="docutils literal notranslate"><span class="pre">CDKFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKFP.getFingerprints"><code class="docutils literal notranslate"><span class="pre">CDKFP.getFingerprints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKFP.getKey"><code class="docutils literal notranslate"><span class="pre">CDKFP.getKey()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKFP.settings"><code class="docutils literal notranslate"><span class="pre">CDKFP.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP"><code class="docutils literal notranslate"><span class="pre">CDKGraphOnlyFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP.getFingerprints"><code class="docutils literal notranslate"><span class="pre">CDKGraphOnlyFP.getFingerprints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP.getKey"><code class="docutils literal notranslate"><span class="pre">CDKGraphOnlyFP.getKey()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKGraphOnlyFP.settings"><code class="docutils literal notranslate"><span class="pre">CDKGraphOnlyFP.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP"><code class="docutils literal notranslate"><span class="pre">CDKKlekotaRothFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP.getFingerprints"><code class="docutils literal notranslate"><span class="pre">CDKKlekotaRothFP.getFingerprints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP.getKey"><code class="docutils literal notranslate"><span class="pre">CDKKlekotaRothFP.getKey()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKKlekotaRothFP.settings"><code class="docutils literal notranslate"><span class="pre">CDKKlekotaRothFP.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKMACCSFP"><code class="docutils literal notranslate"><span class="pre">CDKMACCSFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKMACCSFP.getFingerprints"><code class="docutils literal notranslate"><span class="pre">CDKMACCSFP.getFingerprints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKMACCSFP.getKey"><code class="docutils literal notranslate"><span class="pre">CDKMACCSFP.getKey()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKMACCSFP.settings"><code class="docutils literal notranslate"><span class="pre">CDKMACCSFP.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKPubchemFP"><code class="docutils literal notranslate"><span class="pre">CDKPubchemFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKPubchemFP.getFingerprints"><code class="docutils literal notranslate"><span class="pre">CDKPubchemFP.getFingerprints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKPubchemFP.getKey"><code class="docutils literal notranslate"><span class="pre">CDKPubchemFP.getKey()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKPubchemFP.settings"><code class="docutils literal notranslate"><span class="pre">CDKPubchemFP.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP"><code class="docutils literal notranslate"><span class="pre">CDKSubstructureFP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP.getFingerprints"><code class="docutils literal notranslate"><span class="pre">CDKSubstructureFP.getFingerprints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP.getKey"><code class="docutils literal notranslate"><span class="pre">CDKSubstructureFP.getKey()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.fingerprints.CDKSubstructureFP.settings"><code class="docutils literal notranslate"><span class="pre">CDKSubstructureFP.settings</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#module-qsprpred.extra.data.utils.descriptor_utils.msa_calculator">qsprpred.extra.data.utils.descriptor_utils.msa_calculator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA.current"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA.current</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA.currentFromFile"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA.currentFromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA.currentToFile"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA.currentToFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA.fromFile"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA.getFromCache"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA.getFromCache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA.parseAlignment"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA.parseAlignment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA.parseSequences"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA.parseSequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA.saveToCache"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA.saveToCache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.BioPythonMSA.toFile"><code class="docutils literal notranslate"><span class="pre">BioPythonMSA.toFile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA"><code class="docutils literal notranslate"><span class="pre">ClustalMSA</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA.current"><code class="docutils literal notranslate"><span class="pre">ClustalMSA.current</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA.currentFromFile"><code class="docutils literal notranslate"><span class="pre">ClustalMSA.currentFromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA.currentToFile"><code class="docutils literal notranslate"><span class="pre">ClustalMSA.currentToFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA.fromFile"><code class="docutils literal notranslate"><span class="pre">ClustalMSA.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA.getFromCache"><code class="docutils literal notranslate"><span class="pre">ClustalMSA.getFromCache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA.parseAlignment"><code class="docutils literal notranslate"><span class="pre">ClustalMSA.parseAlignment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA.parseSequences"><code class="docutils literal notranslate"><span class="pre">ClustalMSA.parseSequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA.saveToCache"><code class="docutils literal notranslate"><span class="pre">ClustalMSA.saveToCache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA.toFile"><code class="docutils literal notranslate"><span class="pre">ClustalMSA.toFile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT"><code class="docutils literal notranslate"><span class="pre">MAFFT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT.current"><code class="docutils literal notranslate"><span class="pre">MAFFT.current</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT.currentFromFile"><code class="docutils literal notranslate"><span class="pre">MAFFT.currentFromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT.currentToFile"><code class="docutils literal notranslate"><span class="pre">MAFFT.currentToFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT.fromFile"><code class="docutils literal notranslate"><span class="pre">MAFFT.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT.getFromCache"><code class="docutils literal notranslate"><span class="pre">MAFFT.getFromCache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT.parseAlignment"><code class="docutils literal notranslate"><span class="pre">MAFFT.parseAlignment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT.parseSequences"><code class="docutils literal notranslate"><span class="pre">MAFFT.parseSequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT.saveToCache"><code class="docutils literal notranslate"><span class="pre">MAFFT.saveToCache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MAFFT.toFile"><code class="docutils literal notranslate"><span class="pre">MAFFT.toFile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MSAProvider"><code class="docutils literal notranslate"><span class="pre">MSAProvider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MSAProvider.current"><code class="docutils literal notranslate"><span class="pre">MSAProvider.current</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MSAProvider.fromFile"><code class="docutils literal notranslate"><span class="pre">MSAProvider.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MSAProvider.toFile"><code class="docutils literal notranslate"><span class="pre">MSAProvider.toFile()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#module-qsprpred.extra.data.utils.descriptor_utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.extra.data.utils.datasplitters">
+<span id="qsprpred-extra-data-utils-datasplitters-module"></span><h2>qsprpred.extra.data.utils.datasplitters module<a class="headerlink" href="#module-qsprpred.extra.data.utils.datasplitters" title="Permalink to this heading"></a></h2>
+<p>Different splitters to create train and tests for evalutating QSPR model performance.</p>
+<p>To add a new data splitter:
+* Add a datasplit subclass for your new splitter</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.datasplitters.</span></span><span class="sig-name descname"><span class="pre">LeaveTargetsOut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet" title="qsprpred.extra.data.data.PCMDataSet"><span class="pre">PCMDataSet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/datasplitters.html#LeaveTargetsOut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSplit" title="qsprpred.data.interfaces.DataSplit"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSplit</span></code></a>, <a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSetDependant" title="qsprpred.data.interfaces.DataSetDependant"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetDependant</span></code></a></p>
+<p>Creates a leave target out splitter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – the identifiers of the targets to leave out as test set</p></li>
+<li><p><strong>dataset</strong> (<em>PCMDataset</em>) – a <code class="xref any docutils literal notranslate"><span class="pre">PCMDataset</span></code> instance to split</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut.getDataSet">
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut.getDataSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut.hasDataSet">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasDataSet</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut.hasDataSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut.setDataSet">
+<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.MoleculeDataSet" title="qsprpred.data.interfaces.MoleculeDataSet"><span class="pre">MoleculeDataSet</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut.setDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Set the data sets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/datasplitters.html#LeaveTargetsOut.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut.split" title="Permalink to this definition"></a></dt>
+<dd><p>Split the given data into multiple subsets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>DataFrame</em>) – the input data matrix</p></li>
+<li><p><strong>y</strong> (<em>Series</em>) – the target variable</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an iterator over the generated subsets represented as a tuple of
+(train_indices, test_indices) where the indices are the row indices of the
+input data matrix X</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.datasplitters.</span></span><span class="sig-name descname"><span class="pre">StratifiedPerTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">splitter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSplit" title="qsprpred.data.interfaces.DataSplit"><span class="pre">DataSplit</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splitters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSplit" title="qsprpred.data.interfaces.DataSplit"><span class="pre">qsprpred.data.interfaces.DataSplit</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet" title="qsprpred.extra.data.data.PCMDataSet"><span class="pre">PCMDataSet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/datasplitters.html#StratifiedPerTarget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSplit" title="qsprpred.data.interfaces.DataSplit"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSplit</span></code></a>, <a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSetDependant" title="qsprpred.data.interfaces.DataSetDependant"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetDependant</span></code></a></p>
+<p>Splits dataset in train and test subsets based on the specified splitter.</p>
+<p>Creates a split that is consistent across targets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>splitter</strong> – a <code class="xref any docutils literal notranslate"><span class="pre">datasplit</span></code> instance to split the target subsets of the dataset</p></li>
+<li><p><strong>splitters</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>datasplit</em><em>]</em>) – a dictionary with target keys as keys and
+splitters to use on each protein target as values</p></li>
+<li><p><strong>dataset</strong> (<em>PCMDataset</em>) – a <code class="xref any docutils literal notranslate"><span class="pre">PCMDataset</span></code> instance to split</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.getDataSet">
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.getDataSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.hasDataSet">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasDataSet</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.hasDataSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.setDataSet">
+<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.MoleculeDataSet" title="qsprpred.data.interfaces.MoleculeDataSet"><span class="pre">MoleculeDataSet</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.setDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Set the data sets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Iterable" title="(in Python v3.9)"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/datasplitters.html#StratifiedPerTarget.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.split" title="Permalink to this definition"></a></dt>
+<dd><p>Split the given data into multiple subsets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>DataFrame</em>) – the input data matrix</p></li>
+<li><p><strong>y</strong> (<em>Series</em>) – the target variable</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an iterator over the generated subsets represented as a tuple of
+(train_indices, test_indices) where the indices are the row indices of the
+input data matrix X</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.TemporalPerTarget">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.datasplitters.</span></span><span class="sig-name descname"><span class="pre">TemporalPerTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet" title="qsprpred.extra.data.data.PCMDataSet"><span class="pre">PCMDataSet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/datasplitters.html#TemporalPerTarget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSplit" title="qsprpred.data.interfaces.DataSplit"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSplit</span></code></a>, <a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSetDependant" title="qsprpred.data.interfaces.DataSetDependant"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetDependant</span></code></a></p>
+<p>Creates a temporal split that is consistent across targets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>year_col</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the name of the column in the dataframe that
+contains the year information</p></li>
+<li><p><strong>split_years</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) – a dictionary with target keys as keys
+and split years as values</p></li>
+<li><p><strong>dataset</strong> (<em>PCMDataset</em>) – a <code class="xref any docutils literal notranslate"><span class="pre">PCMDataset</span></code> instance to split</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.getDataSet">
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.getDataSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.hasDataSet">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasDataSet</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.hasDataSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.setDataSet">
+<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.MoleculeDataSet" title="qsprpred.data.interfaces.MoleculeDataSet"><span class="pre">MoleculeDataSet</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.setDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Set the data sets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Iterable" title="(in Python v3.9)"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/datasplitters.html#TemporalPerTarget.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.split" title="Permalink to this definition"></a></dt>
+<dd><p>Split the given data into multiple subsets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>DataFrame</em>) – the input data matrix</p></li>
+<li><p><strong>y</strong> (<em>Series</em>) – the target variable</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an iterator over the generated subsets represented as a tuple of
+(train_indices, test_indices) where the indices are the row indices of the
+input data matrix X</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.extra.data.utils.descriptorcalculator">
+<span id="qsprpred-extra-data-utils-descriptorcalculator-module"></span><h2>qsprpred.extra.data.utils.descriptorcalculator module<a class="headerlink" href="#module-qsprpred.extra.data.utils.descriptorcalculator" title="Permalink to this heading"></a></h2>
+<p>Module containing various extra descriptor calculators.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.descriptorcalculator.</span></span><span class="sig-name descname"><span class="pre">ProteinDescriptorCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">desc_sets:</span> <span class="pre">list[qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet],</span> <span class="pre">msa_provider:</span> <span class="pre">~qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MSAProvider</span> <span class="pre">=</span> <span class="pre">&lt;qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA</span> <span class="pre">object&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorcalculator.html#ProteinDescriptorCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator" title="qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DescriptorsCalculator</span></code></a></p>
+<p>Class for calculating protein descriptors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>desc_sets</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference internal" href="#qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet" title="qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet"><em>ProteinDescriptorSet</em></a><em>]</em>) – a list of protein descriptor sets to
+calculate protein descriptors.</p></li>
+<li><p><strong>msa_provider</strong> (<a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA" title="qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA"><em>ClustalMSA</em></a>) – a provider of multiple sequence alignment (MSA)
+functionality. Defaults to ClustalMSA().</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize the protein descriptor calculator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>desc_sets</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference internal" href="#qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet" title="qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet"><em>ProteinDescriptorSet</em></a><em>]</em>) – a list of protein descriptor sets to
+calculate protein descriptors.</p></li>
+<li><p><strong>msa_provider</strong> (<a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MSAProvider" title="qsprpred.extra.data.utils.descriptor_utils.msa_calculator.MSAProvider"><em>MSAProvider</em></a>) – a provide of multiple sequence alignment
+functionality. Defaults to <a class="reference internal" href="qsprpred.extra.data.utils.descriptor_utils.html#qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA" title="qsprpred.extra.data.utils.descriptor_utils.msa_calculator.ClustalMSA"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ClustalMSA</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.classFromFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">classFromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.classFromFile" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize descriptorset from a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fname</strong> – file name of json file with descriptor names and settings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.fromFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator" title="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator"><span class="pre">ProteinDescriptorCalculator</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorcalculator.html#ProteinDescriptorCalculator.fromFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.fromFile" title="Permalink to this definition"></a></dt>
+<dd><p>Loads the descriptor calculator from file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fname</strong> – Name of the file to load from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loaded descriptor calculator.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator" title="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator">ProteinDescriptorCalculator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.getPrefix">
+<span class="sig-name descname"><span class="pre">getPrefix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorcalculator.html#ProteinDescriptorCalculator.getPrefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.getPrefix" title="Permalink to this definition"></a></dt>
+<dd><p>Return prefix for descriptor names of the calculator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.get_len">
+<span class="sig-name descname"><span class="pre">get_len</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.get_len" title="Permalink to this definition"></a></dt>
+<dd><p>Return number of descriptors calculated by all descriptorsets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.keepDescriptors">
+<span class="sig-name descname"><span class="pre">keepDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.keepDescriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Drop all descriptors/descriptorsets not in descriptor list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>descriptors</strong> – list of descriptornames with descriptorset prefix to keep</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.loadDescriptorSets">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loadDescriptorSets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'DescriptorSet'</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.loadDescriptorSets" title="Permalink to this definition"></a></dt>
+<dd><p>Loads the descriptor sets from a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the json file with descriptor names and settings</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of descriptor sets</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DescriptorSet" title="qsprpred.data.utils.descriptorsets.DescriptorSet">DescriptorSet</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.toFile">
+<span class="sig-name descname"><span class="pre">toFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorcalculator.html#ProteinDescriptorCalculator.toFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.toFile" title="Permalink to this definition"></a></dt>
+<dd><p>Saves the descriptor calculator to file.</p>
+<p>The <code class="xref any docutils literal notranslate"><span class="pre">msaProvider</span></code> is saved to a separate file with the extension
+<code class="xref any docutils literal notranslate"><span class="pre">.msaprovider</span></code>. The calculated alignment is saved as <code class="xref any docutils literal notranslate"><span class="pre">.msaprovider.msa</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – File name to save to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.treatInfs">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">treatInfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator.treatInfs" title="Permalink to this definition"></a></dt>
+<dd><p>Replace infinite values by NaNs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> – dataframe to treat</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dataframe with infinite values replaced by NaNs</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.extra.data.utils.descriptorsets">
+<span id="qsprpred-extra-data-utils-descriptorsets-module"></span><h2>qsprpred.extra.data.utils.descriptorsets module<a class="headerlink" href="#module-qsprpred.extra.data.utils.descriptorsets" title="Permalink to this heading"></a></h2>
+<p>Module with definitions of various extra descriptor sets:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#qsprpred.extra.data.utils.descriptorsets.Mordred" title="qsprpred.extra.data.utils.descriptorsets.Mordred"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Mordred</span></code></a>: Descriptors from molecular descriptor calculation software Mordred.</p></li>
+<li><p><a class="reference internal" href="#qsprpred.extra.data.utils.descriptorsets.Mold2" title="qsprpred.extra.data.utils.descriptorsets.Mold2"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Mold2</span></code></a>: Descriptors from molecular descriptor calculation software Mold2.</p></li>
+<li><p><a class="reference internal" href="#qsprpred.extra.data.utils.descriptorsets.PaDEL" title="qsprpred.extra.data.utils.descriptorsets.PaDEL"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PaDEL</span></code></a>: Descriptors from molecular descriptor calculation software PaDEL.</p></li>
+<li><p><a class="reference internal" href="#qsprpred.extra.data.utils.descriptorsets.ProDec" title="qsprpred.extra.data.utils.descriptorsets.ProDec"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ProDec</span></code></a>: Protein descriptors from the ProDec package.</p></li>
+</ul>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.descriptorsets.</span></span><span class="sig-name descname"><span class="pre">ExtendedValenceSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorsets.html#ExtendedValenceSignature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.MoleculeDescriptorSet" title="qsprpred.data.utils.descriptorsets.MoleculeDescriptorSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MoleculeDescriptorSet</span></code></a></p>
+<p>SMILES signature based on extended valence sequence from</p>
+<p>The Signature Molecular Descriptor.</p>
+<p>1. Using Extended Valence Sequences in QSAR and QSPR StudiesJean-Loup
+Faulon, Donald P. Visco, and Ramdas S. Pophale
+Journal of Chemical Information and Computer Sciences 2003 43 (3), 707-720
+DOI: 10.1021/ci020345w</p>
+<p>Initialize a ExtendedValenceSignature calculator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>depth</strong> – depth of the signature</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.descriptors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptors</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.descriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of descriptor names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.getLen">
+<span class="sig-name descname"><span class="pre">getLen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.getLen" title="Permalink to this definition"></a></dt>
+<dd><p>Return the number of descriptors.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.isFP">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isFP</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.isFP" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if descriptorset is fingerprint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.iterMols">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iterMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">rdkit.Chem.rdchem.Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.iterMols" title="Permalink to this definition"></a></dt>
+<dd><p>Create a molecule iterator or list from RDKit molecules or SMILES.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> – list of molecules (SMILES <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a> or RDKit Mol)</p></li>
+<li><p><strong>to_list</strong> – if True, return a list instead of an iterator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an array or data frame of descriptor values of shape (n_mols, n_descriptors)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ExtendedValenceSignature.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return dictionary with arguments used to initialize the descriptorset.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mold2">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.descriptorsets.</span></span><span class="sig-name descname"><span class="pre">Mold2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorsets.html#Mold2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mold2" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.MoleculeDescriptorSet" title="qsprpred.data.utils.descriptorsets.MoleculeDescriptorSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MoleculeDescriptorSet</span></code></a></p>
+<p>Descriptors from molecular descriptor calculation software Mold2.</p>
+<p>From <a class="reference external" href="https://github.com/OlivierBeq/Mold2_pywrapper">https://github.com/OlivierBeq/Mold2_pywrapper</a>.
+Initialize the descriptor with no arguments.
+All descriptors are always calculated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>descs</strong> – names of Mold2 descriptors to be calculated (e.g. D001)</p>
+</dd>
+</dl>
+<p>Initialize a Mold2 descriptor calculator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>descs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – names of Mold2 descriptors to be calculated (e.g. D001)</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mold2.descriptors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptors</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mold2.descriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of descriptor names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mold2.getLen">
+<span class="sig-name descname"><span class="pre">getLen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mold2.getLen" title="Permalink to this definition"></a></dt>
+<dd><p>Return the number of descriptors.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mold2.isFP">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isFP</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mold2.isFP" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if descriptorset is fingerprint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mold2.iterMols">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iterMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">rdkit.Chem.rdchem.Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mold2.iterMols" title="Permalink to this definition"></a></dt>
+<dd><p>Create a molecule iterator or list from RDKit molecules or SMILES.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> – list of molecules (SMILES <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a> or RDKit Mol)</p></li>
+<li><p><strong>to_list</strong> – if True, return a list instead of an iterator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an array or data frame of descriptor values of shape (n_mols, n_descriptors)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mold2.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mold2.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return dictionary with arguments used to initialize the descriptorset.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mordred">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.descriptorsets.</span></span><span class="sig-name descname"><span class="pre">Mordred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_3D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorsets.html#Mordred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mordred" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.MoleculeDescriptorSet" title="qsprpred.data.utils.descriptorsets.MoleculeDescriptorSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MoleculeDescriptorSet</span></code></a></p>
+<p>Descriptors from molecular descriptor calculation software Mordred.</p>
+<p>From <a class="reference external" href="https://github.com/mordred-descriptor/mordred">https://github.com/mordred-descriptor/mordred</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>descs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – List of Mordred descriptor names.</p></li>
+<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – version of mordred</p></li>
+<li><p><strong>ignore_3D</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – ignore 3D information</p></li>
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – path to config file if available</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize the descriptor with the same arguments as you would pass
+to <a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator" title="qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DescriptorsCalculator</span></code></a> function of Mordred, except the
+<code class="xref any docutils literal notranslate"><span class="pre">descs</span></code> argument, which can also be a <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of mordred descriptor names instead
+of a mordred descriptor module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>descs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – List of Mordred descriptor names, a Mordred descriptor
+module or <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> for all mordred descriptors</p></li>
+<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – version of mordred</p></li>
+<li><p><strong>ignore_3D</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – ignore 3D information</p></li>
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – path to config file?</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mordred.descriptors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptors</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mordred.descriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of descriptor names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mordred.getLen">
+<span class="sig-name descname"><span class="pre">getLen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mordred.getLen" title="Permalink to this definition"></a></dt>
+<dd><p>Return the number of descriptors.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mordred.isFP">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isFP</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mordred.isFP" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if descriptorset is fingerprint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mordred.iterMols">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iterMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">rdkit.Chem.rdchem.Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mordred.iterMols" title="Permalink to this definition"></a></dt>
+<dd><p>Create a molecule iterator or list from RDKit molecules or SMILES.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> – list of molecules (SMILES <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a> or RDKit Mol)</p></li>
+<li><p><strong>to_list</strong> – if True, return a list instead of an iterator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an array or data frame of descriptor values of shape (n_mols, n_descriptors)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.Mordred.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.Mordred.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return dictionary with arguments used to initialize the descriptorset.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.NeedsMSAMixIn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.descriptorsets.</span></span><span class="sig-name descname"><span class="pre">NeedsMSAMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorsets.html#NeedsMSAMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.NeedsMSAMixIn" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Provides an interface for protein descriptors that require
+a multiple sequence alignment.</p>
+<p>Derive from this interface and implement to receive a multiple sequence alignment
+from <a class="reference internal" href="#qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator" title="qsprpred.extra.data.utils.descriptorcalculator.ProteinDescriptorCalculator"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ProteinDescriptorCalculator</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msa</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – mapping of accession keys to sequences with gaps
+from the multiple sequence alignment</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.NeedsMSAMixIn.setMSA">
+<span class="sig-name descname"><span class="pre">setMSA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msa</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorsets.html#NeedsMSAMixIn.setMSA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.NeedsMSAMixIn.setMSA" title="Permalink to this definition"></a></dt>
+<dd><p>Set the multiple sequence alignment for the protein descriptor set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msa</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – mapping of accession keys to gapped sequences as obtained
+from the multiple sequence alignment (all values must
+be the same length)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.PaDEL">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.descriptorsets.</span></span><span class="sig-name descname"><span class="pre">PaDEL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_3D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorsets.html#PaDEL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.PaDEL" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.MoleculeDescriptorSet" title="qsprpred.data.utils.descriptorsets.MoleculeDescriptorSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MoleculeDescriptorSet</span></code></a></p>
+<p>Descriptors from molecular descriptor calculation software PaDEL.</p>
+<p>From <a class="reference external" href="https://github.com/OlivierBeq/PaDEL_pywrapper">https://github.com/OlivierBeq/PaDEL_pywrapper</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>descriptors</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – list of PaDEL descriptor names</p>
+</dd>
+</dl>
+<p>Initialize a PaDEL calculator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>descs</strong> – list of PaDEL descriptor short names</p></li>
+<li><p><strong>ignore_3D</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – skip 3D descriptor calculation</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.PaDEL.descriptors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptors</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.PaDEL.descriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of descriptor names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.PaDEL.getLen">
+<span class="sig-name descname"><span class="pre">getLen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.PaDEL.getLen" title="Permalink to this definition"></a></dt>
+<dd><p>Return the number of descriptors.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.PaDEL.isFP">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isFP</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.PaDEL.isFP" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if descriptorset is fingerprint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.PaDEL.iterMols">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iterMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">rdkit.Chem.rdchem.Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.PaDEL.iterMols" title="Permalink to this definition"></a></dt>
+<dd><p>Create a molecule iterator or list from RDKit molecules or SMILES.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> – list of molecules (SMILES <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a> or RDKit Mol)</p></li>
+<li><p><strong>to_list</strong> – if True, return a list instead of an iterator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an array or data frame of descriptor values of shape (n_mols, n_descriptors)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.PaDEL.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.PaDEL.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return dictionary with arguments used to initialize the descriptorset.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProDec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.descriptorsets.</span></span><span class="sig-name descname"><span class="pre">ProDec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorsets.html#ProDec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProDec" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet" title="qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProteinDescriptorSet</span></code></a>, <a class="reference internal" href="#qsprpred.extra.data.utils.descriptorsets.NeedsMSAMixIn" title="qsprpred.extra.data.utils.descriptorsets.NeedsMSAMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeedsMSAMixIn</span></code></a></p>
+<p>Protein descriptors from the ProDec package.</p>
+<p>See <a class="reference external" href="https://github.com/OlivierBeq/ProDEC">https://github.com/OlivierBeq/ProDEC</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sets</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – list of ProDec descriptor names  (see <a class="reference external" href="https://github.com/OlivierBeq/ProDEC">https://github.com/OlivierBeq/ProDEC</a>)</p></li>
+<li><p><strong>factory</strong> (<em>prodec.ProteinDescriptors</em>) – factory to calculate descriptors</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize a ProDec calculator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sets</strong> – list of ProDec descriptor names, if <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a>, all available are used
+(see <a class="reference external" href="https://github.com/OlivierBeq/ProDEC">https://github.com/OlivierBeq/ProDEC</a>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProDec.calculateDescriptor">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculateDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ProteinDescriptors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msa</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorsets.html#ProDec.calculateDescriptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProDec.calculateDescriptor" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate a protein descriptor for given targets
+using a given multiple sequence alignment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>factory</strong> (<em>ProteinDescriptors</em>) – factory to create the descriptor</p></li>
+<li><p><strong>msa</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – mapping of accession keys to sequences from the multiple
+sequence alignment</p></li>
+<li><p><strong>descriptor</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the descriptor to calculate (see
+<a class="reference external" href="https://github.com/OlivierBeq/ProDEC">https://github.com/OlivierBeq/ProDEC</a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a data frame of descriptor values of shape (acc_keys, n_descriptors),
+indexed by acc_keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProDec.descriptors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptors</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProDec.descriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of descriptor names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProDec.getLen">
+<span class="sig-name descname"><span class="pre">getLen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProDec.getLen" title="Permalink to this definition"></a></dt>
+<dd><p>Return the number of descriptors.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProDec.isFP">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isFP</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProDec.isFP" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if descriptorset is fingerprint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProDec.setMSA">
+<span class="sig-name descname"><span class="pre">setMSA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msa</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProDec.setMSA" title="Permalink to this definition"></a></dt>
+<dd><p>Set the multiple sequence alignment for the protein descriptor set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msa</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – mapping of accession keys to gapped sequences as obtained
+from the multiple sequence alignment (all values must
+be the same length)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProDec.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProDec.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return dictionary with arguments used to initialize the descriptorset.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.descriptorsets.</span></span><span class="sig-name descname"><span class="pre">ProteinDescriptorSet</span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/descriptorsets.html#ProteinDescriptorSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.descriptorsets.DescriptorSet" title="qsprpred.data.utils.descriptorsets.DescriptorSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">DescriptorSet</span></code></a></p>
+<p>Abstract base class for protein descriptor sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>acc_keys</strong> – target accession keys, the resulting data frame will be indexed by</p></li>
+<li><p><strong>keys</strong> (<em>these</em>) – </p></li>
+<li><p><strong>sequences</strong> – optional list of protein sequences matched to the accession keys</p></li>
+<li><p><strong>**kwargs</strong> – additional data mapped to the accession keys, each parameter
+should follow the same format as the sequences (dict(str : str))</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet.descriptors">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptors</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet.descriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of descriptor names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet.getLen">
+<span class="sig-name descname"><span class="pre">getLen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet.getLen" title="Permalink to this definition"></a></dt>
+<dd><p>Return the number of descriptors.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet.isFP">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isFP</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet.isFP" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if descriptorset is fingerprint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet.settings">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.descriptorsets.ProteinDescriptorSet.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Return dictionary with arguments used to initialize the descriptorset.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.extra.data.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.extra.data.utils" title="Permalink to this heading"></a></h2>
+<p>__init__.py</p>
+<p>Created by: Martin Sicho
+On: 12.05.23, 16:22</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.extra.data.html" class="btn btn-neutral float-left" title="qsprpred.extra.data package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.extra.data.utils.descriptor_utils.html" class="btn btn-neutral float-right" title="qsprpred.extra.data.utils.descriptor_utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

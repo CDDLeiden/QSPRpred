@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.deep package &mdash; QSPRpred 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.deep.models package" href="qsprpred.deep.models.html" />
+    <link rel="prev" title="qsprpred.data.utils.descriptor_utils package" href="qsprpred.data.utils.descriptor_utils.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v2.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">qsprpred</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">qsprpred.deep package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.html">qsprpred.extra package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.metrics.html">qsprpred.metrics package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">qsprpred</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+      <li class="breadcrumb-item active">qsprpred.deep package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-deep-package">
+<h1>qsprpred.deep package<a class="headerlink" href="#qsprpred-deep-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.deep.models.html">qsprpred.deep.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.deep.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.deep.models.html#module-qsprpred.deep.models.models">qsprpred.deep.models.models module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN"><code class="docutils literal notranslate"><span class="pre">QSPRDNN</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.checkForData"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.checkForData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.classPath"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.classPath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.cleanFiles"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.cleanFiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.createPredictionDatasetFromMols"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.createPredictionDatasetFromMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.evaluate"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.fit"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.fromFile"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.getDefaultParamsGrid"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.getDefaultParamsGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.getScoringFunction"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.getScoringFunction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.handleInvalidsInPredictions"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.handleInvalidsInPredictions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.isMultiTask"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.isMultiTask</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.loadEstimator"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.loadEstimator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.loadEstimatorFromFile"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.loadEstimatorFromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.loadParamsGrid"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.loadParamsGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.nTargets"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.nTargets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.outDir"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.outDir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.outPrefix"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.outPrefix</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.predict"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.predictDataset"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.predictDataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.predictMols"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.predictMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.predictProba"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.predictProba()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.readDescriptorCalculators"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.readDescriptorCalculators()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.readMetadata"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.readMetadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.readParams"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.readParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.readStandardizer"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.readStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.save"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.saveDescriptorCalculators"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.saveDescriptorCalculators()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.saveEstimator"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.saveEstimator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.saveMetadata"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.saveMetadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.saveParams"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.saveParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.saveStandardizer"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.saveStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.setParams"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.setParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.targetProperties"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.targetProperties</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.models.QSPRDNN.task"><code class="docutils literal notranslate"><span class="pre">QSPRDNN.task</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.deep.models.html#module-qsprpred.deep.models.neural_network">qsprpred.deep.models.neural_network module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.T_destination"><code class="docutils literal notranslate"><span class="pre">Base.T_destination</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.add_module"><code class="docutils literal notranslate"><span class="pre">Base.add_module()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.apply"><code class="docutils literal notranslate"><span class="pre">Base.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.bfloat16"><code class="docutils literal notranslate"><span class="pre">Base.bfloat16()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.buffers"><code class="docutils literal notranslate"><span class="pre">Base.buffers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.children"><code class="docutils literal notranslate"><span class="pre">Base.children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.cpu"><code class="docutils literal notranslate"><span class="pre">Base.cpu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.cuda"><code class="docutils literal notranslate"><span class="pre">Base.cuda()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.double"><code class="docutils literal notranslate"><span class="pre">Base.double()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.dump_patches"><code class="docutils literal notranslate"><span class="pre">Base.dump_patches</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.eval"><code class="docutils literal notranslate"><span class="pre">Base.eval()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.evaluate"><code class="docutils literal notranslate"><span class="pre">Base.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.extra_repr"><code class="docutils literal notranslate"><span class="pre">Base.extra_repr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.fit"><code class="docutils literal notranslate"><span class="pre">Base.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.float"><code class="docutils literal notranslate"><span class="pre">Base.float()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.forward"><code class="docutils literal notranslate"><span class="pre">Base.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.getDataLoader"><code class="docutils literal notranslate"><span class="pre">Base.getDataLoader()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.get_buffer"><code class="docutils literal notranslate"><span class="pre">Base.get_buffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.get_extra_state"><code class="docutils literal notranslate"><span class="pre">Base.get_extra_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.get_parameter"><code class="docutils literal notranslate"><span class="pre">Base.get_parameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.get_params"><code class="docutils literal notranslate"><span class="pre">Base.get_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.get_submodule"><code class="docutils literal notranslate"><span class="pre">Base.get_submodule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.half"><code class="docutils literal notranslate"><span class="pre">Base.half()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.ipu"><code class="docutils literal notranslate"><span class="pre">Base.ipu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.load_state_dict"><code class="docutils literal notranslate"><span class="pre">Base.load_state_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.modules"><code class="docutils literal notranslate"><span class="pre">Base.modules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.named_buffers"><code class="docutils literal notranslate"><span class="pre">Base.named_buffers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.named_children"><code class="docutils literal notranslate"><span class="pre">Base.named_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.named_modules"><code class="docutils literal notranslate"><span class="pre">Base.named_modules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.named_parameters"><code class="docutils literal notranslate"><span class="pre">Base.named_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.parameters"><code class="docutils literal notranslate"><span class="pre">Base.parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.predict"><code class="docutils literal notranslate"><span class="pre">Base.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.register_backward_hook"><code class="docutils literal notranslate"><span class="pre">Base.register_backward_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.register_buffer"><code class="docutils literal notranslate"><span class="pre">Base.register_buffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.register_forward_hook"><code class="docutils literal notranslate"><span class="pre">Base.register_forward_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.register_forward_pre_hook"><code class="docutils literal notranslate"><span class="pre">Base.register_forward_pre_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.register_full_backward_hook"><code class="docutils literal notranslate"><span class="pre">Base.register_full_backward_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.register_load_state_dict_post_hook"><code class="docutils literal notranslate"><span class="pre">Base.register_load_state_dict_post_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.register_module"><code class="docutils literal notranslate"><span class="pre">Base.register_module()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.register_parameter"><code class="docutils literal notranslate"><span class="pre">Base.register_parameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.requires_grad_"><code class="docutils literal notranslate"><span class="pre">Base.requires_grad_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.set_extra_state"><code class="docutils literal notranslate"><span class="pre">Base.set_extra_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.set_params"><code class="docutils literal notranslate"><span class="pre">Base.set_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.share_memory"><code class="docutils literal notranslate"><span class="pre">Base.share_memory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.state_dict"><code class="docutils literal notranslate"><span class="pre">Base.state_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.to"><code class="docutils literal notranslate"><span class="pre">Base.to()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.to_empty"><code class="docutils literal notranslate"><span class="pre">Base.to_empty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.train"><code class="docutils literal notranslate"><span class="pre">Base.train()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.training"><code class="docutils literal notranslate"><span class="pre">Base.training</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.type"><code class="docutils literal notranslate"><span class="pre">Base.type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.xpu"><code class="docutils literal notranslate"><span class="pre">Base.xpu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.Base.zero_grad"><code class="docutils literal notranslate"><span class="pre">Base.zero_grad()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected"><code class="docutils literal notranslate"><span class="pre">STFullyConnected</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.T_destination"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.T_destination</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.add_module"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.add_module()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.apply"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.bfloat16"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.bfloat16()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.buffers"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.buffers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.children"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.cpu"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.cpu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.cuda"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.cuda()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.double"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.double()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.dump_patches"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.dump_patches</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.eval"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.eval()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.evaluate"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.extra_repr"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.extra_repr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.fit"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.float"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.float()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.forward"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.getDataLoader"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.getDataLoader()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.get_buffer"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.get_buffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.get_extra_state"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.get_extra_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.get_parameter"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.get_parameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.get_params"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.get_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.get_submodule"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.get_submodule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.half"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.half()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.initModel"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.initModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.ipu"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.ipu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.load_state_dict"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.load_state_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.modules"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.modules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.named_buffers"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.named_buffers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.named_children"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.named_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.named_modules"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.named_modules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.named_parameters"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.named_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.parameters"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.predict"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.register_backward_hook"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.register_backward_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.register_buffer"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.register_buffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.register_forward_hook"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.register_forward_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.register_forward_pre_hook"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.register_forward_pre_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.register_full_backward_hook"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.register_full_backward_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.register_load_state_dict_post_hook"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.register_load_state_dict_post_hook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.register_module"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.register_module()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.register_parameter"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.register_parameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.requires_grad_"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.requires_grad_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.set_extra_state"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.set_extra_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.set_params"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.set_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.share_memory"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.share_memory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.state_dict"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.state_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.to"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.to()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.to_empty"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.to_empty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.train"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.train()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.training"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.training</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.type"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.xpu"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.xpu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.neural_network.STFullyConnected.zero_grad"><code class="docutils literal notranslate"><span class="pre">STFullyConnected.zero_grad()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.deep.models.html#module-qsprpred.deep.models.tests">qsprpred.deep.models.tests module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet"><code class="docutils literal notranslate"><span class="pre">NeuralNet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.addClassCleanup"><code class="docutils literal notranslate"><span class="pre">NeuralNet.addClassCleanup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.addCleanup"><code class="docutils literal notranslate"><span class="pre">NeuralNet.addCleanup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.addTypeEqualityFunc"><code class="docutils literal notranslate"><span class="pre">NeuralNet.addTypeEqualityFunc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertAlmostEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertAlmostEquals"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertAlmostEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertCountEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertCountEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertDictContainsSubset"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertDictContainsSubset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertDictEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertDictEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertEquals"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertFalse"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertFalse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertGreater"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertGreater()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertGreaterEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertGreaterEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertIn"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertIn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertIs"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertIs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertIsInstance"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertIsInstance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertIsNone"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertIsNone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertIsNot"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertIsNot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertIsNotNone"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertIsNotNone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertLess"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertLess()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertLessEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertLessEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertListEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertListEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertLogs"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertLogs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertMultiLineEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertMultiLineEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertNoLogs"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertNoLogs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertNotAlmostEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertNotAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertNotAlmostEquals"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertNotAlmostEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertNotEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertNotEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertNotEquals"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertNotEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertNotIn"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertNotIn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertNotIsInstance"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertNotIsInstance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertNotRegex"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertNotRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertNotRegexpMatches"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertNotRegexpMatches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertRaises"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertRaises()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertRaisesRegex"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertRaisesRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertRaisesRegexp"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertRaisesRegexp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertRegex"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertRegexpMatches"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertRegexpMatches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertSequenceEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertSequenceEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertSetEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertSetEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertTrue"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertTrue()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertTupleEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertTupleEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertWarns"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertWarns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assertWarnsRegex"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assertWarnsRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.assert_"><code class="docutils literal notranslate"><span class="pre">NeuralNet.assert_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.clean_directories"><code class="docutils literal notranslate"><span class="pre">NeuralNet.clean_directories()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.countTestCases"><code class="docutils literal notranslate"><span class="pre">NeuralNet.countTestCases()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.create_dataset"><code class="docutils literal notranslate"><span class="pre">NeuralNet.create_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.create_large_dataset"><code class="docutils literal notranslate"><span class="pre">NeuralNet.create_large_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.create_small_dataset"><code class="docutils literal notranslate"><span class="pre">NeuralNet.create_small_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.datapath"><code class="docutils literal notranslate"><span class="pre">NeuralNet.datapath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.debug"><code class="docutils literal notranslate"><span class="pre">NeuralNet.debug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.defaultTestResult"><code class="docutils literal notranslate"><span class="pre">NeuralNet.defaultTestResult()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.doClassCleanups"><code class="docutils literal notranslate"><span class="pre">NeuralNet.doClassCleanups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.doCleanups"><code class="docutils literal notranslate"><span class="pre">NeuralNet.doCleanups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.fail"><code class="docutils literal notranslate"><span class="pre">NeuralNet.fail()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.failIf"><code class="docutils literal notranslate"><span class="pre">NeuralNet.failIf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.failIfAlmostEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.failIfAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.failIfEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.failIfEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.failUnless"><code class="docutils literal notranslate"><span class="pre">NeuralNet.failUnless()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.failUnlessAlmostEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.failUnlessAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.failUnlessEqual"><code class="docutils literal notranslate"><span class="pre">NeuralNet.failUnlessEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.failUnlessRaises"><code class="docutils literal notranslate"><span class="pre">NeuralNet.failUnlessRaises()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.failureException"><code class="docutils literal notranslate"><span class="pre">NeuralNet.failureException</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.fitTest"><code class="docutils literal notranslate"><span class="pre">NeuralNet.fitTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.getBigDF"><code class="docutils literal notranslate"><span class="pre">NeuralNet.getBigDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.getModel"><code class="docutils literal notranslate"><span class="pre">NeuralNet.getModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.getParamGrid"><code class="docutils literal notranslate"><span class="pre">NeuralNet.getParamGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.getSmallDF"><code class="docutils literal notranslate"><span class="pre">NeuralNet.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.get_all_descriptors"><code class="docutils literal notranslate"><span class="pre">NeuralNet.get_all_descriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.get_default_prep"><code class="docutils literal notranslate"><span class="pre">NeuralNet.get_default_prep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.get_desc_calculators"><code class="docutils literal notranslate"><span class="pre">NeuralNet.get_desc_calculators()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.get_prep_combinations"><code class="docutils literal notranslate"><span class="pre">NeuralNet.get_prep_combinations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.get_prep_grid"><code class="docutils literal notranslate"><span class="pre">NeuralNet.get_prep_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.gridFile"><code class="docutils literal notranslate"><span class="pre">NeuralNet.gridFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.id"><code class="docutils literal notranslate"><span class="pre">NeuralNet.id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.longMessage"><code class="docutils literal notranslate"><span class="pre">NeuralNet.longMessage</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.maxDiff"><code class="docutils literal notranslate"><span class="pre">NeuralNet.maxDiff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.predictorTest"><code class="docutils literal notranslate"><span class="pre">NeuralNet.predictorTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.qsprModelsPath"><code class="docutils literal notranslate"><span class="pre">NeuralNet.qsprModelsPath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.qsprdatapath"><code class="docutils literal notranslate"><span class="pre">NeuralNet.qsprdatapath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.run"><code class="docutils literal notranslate"><span class="pre">NeuralNet.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.setUp"><code class="docutils literal notranslate"><span class="pre">NeuralNet.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.setUpClass"><code class="docutils literal notranslate"><span class="pre">NeuralNet.setUpClass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.shortDescription"><code class="docutils literal notranslate"><span class="pre">NeuralNet.shortDescription()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.skipTest"><code class="docutils literal notranslate"><span class="pre">NeuralNet.skipTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.subTest"><code class="docutils literal notranslate"><span class="pre">NeuralNet.subTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.tearDown"><code class="docutils literal notranslate"><span class="pre">NeuralNet.tearDown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.tearDownClass"><code class="docutils literal notranslate"><span class="pre">NeuralNet.tearDownClass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.test_qsprpred_model"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_qsprpred_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.test_qsprpred_model_0_STFullyConnected_REGRESSION"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_qsprpred_model_0_STFullyConnected_REGRESSION()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.test_qsprpred_model_1_STFullyConnected_SINGLECLASS"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_qsprpred_model_1_STFullyConnected_SINGLECLASS()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.test_qsprpred_model_2_STFullyConnected_MULTICLASS"><code class="docutils literal notranslate"><span class="pre">NeuralNet.test_qsprpred_model_2_STFullyConnected_MULTICLASS()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.models.html#qsprpred.deep.models.tests.NeuralNet.validate_split"><code class="docutils literal notranslate"><span class="pre">NeuralNet.validate_split()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.deep.models.html#module-qsprpred.deep.models">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-qsprpred.deep">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.deep" title="Permalink to this heading"></a></h2>
+<p>__init__.py</p>
+<p>Created by: Martin Sicho
+On: 12.05.23, 16:38</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.data.utils.descriptor_utils.html" class="btn btn-neutral float-left" title="qsprpred.data.utils.descriptor_utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.deep.models.html" class="btn btn-neutral float-right" title="qsprpred.deep.models package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.utils.smiles_standardization &mdash; QSPRpred 1.3.1 documentation</title>
+  <title>qsprpred.data.utils.smiles_standardization &mdash; QSPRpred 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,7 +16,20 @@
         <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.1
+                v2.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -47,7 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use.html#cli-example">CLI Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">qsprpred</a></li>
 </ul>
 
         </div>
@@ -79,9 +92,32 @@
 
 <span class="kn">import</span> <span class="nn">re</span>
 
+<span class="kn">from</span> <span class="nn">chembl_structure_pipeline</span> <span class="kn">import</span> <span class="n">standardizer</span> <span class="k">as</span> <span class="n">chembl_stand</span>
 <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
 <span class="kn">from</span> <span class="nn">rdkit.Chem.SaltRemover</span> <span class="kn">import</span> <span class="n">SaltRemover</span>
-<span class="kn">from</span> <span class="nn">chembl_structure_pipeline</span> <span class="kn">import</span> <span class="n">standardizer</span> <span class="k">as</span> <span class="n">chembl_stand</span>
+
+<span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
+
+
+<div class="viewcode-block" id="check_smiles_valid"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.smiles_standardization.check_smiles_valid">[docs]</a><span class="k">def</span> <span class="nf">check_smiles_valid</span><span class="p">(</span><span class="n">smiles</span><span class="p">,</span> <span class="n">throw</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">exception</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">smiles</span><span class="p">:</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">exception</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Empty molecule: </span><span class="si">{</span><span class="n">smiles</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mol</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid molecule: </span><span class="si">{</span><span class="n">smiles</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">SanitizeMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span><span class="p">:</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">exception</span> <span class="o">=</span> <span class="n">exp</span>
+
+    <span class="k">if</span> <span class="n">exception</span> <span class="ow">and</span> <span class="n">throw</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exception</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
 
 
 <div class="viewcode-block" id="neutralize_atoms"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.smiles_standardization.neutralize_atoms">[docs]</a><span class="k">def</span> <span class="nf">neutralize_atoms</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
@@ -89,10 +125,10 @@
 
 <span class="sd">    From https://www.rdkit.org/docs/Cookbook.html, adapted from</span>
 <span class="sd">    https://baoilleach.blogspot.com/2019/12/no-charge-simple-approach-to.html</span>
-<span class="sd">    </span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        mol: rdkit molecule to be neutralized</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        mol: neutralized rdkit mol</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -110,7 +146,9 @@
     <span class="k">return</span> <span class="n">mol</span></div>
 
 
-<div class="viewcode-block" id="chembl_smi_standardizer"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.smiles_standardization.chembl_smi_standardizer">[docs]</a><span class="k">def</span> <span class="nf">chembl_smi_standardizer</span><span class="p">(</span><span class="n">smi</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">isomericSmiles</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sanitize</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="chembl_smi_standardizer"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.smiles_standardization.chembl_smi_standardizer">[docs]</a><span class="k">def</span> <span class="nf">chembl_smi_standardizer</span><span class="p">(</span>
+    <span class="n">smi</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">isomericSmiles</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">sanitize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardize SMILES using ChEMBL standardizer.</span>
 
 <span class="sd">    Args:</span>
@@ -119,28 +157,33 @@
 <span class="sd">        sanitize: applies sanitization using the ChEMBL standardizer. Defaults to True.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        standardized SMILES string.</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">        smiles (str): standardized SMILES string or `None` if standardization failed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smi</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa E722</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not parse smiles: &#39;</span><span class="p">,</span> <span class="n">smi</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">standard_mol</span> <span class="o">=</span> <span class="n">chembl_stand</span><span class="o">.</span><span class="n">standardize_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">sanitize</span><span class="o">=</span><span class="n">sanitize</span><span class="p">)</span>
-    <span class="n">standard_smiles</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span>
-        <span class="n">standard_mol</span><span class="p">,</span> <span class="n">kekuleSmiles</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">isomericSmiles</span><span class="o">=</span><span class="n">isomericSmiles</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="n">standard_smiles</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mol</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to parse SMILES: </span><span class="si">{</span><span class="n">smi</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">standard_mol</span> <span class="o">=</span> <span class="n">chembl_stand</span><span class="o">.</span><span class="n">standardize_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">sanitize</span><span class="o">=</span><span class="n">sanitize</span><span class="p">)</span>
+        <span class="n">standard_smiles</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span>
+            <span class="n">standard_mol</span><span class="p">,</span>
+            <span class="n">kekuleSmiles</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">canonical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">isomericSmiles</span><span class="o">=</span><span class="n">isomericSmiles</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">standard_smiles</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span><span class="p">:</span>  <span class="c1"># E722</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not standardize SMILES: </span><span class="si">{</span><span class="n">smi</span><span class="si">}</span><span class="s2"> due to: </span><span class="si">{</span><span class="n">exp</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="old_standardize_sanitize"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.smiles_standardization.old_standardize_sanitize">[docs]</a><span class="k">def</span> <span class="nf">old_standardize_sanitize</span><span class="p">(</span><span class="n">smi</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adaptation of the old QSPRpred molecule standardization/sanitization.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Standardize the rdkit mol object and gets parent molecule using</span>
 <span class="sd">    chembl_structure_pipeline, and applies some sanitization steps.</span>
 <span class="sd">    Using this function is not recommended and it will be deprecated within</span>
 <span class="sd">    next releases.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        smi: single SMILES string to be sanitized.</span>
 
@@ -169,7 +212,7 @@
         <span class="n">parent_smi</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">s_acid_remover</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">parent_smi</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">parent_smi</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: 722</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parent_smi</span><span class="si">}</span><span class="s2"> could not be parsed after removing sulfuric acids!&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
     <span class="c1"># Removing external molecules by splitting on . and picking the largest smiles</span>
@@ -177,7 +220,7 @@
         <span class="n">parent_smi</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">parent_smi</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">parent_smi</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: 722</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Compound, (</span><span class="si">{</span><span class="n">parent_smi</span><span class="si">}</span><span class="s2">) could not be parsed!!&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
     <span class="c1"># Trying to remove the salts</span>
@@ -200,7 +243,9 @@
         <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="ow">not</span> <span class="n">boron_pattern</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">parent_smi</span><span class="p">)]):</span>
             <span class="n">neutralize_atoms</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">salts</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">res</span><span class="p">)):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to remove salts from compound </span><span class="si">{</span><span class="n">parent_smi</span><span class="si">}</span><span class="s2"> after neutralizing&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unable to remove salts from compound </span><span class="si">{</span><span class="n">parent_smi</span><span class="si">}</span><span class="s2"> after neutralizing&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parent_smi</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>

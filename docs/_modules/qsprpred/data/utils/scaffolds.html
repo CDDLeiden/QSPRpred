@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.utils.scaffolds &mdash; QSPRpred 1.3.1 documentation</title>
+  <title>qsprpred.data.utils.scaffolds &mdash; QSPRpred 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,7 +16,20 @@
         <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.1
+                v2.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -47,7 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use.html#cli-example">CLI Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">qsprpred</a></li>
 </ul>
 
         </div>
@@ -83,11 +96,11 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 
+
 <div class="viewcode-block" id="Scaffold"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.scaffolds.Scaffold">[docs]</a><span class="k">class</span> <span class="nc">Scaffold</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class for calculating molecular scaffolds of different kinds.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -99,14 +112,14 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            smiles of the scaffold</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Murcko"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.scaffolds.Murcko">[docs]</a><span class="k">class</span> <span class="nc">Murcko</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
 
+<div class="viewcode-block" id="Murcko"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.scaffolds.Murcko">[docs]</a><span class="k">class</span> <span class="nc">Murcko</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for calculating Murcko scaffolds of a given molecule.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the Murcko scaffold for a molecule.</span>
@@ -120,6 +133,7 @@
 
         <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
         <span class="kn">from</span> <span class="nn">rdkit.Chem.Scaffolds</span> <span class="kn">import</span> <span class="n">MurckoScaffold</span>
+
         <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">mol</span>
         <span class="n">scaff</span> <span class="o">=</span> <span class="n">MurckoScaffold</span><span class="o">.</span><span class="n">GetScaffoldForMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">scaff</span><span class="p">)</span>
@@ -127,35 +141,38 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;Murcko&quot;</span></div>
 
+
 <div class="viewcode-block" id="BemisMurcko"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.scaffolds.BemisMurcko">[docs]</a><span class="k">class</span> <span class="nc">BemisMurcko</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reimplementation of Bemis-Murcko scaffolds based on a function described in the discussion here:</span>
+<span class="sd">    Reimplementation of Bemis-Murcko scaffolds based on a function described in the</span>
+<span class="sd">    discussion here: https://sourceforge.net/p/rdkit/mailman/message/37269507/</span>
 
-<span class="sd">    https://sourceforge.net/p/rdkit/mailman/message/37269507/</span>
-
-<span class="sd">    This implementation allows more flexibility in terms of what substructures should be kept and converted how.</span>
+<span class="sd">    This implementation allows more flexibility in terms of what substructures should be</span>
+<span class="sd">    kept, converted, and how.</span>
 
 <span class="sd">    Credit: Francois Berenger</span>
-<span class="sd">    Ref.: Bemis, G. W., &amp; Murcko, M. A. (1996). &quot;The properties of known drugs. 1. Molecular frameworks.&quot; Journal of medicinal chemistry, 39(15), 2887-2893.</span>
+<span class="sd">    Ref.: Bemis, G. W., &amp; Murcko, M. A. (1996). &quot;The properties of known drugs. 1.</span>
+<span class="sd">    Molecular frameworks.&quot; Journal of medicinal chemistry, 39(15), 2887-2893.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">convert_hetero</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_single_bonds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_terminal_atoms</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">convert_hetero</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_single_bonds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_terminal_atoms</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the scaffold generator.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            convert_hetero (bool): Convert hetero atoms to carbons.</span>
-<span class="sd">            force_single_bonds (bool): Convert all bonds to single bonds in the scaffold.</span>
-<span class="sd">            remove_terminal_atoms (bool): Remove all terminal atoms, keep only ring linkers.</span>
+<span class="sd">            force_single_bonds (bool): Convert all scaffold&#39;s bonds to single ones.</span>
+<span class="sd">            remove_terminal_atoms (bool): Remove all terminal atoms, keep only</span>
+<span class="sd">                ring linkers.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">convert_hetero</span> <span class="o">=</span> <span class="n">convert_hetero</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">force_single_bonds</span> <span class="o">=</span> <span class="n">force_single_bonds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">remove_terminal_atoms</span> <span class="o">=</span> <span class="n">remove_terminal_atoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convertHetero</span> <span class="o">=</span> <span class="n">convert_hetero</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forceSingleBonds</span> <span class="o">=</span> <span class="n">force_single_bonds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeTerminalAtoms</span> <span class="o">=</span> <span class="n">remove_terminal_atoms</span>
 
-
-<div class="viewcode-block" id="BemisMurcko.find_terminal_atoms"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.scaffolds.BemisMurcko.find_terminal_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">find_terminal_atoms</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
+<div class="viewcode-block" id="BemisMurcko.findTerminalAtoms"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.scaffolds.BemisMurcko.findTerminalAtoms">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">findTerminalAtoms</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
         <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
@@ -175,17 +192,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+
         <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">mol</span>
         <span class="n">only_HA</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">rdmolops</span><span class="o">.</span><span class="n">RemoveHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
         <span class="n">rw_mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">(</span><span class="n">only_HA</span><span class="p">)</span>
 
         <span class="c1"># switch all HA to Carbon</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_hetero</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertHetero</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rw_mol</span><span class="o">.</span><span class="n">GetNumAtoms</span><span class="p">()):</span>
                 <span class="n">rw_mol</span><span class="o">.</span><span class="n">ReplaceAtom</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Atom</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
 
         <span class="c1"># switch all non single bonds to single</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_single_bonds</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">forceSingleBonds</span><span class="p">:</span>
             <span class="n">non_single_bonds</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">rw_mol</span><span class="o">.</span><span class="n">GetBonds</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">GetBondType</span><span class="p">()</span> <span class="o">!=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">SINGLE</span><span class="p">:</span>
@@ -197,14 +215,14 @@
                 <span class="n">rw_mol</span><span class="o">.</span><span class="n">AddBond</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">SINGLE</span><span class="p">)</span>
 
         <span class="c1"># as long as there are terminal atoms, remove them</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_terminal_atoms</span><span class="p">:</span>
-            <span class="n">terminal_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_terminal_atoms</span><span class="p">(</span><span class="n">rw_mol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">removeTerminalAtoms</span><span class="p">:</span>
+            <span class="n">terminal_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findTerminalAtoms</span><span class="p">(</span><span class="n">rw_mol</span><span class="p">)</span>
             <span class="k">while</span> <span class="n">terminal_atoms</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">terminal_atoms</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">GetBonds</span><span class="p">():</span>
                         <span class="n">rw_mol</span><span class="o">.</span><span class="n">RemoveBond</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">GetBeginAtomIdx</span><span class="p">(),</span> <span class="n">b</span><span class="o">.</span><span class="n">GetEndAtomIdx</span><span class="p">())</span>
                     <span class="n">rw_mol</span><span class="o">.</span><span class="n">RemoveAtom</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">GetIdx</span><span class="p">())</span>
-                <span class="n">terminal_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_terminal_atoms</span><span class="p">(</span><span class="n">rw_mol</span><span class="p">)</span>
+                <span class="n">terminal_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findTerminalAtoms</span><span class="p">(</span><span class="n">rw_mol</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">rw_mol</span><span class="o">.</span><span class="n">GetMol</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

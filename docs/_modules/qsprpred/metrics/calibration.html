@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.metrics.calibration &mdash; QSPRpred 1.3.1 documentation</title>
+  <title>qsprpred.metrics.calibration &mdash; QSPRpred 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,7 +16,20 @@
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.1
+                v2.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -47,7 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">qsprpred</a></li>
 </ul>
 
         </div>
@@ -75,75 +88,82 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.metrics.calibration</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="sd">&quot;&quot;&quot;  Calibration error metrics.  &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="calibration_error"><a class="viewcode-back" href="../../../api/qsprpred.metrics.html#qsprpred.metrics.calibration.calibration_error">[docs]</a><span class="k">def</span> <span class="nf">calibration_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_prob</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">norm</span> <span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;L1&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute the calibration error of a classifier.</span>
+<div class="viewcode-block" id="calibration_error"><a class="viewcode-back" href="../../../api/qsprpred.metrics.html#qsprpred.metrics.calibration.calibration_error">[docs]</a><span class="k">def</span> <span class="nf">calibration_error</span><span class="p">(</span>
+    <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_prob</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;L1&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the calibration error of a classifier.</span>
 
 <span class="sd">    ECE is defined as the expected difference between the predicted probability</span>
 <span class="sd">    and the observed frequency in each bin. The lower the ECE, the more</span>
 <span class="sd">    calibrated the classifier is.</span>
 
-<span class="sd">    If ``y_prob`` is 1d, it is assumed that the positive class is the last class.</span>
-<span class="sd">    If ``y_prob`` is 2d, it is assumed that the columns correspond to the classes in ascending order.</span>
-<span class="sd">    </span>
-<span class="sd">    If ``norm`` is &#39;L1&#39;, the expected calibration error is returned (ECE).</span>
-<span class="sd">    If ``norm`` is &#39;L2&#39;, the root-mean-square calibration error is returned (RMSCE).</span>
-<span class="sd">    If ``norm`` is &#39;infinity&#39;, the maximum calibration error is returned (MCE).</span>
+<span class="sd">    If `y_prob` is 1d, it assumes that probablities correspond to the positive class of</span>
+<span class="sd">    a binary classification. If `y_prob` is 2d, it assumes each column corresponds to a</span>
+<span class="sd">    class and that the classes are in the columns in ascending order.</span>
+
+<span class="sd">    If `norm` is &#39;L1&#39;, the expected calibration error is returned (ECE).</span>
+<span class="sd">    If `norm` is &#39;L2&#39;, the root-mean-square calibration error is returned (RMSCE).</span>
+<span class="sd">    If `norm` is &#39;infinity&#39;, the maximum calibration error is returned (MCE).</span>
 
 <span class="sd">    Referece: Guo et al. (2017) On Calibration of Modern Neural Networks. https://arxiv.org/abs/1706.04599</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        y_true (np.array): True class labels. 1d array.</span>
-<span class="sd">        y_prob (np.array): Raw probability/score of the positive class or multiclass probability. 1d or 2d array.</span>
-<span class="sd">        n_bins (int, optional): Number of bins to use for calibration. A bigger bin number requires more data. Defaults to 10.</span>
-<span class="sd">        norm (str, optional): The norm to use for the calibration error. Can be &#39;L1&#39; or &#39;L2&#39; or &#39;infinity&#39;. Defaults to &#39;L1&#39;.</span>
+<span class="sd">        y_prob (np.array): Raw probability/score of the positive class</span>
+<span class="sd">            or multiclass probability. 1d or 2d array.</span>
+<span class="sd">        n_bins (int): Number of bins to use for calibration.</span>
+<span class="sd">            A bigger bin number requires more data. Defaults to 10.</span>
+<span class="sd">        norm (str): The norm to use for the calibration error.</span>
+<span class="sd">            Can be &#39;L1&#39; or &#39;L2&#39; or &#39;infinity&#39;. Defaults to &#39;L1&#39;.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        float: The calibration error.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
     <span class="n">y_prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_prob</span><span class="p">)</span>
-
-    <span class="c1"># If y_prob is 1d, convert it to 2d by adding a new axis corresponding to the negative class</span>
+    <span class="c1"># If `y_prob` is 1d, convert it to 2d by adding</span>
+    <span class="c1"># a new axis corresponding to the negative class</span>
     <span class="k">if</span> <span class="n">y_prob</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">y_prob_0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">y_prob</span>
         <span class="n">y_prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">y_prob_0</span><span class="p">,</span> <span class="n">y_prob</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
     <span class="c1"># Get the highest probability and the predicted class</span>
     <span class="n">y_prob_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">y_prob</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">y_pred_class</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">y_prob</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="c1">#  Sort data based on the highest probability</span>
+    <span class="c1"># Sort data based on the highest probability</span>
     <span class="n">sorted_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">y_prob_max</span><span class="p">)</span>
     <span class="n">sorted_y_true</span> <span class="o">=</span> <span class="n">y_true</span><span class="p">[</span><span class="n">sorted_indices</span><span class="p">]</span>
     <span class="n">sorted_y_prob_max</span> <span class="o">=</span> <span class="n">y_prob_max</span><span class="p">[</span><span class="n">sorted_indices</span><span class="p">]</span>
     <span class="n">sorted_y_pred_class</span> <span class="o">=</span> <span class="n">y_pred_class</span><span class="p">[</span><span class="n">sorted_indices</span><span class="p">]</span>
-
     <span class="c1"># Bin sorted data</span>
     <span class="n">binned_y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">sorted_y_true</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
     <span class="n">binned_y_prob_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">sorted_y_prob_max</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
     <span class="n">binned_y_pred_class</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">sorted_y_pred_class</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
-
-    <span class="c1"># Compute the calibration error</span>
+    <span class="c1"># Compute the calibration error by iterating over the bins</span>
     <span class="n">calibration_error</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="k">for</span> <span class="n">bin_y_true</span><span class="p">,</span> <span class="n">bin_y_prob_max</span><span class="p">,</span> <span class="n">bin_y_pred_class</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">binned_y_true</span><span class="p">,</span> <span class="n">binned_y_prob_max</span><span class="p">,</span> <span class="n">binned_y_pred_class</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">bin_y_true</span><span class="p">,</span> <span class="n">bin_y_prob_max</span><span class="p">,</span> <span class="n">bin_y_pred_class</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+        <span class="n">binned_y_true</span><span class="p">,</span> <span class="n">binned_y_prob_max</span><span class="p">,</span> <span class="n">binned_y_pred_class</span>
+    <span class="p">):</span>
+        <span class="c1"># Compute the accuracy and the mean probability for the bin</span>
         <span class="n">mean_prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">bin_y_prob_max</span><span class="p">)</span>
         <span class="n">accuracy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">bin_y_true</span> <span class="o">==</span> <span class="n">bin_y_pred_class</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;L1&#39;</span><span class="p">:</span>
-            <span class="n">calibration_error</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mean_prob</span> <span class="o">-</span> <span class="n">accuracy</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_y_true</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;L2&#39;</span><span class="p">:</span>
-            <span class="n">calibration_error</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">mean_prob</span> <span class="o">-</span> <span class="n">accuracy</span><span class="p">)</span> <span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_y_true</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;infinity&#39;</span><span class="p">:</span>
+        <span class="c1"># Compute the calibration error for the bin based on the norm</span>
+        <span class="k">if</span> <span class="n">norm</span> <span class="o">==</span> <span class="s2">&quot;L1&quot;</span><span class="p">:</span>
+            <span class="n">calibration_error</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mean_prob</span> <span class="o">-</span> <span class="n">accuracy</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_y_true</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">norm</span> <span class="o">==</span> <span class="s2">&quot;L2&quot;</span><span class="p">:</span>
+            <span class="n">calibration_error</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">mean_prob</span> <span class="o">-</span> <span class="n">accuracy</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_y_true</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">norm</span> <span class="o">==</span> <span class="s2">&quot;infinity&quot;</span><span class="p">:</span>
             <span class="n">calibration_error</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">calibration_error</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mean_prob</span> <span class="o">-</span> <span class="n">accuracy</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown norm </span><span class="si">{</span><span class="n">norm</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        
-    <span class="k">if</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;L2&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown norm </span><span class="si">{</span><span class="n">norm</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">norm</span> <span class="o">==</span> <span class="s2">&quot;L2&quot;</span><span class="p">:</span>
         <span class="n">calibration_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">calibration_error</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">calibration_error</span></div>

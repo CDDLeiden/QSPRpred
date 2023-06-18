@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.tests &mdash; QSPRpred 1.3.1 documentation</title>
+  <title>qsprpred.models.tests &mdash; QSPRpred 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,7 +16,20 @@
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.1
+                v2.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -47,7 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">qsprpred</a></li>
 </ul>
 
         </div>
@@ -76,304 +89,491 @@
              
   <h1>Source code for qsprpred.models.tests</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;This module holds the tests for functions regarding QSPR modelling.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numbers</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
 <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.tests</span> <span class="kn">import</span> <span class="n">DataSetsMixIn</span>
-<span class="kn">from</span> <span class="nn">qsprpred.models.interfaces</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
-<span class="kn">from</span> <span class="nn">qsprpred.models.models</span> <span class="kn">import</span> <span class="n">QSPRDNN</span><span class="p">,</span> <span class="n">QSPRsklearn</span>
-<span class="kn">from</span> <span class="nn">qsprpred.models.neural_network</span> <span class="kn">import</span> <span class="n">STFullyConnected</span>
-<span class="kn">from</span> <span class="nn">qsprpred.models.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
 <span class="kn">from</span> <span class="nn">sklearn.cross_decomposition</span> <span class="kn">import</span> <span class="n">PLSRegression</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">get_scorer</span> <span class="k">as</span> <span class="n">get_sklearn_scorer</span>
 <span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="kn">import</span> <span class="n">GaussianNB</span>
 <span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="n">KNeighborsRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span><span class="p">,</span> <span class="n">SVR</span>
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span>
 <span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span><span class="p">,</span> <span class="n">XGBRegressor</span>
 
+<span class="kn">from</span> <span class="nn">..data.data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">..data.tests</span> <span class="kn">import</span> <span class="n">DataSetsMixIn</span>
+<span class="kn">from</span> <span class="nn">..models.hyperparam_optimization</span> <span class="kn">import</span> <span class="n">GridSearchOptimization</span><span class="p">,</span> <span class="n">OptunaOptimization</span>
+<span class="kn">from</span> <span class="nn">..models.interfaces</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">from</span> <span class="nn">..models.metrics</span> <span class="kn">import</span> <span class="n">SklearnMetric</span>
+<span class="kn">from</span> <span class="nn">..models.models</span> <span class="kn">import</span> <span class="n">QSPRsklearn</span>
+<span class="kn">from</span> <span class="nn">..models.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span><span class="p">,</span> <span class="n">TargetTasks</span>
+
 <span class="n">N_CPUS</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="n">GPUS</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">())]</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ModelDataSetsMixIn"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn">[docs]</a><span class="k">class</span> <span class="nc">ModelDataSetsMixIn</span><span class="p">(</span><span class="n">DataSetsMixIn</span><span class="p">):</span>
-    <span class="n">qsprmodelspath</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s1">/test_files/qspr/models&#39;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class sets up the datasets for the model tests.&quot;&quot;&quot;</span>
+
+    <span class="n">qsprModelsPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/qspr/models&quot;</span>
 
 <div class="viewcode-block" id="ModelDataSetsMixIn.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the test environment.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsprmodelspath</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsprmodelspath</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsprModelsPath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsprModelsPath</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ModelDataSetsMixIn.clean_directories"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn.clean_directories">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">clean_directories</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean the directories.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean_directories</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">qsprmodelspath</span><span class="p">):</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">qsprmodelspath</span><span class="p">)</span></div></div>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">qsprModelsPath</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">qsprModelsPath</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ModelTestMixIn"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn">[docs]</a><span class="k">class</span> <span class="nc">ModelTestMixIn</span><span class="p">:</span>
-<div class="viewcode-block" id="ModelTestMixIn.fit_test"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn.fit_test">[docs]</a>    <span class="k">def</span> <span class="nf">fit_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">themodel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the QSPRmodel class.&quot;&quot;&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gridFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/search_space_test.json&quot;</span>
+
+<div class="viewcode-block" id="ModelTestMixIn.getParamGrid"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn.getParamGrid">[docs]</a>    <span class="k">def</span> <span class="nf">getParamGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the parameter grid for a model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): The model to get the parameter grid for.</span>
+<span class="sd">            grid (str): The grid type to get the parameter grid for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: The parameter grid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">mname</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">grid_params</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gridFile</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">mname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grid_params</span><span class="p">[</span><span class="n">grid_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mname</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ModelTestMixIn.fitTest"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn.fitTest">[docs]</a>    <span class="k">def</span> <span class="nf">fitTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model fitting, optimization and evaluation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): The model to test.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># perform bayes optimization</span>
-        <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s1">/test_files/search_space_test.json&#39;</span>
-        <span class="n">mname</span> <span class="o">=</span> <span class="n">themodel</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">grid_params</span> <span class="o">=</span> <span class="n">themodel</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;bayes&quot;</span><span class="p">,</span> <span class="n">mname</span><span class="p">)</span>
-        <span class="n">search_space_bs</span> <span class="o">=</span> <span class="n">grid_params</span><span class="p">[</span><span class="n">grid_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mname</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">themodel</span><span class="o">.</span><span class="n">bayesOptimization</span><span class="p">(</span><span class="n">search_space_bs</span><span class="o">=</span><span class="n">search_space_bs</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_params.json&quot;</span><span class="p">))</span>
-
+        <span class="n">search_space_bs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParamGrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;bayes&quot;</span><span class="p">)</span>
+        <span class="n">bayesoptimizer</span> <span class="o">=</span> <span class="n">OptunaOptimization</span><span class="p">(</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">scoreFunc</span><span class="p">,</span>
+            <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_bs</span><span class="p">,</span>
+            <span class="n">n_trials</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">bayesoptimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">saveParams</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_params.json&quot;</span><span class="p">))</span>
         <span class="c1"># perform grid search</span>
-        <span class="n">themodel</span><span class="o">.</span><span class="n">cleanFiles</span><span class="p">()</span>
-        <span class="n">grid_params</span> <span class="o">=</span> <span class="n">themodel</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">,</span> <span class="n">mname</span><span class="p">)</span>
-        <span class="n">search_space_gs</span> <span class="o">=</span> <span class="n">grid_params</span><span class="p">[</span><span class="n">grid_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mname</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">themodel</span><span class="o">.</span><span class="n">gridSearch</span><span class="p">(</span><span class="n">search_space_gs</span><span class="o">=</span><span class="n">search_space_gs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_params.json&quot;</span><span class="p">))</span>
-        <span class="n">themodel</span><span class="o">.</span><span class="n">cleanFiles</span><span class="p">()</span>
-
+        <span class="n">search_space_gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParamGrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">)</span>
+        <span class="n">gridsearcher</span> <span class="o">=</span> <span class="n">GridSearchOptimization</span><span class="p">(</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">scoreFunc</span><span class="p">,</span>
+            <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_gs</span>
+        <span class="p">)</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">gridsearcher</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">saveParams</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_params.json&quot;</span><span class="p">))</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cleanFiles</span><span class="p">()</span>
         <span class="c1"># perform crossvalidation</span>
-        <span class="n">themodel</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
-            <span class="n">exists</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">.ind.tsv&#39;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
-            <span class="n">exists</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">.cv.tsv&#39;</span><span class="p">))</span>
-
+        <span class="n">model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.ind.tsv&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.cv.tsv&quot;</span><span class="p">))</span>
         <span class="c1"># train the model on all data</span>
-        <span class="n">themodel</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="n">themodel</span><span class="o">.</span><span class="n">metaFile</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;model_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;parameters_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_calculator_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">themodel</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_standardizer_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span></div>
+        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;estimator_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;parameters_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="nb">all</span><span class="p">(</span>
+                <span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;feature_calculator_paths&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_standardizer_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="ModelTestMixIn.predictor_test"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn.predictor_test">[docs]</a>    <span class="k">def</span> <span class="nf">predictor_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">QSPRModel</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">):</span>
-        <span class="c1"># initialize model as predictor</span>
-        <span class="n">predictor</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">)</span>
+<div class="viewcode-block" id="ModelTestMixIn.predictorTest"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn.predictorTest">[docs]</a>    <span class="k">def</span> <span class="nf">predictorTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictor</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test a model as predictor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            predictor (QSPRModel):</span>
+<span class="sd">                The model to test.</span>
+<span class="sd">            **pred_kwargs:</span>
+<span class="sd">                Extra keyword arguments to pass to the predictor&#39;s `predictMols` method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># load molecules to predict</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s1">/test_files/data/test_data.tsv&#39;</span><span class="p">,</span>
-            <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/data/test_data.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># define checks of the shape of the predictions</span>
+        <span class="k">def</span> <span class="nf">check_shape</span><span class="p">(</span><span class="n">input_smiles</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span> <span class="ow">and</span> <span class="n">use_probas</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">predictor</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                        <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                        <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_smiles</span><span class="p">),</span> <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nClasses</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                        <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                        <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_smiles</span><span class="p">),</span> <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nClasses</span><span class="p">),</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                    <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                    <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_smiles</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)),</span>
+                <span class="p">)</span>
 
         <span class="c1"># predict the property</span>
-        <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">SMILES</span><span class="o">.</span><span class="n">to_list</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">SMILES</span><span class="p">),))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">predictor</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">predictor</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown task: </span><span class="si">{</span><span class="n">predictor</span><span class="o">.</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">use_probas</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]:</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">SMILES</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span> <span class="n">use_probas</span><span class="o">=</span><span class="n">use_probas</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
+            <span class="p">)</span>
+            <span class="n">check_shape</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">SMILES</span><span class="o">.</span><span class="n">to_list</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
 
-        <span class="c1"># test with an invalid smiles</span>
-        <span class="n">invalid_smiles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;C1CCCCC1&quot;</span><span class="p">,</span> <span class="s2">&quot;C1CCCCC&quot;</span><span class="p">]</span>
-        <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span><span class="n">invalid_smiles</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">invalid_smiles</span><span class="p">),))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
+            <span class="n">singleoutput</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span>
+                               <span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span>
+                                                                                    <span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span> <span class="ow">or</span>
+                <span class="n">use_probas</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">singleoutput</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span>
+                <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">predictor</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">XGBClassifier</span>
+                <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">singleoutput</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertIn</span><span class="p">(</span><span class="n">singleoutput</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown task: </span><span class="si">{</span><span class="n">predictor</span><span class="o">.</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># test with an invalid smiles</span>
+            <span class="n">invalid_smiles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;C1CCCCC1&quot;</span><span class="p">,</span> <span class="s2">&quot;C1CCCCC&quot;</span><span class="p">]</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+                <span class="n">invalid_smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="n">use_probas</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
+            <span class="p">)</span>
+            <span class="n">check_shape</span><span class="p">(</span><span class="n">invalid_smiles</span><span class="p">)</span>
+            <span class="n">singleoutput</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span>
+                               <span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span>
+                                                                                    <span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">predictions</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span>
+                                                                                    <span class="mi">0</span><span class="p">],</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span> <span class="ow">and</span>
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">XGBClassifier</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">use_probas</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertIn</span><span class="p">(</span><span class="n">singleoutput</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">singleoutput</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span></div></div>
 
-        <span class="c1"># test the same for classification with probabilities</span>
-        <span class="k">if</span> <span class="n">predictor</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">:</span>
-            <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span><span class="n">invalid_smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">invalid_smiles</span><span class="p">),</span> <span class="n">predictor</span><span class="o">.</span><span class="n">nClasses</span><span class="p">))</span>
-            <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">nClasses</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="bp">cls</span><span class="p">]))</span></div></div>
 
-<div class="viewcode-block" id="NeuralNet"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.NeuralNet">[docs]</a><span class="k">class</span> <span class="nc">NeuralNet</span><span class="p">(</span><span class="n">ModelDataSetsMixIn</span><span class="p">,</span> <span class="n">ModelTestMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestQSPRsklearn"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn">[docs]</a><span class="k">class</span> <span class="nc">TestQSPRsklearn</span><span class="p">(</span><span class="n">ModelDataSetsMixIn</span><span class="p">,</span> <span class="n">ModelTestMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the QSPRsklearn class.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="TestQSPRsklearn.getModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.getModel">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a QSPRsklearn model.</span>
 
-<div class="viewcode-block" id="NeuralNet.get_model"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.NeuralNet.get_model">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># intialize dataset and model</span>
-        <span class="k">return</span> <span class="n">QSPRDNN</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s1">/test_files/&#39;</span><span class="p">,</span>
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): the name of the model</span>
+<span class="sd">            alg (Type, optional): the algorithm to use. Defaults to None.</span>
+<span class="sd">            dataset (QSPRDataset, optional): the dataset to use. Defaults to None.</span>
+<span class="sd">            parameters (dict, optional): the parameters to use. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QSPRsklearn: the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">QSPRsklearn</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/&quot;</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
-            <span class="n">gpus</span><span class="o">=</span><span class="n">GPUS</span><span class="p">,</span>
-            <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-            <span class="n">tol</span><span class="o">=</span><span class="mf">0.02</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="NeuralNet.prep_testdata"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.NeuralNet.prep_testdata">[docs]</a>    <span class="k">def</span> <span class="nf">prep_testdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="c1"># prepare test dataset</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="n">th</span><span class="p">,</span> <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">())</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="c1"># prepare data for torch DNN</span>
-        <span class="n">trainloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
-            <span class="n">TensorDataset</span><span class="p">(</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="p">)),</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-        <span class="n">testloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
-            <span class="n">TensorDataset</span><span class="p">(</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">values</span><span class="p">)),</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">trainloader</span><span class="p">,</span> <span class="n">testloader</span></div>
-
-    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span>
-        <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">th</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">STFullyConnected</span><span class="p">,</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">STFullyConnected</span><span class="p">,</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
-            <span class="p">(</span><span class="n">STFullyConnected</span><span class="p">,</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1200</span><span class="p">]),</span>
-        <span class="p">)</span>
-    <span class="p">])</span>
-    <span class="k">def</span> <span class="nf">test_base_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">th</span><span class="p">):</span>
-        <span class="c1"># prepare test regression dataset</span>
-        <span class="n">is_reg</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span> <span class="k">else</span> <span class="kc">False</span>
-        <span class="n">no_features</span><span class="p">,</span> <span class="n">trainloader</span><span class="p">,</span> <span class="n">testloader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prep_testdata</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="n">th</span><span class="p">)</span>
-
-        <span class="c1"># fit model with default settings</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">alg</span><span class="p">(</span><span class="n">n_dim</span><span class="o">=</span><span class="n">no_features</span><span class="p">,</span> <span class="n">is_reg</span><span class="o">=</span><span class="n">is_reg</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-            <span class="n">trainloader</span><span class="p">,</span>
-            <span class="n">testloader</span><span class="p">,</span>
-            <span class="n">out</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">datapath</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-
-        <span class="c1"># fit model with non-default epochs and learning rate and tolerance</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">alg</span><span class="p">(</span><span class="n">n_dim</span><span class="o">=</span><span class="n">no_features</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">is_reg</span><span class="o">=</span><span class="n">is_reg</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-            <span class="n">trainloader</span><span class="p">,</span>
-            <span class="n">testloader</span><span class="p">,</span>
-            <span class="n">out</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">datapath</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-            <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-
-        <span class="c1"># fit model with non-default settings for model construction</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">alg</span><span class="p">(</span>
-            <span class="n">n_dim</span><span class="o">=</span><span class="n">no_features</span><span class="p">,</span>
-            <span class="n">neurons_h1</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
-            <span class="n">neurons_hx</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-            <span class="n">extra_layer</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">is_reg</span><span class="o">=</span><span class="n">is_reg</span>
-        <span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-            <span class="n">trainloader</span><span class="p">,</span>
-            <span class="n">testloader</span><span class="p">,</span>
-            <span class="n">out</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">datapath</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-
-    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span>
-        <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">th</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">STFullyConnected</span><span class="p">,</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">STFullyConnected</span><span class="p">,</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
-            <span class="p">(</span><span class="n">STFullyConnected</span><span class="p">,</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
-        <span class="p">)</span>
-    <span class="p">])</span>
-    <span class="k">def</span> <span class="nf">test_qsprpred_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">th</span><span class="p">):</span>
-        <span class="c1"># initialize dataset</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="n">th</span><span class="p">,</span> <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">())</span>
-
-        <span class="c1"># initialize model for training from class</span>
-        <span class="n">alg_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_th=</span><span class="si">{</span><span class="n">th</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">alg_name</span><span class="p">,</span>
-            <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
-            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit_test</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">predictor_test</span><span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">QSPRDNN</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="TestQSPRsklearn"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn">[docs]</a><span class="k">class</span> <span class="nc">TestQSPRsklearn</span><span class="p">(</span><span class="n">ModelDataSetsMixIn</span><span class="p">,</span> <span class="n">ModelTestMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
-
-<div class="viewcode-block" id="TestQSPRsklearn.get_model"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.get_model">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># intialize dataset and model</span>
-        <span class="k">return</span> <span class="n">QSPRsklearn</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s1">/test_files/&#39;</span><span class="p">,</span>
-            <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span>
-        <span class="p">)</span></div>
-
-    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span>
-        <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">PLSRegression</span><span class="p">,</span> <span class="s2">&quot;PLSR&quot;</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">SVR</span><span class="p">,</span> <span class="s2">&quot;SVR&quot;</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="s2">&quot;RFR&quot;</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">XGBRegressor</span><span class="p">,</span> <span class="s2">&quot;XGBR&quot;</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">KNeighborsRegressor</span><span class="p">,</span> <span class="s2">&quot;KNNR&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
-    <span class="p">])</span>
-    <span class="k">def</span> <span class="nf">test_regression_basic_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;SVR&quot;</span><span class="p">,</span> <span class="s2">&quot;PLSR&quot;</span><span class="p">]:</span>
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span> <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">PLSRegression</span><span class="p">,</span> <span class="s2">&quot;PLSR&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">SVR</span><span class="p">,</span> <span class="s2">&quot;SVR&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="s2">&quot;RFR&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">XGBRegressor</span><span class="p">,</span> <span class="s2">&quot;XGBR&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">KNeighborsRegressor</span><span class="p">,</span> <span class="s2">&quot;KNNR&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testRegressionBasicFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for regression models.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;SVR&quot;</span><span class="p">,</span> <span class="s2">&quot;PLSR&quot;</span><span class="p">]:</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">N_CPUS</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
-
         <span class="c1"># initialize dataset</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">())</span>
-
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span>
+            <span class="p">}],</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">(),</span>
+        <span class="p">)</span>
         <span class="c1"># initialize model for training from class</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
             <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit_test</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">predictor_test</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span>
 
-    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span>
-        <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_th=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">th</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">th</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
-                <span class="p">(</span><span class="n">SVC</span><span class="p">,</span> <span class="s2">&quot;SVC&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
-                <span class="p">(</span><span class="n">SVC</span><span class="p">,</span> <span class="s2">&quot;SVC&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">35</span><span class="p">]),</span>
-                <span class="p">(</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="s2">&quot;RFC&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
-                <span class="p">(</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="s2">&quot;RFC&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">35</span><span class="p">]),</span>
-                <span class="p">(</span><span class="n">XGBClassifier</span><span class="p">,</span> <span class="s2">&quot;XGBC&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
-                <span class="p">(</span><span class="n">XGBClassifier</span><span class="p">,</span> <span class="s2">&quot;XGBC&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">35</span><span class="p">]),</span>
-                <span class="p">(</span><span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="s2">&quot;KNNC&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
-                <span class="p">(</span><span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="s2">&quot;KNNC&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">35</span><span class="p">]),</span>
-                <span class="p">(</span><span class="n">GaussianNB</span><span class="p">,</span> <span class="s2">&quot;NB&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
-                <span class="p">(</span><span class="n">GaussianNB</span><span class="p">,</span> <span class="s2">&quot;NB&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">35</span><span class="p">])</span>
-        <span class="p">)</span>
-    <span class="p">])</span>
-    <span class="k">def</span> <span class="nf">test_classification_basic_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">th</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NB&quot;</span><span class="p">,</span> <span class="s2">&quot;SVC&quot;</span><span class="p">]:</span>
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span> <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">SVC</span><span class="p">,</span> <span class="s2">&quot;SVC&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="s2">&quot;RFC&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">XGBClassifier</span><span class="p">,</span> <span class="s2">&quot;XGBC&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="s2">&quot;KNNC&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">GaussianNB</span><span class="p">,</span> <span class="s2">&quot;NB&quot;</span><span class="p">),</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
+                <span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testClassificationBasicFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for classification models.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NB&quot;</span><span class="p">,</span> <span class="s2">&quot;SVC&quot;</span><span class="p">]:</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">N_CPUS</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
-
+        <span class="c1"># special case for SVC</span>
         <span class="k">if</span> <span class="n">model_name</span> <span class="o">==</span> <span class="s2">&quot;SVC&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;probability&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;probability&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
-
         <span class="c1"># initialize dataset</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="n">th</span><span class="p">,</span> <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">())</span>
-
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
+                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span>
+            <span class="p">}],</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">(),</span>
+        <span class="p">)</span>
         <span class="c1"># test classifier</span>
         <span class="c1"># initialize model for training from class</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
             <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit_test</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">predictor_test</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span> <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="s2">&quot;RFR&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">KNeighborsRegressor</span><span class="p">,</span> <span class="s2">&quot;KNNR&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testRegressionMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for multitask regression models.&quot;&quot;&quot;</span>
+        <span class="c1"># initialize dataset</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="n">target_imputer</span><span class="o">=</span><span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="c1"># test classifier</span>
+        <span class="c1"># initialize model for training from class</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_regression&quot;</span><span class="p">,</span>
+            <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_regression&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span> <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="s2">&quot;RFC&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="s2">&quot;KNNC&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testClassificationMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for multitask classification models.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NB&quot;</span><span class="p">,</span> <span class="s2">&quot;SVC&quot;</span><span class="p">]:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">N_CPUS</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># special case for SVC</span>
+        <span class="k">if</span> <span class="n">model_name</span> <span class="o">==</span> <span class="s2">&quot;SVC&quot;</span><span class="p">:</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;probability&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+        <span class="c1"># initialize dataset</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                    <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                    <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="n">target_imputer</span><span class="o">=</span><span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="c1"># test classifier</span>
+        <span class="c1"># initialize model for training from class</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_classification&quot;</span><span class="p">,</span>
+            <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_classification&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics">[docs]</a><span class="k">class</span> <span class="nc">TestMetrics</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnMetrics from the metrics module.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="TestMetrics.checkMetric"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.checkMetric">[docs]</a>    <span class="k">def</span> <span class="nf">checkMetric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">y_pred_proba</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the metric is correctly implemented.&quot;&quot;&quot;</span>
+        <span class="n">scorer</span> <span class="o">=</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getMetric</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">scorer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">scorer</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;supports_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">scorer</span><span class="o">.</span><span class="n">supportsTask</span><span class="p">(</span><span class="n">task</span><span class="p">))</span>
+        <span class="c1"># lambda function to get the sklearn scoring function from the scorer object</span>
+        <span class="n">sklearn_scorer</span> <span class="o">=</span> <span class="n">get_sklearn_scorer</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">sklearn_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">sklearn_scorer</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="n">sklearn_scorer</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span>
+                <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">**</span><span class="n">sklearn_scorer</span><span class="o">.</span><span class="n">_kwargs</span>
+            <span class="p">)</span>
+
+        <span class="c1"># perform the test</span>
+        <span class="k">if</span> <span class="n">y_pred_proba</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">scorer</span><span class="o">.</span><span class="n">needsProbasToScore</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                <span class="n">scorer</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred_proba</span><span class="p">),</span> <span class="n">sklearn_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred_proba</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">scorer</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="n">sklearn_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TestMetrics.test_RegressionMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_RegressionMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_RegressionMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the regression metrics.&quot;&quot;&quot;</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">])</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">regressionMetrics</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkMetric</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestMetrics.test_SingleClassMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_SingleClassMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_SingleClassMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the single class metrics.&quot;&quot;&quot;</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">singleClassMetrics</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkMetric</span><span class="p">(</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">y_pred_proba</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestMetrics.test_MultiClassMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_MultiClassMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_MultiClassMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the multi class metrics.&quot;&quot;&quot;</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">multiClassMetrics</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkMetric</span><span class="p">(</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">y_pred_proba</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestMetrics.test_MultiTaskRegressionMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_MultiTaskRegressionMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_MultiTaskRegressionMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the multi task regression metrics.&quot;&quot;&quot;</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">]])</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">]])</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">multiTaskRegressionMetrics</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkMetric</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestMetrics.test_MultiTaskSingleClassMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_MultiTaskSingleClassMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_MultiTaskSingleClassMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the multi task single class metrics.&quot;&quot;&quot;</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]]</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">multiTaskSingleClassMetrics</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkMetric</span><span class="p">(</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">y_pred_proba</span>
+            <span class="p">)</span></div></div>
 </pre></div>
 
            </div>

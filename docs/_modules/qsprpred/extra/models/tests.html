@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.models.tests &mdash; QSPRpred 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v2.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">qsprpred</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.models.tests</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.extra.models.tests</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Test module for testing extra models.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
+<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
+
+<span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
+<span class="kn">from</span> <span class="nn">sklearn.cross_decomposition</span> <span class="kn">import</span> <span class="n">PLSRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVR</span>
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span><span class="p">,</span> <span class="n">XGBRegressor</span>
+
+<span class="kn">from</span> <span class="nn">...data.data</span> <span class="kn">import</span> <span class="n">TargetProperty</span>
+<span class="kn">from</span> <span class="nn">...models.tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
+<span class="kn">from</span> <span class="nn">...models.tests</span> <span class="kn">import</span> <span class="n">N_CPUS</span><span class="p">,</span> <span class="n">ModelDataSetsMixIn</span><span class="p">,</span> <span class="n">ModelTestMixIn</span>
+<span class="kn">from</span> <span class="nn">..data.data</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
+<span class="kn">from</span> <span class="nn">..data.tests</span> <span class="kn">import</span> <span class="n">DataSetsMixInExtras</span>
+<span class="kn">from</span> <span class="nn">..data.utils.descriptor_utils.msa_calculator</span> <span class="kn">import</span> <span class="n">ClustalMSA</span>
+<span class="kn">from</span> <span class="nn">..data.utils.descriptorcalculator</span> <span class="kn">import</span> <span class="n">ProteinDescriptorCalculator</span>
+<span class="kn">from</span> <span class="nn">..data.utils.descriptorsets</span> <span class="kn">import</span> <span class="n">ProDec</span>
+<span class="kn">from</span> <span class="nn">..models.pcm</span> <span class="kn">import</span> <span class="n">QSPRsklearnPCM</span>
+
+
+<div class="viewcode-block" id="ModelDataSetsMixInExtras"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras">[docs]</a><span class="k">class</span> <span class="nc">ModelDataSetsMixInExtras</span><span class="p">(</span><span class="n">ModelDataSetsMixIn</span><span class="p">,</span> <span class="n">DataSetsMixInExtras</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for testing models in extras.&quot;&quot;&quot;</span>
+
+    <span class="n">qsprModelsPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/qspr/models&quot;</span></div>
+
+
+<div class="viewcode-block" id="TestPCM"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM">[docs]</a><span class="k">class</span> <span class="nc">TestPCM</span><span class="p">(</span><span class="n">ModelDataSetsMixInExtras</span><span class="p">,</span> <span class="n">ModelTestMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCM.getModel"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getModel">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize dataset and model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the model.</span>
+<span class="sd">            alg (Type | None): Algorithm class.</span>
+<span class="sd">            dataset (PCMDataSet | None): Dataset to use.</span>
+<span class="sd">            parameters (dict | None): Parameters to use.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QSPRsklearnPCM: Initialized model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">QSPRsklearnPCM</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/&quot;</span><span class="p">,</span>
+            <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">alg_name</span><span class="p">,</span>
+                <span class="p">[{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;pchembl_value_Median&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">}],</span>
+                <span class="n">alg_name</span><span class="p">,</span>
+                <span class="n">alg</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">PLSRegression</span><span class="p">,</span> <span class="s2">&quot;PLSR&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">SVR</span><span class="p">,</span> <span class="s2">&quot;SVR&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">XGBRegressor</span><span class="p">,</span> <span class="s2">&quot;XGBR&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">alg_name</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;pchembl_value_Median&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                        <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">],</span>
+                    <span class="p">}</span>
+                <span class="p">],</span>
+                <span class="n">alg_name</span><span class="p">,</span>
+                <span class="n">alg</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="s2">&quot;RFC&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">XGBClassifier</span><span class="p">,</span> <span class="s2">&quot;XGBC&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testRegressionBasicFitPCM</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_class</span><span class="p">:</span> <span class="n">Type</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for regression models.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            _: Name of the test.</span>
+<span class="sd">            props (list[TargetProperty | dict]): List of target properties.</span>
+<span class="sd">            model_name (str): Name of the model.</span>
+<span class="sd">            model_class (Type): Class of the model.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;SVR&quot;</span><span class="p">,</span> <span class="s2">&quot;PLSR&quot;</span><span class="p">]:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">N_CPUS</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># initialize dataset</span>
+        <span class="n">prep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">()</span>
+        <span class="n">prep</span><span class="p">[</span><span class="s2">&quot;feature_calculators&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prep</span><span class="p">[</span><span class="s2">&quot;feature_calculators&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="n">ProteinDescriptorCalculator</span><span class="p">(</span>
+                <span class="n">desc_sets</span><span class="o">=</span><span class="p">[</span><span class="n">ProDec</span><span class="p">(</span><span class="n">sets</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Sneath&quot;</span><span class="p">])],</span>
+                <span class="n">msa_provider</span><span class="o">=</span><span class="n">ClustalMSA</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsprdatapath</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPCMDataSet</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">props</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_pcm&quot;</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="n">props</span><span class="p">,</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="n">prep</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># initialize model for training from class</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">props</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearnPCM</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">props</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">protein_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="s2">&quot;accession&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; QSPRpred 1.3.1 documentation</title>
+  <title>Usage &mdash; QSPRpred 2.0.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,21 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Python API" href="api/modules.html" />
-    <link rel="prev" title="Installation" href="install.html" /> 
+    <link rel="next" title="qsprpred" href="api/modules.html" />
+    <link rel="prev" title="Installation" href="install.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -34,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.1
+                v2.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -60,6 +73,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#feature-calculation">Feature calculation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#feature-filtering">Feature filtering</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#papyrus-low-quality-filter">Papyrus Low quality filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multitask-data">Multitask data</a></li>
 </ul>
 </li>
 </ul>
@@ -68,10 +82,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#id3">Basics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id4">More</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id5">run settings arguments</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#classification-models">Classification models</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#model-types">model types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#defining-model-parameters">Defining model parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hyperparameter-optimization">Hyperparameter optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multitask-modelling">Multitask modelling</a></li>
 </ul>
 </li>
 </ul>
@@ -80,13 +94,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#id6">Basics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id7">More</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id8">run settings arguments</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#model-selection">Model selection</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#skip-smiles-preprocessing">Skip SMILES preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-probability-predictions">Adding probability predictions</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">qsprpred</a></li>
 </ul>
 
         </div>
@@ -128,8 +141,8 @@ Make sure to download the tutorial folder to follow the examples in this CLI tut
 </section>
 <section id="cli-example">
 <span id="id2"></span><h1>CLI Example<a class="headerlink" href="#cli-example" title="Permalink to this heading"></a></h1>
-<p>In this example, we will use the command line utilities of QSPRpred to train a QSAR model for the GABAA receptor.
-We will use the parkinsons dataset from the API tutorial.
+<p>In this example, we will use the command line utilities of QSPRpred to train a QSAR model for the GABAA receptor and the
+Glutamate receptor NMDA. We will use the parkinsons dataset from the API tutorial.
 Make sure to first run the Parkinsons function in the tutorial/datasets.py script (see dataset preparation in the API tutorial)
 to create the tutorial/data/parkinsons_pivot.tsv file.
 QSPRpred assumes that all input data are saved in a subfolder data of the base directory..
@@ -140,18 +153,20 @@ Therefore, our example dataset ‘parkinsons_pivot.tsv’ is located in a subfol
 <section id="basics">
 <h3>Basics<a class="headerlink" href="#basics" title="Permalink to this heading"></a></h3>
 <p>We will now use the QSPRpred <code class="code docutils literal notranslate"><span class="pre">QSPRpred.data_CLI</span></code> script for data preparation.
-In the CLI we need to indicate which property/ies we are interested in predicting (here GABAAalpha),
+In the CLI we need to indicate which property/ies we are interested in predicting (here GABAAalpha and NMDA),
 this should be equal to the column names (should not contain spaces) containing the values to be predicted.
-For regression models these columns should contain numerical datapoints. For categorical models either categorical data or numerical data can be used (the latter will be categorized based on the activity threshold).
+For regression models these columns should contain numerical datapoints.
+For categorical models either categorical data or numerical data can be used (the latter will be categorized based on the activity threshold).
 Furthermore, we should indicate how we wish to split the data to create a train and test set.
-Here we will use a random split with a test fraction of 15%. We need to calculate features that describe the molecules, here we use morgan fingerprints.</p>
+Here we will use a random split with a test fraction of 15%. We need to calculate features that describe the molecules,
+here we use morgan fingerprints.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/parkinsons_pivot.tsv</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">pr</span> <span class="n">NMDA</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
 </pre></div>
 </div>
 <p>Running this command will create a subfolder ‘qspr’. The qspr/data folder should contain 4 files for
-each property, prefixed by the property identifiers (i.e. GABAAalpha), the model task (REGRESSION),
-e.g. GABAAalpha_REGRESSION. As well as a log file and a run settings file.</p>
+each property (8 in total), prefixed by the property identifiers (i.e. GABAAalpha/NMDA), the model task (REGRESSION),
+e.g. GABAAalpha_REGRESSION. As well as an log file and a run settings file.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>File</p></th>
@@ -189,31 +204,34 @@ e.g. GABAAalpha_REGRESSION. As well as a log file and a run settings file.</p>
 <p>Apart from the the input file name, there are a few other base options that can be set.
 The base-directory can be specified using <a class="reference external" href="https://docs.python.org/3.9/using/cmdline.html#cmdoption-b" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">-b</span></code></a>. Including <a class="reference external" href="https://docs.python.org/3.9/using/cmdline.html#cmdoption-d" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">-d</span></code></a>, will print debug information to the log file. The random
 seed (-ran) can also be set manually (although identical results are not guaranteed while keeping the same random seed).
-Furthermore, the number of cpus (-ncpu) used for model training. Finally, the name of the smilescolumn in your dataset
+Furthermore, the number of cpu’s (-ncpu) used for model training. Finally, the name of the smilescolumn in your dataset
 can be indicated with <code class="xref any docutils literal notranslate"><span class="pre">-sm</span></code> (default SMILES).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in tutorial/data/parkinsons_pivot.tsv, setting debug flag, smiles column, random seed, number of cpu&#39;s</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">b</span> <span class="n">tutorial</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">sm</span> <span class="n">SMILES</span> <span class="o">-</span><span class="n">de</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">pr</span> <span class="n">NMDA</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
+</pre></div>
+</div>
 <section id="log-transform-data">
 <h4>Log-transform data<a class="headerlink" href="#log-transform-data" title="Permalink to this heading"></a></h4>
 <p>To log (-lt) transform data specific properties, indicate this in the CLI as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Log transform data for CHEMBL318</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">lt</span> <span class="s1">&#39;{&quot;GABAAalpha&quot;:true}&#39;</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Log transform data for GABAAalpha</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">pr</span> <span class="n">NMDA</span> <span class="o">-</span><span class="n">lt</span> <span class="s1">&#39;{&quot;GABAAalpha&quot;:true,&quot;NMDA&quot;:false}&#39;</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
 </pre></div>
 </div>
 </section>
 <section id="train-test-split">
 <h4>Train test split<a class="headerlink" href="#train-test-split" title="Permalink to this heading"></a></h4>
-<p>In the base example we use a random split to create the train and test set. There are two
-more options, namely a scaffold split, where the data is split into a test and train set
-randomly but keeping molecules with the same Murcko scaffold in the same set.</p>
+<p>In the base example we use a random split to create the train and test set. There are two more options,
+namely a scaffold split, where the data is split into a test and train set randomly but keeping molecules with the same
+(Murcko) scaffold in the same set.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Scaffold split</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">scaffold</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">pr</span> <span class="n">NMDA</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">scaffold</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
 </pre></div>
 </div>
-<p>The third option is a temporal split, where a column needs to be indicated which holds
-information on the time each sample was observed and split based on threshold in a column.
-In this example, all samples after 2015 (in column ‘year’) make up the test set.
-NOTE: this example will not work on the example set as it does not contain a ‘year’ column.</p>
+<p>The third option is a temporal split, where a column needs to be indicated which holds information on the time each
+sample was observed and split based on threshold in a column. In this example, all samples after 2015 (in column ‘year’)
+make up the test set. NOTE: this example will not work on the example set as it does not contain a ‘year’ column.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Time split</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span>  <span class="o">-</span><span class="n">sp</span> <span class="n">time</span> <span class="o">-</span><span class="n">st</span> <span class="mi">2015</span> <span class="o">-</span><span class="n">stc</span> <span class="n">year</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">pr</span> <span class="n">NMDA</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span>  <span class="o">-</span><span class="n">sp</span> <span class="n">time</span> <span class="o">-</span><span class="n">st</span> <span class="mi">2015</span> <span class="o">-</span><span class="n">stc</span> <span class="n">year</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
 </pre></div>
 </div>
 </section>
@@ -223,21 +241,23 @@ NOTE: this example will not work on the example set as it does not contain a ‘
 The default setting is to run both, but you can run either by setting the
 regression argument to true/REG for regression or false/CLS for classification.
 When using classification, the threshold(s) for each property (that has not been preclassified) need to be included.
+If the data is already preclassified, the threshold has to be set to ‘precomputed’.
 This is set using a dictionary. In case of multi-class classification the bounderies of
 the bins need to be given. For binary classification only give 1 threshold per property.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Classification and regression</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="o">-</span><span class="n">th</span> <span class="s1">&#39;{&quot;GABAAalpha&quot;:[6.5]}&#39;</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">pr</span> <span class="n">NMDA</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="o">-</span><span class="n">th</span> <span class="s1">&#39;{&quot;GABAAalpha&quot;:[6.5],&quot;NMDA&quot;:[0, 4, 6, 10]}&#39;</span>
 </pre></div>
 </div>
 </section>
 <section id="feature-calculation">
 <h4>Feature calculation<a class="headerlink" href="#feature-calculation" title="Permalink to this heading"></a></h4>
-<p>There are six different descriptor sets that can be calculated at the moment,
-namely Morgan fingerprints, rdkit, Mordred, Mold2 and Padel descriptors, and the
-physicochemical properties used in the QSAR models in the DrugEx papers. They can also
+<p>There are seven different descriptor sets that can be calculated at the moment,
+namely Morgan fingerprints, rdkit, Mordred, Mold2 and Padel descriptors, the
+physicochemical properties used in the QSAR models in the DrugEx papers from Liu et al., and
+the SMILES based signatures of extended valence. They can also
 be combined. For more control over the descriptorcalculator settings use the python API.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># With Morgan, RDkit, Mordred, Mold2, PaDEL and DrugEx descriptors</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="n">RDkit</span> <span class="n">Mordred</span> <span class="n">Mold2</span> <span class="n">PaDEL</span> <span class="n">DrugEx</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">pr</span> <span class="n">NMDA</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="n">RDkit</span> <span class="n">Mordred</span> <span class="n">Mold2</span> <span class="n">PaDEL</span> <span class="n">DrugEx</span>
 </pre></div>
 </div>
 </section>
@@ -248,7 +268,7 @@ QSPRpred, namely a high correlation filter, a low variance filter and the boruta
 The high correlation filter and low variance filter need to be set with a threshold
 for filtering.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/LIGAND_RAW_small.tsv</span>
-   <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="o">-</span><span class="n">lv</span> <span class="mf">0.1</span> <span class="o">-</span><span class="n">hc</span> <span class="mf">0.9</span> <span class="o">-</span><span class="n">bf</span>
+   <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">pr</span> <span class="n">NMDA</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="o">-</span><span class="n">lv</span> <span class="mf">0.1</span> <span class="o">-</span><span class="n">hc</span> <span class="mf">0.9</span> <span class="o">-</span><span class="n">bf</span>
 </pre></div>
 </div>
 </section>
@@ -258,6 +278,19 @@ for filtering.</p>
 an option is included for filtering low quality data from the dataset (All data is removed with value ‘Low’ in column ‘Quality’).
 To apply this filter include <code class="xref any docutils literal notranslate"><span class="pre">-lq</span></code> or <code class="xref any docutils literal notranslate"><span class="pre">--low_quality</span></code> in your command.</p>
 </section>
+<section id="multitask-data">
+<h4>Multitask data<a class="headerlink" href="#multitask-data" title="Permalink to this heading"></a></h4>
+<p>Multitask modelling is possible by passing multiple properties to the <code class="xref any docutils literal notranslate"><span class="pre">-pr</span></code> argument. Furthermore, missing data can be
+imputed using the <code class="xref any docutils literal notranslate"><span class="pre">-im</span></code> argument. You can combine any number of targets and combination of regression and classification
+tasks for the data preparation, however currently the DNN models do not support multitask modelling and only the random
+forest models and knn sklearn models are supported for multitask. The multitask sklearn modelling is only possible for
+multiple regression task or multiple single class classification tasks. For multiple multi-class classification tasks or
+a combination of regression and classification tasks, the multitask modelling is not supported at the moment.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/parkinsons_pivot.tsv</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="n">NMDA</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span> <span class="o">-</span><span class="n">im</span> <span class="n">mean</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 <section id="model-training">
@@ -265,10 +298,13 @@ To apply this filter include <code class="xref any docutils literal notranslate"
 <section id="id3">
 <h3>Basics<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <p>Finally, we need to indicate what models we want to train and which steps to take in the training.
-In this example, we will build regression random forest models.
+In this example, we will build regression random forest models through passing the prepared regression datasets prefixes
+<code class="xref any docutils literal notranslate"><span class="pre">GABAAalpha_REGRESSION</span></code> and <code class="xref any docutils literal notranslate"><span class="pre">NMDA_REGRESSION</span></code> to the <code class="xref any docutils literal notranslate"><span class="pre">-dp</span></code> argument. If you wish to train classification models, you
+can pass the classification datasets <code class="xref any docutils literal notranslate"><span class="pre">GABAAalpha_CLASSIFICATION</span></code> and <code class="xref any docutils literal notranslate"><span class="pre">NMDA_CLASSIFICATION</span></code> to the <code class="xref any docutils literal notranslate"><span class="pre">-dp</span></code> argument
+(or any combination thereof). The model type is set with <a class="reference external" href="https://docs.python.org/3.9/using/cmdline.html#cmdoption-m" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">-m</span></code></a>.
 We will also evaluate the model through cross-validation (-me) and train the model on all data to save for further use (-s).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/parkinsons_pivot.tsv</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">dp</span> <span class="n">GABAAalpha_REGRESSION</span> <span class="n">NMDA_REGRESSION</span> <span class="o">-</span><span class="n">mt</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
 </section>
@@ -284,20 +320,9 @@ seed can also be set manually (although identical results are not guaranteed whi
 the same random seed). Furthermore, the number of cpu’s used for model training and the
 gpu number for training pytorch models can be set.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting debug flag, random seed, number of cpu&#39;s and a specific gpu (for now multiple gpu&#39;s not possible)</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">gpus</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">de</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">gpus</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span><span class="n">dp</span> <span class="n">GABAAalpha_REGRESSION</span> <span class="n">NMDA_REGRESSION</span> <span class="o">-</span><span class="n">mt</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
-<section id="classification-models">
-<h4>Classification models<a class="headerlink" href="#classification-models" title="Permalink to this heading"></a></h4>
-<p>Firstly, you can set whether to use regression, classification or both.
-The default setting is to run both, but you can run either by setting the
-regression argument to true/REG for regression or false/CLS for classification.
-Make sure you have prepared datasets for the corresponding tasks.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Training a classification model</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
-</pre></div>
-</div>
-</section>
 <section id="model-types">
 <h4>model types<a class="headerlink" href="#model-types" title="Permalink to this heading"></a></h4>
 <p>You also need to indicate which models you want to run, out of the following model types:
@@ -305,7 +330,7 @@ Make sure you have prepared datasets for the corresponding tasks.</p>
 ‘KNN’ (k-nearest neighbours), NB’ (Naive Bayes) and/or ‘DNN’ (pytorch fully connected neural net).
 The default is to run all the different model types.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Training a RF, SVM and PLS model</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="n">SVM</span> <span class="n">PLS</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">dp</span> <span class="n">GABAAalpha_REGRESSION</span> <span class="n">NMDA_REGRESSION</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">mt</span> <span class="n">RF</span> <span class="n">SVM</span> <span class="n">PLS</span>
 </pre></div>
 </div>
 </section>
@@ -322,14 +347,14 @@ The default is to run all the different model types.</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting some parameter values for a Random Forest and k-nearest neighbours model</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="n">KNN</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">p</span> <span class="n">myparams</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">dp</span> <span class="n">GABAAalpha_REGRESSION</span> <span class="n">NMDA_REGRESSION</span> <span class="o">-</span><span class="n">mt</span> <span class="n">RF</span> <span class="n">KNN</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">p</span> <span class="n">myparams</span>
 </pre></div>
 </div>
 <p>Specifically for the training of the DNN model, you can set the tolerance and the patience from the CLI.
 Tolerance gives the mimimum decrease in loss needed to count as an improvement and
 patience is the number of training epochs without improvement in loss to stop the training.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting the tolerance and patience for training a DNN model</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">m</span> <span class="n">DNN</span> <span class="o">-</span><span class="n">tol</span> <span class="mf">0.02</span> <span class="o">-</span><span class="n">pat</span> <span class="mi">100</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">dp</span> <span class="n">GABAAalpha_REGRESSION</span> <span class="n">NMDA_REGRESSION</span> <span class="o">-</span><span class="n">mt</span> <span class="n">DNN</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">tol</span> <span class="mf">0.02</span> <span class="o">-</span><span class="n">pat</span> <span class="mi">100</span>
 </pre></div>
 </div>
 </section>
@@ -360,9 +385,15 @@ as third list item. The search space file should always include all models to be
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bayesian optimization</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">o</span> <span class="n">bayes</span> <span class="o">-</span><span class="n">nt</span> <span class="mi">50</span> <span class="o">-</span><span class="n">ss</span> <span class="n">mysearchspace</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">model_CLI</span> <span class="o">-</span><span class="n">dp</span> <span class="n">GABAAalpha_REGRESSION</span> <span class="n">NMDA_REGRESSION</span> <span class="o">-</span><span class="n">mt</span> <span class="n">RF</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">o</span> <span class="n">bayes</span> <span class="o">-</span><span class="n">nt</span> <span class="mi">50</span> <span class="o">-</span><span class="n">ss</span> <span class="n">mysearchspace</span> <span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
+</section>
+<section id="multitask-modelling">
+<h4>Multitask modelling<a class="headerlink" href="#multitask-modelling" title="Permalink to this heading"></a></h4>
+<p>Multitask modelling is also possible. This means that the models are trained on multiple targets at once.
+The modelling arguments are the same as for single task modelling, you just need to specifiy the a multitask
+dataset data prefix (see multitask data preparation).</p>
 </section>
 </section>
 </section>
@@ -371,10 +402,12 @@ as third list item. The search space file should always include all models to be
 <p>Furthermore, trained QSPRpred models can be used to predict values from SMILES from the command line interface <code class="code docutils literal notranslate"><span class="pre">predict_CLI.py</span></code>.</p>
 <section id="id6">
 <h3>Basics<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
-<p>Here we will predict activity values for the A1 (CHEMBL318) and A3 receptor (CHEMBL256) on the SMILES in the
-dataset used in the previous examples.</p>
+<p>Here we will predict activity values for the A1 (GABAAalpha) and A3 receptor (NMDA) on the SMILES in the
+dataset used in the previous examples using the models from the previous examples. The input <a class="reference external" href="https://docs.python.org/3.9/using/cmdline.html#cmdoption-i" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">-i</span></code></a> here is the
+set of SMILES for which we want to predict activity values. The argument <code class="xref any docutils literal notranslate"><span class="pre">-mp</span></code>, is the paths to the meta files of the
+models we want to use for prediction relative to the base-directory subfolder qspr/models.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input is in ./data/parkinsons_pivot.tsv</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">mp</span> <span class="n">RF_GABAAalpha_REGRESSION</span><span class="o">/</span><span class="n">RF_GABAAalpha_REGRESSION_meta</span><span class="o">.</span><span class="n">json</span> <span class="n">RF_NMDA_REGRESSION</span><span class="o">/</span><span class="n">RF_NMDA_REGRESSION_meta</span><span class="o">.</span><span class="n">json</span>
 </pre></div>
 </div>
 </section>
@@ -390,24 +423,15 @@ seed can also be set manually (although identical results are not guaranteed whi
 the same random seed). The output file name can be set. Furthermore, the number of cpu’s used for model prediction and the
 gpu number for prediction with pytorch models can be set.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting debug flag, random seed, output file name, number of cpu&#39;s and a specific gpu (for now multiple gpu&#39;s not possible)</span>
-    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">o</span> <span class="n">mypredictions</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">gpus</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span>
+    <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">mp</span> <span class="n">RF_GABAAalpha_REGRESSION</span><span class="o">/</span><span class="n">RF_GABAAalpha_REGRESSION_meta</span><span class="o">.</span><span class="n">json</span> <span class="n">RF_NMDA_REGRESSION</span><span class="o">/</span><span class="n">RF_NMDA_REGRESSION_meta</span><span class="o">.</span><span class="n">json</span> <span class="o">-</span><span class="n">o</span> <span class="n">mypredictions</span> <span class="o">-</span><span class="n">de</span> <span class="o">-</span><span class="n">ran</span> <span class="mi">42</span> <span class="o">-</span><span class="n">ncpu</span> <span class="mi">5</span> <span class="o">-</span><span class="n">gpus</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span>
 </pre></div>
 </div>
 </section>
-<section id="model-selection">
-<h3>Model selection<a class="headerlink" href="#model-selection" title="Permalink to this heading"></a></h3>
-<p>You can also include multiple models predictions in the output file. By setting the model task and model types.
-Make sure you have right pretrained models in the qspr/models folder.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Making predictions with the RF and KNN classification models</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">CLS</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="n">KNN</span>
-</pre></div>
-</div>
-</section>
-<section id="skip-smiles-preprocessing">
-<h3>Skip SMILES preprocessing<a class="headerlink" href="#skip-smiles-preprocessing" title="Permalink to this heading"></a></h3>
-<p>By default the SMILES strings are sanitized and standardized. By including the <code class="code docutils literal notranslate"><span class="pre">-np</span></code> flag, this step is skipped.</p>
+<section id="adding-probability-predictions">
+<h3>Adding probability predictions<a class="headerlink" href="#adding-probability-predictions" title="Permalink to this heading"></a></h3>
+<p>When using a classification model, the probability of the predicted class can be added to the output file using the <code class="xref any docutils literal notranslate"><span class="pre">-pr</span></code> flag.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Do not standardize and sanitize SMILES</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">pr</span> <span class="n">GABAAalpha</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">m</span> <span class="n">RF</span> <span class="o">-</span><span class="n">np</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="n">parkinsons_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">mp</span> <span class="n">RF_GABAAalpha_SINGLECLASS</span><span class="o">/</span><span class="n">RF_GABAAalpha_SINGLECLASS_meta</span><span class="o">.</span><span class="n">json</span> <span class="n">RF_NMDA_MULTICLASS</span><span class="o">/</span><span class="n">RF_NMDA_MULTICLASS_meta</span><span class="o">.</span><span class="n">json</span> <span class="o">-</span><span class="n">pr</span>
 </pre></div>
 </div>
 </section>
@@ -419,7 +443,7 @@ Make sure you have right pretrained models in the qspr/models folder.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="api/modules.html" class="btn btn-neutral float-right" title="Python API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="api/modules.html" class="btn btn-neutral float-right" title="qsprpred" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

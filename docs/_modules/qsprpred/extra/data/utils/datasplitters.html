@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.data.utils.datasplitters &mdash; QSPRpred 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v2.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">qsprpred</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.data.utils.datasplitters</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.extra.data.utils.datasplitters</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Different splitters to create train and tests for evalutating QSPR model performance.</span>
+
+<span class="sd">To add a new data splitter:</span>
+<span class="sd">* Add a datasplit subclass for your new splitter</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">qsprpred.data.data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.interfaces</span> <span class="kn">import</span> <span class="n">DataSetDependant</span><span class="p">,</span> <span class="n">DataSplit</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.utils.datasplitters</span> <span class="kn">import</span> <span class="n">TemporalSplit</span>
+<span class="kn">from</span> <span class="nn">qsprpred.extra.data.data</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
+
+
+<div class="viewcode-block" id="LeaveTargetsOut"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut">[docs]</a><span class="k">class</span> <span class="nc">LeaveTargetsOut</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">DataSetDependant</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a leave target out splitter.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            targets (list): the identifiers of the targets to leave out as test set</span>
+<span class="sd">            dataset (PCMDataset): a `PCMDataset` instance to split</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">targets</span><span class="p">))</span>
+
+<div class="viewcode-block" id="LeaveTargetsOut.split"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">()</span>
+        <span class="n">ds_targets</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">ds_targets</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Target key &#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39; not in dataset!&quot;</span>
+            <span class="n">ds_targets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">)</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">ds_targets</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">))))</span>
+        <span class="n">train</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">test</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)])</span></div></div>
+
+
+<div class="viewcode-block" id="StratifiedPerTarget"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget">[docs]</a><span class="k">class</span> <span class="nc">StratifiedPerTarget</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">DataSetDependant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Splits dataset in train and test subsets based on the specified splitter.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">splitter</span><span class="p">:</span> <span class="n">DataSplit</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">splitters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataSplit</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a split that is consistent across targets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            splitter: a `datasplit` instance to split the target subsets of the dataset</span>
+<span class="sd">            splitters (dict[str, datasplit]): a dictionary with target keys as keys and</span>
+<span class="sd">                splitters to use on each protein target as values</span>
+<span class="sd">            dataset (PCMDataset): a `PCMDataset` instance to split</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="o">=</span> <span class="n">splitter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitters</span> <span class="o">=</span> <span class="n">splitters</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> \
+            <span class="s2">&quot;Either a splitter or multiple splitters must be specified!&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">splitter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">splitters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span> \
+            <span class="s2">&quot;Either one splitter or multiple splitters must be specified, but not both!&quot;</span>
+
+<div class="viewcode-block" id="StratifiedPerTarget.split"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span>
+        <span class="n">train</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">test</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">))))</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">():</span>
+            <span class="n">splitter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitters</span><span class="p">[</span>
+                <span class="n">target</span><span class="p">]</span>
+            <span class="n">df_target</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">]</span> <span class="o">==</span> <span class="n">target</span><span class="p">]</span>
+            <span class="n">ds_target</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">_scaff_split_</span><span class="si">{</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">df_target</span><span class="p">,</span>
+                <span class="n">smiles_col</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">,</span>
+                <span class="n">target_props</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span>
+                <span class="n">index_cols</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">indexCols</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ds_target</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">)</span>
+            <span class="n">train</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">ds_target</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">)])</span>
+            <span class="n">test</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">ds_target</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">)])</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">train</span><span class="p">))</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">test</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">),</span> \
+            <span class="s2">&quot;Train and test set do not cover the whole dataset!&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)])</span></div></div>
+
+
+<div class="viewcode-block" id="TemporalPerTarget"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget">[docs]</a><span class="k">class</span> <span class="nc">TemporalPerTarget</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">DataSetDependant</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">year_col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">split_years</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a temporal split that is consistent across targets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            year_col (str):</span>
+<span class="sd">                the name of the column in the dataframe that</span>
+<span class="sd">                contains the year information</span>
+<span class="sd">            split_years (dict[str,int]):</span>
+<span class="sd">                a dictionary with target keys as keys</span>
+<span class="sd">                and split years as values</span>
+<span class="sd">            dataset (PCMDataset):</span>
+<span class="sd">                a `PCMDataset` instance to split</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitYears</span> <span class="o">=</span> <span class="n">split_years</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span> <span class="o">=</span> <span class="n">year_col</span>
+
+<div class="viewcode-block" id="TemporalPerTarget.split"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+        <span class="n">splitters</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">target</span><span class="p">:</span>
+                <span class="n">TemporalSplit</span><span class="p">(</span><span class="n">timeprop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span><span class="p">,</span> <span class="n">timesplit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">splitYears</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">target</span><span class="p">,</span> <span class="n">year</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitYears</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">StratifiedPerTarget</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">(),</span>
+                                   <span class="n">splitters</span><span class="o">=</span><span class="n">splitters</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

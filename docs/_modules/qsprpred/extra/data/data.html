@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.data.data &mdash; QSPRpred 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v2.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">qsprpred</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.data.data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.extra.data.data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">data</span>
+
+<span class="sd">Created by: Martin Sicho</span>
+<span class="sd">On: 12.05.23, 17:14</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">...data.data</span> <span class="kn">import</span> <span class="n">MoleculeTable</span><span class="p">,</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">TargetProperty</span>
+<span class="kn">from</span> <span class="nn">...data.utils.descriptorcalculator</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DescriptorsCalculator</span><span class="p">,</span>
+    <span class="n">MoleculeDescriptorsCalculator</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">.utils.descriptorcalculator</span> <span class="kn">import</span> <span class="n">ProteinDescriptorCalculator</span>
+
+
+<div class="viewcode-block" id="PCMDataSet"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet">[docs]</a><span class="k">class</span> <span class="nc">PCMDataSet</span><span class="p">(</span><span class="n">QSPRDataset</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extension of `QSARDataset` for PCM modelling.</span>
+
+<span class="sd">    It allows specification of a column with protein identifiers</span>
+<span class="sd">    and the calculation of protein descriptors.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        proteinCol (str):</span>
+<span class="sd">            name of column in df containing the protein target identifier (usually a</span>
+<span class="sd">            UniProt ID) to use for protein descriptors for PCM modelling</span>
+<span class="sd">            and other protein related tasks.</span>
+<span class="sd">        proteinSeqProvider (Callable):</span>
+<span class="sd">            function that takes a list of protein identifiers and returns a `dict`</span>
+<span class="sd">            mapping those identifiers to their sequences. Defaults to `None`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">protein_col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">smiles_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">,</span>
+        <span class="n">protein_seq_provider</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">add_rdkit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">store_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="n">drop_invalids</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">drop_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">target_imputer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">index_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a data set to handle PCM data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): data name, used in saving the data</span>
+<span class="sd">            protein_col (str): name of column in df containing the protein target</span>
+<span class="sd">                identifier (usually a UniProt ID) to use for protein descriptors for PCM</span>
+<span class="sd">                modelling and other protein related tasks.</span>
+<span class="sd">            protein_seq_provider: Callable = None, optional):</span>
+<span class="sd">                function that takes a list of protein identifiers and returns a `dict`</span>
+<span class="sd">                mapping those identifiers to their sequences. Defaults to `None`.</span>
+<span class="sd">            target_props (list[TargetProperty | dict]):</span>
+<span class="sd">                target properties,</span>
+<span class="sd">                names should correspond with target column name in `df`</span>
+<span class="sd">            df (pd.DataFrame, optional):</span>
+<span class="sd">                input dataframe containing smiles and target property.</span>
+<span class="sd">                Defaults to `None`.</span>
+<span class="sd">            smiles_col (str, optional):</span>
+<span class="sd">                name of column in `df` containing SMILES. Defaults to &quot;SMILES&quot;.</span>
+<span class="sd">            add_rdkit (bool, optional):</span>
+<span class="sd">                if `True`, column with rdkit molecules will be added to `df`.</span>
+<span class="sd">                Defaults to `False`.</span>
+<span class="sd">            store_dir (str, optional):</span>
+<span class="sd">                directory for saving the output data. Defaults to &#39;.&#39;.</span>
+<span class="sd">            overwrite (bool, optional):</span>
+<span class="sd">                if `True`, existing data will be overwritten. Defaults to `False`.</span>
+<span class="sd">            n_jobs (int, optional):</span>
+<span class="sd">                number of parallel jobs. If &lt;= 0, all available cores will be used.</span>
+<span class="sd">                Defaults to 1.</span>
+<span class="sd">            chunk_size (int, optional):</span>
+<span class="sd">                chunk size for parallel processing. Defaults to 50.</span>
+<span class="sd">            drop_invalids (bool, optional):</span>
+<span class="sd">                If `True`, invalid SMILES will be dropped. Defaults to `True`.</span>
+<span class="sd">            drop_empty (bool, optional):</span>
+<span class="sd">                If `True`, rows with empty SMILES will be dropped. Defaults to `True`.</span>
+<span class="sd">            target_imputer (Callable, optional):</span>
+<span class="sd">                imputer for missing target property values. Defaults to `None`.</span>
+<span class="sd">            index_cols (List[str], optional):</span>
+<span class="sd">                columns to be used as index in the dataframe.</span>
+<span class="sd">                Defaults to `None` in which case a custom ID will be generated.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            `ValueError`:</span>
+<span class="sd">                Raised if threshold given with non-classification task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">smiles_col</span><span class="o">=</span><span class="n">smiles_col</span><span class="p">,</span>
+            <span class="n">add_rdkit</span><span class="o">=</span><span class="n">add_rdkit</span><span class="p">,</span>
+            <span class="n">store_dir</span><span class="o">=</span><span class="n">store_dir</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span>
+            <span class="n">drop_invalids</span><span class="o">=</span><span class="n">drop_invalids</span><span class="p">,</span>
+            <span class="n">index_cols</span><span class="o">=</span><span class="n">index_cols</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">,</span>
+            <span class="n">target_imputer</span><span class="o">=</span><span class="n">target_imputer</span><span class="p">,</span>
+            <span class="n">drop_empty</span><span class="o">=</span><span class="n">drop_empty</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proteinCol</span> <span class="o">=</span> <span class="n">protein_col</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proteinSeqProvider</span> <span class="o">=</span> <span class="n">protein_seq_provider</span>
+
+<div class="viewcode-block" id="PCMDataSet.getProteinKeys"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.getProteinKeys">[docs]</a>    <span class="k">def</span> <span class="nf">getProteinKeys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of keys identifying the proteins in the data frame.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            keys (list): List of protein keys.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PCMDataSet.getProteinSequences"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.getProteinSequences">[docs]</a>    <span class="k">def</span> <span class="nf">getProteinSequences</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a dictionary of protein sequences for the proteins in the data frame.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            sequences (dict): Dictionary of protein sequences.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proteinSeqProvider</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Protein sequence provider not set. Cannot get protein sequences.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proteinSeqProvider</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="PCMDataSet.addProteinDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.addProteinDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">addProteinDescriptors</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">calculator</span><span class="p">:</span> <span class="n">ProteinDescriptorCalculator</span><span class="p">,</span>
+            <span class="n">recalculate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add protein descriptors to the data frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            calculator (ProteinDescriptorCalculator):</span>
+<span class="sd">                `ProteinDescriptorCalculator` instance to use.</span>
+<span class="sd">            recalculate (bool):</span>
+<span class="sd">                Whether to recalculate descriptors even if they are already present</span>
+<span class="sd">                in the data frame.</span>
+<span class="sd">            featurize (bool):</span>
+<span class="sd">                Whether to featurize the descriptors after adding them</span>
+<span class="sd">                to the data frame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">recalculate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropDescriptors</span><span class="p">(</span><span class="n">calculator</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="n">calculator</span><span class="o">.</span><span class="n">getPrefix</span><span class="p">()):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Protein descriptors already exist in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Use `recalculate=True` to overwrite them.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Protein column not set. Cannot calculate protein descriptors.&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># calculate the descriptors</span>
+        <span class="n">sequences</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proteinSeqProvider</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proteinSeqProvider</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="p">)</span>
+        <span class="n">descriptors</span> <span class="o">=</span> <span class="n">calculator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span> <span class="n">sequences</span><span class="p">,</span> <span class="o">**</span><span class="n">info</span><span class="p">)</span>
+        <span class="n">descriptors</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">]</span> <span class="o">=</span> <span class="n">descriptors</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># add the descriptors to the descriptor list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachDescriptors</span><span class="p">(</span><span class="n">calculator</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featurize</span><span class="p">(</span><span class="n">update_splits</span><span class="o">=</span><span class="n">featurize</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PCMDataSet.fromSDF"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.fromSDF">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromSDF</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">smiles_prop</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;SDF loading not implemented for </span><span class="si">{</span><span class="n">PCMDataSet</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">, yet. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Use `PCMDataSet.fromMolTable` to convert a `MoleculeTable`&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;read from an SDF instead.&quot;</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PCMDataSet.fromMolTable"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.fromMolTable">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromMolTable</span><span class="p">(</span>
+        <span class="n">mol_table</span><span class="p">:</span> <span class="n">MoleculeTable</span><span class="p">,</span>
+        <span class="n">protein_col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PCMDataSet&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a data set to handle PCM data from a `MoleculeTable`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mol_table (MoleculeTable):</span>
+<span class="sd">                `MoleculeTable` instance containing the PCM data.</span>
+<span class="sd">            protein_col (str):</span>
+<span class="sd">                name of column in df containing the protein target identifier (usually a</span>
+<span class="sd">                UniProt ID) to use for protein descriptors for PCM modelling</span>
+<span class="sd">                and other protein related tasks.</span>
+<span class="sd">            target_props (list[TargetProperty | dict], optional):</span>
+<span class="sd">                target properties,</span>
+<span class="sd">                names should correspond with target column name in `df`</span>
+<span class="sd">            name (str, optional):</span>
+<span class="sd">                data name, used in saving the data. Defaults to `None`.</span>
+<span class="sd">            **kwargs:</span>
+<span class="sd">                keyword arguments to be passed to the `PCMDataset` constructor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PCMDataSet:</span>
+<span class="sd">                `PCMDataset` instance containing the PCM data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;store_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mol_table</span><span class="o">.</span><span class="n">storeDir</span> <span class="k">if</span> <span class="s2">&quot;store_dir&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;store_dir&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">mol_table</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">PCMDataSet</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">protein_col</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">,</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">mol_table</span><span class="o">.</span><span class="n">getDF</span><span class="p">(),</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ds</span><span class="o">.</span><span class="n">descriptors</span> <span class="ow">and</span> <span class="n">mol_table</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">mol_table</span><span class="o">.</span><span class="n">descriptors</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">descriptorCalculators</span> <span class="o">=</span> <span class="n">mol_table</span><span class="o">.</span><span class="n">descriptorCalculators</span>
+        <span class="k">return</span> <span class="n">ds</span></div>
+
+<div class="viewcode-block" id="PCMDataSet.addFeatures"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.addFeatures">[docs]</a>    <span class="k">def</span> <span class="nf">addFeatures</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_calculators</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorsCalculator</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add features to the feature matrix.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_calculators (list[DescriptorsCalculator], optional):</span>
+<span class="sd">                list of feature calculators to use. Defaults to `None` in which case</span>
+<span class="sd">            recalculate:</span>
+<span class="sd">                whether to recalculate features even if they are already present</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">calc</span> <span class="ow">in</span> <span class="n">feature_calculators</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">MoleculeDescriptorsCalculator</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">ProteinDescriptorCalculator</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addProteinDescriptors</span><span class="p">(</span>
+                    <span class="n">calc</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown feature calculator type: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">calc</span><span class="p">))</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Xuhan Liu, Sohvi Lukkonen, Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

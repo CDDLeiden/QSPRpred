@@ -4,6 +4,14 @@ qsprpred.models package
 Submodules
 ----------
 
+qsprpred.models.hyperparam\_optimization module
+-----------------------------------------------
+
+.. automodule:: qsprpred.models.hyperparam_optimization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 qsprpred.models.interfaces module
 ---------------------------------
 
@@ -12,18 +20,18 @@ qsprpred.models.interfaces module
    :undoc-members:
    :show-inheritance:
 
-qsprpred.models.models module
------------------------------
+qsprpred.models.metrics module
+------------------------------
 
-.. automodule:: qsprpred.models.models
+.. automodule:: qsprpred.models.metrics
    :members:
    :undoc-members:
    :show-inheritance:
 
-qsprpred.models.neural\_network module
---------------------------------------
+qsprpred.models.models module
+-----------------------------
 
-.. automodule:: qsprpred.models.neural_network
+.. automodule:: qsprpred.models.models
    :members:
    :undoc-members:
    :show-inheritance:

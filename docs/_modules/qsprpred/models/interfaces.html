@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.interfaces &mdash; QSPRpred 1.3.1 documentation</title>
+  <title>qsprpred.models.interfaces &mdash; QSPRpred 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,7 +16,20 @@
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.1
+                v2.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -47,7 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">qsprpred</a></li>
 </ul>
 
         </div>
@@ -76,275 +89,220 @@
              
   <h1>Source code for qsprpred.models.interfaces</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;This module holds the base class for QSPRmodels, model types should be a subclass.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">isclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">qsprpred</span> <span class="kn">import</span> <span class="n">VERSION</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.data</span> <span class="kn">import</span> <span class="n">MoleculeTable</span><span class="p">,</span> <span class="n">QSPRDataset</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.utils.descriptorcalculator</span> <span class="kn">import</span> <span class="n">DescriptorsCalculator</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.utils.feature_standardization</span> <span class="kn">import</span> <span class="n">SKLearnStandardizer</span>
-<span class="kn">from</span> <span class="nn">qsprpred.logs</span> <span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">qsprpred.models</span> <span class="kn">import</span> <span class="n">SSPACE</span>
-<span class="kn">from</span> <span class="nn">qsprpred.models.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
-<span class="kn">from</span> <span class="nn">qsprpred.utils.inspect</span> <span class="kn">import</span> <span class="n">import_class</span>
-<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">VERSION</span>
+<span class="kn">from</span> <span class="nn">..data.data</span> <span class="kn">import</span> <span class="n">MoleculeTable</span><span class="p">,</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">TargetProperty</span>
+<span class="kn">from</span> <span class="nn">..data.utils.feature_standardization</span> <span class="kn">import</span> <span class="n">SKLearnStandardizer</span>
+<span class="kn">from</span> <span class="nn">..logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">..models</span> <span class="kn">import</span> <span class="n">SSPACE</span>
+<span class="kn">from</span> <span class="nn">..models.metrics</span> <span class="kn">import</span> <span class="n">SklearnMetric</span>
+<span class="kn">from</span> <span class="nn">..models.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
+<span class="kn">from</span> <span class="nn">..utils.inspect</span> <span class="kn">import</span> <span class="n">import_class</span>
 
 
 <div class="viewcode-block" id="QSPRModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel">[docs]</a><span class="k">class</span> <span class="nc">QSPRModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The definition of the common model interface for the package. Handles model initialization, fit, cross validation and hyperparameter optimization.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The definition of the common model interface for the package.</span>
+
+<span class="sd">    The QSPRModel handles model initialization, fit, cross validation</span>
+<span class="sd">    and hyperparameter optimization.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): name of the model</span>
 <span class="sd">        data (QSPRDataset): data set used to train the model</span>
-<span class="sd">        alg (estimator): estimator instance or class</span>
+<span class="sd">        alg (Type): estimator class</span>
 <span class="sd">        parameters (dict): dictionary of algorithm specific parameters</span>
-<span class="sd">        model (estimator): the underlying estimator instance, if `fit` or optimization is perforemed, this model instance gets updated accordingly</span>
-<span class="sd">        featureCalculator (DescriptorsCalculator): feature calculator instance taken from the data set or deserialized from file if the model is loaded without data</span>
-<span class="sd">        featureStandardizer (SKLearnStandardizer): feature standardizer instance taken from the data set or deserialized from file if the model is loaded without data</span>
-<span class="sd">        metaInfo (dict): dictionary of metadata about the model, only available after the model is saved</span>
-<span class="sd">        baseDir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`</span>
-<span class="sd">        outDir (str): output directory of the model, the model files are stored in this directory (`{baseDir}/qspr/models/{name}`)</span>
-<span class="sd">        outPrefix (str): output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`)</span>
-<span class="sd">        metaFile (str): absolute path to the metadata file of the model (`{outPrefix}_meta.json`)</span>
-<span class="sd">        task (ModelTasks): task of the model, taken from the data set or deserialized from file if the model is loaded without data</span>
-<span class="sd">        targetProperty (str): target property of the model, taken from the data set or deserialized from file if the model is loaded without data</span>
+<span class="sd">        estimator (Any):</span>
+<span class="sd">            the underlying estimator instance of the type specified in `QSPRModel.alg`,</span>
+<span class="sd">            if `QSPRModel.fit` or optimization was performed</span>
+<span class="sd">        featureCalculators (MoleculeDescriptorsCalculator):</span>
+<span class="sd">            feature calculator instance taken from the data set or</span>
+<span class="sd">            deserialized from file if the model is loaded without data</span>
+<span class="sd">        featureStandardizer (SKLearnStandardizer):</span>
+<span class="sd">            feature standardizer instance taken from the data set</span>
+<span class="sd">            or deserialized from file if the model is loaded without data</span>
+<span class="sd">        metaInfo (dict):</span>
+<span class="sd">            dictionary of metadata about the model,</span>
+<span class="sd">            only available after the model is saved</span>
+<span class="sd">        baseDir (str):</span>
+<span class="sd">            base directory of the model,</span>
+<span class="sd">            the model files are stored in a subdirectory `{baseDir}/{outDir}/`</span>
+<span class="sd">        metaFile (str):</span>
+<span class="sd">            absolute path to the metadata file of the model (`{outPrefix}_meta.json`)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_dir</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">alg</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data</span> <span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span> <span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span> <span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize a QSPR model instance. If the model is loaded from file, the data set is not required. Note that the data set is required for fitting and optimization.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            base_dir (str): base directory of the model, the model files are stored in a subdirectory `{baseDir}/{outDir}/`</span>
-<span class="sd">            alg (estimator): estimator instance or class</span>
-<span class="sd">            data (QSPRDataset): data set used to train the model</span>
-<span class="sd">            name (str): name of the model</span>
-<span class="sd">            parameters (dict): dictionary of algorithm specific parameters</span>
-<span class="sd">            autoload (bool): if True, the model is loaded from the serialized file if it exists, otherwise a new model is created</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">alg</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span> <span class="o">=</span> <span class="n">base_dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
-
-        <span class="c1"># load metadata and update parameters accordingly</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_meta.json&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readMetadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># get parameters from metadata if available</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readParams</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;parameters_path&#39;</span><span class="p">]))</span>
-
-        <span class="c1"># initialize a feature calculator instance</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptorCalculator</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">readDescriptorCalculator</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_calculator_path&#39;</span><span class="p">]))</span>
-
-        <span class="c1"># initialize a standardizer instance</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">feature_standardizer</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">readStandardizer</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_standardizer_path&#39;</span><span class="p">]))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_standardizer_path&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
-
-        <span class="c1"># initialize a model instance with the given parameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
-        <span class="k">if</span> <span class="n">autoload</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadModel</span><span class="p">(</span><span class="n">alg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the model and the underlying class as the identifier.&quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;None&#39;</span><span class="si">}</span><span class="s2">)&quot;</span>
-    
-    <span class="c1"># Adding scoring functions available for hyperparam optimization:</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_needs_proba_to_score</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;average_precision&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_brier_score&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_log_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;roc_auc&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;roc_auc_ovo&#39;</span><span class="p">,</span> <span class="s1">&#39;roc_auc_ovo_weighted&#39;</span><span class="p">,</span> <span class="s1">&#39;roc_auc_ovr&#39;</span><span class="p">,</span> <span class="s1">&#39;roc_auc_ovr_weighted&#39;</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[]</span>
-        
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_needs_discrete_to_score</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;top_k_accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;f1&#39;</span><span class="p">,</span> <span class="s1">&#39;f1_micro&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;f1_macro&#39;</span><span class="p">,</span> <span class="s1">&#39;f1_weighted&#39;</span><span class="p">,</span> <span class="s1">&#39;f1_samples&#39;</span><span class="p">,</span> <span class="s1">&#39;precision&#39;</span><span class="p">,</span> <span class="s1">&#39;precision_micro&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;precision_macro&#39;</span><span class="p">,</span> <span class="s1">&#39;precision_weighted&#39;</span><span class="p">,</span> <span class="s1">&#39;precision_samples&#39;</span><span class="p">,</span> <span class="s1">&#39;recall&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;recall_micro&#39;</span><span class="p">,</span> <span class="s1">&#39;recall_macro&#39;</span><span class="p">,</span> <span class="s1">&#39;recall_weighted&#39;</span><span class="p">,</span> <span class="s1">&#39;recall_samples&#39;</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[]</span>
-        
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_supported_scoring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;average_precision&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_brier_score&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_log_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;roc_auc&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;roc_auc_ovo&#39;</span><span class="p">,</span> <span class="s1">&#39;roc_auc_ovo_weighted&#39;</span><span class="p">,</span> <span class="s1">&#39;roc_auc_ovr&#39;</span><span class="p">,</span> <span class="s1">&#39;roc_auc_ovr_weighted&#39;</span>
-                    <span class="s1">&#39;accuracy&#39;</span><span class="p">,</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;top_k_accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;f1&#39;</span><span class="p">,</span> <span class="s1">&#39;f1_micro&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;f1_macro&#39;</span><span class="p">,</span> <span class="s1">&#39;f1_weighted&#39;</span><span class="p">,</span> <span class="s1">&#39;f1_samples&#39;</span><span class="p">,</span> <span class="s1">&#39;precision&#39;</span><span class="p">,</span> <span class="s1">&#39;precision_micro&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;precision_macro&#39;</span><span class="p">,</span> <span class="s1">&#39;precision_weighted&#39;</span><span class="p">,</span> <span class="s1">&#39;precision_samples&#39;</span><span class="p">,</span> <span class="s1">&#39;recall&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;recall_micro&#39;</span><span class="p">,</span> <span class="s1">&#39;recall_macro&#39;</span><span class="p">,</span> <span class="s1">&#39;recall_weighted&#39;</span><span class="p">,</span> <span class="s1">&#39;recall_samples&#39;</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;explained_variance&#39;</span><span class="p">,</span> <span class="s1">&#39;max_error&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_mean_absolute_error&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_mean_squared_error&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;neg_root_mean_squared_error&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_mean_squared_log_error&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_median_absolute_error&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_mean_poisson_deviance&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_mean_gamma_deviance&#39;</span><span class="p">,</span> <span class="s1">&#39;neg_mean_absolute_percentage_error&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;d2_absolute_error_score&#39;</span><span class="p">,</span> <span class="s1">&#39;d2_pinball_score&#39;</span><span class="p">,</span> <span class="s1">&#39;d2_tweedie_scor&#39;</span><span class="p">]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">task</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The task of the model, taken from the data set or deserialized from file if the model is loaded without data.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            ModelTasks: task of the model</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">task</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nClasses</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The number of classes of the model, taken from the data set or deserialized from file if the model is loaded without data.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            int: number of classes of the model if the task is classification, otherwise 0</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nClasses</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;nClasses&#39;</span><span class="p">]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">classPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">targetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The target property of the model, taken from the data set or deserialized from file if the model is loaded without data.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            str: target property of the model</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">targetProperty</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;target_property&#39;</span><span class="p">]</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">outDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The output directory of the model, the model files are stored in this directory (`{baseDir}/qspr/models/{name}`).</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            str: output directory of the model</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s1">/qspr/models/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s1">/qspr/models/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">outPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The output prefix of the model files, the model files are stored with this prefix (i.e. `{outPrefix}_meta.json`).</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            str: output prefix of the model files</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
-
-<div class="viewcode-block" id="QSPRModel.readParams"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readParams">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">readParams</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read model parameters from a JSON file.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            path (str): absolute path to the JSON file</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">j</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s1">&#39;loading model parameters from file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">read</span><span class="p">())</span></div>
-
-<div class="viewcode-block" id="QSPRModel.saveParams"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveParams">[docs]</a>    <span class="k">def</span> <span class="nf">saveParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save model parameters to a JSON file.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            params (dict): dictionary of model parameters</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_params.json&#39;</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">j</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s1">&#39;saving model parameters to file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
-            <span class="n">j</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">path</span></div>
-
-<div class="viewcode-block" id="QSPRModel.readDescriptorCalculator"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readDescriptorCalculator">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">readDescriptorCalculator</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read a descriptor calculator from a JSON file.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            path (str): absolute path to the JSON file</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            DescriptorsCalculator: descriptor calculator instance or None if the file does not exist</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">DescriptorsCalculator</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="QSPRModel.saveDescriptorCalculator"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveDescriptorCalculator">[docs]</a>    <span class="k">def</span> <span class="nf">saveDescriptorCalculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save the current descriptor calculator to a JSON file. The file is stored in the output directory of the model.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            str: absolute path to the JSON file containing the descriptor calculator</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_descriptor_calculator.json&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculator</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">path</span></div>
-
 <div class="viewcode-block" id="QSPRModel.readStandardizer"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readStandardizer">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">readStandardizer</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read a feature standardizer from a JSON file. If the file does not exist, None is returned.</span>
+    <span class="k">def</span> <span class="nf">readStandardizer</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SKLearnStandardizer&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read a feature standardizer from a JSON file.</span>
+
+<span class="sd">        If the file does not exist, None is returned.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            path (str): absolute path to the JSON file</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            SKLearnStandardizer: feature standardizer instance or None if the file does not exist</span>
+<span class="sd">            SKLearnStandardizer:</span>
+<span class="sd">                feature standardizer instance or None if the file does not exist</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">SKLearnStandardizer</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="QSPRModel.saveStandardizer"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveStandardizer">[docs]</a>    <span class="k">def</span> <span class="nf">saveStandardizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save the current feature standardizer to a JSON file. The file is stored in the output directory of the model.</span>
+<div class="viewcode-block" id="QSPRModel.readParams"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readParams">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">readParams</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read model parameters from a JSON file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): absolute path to the JSON file</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            str: absolute path to the JSON file containing the saved feature standardizer</span>
+<span class="sd">            dict: dictionary of model parameters</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">j</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;loading model parameters from file: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">read</span><span class="p">())</span></div>
 
-        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_feature_standardizer.json&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">path</span></div>
+<div class="viewcode-block" id="QSPRModel.readDescriptorCalculators"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readDescriptorCalculators">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">readDescriptorCalculators</span><span class="p">(</span>
+        <span class="n">paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;DescriptorsCalculator&quot;</span><span class="p">]:</span>  <span class="c1"># noqa: F821</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read a descriptor calculators from a JSON file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            paths (list[str]): absolute path to the JSON file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[DescriptorsCalculator]: descriptor calculator instance</span>
+<span class="sd">            or None if the file does not exist</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">calcs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="s2">&quot;calculator&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="n">calc_cls</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="s2">&quot;qsprpred.data.utils.descriptorcalculator.&quot;</span>
+                        <span class="s2">&quot;MoleculeDescriptorsCalculator&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">calc_cls</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;calculator&quot;</span><span class="p">]</span>
+                <span class="n">calc_cls</span> <span class="o">=</span> <span class="n">import_class</span><span class="p">(</span><span class="n">calc_cls</span><span class="p">)</span>
+                <span class="n">calc</span> <span class="o">=</span> <span class="n">calc_cls</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">calcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calc</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Descriptor calculator file &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">calcs</span></div>
+
+<div class="viewcode-block" id="QSPRModel.handleInvalidsInPredictions"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.handleInvalidsInPredictions">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">handleInvalidsInPredictions</span><span class="p">(</span>
+        <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">failed_mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replace invalid predictions with None.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (MoleculeTable): molecules for which the predictions were made</span>
+<span class="sd">            predictions (np.ndarray): predictions made by the model</span>
+<span class="sd">            failed_mask (np.ndarray): boolean mask of failed predictions</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: predictions with invalids replaced by None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">failed_mask</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">predictions_with_invalids</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="n">predictions</span>
+                <span class="p">]</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pred</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">predictions</span><span class="p">):</span>
+                    <span class="n">predictions_with_invalids</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">~</span><span class="n">failed_mask</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">pred</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">predictions_with_invalids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
+                    <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="kc">None</span>
+                <span class="p">)</span>
+                <span class="n">predictions_with_invalids</span><span class="p">[</span><span class="o">~</span><span class="n">failed_mask</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">predictions</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions_with_invalids</span>
+        <span class="k">return</span> <span class="n">predictions</span></div>
+
+<div class="viewcode-block" id="QSPRModel.getDefaultParamsGrid"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.getDefaultParamsGrid">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">getDefaultParamsGrid</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the path to the file with default search grid parameter settings</span>
+<span class="sd">        for some predefined estimator types.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: list of default parameter grids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">SSPACE</span></div>
+
+<div class="viewcode-block" id="QSPRModel.loadParamsGrid"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.loadParamsGrid">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">loadParamsGrid</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optim_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_types</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load parameter grids for bayes or grid search parameter</span>
+<span class="sd">        optimization from json file.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            fname (str):</span>
+<span class="sd">                file name of json file containing array with three columns</span>
+<span class="sd">                containing modeltype, optimization type (grid or bayes) and model type</span>
+<span class="sd">            optim_type (str): optimization type (`grid` or `bayes`)</span>
+<span class="sd">            model_types (list of str):</span>
+<span class="sd">                model type for hyperparameter optimization (e.g. RF)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray:</span>
+<span class="sd">                array with three columns containing modeltype,</span>
+<span class="sd">                optimization type (grid or bayes) and model type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+                    <span class="n">optim_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Search space file (</span><span class="si">%s</span><span class="s2">) not found&quot;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">getDefaultParamsGrid</span><span class="p">())</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+                <span class="n">optim_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="c1"># select either grid or bayes optimization parameters from param array</span>
+        <span class="n">optim_params</span> <span class="o">=</span> <span class="n">optim_params</span><span class="p">[</span><span class="n">optim_params</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">optim_type</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="c1"># check all ModelTasks to be used have parameter grid</span>
+        <span class="n">model_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_types</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_types</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">model_types</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">model_types</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">optim_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;model types </span><span class="si">%s</span><span class="s2"> missing from models in search space dict (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">model_types</span><span class="p">,</span> <span class="n">optim_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;search space loaded from file&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">optim_params</span></div>
+
+<div class="viewcode-block" id="QSPRModel.fromFile"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.fromFile">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;QSPRModel&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a model from its meta file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): full path to the model meta file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">readMetadata</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">model_class</span> <span class="o">=</span> <span class="n">import_class</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;model_class&quot;</span><span class="p">])</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;qspr/models/</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model_class</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="QSPRModel.readMetadata"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.readMetadata">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">readMetadata</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read model metadata from a JSON file.</span>
+    <span class="k">def</span> <span class="nf">readMetadata</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read model metadata from a JSON file.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            path (str): absolute path to the JSON file</span>
@@ -355,54 +313,290 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            FileNotFoundError: if the file does not exist</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">j</span><span class="p">:</span>
-                <span class="n">metaInfo</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-                <span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ModelTasks</span><span class="p">(</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">])</span>
+                <span class="n">meta_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+                <span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;target_properties&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromList</span><span class="p">(</span>
+                    <span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;target_properties&quot;</span><span class="p">],</span> <span class="n">task_from_str</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Metadata file &quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&quot; does not exist.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata file &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">meta_info</span></div>
 
-        <span class="k">return</span> <span class="n">metaInfo</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">scoring</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a QSPR model instance.</span>
 
-<div class="viewcode-block" id="QSPRModel.saveMetadata"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveMetadata">[docs]</a>    <span class="k">def</span> <span class="nf">saveMetadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save model metadata to a JSON file. The file is stored in the output directory of the model.</span>
+<span class="sd">        If the model is loaded from file, the data set is not required.</span>
+<span class="sd">        Note that the data set is required for fitting and optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base_dir (str):</span>
+<span class="sd">                base directory of the model,</span>
+<span class="sd">                the model files are stored in a subdirectory `{baseDir}/{outDir}/`</span>
+<span class="sd">            alg (Type): estimator class</span>
+<span class="sd">            data (QSPRDataset): data set used to train the model</span>
+<span class="sd">            name (str): name of the model</span>
+<span class="sd">            parameters (dict): dictionary of algorithm specific parameters</span>
+<span class="sd">            autoload (bool):</span>
+<span class="sd">                if `True`, the estimator is loaded from the serialized file</span>
+<span class="sd">                if it exists, otherwise a new instance of alg is created</span>
+<span class="sd">            scoring (str or callable):</span>
+<span class="sd">                scoring function to use for cross validation and optimization,</span>
+<span class="sd">                if None, the default scoring function is used</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">alg</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span> <span class="o">=</span> <span class="n">base_dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+        <span class="c1"># load metadata and update parameters accordingly</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_meta.json&quot;</span>
+        <span class="k">if</span> <span class="n">autoload</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readMetadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Metadata file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span>
+                    <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;No data set specified. Make sure you &quot;</span>
+                    <span class="s2">&quot;initialized this model with a &#39;QSPRDataset&#39; &quot;</span>
+                    <span class="s2">&quot;instance to train on. Or if you want to load &quot;</span>
+                    <span class="s2">&quot;a model from file, set &#39;autoload&#39; to True.&quot;</span>
+                <span class="p">)</span>
+        <span class="c1"># get parameters from metadata if available</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readParams</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;parameters_path&quot;</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="c1"># initialize a feature calculator instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptorCalculators</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">readDescriptorCalculators</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;feature_calculator_paths&quot;</span><span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># initialize a standardizer instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">feature_standardizer</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">readStandardizer</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;feature_standardizer_path&quot;</span><span class="p">])</span>
+            <span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;feature_standardizer_path&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="c1"># initialize a estimator instance with the given parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
+        <span class="k">if</span> <span class="n">autoload</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimatorFromFile</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scoreFunc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getScoringFunction</span><span class="p">(</span><span class="n">scoring</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the model and the underlying class as the identifier.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">targetProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the target properties of the model,</span>
+<span class="sd">        taken from the data set or deserialized</span>
+<span class="sd">        from file if the model is loaded without data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[TargetProperty]: target properties of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">targetProperties</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;target_properties&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">task</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelTasks</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the task of the model, taken from the data set</span>
+<span class="sd">        or deserialized from file if the model is loaded without data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ModelTasks: task of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">getModelTask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isMultiTask</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return if model is a multitask model, taken from the data set</span>
+<span class="sd">        or deserialized from file if the model is loaded without data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if model is a multitask model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">classPath</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the fully classified path of the model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: class path of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nTargets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of target properties of the model, taken from the data set</span>
+<span class="sd">        or deserialized from file if the model is loaded without data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: number of target properties of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;target_properties&quot;</span><span class="p">])</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return output directory of the model,</span>
+<span class="sd">        the model files are stored in this directory (`{baseDir}/qspr/models/{name}`).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: output directory of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/qspr/models/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/qspr/models/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return output prefix of the model files.</span>
+
+<span class="sd">        The model files are stored with this prefix (i.e. `{outPrefix}_meta.json`).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: output prefix of the model files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<div class="viewcode-block" id="QSPRModel.saveParams"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveParams">[docs]</a>    <span class="k">def</span> <span class="nf">saveParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save model parameters to a JSON file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): dictionary of model parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: absolute path to the JSON file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_params.json&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="c1"># save parameters to file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">j</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;saving model parameters to file: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+            <span class="n">j</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">path</span></div>
+    
+<div class="viewcode-block" id="QSPRModel.setParams"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.setParams">[docs]</a>    <span class="k">def</span> <span class="nf">setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set model parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): dictionary of model parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="QSPRModel.saveDescriptorCalculators"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveDescriptorCalculators">[docs]</a>    <span class="k">def</span> <span class="nf">saveDescriptorCalculators</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the current descriptor calculator to a JSON file.</span>
+
+<span class="sd">        The file is stored in the output directory of the model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]:</span>
+<span class="sd">                absolute paths to the JSON files containing</span>
+<span class="sd">                the saved descriptor calculators</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">calc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_descriptor_calculator_</span><span class="si">{</span><span class="n">calc</span><span class="si">}</span><span class="s2">.json&quot;</span>
+            <span class="n">calc</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">paths</span></div>
+
+<div class="viewcode-block" id="QSPRModel.saveStandardizer"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveStandardizer">[docs]</a>    <span class="k">def</span> <span class="nf">saveStandardizer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the current feature standardizer to a JSON file.</span>
+
+<span class="sd">        The file is stored in the output directory of the model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str:</span>
+<span class="sd">                absolute path to the JSON file containing the saved feature standardizer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_feature_standardizer.json&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">path</span></div>
+
+<div class="viewcode-block" id="QSPRModel.saveMetadata"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveMetadata">[docs]</a>    <span class="k">def</span> <span class="nf">saveMetadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save model metadata to a JSON file.</span>
+
+<span class="sd">        The file is stored in the output directory of the model.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: absolute path to the JSON file containing the model metadata</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">j</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s1">&#39;saving model metadata to file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;saving model metadata to file: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
             <span class="n">j</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
-
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span></div>
 
-<div class="viewcode-block" id="QSPRModel.save"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save the model data, parameters, metadata and all other files to the output directory of the model.</span>
+<div class="viewcode-block" id="QSPRModel.save"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the model data, parameters, metadata and all other</span>
+<span class="sd">         files to the output directory of the model.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: dictionary containing the model metadata that was saved</span>
+<span class="sd">            str: absolute path to the JSON file containing the model metadata</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">VERSION</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;model_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classPath</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;th&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">th</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;th&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;nClasses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nClasses</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;target_property&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperty</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;parameters_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveParams</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_calculator_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveDescriptorCalculator</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculator</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_standardizer_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveStandardizer</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;model_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveModel</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">VERSION</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;model_class&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classPath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;target_properties&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TargetProperty</span><span class="o">.</span><span class="n">toList</span><span class="p">(</span>
+            <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">),</span> <span class="n">task_as_str</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;parameters_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveParams</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;feature_calculator_paths&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveDescriptorCalculators</span><span class="p">()</span>
+            <span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;feature_standardizer_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">saveStandardizer</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;estimator_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveEstimator</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveMetadata</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="QSPRModel.checkForData"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.checkForData">[docs]</a>    <span class="k">def</span> <span class="nf">checkForData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check if the model has data set.</span>
+<div class="viewcode-block" id="QSPRModel.checkForData"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.checkForData">[docs]</a>    <span class="k">def</span> <span class="nf">checkForData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the model has data set.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            exception (bool): if true, an exception is raised if no data is set</span>
@@ -410,234 +604,307 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if data is set, False otherwise (if exception is False)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">has_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">exception</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No data set specified. &quot;</span>
+                <span class="s2">&quot;Make sure you initialized this model &quot;</span>
+                <span class="s2">&quot;with a &#39;QSPRDataset&#39; instance to train on.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">has_data</span></div>
 
-        <span class="n">hasData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">exception</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">hasData</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data set specified. Make sure you initialized this model with a &quot;QSPRDataset&quot; instance to train on.&#39;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">hasData</span></div>
-
-<div class="viewcode-block" id="QSPRModel.fit"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.fit">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build estimator model from the whole associated data set.&quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
-
-<div class="viewcode-block" id="QSPRModel.evaluate"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.evaluate">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make predictions for crossvalidation and independent test set. If save is True, the predictions are saved to a file</span>
-<span class="sd">        in the output directory.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            save (bool): don&#39;t save predictions when used in bayesian optimization</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
-
-<div class="viewcode-block" id="QSPRModel.gridSearch"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.gridSearch">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">gridSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_space_gs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Optimization of hyperparameters using gridSearch.</span>
+<div class="viewcode-block" id="QSPRModel.createPredictionDatasetFromMols"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.createPredictionDatasetFromMols">[docs]</a>    <span class="k">def</span> <span class="nf">createPredictionDatasetFromMols</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">smiles_standardizer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;chembl&quot;</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a `QSPRDataset` instance from a list of SMILES strings.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            search_space_gs (dict): search space for the grid search</span>
+<span class="sd">            mols (list): list of SMILES strings</span>
+<span class="sd">            smiles_standardizer (str, callable): smiles standardizer to use</span>
+<span class="sd">            n_jobs (int): number of parallel jobs to use</span>
+<span class="sd">            fill_value (float): value to fill for missing features</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple:</span>
+<span class="sd">                a tuple containing the `QSPRDataset` instance and a boolean mask</span>
+<span class="sd">                indicating which molecules failed to be processed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="c1"># make a molecule table first and add the target properties</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">MoleculeTable</span><span class="o">.</span><span class="n">fromSMILES</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">mols</span><span class="p">,</span>
+            <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">targetproperty</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">:</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="n">targetproperty</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="c1"># create the dataset and get failed molecules</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span>
+            <span class="n">drop_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">standardizeSmiles</span><span class="p">(</span><span class="n">smiles_standardizer</span><span class="p">,</span> <span class="n">drop_invalid</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">failed_mask</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># prepare dataset and return it</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
+            <span class="n">smiles_standardizer</span><span class="o">=</span><span class="n">smiles_standardizer</span><span class="p">,</span>
+            <span class="n">feature_calculators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span><span class="p">,</span>
+            <span class="n">feature_standardizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">,</span>
+            <span class="n">feature_fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">failed_mask</span></div>
 
-<div class="viewcode-block" id="QSPRModel.bayesOptimization"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.bayesOptimization">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">bayesOptimization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_space_gs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bayesian optimization of hyperparameters using optuna.</span>
+<div class="viewcode-block" id="QSPRModel.predictDataset"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predictDataset">[docs]</a>    <span class="k">def</span> <span class="nf">predictDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">use_probas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make predictions for the given dataset.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">            search_space_gs (dict): search space for the grid search</span>
+<span class="sd">        Args:</span>
+<span class="sd">            dataset: a `QSPRDataset` instance</span>
+<span class="sd">            use_probas: use probabilities if this is a classification model</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: an array of predictions</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="QSPRModel.loadParamsGrid"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.loadParamsGrid">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">loadParamsGrid</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">optim_type</span><span class="p">,</span> <span class="n">model_types</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load parameter grids for bayes or grid search parameter optimization from json file.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            fname (str): file name of json file containing array with three columns containing modeltype,</span>
-<span class="sd">                            optimization type (grid or bayes) and model type</span>
-<span class="sd">            optim_type (str): optimization type (&#39;grid&#39; or &#39;bayes&#39;)</span>
-<span class="sd">            model_types (list of str): model type for hyperparameter optimization (e.g. RF)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">fname</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
-                    <span class="n">optim_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Search space file (</span><span class="si">%s</span><span class="s2">) not found&quot;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">use_probas</span><span class="p">:</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="c1"># always return 2D array</span>
+            <span class="k">if</span> <span class="n">predictions</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+                <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">SSPACE</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
-                <span class="n">optim_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+            <span class="c1"># NOTE: if a multiclass-multioutput, this will return a list of 2D arrays</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictProba</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">predictions</span></div>
 
-        <span class="c1"># select either grid or bayes optimization parameters from param array</span>
-        <span class="n">optim_params</span> <span class="o">=</span> <span class="n">optim_params</span><span class="p">[</span><span class="n">optim_params</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">optim_type</span><span class="p">,</span> <span class="p">:]</span>
-
-        <span class="c1"># check all modeltypes to be used have parameter grid</span>
-        <span class="n">model_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_types</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">model_types</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">model_types</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">model_types</span><span class="p">))</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">optim_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;model types </span><span class="si">%s</span><span class="s2"> missing from models in search space dict (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">model_types</span><span class="p">,</span> <span class="n">optim_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;search space loaded from file&quot;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">optim_params</span></div>
-
-<div class="viewcode-block" id="QSPRModel.loadModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.loadModel">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">loadModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alg</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">params</span> <span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        Initialize model instance with the given parameters. If no algorithm is given, the model is loaded from file based on available metadata. If no parameters are given, they are also loaded from the available file.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            alg (object): algorithm class to instantiate</span>
-<span class="sd">            params (dict): algorithm parameters</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
-
-<div class="viewcode-block" id="QSPRModel.saveModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveModel">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">saveModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save the underlying model to file.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            str: path to the saved model</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
-
-<div class="viewcode-block" id="QSPRModel.predict"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predict">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">QSPRDataset</span><span class="p">]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Make predictions for the given data matrix or `QSPRDataset`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predictions for</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            np.ndarray: an array of predictions, can be a 1D array for single target models or a 2D/3D array for multi-target/multi-class models</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">pass</span></div>
-
-<div class="viewcode-block" id="QSPRModel.predictProba"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predictProba">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">predictProba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">QSPRDataset</span><span class="p">]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Make predictions for the given data matrix or `QSPRDataset`, but use probabilities for classification models.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predictions for</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">pass</span></div>
-
-<div class="viewcode-block" id="QSPRModel.predictMols"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predictMols">[docs]</a>    <span class="k">def</span> <span class="nf">predictMols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">use_probas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="n">smiles_standardizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;chembl&#39;</span><span class="p">,</span>
-                    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">):</span>
+<div class="viewcode-block" id="QSPRModel.predictMols"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predictMols">[docs]</a>    <span class="k">def</span> <span class="nf">predictMols</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">use_probas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">smiles_standardizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;chembl&quot;</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make predictions for the given molecules.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            mols (List[str]): list of SMILES strings</span>
 <span class="sd">            use_probas (bool): use probabilities for classification models</span>
-<span class="sd">            smiles_standardizer: either `chembl`, `old`, or a partial function that reads and standardizes smiles.</span>
+<span class="sd">            smiles_standardizer:</span>
+<span class="sd">                either `chembl`, `old`, or a partial function</span>
+<span class="sd">                that reads and standardizes smiles.</span>
 <span class="sd">            n_jobs: Number of jobs to use for parallel processing.</span>
 <span class="sd">            fill_value: Value to use for missing values in the feature matrix.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">MoleculeTable</span><span class="o">.</span><span class="n">fromSMILES</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                           <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>
-        <span class="n">dataset</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperty</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperty</span><span class="p">,</span> <span class="n">drop_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                           <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>
-        <span class="n">failed_mask</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-        <span class="n">failed_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">failed_mask</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculator</span><span class="p">:</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray:</span>
+<span class="sd">                an array of predictions, can be a 1D array for single target models,</span>
+<span class="sd">                2D array for multi target and a list of</span>
+<span class="sd">                2D arrays for multi-target and multi-class models</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No feature calculator set on this instance.&quot;</span><span class="p">)</span>
-        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
-            <span class="n">smiles_standardizer</span><span class="o">=</span><span class="n">smiles_standardizer</span><span class="p">,</span>
-            <span class="n">feature_calculator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">featureCalculator</span><span class="p">,</span>
-            <span class="n">feature_standardizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">,</span>
-            <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span>
+        <span class="c1"># create data set from mols</span>
+        <span class="n">dataset</span><span class="p">,</span> <span class="n">failed_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPredictionDatasetFromMols</span><span class="p">(</span>
+            <span class="n">mols</span><span class="p">,</span> <span class="n">smiles_standardizer</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">fill_value</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">use_probas</span><span class="p">:</span>
-            <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">isclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;PLSRegression&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;PLSRegression&#39;</span><span class="p">):</span>
-                <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">:</span>
-                <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictProba</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">failed_indices</span><span class="p">:</span>
-            <span class="n">dim</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">predictions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">pred</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">failed_indices</span><span class="p">:</span>
-                    <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="n">dim</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">predictions</span></div>
-
-<div class="viewcode-block" id="QSPRModel.fromFile"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.fromFile">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Load a model from its meta file.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            path (str): full path to the model meta file</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">meta</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">readMetadata</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="n">model_class</span> <span class="o">=</span> <span class="n">import_class</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;model_class&quot;</span><span class="p">])</span>
-        <span class="n">model_name</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;qspr/models/</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">model_class</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">)</span></div>
+        <span class="c1"># make predictions for the dataset</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictDataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">use_probas</span><span class="p">)</span>
+        <span class="c1"># handle invalids</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handleInvalidsInPredictions</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">failed_mask</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">predictions</span></div>
 
 <div class="viewcode-block" id="QSPRModel.cleanFiles"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.cleanFiles">[docs]</a>    <span class="k">def</span> <span class="nf">cleanFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Clean up the model files. Removes the model directory and all its contents.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up the model files.</span>
 
+<span class="sd">        Removes the model directory and all its contents.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="p">):</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="QSPRModel.get_scoring_func"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.get_scoring_func">[docs]</a>    <span class="k">def</span> <span class="nf">get_scoring_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scoring</span><span class="p">):</span>
+<div class="viewcode-block" id="QSPRModel.getScoringFunction"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.getScoringFunction">[docs]</a>    <span class="k">def</span> <span class="nf">getScoringFunction</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">scoring</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="nb">float</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">SklearnMetric</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get scoring function from sklearn.metrics.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            scoring (Union[str, Callable]): metric name from sklearn.metrics or</span>
-<span class="sd">                user-defined scoring function.</span>
+<span class="sd">            scoring (Union[str, Callable[[Iterable, Iterable], float]]):</span>
+<span class="sd">                metric name from `sklearn.metrics` or user-defined scoring function.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If the scoring function is currently not supported by</span>
 <span class="sd">                GridSearch and BayesOptimization.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            score_func (Callable): scorer function from sklearn.metrics (`str` as input)</span>
-<span class="sd">            or user-defined function (`callable` as input)</span>
+<span class="sd">            score_func (Callable[[Iterable, Iterable], float] | SklearnMetric):</span>
+<span class="sd">                scorer function from sklearn.metrics (`str` as input)</span>
+<span class="sd">                wrapped in the `SklearnMetric` class</span>
+<span class="sd">                or user-defined function (`Callable` as input,</span>
+<span class="sd">                if classification metric has the attribute `needsProbasToScore`,</span>
+<span class="sd">                set to `True` if is needs probabilities instead of predictions).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">scoring</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_supported_scoring</span><span class="p">,</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scoring</span><span class="p">,</span> <span class="nb">str</span><span class="p">)]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Scoring function </span><span class="si">%s</span><span class="s2"> not supported. Supported scoring functions are: </span><span class="si">%s</span><span class="s2">&quot;</span>
-                             <span class="o">%</span> <span class="p">(</span><span class="n">scoring</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_supported_scoring</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">scoring</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">supportedMetrics</span><span class="p">,</span>
+             <span class="nb">isinstance</span><span class="p">(</span><span class="n">scoring</span><span class="p">,</span> <span class="nb">str</span><span class="p">)]</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Scoring function </span><span class="si">%s</span><span class="s2"> not supported. Supported scoring functions are: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">scoring</span><span class="p">,</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">supportedMetrics</span><span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">scoring</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">scoring</span>
         <span class="k">elif</span> <span class="n">scoring</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">:</span>
-                <span class="n">scorer</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_scorer</span><span class="p">(</span><span class="s1">&#39;explained_variance&#39;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nClasses</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># multiclass</span>
-                <span class="k">return</span> <span class="k">lambda</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="p">:</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;weighted&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">():</span>
+                <span class="n">scorer</span> <span class="o">=</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getMetric</span><span class="p">(</span><span class="s2">&quot;explained_variance&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">]:</span>
+                <span class="n">scorer</span> <span class="o">=</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getMetric</span><span class="p">(</span><span class="s2">&quot;roc_auc_ovr_weighted&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">]:</span>
+                <span class="n">scorer</span> <span class="o">=</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getMetric</span><span class="p">(</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">scorer</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_scorer</span><span class="p">(</span><span class="s1">&#39;roc_auc&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;No supported scoring function for task </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">scorer</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_scorer</span><span class="p">(</span><span class="n">scoring</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">scorer</span><span class="o">.</span><span class="n">_score_func</span></div></div>
+            <span class="n">scorer</span> <span class="o">=</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getMetric</span><span class="p">(</span><span class="n">scoring</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">scorer</span><span class="o">.</span><span class="n">supportsTask</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">task</span>
+        <span class="p">),</span> <span class="s2">&quot;Scoring function </span><span class="si">%s</span><span class="s2"> does not support task </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">scorer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scorer</span></div>
+
+<div class="viewcode-block" id="QSPRModel.fit"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.fit">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build estimator model from the whole associated data set.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: absolute path to the saved model file after fitting</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="QSPRModel.evaluate"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.evaluate">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make predictions for crossvalidation and independent test set.</span>
+
+<span class="sd">        If save is True, the predictions are saved to a file in the output directory.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            save (bool): don&#39;t save predictions when used in bayesian optimization</span>
+<span class="sd">            parameters (dict): optional model parameters to use for evaluation</span>
+<span class="sd">            **kwargs: additional keyword arguments for the evaluation function</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float | np.ndarray: predictions for evaluation</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="QSPRModel.loadEstimator"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.loadEstimator">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize estimator instance with the given parameters.</span>
+
+<span class="sd">        If `params` is `None`, the default parameters will be used.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            params (dict): algorithm parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: initialized estimator instance</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="QSPRModel.loadEstimatorFromFile"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.loadEstimatorFromFile">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">loadEstimatorFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load estimator instance from file and apply the given parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): algorithm parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: initialized estimator instance</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="QSPRModel.saveEstimator"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.saveEstimator">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">saveEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the underlying estimator to file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            path (str): path to the saved estimator</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="QSPRModel.predict"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predict">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make predictions for the given data matrix or `QSPRDataset`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray:</span>
+<span class="sd">                an array of predictions, can be a 1D array for single target models</span>
+<span class="sd">                or a 2D/3D array for multi-target/multi-class models</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="QSPRModel.predictProba"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.QSPRModel.predictProba">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">predictProba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make predictions for the given data matrix or `QSPRDataset`,</span>
+<span class="sd">        but use probabilities for classification models. Does not work with</span>
+<span class="sd">        regression models.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray:</span>
+<span class="sd">                an array of predicted class probabilities</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
+
+
+<div class="viewcode-block" id="HyperParameterOptimization"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.HyperParameterOptimization">[docs]</a><span class="k">class</span> <span class="nc">HyperParameterOptimization</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for hyperparameter optimization.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        scoreFunc (Metric): scoring function to use</span>
+<span class="sd">        paramGrid (dict): dictionary of parameters to optimize</span>
+<span class="sd">        bestScore (float): best score found during optimization</span>
+<span class="sd">        bestParams (dict): best parameters found during optimization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">scoring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span> <span class="n">param_grid</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the hyperparameter optimization class.</span>
+
+<span class="sd">        scoring (str | Callable[[Iterable, Iterable], float]):</span>
+<span class="sd">            Metric name from `sklearn.metrics` or user-defined scoring function.</span>
+<span class="sd">        param_grid (dict):</span>
+<span class="sd">            dictionary of parameters to optimize</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scoreFunc</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getMetric</span><span class="p">(</span><span class="n">scoring</span><span class="p">)</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">scoring</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="k">else</span> <span class="n">scoring</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paramGrid</span> <span class="o">=</span> <span class="n">param_grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestScore</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestParams</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="HyperParameterOptimization.optimize"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.interfaces.HyperParameterOptimization.optimize">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Optimize the model hyperparameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to optimize</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: dictionary of best parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
 </pre></div>
 
            </div>

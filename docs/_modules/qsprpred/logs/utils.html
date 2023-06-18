@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.logs.utils &mdash; QSPRpred 1.3.1 documentation</title>
+  <title>qsprpred.logs.utils &mdash; QSPRpred 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,7 +16,20 @@
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.1
+                v2.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -47,7 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">qsprpred</a></li>
 </ul>
 
         </div>
@@ -88,28 +101,35 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">from</span> <span class="nn">turtle</span> <span class="kn">import</span> <span class="n">back</span>
 
 <span class="kn">import</span> <span class="nn">git</span>
+
 <span class="kn">from</span> <span class="nn">qsprpred.logs</span> <span class="kn">import</span> <span class="n">config</span><span class="p">,</span> <span class="n">setLogger</span>
 <span class="kn">from</span> <span class="nn">qsprpred.logs.config</span> <span class="kn">import</span> <span class="n">LogFileConfig</span>
 
-<span class="n">BACKUP_DIR_FOLDER_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;backup&#39;</span>
+<span class="n">BACKUP_DIR_FOLDER_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;backup&quot;</span>
 
 
 <div class="viewcode-block" id="commit_hash"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.commit_hash">[docs]</a><span class="k">def</span> <span class="nf">commit_hash</span><span class="p">(</span><span class="n">GIT_PATH</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">repo</span> <span class="o">=</span> <span class="n">git</span><span class="o">.</span><span class="n">Repo</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">GIT_PATH</span><span class="p">)</span>
-        <span class="n">repo_hash</span> <span class="o">=</span> <span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="n">repo</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">hexsha</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span>
+        <span class="n">repo_hash</span> <span class="o">=</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">repo</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">hexsha</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">qsprpred</span> <span class="kn">import</span> <span class="n">__version__</span>
+
         <span class="n">repo_hash</span> <span class="o">=</span> <span class="n">__version__</span>
     <span class="k">return</span> <span class="n">repo_hash</span></div>
 
 
-<div class="viewcode-block" id="enable_file_logger"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.enable_file_logger">[docs]</a><span class="k">def</span> <span class="nf">enable_file_logger</span><span class="p">(</span><span class="n">log_folder</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                       <span class="n">git_hash</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disable_existing_loggers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-
+<div class="viewcode-block" id="enable_file_logger"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.enable_file_logger">[docs]</a><span class="k">def</span> <span class="nf">enable_file_logger</span><span class="p">(</span>
+    <span class="n">log_folder</span><span class="p">,</span>
+    <span class="n">filename</span><span class="p">,</span>
+    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">log_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">git_hash</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">init_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">disable_existing_loggers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="c1"># # Get run id</span>
     <span class="c1"># runid = config.get_runid(log_folder=log_folder,</span>
     <span class="c1">#                         old=keep_old_runid,</span>
@@ -131,70 +151,140 @@
     <span class="k">return</span> <span class="n">settings</span></div>
 
 
-<div class="viewcode-block" id="generate_backup_runID"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.generate_backup_runID">[docs]</a><span class="k">def</span> <span class="nf">generate_backup_runID</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="generate_backup_runID"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.generate_backup_runID">[docs]</a><span class="k">def</span> <span class="nf">generate_backup_runID</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates runID for generation backups of files to be overwritten</span>
-<span class="sd">    If no previous backfiles (starting with #) exists, runid is set to 0, else to previous runid+1</span>
+<span class="sd">    Generates runID for generation backups of files to be overwritten.</span>
+
+<span class="sd">    If no previous backfiles (starting with #) exists, runid is set to 0, else</span>
+<span class="sd">    to previous runid+1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">regex</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BACKUP_DIR_FOLDER_PREFIX</span><span class="si">}</span><span class="s1">_[0-9]+&#39;</span>
-    <span class="n">previous</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;[0-9]+&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">file</span><span class="p">)]</span>
+    <span class="n">regex</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BACKUP_DIR_FOLDER_PREFIX</span><span class="si">}</span><span class="s2">_[0-9]+&quot;</span>
+    <span class="n">previous</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;[0-9]+&quot;</span><span class="p">,</span> <span class="n">_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">_file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">_file</span><span class="p">)</span>
+    <span class="p">]</span>
 
     <span class="n">runid</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">previous</span><span class="p">:</span>
         <span class="n">runid</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">previous</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 
-    <span class="c1"># backup_files = sorted([ file for file in os.listdir(path) if file.startswith(&#39;#&#39;)])</span>
+    <span class="c1"># backup_files = sorted([ _file for _file in os.listdir(path) if _file.startswith(&#39;#&#39;)]) # noqa: E501</span>
     <span class="c1"># if len(backup_files) == 0 :</span>
     <span class="c1">#     runid = 0</span>
     <span class="c1"># else :</span>
-    <span class="c1">#     previous_id = max([int(file.split(&#39;.&#39;)[-1][:-1]) for file in backup_files])</span>
+    <span class="c1">#     previous_id = max([int(_file.split(&#39;.&#39;)[-1][:-1]) for _file in backup_files])</span>
     <span class="c1">#     runid = previous_id + 1</span>
 
     <span class="k">return</span> <span class="n">runid</span></div>
 
 
-<div class="viewcode-block" id="generateBackupDir"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.generateBackupDir">[docs]</a><span class="k">def</span> <span class="nf">generateBackupDir</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">):</span>
-    <span class="n">new_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BACKUP_DIR_FOLDER_PREFIX</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">backup_id</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="generate_backup_dir"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.generate_backup_dir">[docs]</a><span class="k">def</span> <span class="nf">generate_backup_dir</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates backup directory for files to be overwritten.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        root (str): the root directory</span>
+<span class="sd">        backup_id (int): the ID of the backup</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        new_dir: the path to the new backup directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">new_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">root</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BACKUP_DIR_FOLDER_PREFIX</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">backup_id</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">new_dir</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">new_dir</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">new_dir</span></div>
 
 
-<div class="viewcode-block" id="backUpFilesInFolder"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.backUpFilesInFolder">[docs]</a><span class="k">def</span> <span class="nf">backUpFilesInFolder</span><span class="p">(</span><span class="n">_dir</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">,</span> <span class="n">output_prefixes</span><span class="p">,</span> <span class="n">output_extensions</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span><span class="p">,</span> <span class="n">cp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<div class="viewcode-block" id="backup_files_in_folder"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.backup_files_in_folder">[docs]</a><span class="k">def</span> <span class="nf">backup_files_in_folder</span><span class="p">(</span>
+    <span class="n">_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">backup_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">output_prefixes</span><span class="p">,</span>
+    <span class="n">output_extensions</span><span class="o">=</span><span class="s2">&quot;dummy&quot;</span><span class="p">,</span>
+    <span class="n">cp_suffix</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Backs up files in a specified directory to a backup directory.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _dir (str): The directory path where the files to be backed up are located.</span>
+<span class="sd">        backup_id (int): The ID of the backup.</span>
+<span class="sd">        output_prefixes (str): The prefix of the output files to be backed up.</span>
+<span class="sd">        output_extensions (str, optional): The extension of the output files to be</span>
+<span class="sd">            backed up. Defaults to &quot;dummy&quot;.</span>
+<span class="sd">        cp_suffix (list of str, optional): The suffix of the files to be copied instead</span>
+<span class="sd">            of moved. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A message indicating which files were backed up and where they</span>
+<span class="sd">            were moved/copied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">existing_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">_dir</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">cp_suffix</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">([</span><span class="nb">any</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suff</span><span class="p">)</span> <span class="k">for</span> <span class="n">suff</span> <span class="ow">in</span> <span class="n">cp_suffix</span><span class="p">])</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">existing_files</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="n">cp_suffix</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+        <span class="nb">any</span><span class="p">(</span><span class="n">_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suff</span><span class="p">)</span> <span class="k">for</span> <span class="n">suff</span> <span class="ow">in</span> <span class="n">cp_suffix</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_file</span> <span class="ow">in</span> <span class="n">existing_files</span>
+    <span class="p">):</span>
         <span class="k">return</span> <span class="n">message</span>
-    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">existing_files</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">output_prefixes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">output_extensions</span><span class="p">):</span>
-            <span class="n">backup_dir</span> <span class="o">=</span> <span class="n">generateBackupDir</span><span class="p">(</span><span class="n">_dir</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">)</span>
-            <span class="n">backup_log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">backup_dir</span><span class="p">,</span> <span class="s1">&#39;backuplog.log&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">cp_suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suff</span><span class="p">)</span> <span class="k">for</span> <span class="n">suff</span> <span class="ow">in</span> <span class="n">cp_suffix</span><span class="p">]):</span>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_dir</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">backup_dir</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
-                <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Already existing &#39;</span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&#39; was copied to </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">backup_dir</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">for</span> <span class="n">_file</span> <span class="ow">in</span> <span class="n">existing_files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">output_prefixes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">output_extensions</span><span class="p">):</span>
+            <span class="n">backup_dir</span> <span class="o">=</span> <span class="n">generate_backup_dir</span><span class="p">(</span><span class="n">_dir</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">)</span>
+            <span class="n">backup_log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">backup_dir</span><span class="p">,</span> <span class="s2">&quot;backuplog.log&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cp_suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="n">_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suff</span><span class="p">)</span> <span class="k">for</span> <span class="n">suff</span> <span class="ow">in</span> <span class="n">cp_suffix</span>
+            <span class="p">):</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_dir</span><span class="p">,</span> <span class="n">_file</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">backup_dir</span><span class="p">,</span> <span class="n">_file</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">message</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Already existing &#39;</span><span class="si">{</span><span class="n">_file</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                    <span class="s2">&quot;was copied to {os.path.abspath(backup_dir)}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_dir</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">backup_dir</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
-                <span class="n">backup_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s1">] : </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s1"> was moved from </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">_dir</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Already existing &#39;</span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&#39; was moved to </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">backup_dir</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_dir</span><span class="p">,</span> <span class="n">_file</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">backup_dir</span><span class="p">,</span> <span class="n">_file</span><span class="p">))</span>
+                <span class="n">backup_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s2">] : </span><span class="si">{</span><span class="n">_file</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;was moved from </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">_dir</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="n">message</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Already existing &#39;</span><span class="si">{</span><span class="n">_file</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                    <span class="s2">&quot;was moved to {os.path.abspath(backup_dir)}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
     <span class="k">return</span> <span class="n">message</span></div>
 
 
-<div class="viewcode-block" id="backUpFiles"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.backUpFiles">[docs]</a><span class="k">def</span> <span class="nf">backUpFiles</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_prefixes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">cp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-    <span class="nb">dir</span> <span class="o">=</span> <span class="n">base_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">folder</span>
+<div class="viewcode-block" id="backup_files"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.backup_files">[docs]</a><span class="k">def</span> <span class="nf">backup_files</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_prefixes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">cp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="nb">dir</span> <span class="o">=</span> <span class="n">base_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">folder</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
         <span class="n">backup_id</span> <span class="o">=</span> <span class="n">generate_backup_runID</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">folder</span> <span class="ow">in</span> <span class="s1">&#39;qspr/data&#39;</span><span class="p">:</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="n">backUpFilesInFolder</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">,</span> <span class="n">output_prefixes</span><span class="p">,</span> <span class="n">output_extensions</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">),</span>
-                                          <span class="n">cp_suffix</span><span class="o">=</span><span class="n">cp_suffix</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">folder</span> <span class="o">==</span> <span class="s1">&#39;qspr/models&#39;</span><span class="p">:</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="n">backUpFilesInFolder</span><span class="p">(</span>
-                <span class="nb">dir</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">,</span> <span class="n">output_prefixes</span><span class="p">,</span> <span class="n">output_extensions</span><span class="o">=</span><span class="p">(</span>
-                    <span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">),</span> <span class="n">cp_suffix</span><span class="o">=</span><span class="n">cp_suffix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">folder</span> <span class="ow">in</span> <span class="s2">&quot;qspr/data&quot;</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">backup_files_in_folder</span><span class="p">(</span>
+                <span class="nb">dir</span><span class="p">,</span>
+                <span class="n">backup_id</span><span class="p">,</span>
+                <span class="n">output_prefixes</span><span class="p">,</span>
+                <span class="n">output_extensions</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;log&quot;</span><span class="p">),</span>
+                <span class="n">cp_suffix</span><span class="o">=</span><span class="n">cp_suffix</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">folder</span> <span class="o">==</span> <span class="s2">&quot;qspr/models&quot;</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">backup_files_in_folder</span><span class="p">(</span>
+                <span class="nb">dir</span><span class="p">,</span>
+                <span class="n">backup_id</span><span class="p">,</span>
+                <span class="n">output_prefixes</span><span class="p">,</span>
+                <span class="n">output_extensions</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;log&quot;</span><span class="p">),</span>
+                <span class="n">cp_suffix</span><span class="o">=</span><span class="n">cp_suffix</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">folder</span> <span class="o">==</span> <span class="s2">&quot;qspr/predictions&quot;</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">backup_files_in_folder</span><span class="p">(</span>
+                <span class="nb">dir</span><span class="p">,</span>
+                <span class="n">backup_id</span><span class="p">,</span>
+                <span class="n">output_prefixes</span><span class="p">,</span>
+                <span class="n">output_extensions</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;log&quot;</span><span class="p">),</span>
+                <span class="n">cp_suffix</span><span class="o">=</span><span class="n">cp_suffix</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">message</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;&#39;</span></div>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
 </pre></div>
 
            </div>

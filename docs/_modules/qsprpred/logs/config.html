@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.logs.config &mdash; QSPRpred 1.3.1 documentation</title>
+  <title>qsprpred.logs.config &mdash; QSPRpred 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,7 +16,20 @@
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.1
+                v2.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -47,7 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">qsprpred</a></li>
 </ul>
 
         </div>
@@ -76,35 +89,37 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.logs.config</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">config</span>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">bisect</span> <span class="kn">import</span> <span class="n">bisect</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="c1"># Maximum runid is 9999</span>
+<span class="n">MAX_ID</span> <span class="o">=</span> <span class="mi">10000</span>
+
 
 <div class="viewcode-block" id="LevelFilter"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFilter">[docs]</a><span class="k">class</span> <span class="nc">LevelFilter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        LoggingFilter used to filter one or more specific log levels messages</span>
+<span class="sd">    LoggingFilter used to filter one or more specific log levels messages</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__level</span> <span class="o">=</span> <span class="n">level</span>
 
 <div class="viewcode-block" id="LevelFilter.filter"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFilter.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__level</span> </div></div>
+        <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__level</span></div></div>
 
-<span class="c1">#Adapted from https://stackoverflow.com/a/68154386</span>
+
+<span class="c1"># Adapted from https://stackoverflow.com/a/68154386</span>
 <div class="viewcode-block" id="LevelFormatter"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFormatter">[docs]</a><span class="k">class</span> <span class="nc">LevelFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        LoggingFormatter used to specifiy the formatting per level</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formats</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;LoggingFormatter used to specifiy the formatting per level&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formats</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="s1">&#39;fmt&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;fmt&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Format string must be passed to level-surrogate formatters, &#39;</span>
-                <span class="s1">&#39;not this one&#39;</span>
+                <span class="s2">&quot;Format string must be passed to level-surrogate formatters, &quot;</span>
+                <span class="s2">&quot;not this one&quot;</span>
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">formats</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
@@ -112,153 +127,168 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="LevelFormatter.format"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFormatter.format">[docs]</a>    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formats</span><span class="p">,</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">levelno</span><span class="p">,),</span> <span class="n">hi</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formats</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formats</span><span class="p">,</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">levelno</span><span class="p">,</span> <span class="p">),</span> <span class="n">hi</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formats</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">level</span><span class="p">,</span> <span class="n">formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formats</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div></div>
 
+
 <div class="viewcode-block" id="config_logger"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.config_logger">[docs]</a><span class="k">def</span> <span class="nf">config_logger</span><span class="p">(</span><span class="n">log_file_path</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disable_existing_loggers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Function to configure the logging. </span>
-<span class="sd">        All info is saved in a simple format on the log file path.</span>
-<span class="sd">        Debug entries are saved to a separate file if debug is True</span>
-<span class="sd">        Debug and warning and above are save in a verbose format.</span>
-<span class="sd">        Warning and above are also printed to std.out</span>
-<span class="sd">        ...</span>
+<span class="sd">    Function to configure the logging.</span>
+<span class="sd">    All info is saved in a simple format on the log file path.</span>
+<span class="sd">    Debug entries are saved to a separate file if debug is True</span>
+<span class="sd">    Debug and warning and above are save in a verbose format.</span>
+<span class="sd">    Warning and above are also printed to std.out</span>
+<span class="sd">    ...</span>
 
-<span class="sd">        Arguments</span>
-<span class="sd">        ----------</span>
-<span class="sd">        log_file_path (str): Folder where all logs for this run are saved</span>
-<span class="sd">        debug (bool): if true, debug messages are saved</span>
-<span class="sd">        no_exist_log (bool): if true, existing loggers are disabled</span>
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    log_file_path (str): Folder where all logs for this run are saved</span>
+<span class="sd">    debug (bool): if true, debug messages are saved</span>
+<span class="sd">    no_exist_log (bool): if true, existing loggers are disabled</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">debug_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">log_file_path</span><span class="p">),</span> <span class="s1">&#39;debug.log&#39;</span><span class="p">)</span>
-    <span class="n">simple_format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span>
-    <span class="n">verbose_format</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">%(asctime)s</span><span class="s1">] </span><span class="si">%(levelname)s</span><span class="s1"> [</span><span class="si">%(filename)s</span><span class="s1"> </span><span class="si">%(name)s</span><span class="s1"> </span><span class="si">%(funcName)s</span><span class="s1"> (</span><span class="si">%(lineno)d</span><span class="s1">)]: </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+    <span class="n">debug_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">log_file_path</span><span class="p">),</span> <span class="s2">&quot;debug.log&quot;</span><span class="p">)</span>
+    <span class="n">simple_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span>
+    <span class="n">verbose_format</span> <span class="o">=</span> <span class="s2">&quot;[</span><span class="si">%(asctime)s</span><span class="s2">] </span><span class="si">%(levelname)s</span><span class="s2"> [</span><span class="si">%(filename)s</span><span class="s2"> </span><span class="si">%(name)s</span><span class="s2"> </span><span class="si">%(funcName)s</span><span class="s2"> (</span><span class="si">%(lineno)d</span><span class="s2">)]: </span><span class="si">%(message)s</span><span class="s2">&quot;</span>  <span class="c1"># noqa: E501</span>
 
     <span class="n">LOGGING_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="n">disable_existing_loggers</span><span class="p">,</span>
-        <span class="s1">&#39;formatters&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;simple_formatter&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="n">simple_format</span>
-            <span class="p">},</span>
-            <span class="s1">&#39;verbose_formatter&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="n">verbose_format</span>
-            <span class="p">},</span>
-            <span class="s1">&#39;bylevel_formatter&#39;</span><span class="p">:{</span>
-                <span class="s1">&#39;()&#39;</span><span class="p">:</span>  <span class="n">LevelFormatter</span><span class="p">,</span>
-                <span class="s1">&#39;formats&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;disable_existing_loggers&quot;</span><span class="p">:</span> <span class="n">disable_existing_loggers</span><span class="p">,</span>
+        <span class="s2">&quot;formatters&quot;</span><span class="p">:</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;simple_formatter&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="n">simple_format</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;verbose_formatter&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="n">verbose_format</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;bylevel_formatter&quot;</span><span class="p">:</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;()&quot;</span><span class="p">:</span> <span class="n">LevelFormatter</span><span class="p">,</span>
+                        <span class="s2">&quot;formats&quot;</span><span class="p">:</span>
+                            <span class="p">{</span>
                                 <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span> <span class="n">verbose_format</span><span class="p">,</span>
                                 <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">:</span> <span class="n">simple_format</span><span class="p">,</span>
-                                <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">:</span> <span class="n">verbose_format</span>
-                            <span class="p">}</span>
+                                <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">:</span> <span class="n">verbose_format</span><span class="p">,</span>
+                            <span class="p">},</span>
+                    <span class="p">},</span>
+            <span class="p">},</span>
+        <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;only_debug&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;()&quot;</span><span class="p">:</span> <span class="n">LevelFilter</span><span class="p">,</span>
+                <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">]</span>
             <span class="p">}</span>
         <span class="p">},</span>
-        <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;only_debug&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;()&#39;</span><span class="p">:</span> <span class="n">LevelFilter</span><span class="p">,</span>
-                <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">]</span>
-            <span class="p">}</span>
-        <span class="p">},</span>
-        <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;stream_handler&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.StreamHandler&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;formatter&#39;</span><span class="p">:</span> <span class="s1">&#39;simple_formatter&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARNING&#39;</span>
+        <span class="s2">&quot;handlers&quot;</span><span class="p">:</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;stream_handler&quot;</span><span class="p">:</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;logging.StreamHandler&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;formatter&quot;</span><span class="p">:</span> <span class="s2">&quot;simple_formatter&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;WARNING&quot;</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="s2">&quot;file_handler&quot;</span><span class="p">:</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;logging.FileHandler&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;formatter&quot;</span><span class="p">:</span> <span class="s2">&quot;bylevel_formatter&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">log_file_path</span><span class="p">,</span>
+                        <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="s2">&quot;file_handler_debug&quot;</span><span class="p">:</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;logging.FileHandler&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;formatter&quot;</span><span class="p">:</span> <span class="s2">&quot;bylevel_formatter&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">debug_path</span><span class="p">,</span>
+                        <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;delay&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;only_debug&quot;</span><span class="p">],</span>
+                    <span class="p">},</span>
             <span class="p">},</span>
-            <span class="s1">&#39;file_handler&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.FileHandler&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;formatter&#39;</span><span class="p">:</span> <span class="s1">&#39;bylevel_formatter&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">log_file_path</span><span class="p">,</span>
-                <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;INFO&#39;</span>
+        <span class="s2">&quot;loggers&quot;</span><span class="p">:</span>
+            <span class="p">{</span>
+                <span class="kc">None</span><span class="p">:</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;handlers&quot;</span><span class="p">:</span>
+                            <span class="p">[</span><span class="s2">&quot;stream_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;file_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;file_handler_debug&quot;</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="n">debug</span> <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;stream_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;file_handler&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;level&quot;</span><span class="p">:</span>
+                            <span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
+                    <span class="p">}</span>
             <span class="p">},</span>
-            <span class="s1">&#39;file_handler_debug&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.FileHandler&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;formatter&#39;</span><span class="p">:</span> <span class="s1">&#39;bylevel_formatter&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">debug_path</span><span class="p">,</span>
-                <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;delay&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;only_debug&#39;</span><span class="p">]</span>
-            <span class="p">},</span>
-        <span class="p">},</span>
-        <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="kc">None</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;stream_handler&#39;</span><span class="p">,</span> <span class="s1">&#39;file_handler&#39;</span><span class="p">,</span> <span class="s1">&#39;file_handler_debug&#39;</span><span class="p">]</span> \
-                            <span class="k">if</span> <span class="n">debug</span> <span class="k">else</span> <span class="p">[</span><span class="s1">&#39;stream_handler&#39;</span><span class="p">,</span> <span class="s1">&#39;file_handler&#39;</span><span class="p">],</span>
-                <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;DEBUG&#39;</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
     <span class="p">}</span>
-    
+
     <span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">LOGGING_CONFIG</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="init_logfile"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.init_logfile">[docs]</a><span class="k">def</span> <span class="nf">init_logfile</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">githash</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Put some intial information in the logfile</span>
-<span class="sd">        ...</span>
+<span class="sd">    Put some intial information in the logfile</span>
+<span class="sd">    ...</span>
 
-<span class="sd">        Arguments</span>
-<span class="sd">        ----------</span>
-<span class="sd">        log : Logging instance</span>
-<span class="sd">        runid (str): the current runid</span>
-<span class="sd">        githash (str): githash</span>
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    log : Logging instance</span>
+<span class="sd">    runid (str): the current runid</span>
+<span class="sd">    githash (str): githash</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">baseFilename</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Creation date: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span> 
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Continued at: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">))</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;git hash: </span><span class="si">%s</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">githash</span><span class="p">)</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Run settings:&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creation date: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Continued at: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;git hash: </span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">githash</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Run settings:&quot;</span><span class="p">)</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="get_runid"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.get_runid">[docs]</a><span class="k">def</span> <span class="nf">get_runid</span><span class="p">(</span><span class="n">log_folder</span><span class="o">=</span><span class="s1">&#39;logs&#39;</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_runid"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.get_runid">[docs]</a><span class="k">def</span> <span class="nf">get_runid</span><span class="p">(</span><span class="n">log_folder</span><span class="o">=</span><span class="s2">&quot;logs&quot;</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Fetch runid that is used in all logfiles to identifiy a specific run</span>
-<span class="sd">        ...</span>
+<span class="sd">    Fetch runid that is used in all logfiles to identifiy a specific run</span>
+<span class="sd">    ...</span>
 
-<span class="sd">        Arguments</span>
-<span class="sd">        ----------</span>
-<span class="sd">        log_folder (str): Folder where all logs are saved</span>
-<span class="sd">        old (bool): if true, fetches the last used runid</span>
-<span class="sd">        id (int): If included, returns this runid number</span>
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    log_folder (str): Folder where all logs are saved</span>
+<span class="sd">    old (bool): if true, fetches the last used runid</span>
+<span class="sd">    id (int): If included, returns this runid number</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_folder</span><span class="p">,</span> <span class="s1">&#39;runid.txt&#39;</span><span class="p">)</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_folder</span><span class="p">,</span> <span class="s2">&quot;runid.txt&quot;</span><span class="p">)</span>
 
     <span class="c1"># Determine the runid to fetch</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">runid</span> <span class="o">=</span> <span class="nb">id</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">runid</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">prev_runid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:])</span>
                 <span class="k">if</span> <span class="n">old</span><span class="p">:</span>
                     <span class="n">runid</span> <span class="o">=</span> <span class="n">prev_runid</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">runid</span> <span class="o">=</span> <span class="n">prev_runid</span> <span class="o">+</span> <span class="mi">1</span>
 
-    <span class="c1">#Maximum runid is 9999</span>
-    <span class="k">if</span> <span class="n">runid</span> <span class="o">&gt;=</span> <span class="mi">10000</span> <span class="ow">or</span> <span class="n">runid</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Run id larger than 9999 or smaller than 1&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">runid</span> <span class="o">&gt;=</span> <span class="n">MAX_ID</span> <span class="ow">or</span> <span class="n">runid</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Run id larger than 9999 or smaller than 1&quot;</span><span class="p">)</span>
 
-    <span class="c1">#Create log directory if necessary</span>
+    <span class="c1"># Create log directory if necessary</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">log_folder</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">log_folder</span><span class="p">)</span>
 
-    <span class="c1">#Write runid to runid file</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">: </span><span class="si">%04d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">),</span> <span class="n">runid</span><span class="p">))</span>
+    <span class="c1"># Write runid to runid file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">%s</span><span class="s2">: </span><span class="si">%04d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span> <span class="n">runid</span><span class="p">))</span>
 
-    <span class="c1">#Create runid log directory if necessary</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_folder</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%04d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">runid</span><span class="p">)):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_folder</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%04d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">runid</span><span class="p">))</span>
+    <span class="c1"># Create runid log directory if necessary</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_folder</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%04d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">runid</span><span class="p">)):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_folder</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%04d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">runid</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%04d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">runid</span></div>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%04d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">runid</span></div>
+
 
 <div class="viewcode-block" id="LogFileConfig"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LogFileConfig">[docs]</a><span class="k">class</span> <span class="nc">LogFileConfig</span><span class="p">:</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">debug</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logger</span>

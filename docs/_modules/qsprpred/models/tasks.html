@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.tasks &mdash; QSPRpred 1.3.1 documentation</title>
+  <title>qsprpred.models.tasks &mdash; QSPRpred 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,7 +16,20 @@
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v1.3.1
+                v2.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -47,7 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">qsprpred</a></li>
 </ul>
 
         </div>
@@ -75,21 +88,99 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.models.tasks</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">tasks</span>
-
-<span class="sd">Created by: Martin Sicho</span>
-<span class="sd">On: 28.11.22, 15:23</span>
+<span></span><span class="sd">&quot;&quot;&quot;Enums representing what type of task the model is supposed</span>
+<span class="sd">to perform for a single target property and for all target properties.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
 
 
-<div class="viewcode-block" id="ModelTasks"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.ModelTasks">[docs]</a><span class="k">class</span> <span class="nc">ModelTasks</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="n">REGRESSION</span> <span class="o">=</span> <span class="s1">&#39;REGRESSION&#39;</span>
-    <span class="n">CLASSIFICATION</span> <span class="o">=</span> <span class="s1">&#39;CLASSIFICATION&#39;</span>
+<div class="viewcode-block" id="TargetTasks"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.TargetTasks">[docs]</a><span class="k">class</span> <span class="nc">TargetTasks</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum representing the type of task the model</span>
+<span class="sd">    is supposed to perform for a single target property.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">REGRESSION</span> <span class="o">=</span> <span class="s2">&quot;REGRESSION&quot;</span>
+    <span class="n">SINGLECLASS</span> <span class="o">=</span> <span class="s2">&quot;SINGLECLASS&quot;</span>
+    <span class="n">MULTICLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTICLASS&quot;</span>
+
+<div class="viewcode-block" id="TargetTasks.isClassification"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.TargetTasks.isClassification">[docs]</a>    <span class="k">def</span> <span class="nf">isClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a classification task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="TargetTasks.isRegression"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.TargetTasks.isRegression">[docs]</a>    <span class="k">def</span> <span class="nf">isRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a regression task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">]</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+
+
+<div class="viewcode-block" id="ModelTasks"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.ModelTasks">[docs]</a><span class="k">class</span> <span class="nc">ModelTasks</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum representing the general type of task the</span>
+<span class="sd">    model is supposed to perform for all target properties.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">REGRESSION</span> <span class="o">=</span> <span class="s2">&quot;REGRESSION&quot;</span>
+    <span class="n">SINGLECLASS</span> <span class="o">=</span> <span class="s2">&quot;SINGLECLASS&quot;</span>
+    <span class="n">MULTICLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTICLASS&quot;</span>
+    <span class="n">MULTITASK_REGRESSION</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_REGRESSION&quot;</span>
+    <span class="n">MULTITASK_SINGLECLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_SINGLECLASS&quot;</span>
+    <span class="n">MULTITASK_MULTICLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_MULTICLASS&quot;</span>
+    <span class="n">MULTITASK_MIXED</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_MIXED&quot;</span>
+
+<div class="viewcode-block" id="ModelTasks.isClassification"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.ModelTasks.isClassification">[docs]</a>    <span class="k">def</span> <span class="nf">isClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a classification task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">,</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="ModelTasks.isRegression"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.ModelTasks.isRegression">[docs]</a>    <span class="k">def</span> <span class="nf">isRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a regression task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ModelTasks.isMixed"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.ModelTasks.isMixed">[docs]</a>    <span class="k">def</span> <span class="nf">isMixed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a mixed task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ModelTasks.isMultiTask"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.ModelTasks.isMultiTask">[docs]</a>    <span class="k">def</span> <span class="nf">isMultiTask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a multitask task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span><span class="p">,</span>
+        <span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+<div class="viewcode-block" id="ModelTasks.getModelTask"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tasks.ModelTasks.getModelTask">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getModelTask</span><span class="p">(</span><span class="n">target_properties</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the model type for a given list of target properties.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_properties</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ModelTasks</span><span class="p">[</span><span class="n">target_properties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="k">for</span> <span class="n">target_property</span> <span class="ow">in</span> <span class="n">target_properties</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">target_property</span> <span class="ow">in</span> <span class="n">target_properties</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="n">target_property</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span>
+                <span class="k">for</span> <span class="n">target_property</span> <span class="ow">in</span> <span class="n">target_properties</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span></div></div>
 </pre></div>
 
            </div>
