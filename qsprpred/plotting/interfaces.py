@@ -1,85 +1,99 @@
 """This module contains the base class for all model plots."""
 import os
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Any
 
-from qsprpred.models.interfaces import QSPRModel
+from ..models.interfaces import QSPRModel
 
 
 class ModelPlot(ABC):
     """Base class for all model plots.
 
     Attributes:
-        models (`list` of `QSPRModel`): list of models to plot
-        modelOuts (`dict` of `QSPRModel` and `str`): dictionary mapping models to their output file paths
-        modelNames (`dict` of `QSPRModel` and `str`): dictionary mapping models to their names
-        cvPaths (`dict` of `QSPRModel` and `str`): dictionary mapping models to their cross-validation set results file paths
-        indPaths (`dict` of `QSPRModel` and `str`): dictionary mapping models to their independent test set results file paths
+        models (list[QSPRModel]):
+            list of models to plot
+        modelOuts (dict[QSPRModel, str]):
+            dictionary of model output paths
+        modelNames (dict[QSPRModel, str]):
+            dictionary of model names
+        cvPaths (dict[QSPRModel, str]):
+            dictionary of models mapped to their cross-validation set results paths
+        indPaths (dict[QSPRModel, str]):
+            dictionary of models mapped to their independent test set results paths
     """
-
-    def __init__(self, models: List[QSPRModel]):
+    def __init__(self, models: list[QSPRModel]):
         """Initialize the base class for all model plots.
 
         Args:
-            models (`list` of `QSPRModel`): list of models to plot
+            models (list[QSPRModel]):
+                list of models to plot
         """
         self.models = models
         self.modelOuts = {model: model.outPrefix for model in self.models}
         self.modelNames = {model: model.name for model in self.models}
-        self.cvPaths = dict()
-        self.indPaths = dict()
+        self.cvPaths = {}
+        self.indPaths = {}
         for model in self.models:
-            cvPath, indPath = self.checkModel(model)
-            self.cvPaths[model] = cvPath
-            self.indPaths[model] = indPath
+            cv_path, ind_path = self.checkModel(model)
+            self.cvPaths[model] = cv_path
+            self.indPaths[model] = ind_path
 
-    def checkModel(self, model):
+    def checkModel(self, model: QSPRModel) -> tuple[str, str]:
         """Check if the model has been evaluated and saved. If not, raise an exception.
 
         Args:
-            model (`QSPRModel`): the model to check
+            model (QSPRModel): model to check
 
         Returns:
-            cvPath (`str`): path to the cross-validation set results file
-            indPath (`str`): path to the independent test set results file
+            cvPath (str): path to the cross-validation set results file
+            indPath (str): path to the independent test set results file
+
+        Raises:
+            ValueError: if the model type is not supported
         """
-        cvPath = f"{self.modelOuts[model]}.cv.tsv"
-        indPath = f"{self.modelOuts[model]}.ind.tsv"
+        cv_path = f"{self.modelOuts[model]}.cv.tsv"
+        ind_path = f"{self.modelOuts[model]}.ind.tsv"
         if model.task not in self.getSupportedTasks():
             raise ValueError("Unsupported model type: %s" % model.task)
-        if 'estimator_path' in model.metaInfo['estimator_path'] and not os.path.exists(model.metaInfo['estimator_path']):
+        if "estimator_path" in model.metaInfo["estimator_path"] and not os.path.exists(
+            model.metaInfo["estimator_path"]
+        ):
             raise ValueError(
-                "Model output file does not exist: %s. Have you evaluated and saved the model, yet?" %
-                model.metaInfo['estimator_path'])
-        if not os.path.exists(cvPath):
+                "Model output file does not exist: %s. "
+                "Have you evaluated and saved the model, yet?" %
+                model.metaInfo["estimator_path"]
+            )
+        if not os.path.exists(cv_path):
             raise ValueError(
-                "Model output file does not exist: %s. Have you evaluated and saved the model, yet?" %
-                cvPath)
-        if not os.path.exists(indPath):
+                "Model output file does not exist: %s. "
+                "Have you evaluated and saved the model, yet?" % cv_path
+            )
+        if not os.path.exists(ind_path):
             raise ValueError(
-                "Model output file does not exist: %s. Have you evaluated and saved the model, yet?" %
-                indPath)
-
-        return cvPath, indPath
+                "Model output file does not exist: %s. "
+                "Have you evaluated and saved the model, yet?" % ind_path
+            )
+        return cv_path, ind_path
 
     @abstractmethod
-    def getSupportedTasks(self):
+    def getSupportedTasks(self) -> list[str]:
         """Get the types of models this plotter supports.
 
         Returns:
             `list` of `TargetTasks`: list of supported `TargetTasks`
         """
-        pass
 
     @abstractmethod
-    def make(self, save: bool = True, show: bool = False):
-        """Make the plot. Opens a window to show the plot or returns a plot representation that can be directly shown in a notebook or saved to a file.
+    def make(self, save: bool = True, show: bool = False) -> Any:
+        """Make the plot.
+
+        Opens a window to show the plot or returns a plot
+        representation that can be directly shown in a notebook or saved to a file.
 
         Args:
-            save (`bool`): if `True` the plot will be saved to a file. If `False` the plot will be shown in a window.
-            show (`bool`): if `True` the plot will be shown in a window. If `False` the plot will be saved to a file.
+            save (bool): whether to save the plot to a file
+            show (bool): whether to show the plot in a window
 
         Returns:
-            plot_instance `object` : representation of the plot
+            plot (Any): plot representation
         """
-        pass

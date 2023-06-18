@@ -1,79 +1,123 @@
-"""
-tests
+"""Tests for plotting module."""
 
-Created by: Martin Sicho
-On: 12.02.23, 17:02
-"""
 import os
+from typing import Type
 from unittest import TestCase
 
 import pandas as pd
 from matplotlib.axes import SubplotBase
 from matplotlib.figure import Figure
-from qsprpred.models.models import QSPRsklearn
-from qsprpred.models.tasks import TargetTasks
-from qsprpred.models.tests import ModelDataSetsMixIn
-from qsprpred.plotting.classification import MetricsPlot, ROCPlot
-from qsprpred.plotting.regression import CorrelationPlot
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
+from ..data.data import QSPRDataset
+from ..models.models import QSPRsklearn
+from ..models.tasks import TargetTasks
+from ..models.tests import ModelDataSetsMixIn
+from ..plotting.classification import MetricsPlot, ROCPlot
+from ..plotting.regression import CorrelationPlot
 
 
 class ROCPlotTest(ModelDataSetsMixIn, TestCase):
-
+    """Test ROC curve plotting class."""
     @staticmethod
-    def get_model(dataset, name, alg=RandomForestClassifier):
+    def getModel(
+        dataset: QSPRDataset,
+        name: str,
+        alg: Type = RandomForestClassifier
+    ) -> QSPRsklearn:
+        """Get a model for testing.
+
+        Args:
+            dataset (QSPRDataset):
+                Dataset to use for model.
+            name (str):
+                Name of model.
+            alg (Type, optional):
+                Algorithm to use for model. Defaults to `RandomForestClassifier`.
+
+        Returns:
+            QSPRsklearn:
+                The new model.
+
+        """
         return QSPRsklearn(
             name=name,
             data=dataset,
-            base_dir=os.path.dirname(ROCPlotTest.qsprmodelspath.replace("qspr/models", "")),
+            base_dir=os.path.dirname(
+                ROCPlotTest.qsprModelsPath.replace("qspr/models", "")
+            ),
             alg=alg,
         )
 
-    def test_plot_single(self):
+    def testPlotSingle(self):
+        """Test plotting ROC curve for single task."""
         dataset = self.create_large_dataset(
             "test_roc_plot_single_data",
-            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [50]}],
-            preparation_settings=self.get_default_prep())
-        model = self.get_model(dataset, "test_roc_plot_single_model")
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.SINGLECLASS,
+                "th": [50]
+            }],
+            preparation_settings=self.get_default_prep(),
+        )
+        model = self.getModel(dataset, "test_roc_plot_single_model")
         model.evaluate(save=True)
         model.save()
-
+        # make plots
         plt = ROCPlot([model])
-
         # cross validation plot
-        ax = plt.make("CL_class", validation='cv')[0]
+        ax = plt.make("CL_class", validation="cv")[0]
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.cv.png"))
-
         # independent test set plot
-        ax = plt.make("CL_class", validation='ind')[0]
+        ax = plt.make("CL_class", validation="ind")[0]
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.ind.png"))
 
 
 class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
-
+    """Test metrics plotting class."""
     @staticmethod
-    def get_model(dataset, name, alg=RandomForestClassifier):
+    def getModel(
+        dataset: QSPRDataset,
+        name: str,
+        alg: Type = RandomForestClassifier
+    ) -> QSPRsklearn:
+        """Get a model for testing.
+
+        Args:
+            dataset (QSPRDataset):
+                Dataset to use for model.
+            name (str):
+                Name of model.
+            alg (Type, optional):
+                Algorithm to use for model. Defaults to `RandomForestClassifier`.
+        """
         return QSPRsklearn(
             name=name,
             data=dataset,
-            base_dir=os.path.dirname(ROCPlotTest.qsprmodelspath.replace("qspr/models", "")),
+            base_dir=os.path.dirname(
+                ROCPlotTest.qsprModelsPath.replace("qspr/models", "")
+            ),
             alg=alg,
         )
 
-    def test_plot_single(self):
+    def testPlotSingle(self):
+        """Test plotting metrics for single task."""
         dataset = self.create_large_dataset(
             "test_metrics_plot_single_data",
-            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [50]}],
-            preparation_settings=self.get_default_prep())
-        model = self.get_model(dataset, "test_metrics_plot_single_model")
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.SINGLECLASS,
+                "th": [50]
+            }],
+            preparation_settings=self.get_default_prep(),
+        )
+        model = self.getModel(dataset, "test_metrics_plot_single_model")
         model.evaluate(save=True)
         model.save()
-
-        plt = MetricsPlot([model])
-
         # generate metrics plot and associated files
+        plt = MetricsPlot([model])
         figures, summary = plt.make("CL_class", out_dir=model.outDir)
         for fig, ax in figures:
             self.assertIsInstance(fig, Figure)
@@ -83,25 +127,42 @@ class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
 
 
 class CorrPlotTest(ModelDataSetsMixIn, TestCase):
-
+    """Test correlation plotting class."""
     @staticmethod
-    def get_model(dataset, name, alg=RandomForestRegressor):
+    def getModel(
+        dataset: QSPRDataset,
+        name: str,
+        alg: Type = RandomForestRegressor
+    ) -> QSPRsklearn:
+        """Get a model for testing.
+
+        Args:
+            dataset (QSPRDataset):
+                Dataset to use for model.
+            name (str):
+                Name of model.
+            alg (Type, optional):
+                Algorithm to use for model. Defaults to `RandomForestRegressor`.
+        """
         return QSPRsklearn(
             name=name,
             data=dataset,
-            base_dir=os.path.dirname(ROCPlotTest.qsprmodelspath.replace("qspr/models", "")),
+            base_dir=os.path.dirname(
+                ROCPlotTest.qsprModelsPath.replace("qspr/models", "")
+            ),
             alg=alg,
         )
 
-    def test_plot_single(self):
-        dataset = self.create_large_dataset("test_corr_plot_single_data", preparation_settings=self.get_default_prep())
-        model = self.get_model(dataset, "test_corr_plot_single_model")
+    def testPlotSingle(self):
+        """Test plotting correlation for single task."""
+        dataset = self.create_large_dataset(
+            "test_corr_plot_single_data", preparation_settings=self.get_default_prep()
+        )
+        model = self.getModel(dataset, "test_corr_plot_single_model")
         model.evaluate(save=True)
         model.save()
-
-        plt = CorrelationPlot([model])
-
         # generate metrics plot and associated files
+        plt = CorrelationPlot([model])
         axes, summary = plt.make("CL", out_dir=model.outDir)
         self.assertIsInstance(summary, pd.DataFrame)
         for ax in axes:

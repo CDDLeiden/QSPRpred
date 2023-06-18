@@ -1,16 +1,16 @@
 ### QSPRpred Specific
-
-*.out
-
-.*
+/.*
 !.gitignore
+!.gitlab-ci.yml
+!.pre-commit-config.yaml
 /build/
-/base_test/
 /docs/_build
 *.pkg
 *.tgz
 *.gzip
 *.tar.gz
+*.out
+/**/test_files/qspr/
 
 ### Python template
 # Byte-compiled / optimized / DLL files

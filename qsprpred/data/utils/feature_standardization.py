@@ -1,12 +1,12 @@
 """This module is used for standardizing feature sets."""
 import numpy as np
 import sklearn_json as skljson
-from qsprpred.logs import logger
+
+from ...logs import logger
 
 
 class SKLearnStandardizer:
     """Standardizer for molecular features."""
-
     def __init__(self, scaler):
         """
         Initialize the standardizer.
@@ -55,7 +55,6 @@ class SKLearnStandardizer:
         """
         return SKLearnStandardizer(skljson.from_json(fname))
 
-
     @staticmethod
     def fromFit(features: np.array, scaler):
         """Construct standardizer by fitting on feature set.
@@ -67,12 +66,14 @@ class SKLearnStandardizer:
         scaler.fit(features)
         return SKLearnStandardizer(scaler)
 
+
 def apply_feature_standardizer(feature_standardizer, X, fit=True):
     """
     Apply and/or fit feature standardizers.
 
     Arguments:
-        feature_standardizer (SKLearnStandardizer): standardizes and/or scales features (i.e `StandardScaler` from scikit-learn or `SKLearnStandardizer`)
+        feature_standardizer (SKLearnStandardizer): standardizes and/or scales features
+            (i.e `StandardScaler` from scikit-learn or `SKLearnStandardizer`)
         X (pd.DataFrame): feature matrix to standardize
         fit (bool): fit the standardizer on the data instead of just applying it
 

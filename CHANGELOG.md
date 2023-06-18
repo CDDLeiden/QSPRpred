@@ -52,8 +52,12 @@ From v1.3.1 to v2.0.0
   targetproperties. To support this a targer property is now defined seperatly from the dataset as a `TargetProperty`
   instance, which holds the information on name,  `TargetTask` (see also Changes) and threshold of the property.
 - Support for protein descriptors and PCM modeling was added.
-  - The `PCMDataset` class was introduced that extends `QSPRDataset` and adds the `addProteinDescriptors` method, which can be used to calculate protein descriptors by linking information from the table with sequencing data.
+  - The `PCMDataSet` class was introduced that extends `QSPRDataset` and adds the `addProteinDescriptors` method, which can be used to calculate protein descriptors by linking information from the table with sequencing data.
 - Support for precalculated descriptors was added with `addCustomDescriptors` method of `MoleculeTable`.
   - It allows for adding precalculated descriptors to the `MoleculeTable` by linking the information from the table with external precalculated descriptors.
 - The [tutorial](tutorial) was improved with more detailed sections on data preparation and PCM modelling added.
 - We agreed on and adopted a style guide for contributions to the package. This is described and exemplified in the [example file](docs/style_guide.py). This is also supported by several development tools that were configured to check and automatically format the code. Instructions are included in the example file as well.
+- Style guide implemented. As a consequence, some classes, methods, and attributes were renamed to comply with the style guide. Some changes were:
+  - Fingerprint functions from RDKit are now also implemented. For checking the available fingerprints in qsprpred, the user can now access AVAIL_FPS through `from qsprpred.data.utils.descriptor_utils.fingerprints import AVAIL_FPS`.
+  - `Fingerprint` abstract base class now moved to `qsprpred.data.utils.descriptor_utils.interfaces`.
+  - Instance attributes are now written in camelCase, and method arguments are snake_case. As an example of this, the old parameter `descsets` from `MoleculeDescriptorsCalculator` is now renamed as `desc_sets`, stored as the attribute `self.descSets`. Functions are still written in snake_case.

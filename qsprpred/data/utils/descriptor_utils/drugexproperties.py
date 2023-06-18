@@ -1,8 +1,9 @@
 import numpy as np
-from qsprpred.data.utils.descriptor_utils.interfaces import Scorer
 from rdkit.Chem import AllChem, Crippen
 from rdkit.Chem import Descriptors as desc
 from rdkit.Chem import Lipinski
+
+from .interfaces import Scorer
 
 
 class Property(Scorer):
@@ -39,7 +40,7 @@ class Property(Scorer):
             for j, prop in enumerate(self.props):
                 try:
                     scores[i, j] = self.prop_dict[prop](mol)
-                except:
+                except:  # noqa: E722
                     continue
         return scores
 
