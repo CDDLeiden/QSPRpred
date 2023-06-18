@@ -45,8 +45,8 @@ class MorganFP(Fingerprint):
     def getKey(self):
         return "MorganFP"
 
-class RDkitMACCSFP(Fingerprint):
-    """RDkits implementation of MACCS keys fingerprint."""
+class RDKitMACCSFP(Fingerprint):
+    """RDKits implementation of MACCS keys fingerprint."""
 
     def getFingerprints(self, mols):
         """Return the MACCS fingerprints for the input molecules.
@@ -321,7 +321,7 @@ class _FingerprintRetriever:
         return LayeredFP(*args, **kwargs)
     
     def getRDKitMACCSFP(self, *args, **kwargs):
-        return RDkitMACCSFP(*args, **kwargs)
+        return RDKitMACCSFP(*args, **kwargs)
 
     def getCDKFP(self, *args, **kwargs):
         from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKFP
