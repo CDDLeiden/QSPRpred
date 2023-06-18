@@ -112,6 +112,7 @@ class QSPRsklearn(QSPRModel):
         self,
         save: bool = True,
         parameters: dict = None,
+        score_func=None,
         **kwargs
     ) -> float | np.ndarray:
         """Make predictions for crossvalidation and independent test set.
@@ -122,6 +123,8 @@ class QSPRsklearn(QSPRModel):
                 (don't save predictions when used in bayesian optimization)
             parameters (dict):
                 model parameters, if None, the parameters from the model are used
+            score_func (Metric): 
+                metric to use for scoring, if None, the metric from the model is used
             **kwargs:
                 additional keyword arguments for the estimator's predict method
 
@@ -130,6 +133,8 @@ class QSPRsklearn(QSPRModel):
                 predictions for evaluation
         """
         evalparams = self.parameters if parameters is None else parameters
+        score_func = self.scoreFunc if score_func is None else score_func
+        
         # check if data is available
         self.checkForData()
         folds = self.data.createFolds()
