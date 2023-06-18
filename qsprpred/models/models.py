@@ -133,7 +133,7 @@ class QSPRsklearn(QSPRModel):
                 predictions for evaluation
         """
         evalparams = self.parameters if parameters is None else parameters
-        score_func = self.score_func if score_func is None else score_func
+        score_func = self.scoreFunc if score_func is None else score_func
         
         # check if data is available
         self.checkForData()
