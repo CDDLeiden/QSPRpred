@@ -18,7 +18,7 @@ Quick Start
 
 ## Installation
 
-QSPRpred can be installed with pip like so (with python >= 3.8.0):
+QSPRpred can be installed with pip like so (with python >= 3.10):
 
 ```bash
 pip install git+https://github.com/CDDLeiden/QSPRPred.git@main
