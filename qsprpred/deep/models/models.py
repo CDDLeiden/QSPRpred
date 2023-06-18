@@ -292,7 +292,7 @@ class QSPRDNN(QSPRModel):
                 for the task is used
         """
         evalparams = self.parameters if parameters is None else parameters
-        score_func = self.score_func if score_func is None else score_func
+        score_func = self.scoreFunc if score_func is None else score_func
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetPropertiesValues()
         last_save_epochs = 0

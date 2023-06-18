@@ -147,7 +147,7 @@ class OptunaOptimization(HyperParameterOptimization):
         score = self.scoreFunc(
             y, model.evaluate(save=False,
                               parameters=bayesian_params,
-                              score_func=self.score_func)
+                              score_func=self.scoreFunc)
         )
         return score
 
@@ -186,7 +186,7 @@ class GridSearchOptimization(HyperParameterOptimization):
             y, y_ind = model.data.getTargetPropertiesValues()
             score = self.scoreFunc(y, model.evaluate(save=False,
                                                      parameters=params,
-                                                     score_func=self.score_func))
+                                                     score_func=self.scoreFunc))
             logger.info("Score: %s" % score)
             if score > self.bestScore:
                 self.bestScore = score
