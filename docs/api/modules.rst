@@ -1,5 +1,5 @@
-Python API
-==========
+qsprpred
+========
 
 .. toctree::
    :maxdepth: 4
