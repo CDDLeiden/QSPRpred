@@ -8,6 +8,8 @@ Subpackages
    :maxdepth: 4
 
    qsprpred.data
+   qsprpred.deep
+   qsprpred.extra
    qsprpred.logs
    qsprpred.metrics
    qsprpred.models
@@ -16,14 +18,6 @@ Subpackages
 
 Submodules
 ----------
-
-qsprpred.about module
----------------------
-
-.. automodule:: qsprpred.about
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 qsprpred.data\_CLI module
 -------------------------
