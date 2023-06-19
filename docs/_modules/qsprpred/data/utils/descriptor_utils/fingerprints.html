@@ -93,7 +93,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">DataStructs</span>
 <span class="kn">from</span> <span class="nn">rdkit.Avalon</span> <span class="kn">import</span> <span class="n">pyAvalonTools</span>
-<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">AllChem</span><span class="p">,</span> <span class="n">rdMolDescriptors</span><span class="p">,</span> <span class="n">rdmolops</span>
+<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">AllChem</span><span class="p">,</span> <span class="n">MACCSkeys</span><span class="p">,</span> <span class="n">rdMolDescriptors</span><span class="p">,</span> <span class="n">rdmolops</span>
 
 <span class="kn">from</span> <span class="nn">.interfaces</span> <span class="kn">import</span> <span class="n">Fingerprint</span>
 
@@ -135,6 +135,38 @@
 <div class="viewcode-block" id="MorganFP.getKey"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP.getKey">[docs]</a>    <span class="k">def</span> <span class="nf">getKey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;MorganFP&quot;</span></div></div>
 
+<div class="viewcode-block" id="RDKitMACCSFP"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.RDKitMACCSFP">[docs]</a><span class="k">class</span> <span class="nc">RDKitMACCSFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RDKits implementation of MACCS keys fingerprint.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RDKitMACCSFP.getFingerprints"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.RDKitMACCSFP.getFingerprints">[docs]</a>    <span class="k">def</span> <span class="nf">getFingerprints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the MACCS fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols: molecules to obtain the fingerprint of</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            fingerprint (list): `list` of fingerprints for &quot;mols&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">MACCSkeys</span><span class="o">.</span><span class="n">GenMACCSKeys</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="n">np_fp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp</span><span class="p">))</span>
+            <span class="n">convertFP</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">np_fp</span><span class="p">)</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">np_fp</span>
+
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">167</span>
+
+<div class="viewcode-block" id="RDKitMACCSFP.getKey"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.RDKitMACCSFP.getKey">[docs]</a>    <span class="k">def</span> <span class="nf">getKey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;RDKitMACCSFP&quot;</span></div></div>
 
 <div class="viewcode-block" id="MaccsFP"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.MaccsFP">[docs]</a><span class="k">class</span> <span class="nc">MaccsFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">167</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -357,7 +389,6 @@
 
     <span class="k">def</span> <span class="nf">getMorganFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MorganFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">getMaccsFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MaccsFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -378,6 +409,9 @@
 
     <span class="k">def</span> <span class="nf">getLayeredFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">LayeredFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">getRDKitMACCSFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">RDKitMACCSFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">getCDKFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKFP</span>
