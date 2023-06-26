@@ -272,8 +272,9 @@ class QSPRDNN(QSPRModel):
         save: bool = True,
         es_val_size: float = 0.1,
         parameters: dict | None = None,
+        score_func=None
     ) -> np.ndarray:
-        """Make predictions for cross-validation and independent test set.
+        """Make predictions for crossvalidation and independent test set.
 
         Args:
             save (bool):
@@ -286,8 +287,12 @@ class QSPRDNN(QSPRModel):
         Returns:
             np.ndarray:
                 predictions for test set and cross-validation for further analysis
+            score_func (Metric):
+                scoring function for the model, if None, the default scoring function
+                for the task is used
         """
         evalparams = self.parameters if parameters is None else parameters
+        score_func = self.scoreFunc if score_func is None else score_func
         X, X_ind = self.data.getFeatures()
         y, y_ind = self.data.getTargetPropertiesValues()
         last_save_epochs = 0

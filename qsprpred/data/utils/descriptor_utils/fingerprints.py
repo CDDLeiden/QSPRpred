@@ -3,7 +3,7 @@
 import numpy as np
 from rdkit import DataStructs
 from rdkit.Avalon import pyAvalonTools
-from rdkit.Chem import AllChem, rdMolDescriptors, rdmolops
+from rdkit.Chem import AllChem, MACCSkeys, rdMolDescriptors, rdmolops
 
 from .interfaces import Fingerprint
 
@@ -45,6 +45,38 @@ class MorganFP(Fingerprint):
     def getKey(self):
         return "MorganFP"
 
+class RDKitMACCSFP(Fingerprint):
+    """RDKits implementation of MACCS keys fingerprint."""
+
+    def getFingerprints(self, mols):
+        """Return the MACCS fingerprints for the input molecules.
+
+        Args:
+            mols: molecules to obtain the fingerprint of
+
+        Returns:
+            fingerprint (list): `list` of fingerprints for "mols"
+        """
+        convertFP = DataStructs.ConvertToNumpyArray
+
+        ret = np.zeros((len(mols), len(self)))
+        for idx, mol in enumerate(mols):
+            fp = MACCSkeys.GenMACCSKeys(mol)
+            np_fp = np.zeros(len(fp))
+            convertFP(fp, np_fp)
+            ret[idx] = np_fp
+
+        return ret
+
+    @property
+    def settings(self):
+        return {}
+
+    def __len__(self):
+        return 167
+
+    def getKey(self):
+        return "RDKitMACCSFP"
 
 class MaccsFP(Fingerprint):
     def __init__(self, nBits=167, **kwargs):
@@ -267,7 +299,6 @@ class _FingerprintRetriever:
 
     def getMorganFP(self, *args, **kwargs):
         return MorganFP(*args, **kwargs)
-
     def getMaccsFP(self, *args, **kwargs):
         return MaccsFP(*args, **kwargs)
 
@@ -288,6 +319,9 @@ class _FingerprintRetriever:
 
     def getLayeredFP(self, *args, **kwargs):
         return LayeredFP(*args, **kwargs)
+    
+    def getRDKitMACCSFP(self, *args, **kwargs):
+        return RDKitMACCSFP(*args, **kwargs)
 
     def getCDKFP(self, *args, **kwargs):
         from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKFP

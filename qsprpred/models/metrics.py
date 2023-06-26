@@ -158,6 +158,7 @@ class SklearnMetric(Metric):
         "jaccard_micro",
         "jaccard_macro",
         "jaccard_weighted",
+        'matthews_corrcoef',
     ]
     multiClassMetrics = [
         "neg_log_loss",
@@ -303,6 +304,7 @@ class SklearnMetric(Metric):
             "recall_macro",
             "recall_weighted",
             "recall_samples",
+            "matthews_corrcoef",
         ]
 
     def supportsTask(self, task: ModelTasks):
