@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 from abc import ABC, abstractmethod
-from typing import Callable, Iterable, List, Type, Union
+from typing import Callable, Iterable, List, Optional, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -116,7 +116,7 @@ class QSPRModel(ABC):
     @staticmethod
     def handleInvalidsInPredictions(
         mols: list[str],
-        predictions: np.ndarray | np.ndarray[np.ndarray],
+        predictions: np.ndarray | list[np.ndarray],
         failed_mask: np.ndarray,
     ) -> np.ndarray:
         """Replace invalid predictions with None.
@@ -236,10 +236,10 @@ class QSPRModel(ABC):
     def __init__(
         self,
         base_dir: str,
-        alg: Type = None,
-        data: QSPRDataset = None,
-        name: str = None,
-        parameters: dict = None,
+        alg: Optional[Type] = None,
+        data: Optional[QSPRDataset] = None,
+        name: Optional[str] = None,
+        parameters: Optional[dict] = None,
         autoload=True,
         scoring=None,
     ):
@@ -419,7 +419,7 @@ class QSPRModel(ABC):
             logger.info("saving model parameters to file: %s" % path)
             j.write(json.dumps(params, indent=4))
         return path
-    
+
     def setParams(self, params):
         """Set model parameters.
 
@@ -703,7 +703,7 @@ class QSPRModel(ABC):
     def evaluate(
         self,
         save: bool = True,
-        parameters: dict = None,
+        parameters: Optional[dict] = None,
         **kwargs
     ) -> float | np.ndarray:
         """Make predictions for crossvalidation and independent test set.
@@ -720,7 +720,7 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def loadEstimator(self, params: dict = None) -> object:
+    def loadEstimator(self, params: Optional[dict] = None) -> object:
         """Initialize estimator instance with the given parameters.
 
         If `params` is `None`, the default parameters will be used.
@@ -733,7 +733,7 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def loadEstimatorFromFile(self, params: dict = None) -> object:
+    def loadEstimatorFromFile(self, params: Optional[dict] = None) -> object:
         """Load estimator instance from file and apply the given parameters.
 
         Args:
