@@ -7,7 +7,7 @@ name = "qsprpred"
 dynamic = ["version"]
 description = "A cheminformatics package for training and testing QSAR/QSPR models"
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 license = { file = "LICENSE" }
 keywords = ["qsar", "machine learning", "cheminformatics"]
 authors = [{name = "Helle van den Maagdenberg", email = "h.w.van.den.maagdenberg@lacdr.leidenuniv.nl"},
