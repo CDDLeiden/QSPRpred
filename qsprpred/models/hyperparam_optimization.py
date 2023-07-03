@@ -66,6 +66,19 @@ class OptunaOptimization(HyperParameterOptimization):
                 At the moment only n_jobs=1 is supported.
         """
         super().__init__(scoring, param_grid)
+        search_space_types = [
+            "categorical", "discrete_uniform", "float", "int", "loguniform", "uniform"
+        ]
+        if not all(v[0] in search_space_types for v in param_grid.values()):
+            logger.error(
+                f"Search space {param_grid} is missing or has invalid search type(s), "
+                "see OptunaOptimization docstring for example."
+            )
+            raise ValueError(
+                "Search space for optuna optimization is missing or "
+                "has invalid search type(s)."
+            )
+
         self.nTrials = n_trials
         if n_jobs > 1:
             logger.warning(
@@ -113,7 +126,7 @@ class OptunaOptimization(HyperParameterOptimization):
         self.bestParams = trial.params
         return self.bestParams
 
-    def objective(self, trial : optuna.trial.Trial, model: QSPRModel) -> float:
+    def objective(self, trial: optuna.trial.Trial, model: QSPRModel) -> float:
         """Objective for bayesian optimization.
 
         Arguments:
@@ -145,9 +158,10 @@ class OptunaOptimization(HyperParameterOptimization):
         # evaluate the model with the current parameters and return the score
         y, y_ind = model.data.getTargetPropertiesValues()
         score = self.scoreFunc(
-            y, model.evaluate(save=False,
-                              parameters=bayesian_params,
-                              score_func=self.scoreFunc)
+            y,
+            model.evaluate(
+                save=False, parameters=bayesian_params, score_func=self.scoreFunc
+            )
         )
         return score
 
@@ -172,8 +186,11 @@ class GridSearchOptimization(HyperParameterOptimization):
         """Optimize the hyperparameters of the model.
 
         Args:
-            model (QSPRModel): the model to optimize
-            save_params (bool): whether to set and save the best parameters to the model after optimization
+            model (QSPRModel):
+                the model to optimize
+            save_params (bool):
+                whether to set and save the best parameters to the model
+                after optimization
 
         Returns:
             dict: best parameters found during optimization
@@ -184,9 +201,12 @@ class GridSearchOptimization(HyperParameterOptimization):
         for params in ParameterGrid(self.paramGrid):
             logger.info(params)
             y, y_ind = model.data.getTargetPropertiesValues()
-            score = self.scoreFunc(y, model.evaluate(save=False,
-                                                     parameters=params,
-                                                     score_func=self.scoreFunc))
+            score = self.scoreFunc(
+                y,
+                model.evaluate(
+                    save=False, parameters=params, score_func=self.scoreFunc
+                )
+            )
             logger.info("Score: %s" % score)
             if score > self.bestScore:
                 self.bestScore = score
