@@ -17,13 +17,12 @@ from rdkit.Chem import Descriptors
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-from .utils.datafilters import CategoryFilter
-from .utils.datasplitters import (
-    ManualSplit,
-    RandomSplit,
-    ScaffoldSplit,
-    TemporalSplit,
-)
+from ..logs.stopwatch import StopWatch
+from ..models.models import QSPRsklearn
+from ..models.tasks import TargetTasks
+from .data import QSPRDataset, TargetProperty
+from .utils.datafilters import CategoryFilter, DuplicateFilter
+from .utils.datasplitters import ManualSplit, RandomSplit, ScaffoldSplit, TemporalSplit
 from .utils.descriptorcalculator import (
     CustomDescriptorsCalculator,
     DescriptorsCalculator,
@@ -39,16 +38,8 @@ from .utils.descriptorsets import (
     TanimotoDistances,
 )
 from .utils.feature_standardization import SKLearnStandardizer
-from .utils.featurefilters import (
-    BorutaFilter,
-    HighCorrelationFilter,
-    LowVarianceFilter,
-)
+from .utils.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
 from .utils.scaffolds import BemisMurcko, Murcko
-from ..logs.stopwatch import StopWatch
-from ..models.models import QSPRsklearn
-from ..models.tasks import TargetTasks
-from .data import QSPRDataset, TargetProperty
 
 N_CPU = 2
 CHUNK_SIZE = 100
@@ -174,6 +165,7 @@ class DataSetsMixIn(PathMixIn):
         feature_filters = [None, HighCorrelationFilter(0.9)]
         data_filters = [
             None,
+            DuplicateFilter(),
             # FIXME: this needs to be made more general and not specific to one dataset
             # CategoryFilter(
             #     name="moka_ionState7.4",
@@ -997,6 +989,29 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         )
         df_cation = only_cation(self.getBigDF())
         self.assertTrue((df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
+
+    def test_Duplicatefilter(self):
+        """Test the duplicate filter, which drops rows with identical descriptors
+        from dataset."""
+        df = self.getBigDF()
+        df_test = df.loc[[0, 1, 2]]
+        df_test.index = "duplicate" + df_test.index.astype(str)
+        df = pd.concat([df, df_test], ignore_index=False)
+        descriptors = [f"Descriptor_F{i}" for i in range(100)]
+        df_descriptors = pd.DataFrame(
+            data=np.random.rand(len(df), 100), columns=descriptors
+        )
+        df_descriptors.iloc[-3:] = df_descriptors.iloc[[0, 1, 2]]
+
+        dup_filter1 = DuplicateFilter(
+            keep="first",
+            year_name="Year of first disclosure",
+            target_props=["VDss", "CL"]
+        )
+        dup_filter1(df, df_descriptors)
+
+        dup_filter2 = DuplicateFilter(keep="mean", target_props=["VDss", "CL"])
+        dup_filter2(df, df_descriptors)
 
 
 class TestTargetImputation(PathMixIn, TestCase):
