@@ -131,6 +131,7 @@ class DuplicateFilter(DataFilter):
                     remove_idxs.update(remove_idx)
                 df = df.drop(remove_idxs)
             else:
+                remove_indexes = []
                 for repeat in allrepeats:
                     indexes = df.index[repeat]
                     df_values = df.loc[indexes]
@@ -141,8 +142,10 @@ class DuplicateFilter(DataFilter):
                             index = df_values[self.year_name].idxmax()
                         replace = df_values.loc[index, target_prop]
                         df.at[indexes[0], target_prop] = replace
-                    df = df.drop(indexes[1:])
+                        remove_indexes.extend(indexes[1:])
+                df = df.drop(remove_indexes)
         elif self.keep in ["mean", "median"]:
+            remove_indexes = []
             for repeat in allrepeats:
                 indexes = df.index[repeat]
                 for target_prop in self.target_props:
@@ -152,7 +155,8 @@ class DuplicateFilter(DataFilter):
                     elif self.keep == "median":
                         replace = values.median()
                     df.at[indexes[0], target_prop] = replace
-                df = df.drop(indexes[1:])
+                remove_indexes.extend(indexes[1:])
+            df = df.drop(remove_indexes)
         elif self.keep is False:
             remove_idx = [item for repeat in allrepeats for item in repeat]
             df = df.drop(df.index[remove_idx])
