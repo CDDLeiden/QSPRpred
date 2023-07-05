@@ -9,7 +9,7 @@ import pickle
 import warnings
 from collections.abc import Callable
 from multiprocessing import Pool
-from typing import Literal
+from typing import Literal, Optional
 
 import numpy as np
 import pandas as pd
@@ -61,8 +61,8 @@ class PandasDataSet(DataSet):
         def __init__(
             self,
             func: Callable,
-            func_args: list = None,
-            func_kwargs: dict = None,
+            func_args: Optional[list] = None,
+            func_kwargs: Optional[dict] = None,
             axis: int = 0,
             raw: bool = False,
             result_type: str = "expand"
@@ -108,10 +108,10 @@ class PandasDataSet(DataSet):
     def __init__(
         self,
         name: str,
-        df: pd.DataFrame = None,
+        df: Optional[pd.DataFrame] = None,
         store_dir: int = ".",
         overwrite: bool = False,
-        index_cols: list[str] = None,
+        index_cols: Optional[list[str]] = None,
         n_jobs: int = 1,
         chunk_size: int = 1000,
         id_prefix: str = "QSPRID",
@@ -257,12 +257,12 @@ class PandasDataSet(DataSet):
     def apply(
         self,
         func: Callable,
-        func_args: list = None,
-        func_kwargs: dict = None,
+        func_args: Optional[list] = None,
+        func_kwargs: Optional[dict] = None,
         axis: int = 0,
         raw: bool = False,
         result_type: str = "expand",
-        subset: list = None,
+        subset: Optional[list] = None,
     ):
         """Apply a function to the data frame.
 
@@ -305,12 +305,12 @@ class PandasDataSet(DataSet):
     def papply(
         self,
         func: Callable,
-        func_args: list = None,
-        func_kwargs: dict = None,
+        func_args: Optional[list] = None,
+        func_kwargs: Optional[dict] = None,
         axis: int = 0,
         raw: bool = False,
         result_type: str = "expand",
-        subset: list = None,
+        subset: Optional[list] = None,
         n_cpus: int = 1,
         chunk_size: int = 1000,
     ):
@@ -358,7 +358,9 @@ class PandasDataSet(DataSet):
 
         return pd.concat(results, axis=0)
 
-    def transform(self, targets: list, transformer: Callable, addAs: list = None):
+    def transform(
+        self, targets: list, transformer: Callable, addAs: Optional[list] = None
+    ):
         """Transform the data frame (or its part) using a list of transformers.
 
         Each transformer is a function that takes the data frame (or a subset of it as
@@ -391,9 +393,20 @@ class PandasDataSet(DataSet):
         of the `MoleculeTable`."""
         df_filtered = None
         for table_filter in table_filters:
-            df_filtered = table_filter(self.df)
-        if df_filtered is not None:
-            self.df = df_filtered.copy()
+            if len(self.df) == 0:
+                logger.warning("Dataframe is empty")
+            if table_filter.__class__.__name__ == "CategoryFilter":
+                df_filtered = table_filter(self.df)
+            elif table_filter.__class__.__name__ == "DuplicateFilter":
+                descriptors = self.getDescriptors()
+                if len(self.df.columns) == 0:
+                    logger.warning(
+                        "Removing duplicates based on descriptors does not \
+                                    work if there are no descriptors"
+                    )
+                df_filtered = table_filter(self.df, descriptors)
+            if df_filtered is not None:
+                self.df = df_filtered.copy()
 
     def save(self):
         """Save the data frame to disk and all associated files.
@@ -450,10 +463,10 @@ class DescriptorTable(PandasDataSet):
         self,
         calculator,
         name_prefix: str,
-        df: pd.DataFrame = None,
+        df: Optional[pd.DataFrame] = None,
         store_dir: str = ".",
         overwrite: bool = False,
-        key_cols: list = None,
+        key_cols: Optional[list] = None,
         n_jobs: int = 1,
         chunk_size: int = 1000
     ):
@@ -510,7 +523,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
     def __init__(
         self,
         name: str,
-        df: pd.DataFrame = None,
+        df: Optional[pd.DataFrame] = None,
         smiles_col: str = "SMILES",
         add_rdkit: bool = False,
         store_dir: str = ".",
@@ -518,7 +531,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         n_jobs: int = 1,
         chunk_size: int = 50,
         drop_invalids: bool = True,
-        index_cols: list[str] = None,
+        index_cols: Optional[list[str]] = None,
     ):
         """Initialize a `MoleculeTable` object.
 
@@ -881,7 +894,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         ret.drop(columns=join_cols, inplace=True)
         return ret
 
-    def getDescriptorNames(self, prefix: str = None):
+    def getDescriptorNames(self, prefix: Optional[str] = None):
         """Get the names of the descriptors in the data frame.
 
         Args:
@@ -1149,10 +1162,10 @@ class TargetProperty:
         name: str,
         task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
                       TargetTasks.MULTICLASS],
-        original_name: str = None,
-        th: list[float] | str = None,
-        n_classes: int = None,
-        transformer: Callable = None,
+        original_name: Optional[str] = None,
+        th: Optional[list[float] | str] = None,
+        n_classes: Optional[int] = None,
+        transformer: Optional[Callable] = None,
     ):
         """Initialize a TargetProperty object.
 
@@ -1382,7 +1395,7 @@ class QSPRDataset(MoleculeTable):
         self,
         name: str,
         target_props: list[TargetProperty | dict],
-        df: pd.DataFrame = None,
+        df: Optional[pd.DataFrame] = None,
         smiles_col: str = "SMILES",
         add_rdkit: bool = False,
         store_dir: str = ".",
@@ -1391,8 +1404,8 @@ class QSPRDataset(MoleculeTable):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
-        target_imputer: Callable = None,
-        index_cols: list[str] = None,
+        target_imputer: Optional[Callable] = None,
+        index_cols: Optional[list[str]] = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if
         specified.
@@ -1501,7 +1514,7 @@ class QSPRDataset(MoleculeTable):
         self,
         target_props: list[TargetProperty],
         drop_empty: bool = True,
-        target_imputer: Callable = None,
+        target_imputer: Optional[Callable] = None,
     ):
         """Set list of target properties and apply transformations if specified.
 
@@ -1623,7 +1636,7 @@ class QSPRDataset(MoleculeTable):
         self.restoreTrainingData()
 
     def makeClassification(
-        self, target_property: TargetProperty | str, th: list[float] = None
+        self, target_property: TargetProperty | str, th: Optional[list[float]] = None
     ):
         """Switch to classification task using the given threshold values.
 
@@ -1977,7 +1990,7 @@ class QSPRDataset(MoleculeTable):
             self.X = self.X.drop(self.X.columns, axis=1)
             self.X_ind = self.X_ind.drop(self.X_ind.columns, axis=1)
 
-    def fillMissing(self, fill_value: float, columns: list[str] = None):
+    def fillMissing(self, fill_value: float, columns: Optional[list[str]] = None):
         """Fill missing values in the data set with a given value.
 
         Args:
@@ -2054,12 +2067,12 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: list = None,
+        datafilters: Optional[list] = None,
         split=None,
         fold=None,
-        feature_calculators: list = None,
-        feature_filters: list = None,
-        feature_standardizer: SKLearnStandardizer = None,
+        feature_calculators: Optional[list] = None,
+        feature_filters: Optional[list] = None,
+        feature_standardizer: Optional[SKLearnStandardizer] = None,
         feature_fill_value: float = np.nan,
         recalculate_features: bool = False
     ):
@@ -2179,7 +2192,7 @@ class QSPRDataset(MoleculeTable):
         elif self.X.shape[0] == 0:
             raise ValueError("X has no rows.")
 
-    def createFolds(self, split: DataSplit = None):
+    def createFolds(self, split: Optional[DataSplit] = None):
         """Create folds for cross validation.
 
         Args:
