@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Iterable
 
+import numpy as np
 import pandas as pd
 
 
@@ -157,18 +158,24 @@ class DataSetDependant:  # Note: this shouldn't be ABC; no abstract methods defi
 class DataSplit(ABC):
     """Defines a function split a dataframe into train and test set."""
     @abstractmethod
-    def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
-        """
-        Split the given data into multiple subsets.
+    def split(self, X : np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series) -> Iterable[tuple[list[int], list[int]]]:
+        """Split the given data into one or multiple train/test subsets.
+
+        These classes handle partitioning of a feature matrix
+        by returning an iterator of train
+        and test indices. It is compatible with the approach taken
+        in the `sklearn` package (see `sklearn.model_selection._BaseKFold`).
+        This can be used for both cross-validation or a one time train/test split.
 
         Args:
-            X (DataFrame): the input data matrix
-            y (Series): the target variable
+            X (np.ndarray | pd.DataFrame): the input data matrix
+            y (np.ndarray | pd.DataFrame | pd.Series): the target variable(s)
 
         Returns:
             an iterator over the generated subsets represented as a tuple of
             (train_indices, test_indices) where the indices are the row indices of the
-            input data matrix X
+            input data matrix X (note that these are integer indices, rather than a
+            pandas index!)
         """
 
 

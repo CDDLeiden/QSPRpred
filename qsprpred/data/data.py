@@ -2193,20 +2193,28 @@ class QSPRDataset(MoleculeTable):
         elif self.X.shape[0] == 0:
             raise ValueError("X has no rows.")
 
-    def createFolds(self, split: Optional[DataSplit] = None):
-        """Create folds for cross validation.
+    def createFolds(self, split: DataSplit | None = None):
+        """Create folds for cross validation from the  current feature matrix.
+
+        If you specify a split to use, it will be used to generate the folds.
+        The split should implement the `DataSplit` interface. It can
+        also optionally implement `DataSetDependant` if the split requires the full
+        data set besides the feature matrix alone.
 
         Args:
             split (DataSplit, optional): split to use for creating folds.
                 Defaults to None.
         """
+        # do some checks and give split tha data set if required
         self.checkFeatures()
-
+        if hasattr(split, 'setDataSet'):
+            split.setDataSet(self)
+        # choose the fold generator
         if split is None and not self.fold_generator:
             self.fold_generator = self.getDefaultFoldGenerator()
         elif split is not None:
             self.fold_generator = Folds(split, self.feature_standardizer)
-
+        # generate the folds
         return self.fold_generator.iterFolds(self.X, self.y)
 
     def fitFeatureStandardizer(self):
