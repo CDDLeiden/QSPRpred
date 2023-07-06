@@ -112,7 +112,7 @@ class DuplicateFilter(DataFilter):
                 allrepeats.append(list(this_set))
 
         if self.keep in ["first", "last"]:
-            if self.target_props is None:
+            if self.target_props is None or len(self.target_props) == 1:
                 logger.warning(
                     "For dataframe with multiple target properties it is /"
                     "recommended to give target_props to prevent loss of /"
@@ -142,6 +142,7 @@ class DuplicateFilter(DataFilter):
                             index = df_values[self.year_name].idxmax()
                         replace = df_values.loc[index, target_prop]
                         df.at[indexes[0], target_prop] = replace
+                        #TODO now all other properties are just those from first row
                         remove_indexes.extend(indexes[1:])
                 df = df.drop(remove_indexes)
         elif self.keep in ["mean", "median"]:

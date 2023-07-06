@@ -995,6 +995,8 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         from dataset."""
         df = self.getBigDF()
         df_test = df.loc[[0, 1, 2]]
+        df_test[["VDss", "CL", "Year of first disclosure"]
+               ] = df_test[["VDss", "CL", "Year of first disclosure"]] + 1
         df_test.index = "duplicate" + df_test.index.astype(str)
         df = pd.concat([df, df_test], ignore_index=False)
         descriptors = [f"Descriptor_F{i}" for i in range(100)]
