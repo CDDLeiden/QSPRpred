@@ -15,6 +15,7 @@ from parameterized import parameterized
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 from sklearn.impute import SimpleImputer
+from sklearn.model_selection import ShuffleSplit
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from .utils.datafilters import CategoryFilter
@@ -750,6 +751,81 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         self.assertEqual(sum(~invalids), 1)
         dataset.dropInvalids()
         self.assertEqual(dataset.df.shape[0], all_mols - 1)
+
+    def test_random_state_shuffle(self):
+        dataset = self.create_large_dataset()
+        seed = dataset.randomState
+        dataset.shuffle()
+        order = dataset.getDF().index.tolist()
+        dataset.save()
+        dataset.shuffle()
+        order_next = dataset.getDF().index.tolist()
+        # reload and check if seed and order are the same
+        dataset = QSPRDataset.fromFile(dataset.storePath)
+        self.assertEqual(dataset.randomState, seed)
+        self.assertListEqual(dataset.getDF().index.tolist(), order)
+        # shuffle again and check if order is the same as before
+        dataset.shuffle()
+        self.assertListEqual(dataset.getDF().index.tolist(), order_next)
+
+    def test_random_state_featurization(self):
+        # create and save the data set
+        dataset = self.create_large_dataset()
+        dataset.addDescriptors(
+            MoleculeDescriptorsCalculator(
+                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
+            ),
+            featurize=False,
+        )
+        dataset.save()
+        # split and featurize with shuffling
+        split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
+        dataset.split(split,  featurize=False)
+        dataset.featurizeSplits(shuffle=True)
+        train, test = dataset.getFeatures()
+        train_order = train.index.tolist()
+        test_order = test.index.tolist()
+        # reload and check if orders are the same if we redo the split
+        # and featurization with the same random state
+        dataset = QSPRDataset.fromFile(dataset.storePath)
+        split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
+        dataset.split(split, featurize=False)
+        dataset.featurizeSplits(shuffle=True)
+        train, test = dataset.getFeatures()
+        self.assertListEqual(train.index.tolist(), train_order)
+        self.assertListEqual(test.index.tolist(), test_order)
+
+    def test_random_state_folds(self):
+        # create and save the data set (fixes the seed)
+        dataset = self.create_large_dataset()
+        dataset.save()
+        # calculate descriptors and iterate over folds
+        dataset.prepareDataset(
+            feature_calculators=[
+                MoleculeDescriptorsCalculator(
+                    [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
+                ),
+            ]
+        )
+        train, _ = dataset.getFeatures()
+        order_train = train.index.tolist()
+        order_folds = []
+        for _, _, _, _, train_index, test_index in dataset.createFolds():
+            order_folds.append(train.iloc[train_index].index.tolist())
+        # reload and check if orders are the same if we redo the folds from saved data
+        dataset = QSPRDataset.fromFile(dataset.storePath)
+        dataset.prepareDataset(
+            feature_calculators=[
+                MoleculeDescriptorsCalculator(
+                    [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
+                ),
+            ]
+        )
+        train, _ = dataset.getFeatures()
+        self.assertListEqual(train.index.tolist(), order_train)
+        for i, (_, _, _, _, train_index, test_index) \
+                in enumerate(dataset.createFolds()):
+            self.assertListEqual(train.iloc[train_index].index.tolist(), order_folds[i])
 
 
 class TestTargetProperty(TestCase):

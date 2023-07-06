@@ -37,9 +37,9 @@ class PCMDataSet(QSPRDataset):
         name: str,
         protein_col: str,
         target_props: list[TargetProperty | dict],
-        df: pd.DataFrame = None,
+        df: pd.DataFrame | None = None,
         smiles_col: str = "SMILES",
-        protein_seq_provider: Callable = None,
+        protein_seq_provider: Callable | None = None,
         add_rdkit: bool = False,
         store_dir: str = ".",
         overwrite: bool = False,
@@ -49,6 +49,8 @@ class PCMDataSet(QSPRDataset):
         drop_empty: bool = True,
         target_imputer: Callable = None,
         index_cols: list[str] = None,
+        id_prefix: str = "QSPRID",
+        random_state: int | None = None,
     ):
         """Construct a data set to handle PCM data.
 
@@ -89,6 +91,10 @@ class PCMDataSet(QSPRDataset):
             index_cols (List[str], optional):
                 columns to be used as index in the dataframe.
                 Defaults to `None` in which case a custom ID will be generated.
+            id_prefix (str, optional):
+                prefix for the custom ID. Defaults to "QSPRID".
+            random_state (int, optional):
+                random state for reproducibility. Defaults to `None`.
 
         Raises:
             `ValueError`:
@@ -108,6 +114,8 @@ class PCMDataSet(QSPRDataset):
             target_props=target_props,
             target_imputer=target_imputer,
             drop_empty=drop_empty,
+            id_prefix=id_prefix,
+            random_state=random_state,
         )
         self.proteinCol = protein_col
         self.proteinSeqProvider = protein_seq_provider
