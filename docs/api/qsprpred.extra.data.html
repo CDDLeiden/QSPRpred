@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data package &mdash; QSPRpred 2.0.0 documentation</title>
+  <title>qsprpred.extra.data package &mdash; QSPRpred 2.0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.0
+                v2.0.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -503,7 +503,11 @@ If <code class="xref any docutils literal notranslate"><span class="pre">throw</
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.data.PCMDataSet.createFolds">
 <span class="sig-name descname"><span class="pre">createFolds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSplit" title="qsprpred.data.interfaces.DataSplit"><span class="pre">DataSplit</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.data.PCMDataSet.createFolds" title="Permalink to this definition"></a></dt>
-<dd><p>Create folds for cross validation.</p>
+<dd><p>Create folds for cross validation from the  current feature matrix.</p>
+<p>If you specify a split to use, it will be used to generate the folds.
+The split should implement the <a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSplit" title="qsprpred.data.interfaces.DataSplit"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataSplit</span></code></a> interface. It can
+also optionally implement <a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSetDependant" title="qsprpred.data.interfaces.DataSetDependant"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataSetDependant</span></code></a> if the split requires the full
+data set besides the feature matrix alone.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>split</strong> (<a class="reference internal" href="qsprpred.data.html#qsprpred.data.interfaces.DataSplit" title="qsprpred.data.interfaces.DataSplit"><em>DataSplit</em></a><em>, </em><em>optional</em>) – split to use for creating folds.
@@ -581,13 +585,15 @@ use for descriptor calculation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.data.PCMDataSet.featurizeSplits">
-<span class="sig-name descname"><span class="pre">featurizeSplits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.data.PCMDataSet.featurizeSplits" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">featurizeSplits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.data.PCMDataSet.featurizeSplits" title="Permalink to this definition"></a></dt>
 <dd><p>If the data set has descriptors, load them into the train and test splits.</p>
 <p>If no descriptors are available, remove all features from
 the splits They will become zero length along the feature axis (columns), but
 will retain their original length along the sample axis (rows). This is useful
 for the case where the data set has no descriptors, but the user wants to retain
 train and test splits.</p>
+<p>shuffle (bool): whether to shuffle the training and test sets
+random_state (int): random state for shuffling</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1133,12 +1139,18 @@ set will be regarded as the training set and the test set will have zero length.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.data.PCMDataSet.loadDescriptorsToSplits">
-<span class="sig-name descname"><span class="pre">loadDescriptorsToSplits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.data.PCMDataSet.loadDescriptorsToSplits" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">loadDescriptorsToSplits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.data.PCMDataSet.loadDescriptorsToSplits" title="Permalink to this definition"></a></dt>
 <dd><p>Load all available descriptors into the train and test splits.</p>
 <p>If no descriptors are available, an exception will be raised.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – if no descriptors are available</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shuffle</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – whether to shuffle the training and test sets</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state for shuffling</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – if no descriptors are available</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1232,7 +1244,7 @@ used (reduces memory consumption).</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.data.PCMDataSet.prepareDataset">
-<span class="sig-name descname"><span class="pre">prepareDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles_standardizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.9)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'chembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafilters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_calculators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_filters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_standardizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.feature_standardization.SKLearnStandardizer" title="qsprpred.data.utils.feature_standardization.SKLearnStandardizer"><span class="pre">SKLearnStandardizer</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_fill_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.data.PCMDataSet.prepareDataset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prepareDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles_standardizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.9)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'chembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafilters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_calculators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_filters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_standardizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.utils.html#qsprpred.data.utils.feature_standardization.SKLearnStandardizer" title="qsprpred.data.utils.feature_standardization.SKLearnStandardizer"><span class="pre">SKLearnStandardizer</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_fill_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.data.PCMDataSet.prepareDataset" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the dataset for use in QSPR model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1252,6 +1264,8 @@ different information from the data set</p></li>
 present in the file</p></li>
 <li><p><strong>feature_fill_value</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – value to fill missing values with.
 Defaults to <code class="xref any docutils literal notranslate"><span class="pre">numpy.nan</span></code></p></li>
+<li><p><strong>shuffle</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – whether to shuffle the training and test sets</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state for shuffling</p></li>
 </ul>
 </dd>
 </dl>
@@ -3579,97 +3593,97 @@ block, allowing further test code to be executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_00_Mordred">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_00_Mordred</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_00_Mordred" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’Mordred’, desc_set=&lt;qsprpred.extra.data.utils.descr…ordred object at 0x7fe01ea8fc40&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’Mordred’, desc_set=&lt;qsprpred.extra.data.utils.descr…ordred object at 0x7f43c70e7d60&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_01_Mold2">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_01_Mold2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_01_Mold2" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’Mold2’, desc_set=&lt;qsprpred.extra.data.utils.descr….Mold2 object at 0x7fe01ea8f9d0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’Mold2’, desc_set=&lt;qsprpred.extra.data.utils.descr….Mold2 object at 0x7f43c7120040&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_02_FingerprintSet_CDKFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_02_FingerprintSet_CDKFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_02_FingerprintSet_CDKFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01ea8f460&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c7275b70&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_03_FingerprintSet_CDKExtendedFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_03_FingerprintSet_CDKExtendedFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_03_FingerprintSet_CDKExtendedFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKExtendedFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01ea8e710&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKExtendedFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c7120070&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_04_FingerprintSet_CDKEStateFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_04_FingerprintSet_CDKEStateFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_04_FingerprintSet_CDKEStateFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKEStateFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eaaffd0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKEStateFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c7120d60&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_05_FingerprintSet_CDKGraphOnlyFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_05_FingerprintSet_CDKGraphOnlyFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_05_FingerprintSet_CDKGraphOnlyFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKGraphOnlyFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eaafdf0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKGraphOnlyFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c71206d0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_06_FingerprintSet_CDKMACCSFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_06_FingerprintSet_CDKMACCSFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_06_FingerprintSet_CDKMACCSFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKMACCSFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eaaf7f0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKMACCSFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c70e7460&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_07_FingerprintSet_CDKPubchemFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_07_FingerprintSet_CDKPubchemFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_07_FingerprintSet_CDKPubchemFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKPubchemFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eaaf880&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKPubchemFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c71208e0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_08_FingerprintSet_CDKSubstructureFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_08_FingerprintSet_CDKSubstructureFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_08_FingerprintSet_CDKSubstructureFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKSubstructureFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eaaf220&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKSubstructureFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c7120970&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_09_FingerprintSet_CDKKlekotaRothFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_09_FingerprintSet_CDKKlekotaRothFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_09_FingerprintSet_CDKKlekotaRothFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKKlekotaRothFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eae5e10&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKKlekotaRothFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c7121180&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_10_FingerprintSet_CDKAtomPairs2DFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_10_FingerprintSet_CDKAtomPairs2DFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_10_FingerprintSet_CDKAtomPairs2DFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKAtomPairs2DFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eae4460&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKAtomPairs2DFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c737a110&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_11_FingerprintSet_CDKSubstructureFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_11_FingerprintSet_CDKSubstructureFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_11_FingerprintSet_CDKSubstructureFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKSubstructureFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eae6320&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKSubstructureFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c737af80&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_12_FingerprintSet_CDKKlekotaRothFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_12_FingerprintSet_CDKKlekotaRothFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_12_FingerprintSet_CDKKlekotaRothFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKKlekotaRothFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eae4d00&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKKlekotaRothFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c7379cc0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_13_FingerprintSet_CDKAtomPairs2DFP">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_13_FingerprintSet_CDKAtomPairs2DFP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_13_FingerprintSet_CDKAtomPairs2DFP" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKAtomPairs2DFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7fe01eae6470&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’FingerprintSet_CDKAtomPairs2DFP’, desc_set=&lt;qsprpred.data.utils.descriptors…intSet object at 0x7f43c7297e20&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_14_PaDEL">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_14_PaDEL</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_14_PaDEL" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’PaDEL’, desc_set=&lt;qsprpred.extra.data.utils.descr….PaDEL object at 0x7fe01eae6290&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’PaDEL’, desc_set=&lt;qsprpred.extra.data.utils.descr….PaDEL object at 0x7f43c7297220&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_15_ExtendedValenceSignature">
 <span class="sig-name descname"><span class="pre">testDescriptorsExtraAll_15_ExtendedValenceSignature</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsExtra.testDescriptorsExtraAll_15_ExtendedValenceSignature" title="Permalink to this definition"></a></dt>
-<dd><p>Test the calculation of extra descriptors with data preparation [with _=’ExtendedValenceSignature’, desc_set=&lt;qsprpred.extra.data.utils.descr…nature object at 0x7fe01eae6050&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
+<dd><p>Test the calculation of extra descriptors with data preparation [with _=’ExtendedValenceSignature’, desc_set=&lt;qsprpred.extra.data.utils.descr…nature object at 0x7f43c7296530&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetT…S: ‘SINGLECLASS’&gt;, ‘th’: [0.3]}]].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -4588,7 +4602,7 @@ block, allowing further test code to be executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_0_ProDec_MULTICLASS">
 <span class="sig-name descname"><span class="pre">testDescriptorsPCMAll_0_ProDec_MULTICLASS</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_0_ProDec_MULTICLASS" title="Permalink to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_MULTICLASS’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7fe01eb5a320&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…&gt;, ‘th’: [5.0, 5.5, 6.5, 10.0]}]].</p>
+<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_MULTICLASS’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7f43c71745e0&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…&gt;, ‘th’: [5.0, 5.5, 6.5, 10.0]}]].</p>
 <p>Note that they are not checked with all possible settings
 and all possible preparations,
 but only with the default settings provided
@@ -4601,7 +4615,7 @@ so if you need a specific descriptor tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_1_ProDec_MULTICLASS">
 <span class="sig-name descname"><span class="pre">testDescriptorsPCMAll_1_ProDec_MULTICLASS</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_1_ProDec_MULTICLASS" title="Permalink to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_MULTICLASS’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7fe01e9c0b20&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…&gt;, ‘th’: [5.0, 5.5, 6.5, 10.0]}]].</p>
+<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_MULTICLASS’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7f43c6fbb670&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…&gt;, ‘th’: [5.0, 5.5, 6.5, 10.0]}]].</p>
 <p>Note that they are not checked with all possible settings
 and all possible preparations,
 but only with the default settings provided
@@ -4614,7 +4628,7 @@ so if you need a specific descriptor tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_2_ProDec_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsPCMAll_2_ProDec_REGRESSION</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_2_ProDec_REGRESSION" title="Permalink to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_REGRESSION’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7fe01e9c3e80&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…asks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_REGRESSION’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7f43c6fb9ff0&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…asks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings
 and all possible preparations,
 but only with the default settings provided
@@ -4627,7 +4641,7 @@ so if you need a specific descriptor tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_3_ProDec_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsPCMAll_3_ProDec_REGRESSION</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_3_ProDec_REGRESSION" title="Permalink to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_REGRESSION’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7fe01e9c8e50&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…asks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_REGRESSION’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7f43c6fb15a0&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…asks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings
 and all possible preparations,
 but only with the default settings provided
@@ -4640,7 +4654,7 @@ so if you need a specific descriptor tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_4_ProDec_Multitask">
 <span class="sig-name descname"><span class="pre">testDescriptorsPCMAll_4_ProDec_Multitask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_4_ProDec_Multitask" title="Permalink to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_Multitask’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7fe01e9d6590&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…S: ‘SINGLECLASS’&gt;, ‘th’: [6.5]}]].</p>
+<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_Multitask’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7f43c6fb38e0&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…S: ‘SINGLECLASS’&gt;, ‘th’: [6.5]}]].</p>
 <p>Note that they are not checked with all possible settings
 and all possible preparations,
 but only with the default settings provided
@@ -4653,7 +4667,7 @@ so if you need a specific descriptor tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_5_ProDec_Multitask">
 <span class="sig-name descname"><span class="pre">testDescriptorsPCMAll_5_ProDec_Multitask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestDescriptorsPCM.testDescriptorsPCMAll_5_ProDec_Multitask" title="Permalink to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_Multitask’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7fe01e9d7820&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…S: ‘SINGLECLASS’&gt;, ‘th’: [6.5]}]].</p>
+<dd><p>Tests all available descriptor sets with data set preparation [with _=’ProDec_Multitask’, desc_set=&lt;qsprpred.extra.data.utils.descr…ProDec object at 0x7f43c6fdd150&gt;, target_props=[{‘name’: ‘pchembl_value_Median’…S: ‘SINGLECLASS’&gt;, ‘th’: [6.5]}]].</p>
 <p>Note that they are not checked with all possible settings
 and all possible preparations,
 but only with the default settings provided
@@ -5579,7 +5593,7 @@ block, allowing further test code to be executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_00_Descriptor_None_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_00_Descriptor_None_None_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_00_Descriptor_None_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_None_None’, name=’Descriptor_None_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01ea8fee0&gt;], split=None, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_None_None’, name=’Descriptor_None_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e6d70&gt;], split=None, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5599,7 +5613,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_01_Descriptor_None_None_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_01_Descriptor_None_None_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_01_Descriptor_None_None_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_HighCorrelationFilter_None’, name=’Descriptor_None_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01ea8ff70&gt;], split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01ea8ff40&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_HighCorrelationFilter_None’, name=’Descriptor_None_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e6ce0&gt;], split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e6d10&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5619,7 +5633,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_02_Descriptor_None_StandardScaler_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_02_Descriptor_None_StandardScaler_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_02_Descriptor_None_StandardScaler_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_None_None’, name=’Descriptor_None_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaac190&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_None_None’, name=’Descriptor_None_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e6b00&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5639,7 +5653,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_03_Descriptor_None_StandardScaler_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_03_Descriptor_None_StandardScaler_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_03_Descriptor_None_StandardScaler_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, name=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaac310&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaac3a0&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, name=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e6980&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e68f0&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5659,7 +5673,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_04_Descriptor_RandomSplit_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_04_Descriptor_RandomSplit_None_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_04_Descriptor_RandomSplit_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_None_None’, name=’Descriptor_RandomSplit_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaac520&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaac550&gt;, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_None_None’, name=’Descriptor_RandomSplit_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e6770&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e6740&gt;, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5679,7 +5693,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_05_Descriptor_RandomSplit_None_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_05_Descriptor_RandomSplit_None_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_05_Descriptor_RandomSplit_None_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaac670&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaac640&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaac700&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e6620&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e6650&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e6590&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5699,7 +5713,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_06_Descriptor_RandomSplit_StandardScaler_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_06_Descriptor_RandomSplit_StandardScaler_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_06_Descriptor_RandomSplit_StandardScaler_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_StandardScaler_None_None’, name=’Descriptor_RandomSplit_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaac880&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaac8b0&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_StandardScaler_None_None’, name=’Descriptor_RandomSplit_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e6410&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e63e0&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5719,7 +5733,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_07_Descriptor_RandomSplit_StandardScaler_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_07_Descriptor_RandomSplit_StandardScaler_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_07_Descriptor_RandomSplit_StandardScaler_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaaca60&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaaca90&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaacb80&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e6230&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e6200&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e6110&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5739,7 +5753,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_08_Descriptor_None_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_08_Descriptor_None_None_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_08_Descriptor_None_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_None_None’, name=’Descriptor_None_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaacca0&gt;], split=None, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_None_None’, name=’Descriptor_None_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e5ff0&gt;], split=None, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5759,7 +5773,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_09_Descriptor_None_None_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_09_Descriptor_None_None_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_09_Descriptor_None_None_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_HighCorrelationFilter_None’, name=’Descriptor_None_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaacd30&gt;], split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaacd00&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_HighCorrelationFilter_None’, name=’Descriptor_None_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e5f60&gt;], split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e5f90&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5779,7 +5793,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_10_Descriptor_None_StandardScaler_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_10_Descriptor_None_StandardScaler_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_10_Descriptor_None_StandardScaler_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_None_None’, name=’Descriptor_None_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaacf10&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_None_None’, name=’Descriptor_None_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e5d80&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5799,7 +5813,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_11_Descriptor_None_StandardScaler_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_11_Descriptor_None_StandardScaler_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_11_Descriptor_None_StandardScaler_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, name=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaad090&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaad120&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, name=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e5c00&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e5b70&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5819,7 +5833,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_12_Descriptor_RandomSplit_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_12_Descriptor_RandomSplit_None_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_12_Descriptor_RandomSplit_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_None_None’, name=’Descriptor_RandomSplit_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaad2a0&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaad2d0&gt;, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_None_None’, name=’Descriptor_RandomSplit_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e59f0&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e59c0&gt;, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5839,7 +5853,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_13_Descriptor_RandomSplit_None_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_13_Descriptor_RandomSplit_None_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_13_Descriptor_RandomSplit_None_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaad3f0&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaad3c0&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaad480&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e58a0&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e58d0&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e5810&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5859,7 +5873,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_14_Descriptor_RandomSplit_StandardScaler_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_14_Descriptor_RandomSplit_StandardScaler_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_14_Descriptor_RandomSplit_StandardScaler_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_StandardScaler_None_None’, name=’Descriptor_RandomSplit_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaad600&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaad630&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_StandardScaler_None_None’, name=’Descriptor_RandomSplit_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e5690&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e5660&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5879,7 +5893,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_15_Descriptor_RandomSplit_StandardScaler_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_15_Descriptor_RandomSplit_StandardScaler_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_15_Descriptor_RandomSplit_StandardScaler_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaad7e0&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaad810&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaad900&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e54b0&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e5480&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e5390&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5899,7 +5913,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_16_Descriptor_None_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_16_Descriptor_None_None_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_16_Descriptor_None_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_None_None’, name=’Descriptor_None_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaada20&gt;], split=None, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_None_None’, name=’Descriptor_None_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e5270&gt;], split=None, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5919,7 +5933,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_17_Descriptor_None_None_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_17_Descriptor_None_None_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_17_Descriptor_None_None_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_HighCorrelationFilter_None’, name=’Descriptor_None_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaada80&gt;], split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaadab0&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_None_HighCorrelationFilter_None’, name=’Descriptor_None_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e5210&gt;], split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e51e0&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5939,7 +5953,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_18_Descriptor_None_StandardScaler_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_18_Descriptor_None_StandardScaler_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_18_Descriptor_None_StandardScaler_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_None_None’, name=’Descriptor_None_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaade10&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_None_None’, name=’Descriptor_None_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e4e80&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5959,7 +5973,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_19_Descriptor_None_StandardScaler_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_19_Descriptor_None_StandardScaler_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_19_Descriptor_None_StandardScaler_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, name=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaae050&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaae020&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, name=’Descriptor_None_StandardScaler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e4c40&gt;], split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e4b80&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5979,7 +5993,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_20_Descriptor_RandomSplit_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_20_Descriptor_RandomSplit_None_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_20_Descriptor_RandomSplit_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_None_None’, name=’Descriptor_RandomSplit_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaae260&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaae290&gt;, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_None_None’, name=’Descriptor_RandomSplit_None_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e4970&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e4940&gt;, feature_standardizer=None, feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -5999,7 +6013,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_21_Descriptor_RandomSplit_None_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_21_Descriptor_RandomSplit_None_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_21_Descriptor_RandomSplit_None_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaae470&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaae440&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaae530&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_None_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e4760&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e4790&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c70e46a0&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -6019,7 +6033,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_22_Descriptor_RandomSplit_StandardScaler_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_22_Descriptor_RandomSplit_StandardScaler_None_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_22_Descriptor_RandomSplit_StandardScaler_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_StandardScaler_None_None’, name=’Descriptor_RandomSplit_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaae740&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaae770&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_StandardScaler_None_None’, name=’Descriptor_RandomSplit_StandardScaler_None_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e4490&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e4460&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -6039,7 +6053,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_23_Descriptor_RandomSplit_StandardScaler_HighCorrelationFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_23_Descriptor_RandomSplit_StandardScaler_HighCorrelationFilter_None</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tests.TestPCMDataSetPreparation.testPrepCombinations_23_Descriptor_RandomSplit_StandardScaler_HighCorrelationFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7fe01eaae9e0&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7fe01eaaea10&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7fe01eaaebc0&gt;, data_filter=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, name=’Descriptor_RandomSplit_Standard…aler_HighCorrelationFilter_None’, feature_calculators=[&lt;qsprpred.data.utils.descriptor…lator object at 0x7f43c70e41f0&gt;], split=&lt;qsprpred.data.utils.datasplitte…mSplit object at 0x7f43c70e41c0&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.utils.featurefilt…Filter object at 0x7f43c7296260&gt;, data_filter=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
