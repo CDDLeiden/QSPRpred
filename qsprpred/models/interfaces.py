@@ -583,7 +583,6 @@ class QSPRModel(ABC):
         Returns:
             np.ndarray: an array of predictions
         """
-
         if self.task.isRegression() or not use_probas:
             predictions = self.predict(dataset)
             # always return 2D array
