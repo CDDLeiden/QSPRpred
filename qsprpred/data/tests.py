@@ -1005,15 +1005,16 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         )
         df_descriptors.iloc[-3:] = df_descriptors.iloc[[0, 1, 2]]
 
-        dup_filter1 = DuplicateFilter(
-            keep="first",
-            year_name="Year of first disclosure",
-            target_props=["VDss", "CL"]
-        )
+        dup_filter1 = DuplicateFilter(keep=True)
         dup_filter1(df, df_descriptors)
 
-        dup_filter2 = DuplicateFilter(keep="mean", target_props=["VDss", "CL"])
+        dup_filter2 = DuplicateFilter(keep=False)
         dup_filter2(df, df_descriptors)
+
+        dup_filter3 = DuplicateFilter(
+            keep="first", year_name="Year of first disclosure"
+        )
+        dup_filter3(df, df_descriptors)
 
 
 class TestTargetImputation(PathMixIn, TestCase):

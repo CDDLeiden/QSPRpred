@@ -67,30 +67,23 @@ class DuplicateFilter(DataFilter):
 
     Attributes:
         keep (str): For duplicate entries determines how properties are treated,
-            e.g. keep property of first entry (by year), average of all entries,
-            or remove duplicate entries
-            options: 'first', 'last', 'average', 'median', False
+            if False remove both (/all) duplicate entries, if True keep them,
+            if first, keep row of first entry (based on year), if last keep row of
+            last entry based on year.
+            options: 'first', 'last', True, False
         year_name (str, optional): name of column containing year of publication
             used if keep is 'first' or 'last'
-        target_props (list, optional): name of column(s) containing target properties
-            to combine for duplicates
-            used if keep is 'average' or 'median'
     """
-    def __init__(
-        self,
-        keep: str = "first",
-        year_name: Optional[str] = "Year",
-        target_props: Optional[list] = None
-    ):
+    def __init__(self, keep: str = "first", year_name: Optional[str] = "Year"):
         self.keep = keep
         self.year_name = year_name
-        self.target_props = target_props
 
     def __call__(self, df: pd.DataFrame, descriptors: pd.DataFrame) -> pd.DataFrame:
         """Filter rows from dataframe.
 
         Arguments:
             df (pandas dataframe): dataframe to filter
+            descriptors (pandas dataframe): dataframe containing descriptors
         """
         df.shape[0]
 
@@ -111,55 +104,32 @@ class DuplicateFilter(DataFilter):
             if this_set not in allrepeats:
                 allrepeats.append(list(this_set))
 
-        if self.keep in ["first", "last"]:
-            if self.target_props is None or len(self.target_props) == 1:
-                logger.warning(
-                    "For dataframe with multiple target properties it is /"
-                    "recommended to give target_props to prevent loss of /"
-                    "values for properties only occuring for some datapoints"
-                )
-                remove_idxs = set()
-                for repeat in allrepeats:
-                    indexes = df.index[repeat]
-                    years = df.loc[indexes, self.year_name]
-                    if self.keep == "first":
-                        tokeep = years.idxmin()  # Use the first occurance
-                    else:
-                        tokeep = years.idxmax()
-                    remove_idx = list(indexes)
-                    remove_idx.remove(tokeep)
-                    remove_idxs.update(remove_idx)
-                df = df.drop(remove_idxs)
-            else:
-                remove_indexes = []
-                for repeat in allrepeats:
-                    indexes = df.index[repeat]
-                    df_values = df.loc[indexes]
-                    for target_prop in self.target_props:
-                        if self.keep == "first":
-                            index = df_values[self.year_name].idxmin()
-                        elif self.keep == "last":
-                            index = df_values[self.year_name].idxmax()
-                        replace = df_values.loc[index, target_prop]
-                        df.at[indexes[0], target_prop] = replace
-                        #TODO now all other properties are just those from first row
-                        remove_indexes.extend(indexes[1:])
-                df = df.drop(remove_indexes)
-        elif self.keep in ["mean", "median"]:
-            remove_indexes = []
-            for repeat in allrepeats:
-                indexes = df.index[repeat]
-                for target_prop in self.target_props:
-                    values = df.loc[indexes, target_prop]
-                    if self.keep == "mean":
-                        replace = sum(values) / len(values)
-                    elif self.keep == "median":
-                        replace = values.median()
-                    df.at[indexes[0], target_prop] = replace
-                remove_indexes.extend(indexes[1:])
-            df = df.drop(remove_indexes)
+        if self.keep is True:
+            logger.warning(
+                "Dataframe contains duplicate compounds and/or compounds with "
+                "identical descriptors.\nThe following rows contain duplicates: "
+                f"{[df.index[repeats].to_list() for repeats in allrepeats]}"
+            )
         elif self.keep is False:
             remove_idx = [item for repeat in allrepeats for item in repeat]
             df = df.drop(df.index[remove_idx])
+        elif self.keep in ["first", "last"]:
+            logger.warning(
+                "For dataframe with multiple target properties it is "
+                "recommended to give target_props to prevent loss of "
+                "values for properties only occuring for some datapoints"
+            )
+            remove_idxs = set()
+            for repeat in allrepeats:
+                indexes = df.index[repeat]
+                years = df.loc[indexes, self.year_name]
+                if self.keep == "first":
+                    tokeep = years.idxmin()  # Use the first occurance
+                else:
+                    tokeep = years.idxmax()
+                remove_idx = list(indexes)
+                remove_idx.remove(tokeep)
+                remove_idxs.update(remove_idx)
+            df = df.drop(remove_idxs)
 
         return df
