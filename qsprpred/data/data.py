@@ -2077,7 +2077,6 @@ class QSPRDataset(MoleculeTable):
         self,
         smiles_standardizer: str | Callable | None = "chembl",
         datafilters: list = [DuplicateFilter(keep=True)],
-        datafilters: Optional[list] = None,
         split=None,
         fold=None,
         feature_calculators: Optional[list] = None,
