@@ -75,6 +75,7 @@ class ModelPCM(QSPRModel, ABC):
             feature_calculators=self.featureCalculators,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value,
+            shuffle=False,
         )
         return dataset, failed_mask
 

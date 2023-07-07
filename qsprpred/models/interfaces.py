@@ -568,6 +568,7 @@ class QSPRModel(ABC):
             feature_calculators=self.featureCalculators,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value,
+            shuffle=False
         )
         return dataset, failed_mask
 
@@ -582,7 +583,6 @@ class QSPRModel(ABC):
         Returns:
             np.ndarray: an array of predictions
         """
-
         if self.task.isRegression() or not use_probas:
             predictions = self.predict(dataset)
             # always return 2D array

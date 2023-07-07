@@ -359,9 +359,7 @@ class PandasDataSet(DataSet):
 
         return pd.concat(results, axis=0)
 
-    def transform(
-        self, targets: list, transformer: Callable, addAs: Optional[list] = None
-    ):
+    def transform(self, targets: list, transformer: Callable, addAs: Optional[list] = None):
         """Transform the data frame (or its part) using a list of transformers.
 
         Each transformer is a function that takes the data frame (or a subset of it as
@@ -1944,10 +1942,16 @@ class QSPRDataset(MoleculeTable):
             self.X_ind = self.X.drop(self.X.index)
             self.y_ind = self.y.drop(self.y.index)
 
-    def loadDescriptorsToSplits(self):
+    def loadDescriptorsToSplits(self,
+                                shuffle: bool = True,
+                                random_state: Optional[int] = None):
         """Load all available descriptors into the train and test splits.
 
         If no descriptors are available, an exception will be raised.
+
+        args:
+            shuffle (bool): whether to shuffle the training and test sets
+            random_state (int): random state for shuffling
 
         Raises:
             ValueError: if no descriptors are available
@@ -1969,12 +1973,13 @@ class QSPRDataset(MoleculeTable):
             self.y_ind = pd.DataFrame(columns=[self.targetPropertyNames])
 
         # shuffle the training and test sets
-        self.X = self.X.sample(frac=1)
-        self.X_ind = self.X_ind.sample(frac=1)
-        self.y = self.y.loc[self.X.index, :]
-        self.y_ind = self.y_ind.loc[self.X_ind.index, :]
+        if shuffle:
+            self.X = self.X.sample(frac=1, random_state=random_state)
+            self.X_ind = self.X_ind.sample(frac=1, random_state=random_state)
+            self.y = self.y.loc[self.X.index, :]
+            self.y_ind = self.y_ind.loc[self.X_ind.index, :]
 
-    def featurizeSplits(self):
+    def featurizeSplits(self, shuffle: bool = True, random_state: Optional[int] = None):
         """If the data set has descriptors, load them into the train and test splits.
 
         If no descriptors are available, remove all features from
@@ -1982,9 +1987,12 @@ class QSPRDataset(MoleculeTable):
         will retain their original length along the sample axis (rows). This is useful
         for the case where the data set has no descriptors, but the user wants to retain
         train and test splits.
+
+        shuffle (bool): whether to shuffle the training and test sets
+        random_state (int): random state for shuffling
         """
         if self.featureNames:
-            self.loadDescriptorsToSplits()
+            self.loadDescriptorsToSplits(shuffle=shuffle, random_state=random_state)
             self.X = self.X[self.featureNames]
             self.X_ind = self.X_ind[self.featureNames]
         else:
@@ -2068,14 +2076,17 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: Optional[list] = [DuplicateFilter(keep=True)],
+        datafilters: list = [DuplicateFilter(keep=True)],
+        datafilters: Optional[list] = None,
         split=None,
         fold=None,
         feature_calculators: Optional[list] = None,
         feature_filters: Optional[list] = None,
         feature_standardizer: Optional[SKLearnStandardizer] = None,
         feature_fill_value: float = np.nan,
-        recalculate_features: bool = False
+        recalculate_features: bool = False,
+        shuffle: bool = True,
+        random_state: Optional[int] = None
     ):
         """Prepare the dataset for use in QSPR model.
 
@@ -2096,6 +2107,8 @@ class QSPRDataset(MoleculeTable):
                 present in the file
             feature_fill_value (float): value to fill missing values with.
                 Defaults to `numpy.nan`
+            shuffle (bool): whether to shuffle the training and test sets
+            random_state (int): random state for shuffling
         """
         # apply sanitization and standardization
         if smiles_standardizer is not None:
@@ -2124,7 +2137,7 @@ class QSPRDataset(MoleculeTable):
 
         # featurize splits
         if self.hasDescriptors:
-            self.featurizeSplits()
+            self.featurizeSplits(shuffle=shuffle, random_state=random_state)
         else:
             logger.warning(
                 "Attempting to featurize splits without descriptors. "
@@ -2193,7 +2206,7 @@ class QSPRDataset(MoleculeTable):
         elif self.X.shape[0] == 0:
             raise ValueError("X has no rows.")
 
-    def createFolds(self, split: DataSplit = None):
+    def createFolds(self, split: DataSplit | None = None):
         """Create folds for cross validation from the  current feature matrix.
 
         If you specify a split to use, it will be used to generate the folds.
