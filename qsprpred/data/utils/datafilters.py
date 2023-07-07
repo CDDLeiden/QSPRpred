@@ -105,11 +105,12 @@ class DuplicateFilter(DataFilter):
                 allrepeats.append(list(this_set))
 
         if self.keep is True:
-            logger.warning(
-                "Dataframe contains duplicate compounds and/or compounds with "
-                "identical descriptors.\nThe following rows contain duplicates: "
-                f"{[df.index[repeats].to_list() for repeats in allrepeats]}"
-            )
+            if len(allrepeats) > 0:
+                logger.warning(
+                    "Dataframe contains duplicate compounds and/or compounds with "
+                    "identical descriptors.\nThe following rows contain duplicates: "
+                    f"{[df.index[repeats].to_list() for repeats in allrepeats]}"
+                )
         elif self.keep is False:
             remove_idx = [item for repeat in allrepeats for item in repeat]
             df = df.drop(df.index[remove_idx])
