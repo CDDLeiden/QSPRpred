@@ -5,7 +5,7 @@ import numbers
 import os
 import shutil
 from os.path import exists
-from typing import Type
+from typing import Optional, Type
 from unittest import TestCase
 
 import numpy as np
@@ -81,9 +81,7 @@ class ModelTestMixIn:
         # perform bayes optimization
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
-            scoring=model.scoreFunc,
-            param_grid=search_space_bs,
-            n_trials=1
+            scoring=model.scoreFunc, param_grid=search_space_bs, n_trials=1
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
@@ -91,8 +89,7 @@ class ModelTestMixIn:
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
-            scoring=model.scoreFunc,
-            param_grid=search_space_gs
+            scoring=model.scoreFunc, param_grid=search_space_gs
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)
@@ -135,17 +132,11 @@ class ModelTestMixIn:
         # define checks of the shape of the predictions
         def check_shape(input_smiles):
             if predictor.targetProperties[0].task.isClassification() and use_probas:
-                if predictor.isMultiTask:
-                    self.assertEqual(len(predictions), len(predictor.targetProperties))
-                    self.assertEqual(
-                        predictions[0].shape,
-                        (len(input_smiles), predictor.targetProperties[0].nClasses),
-                    )
-                else:
-                    self.assertEqual(
-                        predictions.shape,
-                        (len(input_smiles), predictor.targetProperties[0].nClasses),
-                    )
+                self.assertEqual(len(predictions), len(predictor.targetProperties))
+                self.assertEqual(
+                    predictions[0].shape,
+                    (len(input_smiles), predictor.targetProperties[0].nClasses),
+                )
             else:
                 self.assertEqual(
                     predictions.shape,
@@ -214,9 +205,9 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     @staticmethod
     def getModel(
         name: str,
-        alg: Type = None,
+        alg: Optional[Type] = None,
         dataset: QSPRDataset = None,
-        parameters: dict = None,
+        parameters: Optional[dict] = None,
     ):
         """Create a QSPRsklearn model.
 

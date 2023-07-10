@@ -9,7 +9,7 @@ import os
 from copy import deepcopy
 from datetime import datetime
 from inspect import isclass
-from typing import Any
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
@@ -33,8 +33,8 @@ class QSPRsklearn(QSPRModel):
         base_dir: str,
         alg=None,
         data: QSPRDataset = None,
-        name: str = None,
-        parameters: dict = None,
+        name: Optional[str] = None,
+        parameters: Optional[dict] = None,
         autoload: bool = True,
         scoring=None,
     ):
@@ -111,7 +111,7 @@ class QSPRsklearn(QSPRModel):
     def evaluate(
         self,
         save: bool = True,
-        parameters: dict = None,
+        parameters: Optional[dict] = None,
         score_func=None,
         **kwargs
     ) -> float | np.ndarray:
@@ -123,7 +123,7 @@ class QSPRsklearn(QSPRModel):
                 (don't save predictions when used in bayesian optimization)
             parameters (dict):
                 model parameters, if None, the parameters from the model are used
-            score_func (Metric): 
+            score_func (Metric):
                 metric to use for scoring, if None, the metric from the model is used
             **kwargs:
                 additional keyword arguments for the estimator's predict method
@@ -134,7 +134,6 @@ class QSPRsklearn(QSPRModel):
         """
         evalparams = self.parameters if parameters is None else parameters
         score_func = self.scoreFunc if score_func is None else score_func
-        
         # check if data is available
         self.checkForData()
         folds = self.data.createFolds()
@@ -184,21 +183,12 @@ class QSPRsklearn(QSPRModel):
             crossvalmodel.fit(**fit_set)
             # predict and store predictions
             if self.task.isRegression():
-                preds = crossvalmodel.predict(X_test)
-                # some sklearn regression models return 1d arrays
-                # and others 2d arrays (e.g. PLSRegression)
-                if preds.ndim == 1:
-                    preds = preds.reshape(-1, 1)
-                cvs[idx_test] = preds
+                cvs[idx_test] = self.predict(X_test, crossvalmodel)
             else:
-                # for the multiclass-multitask case predict_proba returns a list of
-                # arrays, otherwise a single array is returned
-                preds = crossvalmodel.predict_proba(X_test)
-                for idx in range(len(self.data.targetProperties)):
-                    if len(self.data.targetProperties) == 1:
-                        cvs[idx][idx_test] = preds
-                    else:
-                        cvs[idx][idx_test] = preds[idx]
+                preds = self.predictProba(X_test, crossvalmodel)
+                for idx in range(self.nTargets):
+                    cvs[idx][idx_test] = preds[idx]
+
             cvs_ids[idx_test] = X.iloc[idx_test].index.to_numpy()
             # log some things
             logger.info(
@@ -218,21 +208,11 @@ class QSPRsklearn(QSPRModel):
         # if independent test set is available, predict on it
         if X_ind.shape[0] > 0:
             if self.task.isRegression():
-                preds = indmodel.predict(X_ind)
-                # some sklearn regression models return 1d arrays
-                # and others 2d arrays (e.g. PLSRegression)
-                if preds.ndim == 1:
-                    preds = preds.reshape(-1, 1)
-                inds = preds
+                inds = self.predict(X_ind, indmodel)
             else:
-                # for the multiclass-multitask case predict_proba returns a list of
-                # arrays, otherwise a single array is returned
-                preds = indmodel.predict_proba(X_ind)
+                preds = self.predictProba(X_ind, indmodel)
                 for idx in range(self.nTargets):
-                    if self.nTargets == 1:
-                        inds[idx] = preds
-                    else:
-                        inds[idx] = preds[idx]
+                    inds[idx] = preds[idx]
         else:
             logger.warning(
                 "No independent test set available. "
@@ -296,7 +276,7 @@ class QSPRsklearn(QSPRModel):
         else:
             return np.transpose([np.argmax(y_pred, axis=1) for y_pred in cvs])
 
-    def loadEstimator(self, params: dict = None) -> Any:
+    def loadEstimator(self, params: Optional[dict] = None) -> Any:
         """Load estimator from alg and params.
 
         Args:
@@ -314,7 +294,9 @@ class QSPRsklearn(QSPRModel):
         else:
             return self.alg()
 
-    def loadEstimatorFromFile(self, params: dict = None, fallback_load: bool = True):
+    def loadEstimatorFromFile(
+        self, params: Optional[dict] = None, fallback_load: bool = True
+    ):
         """Load estimator from file.
 
         Args:
@@ -344,18 +326,37 @@ class QSPRsklearn(QSPRModel):
         skljson.to_json(self.estimator, estimator_path)
         return estimator_path
 
-    def predict(self, X: pd.DataFrame | np.ndarray | QSPRDataset):
+    def predict(
+        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+    ):
         """See `QSARModel.predict`."""
+        if estimator is None:
+            estimator = self.estimator
         if isinstance(X, QSPRDataset):
             X = X.getFeatures(raw=True, concat=True)
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
-        return self.estimator.predict(X)
+        preds = estimator.predict(X)
+        # Most sklearn regression models return 1d arrays for single target regression
+        # and sklearn single task classification models return 1d arrays
+        # However, QSPRpred expects 2d arrays in every case
+        if preds.ndim == 1:
+            preds = preds.reshape(-1, 1)
+        return preds
 
-    def predictProba(self, X: pd.DataFrame | np.ndarray | QSPRDataset):
+    def predictProba(
+        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+    ):
         """See `QSARModel.predictProba`."""
+        if estimator is None:
+            estimator = self.estimator
         if isinstance(X, QSPRDataset):
             X = X.getFeatures(raw=True, concat=True)
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
-        return self.estimator.predict_proba(X)
+        preds = estimator.predict_proba(X)
+        # if preds is a numpy array, convert it to a list
+        # to be consistent with the multiclass-multitask case
+        if isinstance(preds, np.ndarray):
+            preds = [preds]
+        return preds

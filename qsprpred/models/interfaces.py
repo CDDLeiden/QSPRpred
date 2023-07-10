@@ -752,7 +752,7 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def predict(self, X: pd.DataFrame | np.ndarray | QSPRDataset):
+    def predict(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
         Args:
@@ -760,12 +760,12 @@ class QSPRModel(ABC):
 
         Returns:
             np.ndarray:
-                an array of predictions, can be a 1D array for single target models
-                or a 2D/3D array for multi-target/multi-class models
+                2D array containing the predictions, where each row corresponds
+                to a sample in the data and each column to a target property
         """
 
     @abstractmethod
-    def predictProba(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> np.ndarray:
+    def predictProba(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> list:
         """Make predictions for the given data matrix or `QSPRDataset`,
         but use probabilities for classification models. Does not work with
         regression models.
@@ -774,8 +774,10 @@ class QSPRModel(ABC):
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
 
         Returns:
-            np.ndarray:
-                an array of predicted class probabilities
+            list[np.ndarray]:
+                a list of 2D arrays containing the probabilities for each class,
+                where each array corresponds to a target property, each row
+                to a sample in the data and each column to a class
         """
 
 

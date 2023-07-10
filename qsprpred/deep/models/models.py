@@ -9,7 +9,7 @@ import os
 import sys
 from copy import deepcopy
 from datetime import datetime
-from typing import Callable, Type
+from typing import Any, Callable, Type
 
 import numpy as np
 import pandas as pd
@@ -321,7 +321,10 @@ class QSPRDNN(QSPRModel):
             )
             last_save_epochs += last_save_epoch
             logger.info(f"cross validation fold {i}: last save epoch {last_save_epoch}")
-            cvs[idx_test] = crossvalmodel.predict(X_test)
+            if self.task.isClassification():
+                cvs[idx_test] = self.predictProba(X_test, crossvalmodel)[0]
+            else:
+                cvs[idx_test] = self.predict(X_test, crossvalmodel)
             fold_counter[idx_test] = i
             cvs_ids[idx_test] = X.index.values[idx_test]
         # save cross validation predictions if specified
@@ -333,7 +336,10 @@ class QSPRDNN(QSPRModel):
             self.optimalEpochs = int(math.ceil(last_save_epochs / n_folds)) + 1
             indmodel = indmodel.set_params(n_epochs=self.optimalEpochs)
             indmodel.fit(X_train_fold, y_train_fold)
-            inds = indmodel.predict(X_ind)
+            if self.task.isClassification():
+                inds = self.predictProba(X_ind, indmodel)[0]
+            else:
+                inds = self.predict(X_ind, indmodel)
             inds_ids = X_ind.index.values
             # save cross validation predictions and independent test set predictions
             cvs_index = pd.Index(cvs_ids, name=self.data.getDF().index.name)
@@ -400,7 +406,11 @@ class QSPRDNN(QSPRModel):
         self.metaInfo["n_class"] = self.nClass
         return super().save()
 
-    def predict(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> np.ndarray:
+    def predict(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> np.ndarray:
         """Predict the target property values for the given features.
 
         Args:
@@ -409,24 +419,32 @@ class QSPRDNN(QSPRModel):
         Returns:
             np.ndarray: predicted target property values
         """
-        scores = self.predictProba(X)
+        estimator = self.estimator if estimator is None else estimator
+        scores = self.predictProba(X, estimator)
         if self.task.isClassification():
-            return np.argmax(scores, axis=1)
+            return np.argmax(scores[0], axis=1, keepdims=True)
         else:
-            return scores.flatten()
+            return scores[0]
 
-    def predictProba(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> np.ndarray:
+    def predictProba(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> np.ndarray:
         """Predict the probability of target property values for the given features.
 
         Args:
             X (pd.DataFrame | np.ndarray | QSPRDataset): features to predict
+            estimator (Any, optional): estimator instance. Defaults to None.
 
         Returns:
             np.ndarray: predicted probability of target property values
         """
+        if estimator is None:
+            estimator = self.estimator
         if isinstance(X, QSPRDataset):
             X = X.getFeatures(raw=True, concat=True)
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
 
-        return self.estimator.predict(X)
+        return [estimator.predict(X)]
