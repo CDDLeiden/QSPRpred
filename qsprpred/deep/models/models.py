@@ -248,7 +248,9 @@ class QSPRDNN(QSPRModel):
             "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         logger.info("Logging model fit to: %s.log" % self.outPrefix)
-        self.estimator.fit(X_all, y_all, log=True, log_prefix=self.outPrefix)
+        self.estimator = self.fit(
+            X_all, y_all, early_stopping=False, log=True, log_prefix=self.outPrefix
+        )
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
@@ -315,17 +317,10 @@ class QSPRDNN(QSPRModel):
             self.data.createFolds()
         ):
             crossvalmodel = self.loadEstimator(evalparams)
-            y_train = y_train.reshape(-1, 1)
-            # split cross validation fold train set into train
-            # and validation set for early stopping
-            X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
-                X_train, y_train, test_size=es_val_size
-            )
-            last_save_epoch = crossvalmodel.fit(
-                X_train_fold, y_train_fold, X_val_fold, y_val_fold
-            )
+            crossvalmodel, last_save_epoch = self.fit(X_train, y_train, crossvalmodel)
             last_save_epochs += last_save_epoch
             logger.info(f"cross validation fold {i}: last save epoch {last_save_epoch}")
+
             if self.task.isClassification():
                 cvs[idx_test] = self.predictProba(X_test, crossvalmodel)[0]
             else:
@@ -340,7 +335,7 @@ class QSPRDNN(QSPRModel):
             # number of epochs from the cross-validation
             self.optimalEpochs = int(math.ceil(last_save_epochs / n_folds)) + 1
             indmodel = indmodel.set_params(n_epochs=self.optimalEpochs)
-            indmodel.fit(X_train_fold, y_train_fold)
+            indmodel = self.fit(X_train, y_train, indmodel, early_stopping=False)
             if self.task.isClassification():
                 inds = self.predictProba(X_ind, indmodel)[0]
             else:
@@ -410,6 +405,43 @@ class QSPRDNN(QSPRModel):
         self.metaInfo["n_dim"] = self.nDim
         self.metaInfo["n_class"] = self.nClass
         return super().save()
+
+    def fit(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None,
+        early_stopping: bool = True,
+        **kwargs
+    ):
+        """Fit the model to the given data matrix or `QSPRDataset`.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
+            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            estimator (Any): estimator instance to use for fitting,
+            kwargs (dict): additional keyword arguments for the estimator's fit method
+
+        Returns:
+            (Any): fitted estimator instance
+        """
+        estimator = self.estimator if estimator is None else estimator
+        if isinstance(X, QSPRDataset):
+            X = X.getFeatures(raw=True, concat=True)
+            y = y.getTargetPropertiesValues(concat=True)
+        if self.featureStandardizer:
+            X = self.featureStandardizer(X)
+
+        y = y.reshape(-1, 1)
+
+        if early_stopping:
+            # split cross validation fold train set into train
+            # and validation set for early stopping
+            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
+            return estimator.fit(X_train, y_train, X_val, y_val, **kwargs)
+
+        estimator, _ = estimator.fit(X, y, **kwargs)
+        return estimator
 
     def predict(
         self,

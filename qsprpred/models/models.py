@@ -8,7 +8,6 @@ the `QSPRModel` interface can be added.
 import os
 from copy import deepcopy
 from datetime import datetime
-from inspect import isclass
 from typing import Any, Optional
 
 import numpy as np
@@ -94,19 +93,11 @@ class QSPRsklearn(QSPRModel):
         # get data into fit set
         X_all = self.data.getFeatures(concat=True).values
         y_all = self.data.getTargetPropertiesValues(concat=True)
-        if not self.task.isMultiTask:
-            y_all = y_all.values.ravel()
-        fit_set = {"X": X_all}
-        # PLSRegression uses "Y" instead of "y"
-        if type(self.estimator).__name__ == "PLSRegression":
-            fit_set["Y"] = y_all
-        else:
-            fit_set["y"] = y_all
         # fit model
         logger.info(
             "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-        self.estimator.fit(**fit_set)
+        self.fit(X_all, y_all)
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
@@ -174,18 +165,8 @@ class QSPRsklearn(QSPRModel):
             )
             # store molecule indices
             fold_counter[idx_test] = i
-            # initialize fit set
-            fit_set = {"X": X_train}
-            # self.data.createFolds() returns numpy arrays by default
-            # so we don't call `.values` here
-            if (isclass(self.alg) and self.alg.__name__
-                == "PLSRegression") or (type(self.alg).__name__ == "PLSRegression"):
-                fit_set["Y"] = y_train.ravel()
-            elif self.isMultiTask:
-                fit_set["y"] = y_train
-            else:
-                fit_set["y"] = y_train.ravel()
-            crossvalmodel.fit(**fit_set)
+            # fit model
+            self.fit(X_train, y_train, crossvalmodel)
             # predict and store predictions
             if self.task.isRegression():
                 cvs[idx_test] = self.predict(X_test, crossvalmodel)
@@ -201,15 +182,8 @@ class QSPRsklearn(QSPRModel):
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
         # fitting on whole trainingset and predicting on test set
-        fit_set = {"X": X}
-        if type(self.estimator).__name__ == "PLSRegression":
-            fit_set["Y"] = y.values.ravel()
-        elif self.isMultiTask:
-            fit_set["y"] = y
-        else:
-            fit_set["y"] = y.values.ravel()
         indmodel = self.loadEstimator(evalparams)
-        indmodel.fit(**fit_set)
+        self.fit(X, y, indmodel)
         # if independent test set is available, predict on it
         if X_ind.shape[0] > 0:
             if self.task.isRegression():
@@ -330,6 +304,24 @@ class QSPRsklearn(QSPRModel):
         estimator_path = f"{self.outPrefix}.json"
         skljson.to_json(self.estimator, estimator_path)
         return estimator_path
+
+    def fit(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ):
+        """See `QSARModel.fit`."""
+        estimator = self.estimator if estimator is None else estimator
+        if isinstance(X, QSPRDataset):
+            X = X.getFeatures(raw=True, concat=True)
+            y = y.getTargetPropertiesValues(concat=True)
+        if self.featureStandardizer:
+            X = self.featureStandardizer(X)
+
+        if not self.task.isMultiTask:
+            y = y.ravel()
+        return estimator.fit(X, y)
 
     def predict(
         self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None

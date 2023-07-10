@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 from abc import ABC, abstractmethod
-from typing import Callable, Iterable, List, Optional, Type, Union
+from typing import Any, Callable, Iterable, List, Optional, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -757,11 +757,43 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def predict(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> np.ndarray:
+    def fit(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None,
+        early_stopping: bool = False,
+        **kwargs
+    ) -> Any | tuple[Any, Optional[int]]:
+        """Fit the model to the given data matrix or `QSPRDataset`.
+
+        If early stopping is used, the number of iterations after which the
+        model stopped training is returned as well.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
+            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            estimator (Any): estimator instance to use for fitting
+            early_stopping (bool): if True, early stopping is used
+            kwargs: additional keyword arguments for the fit function
+
+        Returns:
+            (Any): fitted estimator instance
+            (Optional[int]): in case of early stopping, the number of iterations
+                after which the model stopped training
+        """
+
+    @abstractmethod
+    def predict(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
+            estimator (Any): estimator instance to use for fitting
 
         Returns:
             np.ndarray:
@@ -770,13 +802,18 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def predictProba(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> list:
+    def predictProba(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> list:
         """Make predictions for the given data matrix or `QSPRDataset`,
         but use probabilities for classification models. Does not work with
         regression models.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
+            estimator (Any): estimator instance to use for fitting
 
         Returns:
             list[np.ndarray]:
