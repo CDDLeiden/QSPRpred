@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Iterable, List, Optional, Type, Union
+from typing import Callable, Iterable, List, Optional, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -403,6 +403,11 @@ class QSPRModel(ABC):
         """
         return f"{self.outDir}/{self.name}"
 
+    @property
+    @abstractmethod
+    def supportsEarlyStopping(self) -> bool:
+        """Return if the model supports early stopping."""
+
     def saveParams(self, params: dict) -> str:
         """Save model parameters to a JSON file.
 
@@ -692,7 +697,7 @@ class QSPRModel(ABC):
         return scorer
 
     @abstractmethod
-    def fitAllData(self) -> str:
+    def fit(self) -> str:
         """Build estimator model from the whole associated data set.
 
         Returns:
@@ -752,14 +757,11 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def predict(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Optional[Any]
-    ) -> np.ndarray:
+    def predict(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
-            estimator (object): estimator instance
 
         Returns:
             np.ndarray:
@@ -768,16 +770,13 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def predictProba(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Optional[Any]
-    ) -> list:
+    def predictProba(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> list:
         """Make predictions for the given data matrix or `QSPRDataset`,
         but use probabilities for classification models. Does not work with
         regression models.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
-            estimator (object): estimator instance
 
         Returns:
             list[np.ndarray]:

@@ -133,6 +133,11 @@ class QSPRDNN(QSPRModel):
             if self.parameters is not None and "n_epochs" in self.parameters else -1
         )
 
+    @property
+    def supportsEarlyStopping(self) -> bool:
+        """Whether the model supports early stopping or not."""
+        return True
+
     @classmethod
     def getDefaultParamsGrid(cls) -> list[list]:
         return SSPACE

@@ -78,6 +78,11 @@ class QSPRsklearn(QSPRModel):
         logger.info("parameters: %s" % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
 
+    @property
+    def supportsEarlyStopping(self) -> bool:
+        """Whether the model supports early stopping or not."""
+        return False
+
     def fitAllData(self) -> str:
         """Fit the underlying scikit-learn estimator.
 
