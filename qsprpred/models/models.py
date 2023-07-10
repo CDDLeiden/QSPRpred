@@ -78,7 +78,7 @@ class QSPRsklearn(QSPRModel):
         logger.info("parameters: %s" % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
 
-    def fit(self) -> str:
+    def fitAllData(self) -> str:
         """Fit the underlying scikit-learn estimator.
 
         Returns:

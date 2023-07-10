@@ -297,9 +297,10 @@ def QSPR_modelling(args):
                     parameters["class_weight"] = class_weight
                 counts = mydataset.y.value_counts()
                 scale_pos_weight = (
-                    counts[0] / counts[1] if
-                    (args.sample_weighing and len(tasks)==1 and
-                     not tasks[0].isMultiClass()) else 1
+                    counts[0] / counts[1] if (
+                        args.sample_weighing and len(tasks) == 1 and
+                        not tasks[0].isMultiClass()
+                    ) else 1
                 )
                 if alg_dict[model_type] == XGBClassifier:
                     parameters["scale_pos_weight"] = scale_pos_weight
@@ -343,9 +344,8 @@ def QSPR_modelling(args):
                 )
                 best_params = gridsearcher.optimize(QSPRmodel)
                 QSPRmodel.saveParams(best_params)
-            elif args.optimization == 'bayes':
-                search_space_bs = grid_params[grid_params[:, 0] ==
-                                              model_type, 1][0]
+            elif args.optimization == "bayes":
+                search_space_bs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_bs)
                 if reg and model_type == "RF":
                     if mydataset.y.min()[0] < 0 or mydataset.y_ind.min()[0] < 0:
@@ -383,7 +383,7 @@ def QSPR_modelling(args):
                         "for determining optimal number of epochs to stop training."
                     )
                 else:
-                    QSPRmodel.fit()
+                    QSPRmodel.fitAllData()
 
 
 if __name__ == "__main__":

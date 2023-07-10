@@ -212,7 +212,7 @@ class QSPRDNN(QSPRModel):
         torch.save(self.estimator.state_dict(), path)
         return path
 
-    def fit(self) -> str:
+    def fitAllData(self) -> str:
         """Train model on the training data,
         determine best model using test set, save best model.
 
