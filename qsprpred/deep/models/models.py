@@ -4,7 +4,6 @@ models
 Created by: Martin Sicho
 On: 12.05.23, 16:39
 """
-import math
 import os
 import sys
 from copy import deepcopy
@@ -273,128 +272,6 @@ class QSPRDNN(QSPRModel):
                 if not k.startswith("_") and k not in ["training", "device", "gpus"]
             }
         )
-
-    def evaluate(
-        self,
-        save: bool = True,
-        es_val_size: float = 0.1,
-        parameters: dict | None = None,
-        score_func=None
-    ) -> np.ndarray:
-        """Make predictions for crossvalidation and independent test set.
-
-        Args:
-            save (bool):
-                whether to save the cross validation predictions
-            es_val_size (float):
-                validation set size for early stopping in CV
-            parameters (dict):
-                model parameters, if None, the parameters from the model are used
-
-        Returns:
-            np.ndarray:
-                predictions for test set and cross-validation for further analysis
-            score_func (Metric):
-                scoring function for the model, if None, the default scoring function
-                for the task is used
-        """
-        evalparams = self.parameters if parameters is None else parameters
-        score_func = self.scoreFunc if score_func is None else score_func
-        X, X_ind = self.data.getFeatures()
-        y, y_ind = self.data.getTargetPropertiesValues()
-        last_save_epochs = 0
-        # prepare arrays to store molecule ids
-        cvs_ids = np.array([None] * len(X))
-        # create array for cross validation predictions
-        # and for keeping track of the number of folds
-        if self.task.isRegression():
-            cvs = np.zeros((y.shape[0], 1))
-        else:
-            cvs = np.zeros((y.shape[0], self.data.targetProperties[0].nClasses))
-        fold_counter = np.zeros(y.shape[0])
-        # perform cross validation
-        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(
-            self.data.createFolds()
-        ):
-            crossvalmodel = self.loadEstimator(evalparams)
-            crossvalmodel, last_save_epoch = self.fit(X_train, y_train, crossvalmodel)
-            last_save_epochs += last_save_epoch
-            logger.info(f"cross validation fold {i}: last save epoch {last_save_epoch}")
-
-            if self.task.isClassification():
-                cvs[idx_test] = self.predictProba(X_test, crossvalmodel)[0]
-            else:
-                cvs[idx_test] = self.predict(X_test, crossvalmodel)
-            fold_counter[idx_test] = i
-            cvs_ids[idx_test] = X.index.values[idx_test]
-        # save cross validation predictions if specified
-        if save:
-            indmodel = self.loadEstimator(evalparams)
-            n_folds = max(fold_counter) + 1
-            # save the optimal number of epochs for fitting the model as the average
-            # number of epochs from the cross-validation
-            self.optimalEpochs = int(math.ceil(last_save_epochs / n_folds)) + 1
-            indmodel = indmodel.set_params(n_epochs=self.optimalEpochs)
-            indmodel = self.fit(X_train, y_train, indmodel, early_stopping=False)
-            if self.task.isClassification():
-                inds = self.predictProba(X_ind, indmodel)[0]
-            else:
-                inds = self.predict(X_ind, indmodel)
-            inds_ids = X_ind.index.values
-            # save cross validation predictions and independent test set predictions
-            cvs_index = pd.Index(cvs_ids, name=self.data.getDF().index.name)
-            ind_index = pd.Index(inds_ids, name=self.data.getDF().index.name)
-            train, test = y.add_suffix("_Label"), y_ind.add_suffix("_Label")
-            train, test = pd.DataFrame(
-                train.values, columns=train.columns, index=cvs_index
-            ), pd.DataFrame(test.values, columns=test.columns, index=ind_index)
-            for idx, prop in enumerate(self.data.targetProperties):
-                if prop.task.isClassification():
-                    (
-                        train[f"{prop.name}_Prediction"],
-                        test[f"{prop.name}_Prediction"],
-                    ) = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
-                    # add probability columns to train and test set
-                    # FIXME: this will not work for multiclass classification
-                    train = pd.concat(
-                        [
-                            train,
-                            pd.DataFrame(cvs, index=cvs_index
-                                        ).add_prefix(f"{prop.name}_ProbabilityClass_"),
-                        ],
-                        axis=1,
-                    )
-                    test = pd.concat(
-                        [
-                            test,
-                            pd.DataFrame(inds, index=ind_index
-                                        ).add_prefix(f"{prop.name}_ProbabilityClass_"),
-                        ],
-                        axis=1,
-                    )
-                else:
-                    (
-                        train[f"{prop.name}_Prediction"],
-                        test[f"{prop.name}_Prediction"],
-                    ) = (cvs[:, idx], inds[:, idx])
-            train["Fold"] = fold_counter
-            train.to_csv(self.outPrefix + ".cv.tsv", sep="\t")
-            test.to_csv(self.outPrefix + ".ind.tsv", sep="\t")
-        # return predictions in the right format for scorer
-        if self.task.isClassification():
-            if self.scoreFunc.needsProbasToScore:
-                if self.task == ModelTasks.SINGLECLASS:
-                    # if binary classification,
-                    # return only the scores for the positive class
-                    return cvs[:, 1]
-                else:
-                    return cvs
-            else:
-                # if score function does not need probabilities,
-                # return the class with the highest score
-                return np.argmax(cvs, axis=1)
-        else:
-            return cvs
 
     def save(self) -> str:
         """Save the QSPRDNN model and meta information.
