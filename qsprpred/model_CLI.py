@@ -21,6 +21,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from .data.data import QSPRDataset
 from .deep.models.models import QSPRDNN
 from .logs.utils import backup_files, commit_hash, enable_file_logger
+from .models.evaluation_methods import CrossValidation, EvaluateTestSetPerformance
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from .models.models import QSPRModel, QSPRsklearn
 from .models.tasks import TargetTasks
@@ -374,8 +375,8 @@ def QSPR_modelling(args):
             # initialize models from saved or default parameters
 
             if args.model_evaluation:
-                QSPRmodel.crossValidate()
-                QSPRmodel.predictTestSet()
+                CrossValidation()(QSPRmodel)
+                EvaluateTestSetPerformance()(QSPRmodel)
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):

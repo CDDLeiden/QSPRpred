@@ -22,6 +22,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from ..data.data import QSPRDataset
 from ..data.tests import DataSetsMixIn
+from ..models.evaluation_methods import CrossValidation, EvaluateTestSetPerformance
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
@@ -96,8 +97,8 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        model.crossValidate()
-        model.predictTestSet()
+        CrossValidation()(model)
+        EvaluateTestSetPerformance()(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
