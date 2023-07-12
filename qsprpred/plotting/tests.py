@@ -115,7 +115,8 @@ class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
             preparation_settings=self.get_default_prep(),
         )
         model = self.getModel(dataset, "test_metrics_plot_single_model")
-        model.evaluate(save=True)
+        model.crossValidate()
+        model.predictTestSet()
         model.save()
         # generate metrics plot and associated files
         plt = MetricsPlot([model])
