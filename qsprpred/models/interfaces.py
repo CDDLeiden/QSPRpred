@@ -857,3 +857,49 @@ class EvaluationMethod(ABC):
         Returns:
             dict: dictionary of evaluation results
         """
+
+    def savePredictionsToFile(
+        self,
+        model: QSPRModel,
+        y: np.array,
+        predictions: np.ndarray | list[np.ndarray],
+        index: pd.Series,
+        file_suffix: str,
+        extra_columns: Optional[dict[str, np.ndarray]] = None
+    ):
+        """Save predictions to file.
+
+        Args:
+            model (QSPRModel): model to evaluate
+            y (np.array): target values
+            predictions (np.ndarray | list[np.ndarray]): predictions
+            index (pd.Series): index of the data set
+            file_suffix (str): suffix to add to the file name
+            extra_columns (dict[str, np.ndarray]): extra columns to add to the output
+        """
+        # Create dataframe with true values
+        df_out = pd.DataFrame(
+            y.add_suffix("_Label").values, columns=y.columns, index=index
+        )
+        # Add predictions to dataframe
+        for idx, prop in enumerate(model.data.targetProperties):
+            if prop.task.isClassification():
+                # convert one-hot encoded predictions to class labels
+                # and add to train and test
+                df_out[f"{prop.name}_Prediction"] = np.argmax(predictions[idx], axis=1)
+                # add probability columns to train and test set
+                df_out = pd.concat(
+                    [
+                        df_out,
+                        pd.DataFrame(predictions[idx], index=index
+                                    ).add_prefix(f"{prop.name}_ProbabilityClass_"),
+                    ],
+                    axis=1,
+                )
+            else:
+                df_out[f"{prop.name}_Prediction"] = predictions[:, idx]
+        # Add extra columns to dataframe if given (such as fold indexes)
+        if extra_columns is not None:
+            for col_name, col_values in extra_columns.items():
+                df_out[col_name] = col_values
+        df_out.to_csv(f"{model.outPrefix}.{file_suffix}.tsv", sep="\t")
