@@ -23,6 +23,7 @@ from .utils.datasplitters import (
     RandomSplit,
     ScaffoldSplit,
     TemporalSplit,
+    ClusterSplit,
 )
 from .utils.descriptorcalculator import (
     CustomDescriptorsCalculator,
@@ -318,6 +319,34 @@ class DataSetsMixIn(PathMixIn):
         if prep:
             ret.prepareDataset(**prep)
         return ret
+
+
+    def create_large_multitask_dataset(
+            self, name="QSPRDataset_test",
+            target_props=[
+                {"name" : "HBD", "task" : TargetTasks.MULTICLASS, "th": [-1,1,2,100]},
+                {"name": "CL", "task": TargetTasks.REGRESSION}
+            ],
+            target_imputer=None,
+            preparation_settings=None
+    ):
+        """Create a large dataset for testing purposes.
+
+        Args:
+            name (str): name of the dataset
+            target_props (List of dicts or TargetProperty): list of target properties
+            preparation_settings (dict): dictionary containing preparation settings
+
+        Returns:
+            QSPRDataset: a `QSPRDataset` object
+        """
+        return self.create_dataset(
+            self.getBigDF(),
+            name=name,
+            target_props=target_props,
+            target_imputer=target_imputer,
+            prep=preparation_settings
+        )
 
     def validate_split(self, dataset):
         """Check if the split has the data it should have after splitting."""
@@ -838,7 +867,8 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     The tests here should be used to check for all their specific parameters and edge
     cases."""
-    def test_manualsplit(self):
+
+    def test_ManualSplit(self):
         """Test the manual split function, where the split is done manually."""
         dataset = self.create_large_dataset()
 
@@ -850,16 +880,41 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
-    def test_randomsplit(self):
-        """Test the random split function, where the split is done randomly."""
+    def test_RandomSplit_singletask(self):
+        """Test the random split function for single-task dataset."""
         dataset = self.create_large_dataset()
-        dataset.prepareDataset(split=RandomSplit(0.1))
+        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.1))
         self.validate_split(dataset)
 
-    def test_temporalsplit(self):
+    def test_RandomSplit_multitask(self):
+        """Test the random split function for multi-task dataset."""
+        dataset = self.create_large_multitask_dataset()
+        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.1))
+        self.validate_split(dataset)
+
+    def test_TemporalSplit_singletask(self):
         """Test the temporal split function, where the split is done based on a time
         property."""
         dataset = self.create_large_dataset()
+        split = TemporalSplit(
+            dataset=dataset,
+            timesplit=TIME_SPLIT_YEAR,
+            timeprop="Year of first disclosure"
+        )
+
+        dataset.prepareDataset(split=split)
+        self.validate_split(dataset)
+
+        # test if dates higher than 2000 are in test set
+        self.assertTrue(
+            sum(dataset.X_ind["Year of first disclosure"] > TIME_SPLIT_YEAR) ==
+            len(dataset.X_ind)
+        )
+
+    def test_TemporalSplit_multitask(self):
+        """Test the temporal split function, where the split is done based on a time
+        property."""
+        dataset = self.create_large_multitask_dataset()
         split = TemporalSplit(
             dataset=dataset,
             timesplit=TIME_SPLIT_YEAR,
@@ -881,7 +936,8 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             (BemisMurcko(), False, ["ScaffoldSplit_0", "ScaffoldSplit_1"]),
         ]
     )
-    def test_ScaffoldSplit(self, scaffold, shuffle, custom_test_list):
+    def test_ScaffoldSplit_singletask(self, scaffold, shuffle, custom_test_list):
+        """Test the scaffold split function for single-task dataset."""
         dataset = self.create_large_dataset(name="ScaffoldSplit")
         split = ScaffoldSplit(scaffold, 0.1, shuffle, custom_test_list)
         dataset.prepareDataset(split=split)
@@ -892,6 +948,56 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             self.assertTrue(
                 all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
             )
+
+    @parameterized.expand(
+        [
+            (Murcko(), True, None),
+        ]
+    )
+    def test_ScaffoldSplit_multitask(self, scaffold, shuffle, custom_test_list):
+        """Test the scaffold split function for multi-task dataset."""
+        dataset = self.create_large_multitask_dataset(name="ScaffoldSplit")
+        split = ScaffoldSplit(scaffold, 0.1, shuffle, custom_test_list)
+        dataset.prepareDataset(split=split)
+        self.validate_split(dataset)
+
+    @parameterized.expand(
+        [
+            ("MaxMin", ["ClusterSplit_0", "ClusterSplit_1"]),
+            ("LeaderPicker", None),
+        ]
+    )
+    def test_ClusterSplit_singletask(self, clustering_algorithm, custom_test_list):
+        """Test the cluster split function for single-task dataset."""
+        dataset = self.create_large_dataset(name="ClusterSplit")
+        split = ClusterSplit(
+            test_fraction=0.1,
+            clustering_algorithm=clustering_algorithm,
+            custom_test_list=custom_test_list,
+            n_initial_clusters=10, )
+        dataset.prepareDataset(split=split)
+        self.validate_split(dataset)
+
+        # check that smiles in custom_test_list are in the test set
+        if custom_test_list:
+            self.assertTrue(
+                all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
+            )
+
+    @parameterized.expand(
+        [
+            ("MaxMin",),
+            ("LeaderPicker",),
+        ]
+    )
+    def test_ClusterSplit_multitask(self, clustering_algorithm):
+        """Test the cluster split function for multi-task dataset."""
+        dataset = self.create_large_multitask_dataset(name="ClusterSplit")
+        split = ClusterSplit(
+            test_fraction=0.1,
+            clustering_algorithm=clustering_algorithm,
+            custom_test_list=None, )
+        dataset.prepareDataset(split=split)
 
     def test_serialization(self):
         """Test the serialization of dataset with datasplit."""

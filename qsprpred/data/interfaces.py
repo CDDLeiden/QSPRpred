@@ -155,9 +155,12 @@ class DataSetDependant:  # Note: this shouldn't be ABC; no abstract methods defi
             raise ValueError("Data set not set.")
 
 
-class DataSplit(ABC):
+class DataSplit(ABC, DataSetDependant):
     """Defines a function split a dataframe into train and test set."""
-    @abstractmethod
+
+    def __init__(self, dataset: MoleculeDataSet) -> None:
+        super().__init__(dataset)
+
     def split(self, X : np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series) -> Iterable[tuple[list[int], list[int]]]:
         """Split the given data into one or multiple train/test subsets.
 
@@ -178,6 +181,29 @@ class DataSplit(ABC):
             pandas index!)
         """
 
+        self.X = X
+        self.y = y
+
+        self.dataset = self.getDataSet()
+        self.df = self.dataset.getDF().reset_index(drop=True) # need numeric index splits
+        self.tasks = self.dataset.targetProperties
+
+        assert len(self.tasks) > 0, "No target properties found."
+        assert len(X) == len(self.df), \
+            "X and the current data in the dataset must have same length"
+
+        if len(self.tasks) == 1:
+            return self._singletask_split()
+        else:
+            return self._multitask_split()
+
+    @abstractmethod
+    def _singletask_split(self):
+        pass
+
+    @abstractmethod
+    def _multitask_split(self):
+        pass
 
 class DataFilter(ABC):
     """Filter out some rows from a dataframe."""

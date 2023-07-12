@@ -44,8 +44,8 @@ class Folds:
         folds = self.split.split(X_arr, y_arr)
 
         for train_index, test_index in folds:
-            yield X_arr[train_index, :], X_arr[test_index, :], y_arr[
-                train_index], y_arr[test_index], train_index, test_index
+            yield X_arr[train_index, :], X_arr[test_index, :], \
+                y_arr[train_index], y_arr[test_index], train_index, test_index
 
     def __init__(self, split: "DataSplit", feature_standardizer=None):  # noqa: F821
         """Create a new instance of Folds."""
