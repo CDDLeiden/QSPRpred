@@ -88,7 +88,7 @@ class DataSetsMixIn(PathMixIn):
     preparation settings to use in tests."""
 
     @staticmethod
-    def get_default_prep():
+    def get_default_prep(dataset):
         """Return a dictionary with default preparation settings."""
         return {
             "feature_calculators": [
@@ -96,7 +96,7 @@ class DataSetsMixIn(PathMixIn):
                     [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
                 )
             ],
-            "split": RandomSplit(0.1),
+            "split": RandomSplit(dataset=dataset, test_fraction=0.1),
             "feature_standardizer": StandardScaler(),
             "feature_filters": [LowVarianceFilter(0.05), HighCorrelationFilter(0.8)],
         }
@@ -1553,5 +1553,5 @@ class TestDescriptorsAll(DataSetsMixIn, TestDescriptorInDataMixIn, TestCase):
         )
 
         self.check_desc_in_dataset(
-            dataset, desc_set, self.get_default_prep(), target_props
+            dataset, desc_set, self.get_default_prep(dataset), target_props
         )
