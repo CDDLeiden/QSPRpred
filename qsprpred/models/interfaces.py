@@ -879,7 +879,7 @@ class EvaluationMethod(ABC):
         """
         # Create dataframe with true values
         df_out = pd.DataFrame(
-            y.add_suffix("_Label").values, columns=y.columns, index=index
+            y.values, columns=y.add_suffix("_Label").columns, index=index
         )
         # Add predictions to dataframe
         for idx, prop in enumerate(model.data.targetProperties):
