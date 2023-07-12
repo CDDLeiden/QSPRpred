@@ -61,7 +61,8 @@ class ROCPlotTest(ModelDataSetsMixIn, TestCase):
             preparation_settings=self.get_default_prep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
-        model.evaluate(save=True)
+        model.crossValidate()
+        model.predictTestSet()
         model.save()
         # make plots
         plt = ROCPlot([model])
@@ -159,7 +160,8 @@ class CorrPlotTest(ModelDataSetsMixIn, TestCase):
             "test_corr_plot_single_data", preparation_settings=self.get_default_prep()
         )
         model = self.getModel(dataset, "test_corr_plot_single_model")
-        model.evaluate(save=True)
+        model.crossValidate()
+        model.predictTestSet()
         model.save()
         # generate metrics plot and associated files
         plt = CorrelationPlot([model])
