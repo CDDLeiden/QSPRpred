@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from functools import partial
 from typing import Callable, Iterable
 
+import numpy as np
 from sklearn import metrics
 
 from .tasks import ModelTasks
@@ -22,12 +23,16 @@ class Metric(ABC):
         self.func = func
 
     @abstractmethod
-    def __call__(self, y_true: Iterable, y_pred: Iterable, *args, **kwargs) -> float:
+    def __call__(
+        self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray], *args, **kwargs
+    ) -> float:
         """Calculate the score.
 
         Args:
-            y_true (Iterable): True values.
-            y_pred (Iterable): Predicted values.
+            y_true (np.array): True values. Must be of shape (n_samples, n_targets)
+            y_pred (Iterable): Predicted values. Must be of shape (n_samples, n_targets)
+                               or list of arrays of shape (n_samples, n_task) of length
+                               n_targets.
             *args: Additional arguments.
             **kwargs: Additional keyword arguments.
         """
@@ -117,7 +122,7 @@ class SklearnMetric(Metric):
         multiTaskMixedMetrics: List of multi task mixed metrics.
     """
 
-    regressionMetrics = [
+    regressionMetrics = [  # noqa: RUF012
         "explained_variance",
         "max_error",
         "neg_mean_absolute_error",
@@ -130,7 +135,7 @@ class SklearnMetric(Metric):
         "neg_mean_gamma_deviance",
         "neg_mean_absolute_percentage_error",
     ]  # 'd2_absolute_error_score','d2_pinball_score', 'd2_tweedie_scor'
-    singleClassMetrics = [
+    singleClassMetrics = [  # noqa: RUF012
         "average_precision",
         "neg_brier_score",
         "neg_log_loss",
@@ -158,9 +163,9 @@ class SklearnMetric(Metric):
         "jaccard_micro",
         "jaccard_macro",
         "jaccard_weighted",
-        'matthews_corrcoef',
+        "matthews_corrcoef",
     ]
-    multiClassMetrics = [
+    multiClassMetrics = [  # noqa: RUF012
         "neg_log_loss",
         "roc_auc_ovo",
         "roc_auc_ovo_weighted",
@@ -182,7 +187,7 @@ class SklearnMetric(Metric):
         "jaccard_macro",
         "jaccard_weighted",
     ]
-    multiTaskRegressionMetrics = [
+    multiTaskRegressionMetrics = [  # noqa: RUF012
         "explained_variance",
         "neg_mean_absolute_error",
         "neg_mean_squared_error",
@@ -192,7 +197,7 @@ class SklearnMetric(Metric):
         "r2",
         "neg_mean_absolute_percentage_error",
     ]
-    multiTaskSingleClassMetrics = [
+    multiTaskSingleClassMetrics = [  # noqa: RUF012
         "roc_auc_ovo",
         "roc_auc_ovo_weighted",
         "roc_auc_ovr",
@@ -224,8 +229,38 @@ class SklearnMetric(Metric):
         super().__init__(name, func)
         self.scorer = scorer  # Sklearn scorer object
 
-    def __call__(self, y_true, y_pred, *args, **kwargs):
-        """Call the scoring function."""
+    def __call__(
+        self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray], *args, **kwargs
+    ):
+        """Call the scoring function.
+
+        Args:
+            y_true (np.array): True values. Must be of shape (n_samples, n_targets)
+            y_pred (Iterable or np.array): Predicted values. Must be of shape
+                    (n_samples, n_targets) or list of arrays of shape
+                    (n_samples, n_task) of length n_targets.
+            *args: Additional arguments. Unused.
+            **kwargs: Additional keyword arguments. Unused.
+        """
+        # Convert predictions to correct shape for sklearn scorer
+        if isinstance(y_pred, list):
+            if self.needsDiscreteToScore:
+                # convert to discrete values
+                y_pred = np.transpose([np.argmax(y_pred, axis=1) for y_pred in y_pred])
+            else:
+                # for each task if single class take second column
+                y_pred = [
+                    y_pred[:, 1].reshape(-1, 1) if y_pred.shape[1] == 2 else y_pred
+                    for y_pred in y_pred
+                ]
+
+            if len(y_pred) > 1:
+                # if multi-task concatenate arrays
+                y_pred = np.concatenate(y_pred, axis=1)
+            else:
+                # if single class classification, convert to 1d array
+                y_pred = y_pred[0]
+
         return self.func(y_true, y_pred, *args, **kwargs)
 
     @property

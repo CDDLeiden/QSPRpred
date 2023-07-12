@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 
 from ..logs import logger
-from ..models.tasks import ModelTasks
 from .interfaces import EvaluationMethod, QSPRModel
 from .metrics import SklearnMetric
 
@@ -109,20 +108,7 @@ class CrossValidation(EvaluationMethod):
             self.savePredictionsToFile(
                 model, y, cvs, cvs_index, "cv", extra_columns={"Fold": fold_counter}
             )
-        if model.task.isRegression():
-            return cvs
-        elif model.scoreFunc.needsProbasToScore:
-            if model.task in [
-                ModelTasks.SINGLECLASS,
-                ModelTasks.MULTITASK_SINGLECLASS,
-            ]:
-                return np.transpose([y_pred[:, 1] for y_pred in cvs])
-            elif model.task.isMultiTask():
-                return cvs
-            else:
-                return cvs[0]
-        else:
-            return np.transpose([np.argmax(y_pred, axis=1) for y_pred in cvs])
+        return cvs
 
 
 class EvaluateTestSetPerformance(EvaluationMethod):
