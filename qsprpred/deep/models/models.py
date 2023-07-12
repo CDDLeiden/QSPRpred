@@ -309,7 +309,9 @@ class QSPRDNN(QSPRModel):
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
 
-        y = y.reshape(-1, 1)
+        #check if y is a dataframe
+        if not isinstance(y, pd.DataFrame):
+            y = y.reshape(-1, 1)
 
         if early_stopping:
             # split cross validation fold train set into train

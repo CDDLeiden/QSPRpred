@@ -706,25 +706,26 @@ class QSPRModel(ABC):
             str: absolute path to the saved model file after fitting
         """
 
-    def evaluate(
+    def crossValidate(
         self,
         save: bool = True,
         parameters: Optional[dict] = None,
         score_func=None,
         **kwargs
     ) -> float | np.ndarray:
-        """Make predictions for crossvalidation and independent test set.
+        """Perform cross validation on the model with the given parameters.
 
-        If save is True, the predictions are saved to a file in the output directory.
+        If save is True, the predictions on the validation set are saved to a file in
+        the output directory.
 
         Arguments:
             save (bool): don't save predictions when used in bayesian optimization
             parameters (dict): optional model parameters to use for evaluation
+            score_func (str or callable): scoring function to use for evaluation
             **kwargs: additional keyword arguments for the evaluation function
 
         Returns:
-            float | np.ndarray: predictions for evaluation
-        """
+            float | np.ndarray: predictions on the validation set"""
         evalparams = self.parameters if parameters is None else parameters
         score_func = self.scoreFunc if score_func is None else score_func
         # check if data is available
@@ -733,7 +734,6 @@ class QSPRModel(ABC):
         y, y_ind = self.data.getTargetPropertiesValues()
         # prepare arrays to store molecule ids
         cvs_ids = np.array([None] * len(X))
-        inds_ids = X_ind.index.to_numpy()
         # cvs and inds are used to store the predictions for the cross validation
         # and the independent test set
         if self.task.isRegression():
@@ -743,10 +743,6 @@ class QSPRModel(ABC):
             # for multiclass-multitask classification
             cvs = [
                 np.zeros((y.shape[0], prop.nClasses)) for prop in self.targetProperties
-            ]
-            inds = [
-                np.zeros((y_ind.shape[0], prop.nClasses))
-                for prop in self.targetProperties
             ]
         # cross validation
         folds = self.data.createFolds()
@@ -787,42 +783,17 @@ class QSPRModel(ABC):
             if self.supportsEarlyStopping:
                 n_folds = max(fold_counter) + 1
                 self.optimalEpochs = int(math.ceil(last_save_epochs / n_folds)) + 1
-        # predict values for independent test set and save results
+        # save results
         if save:
-            indmodel = self.loadEstimator(evalparams)
-            # fitting on whole trainingset and predicting on test set
-            if self.supportsEarlyStopping:
-                indmodel = indmodel.set_params(n_epochs=self.optimalEpochs)
-
-            indmodel = self.fit(X_train, y_train, indmodel, early_stopping=False)
-            # if independent test set is available, predict on it
-            if X_ind.shape[0] > 0:
-                if self.task.isRegression():
-                    inds = self.predict(X_ind, indmodel)
-                else:
-                    preds = self.predictProba(X_ind, indmodel)
-                    for idx in range(self.nTargets):
-                        inds[idx] = preds[idx]
-            else:
-                logger.warning(
-                    "No independent test set available. "
-                    "Skipping prediction on independent test set."
-                )
             index_name = self.data.getDF().index.name
-            ind_index = pd.Index(inds_ids, name=index_name)
             cvs_index = pd.Index(cvs_ids, name=index_name)
-            train, test = y.add_suffix("_Label"), y_ind.add_suffix("_Label")
-            train, test = pd.DataFrame(
-                train.values, columns=train.columns, index=cvs_index
-            ), pd.DataFrame(test.values, columns=test.columns, index=ind_index)
+            train = y.add_suffix("_Label")
+            train = pd.DataFrame(train.values, columns=train.columns, index=cvs_index)
             for idx, prop in enumerate(self.data.targetProperties):
                 if prop.task.isClassification():
                     # convert one-hot encoded predictions to class labels
                     # and add to train and test
-                    (
-                        train[f"{prop.name}_Prediction"],
-                        test[f"{prop.name}_Prediction"],
-                    ) = np.argmax(cvs[idx], axis=1), np.argmax(inds[idx], axis=1)
+                    train[f"{prop.name}_Prediction"] = np.argmax(cvs[idx], axis=1)
                     # add probability columns to train and test set
                     train = pd.concat(
                         [
@@ -832,22 +803,10 @@ class QSPRModel(ABC):
                         ],
                         axis=1,
                     )
-                    test = pd.concat(
-                        [
-                            test,
-                            pd.DataFrame(inds[idx], index=ind_index
-                                        ).add_prefix(f"{prop.name}_ProbabilityClass_"),
-                        ],
-                        axis=1,
-                    )
                 else:
-                    (
-                        train[f"{prop.name}_Prediction"],
-                        test[f"{prop.name}_Prediction"],
-                    ) = (cvs[:, idx], inds[:, idx])
+                    train[f"{prop.name}_Prediction"] = cvs[:, idx]
             train["Fold"] = fold_counter
             train.to_csv(self.outPrefix + ".cv.tsv", sep="\t")
-            test.to_csv(self.outPrefix + ".ind.tsv", sep="\t")
         # Return predictions in the right format for scorer
         if self.task.isRegression():
             return cvs
@@ -863,6 +822,82 @@ class QSPRModel(ABC):
                 return cvs[0]
         else:
             return np.transpose([np.argmax(y_pred, axis=1) for y_pred in cvs])
+
+    def predictTestSet(
+        self,
+        save: bool = True,
+        parameters: Optional[dict] = None,
+        score_func=None,
+        **kwargs
+    ):
+        """Make predictions for crossvalidation and independent test set.
+
+        If save is True, the predictions are saved to a file in the output directory.
+
+        Arguments:
+            save (bool): don't save predictions when used in bayesian optimization
+            parameters (dict): optional model parameters to use for evaluation
+            **kwargs: additional keyword arguments for the evaluation function
+
+        Returns:
+            float | np.ndarray: predictions for evaluation
+        """
+        evalparams = self.parameters if parameters is None else parameters
+        score_func = self.scoreFunc if score_func is None else score_func
+        # check if data is available
+        self.checkForData()
+        X, X_ind = self.data.getFeatures()
+        y, y_ind = self.data.getTargetPropertiesValues()
+        # prepare arrays to store molecule ids and predictions
+        inds_ids = X_ind.index.to_numpy()
+        if not self.task.isRegression():
+            inds = [
+                np.zeros((y_ind.shape[0], prop.nClasses))
+                for prop in self.targetProperties
+            ]
+
+        # predict values for independent test set and save results
+        if save:
+            indmodel = self.loadEstimator(evalparams)
+            # fitting on whole trainingset and predicting on test set
+            if self.supportsEarlyStopping:
+                indmodel = indmodel.set_params(n_epochs=self.optimalEpochs)
+
+            indmodel = self.fit(X, y, indmodel, early_stopping=False)
+            # if independent test set is available, predict on it
+            if X_ind.shape[0] > 0:
+                if self.task.isRegression():
+                    inds = self.predict(X_ind, indmodel)
+                else:
+                    preds = self.predictProba(X_ind, indmodel)
+                    for idx in range(self.nTargets):
+                        inds[idx] = preds[idx]
+            else:
+                logger.warning(
+                    "No independent test set available. "
+                    "Skipping prediction on independent test set."
+                )
+            index_name = self.data.getDF().index.name
+            ind_index = pd.Index(inds_ids, name=index_name)
+            test = y_ind.add_suffix("_Label")
+            test = pd.DataFrame(test.values, columns=test.columns, index=ind_index)
+            for idx, prop in enumerate(self.data.targetProperties):
+                if prop.task.isClassification():
+                    # convert one-hot encoded predictions to class labels
+                    # and add to train and test
+                    test[f"{prop.name}_Prediction"] = np.argmax(inds[idx], axis=1)
+                    # add probability columns to train and test set
+                    test = pd.concat(
+                        [
+                            test,
+                            pd.DataFrame(inds[idx], index=ind_index
+                                        ).add_prefix(f"{prop.name}_ProbabilityClass_"),
+                        ],
+                        axis=1,
+                    )
+                else:
+                    test[f"{prop.name}_Prediction"] = inds[:, idx]
+            test.to_csv(self.outPrefix + ".ind.tsv", sep="\t")
 
     @abstractmethod
     def loadEstimator(self, params: Optional[dict] = None) -> object:

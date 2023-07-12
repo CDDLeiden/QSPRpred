@@ -159,7 +159,7 @@ class OptunaOptimization(HyperParameterOptimization):
         y, y_ind = model.data.getTargetPropertiesValues()
         score = self.scoreFunc(
             y,
-            model.evaluate(
+            model.crossValidate(
                 save=False, parameters=bayesian_params, score_func=self.scoreFunc
             )
         )
@@ -203,7 +203,7 @@ class GridSearchOptimization(HyperParameterOptimization):
             y, y_ind = model.data.getTargetPropertiesValues()
             score = self.scoreFunc(
                 y,
-                model.evaluate(
+                model.crossValidate(
                     save=False, parameters=params, score_func=self.scoreFunc
                 )
             )

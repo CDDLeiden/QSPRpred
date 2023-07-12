@@ -169,8 +169,11 @@ class QSPRsklearn(QSPRModel):
         if self.featureStandardizer:
             X = self.featureStandardizer(X)
 
-        if not self.task.isMultiTask:
-            y = y.ravel()
+        if not self.task.isMultiTask():
+            if isinstance(y, pd.DataFrame):
+                y = y.squeeze()
+            else:
+                y = y.ravel()
         return estimator.fit(X, y)
 
     def predict(

@@ -96,7 +96,8 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        model.evaluate()
+        model.crossValidate()
+        model.predictTestSet()
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data

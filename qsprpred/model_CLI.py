@@ -374,7 +374,8 @@ def QSPR_modelling(args):
             # initialize models from saved or default parameters
 
             if args.model_evaluation:
-                QSPRmodel.evaluate()
+                QSPRmodel.crossValidate()
+                QSPRmodel.predictTestSet()
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):
