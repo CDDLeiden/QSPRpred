@@ -21,6 +21,7 @@ from .data.utils.datafilters import papyrusLowQualityFilter
 from .data.utils.datasplitters import (
     ManualSplit,
     RandomSplit,
+    ClusterSplit,
     ScaffoldSplit,
     TemporalSplit,
 )
@@ -140,14 +141,14 @@ def QSPRArgParser(txt=None):
         "-sp",
         "--split",
         type=str,
-        choices=["random", "time", "scaffold", "manual"],
+        choices=["random", "cluster", "scaffold", "time", "manual",],
         default="random",
         help=(
-            "Split type (Randomsplit, ScaffoldSplit, manualsplit and TemporalSplit)."
-            "If manualsplit is chosen, a column 'datasplit' with values 'train' and "
-            "'test' is required. If ScaffoldSplit or TemporalSplit is chosen, you can "
-            "specify the split_fraction with -sf. If TemporalSplit is chosen, you can "
-            "specify the split_time with -st and the split_timecolumn with -stc."
+            "Split type. If 'random', 'cluster' or 'scaffold', you can specify the"
+            "split_fraction with -sf. If 'cluster', you can specify the clustering"
+            "method with -scm. If 'time', you can specify the split_time with -st and "
+            " the split_timecolumn with -stc. If 'manual', a column 'datasplit' with "
+            "values 'train' and 'test' is required."
         ),
     )
     parser.add_argument(
@@ -157,7 +158,7 @@ def QSPRArgParser(txt=None):
         default=0.1,
         help=(
             "Fraction of the dataset used as test set. "
-            "Used for RandomSplit and ScaffoldSplit"
+            "Used for RandomSplit, ClusterSplit and ScaffoldSplit"
         ),
     )
     parser.add_argument(
@@ -165,14 +166,22 @@ def QSPRArgParser(txt=None):
         "--split_time",
         type=float,
         default=2015,
-        help="Temporal split limit. Used for temporal split.",
+        help="Temporal split limit. Used for TemporalSplit.",
     )
     parser.add_argument(
         "-stc",
         "--split_timecolumn",
         type=str,
         default="Year",
-        help="Temporal split time column. Used for temporal split.",
+        help="Temporal split time column. Used for TemporalSplit.",
+    )
+    parser.add_argument(
+        "-scm",
+        "--split_cluster_method",
+        type=str,
+        choices=["MaxMin", "LeaderPicker"],
+        default="MaxMin",
+        help="Cluster method. Used for ClusterSplit.",
     )
     # features to calculate
     parser.add_argument(
@@ -342,8 +351,14 @@ def QSPR_dataprep(args):
                 split = ManualSplit(
                     splitcol=df["datasplit"], trainval="train", testval="test"
                 )
+            elif args.split == "cluster":
+                split = ClusterSplit(
+                    test_fraction=args.split_fraction,
+                    clustering_algorithm=args.split_clustering_method,
+                    dataset=mydataset,
+                )
             else:
-                split = RandomSplit(test_fraction=args.split_fraction)
+                split = RandomSplit(test_fraction=args.split_fraction, dataset=mydataset)
             # feature calculator
             descriptorsets = []
             # Avoid importing optional dependencies if not needed
