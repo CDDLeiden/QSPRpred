@@ -8,6 +8,7 @@ import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
 from ..logs import logger
+from ..models.evaluation_methods import CrossValidation
 from ..models.interfaces import HyperParameterOptimization, QSPRModel
 
 
@@ -159,9 +160,8 @@ class OptunaOptimization(HyperParameterOptimization):
         y, y_ind = model.data.getTargetPropertiesValues()
         score = self.scoreFunc(
             y,
-            model.crossValidate(
-                save=False, parameters=bayesian_params, score_func=self.scoreFunc
-            )
+            CrossValidation(score_func=self.scoreFunc
+                           )(model, save=False, parameters=bayesian_params)
         )
         return score
 
@@ -203,9 +203,8 @@ class GridSearchOptimization(HyperParameterOptimization):
             y, y_ind = model.data.getTargetPropertiesValues()
             score = self.scoreFunc(
                 y,
-                model.crossValidate(
-                    save=False, parameters=params, score_func=self.scoreFunc
-                )
+                CrossValidation(score_func=self.scoreFunc
+                               )(model, save=False, parameters=params)
             )
             logger.info("Score: %s" % score)
             if score > self.bestScore:
