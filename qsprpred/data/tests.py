@@ -17,13 +17,17 @@ from rdkit.Chem import Descriptors
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
+from ..logs.stopwatch import StopWatch
+from ..models.models import QSPRsklearn
+from ..models.tasks import TargetTasks
+from .data import QSPRDataset, TargetProperty
 from .utils.datafilters import CategoryFilter
 from .utils.datasplitters import (
+    ClusterSplit,
     ManualSplit,
     RandomSplit,
     ScaffoldSplit,
     TemporalSplit,
-    ClusterSplit,
 )
 from .utils.descriptorcalculator import (
     CustomDescriptorsCalculator,
@@ -40,16 +44,8 @@ from .utils.descriptorsets import (
     TanimotoDistances,
 )
 from .utils.feature_standardization import SKLearnStandardizer
-from .utils.featurefilters import (
-    BorutaFilter,
-    HighCorrelationFilter,
-    LowVarianceFilter,
-)
+from .utils.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
 from .utils.scaffolds import BemisMurcko, Murcko
-from ..logs.stopwatch import StopWatch
-from ..models.models import QSPRsklearn
-from ..models.tasks import TargetTasks
-from .data import QSPRDataset, TargetProperty
 
 N_CPU = 2
 CHUNK_SIZE = 100
@@ -320,15 +316,22 @@ class DataSetsMixIn(PathMixIn):
             ret.prepareDataset(**prep)
         return ret
 
-
     def create_large_multitask_dataset(
-            self, name="QSPRDataset_test",
-            target_props=[
-                {"name" : "HBD", "task" : TargetTasks.MULTICLASS, "th": [-1,1,2,100]},
-                {"name": "CL", "task": TargetTasks.REGRESSION}
-            ],
-            target_imputer=None,
-            preparation_settings=None
+        self,
+        name="QSPRDataset_test",
+        target_props=[
+            {
+                "name": "HBD",
+                "task": TargetTasks.MULTICLASS,
+                "th": [-1, 1, 2, 100]
+            },
+            {
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            },
+        ],
+        target_imputer=None,
+        preparation_settings=None,
     ):
         """Create a large dataset for testing purposes.
 
@@ -345,7 +348,7 @@ class DataSetsMixIn(PathMixIn):
             name=name,
             target_props=target_props,
             target_imputer=target_imputer,
-            prep=preparation_settings
+            prep=preparation_settings,
         )
 
     def validate_split(self, dataset):
@@ -784,8 +787,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
 class TestTargetProperty(TestCase):
     """Test the TargetProperty class."""
     def test_target_property(self):
-        """Check the TargetProperty class on target property creation and serialization.
-        """
+        """Check the TargetProperty class on target property creation and serialization."""
         def check_target_property(targetprop, name, task, original_name, th):
             # Check the target property creation consistency
             self.assertEqual(targetprop.name, name)
@@ -867,7 +869,6 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     The tests here should be used to check for all their specific parameters and edge
     cases."""
-
     def test_ManualSplit(self):
         """Test the manual split function, where the split is done manually."""
         dataset = self.create_large_dataset()
@@ -899,7 +900,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         split = TemporalSplit(
             dataset=dataset,
             timesplit=TIME_SPLIT_YEAR,
-            timeprop="Year of first disclosure"
+            timeprop="Year of first disclosure",
         )
 
         dataset.prepareDataset(split=split)
@@ -918,7 +919,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         split = TemporalSplit(
             dataset=dataset,
             timesplit=TIME_SPLIT_YEAR,
-            timeprop="Year of first disclosure"
+            timeprop="Year of first disclosure",
         )
 
         dataset.prepareDataset(split=split)
@@ -949,11 +950,9 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
                 all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
             )
 
-    @parameterized.expand(
-        [
-            (Murcko(), True, None),
-        ]
-    )
+    @parameterized.expand([
+        (Murcko(), True, None),
+    ])
     def test_ScaffoldSplit_multitask(self, scaffold, shuffle, custom_test_list):
         """Test the scaffold split function for multi-task dataset."""
         dataset = self.create_large_multitask_dataset(name="ScaffoldSplit")
@@ -974,7 +973,8 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             test_fraction=0.1,
             clustering_algorithm=clustering_algorithm,
             custom_test_list=custom_test_list,
-            n_initial_clusters=10, )
+            n_initial_clusters=10,
+        )
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
@@ -984,19 +984,18 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
                 all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
             )
 
-    @parameterized.expand(
-        [
-            ("MaxMin",),
-            ("LeaderPicker",),
-        ]
-    )
+    @parameterized.expand([
+        ("MaxMin", ),
+        ("LeaderPicker", ),
+    ])
     def test_ClusterSplit_multitask(self, clustering_algorithm):
         """Test the cluster split function for multi-task dataset."""
         dataset = self.create_large_multitask_dataset(name="ClusterSplit")
         split = ClusterSplit(
             test_fraction=0.1,
             clustering_algorithm=clustering_algorithm,
-            custom_test_list=None, )
+            custom_test_list=None,
+        )
         dataset.prepareDataset(split=split)
 
     def test_serialization(self):

@@ -4,23 +4,24 @@ To add a new data splitter:
 * Add a DataSplit subclass for your new splitter
 """
 from collections import defaultdict
-from typing import Iterable, Literal
+from typing import Iterable, Literal, Optional
 
 import numpy as np
 import pandas as pd
-
-
 from gbmtsplits import GloballyBalancedSplit
-from sklearn.model_selection import StratifiedShuffleSplit, ShuffleSplit
-
+from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit
 
 from ...logs import logger
 from ..data import QSPRDataset
 from ..interfaces import DataSetDependant, DataSplit
-from .scaffolds import Murcko, Scaffold
-from .data_clustering import RandomClusters, MurckoScaffoldClusters, \
-    FPSimilarityMaxMinClusters, FPSimilarityLeaderPickerClusters
+from .data_clustering import (
+    FPSimilarityLeaderPickerClusters,
+    FPSimilarityMaxMinClusters,
+    MurckoScaffoldClusters,
+    RandomClusters,
+)
 from .descriptorsets import FingerprintSet
+from .scaffolds import Murcko, Scaffold
 
 # TODO: Check if the order of molecules in (X,y) is the same as in the dataframe from dataset
 
@@ -75,7 +76,13 @@ class RandomSplit(DataSplit, DataSetDependant):
     Attributes:
         testFraction (float): fraction of total dataset to testset
     """
-    def __init__(self, dataset : QSPRDataset = None, test_fraction=0.1, seed=42, **mt_kwargs) -> None:
+    def __init__(
+        self,
+        dataset: QSPRDataset = None,
+        test_fraction=0.1,
+        seed=42,
+        **mt_kwargs
+    ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
         self.seed = seed
@@ -89,15 +96,11 @@ class RandomSplit(DataSplit, DataSetDependant):
         task = self.tasks[0].task
         if task.isRegression():
             splitter = ShuffleSplit(
-                1,
-                test_size=self.testFraction,
-                random_state=self.seed
+                1, test_size=self.testFraction, random_state=self.seed
             )
         elif task.isClassification():
-            splitter =  StratifiedShuffleSplit(
-                1,
-                test_size=self.testFraction,
-                random_state=self.seed
+            splitter = StratifiedShuffleSplit(
+                1, test_size=self.testFraction, random_state=self.seed
             )
 
         return splitter.split(self.X, self.y)
@@ -112,21 +115,21 @@ class RandomSplit(DataSplit, DataSetDependant):
         smiles_col = self.getDataSet().smilesCol
         target_cols = [TargetProperty.name for TargetProperty in self.tasks]
 
-        df = self.df.reset_index(drop=True) # Reset index to avoid problems with the splitter
-
         # Initial random clustering
-        nclusters = self.mt_kwargs["n_intial_clusters"] \
+        nclusters = (
+            self.mt_kwargs["n_intial_clusters"]
             if "n_intial_clusters" in self.mt_kwargs else None
+        )
         clustering = RandomClusters(seed=self.seed, n_clusters=nclusters)
-        clusters = clustering.get_clusters(df[smiles_col].tolist())
+        clusters = clustering.get_clusters(self.df[smiles_col].tolist())
 
         # Split dataset
         splitter = GloballyBalancedSplit(
             sizes=[1 - self.testFraction, self.testFraction],
-            clusters = clusters,
+            clusters=clusters,
             clustering_method=None,
             time_limit_seconds=60 * len(self.tasks),
-            )
+        )
         df = splitter(df, smiles_col, target_cols)
 
         # Get indices
@@ -177,9 +180,11 @@ class TemporalSplit(DataSplit, DataSetDependant):
         """
         Split multi-task dataset based on a time threshold.
         """
-        logger.warning("The TemporalSplit is not recommended for multitask\
-                        or PCM datasets might lead to very unbalanced subsets\
-                        for some tasks")
+        logger.warning(
+            "The TemporalSplit is not recommended for multitask\
+            or PCM datasets might lead to very unbalanced subsets\
+            for some tasks"
+        )
 
         indices = np.array(list(range(len(self.df))))
         mask = self.df[self.timeCol] > self.timeSplit
@@ -228,7 +233,6 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
         self.customTestList = custom_test_list
 
     def _singletask_split(self) -> Iterable[tuple[list[int], list[int]]]:
-
         # Add scaffolds to dataset
         dataset = self.getDataSet()
         dataset.addScaffolds([self.scaffold])
@@ -292,9 +296,7 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
         """
 
         if not isinstance(self.scaffold, Murcko):
-            raise NotImplementedError(
-                "Multitask scaffold split only supports Murcko()"
-            )
+            raise NotImplementedError("Multitask scaffold split only supports Murcko()")
 
         if self.customTestList is not None:
             raise NotImplementedError(
@@ -305,7 +307,6 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
         df = self.getDataSet().getDF().copy()
         smiles_col = self.getDataSet().smilesCol
         target_cols = [TargetProperty.name for TargetProperty in self.tasks]
-        df = df.reset_index(drop=True) # Reset index to avoid problems with the splitter
 
         # Initial clusters
         clustering = MurckoScaffoldClusters()
@@ -314,10 +315,10 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
         # Split dataset
         splitter = GloballyBalancedSplit(
             sizes=[1 - self.testFraction, self.testFraction],
-            clusters = clusters,
+            clusters=clusters,
             clustering_method=None,
             time_limit_seconds=60 * len(self.tasks),
-            )
+        )
         df = splitter(df, smiles_col, target_cols)
 
         # Get indices
@@ -328,6 +329,7 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
             "Not all samples were assigned to a split"
 
         return iter([(train_indices, test_indices)])
+
 
 class ClusterSplit(DataSplit, DataSetDependant):
     """
@@ -343,14 +345,16 @@ class ClusterSplit(DataSplit, DataSetDependant):
     """
     def __init__(
         self,
-        test_fraction : float =0.1,
-        custom_test_list : list[str] = None,
-        dataset : QSPRDataset = None,
-        fp_calculator : FingerprintSet = FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-        n_initial_clusters : int | None = None,
-        seed : int = 42,
-        similarity_threshold : float = 0.7,
-        clustering_algorithm : Literal["MaxMin", "LeaderPicker"] = "MaxMin",
+        test_fraction: float = 0.1,
+        custom_test_list: list[str] | None = None,
+        dataset: QSPRDataset = None,
+        fp_calculator: FingerprintSet = FingerprintSet(
+            fingerprint_type="MorganFP", radius=3, nBits=2048
+        ),
+        n_initial_clusters: int | None = None,
+        seed: int = 42,
+        similarity_threshold: float = 0.7,
+        clustering_algorithm: Literal["MaxMin", "LeaderPicker"] = "MaxMin",
     ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
@@ -372,12 +376,12 @@ class ClusterSplit(DataSplit, DataSetDependant):
                 seed=self.seed,
                 fp_calculator=self.fpCalculator,
                 initial_centroids=self.customTestList,
-                )
+            )
         elif self.clusteringAlgorithm == "LeaderPicker":
             clustering = FPSimilarityLeaderPickerClusters(
                 fp_calculator=self.fpCalculator,
                 similarity_threshold=self.similarityThreshold,
-                )
+            )
         else:
             raise ValueError(
                 f"clustering_algorithm must be either 'MaxMin' \
@@ -399,9 +403,8 @@ class ClusterSplit(DataSplit, DataSetDependant):
             assert self.clusteringAlgorithm == "MaxMin", \
                 "custom_test_list only supported for MaxMin clustering"
 
-            assert set(self.customTestList).issubset(
-                self.df.QSPRID
-            ), "custom_test_list contains invalid indexes"
+            assert set(self.customTestList).issubset(self.df.QSPRID),\
+                "custom_test_list contains invalid indexes"
 
             if not self.nInitialClusters:
                 self.nInitialClusters = len(self.df) // 100
@@ -445,7 +448,7 @@ class ClusterSplit(DataSplit, DataSetDependant):
 
         return iter([(train_idx, test_idx)])
 
-    def _multitask_split(self,) -> Iterable[tuple[list[int], list[int]]]:
+    def _multitask_split(self, ) -> Iterable[tuple[list[int], list[int]]]:
         """
         Split multi-task dataset in two subsets based on clusters of fingerprints
         with globally balanced split from https://github.com/sohviluukkonen/gbmt-splits
@@ -459,23 +462,20 @@ class ClusterSplit(DataSplit, DataSetDependant):
                 "Multitask cluster split does not support custom_test_list"
             )
 
-        # Reset index to avoid problems with the splitter
-        self.df = self.df.reset_index(drop=True) 
-
         # Initial clusters
         clusters = self._cluster_molecules()
 
         # Split dataset
         splitter = GloballyBalancedSplit(
             sizes=[1 - self.testFraction, self.testFraction],
-            clusters = clusters,
+            clusters=clusters,
             clustering_method=None,
             time_limit_seconds=60 * len(self.tasks),
-            )
+        )
         df = splitter(
             self.df,
             self.dataset.smilesCol,
-            [TargetProperty.name for TargetProperty in self.tasks]
+            [TargetProperty.name for TargetProperty in self.tasks],
         )
 
         # Get indices

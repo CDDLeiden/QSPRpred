@@ -1,20 +1,17 @@
-import numpy as np
-
 from abc import ABC, abstractmethod
 
+import numpy as np
 from rdkit import Chem, DataStructs
 from rdkit.SimDivFilters import rdSimDivPickers
 
-from .scaffolds import Murcko
 from .descriptorsets import FingerprintSet
+from .scaffolds import Murcko
 
 
 class MoleculeClusters(ABC):
-
     """
     Abstract base class for clustering molecules.
     """
-
     @abstractmethod
     def get_clusters(self, mols):
         """
@@ -28,14 +25,14 @@ class MoleculeClusters(ABC):
                 and values are indices of molecules
         """
 
-    def _set_nClusters(self, N : int) -> None:
+    def _set_nClusters(self, N: int) -> None:
         self.nClusters = self.nClusters if self.nClusters is not None else N // 100
         # Set minimum number of clusters to 10
         if self.nClusters < 10:
             self.nClusters = 10
 
-class RandomClusters(MoleculeClusters):
 
+class RandomClusters(MoleculeClusters):
     """
     Randomly cluster molecules.
 
@@ -43,13 +40,12 @@ class RandomClusters(MoleculeClusters):
         seed (int): random seed
         nClusters (int): number of clusters
     """
-
-    def __init__(self, seed : int = 42, n_clusters : int | None = None):
+    def __init__(self, seed: int = 42, n_clusters: int | None = None):
         super().__init__()
         self.seed = seed
         self.nClusters = n_clusters
 
-    def get_clusters(self, smiles_list : list[str]) -> dict:
+    def get_clusters(self, smiles_list: list[str]) -> dict:
         """
         Cluster molecules.
 
@@ -64,7 +60,7 @@ class RandomClusters(MoleculeClusters):
         self._set_nClusters(len(smiles_list))
 
         # Initialize clusters
-        clusters = { i: [] for i in range(self.nClusters) }
+        clusters = {i: [] for i in range(self.nClusters)}
 
         # Randomly assign each molecule to a cluster
         indices = np.random.RandomState(seed=self.seed).permutation(len(smiles_list))
@@ -73,16 +69,16 @@ class RandomClusters(MoleculeClusters):
 
         return clusters
 
+
 class MurckoScaffoldClusters(MoleculeClusters):
     """
     Cluster molecules based on Murcko scaffolds.
     """
-
     def __init__(self):
         super().__init__()
         self.scaffold = Murcko()
 
-    def get_clusters(self, smiles_list : list[str]) -> dict:
+    def get_clusters(self, smiles_list: list[str]) -> dict:
         """
         Cluster molecules.
 
@@ -95,11 +91,13 @@ class MurckoScaffoldClusters(MoleculeClusters):
         """
 
         # Generate scaffolds for each molecule
-        scaffolds = [self.scaffold(Chem.MolFromSmiles(smiles)) for smiles in smiles_list]
+        scaffolds = [
+            self.scaffold(Chem.MolFromSmiles(smiles)) for smiles in smiles_list
+        ]
 
         # Get unique scaffolds and initialize clusters
         unique_scaffolds = list(set(scaffolds))
-        clusters = { i: [] for i in range(len(unique_scaffolds)) }
+        clusters = {i: [] for i in range(len(unique_scaffolds))}
 
         # Cluster molecules based on scaffolds
         for i, scaffold in enumerate(scaffolds):
@@ -107,19 +105,18 @@ class MurckoScaffoldClusters(MoleculeClusters):
 
         return clusters
 
-class FPSimilarityClusters(MoleculeClusters):
 
-    def __init__(self, fp_calculator : FingerprintSet = FingerprintSet(
-                    fingerprint_type="MorganFP",
-                    radius=3,
-                    nBits=2048
-                )
-        ) -> None:
+class FPSimilarityClusters(MoleculeClusters):
+    def __init__(
+        self,
+        fp_calculator: FingerprintSet = FingerprintSet(
+            fingerprint_type="MorganFP", radius=3, nBits=2048
+        ),
+    ) -> None:
         super().__init__()
         self.fp_calculator = fp_calculator
 
-    def get_clusters(self, smiles_list : list[str]) -> dict:
-
+    def get_clusters(self, smiles_list: list[str]) -> dict:
         """
         Cluster a list of SMILES strings based on molecular dissimilarity.
 
@@ -136,11 +133,14 @@ class FPSimilarityClusters(MoleculeClusters):
         fps = self.fp_calculator.getFingerprint(mols)
 
         # Convert np fingerprints to rdkit fingerprints
-        fps = [DataStructs.cDataStructs.CreateFromBitString("".join(fp.astype(str))) for fp in fps]
+        fps = [
+            DataStructs.cDataStructs.CreateFromBitString("".join(fp.astype(str)))
+            for fp in fps
+        ]
 
         # Get cluster centroids and initialize clusters
         centroid_indices = self._get_centroids(fps)
-        clusters = { i: [] for i in range(len(centroid_indices)) }
+        clusters = {i: [] for i in range(len(centroid_indices))}
 
         # Cluster molecules based on centroids
         for i, fp in enumerate(fps):
@@ -152,8 +152,9 @@ class FPSimilarityClusters(MoleculeClusters):
         return clusters
 
     @abstractmethod
-    def _get_centroids(self, fps : list) -> list:
+    def _get_centroids(self, fps: list) -> list:
         pass
+
 
 class FPSimilarityMaxMinClusters(FPSimilarityClusters):
     """
@@ -165,18 +166,15 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
         seed (int): random seed
         initialCentroids (list): list of indices of initial cluster centroids
     """
-
     def __init__(
-            self,
-            n_clusters : int | None = None,
-            seed : int = 42,
-            initial_centroids : list[str] | None = None,
-            fp_calculator : FingerprintSet = FingerprintSet(
-                fingerprint_type="MorganFP",
-                radius=3,
-                nBits=2048
-            )
-            ):
+        self,
+        n_clusters: int | None = None,
+        seed: int = 42,
+        initial_centroids: list[str] | None = None,
+        fp_calculator: FingerprintSet = FingerprintSet(
+            fingerprint_type="MorganFP", radius=3, nBits=2048
+        ),
+    ):
         super().__init__(fp_calculator=fp_calculator)
         self.nClusters = n_clusters
         self.seed = seed
@@ -202,7 +200,7 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
             len(fps),
             self.nClusters,
             firstPicks=self.initialCentroids if self.initialCentroids else [],
-            seed = self.seed
+            seed=self.seed,
         )
 
         return centroid_indices
@@ -216,15 +214,12 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
         fp_calculator (FingerprintSet): fingerprint calculator
         similarity_threshold (float): similarity threshold
     """
-
     def __init__(
-            self,
-            similarity_threshold : float = 0.7,
-            fp_calculator : FingerprintSet = FingerprintSet(
-                fingerprint_type="MorganFP",
-                radius=3,
-                nBits=2048
-            )
+        self,
+        similarity_threshold: float = 0.7,
+        fp_calculator: FingerprintSet = FingerprintSet(
+            fingerprint_type="MorganFP", radius=3, nBits=2048
+        ),
     ):
         super().__init__()
         self.similarityThreshold = similarity_threshold
@@ -235,6 +230,8 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
         Get cluster centroids with LeaderPicker algorithm.
         """
         picker = rdSimDivPickers.LeaderPicker()
-        centroid_indices = picker.LazyBitVectorPick(fps, len(fps), self.similarityThreshold)
+        centroid_indices = picker.LazyBitVectorPick(
+            fps, len(fps), self.similarityThreshold
+        )
 
         return centroid_indices
