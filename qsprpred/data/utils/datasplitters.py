@@ -130,7 +130,7 @@ class RandomSplit(DataSplit, DataSetDependant):
             clustering_method=None,
             time_limit_seconds=60 * len(self.tasks),
         )
-        df = splitter(df, smiles_col, target_cols)
+        df = splitter(self.df, smiles_col, target_cols)
 
         # Get indices
         train = df[df["Split"] == 0].index.values
@@ -399,6 +399,8 @@ class ClusterSplit(DataSplit, DataSetDependant):
             Iterable of tuples with train and test indices.
         """
 
+        self.df.reset_index(drop=True, inplace=True)
+
         if self.customTestList is not None:
             assert self.clusteringAlgorithm == "MaxMin", \
                 "custom_test_list only supported for MaxMin clustering"
@@ -406,14 +408,14 @@ class ClusterSplit(DataSplit, DataSetDependant):
             assert set(self.customTestList).issubset(self.df.QSPRID),\
                 "custom_test_list contains invalid indexes"
 
-            if not self.nInitialClusters:
+            if self.nInitialClusters is None:
                 self.nInitialClusters = len(self.df) // 100
-            print(self.nInitialClusters, self.customTestList)
             assert len(self.customTestList) < self.nInitialClusters, \
                 "Number of molecules in custom_test_list must be less than \
                     n_initial_clusters. Try increasing n_initial_clusters."
 
-            # Convert QSPRID indices into numerical indices
+            # Convert QSPRID indices into numerical indices, which are used
+            # internally by the clustering algorithm
             self.customTestList = [
                 int(self.df[self.df.QSPRID == x].index[0]) for x in self.customTestList
             ]
@@ -445,6 +447,9 @@ class ClusterSplit(DataSplit, DataSetDependant):
 
         # Get train set indices
         train_idx = list(set(self.df.index) - set(test_idx))
+
+        # Reset index back to QSPRID
+        self.df.set_index("QSPRID", inplace=True)
 
         return iter([(train_idx, test_idx)])
 

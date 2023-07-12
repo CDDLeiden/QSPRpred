@@ -187,7 +187,6 @@ class DataSplit(ABC, DataSetDependant):
 
         self.dataset = self.getDataSet()
         self.df = self.dataset.getDF()
-        self.df.reset_index(drop=True)  # need numeric index splits
         self.tasks = self.dataset.targetProperties
 
         assert len(self.tasks) > 0, "No target properties found."
@@ -197,6 +196,7 @@ class DataSplit(ABC, DataSetDependant):
         if len(self.tasks) == 1:
             return self._singletask_split()
         else:
+            self.df.reset_index(drop=True, inplace=True)  # need numeric index splits
             return self._multitask_split()
 
     @abstractmethod

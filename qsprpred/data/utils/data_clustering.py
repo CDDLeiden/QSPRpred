@@ -192,9 +192,6 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
         """
         self._set_nClusters(len(fps))
         picker = rdSimDivPickers.MaxMinPicker()
-
-        print(self.initialCentroids)
-
         centroid_indices = picker.LazyBitVectorPick(
             fps,
             len(fps),
