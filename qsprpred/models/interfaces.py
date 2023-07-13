@@ -877,13 +877,15 @@ class HyperParameterOptimization(ABC):
     Attributes:
         scoreFunc (Metric): scoring function to use
         evaluationMethod (EvaluationMethod): evaluation method to use
+        scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
         paramGrid (dict): dictionary of parameters to optimize
         bestScore (float): best score found during optimization
         bestParams (dict): best parameters found during optimization
     """
     def __init__(
         self, scoring: str | Callable[[Iterable, Iterable], float], param_grid: dict,
-        evaluation_method: EvaluationMethod
+        evaluation_method: EvaluationMethod, score_aggregation: Callable[[Iterable],
+                                                                         float]
     ):
         """Initialize the hyperparameter optimization class.
 
@@ -893,6 +895,7 @@ class HyperParameterOptimization(ABC):
             dictionary of parameters to optimize
         evaluation_method (EvaluationMethod):
             evaluation method to use for determining the best parameters
+        score_aggregation (Callable[[Iterable], float]): function to aggregate scores
         """
         self.scoreFunc = (
             SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
@@ -901,6 +904,7 @@ class HyperParameterOptimization(ABC):
         self.bestScore = -np.inf
         self.bestParams = None
         self.evaluationMethod = evaluation_method
+        self.scoreAggregation = score_aggregation
 
     @abstractmethod
     def optimize(self, model: QSPRModel) -> dict:

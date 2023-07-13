@@ -48,6 +48,7 @@ class OptunaOptimization(HyperParameterOptimization):
         scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
         evaluation_method: EvaluationMethod = CrossValidation(),
+        score_aggregation: Callable[[Iterable], float] = np.mean,
         n_trials: int = 100,
         n_jobs: int = 1,
     ):
@@ -64,13 +65,16 @@ class OptunaOptimization(HyperParameterOptimization):
             evaluation_method (EvaluationMethod): evaluation method to use for the
                                                   optimization
                                                   (default: CrossValidation)
+            score_aggregation (Callable): function to aggregate the scores of different
+                                          folds if the evaluation method returns
+                                          multiple predictions
             n_trials (int):
                 number of trials for bayes optimization
             n_jobs (int):
                 number of jobs to run in parallel.
                 At the moment only n_jobs=1 is supported.
         """
-        super().__init__(scoring, param_grid, evaluation_method)
+        super().__init__(scoring, param_grid, evaluation_method, score_aggregation)
         search_space_types = [
             "categorical", "discrete_uniform", "float", "int", "loguniform", "uniform"
         ]
@@ -166,7 +170,9 @@ class OptunaOptimization(HyperParameterOptimization):
             model, save=False, parameters=bayesian_params
         )
         scores = [self.scoreFunc(*pred) for pred in predictions]
-        score = np.mean(scores)
+        score = self.scoreAggregation(scores)
+        logger.info(bayesian_params)
+        logger.info(f"Score: {score}, std: {np.std(scores)}")
         return score
 
 
@@ -177,6 +183,7 @@ class GridSearchOptimization(HyperParameterOptimization):
         scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
         evaluation_method: EvaluationMethod = CrossValidation(),
+        score_aggregation: Callable = np.mean,
     ):
         """Initialize the class.
 
@@ -188,8 +195,11 @@ class GridSearchOptimization(HyperParameterOptimization):
                 of parameter settings to try as values
             evaluation_method (EvaluationMethod): evaluation method to use for the
                                                   optimization
+            score_aggregation (Callable): function to aggregate the scores of different
+                                          folds if the evaluation method returns
+                                          multiple predictions (default: np.mean)
         """
-        super().__init__(scoring, param_grid, evaluation_method)
+        super().__init__(scoring, param_grid, evaluation_method, score_aggregation)
 
     def optimize(self, model: QSPRModel, save_params: bool = True) -> dict:
         """Optimize the hyperparameters of the model.
@@ -209,11 +219,10 @@ class GridSearchOptimization(HyperParameterOptimization):
         )
         for params in ParameterGrid(self.paramGrid):
             logger.info(params)
-            y, y_ind = model.data.getTargetPropertiesValues()
             predictions = self.evaluationMethod(model, save=False, parameters=params)
             scores = [self.scoreFunc(*pred) for pred in predictions]
-            score = np.mean(scores)
-            logger.info("Score: %s" % score)
+            score = self.scoreAggregation(scores)
+            logger.info(f"Score: {score}, std: {np.std(scores)}")
             if score > self.bestScore:
                 self.bestScore = score
                 self.bestParams = params
@@ -223,7 +232,7 @@ class GridSearchOptimization(HyperParameterOptimization):
         )
         logger.info(
             "Grid search best params: %s with score: %s" %
-            (self.bestScore, self.bestScore)
+            (self.bestParams, self.bestScore)
         )
         # save the best parameters to the model if requested
         if save_params:
