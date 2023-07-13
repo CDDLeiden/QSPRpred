@@ -59,39 +59,54 @@ class ManualSplit(DataSplit):
             )
 
     def split(self, X, y):
+        """
+        Split the given data into one or multiple train/test subsets based on the
+        predefined splitcol.
+
+        Args:
+            X (np.ndarray | pd.DataFrame): the input data matrix
+            y (np.ndarray | pd.DataFrame | pd.Series): the target variable(s)
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
+        """
         train = self.splitCol[self.splitCol == self.trainVal].index.values
         test = self.splitCol[self.splitCol == self.testVal].index.values
         return iter([(train, test)])
 
-    def _singletask_split(self):
-        pass
-
-    def _multitask_split(self):
-        pass
-
-
-class RandomSplit(DataSplit, DataSetDependant):
+class RandomSplit(DataSplit):
     """Splits dataset in random train and test subsets.
 
     Attributes:
+        dataSet (QSPRDataset): dataset that this splitter will be acting on
         testFraction (float): fraction of total dataset to testset
+        seed (int): random seed for reproducibility
+        nInitialClusters (int): number of initial random clusters used by
+        the multitask splitter
     """
     def __init__(
-        self,
-        dataset: QSPRDataset = None,
-        test_fraction=0.1,
-        seed=42,
-        **mt_kwargs
+            self,
+            dataset: QSPRDataset | None= None,
+            test_fraction: float = 0.1,
+            seed: int = 42,
+            n_initial_clusters: int | None = None,
     ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
         self.seed = seed
-        self.mt_kwargs = mt_kwargs if mt_kwargs else {}
+        self.nInitialClusters = n_initial_clusters
 
     def _singletask_split(self) -> Iterable[tuple[list[int], list[int]]]:
         """
         Split single-task dataset in two subsets with shuffled random sampling.
         In the case classification, stratified sampling is used.
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
         """
         task = self.tasks[0].task
         if task.isRegression():
@@ -109,6 +124,11 @@ class RandomSplit(DataSplit, DataSetDependant):
         """
         Split multi-task dataset in two subsets with globally balanced random
         sampling from https://github.com/sohviluukkonen/gbmt-splits
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
         """
 
         # Dataframe and columns
@@ -116,11 +136,7 @@ class RandomSplit(DataSplit, DataSetDependant):
         target_cols = [TargetProperty.name for TargetProperty in self.tasks]
 
         # Initial random clustering
-        nclusters = (
-            self.mt_kwargs["n_intial_clusters"]
-            if "n_intial_clusters" in self.mt_kwargs else None
-        )
-        clustering = RandomClusters(seed=self.seed, n_clusters=nclusters)
+        clustering = RandomClusters(seed=self.seed, n_clusters=self.nInitialClusters)
         clusters = clustering.get_clusters(self.df[smiles_col].tolist())
 
         # Split dataset
@@ -151,7 +167,9 @@ class TemporalSplit(DataSplit, DataSetDependant):
         timeSplit(float): time point after which sample to test set
         timeCol (str): name of the column within the dataframe with timepoints
     """
-    def __init__(self, timesplit, timeprop, dataset=None) -> None:
+    def __init__(
+            self,timesplit: float, timeprop: str, dataset: QSPRDataset | None = None
+    ) -> None:
         """Initialize a TemporalSplit object.
 
         Args:
@@ -166,6 +184,11 @@ class TemporalSplit(DataSplit, DataSetDependant):
     def _singletask_split(self):
         """
         Split single-task dataset based on a time threshold.
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
         """
 
         indices = np.array(list(range(len(self.df))))
@@ -179,6 +202,11 @@ class TemporalSplit(DataSplit, DataSetDependant):
     def _multitask_split(self):
         """
         Split multi-task dataset based on a time threshold.
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
         """
         logger.warning(
             "The TemporalSplit is not recommended for multitask\
@@ -195,6 +223,8 @@ class TemporalSplit(DataSplit, DataSetDependant):
         for task in self.tasks:
             if len(self.df[mask][task.name]) == 0:
                 raise ValueError(f"No test samples found for task {task.name}")
+            elif len(self.df[~mask][task.name]) == 0:
+                raise ValueError(f"No train samples found for task {task.name}")
 
         train = indices[~mask]
 
@@ -221,10 +251,10 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
     def __init__(
         self,
         scaffold: Scaffold = Murcko(),
-        test_fraction=0.1,
-        shuffle=True,
-        custom_test_list=None,
-        dataset=None,
+        test_fraction: float = 0.1,
+        shuffle: bool = True,
+        custom_test_list: list | None = None,
+        dataset: QSPRDataset | None = None,
     ) -> None:
         super().__init__(dataset)
         self.scaffold = scaffold
@@ -233,6 +263,14 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
         self.customTestList = custom_test_list
 
     def _singletask_split(self) -> Iterable[tuple[list[int], list[int]]]:
+        """
+        Single-task dataset split based on scaffold.
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
+        """
         # Add scaffolds to dataset
         dataset = self.getDataSet()
         dataset.addScaffolds([self.scaffold])
@@ -293,6 +331,11 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
         """
         Split multi-task dataset in two subsets with globally balanced scaffold-based
         split from https://github.com/sohviluukkonen/gbmt-splits
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
         """
 
         if not isinstance(self.scaffold, Murcko):
@@ -338,10 +381,15 @@ class ClusterSplit(DataSplit, DataSetDependant):
     Attributes:
         dataSet: QSPRDataset object.
         testFraction (float): fraction of the test set. Defaults to 0.1.
-        shuffle (bool): whether to shuffle the data or not. Defaults to True.
-        customTestList (list): list of molecule indexes to force in test set. If
-            forced test contains the totality of the molecules in the dataset, the
-            custom_test_list reverts to default None.
+        fpCalculator (FingerprintSet): fingerprint calculator.
+            Defaults to MorganFP with radius 3 and 2048 bits.
+        customTestList (list): list of molecule indexes to force in test set.
+            If forced test contains the totality of the molecules in the dataset,
+            the custom_test_list reverts to default None.
+        nInitialClusters (int): number of initial clusters. Defaults to None.
+        seed (int): random seed. Used in case of 'MaxMin' clustering. Defaults to 42.
+        similarityThreshold (float): similarity threshold for clustering. Used in case
+            of 'LeaderPicker' clustering. Defaults to 0.7.
     """
     def __init__(
         self,
@@ -368,6 +416,10 @@ class ClusterSplit(DataSplit, DataSetDependant):
     def _cluster_molecules(self):
         """
         Cluster molecules based on fingerprints.
+
+        Returns:
+            dict: dictionary of clusters. Keys are cluster indexes and values are lists
+                of molecule indexes.
         """
 
         if self.clusteringAlgorithm == "MaxMin":
@@ -396,7 +448,9 @@ class ClusterSplit(DataSplit, DataSetDependant):
         Split single-task dataset in two subsets based on clusters of fingerprints.
 
         Returns:
-            Iterable of tuples with train and test indices.
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
         """
 
         self.df.reset_index(drop=True, inplace=True)
@@ -453,13 +507,15 @@ class ClusterSplit(DataSplit, DataSetDependant):
 
         return iter([(train_idx, test_idx)])
 
-    def _multitask_split(self, ) -> Iterable[tuple[list[int], list[int]]]:
+    def _multitask_split(self,) -> Iterable[tuple[list[int], list[int]]]:
         """
         Split multi-task dataset in two subsets based on clusters of fingerprints
         with globally balanced split from https://github.com/sohviluukkonen/gbmt-splits
 
         Returns:
-            Iterable of tuples with train and test indices.
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
         """
 
         if self.customTestList is not None:

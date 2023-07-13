@@ -156,7 +156,12 @@ class DataSetDependant:  # Note: this shouldn't be ABC; no abstract methods defi
 
 
 class DataSplit(ABC, DataSetDependant):
-    """Defines a function split a dataframe into train and test set."""
+    """
+    Defines a function split a dataframe into train and test set.
+
+    Attributes:
+        dataset (MoleculeDataSet): The dataset to split.
+    """
     def __init__(self, dataset: MoleculeDataSet) -> None:
         super().__init__(dataset)
 
@@ -199,13 +204,13 @@ class DataSplit(ABC, DataSetDependant):
             self.df.reset_index(drop=True, inplace=True)  # need numeric index splits
             return self._multitask_split()
 
-    @abstractmethod
-    def _singletask_split(self):
-        pass
+    # @abstractmethod
+    # def _singletask_split(self):
+    #     pass
 
-    @abstractmethod
-    def _multitask_split(self):
-        pass
+    # @abstractmethod
+    # def _multitask_split(self):
+    #     pass
 
 
 class DataFilter(ABC):
