@@ -69,7 +69,7 @@ class CrossValidation(EvaluationMethod):
         for i, (X_train, X_test, y_train, y_test, idx_train,
                 idx_test) in enumerate(folds):
             crossvalmodel = model.loadEstimator(evalparams)
-            logger.info(
+            logger.debug(
                 "cross validation fold %s started: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
@@ -85,7 +85,7 @@ class CrossValidation(EvaluationMethod):
                     f"cross validation fold {i}: last save epoch {last_save_epoch}"
                 )
             model.fit(X_train, y_train, crossvalmodel)
-            # predict and store predictions
+            # make predictions
             if model.task.isRegression():
                 cvs[idx_test] = model.predict(X_test, crossvalmodel)
             else:
@@ -94,7 +94,7 @@ class CrossValidation(EvaluationMethod):
                     cvs[idx][idx_test] = preds[idx]
 
             cvs_ids[idx_test] = X.iloc[idx_test].index.to_numpy()
-            logger.info(
+            logger.debug(
                 "cross validation fold %s ended: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
@@ -108,7 +108,16 @@ class CrossValidation(EvaluationMethod):
             self.savePredictionsToFile(
                 model, y, cvs, cvs_index, "cv", extra_columns={"Fold": fold_counter}
             )
-        return cvs
+        # create output list with tuples of true values and predictions for each fold
+        output = []
+        for i in np.unique(fold_counter):
+            if model.task.isRegression():
+                predictions = cvs[fold_counter == i]
+            else:
+                predictions = [cvs_task[fold_counter == i] for cvs_task in cvs]
+            output.append((y[fold_counter == i], predictions))
+
+        return output
 
 
 class EvaluateTestSetPerformance(EvaluationMethod):
@@ -169,3 +178,4 @@ class EvaluateTestSetPerformance(EvaluationMethod):
             index_name = model.data.getDF().index.name
             ind_index = pd.Index(inds_ids, name=index_name)
             self.savePredictionsToFile(model, y_ind, inds, ind_index, "ind")
+        return [(y_ind, inds)]

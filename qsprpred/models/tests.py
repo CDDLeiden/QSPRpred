@@ -90,7 +90,9 @@ class ModelTestMixIn:
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
-            scoring=model.scoreFunc, param_grid=search_space_gs
+            scoring=model.scoreFunc,
+            param_grid=search_space_gs,
+            evaluation_method=EvaluateTestSetPerformance()
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)

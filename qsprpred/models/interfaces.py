@@ -803,44 +803,6 @@ class QSPRModel(ABC):
         """
 
 
-class HyperParameterOptimization(ABC):
-    """Base class for hyperparameter optimization.
-
-    Attributes:
-        scoreFunc (Metric): scoring function to use
-        paramGrid (dict): dictionary of parameters to optimize
-        bestScore (float): best score found during optimization
-        bestParams (dict): best parameters found during optimization
-    """
-    def __init__(
-        self, scoring: str | Callable[[Iterable, Iterable], float], param_grid: dict
-    ):
-        """Initialize the hyperparameter optimization class.
-
-        scoring (str | Callable[[Iterable, Iterable], float]):
-            Metric name from `sklearn.metrics` or user-defined scoring function.
-        param_grid (dict):
-            dictionary of parameters to optimize
-        """
-        self.scoreFunc = (
-            SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
-        )
-        self.paramGrid = param_grid
-        self.bestScore = -np.inf
-        self.bestParams = None
-
-    @abstractmethod
-    def optimize(self, model: QSPRModel) -> dict:
-        """Optimize the model hyperparameters.
-
-        Args:
-            model (QSPRModel): model to optimize
-
-        Returns:
-            dict: dictionary of best parameters
-        """
-
-
 class EvaluationMethod(ABC):
     """Base class for evaluation methods.
 
@@ -848,14 +810,18 @@ class EvaluationMethod(ABC):
         scoreFunc (Metric): scoring function to use
     """
     @abstractmethod
-    def __call__(self, model: QSPRModel) -> dict:
+    def __call__(
+        self, model: QSPRModel
+    ) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
         """Evaluate the model.
 
         Args:
             model (QSPRModel): model to evaluate
 
         Returns:
-            dict: dictionary of evaluation results
+            list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]:
+                list of tuples containing the true values and the predictions, where
+                each tuple corresponds a set of predictions such as different folds.
         """
 
     def savePredictionsToFile(
@@ -903,3 +869,46 @@ class EvaluationMethod(ABC):
             for col_name, col_values in extra_columns.items():
                 df_out[col_name] = col_values
         df_out.to_csv(f"{model.outPrefix}.{file_suffix}.tsv", sep="\t")
+
+
+class HyperParameterOptimization(ABC):
+    """Base class for hyperparameter optimization.
+
+    Attributes:
+        scoreFunc (Metric): scoring function to use
+        evaluationMethod (EvaluationMethod): evaluation method to use
+        paramGrid (dict): dictionary of parameters to optimize
+        bestScore (float): best score found during optimization
+        bestParams (dict): best parameters found during optimization
+    """
+    def __init__(
+        self, scoring: str | Callable[[Iterable, Iterable], float], param_grid: dict,
+        evaluation_method: EvaluationMethod
+    ):
+        """Initialize the hyperparameter optimization class.
+
+        scoring (str | Callable[[Iterable, Iterable], float]):
+            Metric name from `sklearn.metrics` or user-defined scoring function.
+        param_grid (dict):
+            dictionary of parameters to optimize
+        evaluation_method (EvaluationMethod):
+            evaluation method to use for determining the best parameters
+        """
+        self.scoreFunc = (
+            SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
+        )
+        self.paramGrid = param_grid
+        self.bestScore = -np.inf
+        self.bestParams = None
+        self.evaluationMethod = evaluation_method
+
+    @abstractmethod
+    def optimize(self, model: QSPRModel) -> dict:
+        """Optimize the model hyperparameters.
+
+        Args:
+            model (QSPRModel): model to optimize
+
+        Returns:
+            dict: dictionary of best parameters
+        """
