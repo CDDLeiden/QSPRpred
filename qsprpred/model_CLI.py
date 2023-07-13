@@ -23,6 +23,7 @@ from .deep.models.models import QSPRDNN
 from .logs.utils import backup_files, commit_hash, enable_file_logger
 from .models.evaluation_methods import CrossValidation, EvaluateTestSetPerformance
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
+from .models.metrics import SklearnMetric
 from .models.models import QSPRModel, QSPRsklearn
 from .models.tasks import TargetTasks
 
@@ -337,11 +338,12 @@ def QSPR_modelling(args):
                 )
 
             # if desired run parameter optimization
+            score_func = SklearnMetric.getDefaultMetric(model.task)
             if args.optimization == "grid":
                 search_space_gs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_gs)
                 gridsearcher = GridSearchOptimization(
-                    scoring=QSPRmodel.scoreFunc, param_grid=search_space_gs
+                    scoring=score_func, param_grid=search_space_gs
                 )
                 best_params = gridsearcher.optimize(QSPRmodel)
                 QSPRmodel.saveParams(best_params)
@@ -365,7 +367,7 @@ def QSPR_modelling(args):
                         {"criterion": ["categorical", ["gini", "entropy"]]}
                     )
                 bayesoptimizer = OptunaOptimization(
-                    scoring=QSPRmodel.scoreFunc,
+                    scoring=score_func,
                     param_grid=search_space_bs,
                     n_trials=args.n_trials,
                     n_jobs=args.n_jobs,

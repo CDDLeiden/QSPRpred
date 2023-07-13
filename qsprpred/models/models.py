@@ -34,8 +34,7 @@ class QSPRsklearn(QSPRModel):
         data: QSPRDataset = None,
         name: Optional[str] = None,
         parameters: Optional[dict] = None,
-        autoload: bool = True,
-        scoring=None,
+        autoload: bool = True
     ):
         """Initialize QSPRsklearn model.
 
@@ -46,9 +45,8 @@ class QSPRsklearn(QSPRModel):
             name (str): customized model name
             parameters (dict): model parameters
             autoload (bool): load model from file
-            scoring (str): scoring function to use for model evaluation
         """
-        super().__init__(base_dir, alg, data, name, parameters, autoload, scoring)
+        super().__init__(base_dir, alg, data, name, parameters, autoload)
         # check for incompatible tasks
         if self.task == ModelTasks.MULTITASK_MIXED:
             raise ValueError(

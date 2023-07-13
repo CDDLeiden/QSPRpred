@@ -80,9 +80,10 @@ class ModelTestMixIn:
             model (QSPRModel): The model to test.
         """
         # perform bayes optimization
+        score_func = SklearnMetric.getDefaultMetric(model.task)
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
-            scoring=model.scoreFunc, param_grid=search_space_bs, n_trials=1
+            scoring=score_func, param_grid=search_space_bs, n_trials=1
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
@@ -90,7 +91,7 @@ class ModelTestMixIn:
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
-            scoring=model.scoreFunc,
+            scoring=score_func,
             param_grid=search_space_gs,
             score_aggregation=np.median,
             evaluation_method=EvaluateTestSetPerformance()

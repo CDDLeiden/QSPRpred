@@ -8,7 +8,7 @@ import os
 import sys
 from copy import deepcopy
 from datetime import datetime
-from typing import Any, Callable, Type
+from typing import Any, Type
 
 import numpy as np
 import pandas as pd
@@ -78,7 +78,6 @@ class QSPRDNN(QSPRModel):
         name: str | None = None,
         parameters: dict | None = None,
         autoload: bool = True,
-        scoring: str | Callable | None = None,
         device: torch.device = DEFAULT_DEVICE,
         gpus: list[int] = DEFAULT_GPUS,
         patience: int = 50,
@@ -100,9 +99,6 @@ class QSPRDNN(QSPRModel):
                 dictionary of algorithm specific parameters. Defaults to None.
             autoload (bool, optional):
                 whether to load the model from file or not. Defaults to True.
-            scoring (str | Callable, optional):
-                scoring function for the model. Defaults to `None`, in which case
-                the default scoring function for the task is used.
             device (torch.device, optional):
                 The cuda device. Defaults to `DEFAULT_DEVICE`.
             gpus (list[int], optional):
@@ -120,9 +116,7 @@ class QSPRDNN(QSPRModel):
         self.tol = tol
         self.nClass = None
         self.nDim = None
-        super().__init__(
-            base_dir, alg, data, name, parameters, autoload=autoload, scoring=scoring
-        )
+        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload)
         if self.task.isMultiTask():
             raise NotImplementedError(
                 "Multitask modelling is not implemented for QSPRDNN models."

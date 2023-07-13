@@ -240,8 +240,7 @@ class QSPRModel(ABC):
         data: Optional[QSPRDataset] = None,
         name: Optional[str] = None,
         parameters: Optional[dict] = None,
-        autoload=True,
-        scoring=None,
+        autoload=True
     ):
         """Initialize a QSPR model instance.
 
@@ -259,9 +258,6 @@ class QSPRModel(ABC):
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
-            scoring (str or callable):
-                scoring function to use for cross validation and optimization,
-                if None, the default scoring function is used
         """
         self.data = data
         self.name = name or alg.__class__.__name__
@@ -312,8 +308,6 @@ class QSPRModel(ABC):
         self.alg = alg
         if autoload:
             self.estimator = self.loadEstimatorFromFile(params=self.parameters)
-
-        self.scoreFunc = self.getScoringFunction(scoring)
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""
@@ -645,56 +639,6 @@ class QSPRModel(ABC):
         """
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
-
-    def getScoringFunction(
-        self,
-        scoring: Union[str, Callable[[Iterable, Iterable], float]],
-    ) -> Callable[[Iterable, Iterable], float] | SklearnMetric:
-        """Get scoring function from sklearn.metrics.
-
-        Args:
-            scoring (Union[str, Callable[[Iterable, Iterable], float]]):
-                metric name from `sklearn.metrics` or user-defined scoring function.
-
-        Raises:
-            ValueError: If the scoring function is currently not supported by
-                GridSearch and BayesOptimization.
-
-        Returns:
-            score_func (Callable[[Iterable, Iterable], float] | SklearnMetric):
-                scorer function from sklearn.metrics (`str` as input)
-                wrapped in the `SklearnMetric` class
-                or user-defined function (`Callable` as input,
-                if classification metric has the attribute `needsProbasToScore`,
-                set to `True` if is needs probabilities instead of predictions).
-        """
-        if all(
-            [scoring not in SklearnMetric.supportedMetrics,
-             isinstance(scoring, str)]
-        ):
-            raise ValueError(
-                "Scoring function %s not supported. Supported scoring functions are: %s"
-                % (scoring, SklearnMetric.supportedMetrics)
-            )
-        elif callable(scoring):
-            return scoring
-        elif scoring is None:
-            if self.task.isRegression():
-                scorer = SklearnMetric.getMetric("explained_variance")
-            elif self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_SINGLECLASS]:
-                scorer = SklearnMetric.getMetric("roc_auc_ovr_weighted")
-            elif self.task in [ModelTasks.SINGLECLASS]:
-                scorer = SklearnMetric.getMetric("roc_auc")
-            else:
-                raise ValueError(
-                    "No supported scoring function for task %s" % self.task
-                )
-        else:
-            scorer = SklearnMetric.getMetric(scoring)
-        assert scorer.supportsTask(
-            self.task
-        ), "Scoring function %s does not support task %s" % (scorer, self.task)
-        return scorer
 
     @abstractmethod
     def fit(self) -> str:
