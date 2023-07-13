@@ -50,6 +50,8 @@ class HighCorrelationFilter(FeatureFilter):
         self.th = th
 
     def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None) -> pd.DataFrame:
+        if df.shape[1] == 1:
+            return df
         # make absolute, because we also want to filter out large negative correlation
         correlation = np.triu(np.abs(np.corrcoef(df.values.astype(float).T)), k=1)
         high_corr = np.where(np.any(correlation > self.th, axis=0))
