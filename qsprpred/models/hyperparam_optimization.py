@@ -169,7 +169,17 @@ class OptunaOptimization(HyperParameterOptimization):
         predictions = self.evaluationMethod(
             model, save=False, parameters=bayesian_params
         )
-        scores = [self.scoreFunc(*pred) for pred in predictions]
+        scores = []
+        # TODO: this should be removed once random seeds are fixed
+        for pred in predictions:
+            if model.task.isClassification():
+                # check if more than 1 class in y_true
+                if not len(np.unique(pred[0])) > 1:
+                    logger.warning("Only 1 class in y_true, skipping fold.")
+                    pass
+            scores.append(self.scoreFunc(*pred))
+        assert len(scores) > 0, "No scores calculated, all folds skipped."
+        #scores = [self.scoreFunc(*pred) for pred in predictions]
         score = self.scoreAggregation(scores)
         logger.info(bayesian_params)
         logger.info(f"Score: {score}, std: {np.std(scores)}")
@@ -220,7 +230,17 @@ class GridSearchOptimization(HyperParameterOptimization):
         for params in ParameterGrid(self.paramGrid):
             logger.info(params)
             predictions = self.evaluationMethod(model, save=False, parameters=params)
-            scores = [self.scoreFunc(*pred) for pred in predictions]
+            scores = []
+            # TODO: this should be removed once random seeds are fixed
+            for pred in predictions:
+                if model.task.isClassification():
+                    # check if more than 1 class in y_true
+                    if not len(np.unique(pred[0])) > 1:
+                        logger.warning("Only 1 class in y_true, skipping fold.")
+                        pass
+                scores.append(self.scoreFunc(*pred))
+            assert len(scores) > 0, "No scores calculated, all folds skipped."
+            #scores = [self.scoreFunc(*pred) for pred in predictions]
             score = self.scoreAggregation(scores)
             logger.info(f"Score: {score}, std: {np.std(scores)}")
             if score > self.bestScore:
