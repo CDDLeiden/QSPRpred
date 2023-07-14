@@ -7,7 +7,6 @@ the `QSPRModel` interface can be added.
 
 import os
 from copy import deepcopy
-from datetime import datetime
 from typing import Any, Optional
 
 import numpy as np
@@ -79,28 +78,6 @@ class QSPRsklearn(QSPRModel):
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""
         return False
-
-    def fitAllData(self) -> str:
-        """Fit the underlying scikit-learn estimator.
-
-        Returns:
-            str: path to saved model
-        """
-        # check if data is available
-        self.checkForData()
-        # get data into fit set
-        X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargetPropertiesValues(concat=True)
-        # fit model
-        logger.info(
-            "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-        self.fit(X_all, y_all)
-        logger.info(
-            "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-        # save model
-        return self.save()
 
     def loadEstimator(self, params: Optional[dict] = None) -> Any:
         """Load estimator from alg and params.

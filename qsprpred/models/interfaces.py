@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Any, Callable, Iterable, List, Optional, Type, Union
 
 import numpy as np
@@ -639,6 +640,51 @@ class QSPRModel(ABC):
         """
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
+
+    def fitAllData(self, **kwargs) -> str:
+        """Train model on the training data,
+        determine best model using test set, save best model.
+
+        ** IMPORTANT ** For models that supportEarlyStopping, the `crossValidate` method
+        should be run first, so that the average number of epochs from the
+        cross-validation with early stopping can be used for fitting the model.
+
+        Args:
+            kwargs: additional arguments to pass to fit
+
+        Returns:
+            str: path to the saved model
+        """
+        # do some checks
+        self.checkForData()
+        # get data
+        X_all = self.data.getFeatures(concat=True).values
+        y_all = self.data.getTargetPropertiesValues(concat=True).values
+        # Check and set some things for models with early stopping
+        if self.supportsEarlyStopping:
+            if self.optimalEpochs == -1:
+                logger.error(
+                    "Cannot fit final model without first determining "
+                    "the optimal number of epochs for fitting. \
+                            Run the `evaluate` method first."
+                )
+                sys.exit()
+            if self.parameters is not None:
+                self.parameters.update({"n_epochs": self.optimalEpochs})
+            else:
+                self.parameters = {"n_epochs": self.optimalEpochs}
+        # load estimator
+        self.estimator = self.loadEstimator(self.parameters)
+        # fit model
+        logger.info(
+            "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        self.estimator = self.fit(X_all, y_all, early_stopping=False, **kwargs)
+        logger.info(
+            "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        # save model and return path
+        return self.save()
 
     @abstractmethod
     def fit(self) -> str:

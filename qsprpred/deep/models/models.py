@@ -5,9 +5,7 @@ Created by: Martin Sicho
 On: 12.05.23, 16:39
 """
 import os
-import sys
 from copy import deepcopy
-from datetime import datetime
 from typing import Any, Type
 
 import numpy as np
@@ -18,7 +16,6 @@ from sklearn.model_selection import train_test_split
 from ...data.data import QSPRDataset
 from ...deep import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
 from ...deep.models.neural_network import STFullyConnected
-from ...logs import logger
 from ...models.interfaces import QSPRModel
 from ...models.tasks import ModelTasks
 
@@ -209,46 +206,6 @@ class QSPRDNN(QSPRModel):
         path = f"{self.outPrefix}_weights.pkg"
         torch.save(self.estimator.state_dict(), path)
         return path
-
-    def fitAllData(self) -> str:
-        """Train model on the training data,
-        determine best model using test set, save best model.
-
-        ** IMPORTANT ** The `evaluate` method should be run first,
-        so that the average number of epochs from the cross-validation
-        with early stopping can be used for fitting the model.
-        """
-        # do some checks
-        if self.optimalEpochs == -1:
-            logger.error(
-                "Cannot fit final model without first determining "
-                "the optimal number of epochs for fitting. \
-                          Run the `evaluate` method first."
-            )
-            sys.exit()
-        self.checkForData()
-        # get data
-        X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargetPropertiesValues(concat=True).values
-        # load estimator
-        if self.parameters is not None:
-            self.parameters.update({"n_epochs": self.optimalEpochs})
-        else:
-            self.parameters = {"n_epochs": self.optimalEpochs}
-        self.estimator = self.loadEstimator(self.parameters)
-        # fit model
-        logger.info(
-            "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-        logger.info("Logging model fit to: %s.log" % self.outPrefix)
-        self.estimator = self.fit(
-            X_all, y_all, early_stopping=False, log=True, log_prefix=self.outPrefix
-        )
-        logger.info(
-            "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-        # save model and return path
-        return self.save()
 
     def saveParams(self, params: dict) -> str:
         """Save model parameters to file.
