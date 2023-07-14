@@ -36,7 +36,7 @@ logging.basicConfig(level=logging.DEBUG)
 class ModelDataSetsMixIn(DataSetsMixIn):
     """This class sets up the datasets for the model tests."""
 
-    qsprModelsPath = f"{os.path.dirname(__file__)}/test_files/qspr/models"
+    qsprModelsPath = f"{os.path.dirname(__file__)}/test_files/qspr/models/"
 
     def setUp(self):
         """Set up the test environment."""
@@ -228,7 +228,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             QSPRsklearn: the model
         """
         return QSPRsklearn(
-            base_dir=f"{os.path.dirname(__file__)}/test_files/",
+            base_dir=f"{os.path.dirname(__file__)}/test_files/qspr/models",
             alg=alg,
             data=dataset,
             name=name,

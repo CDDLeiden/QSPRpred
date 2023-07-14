@@ -320,7 +320,7 @@ def QSPR_modelling(args):
             # Create QSPR model object
             if model_type == "DNN":
                 QSPRmodel = QSPRDNN(
-                    base_dir=args.base_dir,
+                    base_dir=f"{args.base_dir}/qspr/models/",
                     data=mydataset,
                     parameters=parameters,
                     name=f"{model_type}_{data_prefix}",
@@ -330,7 +330,7 @@ def QSPR_modelling(args):
                 )
             else:
                 QSPRmodel = QSPRsklearn(
-                    args.base_dir,
+                    base_dir=f"{args.base_dir}/qspr/models/",
                     data=mydataset,
                     alg=alg_dict[model_type],
                     name=f"{model_type}_{data_prefix}",
@@ -338,7 +338,7 @@ def QSPR_modelling(args):
                 )
 
             # if desired run parameter optimization
-            score_func = SklearnMetric.getDefaultMetric(model.task)
+            score_func = SklearnMetric.getDefaultMetric(QSPRmodel.task)
             if args.optimization == "grid":
                 search_space_gs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_gs)

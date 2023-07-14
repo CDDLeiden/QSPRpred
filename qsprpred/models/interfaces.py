@@ -208,7 +208,7 @@ class QSPRModel(ABC):
         meta = cls.readMetadata(path)
         model_class = import_class(meta["model_class"])
         model_name = meta["name"]
-        base_dir = os.path.dirname(path).replace(f"qspr/models/{model_name}", "")
+        base_dir = os.path.dirname(path).replace(f"{model_name}", "")
         return model_class(name=model_name, base_dir=base_dir)
 
     @classmethod
@@ -379,13 +379,13 @@ class QSPRModel(ABC):
     @property
     def outDir(self) -> str:
         """Return output directory of the model,
-        the model files are stored in this directory (`{baseDir}/qspr/models/{name}`).
+        the model files are stored in this directory (`{baseDir}/{name}`).
 
         Returns:
             str: output directory of the model
         """
-        os.makedirs(f"{self.baseDir}/qspr/models/{self.name}", exist_ok=True)
-        return f"{self.baseDir}/qspr/models/{self.name}"
+        os.makedirs(f"{self.baseDir}/{self.name}", exist_ok=True)
+        return f"{self.baseDir}/{self.name}"
 
     @property
     def outPrefix(self) -> str:
