@@ -107,6 +107,9 @@ class OptunaOptimization(HyperParameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
+        self.scoreFunc.checkMetricCompatibility(
+            model.task, self.evaluationMethod.useProba
+        )
         import optuna
 
         logger.info(
@@ -224,6 +227,9 @@ class GridSearchOptimization(HyperParameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
+        self.scoreFunc.checkMetricCompatibility(
+            model.task, self.evaluationMethod.useProba
+        )
         logger.info(
             "Grid search started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )

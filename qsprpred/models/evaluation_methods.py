@@ -2,29 +2,21 @@
 
 import math
 from datetime import datetime
-from typing import Callable, Iterable, Optional
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 
 from ..logs import logger
 from .interfaces import EvaluationMethod, QSPRModel
-from .metrics import SklearnMetric
 
 
 class CrossValidation(EvaluationMethod):
-    def __init__(
-        self, score_func: Callable[[Iterable, Iterable], float] | SklearnMetric = None
-    ):
-        """Initialize the cross validation evaluation method.
+    """Perform cross validation on a model.
 
-        Args:
-            score_func (Callable[[Iterable, Iterable], float] | SklearnMetric):
-                scoring function to use to determine the best model in the
-                cross validation, if None defaults to the score function of the model
-        """
-        self.scoreFunc = score_func
-
+    Attributes:
+        useProba (bool): use predictProba instead of predict for classification
+    """
     def __call__(
         self,
         model: QSPRModel,
@@ -41,7 +33,8 @@ class CrossValidation(EvaluationMethod):
             save (bool): don't save predictions when used in bayesian optimization
             parameters (dict): optional model parameters to use for evaluation
             score_func (str or callable): scoring function to use for evaluation
-            **kwargs: additional keyword arguments for the evaluation function
+            use_proba (bool): use predictProba instead of predict for classification
+            **kwargs: additional keyword arguments for the fit function
 
         Returns:
             float | np.ndarray: predictions on the validation set"""
@@ -54,7 +47,7 @@ class CrossValidation(EvaluationMethod):
         cvs_ids = np.array([None] * len(X))
         # cvs and inds are used to store the predictions for the cross validation
         # and the independent test set
-        if model.task.isRegression():
+        if model.task.isRegression() or not self.useProba:
             cvs = np.zeros((y.shape[0], model.nTargets))
         else:
             # cvs, inds need to be lists of arrays
@@ -86,7 +79,7 @@ class CrossValidation(EvaluationMethod):
                 )
             model.fit(X_train, y_train, crossvalmodel)
             # make predictions
-            if model.task.isRegression():
+            if model.task.isRegression() or not self.useProba:
                 cvs[idx_test] = model.predict(X_test, crossvalmodel)
             else:
                 preds = model.predictProba(X_test, crossvalmodel)
@@ -135,19 +128,21 @@ class EvaluateTestSetPerformance(EvaluationMethod):
         Arguments:
             save (bool): don't save predictions when used in bayesian optimization
             parameters (dict): optional model parameters to use for evaluation
+            use_proba (bool): use predictProba instead of predict for classification
             **kwargs: additional keyword arguments for the evaluation function
 
         Returns:
             float | np.ndarray: predictions for evaluation
         """
         evalparams = model.parameters if parameters is None else parameters
+
         # check if data is available
         model.checkForData()
         X, X_ind = model.data.getFeatures()
         y, y_ind = model.data.getTargetPropertiesValues()
         # prepare arrays to store molecule ids and predictions
         inds_ids = X_ind.index.to_numpy()
-        if not model.task.isRegression():
+        if not model.task.isRegression() and self.useProba:
             inds = [
                 np.zeros((y_ind.shape[0], prop.nClasses))
                 for prop in model.targetProperties
@@ -161,7 +156,7 @@ class EvaluateTestSetPerformance(EvaluationMethod):
         indmodel = model.fit(X, y, indmodel, early_stopping=False)
         # if independent test set is available, predict on it
         if X_ind.shape[0] > 0:
-            if model.task.isRegression():
+            if model.task.isRegression() or not self.useProba:
                 inds = model.predict(X_ind, indmodel)
             else:
                 preds = model.predictProba(X_ind, indmodel)

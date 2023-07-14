@@ -797,8 +797,16 @@ class EvaluationMethod(ABC):
     """Base class for evaluation methods.
 
     Attributes:
-        scoreFunc (Metric): scoring function to use
+        useProba (bool): use probabilities for classification models
     """
+    def __init__(self, use_proba: bool = True):
+        """Initialize the evaluation method class.
+
+        Args:
+            use_proba (bool): use probabilities for classification models
+        """
+        self.useProba = use_proba
+
     @abstractmethod
     def __call__(
         self, model: QSPRModel
@@ -890,11 +898,11 @@ class HyperParameterOptimization(ABC):
         self.scoreFunc = (
             SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
         )
+        self.evaluationMethod = evaluation_method
+        self.scoreAggregation = score_aggregation
         self.paramGrid = param_grid
         self.bestScore = -np.inf
         self.bestParams = None
-        self.evaluationMethod = evaluation_method
-        self.scoreAggregation = score_aggregation
 
     @abstractmethod
     def optimize(self, model: QSPRModel) -> dict:

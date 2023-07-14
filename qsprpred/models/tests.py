@@ -90,11 +90,12 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
+        score_func = SklearnMetric.getMetric("accuracy")
         gridsearcher = GridSearchOptimization(
             scoring=score_func,
             param_grid=search_space_gs,
             score_aggregation=np.median,
-            evaluation_method=EvaluateTestSetPerformance()
+            evaluation_method=EvaluateTestSetPerformance(use_proba=False)
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)
@@ -410,7 +411,6 @@ class TestMetrics(TestCase):
         """Check if the metric is correctly implemented."""
         scorer = SklearnMetric.getMetric(metric)
         self.assertEqual(scorer.name, metric)
-        self.assertTrue(getattr(scorer, f"supports_{task}"))
         self.assertTrue(scorer.supportsTask(task))
         # lambda function to get the sklearn scoring function from the scorer object
         sklearn_scorer = get_sklearn_scorer(metric)

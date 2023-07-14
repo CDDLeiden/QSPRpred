@@ -42,6 +42,24 @@ class Metric(ABC):
             **kwargs: Additional keyword arguments.
         """
 
+    def checkMetricCompatibility(self, task: ModelTasks, probas: bool):
+        """Check if the metric supports the given task and prediction type.
+
+        Args:
+            task (ModelTasks): Task of the model.
+            probas (bool): True if the predictions are probabilities.
+
+        Raises:
+            ValueError: If the metric does not support the given task or prediction
+                        type.
+        """
+        if not self.supportsTask(task):
+            raise ValueError("Scorer %s does not support task %s" % (self.name, task))
+        if self.needsProbasToScore and not probas:
+            raise ValueError("Scorer %s needs probabilities to score" % self.name)
+        if self.needsDiscreteToScore and probas:
+            raise ValueError("Scorer %s needs discrete values to score" % self.name)
+
     @abstractmethod
     def supportsTask(self, task: ModelTasks) -> bool:
         """Return true if the scorer supports the given task.
@@ -292,9 +310,9 @@ class SklearnMetric(Metric):
     def supportsTask(self, task: ModelTasks):
         """Return true if the scorer supports the given task."""
         task_dict = {
-            ModelTasks.REGRESSION: self.RegressionMetrics,
-            ModelTasks.SINGLECLASS: self.SingleClassMetrics,
-            ModelTasks.MULTICLASS: self.MultiClassMetrics,
+            ModelTasks.REGRESSION: self.regressionMetrics,
+            ModelTasks.SINGLECLASS: self.singleClassMetrics,
+            ModelTasks.MULTICLASS: self.multiClassMetrics,
             ModelTasks.MULTITASK_REGRESSION: self.multiTaskRegressionMetrics,
             ModelTasks.MULTITASK_SINGLECLASS: self.multiTaskSingleClassMetrics,
             ModelTasks.MULTITASK_MULTICLASS: self.multiTaskMultiClassMetrics,
