@@ -90,7 +90,8 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
-        score_func = SklearnMetric.getMetric("accuracy")
+        if model.task.isClassification():
+            score_func = SklearnMetric.getMetric("accuracy")
         gridsearcher = GridSearchOptimization(
             scoring=score_func,
             param_grid=search_space_gs,
