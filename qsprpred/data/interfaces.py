@@ -204,14 +204,6 @@ class DataSplit(ABC, DataSetDependant):
             self.df.reset_index(drop=True, inplace=True)  # need numeric index splits
             return self._multitask_split()
 
-    # @abstractmethod
-    # def _singletask_split(self):
-    #     pass
-
-    # @abstractmethod
-    # def _multitask_split(self):
-    #     pass
-
 
 class DataFilter(ABC):
     """Filter out some rows from a dataframe."""

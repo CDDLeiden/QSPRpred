@@ -156,6 +156,9 @@ class RandomSplit(DataSplit):
         assert len(train) + len(test) == len(df),\
             "Not all samples were assigned to a split"
 
+        # Reset index back to QSPRID
+        self.df.set_index(self.dataset.indexCols, inplace=True, drop=False)
+
         return iter([(train, test)])
 
 
@@ -197,6 +200,7 @@ class TemporalSplit(DataSplit, DataSetDependant):
         test = indices[mask]
         assert len(test) > 0, "No test samples found"
         train = indices[~mask]
+
         return iter([(train, test)])
 
     def _multitask_split(self):
@@ -230,6 +234,9 @@ class TemporalSplit(DataSplit, DataSetDependant):
 
         assert len(test) + len(train) == len(self.df), \
             "Not all samples were assigned to a split"
+
+        # Reset index back to QSPRID
+        self.df.set_index(self.dataset.indexCols, inplace=True, drop=False)
 
         return iter([(train, test)])
 
@@ -325,6 +332,7 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
         # Get train and test set indices
         train_idx = [df.index.get_loc(x) for x in df.index if x not in test_idx]
         test_idx = [df.index.get_loc(x) for x in test_idx]
+
         return iter([(train_idx, test_idx)])
 
     def _multitask_split(self) -> Iterable[tuple[list[int], list[int]]]:
@@ -370,6 +378,9 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
 
         assert len(train_indices) + len(test_indices) == len(df), \
             "Not all samples were assigned to a split"
+
+        # Reset index back to QSPRID
+        self.df.set_index(self.dataset.indexCols, inplace=True, drop=False)
 
         return iter([(train_indices, test_indices)])
 
@@ -503,7 +514,7 @@ class ClusterSplit(DataSplit, DataSetDependant):
         train_idx = list(set(self.df.index) - set(test_idx))
 
         # Reset index back to QSPRID
-        self.df.set_index("QSPRID", inplace=True)
+        self.df.set_index(self.dataset.indexCols, inplace=True, drop=False)
 
         return iter([(train_idx, test_idx)])
 
@@ -545,5 +556,8 @@ class ClusterSplit(DataSplit, DataSetDependant):
 
         assert len(train_indices) + len(test_indices) == len(df), \
             "Not all samples were assigned to a split"
+
+        # Reset index back to QSPRID
+        self.df.set_index(self.dataset.indexCols, inplace=True, drop=False)
 
         return iter([(train_indices, test_indices)])
