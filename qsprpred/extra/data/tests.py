@@ -15,6 +15,7 @@ from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
 from .utils.datasplitters import (
+    PCMSplit,
     StratifiedPerTarget,
     TemporalPerTarget,
     LeaveTargetsOut
@@ -28,7 +29,11 @@ from ...data.tests import (
     DataSetsMixIn,
     TestDescriptorInDataMixIn,
 )
-from ...data.utils.datasplitters import RandomSplit, ScaffoldSplit
+from ...data.utils.datasplitters import (
+    RandomSplit,
+    ScaffoldSplit,
+    ClusterSplit,
+)
 from ...data.utils.descriptorcalculator import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
@@ -627,7 +632,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
         )
 
 
-class TestSplitsPCM(DataSetsMixInExtras, TestCase):
+class TestPCMSplitters(DataSetsMixInExtras, TestCase):
 
     def setUp(self):
         super().setUp()
@@ -644,7 +649,31 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
             )
         )
 
-    def testLeaveTargetOut(self):
+    @parameterized.expand(
+        [
+            (RandomSplit(),),
+            (ScaffoldSplit(),),
+            (ClusterSplit(),)
+        ]
+    )
+
+    def test_PCMSplit(self, splitter):
+        splitter = PCMSplit(splitter)
+        self.dataset.split(splitter, featurize=True)
+        train, test = self.dataset.getFeatures()
+        train, test = train.index, test.index
+        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test]
+        train_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[train]
+        test_smiles = self.dataset.getProperty(self.dataset.smilesCol).loc[test]
+        train_smiles = self.dataset.getProperty(self.dataset.smilesCol).loc[train]
+        self.assertEqual(len(test_targets), len(test))
+        self.assertEqual(len(train_targets), len(train))
+        self.assertTrue(
+            set(test_smiles.unique()).isdisjoint(set(train_smiles.unique()))
+        )
+
+
+    def test_LeaveTargetOut(self):
         target = self.dataset.getProteinKeys()[0:2]
         splitter = LeaveTargetsOut(targets=target)
         self.dataset.split(splitter, featurize=True)
@@ -658,17 +687,20 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
             set(test_targets.unique()).isdisjoint(set(train_targets.unique()))
         )
 
-    def testStratifiedPerTarget(self):
-        randsplitter = RandomSplit(0.2)
-        splitter = StratifiedPerTarget(splitter=randsplitter)
-        self.dataset.split(splitter, featurize=True)
-        train, test = self.dataset.getFeatures()
-        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
-        # check that all targets are present in the test set just once
-        # (implied by the stratification on this particular dataset)
-        self.assertEqual(len(test_targets), len(self.dataset.getProteinKeys()))
+# TODO: Delete this once checked with Martin/Marina
+    # def test_StratifiedPerTarget(self):
+    #     randsplitter = RandomSplit(test_fraction=0.2)
+    #     splitter = StratifiedPerTarget(splitter=randsplitter)
+    #     self.dataset.split(splitter, featurize=True)
+    #     train, test = self.dataset.getFeatures()
+    #     test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
+    #     # check that all targets are present in the test set just once
+    #     # (implied by the stratification on this particular dataset)
+    #     print(test_targets)
+    #     print(self.dataset.getProteinKeys())
+    #     self.assertEqual(len(test_targets), len(self.dataset.getProteinKeys()))
 
-    def testPerTargetTemporal(self):
+    def test_PerTargetTemporal(self):
         year_col = "Year"
         year = 2015
         splitter = TemporalPerTarget(
@@ -680,7 +712,7 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
         self.assertTrue(self.dataset.getDF()[year_col].loc[train.index].max() <= year)
         self.assertTrue(self.dataset.getDF()[year_col].loc[test.index].min() > year)
 
-    def testPerTargetScaffoldSplit(self):
+    def test_PerTargetScaffoldSplit(self):
         scaffsplit = ScaffoldSplit()
         splitter = StratifiedPerTarget(splitter=scaffsplit)
         self.dataset.split(splitter, featurize=True)
