@@ -9,6 +9,9 @@ From v2.0.0 to v2.0.1
 - The `predictMols` method returned random predictions in v2.0.0 due to unpatched shuffling code. This has now been fixed.
 
 ## Changes
+- `PCMSplit` replaces `StratifiedPerTarget` and is compatible with `RandomSplit`, `ScaffoldSplit` and `ClusterSplit`.
+- In the case single-task dataset, the `RandomSplit` now uses `StratifiedShuffleSplit` in case of classification.
 
 ## New Features
+- `ClusterSplit` - splits data based clustering of molecular fingerprints.
 - raise error if search space for optuna optimization is missing search space type annotation or if type not in list
