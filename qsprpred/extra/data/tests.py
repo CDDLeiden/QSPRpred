@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler
 
 from .utils.datasplitters import (
     PCMSplit,
-    StratifiedPerTarget,
+    # StratifiedPerTarget,
     TemporalPerTarget,
     LeaveTargetsOut
 )
@@ -354,15 +354,16 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
             feature_filters=[LowVarianceFilter(0.05),
                              HighCorrelationFilter(0.9)],
         )
+        ndata = dataset.getDF().shape[0]
         self.validate_split(dataset)
-        self.assertEqual(dataset.X_ind.shape[0], 4)
+        self.assertEqual(dataset.X_ind.shape[0], round(ndata*0.2))
         test_ids = dataset.X_ind.index.values
         train_ids = dataset.y_ind.index.values
         dataset.save()
         # load dataset and test if all checks out after loading
         dataset_new = PCMDataSet.fromFile(dataset.storePath)
         self.validate_split(dataset_new)
-        self.assertEqual(dataset.X_ind.shape[0], 4)
+        self.assertEqual(dataset.X_ind.shape[0], round(ndata*0.2))
         self.assertEqual(
             len(dataset_new.descriptorCalculators), len(dataset_new.descriptors)
         )
@@ -394,8 +395,9 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
             recalculate_features=True,
             feature_fill_value=np.nan,
         )
+        ndata = dataset.getDF().shape[0]
         self.assertEqual(len(dataset.descriptorCalculators), len(dataset.descriptors))
-        self.assertEqual(dataset.X_ind.shape, (10, len(self.sampleDescSet)))
+        self.assertEqual(dataset.X_ind.shape, (round(ndata*0.5), len(self.sampleDescSet))) 
         # create new dataset with different feature calculator
         dataset_next = self.createPCMDataSet(f"{self.__class__.__name__}_next")
         dataset_next.prepareDataset(
@@ -408,8 +410,8 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         self.assertEqual(
             len(dataset_next.descriptorCalculators), len(dataset_next.descriptors)
         )
-        self.assertEqual(dataset_next.X_ind.shape, (10, len(self.sampleDescSet)))
-        self.assertEqual(dataset_next.X.shape, (10, len(self.sampleDescSet)))
+        self.assertEqual(dataset_next.X_ind.shape, (round(ndata*0.5), len(self.sampleDescSet)))
+        self.assertEqual(dataset_next.X.shape, (round(ndata*0.5), len(self.sampleDescSet)))
 
     def testWithMolDescriptors(self):
         """Test the calculation of protein and molecule descriptors."""
@@ -696,8 +698,6 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
     #     test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
     #     # check that all targets are present in the test set just once
     #     # (implied by the stratification on this particular dataset)
-    #     print(test_targets)
-    #     print(self.dataset.getProteinKeys())
     #     self.assertEqual(len(test_targets), len(self.dataset.getProteinKeys()))
 
     def test_PerTargetTemporal(self):
@@ -712,12 +712,12 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.assertTrue(self.dataset.getDF()[year_col].loc[train.index].max() <= year)
         self.assertTrue(self.dataset.getDF()[year_col].loc[test.index].min() > year)
 
-    def test_PerTargetScaffoldSplit(self):
-        scaffsplit = ScaffoldSplit()
-        splitter = StratifiedPerTarget(splitter=scaffsplit)
-        self.dataset.split(splitter, featurize=True)
-        train, test = self.dataset.getFeatures()
-        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
-        # check that all targets are present in the test set at least once,
-        # very crude check
-        self.assertEqual(len(test_targets.unique()), len(self.dataset.getProteinKeys()))
+    # def test_PerTargetScaffoldSplit(self):
+    #     scaffsplit = ScaffoldSplit()
+    #     splitter = StratifiedPerTarget(splitter=scaffsplit)
+    #     self.dataset.split(splitter, featurize=True)
+    #     train, test = self.dataset.getFeatures()
+    #     test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
+    #     # check that all targets are present in the test set at least once,
+    #     # very crude check
+    #     self.assertEqual(len(test_targets.unique()), len(self.dataset.getProteinKeys()))

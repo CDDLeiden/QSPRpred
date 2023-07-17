@@ -13,7 +13,7 @@ from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit
 
 from ...logs import logger
 from ..data import QSPRDataset
-from ..interfaces import DataSetDependant, DataSplit
+from ..interfaces import DataSplit
 from .data_clustering import (
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
@@ -88,7 +88,7 @@ class RandomSplit(DataSplit):
     """
     def __init__(
             self,
-            dataset: QSPRDataset | None= None,
+            dataset: QSPRDataset | None = None,
             test_fraction: float = 0.1,
             seed: int = 42,
             n_initial_clusters: int | None = None,
@@ -162,7 +162,7 @@ class RandomSplit(DataSplit):
         return iter([(train, test)])
 
 
-class TemporalSplit(DataSplit, DataSetDependant):
+class TemporalSplit(DataSplit):
     """Splits dataset train and test subsets based on a threshold in time.
 
     Attributes:
@@ -241,7 +241,7 @@ class TemporalSplit(DataSplit, DataSetDependant):
         return iter([(train, test)])
 
 
-class ScaffoldSplit(DataSplit, DataSetDependant):
+class ScaffoldSplit(DataSplit):
     """Splits dataset in train and test subsets based on their Murcko scaffold.
 
     Attributes:
@@ -385,7 +385,7 @@ class ScaffoldSplit(DataSplit, DataSetDependant):
         return iter([(train_indices, test_indices)])
 
 
-class ClusterSplit(DataSplit, DataSetDependant):
+class ClusterSplit(DataSplit):
     """
     Splits dataset in train and test subsets based on MaxMin clustering of the features.
 

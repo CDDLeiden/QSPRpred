@@ -1,10 +1,9 @@
 """Abstract base classes for data preparation classes."""
 from abc import ABC, abstractmethod
-from typing import Callable, Iterable, Optional
+from typing import Callable, Iterable
 
 import numpy as np
 import pandas as pd
-
 
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
@@ -133,9 +132,9 @@ class MoleculeDataSet(DataSet):
         """Indicates if the dataset has descriptors."""
 
 
-class DataSetDependant:  # Note: this shouldn't be ABC; no abstract methods defined
+class DataSetDependant:
     """Classes that need a data set to operate have to implement this."""
-    def __init__(self, dataset) -> None:
+    def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
         self.dataSet = dataset
 
     def setDataSet(self, dataset: MoleculeDataSet):
