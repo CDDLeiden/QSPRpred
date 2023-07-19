@@ -159,15 +159,6 @@ class TemporalPerTarget(DataSplit):
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
 
-        # TODO: Delete this once checked with Martin/Marina
-        # splitters = {
-        #     target:
-        #         TemporalSplit(timeprop=self.yearCol, timesplit=self.splitYears[target])
-        #     for target, year in self.splitYears.items()
-        # }
-        # return StratifiedPerTarget(dataset=self.getDataSet(),
-        #                            splitters=splitters).split(X, y)
-
         ds = self.getDataSet()
         df = ds.getDF()
         indices = df.index.tolist()
