@@ -16,7 +16,6 @@ from sklearn.preprocessing import StandardScaler
 
 from .utils.datasplitters import (
     PCMSplit,
-    StratifiedPerTarget,
     TemporalPerTarget,
     LeaveTargetsOut
 )

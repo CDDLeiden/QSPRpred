@@ -1216,7 +1216,7 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
             f"{os.path.dirname(__file__)}/test_files/test_predictor/"
             "qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json"
         )
-        from qsprpred.models.models import QSPRsklearn
+        from ..models.models import QSPRsklearn
 
         model = QSPRsklearn.fromFile(meta_path)
         desc_calc = MoleculeDescriptorsCalculator([PredictorDesc(model)])

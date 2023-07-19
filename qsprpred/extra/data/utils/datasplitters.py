@@ -8,11 +8,10 @@ from typing import Iterable
 import numpy as np
 
 from ....data.data import TargetProperty
-from qsprpred.data.data import QSPRDataset
-from qsprpred.data.interfaces import DataSplit, MoleculeDataSet
-from qsprpred.data.utils.datasplitters import TemporalSplit, RandomSplit, ScaffoldSplit, ClusterSplit
-from qsprpred.extra.data.data import PCMDataSet
-from qsprpred.logs import logger
+from ....data.data import QSPRDataset
+from ....data.interfaces import DataSplit
+from ....data.utils.datasplitters import  RandomSplit, ScaffoldSplit, ClusterSplit
+from ..data import PCMDataSet
 
 
 class PCMSplit(DataSplit):
