@@ -59,6 +59,7 @@ class PCMSplit(DataSplit):
         indices = df.index.tolist()
         proteins = df[ds.proteinCol].unique()
         task = ds.targetProperties[0].task
+        th = ds.targetProperties[0].th
 
         assert len(ds.targetProperties) == 1, \
             "PCMSplit only works for single-task datasets!"
@@ -73,7 +74,7 @@ class PCMSplit(DataSplit):
 
         # Create target properties for multi-task dataset
         mt_targetProperties = [
-            TargetProperty(name=target, task=task) for target in proteins
+            TargetProperty(name=target, task=task, th=th) for target in proteins
         ]
 
         # Create multi-task dataset and split it with the given splitter
