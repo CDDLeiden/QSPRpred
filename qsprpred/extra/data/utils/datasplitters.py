@@ -106,7 +106,6 @@ class PCMSplit(DataSplit):
         return iter([(train_indices, test_indices)])
 
 
-
 class LeaveTargetsOut(DataSplit):
     def __init__(self, targets: list[str], dataset: PCMDataSet | None = None):
         """Creates a leave target out splitter.
@@ -130,57 +129,6 @@ class LeaveTargetsOut(DataSplit):
         train = indices[mask]
         test = indices[~mask]
         return iter([(train, test)])
-
-# TODO: Delete this class once checked with Martin/Marina
-class StratifiedPerTarget(DataSplit):
-    """Splits dataset in train and test subsets based on the specified splitter."""
-    def __init__(
-        self,
-        splitter: DataSplit | None = None,
-        splitters: dict[str, DataSplit] | None = None,
-        dataset: PCMDataSet | None = None
-    ):
-        """Creates a split that is consistent across targets.
-
-        Args:
-            splitter: a `datasplit` instance to split the target subsets of the dataset
-            splitters (dict[str, datasplit]): a dictionary with target keys as keys and
-                splitters to use on each protein target as values
-            dataset (PCMDataset): a `PCMDataset` instance to split
-        """
-        super().__init__(dataset)
-        self.splitter = splitter
-        self.splitters = splitters
-        assert self.splitter is not None or self.splitters is not None, \
-            "Either a splitter or multiple splitters must be specified!"
-        assert (splitter is None) != (splitters is None), \
-            "Either one splitter or multiple splitters must be specified, but not both!"
-
-    def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
-        ds = self.getDataSet()
-        df = ds.getDF()
-        train = []
-        test = []
-        indices = np.array(list(range(len(ds))))
-        for target in ds.getProteinKeys():
-            splitter = self.splitter if self.splitter is not None else self.splitters[
-                target]
-            df_target = df[df[ds.proteinCol] == target]
-            ds_target = QSPRDataset(
-                name=f"{target}_scaff_split_{hash(self)}",
-                df=df_target,
-                smiles_col=ds.smilesCol,
-                target_props=ds.targetProperties,
-                index_cols=ds.indexCols,
-            )
-            ds_target.split(splitter)
-            train.extend(indices[df.index.isin(ds_target.X.index)])
-            test.extend(indices[df.index.isin(ds_target.X_ind.index)])
-
-        assert len(set(train)) + len(set(test)) == len(ds), \
-            "Train and test set do not cover the whole dataset!"
-        return iter([(train, test)])
-
 
 class TemporalPerTarget(DataSplit):
     def __init__(

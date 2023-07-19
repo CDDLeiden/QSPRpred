@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler
 
 from .utils.datasplitters import (
     PCMSplit,
-    # StratifiedPerTarget,
+    StratifiedPerTarget,
     TemporalPerTarget,
     LeaveTargetsOut
 )
@@ -689,17 +689,6 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
             set(test_targets.unique()).isdisjoint(set(train_targets.unique()))
         )
 
-# TODO: Delete this once checked with Martin/Marina
-    # def test_StratifiedPerTarget(self):
-    #     randsplitter = RandomSplit(test_fraction=0.2)
-    #     splitter = StratifiedPerTarget(splitter=randsplitter)
-    #     self.dataset.split(splitter, featurize=True)
-    #     train, test = self.dataset.getFeatures()
-    #     test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
-    #     # check that all targets are present in the test set just once
-    #     # (implied by the stratification on this particular dataset)
-    #     self.assertEqual(len(test_targets), len(self.dataset.getProteinKeys()))
-
     def test_PerTargetTemporal(self):
         year_col = "Year"
         year = 2015
@@ -711,13 +700,3 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         train, test = self.dataset.getFeatures()
         self.assertTrue(self.dataset.getDF()[year_col].loc[train.index].max() <= year)
         self.assertTrue(self.dataset.getDF()[year_col].loc[test.index].min() > year)
-
-    # def test_PerTargetScaffoldSplit(self):
-    #     scaffsplit = ScaffoldSplit()
-    #     splitter = StratifiedPerTarget(splitter=scaffsplit)
-    #     self.dataset.split(splitter, featurize=True)
-    #     train, test = self.dataset.getFeatures()
-    #     test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
-    #     # check that all targets are present in the test set at least once,
-    #     # very crude check
-    #     self.assertEqual(len(test_targets.unique()), len(self.dataset.getProteinKeys()))
