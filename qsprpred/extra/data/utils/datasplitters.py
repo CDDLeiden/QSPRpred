@@ -59,11 +59,14 @@ class PCMSplit(DataSplit):
         indices = df.index.tolist()
         proteins = df[ds.proteinCol].unique()
         task = ds.targetProperties[0].task
-        th = ds.targetProperties[0].th
+        th = ds.targetProperties[0].th if task.isClassification() else None
+
 
         assert len(ds.targetProperties) == 1, \
             "PCMSplit only works for single-task datasets!"
-            # TODO: Add support for multi-target PCM datasets
+            # TODO: Add support for multi-target PCM datasets: creta a multi-task dataset
+            # with all target-task combinations as different columns and split that
+            # dataset with the given splitter
 
         # Pivot dataframe to get a matrix with protein targets as columns
         df_mt = df.pivot(
