@@ -124,7 +124,7 @@ class QSPRsklearn(QSPRModel):
             )
 
     def saveEstimator(self) -> str:
-        """See `QSARModel.saveEstimator`."""
+        """See `QSPRModel.saveEstimator`."""
         estimator_path = f"{self.outPrefix}.json"
         skljson.to_json(self.estimator, estimator_path)
         return estimator_path
@@ -136,31 +136,20 @@ class QSPRsklearn(QSPRModel):
         estimator: Any = None,
         early_stopping: Any = None
     ):
-        """See `QSARModel.fit`."""
+        """See `QSPRModel.fit`."""
         estimator = self.estimator if estimator is None else estimator
-        if isinstance(X, QSPRDataset):
-            X = X.getFeatures(raw=True, concat=True)
-            y = y.getTargetPropertiesValues(concat=True)
-        if self.featureStandardizer:
-            X = self.featureStandardizer(X)
-
+        X, y = self.convertToNumpy(X, y)
+        # sklearn models expect 1d arrays for single target regression and classification
         if not self.task.isMultiTask():
-            if isinstance(y, pd.DataFrame):
-                y = y.squeeze()
-            else:
-                y = y.ravel()
+            y = y.ravel()
         return estimator.fit(X, y)
 
     def predict(
         self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ):
-        """See `QSARModel.predict`."""
-        if estimator is None:
-            estimator = self.estimator
-        if isinstance(X, QSPRDataset):
-            X = X.getFeatures(raw=True, concat=True)
-        if self.featureStandardizer:
-            X = self.featureStandardizer(X)
+        """See `QSPRModel.predict`."""
+        estimator = self.estimator if estimator is None else estimator
+        X = self.convertToNumpy(X)
         preds = estimator.predict(X)
         # Most sklearn regression models return 1d arrays for single target regression
         # and sklearn single task classification models return 1d arrays
@@ -172,13 +161,9 @@ class QSPRsklearn(QSPRModel):
     def predictProba(
         self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ):
-        """See `QSARModel.predictProba`."""
-        if estimator is None:
-            estimator = self.estimator
-        if isinstance(X, QSPRDataset):
-            X = X.getFeatures(raw=True, concat=True)
-        if self.featureStandardizer:
-            X = self.featureStandardizer(X)
+        """See `QSPRModel.predictProba`."""
+        estimator = self.estimator if estimator is None else estimator
+        X = self.convertToNumpy(X)
         preds = estimator.predict_proba(X)
         # if preds is a numpy array, convert it to a list
         # to be consistent with the multiclass-multitask case

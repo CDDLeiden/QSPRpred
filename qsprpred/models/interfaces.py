@@ -25,8 +25,7 @@ from ..utils.inspect import import_class
 class QSPRModel(ABC):
     """The definition of the common model interface for the package.
 
-    The QSPRModel handles model initialization, fit, cross validation
-    and hyperparameter optimization.
+    The QSPRModel handles model initialization, fitting, predicting and saving.
 
     Attributes:
         name (str): name of the model
@@ -401,7 +400,11 @@ class QSPRModel(ABC):
     @property
     @abstractmethod
     def supportsEarlyStopping(self) -> bool:
-        """Return if the model supports early stopping."""
+        """Return if the model supports early stopping.
+
+        Returns:
+            bool: True if the model supports early stopping
+        """
 
     def saveParams(self, params: dict) -> str:
         """Save model parameters to a JSON file.
@@ -506,7 +509,7 @@ class QSPRModel(ABC):
         return self.saveMetadata()
 
     def checkForData(self, exception: bool = True) -> bool:
-        """Check if the model has data set.
+        """Check if the model has a data set.
 
         Args:
             exception (bool): if true, an exception is raised if no data is set
@@ -522,6 +525,33 @@ class QSPRModel(ABC):
                 "with a 'QSPRDataset' instance to train on."
             )
         return has_data
+
+    def convertToNumpy(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: Optional[pd.DataFrame | np.ndarray | QSPRDataset] = None
+    ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
+        """Convert the given data matrix and target matrix to np.ndarray format.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix
+            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix
+
+        Returns:
+                data matrix and/or target matrix in np.ndarray format
+        """
+        if isinstance(X, QSPRDataset):
+            X = X.getFeatures(raw=True, concat=True)
+        if isinstance(X, pd.DataFrame):
+            X = X.values
+        if y is not None:
+            if isinstance(y, QSPRDataset):
+                y = y.getTargetPropertiesValues(concat=True)
+            if isinstance(y, pd.DataFrame):
+                y = y.values
+            return X, y
+        else:
+            return X
 
     def createPredictionDatasetFromMols(
         self,
@@ -572,7 +602,9 @@ class QSPRModel(ABC):
         )
         return dataset, failed_mask
 
-    def predictDataset(self, dataset: QSPRDataset, use_probas: bool = False):
+    def predictDataset(self,
+                       dataset: QSPRDataset,
+                       use_probas: bool = False) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given dataset.
 
@@ -581,17 +613,17 @@ class QSPRModel(ABC):
             use_probas: use probabilities if this is a classification model
 
         Returns:
-            np.ndarray: an array of predictions
+            np.ndarray | list[np.ndarray]:
+                an array of predictions or a list of arrays of predictions
+                (for classification models with use_probas=True)
         """
         if self.task.isRegression() or not use_probas:
             predictions = self.predict(dataset)
             # always return 2D array
-            if predictions.ndim == 1:
-                predictions = predictions.reshape(-1, 1)
             if self.task.isClassification():
                 predictions = predictions.astype(int)
         else:
-            # NOTE: if a multiclass-multioutput, this will return a list of 2D arrays
+            #return a list of 2D arrays
             predictions = self.predictProba(dataset)
         return predictions
 
@@ -602,7 +634,7 @@ class QSPRModel(ABC):
         smiles_standardizer: Union[str, callable] = "chembl",
         n_jobs: int = 1,
         fill_value: float = np.nan,
-    ) -> np.ndarray:
+    ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given molecules.
 
@@ -616,10 +648,9 @@ class QSPRModel(ABC):
             fill_value: Value to use for missing values in the feature matrix.
 
         Returns:
-            np.ndarray:
-                an array of predictions, can be a 1D array for single target models,
-                2D array for multi target and a list of
-                2D arrays for multi-target and multi-class models
+            np.ndarray | list[np.ndarray]:
+                an array of predictions or a list of arrays of predictions
+                (for classification models with use_probas=True)
         """
         if not self.featureCalculators:
             raise ValueError("No feature calculator set on this instance.")
@@ -642,10 +673,9 @@ class QSPRModel(ABC):
             shutil.rmtree(self.outDir)
 
     def fitAllData(self, **kwargs) -> str:
-        """Train model on the training data,
-        determine best model using test set, save best model.
+        """Train model on the whole data set.
 
-        ** IMPORTANT ** For models that supportEarlyStopping, the `crossValidate` method
+        ** IMPORTANT ** For models that supportEarlyStopping, `crossValidation`
         should be run first, so that the average number of epochs from the
         cross-validation with early stopping can be used for fitting the model.
 
@@ -687,11 +717,83 @@ class QSPRModel(ABC):
         return self.save()
 
     @abstractmethod
-    def fit(self) -> str:
-        """Build estimator model from the whole associated data set.
+    def fit(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None,
+        early_stopping: Optional[bool] = None
+    ) -> Any | tuple[Any, Optional[int]]:
+        """Fit the model to the given data matrix or `QSPRDataset`.
+
+        Note. convertToNumpy can be called here, to convert the input data to
+        np.ndarray format.
+
+        Note. if no estimator is given, the estimator instance of the model
+              is used.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
+            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            estimator (Any): estimator instance to use for fitting
+            early_stopping (bool): if True, early stopping is used,
+                                   only applies to models that support early stopping.
 
         Returns:
-            str: absolute path to the saved model file after fitting
+            Any: fitted estimator instance
+            Optional[int]: in case of early stopping, the number of iterations
+                after which the model stopped training
+        """
+
+    @abstractmethod
+    def predict(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> np.ndarray:
+        """Make predictions for the given data matrix or `QSPRDataset`.
+
+        Note. convertToNumpy can be called here, to convert the input data to
+        np.ndarray format.
+
+        Note. if no estimator is given, the estimator instance of the model
+              is used.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
+            estimator (Any): estimator instance to use for fitting
+
+        Returns:
+            np.ndarray:
+                2D array containing the predictions, where each row corresponds
+                to a sample in the data and each column to a target property
+        """
+
+    @abstractmethod
+    def predictProba(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> list[np.ndarray]:
+        """Make predictions for the given data matrix or `QSPRDataset`,
+        but use probabilities for classification models. Does not work with
+        regression models.
+
+        Note. convertToNumpy can be called here, to convert the input data to
+        np.ndarray format.
+
+        Note. if no estimator is given, the estimator instance of the model
+              is used.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
+            estimator (Any): estimator instance to use for fitting
+
+        Returns:
+            list[np.ndarray]:
+                a list of 2D arrays containing the probabilities for each class,
+                where each array corresponds to a target property, each row
+                to a sample in the data and each column to a class
         """
 
     @abstractmethod
@@ -724,72 +826,6 @@ class QSPRModel(ABC):
 
         Returns:
             path (str): path to the saved estimator
-        """
-
-    @abstractmethod
-    def fit(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None,
-        early_stopping: bool = False,
-        **kwargs
-    ) -> Any | tuple[Any, Optional[int]]:
-        """Fit the model to the given data matrix or `QSPRDataset`.
-
-        If early stopping is used, the number of iterations after which the
-        model stopped training is returned as well.
-
-        Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
-            estimator (Any): estimator instance to use for fitting
-            early_stopping (bool): if True, early stopping is used
-            kwargs: additional keyword arguments for the fit function
-
-        Returns:
-            (Any): fitted estimator instance
-            (Optional[int]): in case of early stopping, the number of iterations
-                after which the model stopped training
-        """
-
-    @abstractmethod
-    def predict(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
-    ) -> np.ndarray:
-        """Make predictions for the given data matrix or `QSPRDataset`.
-
-        Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
-            estimator (Any): estimator instance to use for fitting
-
-        Returns:
-            np.ndarray:
-                2D array containing the predictions, where each row corresponds
-                to a sample in the data and each column to a target property
-        """
-
-    @abstractmethod
-    def predictProba(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
-    ) -> list:
-        """Make predictions for the given data matrix or `QSPRDataset`,
-        but use probabilities for classification models. Does not work with
-        regression models.
-
-        Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
-            estimator (Any): estimator instance to use for fitting
-
-        Returns:
-            list[np.ndarray]:
-                a list of 2D arrays containing the probabilities for each class,
-                where each array corresponds to a target property, each row
-                to a sample in the data and each column to a class
         """
 
 

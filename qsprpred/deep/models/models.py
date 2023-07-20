@@ -247,22 +247,17 @@ class QSPRDNN(QSPRModel):
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
-            estimator (Any): estimator instance to use for fitting,
+            estimator (Any): estimator instance to use for fitting
+            early_stopping (bool): if True, early stopping is used
             kwargs (dict): additional keyword arguments for the estimator's fit method
 
         Returns:
-            (Any): fitted estimator instance
+            Any: fitted estimator instance
+            Optional[int]: in case of early stopping, the number of iterations
+                after which the model stopped training
         """
         estimator = self.estimator if estimator is None else estimator
-        if isinstance(X, QSPRDataset):
-            X = X.getFeatures(raw=True, concat=True)
-            y = y.getTargetPropertiesValues(concat=True)
-        if self.featureStandardizer:
-            X = self.featureStandardizer(X)
-
-        #check if y is a dataframe
-        if not isinstance(y, pd.DataFrame):
-            y = y.reshape(-1, 1)
+        X, y = self.convertToNumpy(X, y)
 
         if early_stopping:
             # split cross validation fold train set into train
@@ -278,16 +273,10 @@ class QSPRDNN(QSPRModel):
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None
     ) -> np.ndarray:
-        """Predict the target property values for the given features.
-
-        Args:
-            X (pd.DataFrame | np.ndarray | QSPRDataset): features to predict
-
-        Returns:
-            np.ndarray: predicted target property values
-        """
+        """See `QSPRModel.predict`."""
         estimator = self.estimator if estimator is None else estimator
         scores = self.predictProba(X, estimator)
+        # return class labels for classification
         if self.task.isClassification():
             return np.argmax(scores[0], axis=1, keepdims=True)
         else:
@@ -298,20 +287,8 @@ class QSPRDNN(QSPRModel):
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None
     ) -> np.ndarray:
-        """Predict the probability of target property values for the given features.
-
-        Args:
-            X (pd.DataFrame | np.ndarray | QSPRDataset): features to predict
-            estimator (Any, optional): estimator instance. Defaults to None.
-
-        Returns:
-            np.ndarray: predicted probability of target property values
-        """
-        if estimator is None:
-            estimator = self.estimator
-        if isinstance(X, QSPRDataset):
-            X = X.getFeatures(raw=True, concat=True)
-        if self.featureStandardizer:
-            X = self.featureStandardizer(X)
+        """See `QSPRModel.predictProba`."""
+        estimator = self.estimator if estimator is None else estimator
+        X = self.convertToNumpy(X)
 
         return [estimator.predict(X)]
