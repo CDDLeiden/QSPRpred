@@ -10,24 +10,59 @@ import logging
 import os
 import re
 import shutil
-
-import git
+import subprocess
+from typing import Optional
 
 from . import config, setLogger
 from .config import LogFileConfig
 
 BACKUP_DIR_FOLDER_PREFIX = "backup"
 
-def enable_file_logger(
-    log_folder,
-    filename,
-    debug=False,
-    log_name=None,
-    init_data=None,
-    disable_existing_loggers=True,
-):
 
+def export_conda_environment(filepath: str):
+    """Export the conda environment to a yaml file.
+
+    Args:
+        filepath (str): path to the yaml file
+
+    Raises:
+        subprocess.CalledProcessError: if the command fails
+        Exception: if an unexpected error occurs
+    """
+    try:
+        cmd = f"conda env export > {filepath}"
+        subprocess.run(cmd, shell=True, check=True)
+        print(f"Environment exported to {filepath} successfully!")
+    except subprocess.CalledProcessError as e:
+        print(f"Error exporting the environment: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+def enable_file_logger(
+    log_folder: str,
+    filename: str,
+    debug: bool = False,
+    log_name: Optional[str] = None,
+    init_data: Optional[dict] = None,
+    disable_existing_loggers: bool = False,
+):
+    """Enable file logging.
+
+    Args:
+        log_folder (str): path to the folder where the log file should be stored
+        filename (str): name of the log file
+        debug (bool): whether to enable debug logging. Defaults to False.
+        log_name (str, optional): name of the logger. Defaults to None.
+        init_data (dict, optional): initial data to be logged. Defaults to None.
+        disable_existing_loggers (bool): whether to disable existing loggers.
+    """
+    # create log folder if it does not exist
     path = os.path.join(log_folder, filename)
+    if not os.path.exists(log_folder):
+        os.makedirs(log_folder)
+
+    # configure logging
     config.config_logger(path, debug, disable_existing_loggers=disable_existing_loggers)
 
     # get logger and init configuration
