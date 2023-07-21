@@ -909,7 +909,10 @@ class HyperParameterOptimization(ABC):
     """Base class for hyperparameter optimization.
 
     Attributes:
-        scoreFunc (Metric): scoring function to use
+        scoreFunc (Metric): scoring function to use, should match the output of the
+                            evaluation method (e.g. if the evaluation methods returns
+                            class probabilities, the scoring function support class
+                            probabilities)
         evaluationMethod (EvaluationMethod): evaluation method to use
         scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
         paramGrid (dict): dictionary of parameters to optimize
