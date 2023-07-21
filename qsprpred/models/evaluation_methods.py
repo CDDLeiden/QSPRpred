@@ -77,7 +77,8 @@ class CrossValidation(EvaluationMethod):
                 logger.info(
                     f"cross validation fold {i}: last save epoch {last_save_epoch}"
                 )
-            model.fit(X_train, y_train, crossvalmodel)
+            else:
+                model.fit(X_train, y_train, crossvalmodel)
             # make predictions
             if model.task.isRegression() or not self.useProba:
                 cvs[idx_test] = model.predict(X_test, crossvalmodel)
