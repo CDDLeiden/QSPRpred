@@ -13,7 +13,7 @@ class MoleculeClusters(ABC):
     Abstract base class for clustering molecules.
     """
     @abstractmethod
-    def get_clusters(self, mols):
+    def get_clusters(self, smiles_list: list[str]) -> dict:
         """
         Cluster molecules.
 
