@@ -41,7 +41,6 @@ class RandomClusters(MoleculeClusters):
         nClusters (int): number of clusters
     """
     def __init__(self, seed: int = 42, n_clusters: int | None = None):
-        super().__init__()
         self.seed = seed
         self.nClusters = n_clusters
 
