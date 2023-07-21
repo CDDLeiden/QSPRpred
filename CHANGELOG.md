@@ -1,6 +1,6 @@
 # Change Log
 
-From v2.0.0 to v2.0.1
+From v2.0.0 to v2.0.2
 
 ## Fixes
 
@@ -14,7 +14,8 @@ From v2.0.0 to v2.0.1
 
 ## New Features
 - `ClusterSplit` - splits data based clustering of molecular fingerprints.
-- raise error if search space for optuna optimization is missing search space type annotation or if type not in list
+- Raise error if search space for optuna optimization is missing search space type annotation or if type not in list.
+- When installing package with pip, the commit hash and date of the installation is saved into `qsprpred._version`
 
 ## Removed Features
 - `StratifiedPerTarget` is replaced by `PCMSplit`.
