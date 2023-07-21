@@ -4,13 +4,16 @@ import numpy as np
 from rdkit import Chem, DataStructs
 from rdkit.SimDivFilters import rdSimDivPickers
 
+from ..logging import logger
 from .descriptorsets import FingerprintSet
 from .scaffolds import Murcko
-
 
 class MoleculeClusters(ABC):
     """
     Abstract base class for clustering molecules.
+
+    Attributes:
+        nClusters (int): number of clusters
     """
     @abstractmethod
     def get_clusters(self, smiles_list: list[str]) -> dict:
@@ -27,9 +30,12 @@ class MoleculeClusters(ABC):
 
     def _set_nClusters(self, N: int) -> None:
         self.nClusters = self.nClusters if self.nClusters is not None else N // 100
-        # Set minimum number of clusters to 10
-        if self.nClusters < 10:
-            self.nClusters = 10
+        # Number of initial clusters > the number of final subsets (i.e. >2)
+        if self.nClusters < 3:
+            self.nClusters = 3
+            logger.warning(
+                f"Number of initial clusters is too small, set to {self.nClusters}"
+            )
 
 
 class RandomClusters(MoleculeClusters):
