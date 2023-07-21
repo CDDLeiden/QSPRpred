@@ -12,7 +12,7 @@ import numpy as np
 import optuna
 import pandas as pd
 
-from .logs.utils import backup_files, commit_hash, enable_file_logger
+from .logs.utils import backup_files, enable_file_logger
 from .models.interfaces import QSPRModel
 
 
@@ -179,8 +179,6 @@ if __name__ == "__main__":
         "QSPRpredict.log",
         args.debug,
         __name__,
-        commit_hash(os.path.dirname(os.path.realpath(__file__)))
-        if not args.no_git else None,
         vars(args),
         disable_existing_loggers=False,
     )

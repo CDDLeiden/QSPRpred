@@ -18,32 +18,14 @@ from .config import LogFileConfig
 
 BACKUP_DIR_FOLDER_PREFIX = "backup"
 
-
-def commit_hash(GIT_PATH):
-    try:
-        repo = git.Repo.init(GIT_PATH)
-        repo_hash = "#" + repo.head.object.hexsha[:8]
-    except ValueError:
-        from .. import __version__
-
-        repo_hash = __version__
-    return repo_hash
-
-
 def enable_file_logger(
     log_folder,
     filename,
     debug=False,
     log_name=None,
-    git_hash=None,
     init_data=None,
     disable_existing_loggers=True,
 ):
-    # # Get run id
-    # runid = config.get_runid(log_folder=log_folder,
-    #                         old=keep_old_runid,
-    #                         id=picked_runid)
-    # path = os.path.join(log_folder, f'{runid}/{filename}')
 
     path = os.path.join(log_folder, filename)
     config.config_logger(path, debug, disable_existing_loggers=disable_existing_loggers)
@@ -55,7 +37,7 @@ def enable_file_logger(
     settings = LogFileConfig(path, log, debug)
 
     # Begin log file
-    config.init_logfile(log, git_hash, json.dumps(init_data, sort_keys=False, indent=2))
+    config.init_logfile(log, json.dumps(init_data, sort_keys=False, indent=2))
 
     return settings
 

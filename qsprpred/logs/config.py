@@ -1,5 +1,7 @@
+import git
 import logging
 import os
+
 from bisect import bisect
 from datetime import datetime
 from logging import config
@@ -129,16 +131,47 @@ def config_logger(log_file_path, debug=None, disable_existing_loggers=True):
     config.dictConfig(LOGGING_CONFIG)
 
 
-def init_logfile(log, githash=None, args=None):
+def get_git_info():
+    """
+    Get information of the current git commit
+
+    If the package is installed with pip, read detailed version extracted by setuptools_scm.
+    Otherwise, use gitpython to get the information from the git repo.
+    """
+
+    import qsprpred
+    path = qsprpred.__path__[0]
+    logging.debug(f"Package path: {path}")
+    is_pip_package = "site-packages" in path
+
+    if is_pip_package:
+        # Version info is extracted by setuptools_scm (default format)
+        from .._version import __version__
+        info = __version__
+        logging.info(f"Version info [from pip]: {info}")
+    else:
+        # If git repo
+        repo = git.Repo(search_parent_directories=True)
+        # Get git hash
+        git_hash = repo.head.object.hexsha[:8]
+        # Get git branch
+        branch = repo.active_branch.name
+        # Get git tag
+        tag = repo.tags[-1].name
+        # Get number of commits between current commit and last tag
+        ncommits = len(list(repo.iter_commits(f"{tag}..HEAD")))
+        # Check if repo is dirty
+        dirty = repo.is_dirty()
+        info = f"({branch}) {tag}+{ncommits}[{git_hash}]+{'dirty' if dirty else ''} "
+        logging.info(f"Version info [from git repo]: {info}")
+
+def init_logfile(log, args=None):
     """
     Put some intial information in the logfile
-    ...
 
-    Arguments
-    ----------
-    log : Logging instance
-    runid (str): the current runid
-    githash (str): githash
+    Args:
+        log : Logging instance
+        args (dict): Dictionary with all command line arguments
     """
     if os.path.getsize(log.root.handlers[1].baseFilename) == 0:
         logging.info("Creation date: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -146,7 +179,8 @@ def init_logfile(log, githash=None, args=None):
         logging.info(
             "\nContinued at: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-    logging.info("git hash: %s \n" % githash)
+
+    get_git_info()
     logging.info("Run settings:")
     logging.info(args)
     logging.info("")
