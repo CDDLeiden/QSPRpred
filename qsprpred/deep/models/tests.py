@@ -5,7 +5,7 @@ Created by: Martin Sicho
 On: 12.05.23, 18:31
 """
 import os
-from typing import Optional, Type
+from typing import Type
 from unittest import TestCase
 
 import torch
@@ -36,9 +36,9 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     def getModel(
         base_dir: str,
         name: str,
-        alg: Optional[Type] = None,
+        alg: Type | None = None,
         dataset: QSPRDataset = None,
-        parameters: Optional[dict] = None,
+        parameters: dict | None = None,
     ):
         """Initialize model with data set.
 

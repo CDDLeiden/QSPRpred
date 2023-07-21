@@ -7,7 +7,7 @@ import shutil
 import sys
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Callable, Iterable, List, Optional, Type, Union
+from typing import Any, Callable, Iterable, List, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -236,10 +236,10 @@ class QSPRModel(ABC):
     def __init__(
         self,
         base_dir: str,
-        alg: Optional[Type] = None,
-        data: Optional[QSPRDataset] = None,
-        name: Optional[str] = None,
-        parameters: Optional[dict] = None,
+        alg: Type | None = None,
+        data: QSPRDataset | None = None,
+        name: str | None = None,
+        parameters: dict | None = None,
         autoload=True
     ):
         """Initialize a QSPR model instance.
@@ -529,7 +529,7 @@ class QSPRModel(ABC):
     def convertToNumpy(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: Optional[pd.DataFrame | np.ndarray | QSPRDataset] = None
+        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to np.ndarray format.
 
@@ -722,8 +722,8 @@ class QSPRModel(ABC):
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
-        early_stopping: Optional[bool] = None
-    ) -> Any | tuple[Any, Optional[int]]:
+        early_stopping: bool | None = None
+    ) -> Any | tuple[Any, int] | None:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
         Note. convertToNumpy can be called here, to convert the input data to
@@ -741,7 +741,7 @@ class QSPRModel(ABC):
 
         Returns:
             Any: fitted estimator instance
-            Optional[int]: in case of early stopping, the number of iterations
+            int]: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
 
@@ -797,7 +797,7 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def loadEstimator(self, params: Optional[dict] = None) -> object:
+    def loadEstimator(self, params: dict | None = None) -> object:
         """Initialize estimator instance with the given parameters.
 
         If `params` is `None`, the default parameters will be used.
@@ -810,7 +810,7 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def loadEstimatorFromFile(self, params: Optional[dict] = None) -> object:
+    def loadEstimatorFromFile(self, params: dict | None = None) -> object:
         """Load estimator instance from file and apply the given parameters.
 
         Args:
@@ -865,7 +865,7 @@ class EvaluationMethod(ABC):
         predictions: np.ndarray | list[np.ndarray],
         index: pd.Series,
         file_suffix: str,
-        extra_columns: Optional[dict[str, np.ndarray]] = None
+        extra_columns: dict[str, np.ndarray] | None = None
     ):
         """Save predictions to file.
 

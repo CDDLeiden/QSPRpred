@@ -5,7 +5,7 @@ import numbers
 import os
 import shutil
 from os.path import exists
-from typing import Optional, Type
+from typing import Type
 from unittest import TestCase
 
 import numpy as np
@@ -213,9 +213,9 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     @staticmethod
     def getModel(
         name: str,
-        alg: Optional[Type] = None,
+        alg: Type | None = None,
         dataset: QSPRDataset = None,
-        parameters: Optional[dict] = None,
+        parameters: dict | None = None,
     ):
         """Create a QSPRsklearn model.
 

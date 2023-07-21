@@ -238,8 +238,8 @@ class QSPRDNN(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None,
-        early_stopping: bool = True,
+        estimator: Any | None = None,
+        early_stopping: bool | None = True,
         **kwargs
     ):
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -253,7 +253,7 @@ class QSPRDNN(QSPRModel):
 
         Returns:
             Any: fitted estimator instance
-            Optional[int]: in case of early stopping, the number of iterations
+            int, optional: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
         estimator = self.estimator if estimator is None else estimator

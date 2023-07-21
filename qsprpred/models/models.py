@@ -7,7 +7,7 @@ the `QSPRModel` interface can be added.
 
 import os
 from copy import deepcopy
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -31,8 +31,8 @@ class QSPRsklearn(QSPRModel):
         base_dir: str,
         alg=None,
         data: QSPRDataset = None,
-        name: Optional[str] = None,
-        parameters: Optional[dict] = None,
+        name: str | None = None,
+        parameters: dict | None = None,
         autoload: bool = True
     ):
         """Initialize QSPRsklearn model.
@@ -79,7 +79,7 @@ class QSPRsklearn(QSPRModel):
         """Whether the model supports early stopping or not."""
         return False
 
-    def loadEstimator(self, params: Optional[dict] = None) -> Any:
+    def loadEstimator(self, params: dict | None = None) -> Any:
         """Load estimator from alg and params.
 
         Args:
@@ -98,7 +98,7 @@ class QSPRsklearn(QSPRModel):
             return self.alg()
 
     def loadEstimatorFromFile(
-        self, params: Optional[dict] = None, fallback_load: bool = True
+        self, params: dict | None = None, fallback_load: bool = True
     ):
         """Load estimator from file.
 

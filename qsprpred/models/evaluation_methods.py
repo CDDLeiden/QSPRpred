@@ -2,7 +2,6 @@
 
 import math
 from datetime import datetime
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -21,7 +20,7 @@ class CrossValidation(EvaluationMethod):
         self,
         model: QSPRModel,
         save: bool = True,
-        parameters: Optional[dict] = None,
+        parameters: dict | None = None,
         **kwargs
     ) -> float | np.ndarray:
         """Perform cross validation on the model with the given parameters.
@@ -119,7 +118,7 @@ class EvaluateTestSetPerformance(EvaluationMethod):
         self,
         model: QSPRModel,
         save: bool = True,
-        parameters: Optional[dict] = None,
+        parameters: dict | None = None,
         **kwargs
     ):
         """Make predictions for independent test set.
