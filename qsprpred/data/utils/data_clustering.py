@@ -4,7 +4,7 @@ import numpy as np
 from rdkit import Chem, DataStructs
 from rdkit.SimDivFilters import rdSimDivPickers
 
-from ..logging import logger
+from ...logs import logger
 from .descriptorsets import FingerprintSet
 from .scaffolds import Murcko
 
@@ -30,11 +30,11 @@ class MoleculeClusters(ABC):
 
     def _set_nClusters(self, N: int) -> None:
         self.nClusters = self.nClusters if self.nClusters is not None else N // 100
-        # Number of initial clusters > the number of final subsets (i.e. >2)
-        if self.nClusters < 3:
-            self.nClusters = 3
+        if self.nClusters < 10:
+            self.nClusters = 10
             logger.warning(
-                f"Number of initial clusters is too small, set to {self.nClusters}"
+                f"Number of initial clusters is too small to combine them well,\
+                it has set to {self.nClusters}"
             )
 
 
