@@ -6,7 +6,6 @@ the `QSPRModel` interface can be added.
 """
 
 import os
-from copy import deepcopy
 from typing import Any
 
 import numpy as np
@@ -85,15 +84,9 @@ class QSPRsklearn(QSPRModel):
         Args:
             params (dict): parameters
         """
-        if params:
-            if self.parameters is not None:
-                temp_params = deepcopy(self.parameters)
-                temp_params.update(params)
-                return self.alg(**temp_params)
-            else:
-                return self.alg(**params)
-        elif self.parameters is not None:
-            return self.alg(**self.parameters)
+        new_parameters = self.getParameters(params)
+        if new_parameters is not None:
+            return self.alg(**new_parameters)
         else:
             return self.alg()
 
@@ -112,8 +105,9 @@ class QSPRsklearn(QSPRModel):
         if os.path.isfile(path):
             estimator = skljson.from_json(path)
             self.alg = estimator.__class__
-            if params:
-                return estimator.set_params(**params)
+            new_parameters = self.getParameters(params)
+            if new_parameters is not None:
+                return estimator.set_params(**new_parameters)
             else:
                 return estimator
         elif fallback_load:

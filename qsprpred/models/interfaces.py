@@ -553,6 +553,25 @@ class QSPRModel(ABC):
         else:
             return X
 
+    def getParameters(self, new_parameters) -> dict | None:
+        """Get the model parameters combined with the given parameters.
+
+        If both the model and the given parameters contain the same key,
+        the value from the given parameters is used.
+
+        Args:
+            new_parameters (dict): dictionary of new parameters to add
+
+        Returns:
+            dict: dictionary of model parameters
+        """
+        parameters_out = copy.deepcopy(self.parameters)
+        if parameters_out is not None:
+            parameters_out.update(new_parameters)
+        else:
+            parameters_out = new_parameters
+        return parameters_out
+
     def createPredictionDatasetFromMols(
         self,
         mols: list[str],
