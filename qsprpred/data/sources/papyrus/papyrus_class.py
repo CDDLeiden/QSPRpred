@@ -32,7 +32,7 @@ class Papyrus:
         self,
         data_dir: str = DEFAULT_DIR,
         version: str = "latest",
-        descriptors: str | list[str] | None = "all",
+        descriptors: str | list[str] | None = None,
         stereo: bool = False,
         disk_margin: float = 0.01,
         plus_only: bool = True,
@@ -41,12 +41,20 @@ class Papyrus:
         `Papyrus.download` and `Papyrus.getData` for more details.
 
         Args:
-            data_dir (str): storage directory for Papyrus database and the extracted data
-            version (str): Papyrus database version
-            descriptors (str, list, None): descriptors to download if not already present
-            stereo (str): include stereochemistry in the database
-            disk_margin (float): the disk space margin to leave free
-            plus_only (bool): use only plusplus version, only high quality data
+            data_dir (str):
+                storage directory for Papyrus database and the extracted data
+            version (str):
+                Papyrus database version
+            descriptors (str, list, None):
+                descriptors to download if not already present (set to 'all' for
+                all descriptors, otherwise a list of descriptor names, see
+                https://github.com/OlivierBeq/Papyrus-scripts)
+            stereo (str):
+                include stereochemistry in the database
+            disk_margin (float):
+                the disk space margin to leave free
+            plus_only (bool):
+                use only plusplus version, only high quality data
         """
         self.dataDir = data_dir
         self.version = version
