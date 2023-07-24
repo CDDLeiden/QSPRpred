@@ -13,8 +13,8 @@ import shutil
 
 import git
 
-from qsprpred.logs import config, setLogger
-from qsprpred.logs.config import LogFileConfig
+from . import config, setLogger
+from .config import LogFileConfig
 
 BACKUP_DIR_FOLDER_PREFIX = "backup"
 
@@ -24,7 +24,7 @@ def commit_hash(GIT_PATH):
         repo = git.Repo.init(GIT_PATH)
         repo_hash = "#" + repo.head.object.hexsha[:8]
     except ValueError:
-        from qsprpred import __version__
+        from .. import __version__
 
         repo_hash = __version__
     return repo_hash
