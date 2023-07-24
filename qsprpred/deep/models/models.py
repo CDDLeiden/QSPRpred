@@ -161,7 +161,7 @@ class QSPRDNN(QSPRModel):
         # set parameters if available and return
         new_parameters = self.getParameters(params)
         if new_parameters is not None:
-            estimator.set_params(**self.parameters)
+            estimator.set_params(**new_parameters)
         return estimator
 
     def loadEstimatorFromFile(
