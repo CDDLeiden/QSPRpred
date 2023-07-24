@@ -392,7 +392,7 @@ class PredictorDesc(MoleculeDescriptorSet):
         """
 
         if isinstance(model, str):
-            from qsprpred.models.interfaces import QSPRModel
+            from ...models.interfaces import QSPRModel
 
             self.model = QSPRModel.fromFile(model)
         else:
@@ -469,19 +469,19 @@ class _DescriptorSetRetriever:
 
     def getMordred(self, *args, **kwargs):
         """Wrapper to get Mordred descriptors - depends on optional dependency."""
-        from qsprpred.extra.data.utils.descriptorsets import Mordred
+        from ...extra.data.utils.descriptorsets import Mordred
 
         return Mordred(*args, **kwargs)
 
     def getMold2(self, *args, **kwargs):
         """Wrapper to get Mold2 descriptors - depends on optional dependency."""
-        from qsprpred.extra.data.utils.descriptorsets import Mold2
+        from ...extra.data.utils.descriptorsets import Mold2
 
         return Mold2(*args, **kwargs)
 
     def getPaDEL(self, *args, **kwargs):
         """Wrapper to get PaDEL descriptors - depends on optional dependency."""
-        from qsprpred.extra.data.utils.descriptorsets import PaDEL
+        from ...extra.data.utils.descriptorsets import PaDEL
 
         return PaDEL(*args, **kwargs)
 
@@ -490,7 +490,7 @@ class _DescriptorSetRetriever:
         return RDKitDescs(*args, **kwargs)
 
     def getExtendedValenceSignature(self, *args, **kwargs):
-        from qsprpred.extra.data.utils.descriptorsets import ExtendedValenceSignature
+        from ...extra.data.utils.descriptorsets import ExtendedValenceSignature
         return ExtendedValenceSignature(*args, **kwargs)
 
     def getPredictorDesc(self, *args, **kwargs):
@@ -500,7 +500,7 @@ class _DescriptorSetRetriever:
     def getProDec(self, *args, **kwargs):
         """Wrapper to get protein descriptorsfrom prodec - depends on optional
         dependency."""
-        from qsprpred.extra.data.utils.descriptorsets import ProDec
+        from ...extra.data.utils.descriptorsets import ProDec
 
         return ProDec(*args, **kwargs)
 

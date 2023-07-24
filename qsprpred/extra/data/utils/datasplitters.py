@@ -7,14 +7,110 @@ from typing import Iterable
 
 import numpy as np
 
-from qsprpred.data.data import QSPRDataset
-from qsprpred.data.interfaces import DataSetDependant, DataSplit
-from qsprpred.data.utils.datasplitters import TemporalSplit
-from qsprpred.extra.data.data import PCMDataSet
+from ....data.data import TargetProperty
+from ....data.data import QSPRDataset
+from ....data.interfaces import DataSplit
+from ....data.utils.datasplitters import  RandomSplit, ScaffoldSplit, ClusterSplit
+from ..data import PCMDataSet
 
 
-class LeaveTargetsOut(DataSplit, DataSetDependant):
-    def __init__(self, targets: list[str], dataset: PCMDataSet = None):
+class PCMSplit(DataSplit):
+    """
+    Splits a dataset into train and test set such that the subset are balanced with
+    respect to each of the protein targets.
+
+    This is done with https://github.com/sohviluukkonen/gbmt-splits, linear programming
+    of initial clusters (random-, scaffold- or cluster-based) to get a balanced split.
+
+    Attributes:
+        dataset (PCMDataSet): The dataset to split.
+        splitter (DataSplit): The splitter to use on the initial clusters.
+    """
+    def __init__(self, splitter : DataSplit, dataset: PCMDataSet | None = None) -> None:
+        super().__init__(dataset)
+        self.splitter = splitter
+
+        # Check that splitter is either RandomSplit, ScaffoldSplit or ClusterSplit
+        assert isinstance(self.splitter, (RandomSplit, ScaffoldSplit, ClusterSplit)), \
+            "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
+
+    def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
+        """
+        Split the PCM dataset into train and test set such that the subsets are balanced
+        with respect to the protein targets and there is not data leakage between the
+        train and test set.
+
+        Converts the PCM dataset into a multi-task dataset with protein targets as
+        columns and uses the given splitter to split the multi-task dataset.
+
+        Args:
+            X (np.ndarray | pd.DataFrame): the input data matrix
+            y (np.ndarray | pd.DataFrame | pd.Series): the target variable(s)
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix X (note that these are integer indices, rather than a
+            pandas index!)
+        """
+
+        ds = self.getDataSet()
+        df = ds.getDF()
+        indices = df.index.tolist()
+        proteins = df[ds.proteinCol].unique()
+        task = ds.targetProperties[0].task
+        th = ds.targetProperties[0].th if task.isClassification() else None
+
+
+        assert len(ds.targetProperties) == 1, \
+            "PCMSplit only works for single-task datasets!"
+            # TODO: Add support for multi-target PCM datasets: creta a multi-task dataset
+            # with all target-task combinations as different columns and split that
+            # dataset with the given splitter
+
+        # Pivot dataframe to get a matrix with protein targets as columns
+        df_mt = df.pivot(
+            index=ds.smilesCol,
+            columns=ds.proteinCol,
+            values=ds.targetProperties[0].name,
+        ).reset_index()
+
+        # Create target properties for multi-task dataset
+        mt_targetProperties = [
+            TargetProperty(name=target, task=task, th=th) for target in proteins
+        ]
+
+        # Create multi-task dataset and split it with the given splitter
+        ds_mt = QSPRDataset(
+            name=f"PCM_{self.splitter.__class__.__name__}_{hash(self)}",
+            df=df_mt,
+            smiles_col=ds.smilesCol,
+            target_props=mt_targetProperties,
+        )
+        ds_mt.split(self.splitter)
+
+        # Convert MT indices to indices of original PCM dataset
+        test_indices = []
+        for i in ds_mt.X_ind.index:
+            # Get SMILES and non-NaN targets for index i
+            smiles = df_mt.loc[i, ds_mt.smilesCol]
+            cols = df_mt.loc[i, :].dropna().index
+            targets = [col for col in cols if col in proteins]
+            for target in targets:
+                # Get index in the original PCM dataset the SMILES-target pair
+                ds_idx = df[
+                    (df[ds.proteinCol] == target) & (df[ds.smilesCol] == smiles)
+                ].index.astype(str)[0]
+                # Convert to numeric index
+                test_indices.append(indices.index(ds_idx))
+
+        train_indices = [i for i in range(len(df)) if i not in test_indices]
+
+        return iter([(train_indices, test_indices)])
+
+
+class LeaveTargetsOut(DataSplit):
+    def __init__(self, targets: list[str], dataset: PCMDataSet | None = None):
         """Creates a leave target out splitter.
 
         Args:
@@ -37,60 +133,13 @@ class LeaveTargetsOut(DataSplit, DataSetDependant):
         test = indices[~mask]
         return iter([(train, test)])
 
-
-class StratifiedPerTarget(DataSplit, DataSetDependant):
-    """Splits dataset in train and test subsets based on the specified splitter."""
+class TemporalPerTarget(DataSplit):
     def __init__(
         self,
-        splitter: DataSplit = None,
-        splitters: dict[str, DataSplit] = None,
-        dataset: PCMDataSet = None
-    ):
-        """Creates a split that is consistent across targets.
-
-        Args:
-            splitter: a `datasplit` instance to split the target subsets of the dataset
-            splitters (dict[str, datasplit]): a dictionary with target keys as keys and
-                splitters to use on each protein target as values
-            dataset (PCMDataset): a `PCMDataset` instance to split
-        """
-        super().__init__(dataset)
-        self.splitter = splitter
-        self.splitters = splitters
-        assert self.splitter is not None or self.splitters is not None, \
-            "Either a splitter or multiple splitters must be specified!"
-        assert (splitter is None) != (splitters is None), \
-            "Either one splitter or multiple splitters must be specified, but not both!"
-
-    def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
-        ds = self.getDataSet()
-        df = ds.getDF()
-        train = []
-        test = []
-        indices = np.array(list(range(len(ds))))
-        for target in ds.getProteinKeys():
-            splitter = self.splitter if self.splitter is not None else self.splitters[
-                target]
-            df_target = df[df[ds.proteinCol] == target]
-            ds_target = QSPRDataset(
-                name=f"{target}_scaff_split_{hash(self)}",
-                df=df_target,
-                smiles_col=ds.smilesCol,
-                target_props=ds.targetProperties,
-                index_cols=ds.indexCols,
-            )
-            ds_target.split(splitter)
-            train.extend(indices[df.index.isin(ds_target.X.index)])
-            test.extend(indices[df.index.isin(ds_target.X_ind.index)])
-
-        assert len(set(train)) + len(set(test)) == len(ds), \
-            "Train and test set do not cover the whole dataset!"
-        return iter([(train, test)])
-
-
-class TemporalPerTarget(DataSplit, DataSetDependant):
-    def __init__(
-        self, year_col: str, split_years: dict[str, int], dataset: PCMDataSet = None
+        year_col: str,
+        split_years: dict[str, int],
+        firts_year_per_compound: bool = True,
+        dataset: PCMDataSet | None = None
     ):
         """Creates a temporal split that is consistent across targets.
 
@@ -101,18 +150,52 @@ class TemporalPerTarget(DataSplit, DataSetDependant):
             split_years (dict[str,int]):
                 a dictionary with target keys as keys
                 and split years as values
+            firts_year_per_compound (bool):
+                if True, the first year a compound appears in the dataset is used for all targets
             dataset (PCMDataset):
                 a `PCMDataset` instance to split
         """
         super().__init__(dataset)
         self.splitYears = split_years
         self.yearCol = year_col
+        self.firstYearPerCompound = firts_year_per_compound
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
-        splitters = {
-            target:
-                TemporalSplit(timeprop=self.yearCol, timesplit=self.splitYears[target])
-            for target, year in self.splitYears.items()
-        }
-        return StratifiedPerTarget(dataset=self.getDataSet(),
-                                   splitters=splitters).split(X, y)
+
+        ds = self.getDataSet()
+        df = ds.getDF()
+        indices = df.index.tolist()
+
+        # Set the first year a compound appears in the dataset as the year
+        # of the compound for all targets
+        if self.firstYearPerCompound:
+            first_years = df.groupby(ds.smilesCol)[self.yearCol].min()
+            df[self.yearCol + "_first"] = df[ds.smilesCol].map(first_years)
+            self.yearCol += "_first"
+
+        train_indices = []
+        test_indices = []
+
+        for target, split_year in self.splitYears.items():
+            df_target = df[df[ds.proteinCol] == target]
+            # Get indices of the train and test set
+            train = df_target[df_target[self.yearCol] <= split_year].index.tolist()
+            test = df_target[df_target[self.yearCol] > split_year].index.tolist()
+            # Check if there is data for the target before/after the split year
+            if len(train) == 0:
+                raise ValueError(
+                    f"No training data for target {target} before {split_year}!"
+                )
+            elif len(test) == 0:
+                raise ValueError(
+                    f"No test data for target {target} after {split_year}!"
+                )
+            # Convert to numeric indices
+            train_indices.extend([indices.index(i) for i in train])
+            test_indices.extend([indices.index(i) for i in test])
+
+
+        assert len(set(train_indices)) + len(set(test_indices)) == len(ds), \
+            "Train and test set do not cover the whole dataset!"
+
+        return iter([(train_indices, test_indices)])
