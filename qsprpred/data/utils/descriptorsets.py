@@ -508,7 +508,7 @@ class _DescriptorSetRetriever:
         """Wrapper to get bulk tanimoto distances."""
         return TanimotoDistances(*args, **kwargs)
 
-    def get_DataFrame(self, *args, **kwargs):
+    def getDataFrame(self, *args, **kwargs):
         return DataFrameDescriptorSet(*args, **kwargs)
 
 
