@@ -15,7 +15,7 @@ from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
 from .utils.datasplitters import (
-    StratifiedPerTarget,
+    PCMSplit,
     TemporalPerTarget,
     LeaveTargetsOut
 )
@@ -28,7 +28,11 @@ from ...data.tests import (
     DataSetsMixIn,
     TestDescriptorInDataMixIn,
 )
-from ...data.utils.datasplitters import RandomSplit, ScaffoldSplit
+from ...data.utils.datasplitters import (
+    RandomSplit,
+    ScaffoldSplit,
+    ClusterSplit,
+)
 from ...data.utils.descriptorcalculator import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
@@ -349,15 +353,16 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
             feature_filters=[LowVarianceFilter(0.05),
                              HighCorrelationFilter(0.9)],
         )
+        ndata = dataset.getDF().shape[0]
         self.validate_split(dataset)
-        self.assertEqual(dataset.X_ind.shape[0], 4)
+        self.assertEqual(dataset.X_ind.shape[0], round(ndata*0.2))
         test_ids = dataset.X_ind.index.values
         train_ids = dataset.y_ind.index.values
         dataset.save()
         # load dataset and test if all checks out after loading
         dataset_new = PCMDataSet.fromFile(dataset.storePath)
         self.validate_split(dataset_new)
-        self.assertEqual(dataset.X_ind.shape[0], 4)
+        self.assertEqual(dataset.X_ind.shape[0], round(ndata*0.2))
         self.assertEqual(
             len(dataset_new.descriptorCalculators), len(dataset_new.descriptors)
         )
@@ -389,8 +394,9 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
             recalculate_features=True,
             feature_fill_value=np.nan,
         )
+        ndata = dataset.getDF().shape[0]
         self.assertEqual(len(dataset.descriptorCalculators), len(dataset.descriptors))
-        self.assertEqual(dataset.X_ind.shape, (10, len(self.sampleDescSet)))
+        self.assertEqual(dataset.X_ind.shape, (round(ndata*0.5), len(self.sampleDescSet))) 
         # create new dataset with different feature calculator
         dataset_next = self.createPCMDataSet(f"{self.__class__.__name__}_next")
         dataset_next.prepareDataset(
@@ -403,8 +409,8 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         self.assertEqual(
             len(dataset_next.descriptorCalculators), len(dataset_next.descriptors)
         )
-        self.assertEqual(dataset_next.X_ind.shape, (10, len(self.sampleDescSet)))
-        self.assertEqual(dataset_next.X.shape, (10, len(self.sampleDescSet)))
+        self.assertEqual(dataset_next.X_ind.shape, (round(ndata*0.5), len(self.sampleDescSet)))
+        self.assertEqual(dataset_next.X.shape, (round(ndata*0.5), len(self.sampleDescSet)))
 
     def testWithMolDescriptors(self):
         """Test the calculation of protein and molecule descriptors."""
@@ -627,7 +633,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
         )
 
 
-class TestSplitsPCM(DataSetsMixInExtras, TestCase):
+class TestPCMSplitters(DataSetsMixInExtras, TestCase):
 
     def setUp(self):
         super().setUp()
@@ -644,7 +650,31 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
             )
         )
 
-    def testLeaveTargetOut(self):
+    @parameterized.expand(
+        [
+            (RandomSplit(),),
+            (ScaffoldSplit(),),
+            (ClusterSplit(),)
+        ]
+    )
+
+    def test_PCMSplit(self, splitter):
+        splitter = PCMSplit(splitter)
+        self.dataset.split(splitter, featurize=True)
+        train, test = self.dataset.getFeatures()
+        train, test = train.index, test.index
+        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test]
+        train_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[train]
+        test_smiles = self.dataset.getProperty(self.dataset.smilesCol).loc[test]
+        train_smiles = self.dataset.getProperty(self.dataset.smilesCol).loc[train]
+        self.assertEqual(len(test_targets), len(test))
+        self.assertEqual(len(train_targets), len(train))
+        self.assertTrue(
+            set(test_smiles.unique()).isdisjoint(set(train_smiles.unique()))
+        )
+
+
+    def test_LeaveTargetOut(self):
         target = self.dataset.getProteinKeys()[0:2]
         splitter = LeaveTargetsOut(targets=target)
         self.dataset.split(splitter, featurize=True)
@@ -658,17 +688,7 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
             set(test_targets.unique()).isdisjoint(set(train_targets.unique()))
         )
 
-    def testStratifiedPerTarget(self):
-        randsplitter = RandomSplit(0.2)
-        splitter = StratifiedPerTarget(splitter=randsplitter)
-        self.dataset.split(splitter, featurize=True)
-        train, test = self.dataset.getFeatures()
-        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
-        # check that all targets are present in the test set just once
-        # (implied by the stratification on this particular dataset)
-        self.assertEqual(len(test_targets), len(self.dataset.getProteinKeys()))
-
-    def testPerTargetTemporal(self):
+    def test_PerTargetTemporal(self):
         year_col = "Year"
         year = 2015
         splitter = TemporalPerTarget(
@@ -679,13 +699,3 @@ class TestSplitsPCM(DataSetsMixInExtras, TestCase):
         train, test = self.dataset.getFeatures()
         self.assertTrue(self.dataset.getDF()[year_col].loc[train.index].max() <= year)
         self.assertTrue(self.dataset.getDF()[year_col].loc[test.index].min() > year)
-
-    def testPerTargetScaffoldSplit(self):
-        scaffsplit = ScaffoldSplit()
-        splitter = StratifiedPerTarget(splitter=scaffsplit)
-        self.dataset.split(splitter, featurize=True)
-        train, test = self.dataset.getFeatures()
-        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test.index]
-        # check that all targets are present in the test set at least once,
-        # very crude check
-        self.assertEqual(len(test_targets.unique()), len(self.dataset.getProteinKeys()))

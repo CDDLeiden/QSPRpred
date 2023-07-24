@@ -5,7 +5,6 @@ Created by: Martin Sicho
 On: 12.05.23, 16:39
 """
 import os
-from copy import deepcopy
 from typing import Any, Type
 
 import numpy as np
@@ -160,15 +159,9 @@ class QSPRDNN(QSPRModel):
             tol=self.tol,
         )
         # set parameters if available and return
-        if params is not None:
-            if self.parameters is not None:
-                temp_params = deepcopy(self.parameters)
-                temp_params.update(params)
-                estimator.set_params(**temp_params)
-            else:
-                estimator.set_params(**params)
-        elif self.parameters is not None:
-            estimator.set_params(**self.parameters)
+        new_parameters = self.getParameters(params)
+        if new_parameters is not None:
+            estimator.set_params(**new_parameters)
         return estimator
 
     def loadEstimatorFromFile(
