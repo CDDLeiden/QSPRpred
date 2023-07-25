@@ -209,9 +209,7 @@ class Chemprop(QSPRModel):
         if self.chempropLogger is not None:
             debug, info = self.chempropLogger.debug, self.chempropLogger.info
         else:
-            debug = print
-        debug("Fitting model.")
-        info("Fitting model info.")
+            pass
 
     def predict(
         self,
