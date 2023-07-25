@@ -144,7 +144,8 @@ class Chemprop(QSPRModel):
         data: QSPRDataset | None = None,
         name: str | None = None,
         parameters: dict | None = None,
-        autoload=True
+        autoload=True,
+        quiet_logger: bool = True
     ):
         """Initialize a QSPR model instance.
 
@@ -161,13 +162,13 @@ class Chemprop(QSPRModel):
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
+            quiet_logger (bool):
+                if `True`, the logger is set to quiet mode (no debug messages)
         """
         alg = MoleculeModel  # wrapper for chemprop.models.MoleculeModel
         super().__init__(base_dir, alg, data, name, parameters, autoload)
         self.chempropLogger = chemprop.utils.create_logger(
-            name=chemprop.constants.TRAIN_LOGGER_NAME,
-            save_dir=self.baseDir,
-            quiet=True
+            name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
         )
 
     def supportsEarlyStopping(self) -> bool:
@@ -205,7 +206,12 @@ class Chemprop(QSPRModel):
             int]: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
-        raise NotImplementedError("Not implemented yet.")
+        if self.chempropLogger is not None:
+            debug, info = self.chempropLogger.debug, self.chempropLogger.info
+        else:
+            debug = print
+        debug("Fitting model.")
+        info("Fitting model info.")
 
     def predict(
         self,
