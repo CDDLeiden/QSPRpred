@@ -96,7 +96,7 @@ class ModelTestMixIn:
             scoring=score_func,
             param_grid=search_space_gs,
             score_aggregation=np.median,
-            evaluation_method=TestSetAssessor(use_proba=False)
+            model_assessor=TestSetAssessor(use_proba=False)
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)
