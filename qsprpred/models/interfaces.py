@@ -691,8 +691,8 @@ class QSPRModel(ABC):
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
-    def fitAllData(self, **kwargs) -> str:
-        """Train model on the whole data set.
+    def fitAttached(self, **kwargs) -> str:
+        """Train model on the whole attached data set.
 
         ** IMPORTANT ** For models that supportEarlyStopping, `crossValidation`
         should be run first, so that the average number of epochs from the

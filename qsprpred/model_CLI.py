@@ -387,7 +387,7 @@ def QSPR_modelling(args):
                         "for determining optimal number of epochs to stop training."
                     )
                 else:
-                    QSPRmodel.fitAllData()
+                    QSPRmodel.fitAttached()
 
 
 if __name__ == "__main__":

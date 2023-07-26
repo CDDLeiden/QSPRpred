@@ -108,7 +108,7 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
-        model.fitAllData()
+        model.fitAttached()
         self.assertTrue(exists(model.metaFile))
         self.assertTrue(exists(f"{model.baseDir}/{model.metaInfo['estimator_path']}"))
         self.assertTrue(exists(f"{model.baseDir}/{model.metaInfo['parameters_path']}"))
