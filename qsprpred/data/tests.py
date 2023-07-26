@@ -1043,16 +1043,25 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         """Test the duplicate filter, which drops rows with identical descriptors
         from dataset."""
         df = self.getBigDF()
+        
+        # add duplicates
         df_test = df.loc[[0, 1, 2]]
         df_test[["VDss", "CL", "Year of first disclosure"]
                ] = df_test[["VDss", "CL", "Year of first disclosure"]] + 1
         df_test.index = "duplicate" + df_test.index.astype(str)
         df = pd.concat([df, df_test], ignore_index=False)
+        print(df.iloc[-3:])
+        
+        # add descriptors
         descriptors = [f"Descriptor_F{i}" for i in range(100)]
         df_descriptors = pd.DataFrame(
             data=np.random.rand(len(df), 100), columns=descriptors
         )
         df_descriptors.iloc[-3:] = df_descriptors.iloc[[0, 1, 2]]
+        print(df_descriptors.iloc[-3:])
+        
+        # add index to descriptors
+        df_descriptors.index = df.index
 
         dup_filter1 = DuplicateFilter(keep=True)
         dup_filter1(df, df_descriptors)
