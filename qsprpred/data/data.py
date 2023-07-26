@@ -398,7 +398,7 @@ class PandasDataSet(DataSet):
                 df_filtered = table_filter(self.df)
             elif table_filter.__class__.__name__ == "DuplicateFilter":
                 descriptors = self.getDescriptors()
-                if len(self.df.columns) == 0:
+                if len(descriptors.columns) == 0:
                     logger.warning(
                         "Removing duplicates based on descriptors does not \
                                     work if there are no descriptors"
