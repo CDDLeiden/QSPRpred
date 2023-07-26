@@ -155,7 +155,10 @@ def get_git_info():
         # Get git hash
         git_hash = repo.head.object.hexsha[:8]
         # Get git branch
-        branch = repo.active_branch.name
+        try :
+            branch = repo.active_branch.name
+        except TypeError:
+            branch = "detached HEAD"
         # Get git tag
         tag = repo.tags[-1].name
         # Get number of commits between current commit and last tag
