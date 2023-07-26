@@ -4,7 +4,7 @@ To add a new filter:
 * Add a DataFilter subclass for your new filter
 """
 from functools import partial
-from itertools import combinations, compress
+from itertools import chain
 from typing import Optional
 
 import numpy as np
@@ -121,28 +121,23 @@ class DuplicateFilter(DataFilter):
                 logger.warning(
                     "Dataframe contains duplicate compounds and/or compounds with "
                     "identical descriptors.\nThe following rows contain duplicates: "
-                    f"{[df.index[repeats].to_list() for repeats in allrepeats]}"
+                    f"{allrepeats}"
                 )
         elif self.keep is False:
-            remove_idx = [item for repeat in allrepeats for item in repeat]
-            df = df.drop(df.index[remove_idx])
+            df = df.drop(list(chain(*allrepeats)))
         elif self.keep in ["first", "last"]:
             logger.warning(
                 "For dataframe with multiple target properties it is "
                 "recommended to give target_props to prevent loss of "
                 "values for properties only occuring for some datapoints"
             )
-            remove_idxs = set()
             for repeat in allrepeats:
-                indexes = df.index[repeat]
-                years = df.loc[indexes, self.year_name]
+                years = df.loc[repeat, self.year_name]
                 if self.keep == "first":
                     tokeep = years.idxmin()  # Use the first occurance
                 else:
                     tokeep = years.idxmax()
-                remove_idx = list(indexes)
-                remove_idx.remove(tokeep)
-                remove_idxs.update(remove_idx)
-            df = df.drop(remove_idxs)
+                repeat.remove(tokeep) # Remove the one to keep from the allrepeats list
+            df = df.drop(list(chain(*allrepeats)))
 
         return df
