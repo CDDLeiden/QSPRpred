@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from ..data.data import QSPRDataset
-from ..models.evaluation_methods import CrossValidation, EvaluateTestSetPerformance
+from ..models.assessment_methods import CrossValidation, EvaluateTestSetPerformance
 from ..models.models import QSPRsklearn
 from ..models.tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn

@@ -22,7 +22,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from ..data.data import QSPRDataset
 from ..data.tests import DataSetsMixIn
-from ..models.evaluation_methods import CrossValidation, EvaluateTestSetPerformance
+from ..models.assessment_methods import CrossValidation, EvaluateTestSetPerformance
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric

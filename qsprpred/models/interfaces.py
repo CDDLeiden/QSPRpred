@@ -848,8 +848,8 @@ class QSPRModel(ABC):
         """
 
 
-class EvaluationMethod(ABC):
-    """Base class for evaluation methods.
+class ModelAssessor(ABC):
+    """Base class for assessment methods.
 
     Attributes:
         useProba (bool): use probabilities for classification models
@@ -932,7 +932,7 @@ class HyperParameterOptimization(ABC):
                             evaluation method (e.g. if the evaluation methods returns
                             class probabilities, the scoring function support class
                             probabilities)
-        evaluationMethod (EvaluationMethod): evaluation method to use
+        runAssessment (ModelAssessor): evaluation method to use
         scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
         paramGrid (dict): dictionary of parameters to optimize
         bestScore (float): best score found during optimization
@@ -940,8 +940,7 @@ class HyperParameterOptimization(ABC):
     """
     def __init__(
         self, scoring: str | Callable[[Iterable, Iterable], float], param_grid: dict,
-        evaluation_method: EvaluationMethod, score_aggregation: Callable[[Iterable],
-                                                                         float]
+        model_assessor: ModelAssessor, score_aggregation: Callable[[Iterable], float]
     ):
         """Initialize the hyperparameter optimization class.
 
@@ -949,14 +948,14 @@ class HyperParameterOptimization(ABC):
             Metric name from `sklearn.metrics` or user-defined scoring function.
         param_grid (dict):
             dictionary of parameters to optimize
-        evaluation_method (EvaluationMethod):
-            evaluation method to use for determining the best parameters
+        model_assessor (ModelAssessor):
+            assessment method to use for determining the best parameters
         score_aggregation (Callable[[Iterable], float]): function to aggregate scores
         """
         self.scoreFunc = (
             SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
         )
-        self.evaluationMethod = evaluation_method
+        self.runAssessment = model_assessor
         self.scoreAggregation = score_aggregation
         self.paramGrid = param_grid
         self.bestScore = -np.inf
