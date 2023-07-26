@@ -20,7 +20,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from .data.data import QSPRDataset
 from .deep.models.models import QSPRDNN
-from .logs.utils import backup_files, commit_hash, enable_file_logger
+from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from .models.metrics import SklearnMetric
