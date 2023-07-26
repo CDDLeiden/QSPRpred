@@ -1,10 +1,11 @@
-import git
 import logging
 import os
-
 from bisect import bisect
 from datetime import datetime
 from logging import config
+from typing import Optional
+
+import git
 
 # Maximum runid is 9999
 MAX_ID = 10000
@@ -50,13 +51,11 @@ def config_logger(log_file_path, debug=None, disable_existing_loggers=True):
     Debug entries are saved to a separate file if debug is True
     Debug and warning and above are save in a verbose format.
     Warning and above are also printed to std.out
-    ...
 
-    Arguments
-    ----------
-    log_file_path (str): Folder where all logs for this run are saved
-    debug (bool): if true, debug messages are saved
-    no_exist_log (bool): if true, existing loggers are disabled
+    Args:
+        log_file_path (str): Folder where all logs for this run are saved
+        debug (bool): if true, debug messages are saved
+        no_exist_log (bool): if true, existing loggers are disabled
     """
     debug_path = os.path.join(os.path.dirname(log_file_path), "debug.log")
     simple_format = "%(message)s"
@@ -168,6 +167,7 @@ def get_git_info():
         info = f"({branch}) {tag}+{ncommits}[{git_hash}]+{'dirty' if dirty else ''} "
         logging.info(f"Version info [from git repo]: {info}")
 
+
 def init_logfile(log, args=None):
     """
     Put some intial information in the logfile
@@ -189,18 +189,18 @@ def init_logfile(log, args=None):
     logging.info("")
 
 
-def get_runid(log_folder="logs", old=True, id=None):
+def get_runid(log_folder: str ="logs", old: bool=True, id: Optional[int]=None):
     """
-    Fetch runid that is used in all logfiles to identifiy a specific run
-    ...
+    Fetch runid that is used in all logfiles to identifiy a specific run.
 
-    Arguments
-    ----------
-    log_folder (str): Folder where all logs are saved
-    old (bool): if true, fetches the last used runid
-    id (int): If included, returns this runid number
+    Args:
+        log_folder (str): Folder where all logs are saved
+        old (bool): if true, fetches the last used runid
+        id (int): If included, returns this runid number
+
+    Returns:
+        runid (str): runid in the format "0001"
     """
-
     fname = os.path.join(log_folder, "runid.txt")
 
     # Determine the runid to fetch
