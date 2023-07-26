@@ -85,24 +85,36 @@ class DuplicateFilter(DataFilter):
             df (pandas dataframe): dataframe to filter
             descriptors (pandas dataframe): dataframe containing descriptors
         """
-        df.shape[0]
 
-        fps = descriptors.values.tolist()
+        def group_duplicate_index(df) -> list[list[int]]:
+            """Group indices of duplicate rows
+            
+            From https://stackoverflow.com/a/46629623
+            
+            Args:
+                a (numpy array): array of fingerprints
+            
+            Returns:
+                list[list[int]]: list of lists of indices of duplicate rows
+            """
+            # Sort by rows
+            a = df.values
+            sidx = np.lexsort(a.T)
+            b = a[sidx]
 
-        idxs = list(range(len(df)))
-        fps_tpl = list(combinations(fps, 2))
-        idxs_tpl = list(combinations(idxs, 2))
-        results = [i[0] == i[1] for i in fps_tpl]  # True if fingerprints identical
-        duplicate_idxs = list(compress(idxs_tpl, results))
+            # Get unique row mask
+            m = np.concatenate(([False], (b[1:] == b[:-1]).all(1), [False] ))
+            
+            # Get start and stop indices for each group of duplicates
+            idx = np.flatnonzero(m[1:] != m[:-1])
+            
+            # Get sorted indices
+            I = df.index[sidx].tolist()
+            
+            # Return list of lists of indices of duplicate rows    
+            return [I[i:j] for i,j in zip(idx[::2],idx[1::2]+1)]
 
-        allrepeats = []  # This part could be refactored but for now it works
-        for number in np.unique(np.array(duplicate_idxs)):
-            repeat = []
-            for x in np.where(np.array(duplicate_idxs) == number)[0]:
-                repeat.append(duplicate_idxs[x])
-            this_set = list(np.unique(np.array(repeat).flatten()))
-            if this_set not in allrepeats:
-                allrepeats.append(list(this_set))
+        allrepeats = group_duplicate_index(descriptors)
 
         if self.keep is True:
             if len(allrepeats) > 0:
