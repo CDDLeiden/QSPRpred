@@ -10,7 +10,7 @@ from ..logs import logger
 from .interfaces import ModelAssessor, QSPRModel
 
 
-class CrossValidation(ModelAssessor):
+class CrossValAssessor(ModelAssessor):
     """Perform cross validation on a model.
 
     Attributes:
@@ -111,7 +111,7 @@ class CrossValidation(ModelAssessor):
         return output
 
 
-class EvaluateTestSetPerformance(ModelAssessor):
+class TestSetAssessor(ModelAssessor):
     def __call__(
         self,
         model: QSPRModel,

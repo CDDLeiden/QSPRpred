@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from ..data.data import QSPRDataset
-from ..models.assessment_methods import CrossValidation, EvaluateTestSetPerformance
+from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.models import QSPRsklearn
 from ..models.tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
@@ -61,8 +61,8 @@ class ROCPlotTest(ModelDataSetsMixIn, TestCase):
             preparation_settings=self.get_default_prep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
-        CrossValidation()(model)
-        EvaluateTestSetPerformance()(model)
+        CrossValAssessor()(model)
+        TestSetAssessor()(model)
         model.save()
         # make plots
         plt = ROCPlot([model])
@@ -113,8 +113,8 @@ class MetricsPlotTest(ModelDataSetsMixIn, TestCase):
             preparation_settings=self.get_default_prep(),
         )
         model = self.getModel(dataset, "test_metrics_plot_single_model")
-        CrossValidation()(model)
-        EvaluateTestSetPerformance()(model)
+        CrossValAssessor()(model)
+        TestSetAssessor()(model)
         model.save()
         # generate metrics plot and associated files
         plt = MetricsPlot([model])
@@ -157,8 +157,8 @@ class CorrPlotTest(ModelDataSetsMixIn, TestCase):
             "test_corr_plot_single_data", preparation_settings=self.get_default_prep()
         )
         model = self.getModel(dataset, "test_corr_plot_single_model")
-        CrossValidation()(model)
-        EvaluateTestSetPerformance()(model)
+        CrossValAssessor()(model)
+        TestSetAssessor()(model)
         model.save()
         # generate metrics plot and associated files
         plt = CorrelationPlot([model])

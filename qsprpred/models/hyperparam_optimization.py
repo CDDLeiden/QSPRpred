@@ -8,7 +8,7 @@ import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
 from ..logs import logger
-from ..models.assessment_methods import CrossValidation
+from ..models.assessment_methods import CrossValAssessor
 from ..models.interfaces import HyperParameterOptimization, ModelAssessor, QSPRModel
 
 
@@ -47,7 +47,7 @@ class OptunaOptimization(HyperParameterOptimization):
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
-        model_assessor: ModelAssessor = CrossValidation(),
+        model_assessor: ModelAssessor = CrossValAssessor(),
         score_aggregation: Callable[[Iterable], float] = np.mean,
         n_trials: int = 100,
         n_jobs: int = 1,
@@ -63,7 +63,7 @@ class OptunaOptimization(HyperParameterOptimization):
                 values are lists with first element the type of the parameter and the
                 following elements the parameter bounds or values.
             model_assessor (ModelAssessor): assessment method to use for the
-                                            optimization (default: CrossValidation)
+                                            optimization (default: CrossValAssessor)
             score_aggregation (Callable): function to aggregate the scores of different
                                           folds if the assessment method returns
                                           multiple predictions
@@ -190,7 +190,7 @@ class GridSearchOptimization(HyperParameterOptimization):
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
-        model_assessor: ModelAssessor = CrossValidation(),
+        model_assessor: ModelAssessor = CrossValAssessor(),
         score_aggregation: Callable = np.mean,
     ):
         """Initialize the class.

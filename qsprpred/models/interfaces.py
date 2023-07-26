@@ -694,7 +694,7 @@ class QSPRModel(ABC):
     def fitAttached(self, **kwargs) -> str:
         """Train model on the whole attached data set.
 
-        ** IMPORTANT ** For models that supportEarlyStopping, `crossValidation`
+        ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
         should be run first, so that the average number of epochs from the
         cross-validation with early stopping can be used for fitting the model.
 
