@@ -34,21 +34,23 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @staticmethod
     def getModel(
+        base_dir: str,
         name: str,
-        alg: Type = None,
+        alg: Type | None = None,
         dataset: QSPRDataset = None,
-        parameters: dict = None,
+        parameters: dict | None = None,
     ):
         """Initialize model with data set.
 
         Args:
+            base_dir: Base directory for model.
             name: Name of the model.
             alg: Algorithm to use.
             dataset: Data set to use.
             parameters: Parameters to use.
         """
         return QSPRDNN(
-            base_dir=f"{os.path.dirname(__file__)}/test_files/",
+            base_dir=base_dir,
             alg=alg,
             data=dataset,
             name=name,
@@ -96,7 +98,9 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
-        model = self.getModel(name=f"{alg_name}", alg=alg, dataset=dataset)
+        model = self.getModel(
+            base_dir=self.qsprModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset
+        )
         self.fitTest(model)
         predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
