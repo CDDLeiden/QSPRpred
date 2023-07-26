@@ -2076,7 +2076,7 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: list = [DuplicateFilter(keep=True)],
+        datafilters: list = [], # DuplicateFilter(keep=True)
         split=None,
         fold=None,
         feature_calculators: Optional[list] = None,
