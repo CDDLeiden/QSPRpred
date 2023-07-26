@@ -211,7 +211,7 @@ class Base(nn.Module):
             print("Neural net fitting completed.", file=log_file)
             log_file.close()
         self.load_state_dict(best_weights)
-        return last_save
+        return self, last_save
 
     def evaluate(self, loader) -> float:
         """Evaluate the performance of the DNN model.

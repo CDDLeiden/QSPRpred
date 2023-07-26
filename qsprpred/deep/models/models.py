@@ -4,12 +4,8 @@ models
 Created by: Martin Sicho
 On: 12.05.23, 16:39
 """
-import math
 import os
-import sys
-from copy import deepcopy
-from datetime import datetime
-from typing import Callable, Type
+from typing import Any, Type
 
 import numpy as np
 import pandas as pd
@@ -19,7 +15,6 @@ from sklearn.model_selection import train_test_split
 from ...data.data import QSPRDataset
 from ...deep import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
 from ...deep.models.neural_network import STFullyConnected
-from ...logs import logger
 from ...models.interfaces import QSPRModel
 from ...models.tasks import ModelTasks
 
@@ -79,7 +74,6 @@ class QSPRDNN(QSPRModel):
         name: str | None = None,
         parameters: dict | None = None,
         autoload: bool = True,
-        scoring: str | Callable | None = None,
         device: torch.device = DEFAULT_DEVICE,
         gpus: list[int] = DEFAULT_GPUS,
         patience: int = 50,
@@ -101,9 +95,6 @@ class QSPRDNN(QSPRModel):
                 dictionary of algorithm specific parameters. Defaults to None.
             autoload (bool, optional):
                 whether to load the model from file or not. Defaults to True.
-            scoring (str | Callable, optional):
-                scoring function for the model. Defaults to `None`, in which case
-                the default scoring function for the task is used.
             device (torch.device, optional):
                 The cuda device. Defaults to `DEFAULT_DEVICE`.
             gpus (list[int], optional):
@@ -121,9 +112,7 @@ class QSPRDNN(QSPRModel):
         self.tol = tol
         self.nClass = None
         self.nDim = None
-        super().__init__(
-            base_dir, alg, data, name, parameters, autoload=autoload, scoring=scoring
-        )
+        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload)
         if self.task.isMultiTask():
             raise NotImplementedError(
                 "Multitask modelling is not implemented for QSPRDNN models."
@@ -132,6 +121,11 @@ class QSPRDNN(QSPRModel):
             self.parameters["n_epochs"]
             if self.parameters is not None and "n_epochs" in self.parameters else -1
         )
+
+    @property
+    def supportsEarlyStopping(self) -> bool:
+        """Whether the model supports early stopping or not."""
+        return True
 
     @classmethod
     def getDefaultParamsGrid(cls) -> list[list]:
@@ -165,15 +159,9 @@ class QSPRDNN(QSPRModel):
             tol=self.tol,
         )
         # set parameters if available and return
-        if params is not None:
-            if self.parameters is not None:
-                temp_params = deepcopy(self.parameters)
-                temp_params.update(params)
-                estimator.set_params(**temp_params)
-            else:
-                estimator.set_params(**params)
-        elif self.parameters is not None:
-            estimator.set_params(**self.parameters)
+        new_parameters = self.getParameters(params)
+        if new_parameters is not None:
+            estimator.set_params(**new_parameters)
         return estimator
 
     def loadEstimatorFromFile(
@@ -212,44 +200,6 @@ class QSPRDNN(QSPRModel):
         torch.save(self.estimator.state_dict(), path)
         return path
 
-    def fit(self) -> str:
-        """Train model on the training data,
-        determine best model using test set, save best model.
-
-        ** IMPORTANT ** The `evaluate` method should be run first,
-        so that the average number of epochs from the cross-validation
-        with early stopping can be used for fitting the model.
-        """
-        # do some checks
-        if self.optimalEpochs == -1:
-            logger.error(
-                "Cannot fit final model without first determining "
-                "the optimal number of epochs for fitting. \
-                          Run the `evaluate` method first."
-            )
-            sys.exit()
-        self.checkForData()
-        # get data
-        X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargetPropertiesValues(concat=True).values
-        # load estimator
-        if self.parameters is not None:
-            self.parameters.update({"n_epochs": self.optimalEpochs})
-        else:
-            self.parameters = {"n_epochs": self.optimalEpochs}
-        self.estimator = self.loadEstimator(self.parameters)
-        # fit model
-        logger.info(
-            "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-        logger.info("Logging model fit to: %s.log" % self.outPrefix)
-        self.estimator.fit(X_all, y_all, log=True, log_prefix=self.outPrefix)
-        logger.info(
-            "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-        # save model and return path
-        return self.save()
-
     def saveParams(self, params: dict) -> str:
         """Save model parameters to file.
 
@@ -267,129 +217,6 @@ class QSPRDNN(QSPRModel):
             }
         )
 
-    def evaluate(
-        self,
-        save: bool = True,
-        es_val_size: float = 0.1,
-        parameters: dict | None = None,
-        score_func=None
-    ) -> np.ndarray:
-        """Make predictions for crossvalidation and independent test set.
-
-        Args:
-            save (bool):
-                whether to save the cross validation predictions
-            es_val_size (float):
-                validation set size for early stopping in CV
-            parameters (dict):
-                model parameters, if None, the parameters from the model are used
-
-        Returns:
-            np.ndarray:
-                predictions for test set and cross-validation for further analysis
-            score_func (Metric):
-                scoring function for the model, if None, the default scoring function
-                for the task is used
-        """
-        evalparams = self.parameters if parameters is None else parameters
-        score_func = self.scoreFunc if score_func is None else score_func
-        X, X_ind = self.data.getFeatures()
-        y, y_ind = self.data.getTargetPropertiesValues()
-        last_save_epochs = 0
-        # prepare arrays to store molecule ids
-        cvs_ids = np.array([None] * len(X))
-        # create array for cross validation predictions
-        # and for keeping track of the number of folds
-        if self.task.isRegression():
-            cvs = np.zeros((y.shape[0], 1))
-        else:
-            cvs = np.zeros((y.shape[0], self.data.targetProperties[0].nClasses))
-        fold_counter = np.zeros(y.shape[0])
-        # perform cross validation
-        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(
-            self.data.createFolds()
-        ):
-            crossvalmodel = self.loadEstimator(evalparams)
-            y_train = y_train.reshape(-1, 1)
-            # split cross validation fold train set into train
-            # and validation set for early stopping
-            X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
-                X_train, y_train, test_size=es_val_size
-            )
-            last_save_epoch = crossvalmodel.fit(
-                X_train_fold, y_train_fold, X_val_fold, y_val_fold
-            )
-            last_save_epochs += last_save_epoch
-            logger.info(f"cross validation fold {i}: last save epoch {last_save_epoch}")
-            cvs[idx_test] = crossvalmodel.predict(X_test)
-            fold_counter[idx_test] = i
-            cvs_ids[idx_test] = X.index.values[idx_test]
-        # save cross validation predictions if specified
-        if save:
-            indmodel = self.loadEstimator(evalparams)
-            n_folds = max(fold_counter) + 1
-            # save the optimal number of epochs for fitting the model as the average
-            # number of epochs from the cross-validation
-            self.optimalEpochs = int(math.ceil(last_save_epochs / n_folds)) + 1
-            indmodel = indmodel.set_params(n_epochs=self.optimalEpochs)
-            indmodel.fit(X_train_fold, y_train_fold)
-            inds = indmodel.predict(X_ind)
-            inds_ids = X_ind.index.values
-            # save cross validation predictions and independent test set predictions
-            cvs_index = pd.Index(cvs_ids, name=self.data.getDF().index.name)
-            ind_index = pd.Index(inds_ids, name=self.data.getDF().index.name)
-            train, test = y.add_suffix("_Label"), y_ind.add_suffix("_Label")
-            train, test = pd.DataFrame(
-                train.values, columns=train.columns, index=cvs_index
-            ), pd.DataFrame(test.values, columns=test.columns, index=ind_index)
-            for idx, prop in enumerate(self.data.targetProperties):
-                if prop.task.isClassification():
-                    (
-                        train[f"{prop.name}_Prediction"],
-                        test[f"{prop.name}_Prediction"],
-                    ) = np.argmax(cvs, axis=1), np.argmax(inds, axis=1)
-                    # add probability columns to train and test set
-                    # FIXME: this will not work for multiclass classification
-                    train = pd.concat(
-                        [
-                            train,
-                            pd.DataFrame(cvs, index=cvs_index
-                                        ).add_prefix(f"{prop.name}_ProbabilityClass_"),
-                        ],
-                        axis=1,
-                    )
-                    test = pd.concat(
-                        [
-                            test,
-                            pd.DataFrame(inds, index=ind_index
-                                        ).add_prefix(f"{prop.name}_ProbabilityClass_"),
-                        ],
-                        axis=1,
-                    )
-                else:
-                    (
-                        train[f"{prop.name}_Prediction"],
-                        test[f"{prop.name}_Prediction"],
-                    ) = (cvs[:, idx], inds[:, idx])
-            train["Fold"] = fold_counter
-            train.to_csv(self.outPrefix + ".cv.tsv", sep="\t")
-            test.to_csv(self.outPrefix + ".ind.tsv", sep="\t")
-        # return predictions in the right format for scorer
-        if self.task.isClassification():
-            if self.scoreFunc.needsProbasToScore:
-                if self.task == ModelTasks.SINGLECLASS:
-                    # if binary classification,
-                    # return only the scores for the positive class
-                    return cvs[:, 1]
-                else:
-                    return cvs
-            else:
-                # if score function does not need probabilities,
-                # return the class with the highest score
-                return np.argmax(cvs, axis=1)
-        else:
-            return cvs
-
     def save(self) -> str:
         """Save the QSPRDNN model and meta information.
 
@@ -400,33 +227,61 @@ class QSPRDNN(QSPRModel):
         self.metaInfo["n_class"] = self.nClass
         return super().save()
 
-    def predict(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> np.ndarray:
-        """Predict the target property values for the given features.
+    def fit(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any | None = None,
+        early_stopping: bool | None = True,
+        **kwargs
+    ):
+        """Fit the model to the given data matrix or `QSPRDataset`.
 
         Args:
-            X (pd.DataFrame | np.ndarray | QSPRDataset): features to predict
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
+            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            estimator (Any): estimator instance to use for fitting
+            early_stopping (bool): if True, early stopping is used
+            kwargs (dict): additional keyword arguments for the estimator's fit method
 
         Returns:
-            np.ndarray: predicted target property values
+            Any: fitted estimator instance
+            int, optional: in case of early stopping, the number of iterations
+                after which the model stopped training
         """
-        scores = self.predictProba(X)
+        estimator = self.estimator if estimator is None else estimator
+        X, y = self.convertToNumpy(X, y)
+
+        if early_stopping:
+            # split cross validation fold train set into train
+            # and validation set for early stopping
+            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
+            return estimator.fit(X_train, y_train, X_val, y_val, **kwargs)
+
+        estimator, _ = estimator.fit(X, y, **kwargs)
+        return estimator
+
+    def predict(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> np.ndarray:
+        """See `QSPRModel.predict`."""
+        estimator = self.estimator if estimator is None else estimator
+        scores = self.predictProba(X, estimator)
+        # return class labels for classification
         if self.task.isClassification():
-            return np.argmax(scores, axis=1)
+            return np.argmax(scores[0], axis=1, keepdims=True)
         else:
-            return scores.flatten()
+            return scores[0]
 
-    def predictProba(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> np.ndarray:
-        """Predict the probability of target property values for the given features.
+    def predictProba(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> np.ndarray:
+        """See `QSPRModel.predictProba`."""
+        estimator = self.estimator if estimator is None else estimator
+        X = self.convertToNumpy(X)
 
-        Args:
-            X (pd.DataFrame | np.ndarray | QSPRDataset): features to predict
-
-        Returns:
-            np.ndarray: predicted probability of target property values
-        """
-        if isinstance(X, QSPRDataset):
-            X = X.getFeatures(raw=True, concat=True)
-        if self.featureStandardizer:
-            X = self.featureStandardizer(X)
-
-        return self.estimator.predict(X)
+        return [estimator.predict(X)]

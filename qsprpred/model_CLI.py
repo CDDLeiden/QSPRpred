@@ -20,8 +20,10 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from .data.data import QSPRDataset
 from .deep.models.models import QSPRDNN
-from .logs.utils import backup_files, enable_file_logger
+from .logs.utils import backup_files, commit_hash, enable_file_logger
+from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
+from .models.metrics import SklearnMetric
 from .models.models import QSPRModel, QSPRsklearn
 from .models.tasks import TargetTasks
 
@@ -297,9 +299,10 @@ def QSPR_modelling(args):
                     parameters["class_weight"] = class_weight
                 counts = mydataset.y.value_counts()
                 scale_pos_weight = (
-                    counts[0] / counts[1] if
-                    (args.sample_weighing and len(tasks)==1 and
-                     not tasks[0].isMultiClass()) else 1
+                    counts[0] / counts[1] if (
+                        args.sample_weighing and len(tasks) == 1 and
+                        not tasks[0].isMultiClass()
+                    ) else 1
                 )
                 if alg_dict[model_type] == XGBClassifier:
                     parameters["scale_pos_weight"] = scale_pos_weight
@@ -317,7 +320,7 @@ def QSPR_modelling(args):
             # Create QSPR model object
             if model_type == "DNN":
                 QSPRmodel = QSPRDNN(
-                    base_dir=args.base_dir,
+                    base_dir=f"{args.base_dir}/qspr/models/",
                     data=mydataset,
                     parameters=parameters,
                     name=f"{model_type}_{data_prefix}",
@@ -327,7 +330,7 @@ def QSPR_modelling(args):
                 )
             else:
                 QSPRmodel = QSPRsklearn(
-                    args.base_dir,
+                    base_dir=f"{args.base_dir}/qspr/models/",
                     data=mydataset,
                     alg=alg_dict[model_type],
                     name=f"{model_type}_{data_prefix}",
@@ -335,17 +338,17 @@ def QSPR_modelling(args):
                 )
 
             # if desired run parameter optimization
+            score_func = SklearnMetric.getDefaultMetric(QSPRmodel.task)
             if args.optimization == "grid":
                 search_space_gs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_gs)
                 gridsearcher = GridSearchOptimization(
-                    scoring=QSPRmodel.scoreFunc, param_grid=search_space_gs
+                    scoring=score_func, param_grid=search_space_gs
                 )
                 best_params = gridsearcher.optimize(QSPRmodel)
                 QSPRmodel.saveParams(best_params)
-            elif args.optimization == 'bayes':
-                search_space_bs = grid_params[grid_params[:, 0] ==
-                                              model_type, 1][0]
+            elif args.optimization == "bayes":
+                search_space_bs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_bs)
                 if reg and model_type == "RF":
                     if mydataset.y.min()[0] < 0 or mydataset.y_ind.min()[0] < 0:
@@ -364,7 +367,7 @@ def QSPR_modelling(args):
                         {"criterion": ["categorical", ["gini", "entropy"]]}
                     )
                 bayesoptimizer = OptunaOptimization(
-                    scoring=QSPRmodel.scoreFunc,
+                    scoring=score_func,
                     param_grid=search_space_bs,
                     n_trials=args.n_trials,
                     n_jobs=args.n_jobs,
@@ -374,7 +377,8 @@ def QSPR_modelling(args):
             # initialize models from saved or default parameters
 
             if args.model_evaluation:
-                QSPRmodel.evaluate()
+                CrossValAssessor()(QSPRmodel)
+                TestSetAssessor()(QSPRmodel)
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):
@@ -383,7 +387,7 @@ def QSPR_modelling(args):
                         "for determining optimal number of epochs to stop training."
                     )
                 else:
-                    QSPRmodel.fit()
+                    QSPRmodel.fitAttached()
 
 
 if __name__ == "__main__":

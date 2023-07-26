@@ -22,6 +22,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from ..data.data import QSPRDataset
 from ..data.tests import DataSetsMixIn
+from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
@@ -35,7 +36,7 @@ logging.basicConfig(level=logging.DEBUG)
 class ModelDataSetsMixIn(DataSetsMixIn):
     """This class sets up the datasets for the model tests."""
 
-    qsprModelsPath = f"{os.path.dirname(__file__)}/test_files/qspr/models"
+    qsprModelsPath = f"{os.path.dirname(__file__)}/test_files/qspr/models/"
 
     def setUp(self):
         """Set up the test environment."""
@@ -79,31 +80,35 @@ class ModelTestMixIn:
             model (QSPRModel): The model to test.
         """
         # perform bayes optimization
+        score_func = SklearnMetric.getDefaultMetric(model.task)
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
-            scoring=model.scoreFunc,
-            param_grid=search_space_bs,
-            n_trials=1
+            scoring=score_func, param_grid=search_space_bs, n_trials=1
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
+        if model.task.isClassification():
+            score_func = SklearnMetric.getMetric("accuracy")
         gridsearcher = GridSearchOptimization(
-            scoring=model.scoreFunc,
-            param_grid=search_space_gs
+            scoring=score_func,
+            param_grid=search_space_gs,
+            score_aggregation=np.median,
+            model_assessor=TestSetAssessor(use_proba=False)
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        model.evaluate()
+        CrossValAssessor()(model)
+        TestSetAssessor()(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
-        model.fit()
+        model.fitAttached()
         self.assertTrue(exists(model.metaFile))
         self.assertTrue(exists(f"{model.baseDir}/{model.metaInfo['estimator_path']}"))
         self.assertTrue(exists(f"{model.baseDir}/{model.metaInfo['parameters_path']}"))
@@ -135,17 +140,11 @@ class ModelTestMixIn:
         # define checks of the shape of the predictions
         def check_shape(input_smiles):
             if predictor.targetProperties[0].task.isClassification() and use_probas:
-                if predictor.isMultiTask:
-                    self.assertEqual(len(predictions), len(predictor.targetProperties))
-                    self.assertEqual(
-                        predictions[0].shape,
-                        (len(input_smiles), predictor.targetProperties[0].nClasses),
-                    )
-                else:
-                    self.assertEqual(
-                        predictions.shape,
-                        (len(input_smiles), predictor.targetProperties[0].nClasses),
-                    )
+                self.assertEqual(len(predictions), len(predictor.targetProperties))
+                self.assertEqual(
+                    predictions[0].shape,
+                    (len(input_smiles), predictor.targetProperties[0].nClasses),
+                )
             else:
                 self.assertEqual(
                     predictions.shape,
@@ -214,9 +213,9 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     @staticmethod
     def getModel(
         name: str,
-        alg: Type = None,
+        alg: Type | None = None,
         dataset: QSPRDataset = None,
-        parameters: dict = None,
+        parameters: dict | None = None,
     ):
         """Create a QSPRsklearn model.
 
@@ -230,7 +229,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             QSPRsklearn: the model
         """
         return QSPRsklearn(
-            base_dir=f"{os.path.dirname(__file__)}/test_files/",
+            base_dir=f"{os.path.dirname(__file__)}/test_files/qspr/models",
             alg=alg,
             data=dataset,
             name=name,
@@ -413,7 +412,6 @@ class TestMetrics(TestCase):
         """Check if the metric is correctly implemented."""
         scorer = SklearnMetric.getMetric(metric)
         self.assertEqual(scorer.name, metric)
-        self.assertTrue(getattr(scorer, f"supports_{task}"))
         self.assertTrue(scorer.supportsTask(task))
         # lambda function to get the sklearn scoring function from the scorer object
         sklearn_scorer = get_sklearn_scorer(metric)

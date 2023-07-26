@@ -8,4 +8,5 @@ jupyter nbconvert --to notebook --execute data_preparation.ipynb
 jupyter nbconvert --to notebook --execute data_preparation_advanced.ipynb
 jupyter nbconvert --to notebook --execute tutorial_training.ipynb
 jupyter nbconvert --to notebook --execute tutorial_usage.ipynb
+jupyter nbconvert --to notebook --execute adding_new_components.ipynb
 jupyter nbconvert --to notebook --execute pcm.ipynb

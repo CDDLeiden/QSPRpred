@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 import papyrus_scripts
@@ -86,11 +87,12 @@ class Papyrus:
         acc_keys: list[str],
         quality: str,
         activity_types: list[str] | str = "all",
-        output_dir: str = None,
-        name: str = None,
+        output_dir: Optional[str] = None,
+        name: Optional[str] = None,
         drop_duplicates: bool = False,
         chunk_size: int = 1e5,
         use_existing: bool = True,
+        **kwargs
     ) -> MoleculeTable:
         """Get the data from the Papyrus database as a `DataSetTSV` instance.
 
@@ -103,6 +105,7 @@ class Papyrus:
             drop_duplicates (bool): remove duplicates after filtering
             chunk_size (int): data is read in chunks of this size (see `papyrus_filter`)
             use_existing (bool): use existing if available
+            kwargs: additional keyword arguments passed to `MoleculeTable.fromTableFile`
 
         Returns:
             MolculeTable: the filtered data set
@@ -124,13 +127,13 @@ class Papyrus:
             plusplus=self.plusplus,
             papyrus_dir=self.dataDir,
         )
-        return MoleculeTable.fromTableFile(name, path, store_dir=output_dir)
+        return MoleculeTable.fromTableFile(name, path, store_dir=output_dir, **kwargs)
 
     def getProteinData(
         self,
         acc_keys: list[str],
-        output_dir: str = None,
-        name: str = None,
+        output_dir: Optional[str] = None,
+        name: Optional[str] = None,
         use_existing: bool = True,
     ) -> pd.DataFrame:
         """Get the protein data from the Papyrus database.
