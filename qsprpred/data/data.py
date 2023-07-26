@@ -403,7 +403,8 @@ class PandasDataSet(DataSet):
                         "Removing duplicates based on descriptors does not \
                                     work if there are no descriptors"
                     )
-                df_filtered = table_filter(self.df, descriptors)
+                else: 
+                    df_filtered = table_filter(self.df, descriptors)
             if df_filtered is not None:
                 self.df = df_filtered.copy()
 
