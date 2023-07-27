@@ -207,7 +207,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, th, alg_name, params) for params, alg_name in [
+            (f"{'PyBoost'}_{task}", task, th, "PyBoost", params) for params in [
                 {
                     "loss": "bce",
                     "metric": "auc"
@@ -251,20 +251,23 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (alg_name, alg_name, params) for params, alg_name in (
-                ({
+            ("PyBoost", "PyBoost", params) for params in [
+                {
                     "loss": "mse",
                     "metric": "r2_score"
-                }, "PBBaseReg"),
-                ({
+                },
+                "PBBaseReg",
+                {
                     "loss": MSEwithNaNLoss(),
                     "metric": "r2_score"
-                }, "PBCustomLossReg"),
-                ({
+                },
+                "PBCustomLossReg",
+                {
                     "loss": "mse",
                     "metric": NaNR2Score()
-                }, "PBCustomR2"),
-            )
+                },
+                "PBCustomR2",
+            ]
         ]
     )
     def testRegressionMultiTaskFit(self, _, model_name, parameters):
@@ -300,20 +303,23 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (alg_name, alg_name, params) for params, alg_name in (
-                ({
+            ("PyBoost", "PyBoost", params) for params in [
+                {
                     "loss": "bce",
                     "metric": "auc"
-                }, "PBBaseCls"),
-                ({
+                },
+                "PBBaseCls",
+                {
                     "loss": BCEWithNaNLoss(),
                     "metric": "auc"
-                }, "PBCustomLossCls"),
-                ({
+                },
+                "PBCustomLossCls",
+                {
                     "loss": "bce",
                     "metric": NaNAucMetric()
-                }, "PBCustomAUC"),
-            )
+                },
+                "PBCustomAUC",
+            ]
         ]
     )
     def testClassificationMultiTaskFit(self, _, model_name, parameters):
