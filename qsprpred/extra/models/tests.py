@@ -256,17 +256,14 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     "loss": "mse",
                     "metric": "r2_score"
                 },
-                "PBBaseReg",
                 {
                     "loss": MSEwithNaNLoss(),
                     "metric": "r2_score"
                 },
-                "PBCustomLossReg",
                 {
                     "loss": "mse",
                     "metric": NaNR2Score()
                 },
-                "PBCustomR2",
             ]
         ]
     )
@@ -308,17 +305,14 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     "loss": "bce",
                     "metric": "auc"
                 },
-                "PBBaseCls",
                 {
                     "loss": BCEWithNaNLoss(),
                     "metric": "auc"
                 },
-                "PBCustomLossCls",
                 {
                     "loss": "bce",
                     "metric": NaNAucMetric()
                 },
-                "PBCustomAUC",
             ]
         ]
     )
