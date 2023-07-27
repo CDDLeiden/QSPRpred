@@ -200,6 +200,6 @@ class PyBoostModel(QSPRModel):
         """
         estimator_path = f"{self.outPrefix}.pkl"
 
-        joblib.dump(self.estimator, "../data/temp_model.pkl")
+        joblib.dump(self.estimator, estimator_path)
 
         return estimator_path
