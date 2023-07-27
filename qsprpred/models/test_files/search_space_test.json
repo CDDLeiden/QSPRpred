@@ -47,5 +47,7 @@
 ["NB", {"var_smoothing": ["loguniform", 1e-10, 1]}, "bayes"],
 ["PLSR", {"n_components": [1, 81]}, "grid"],
 ["PLSR", {"n_components": ["int", 1, 100],
-        "scale": ["categorical", [true, false]]}, "bayes"]
+        "scale": ["categorical", [true, false]]}, "bayes"],
+["PyBoost", {"ntrees": [10, 100]}, "grid"],
+["PyBoost", {"ntrees": ["int", 10, 100]}, "bayes"]
 ]
