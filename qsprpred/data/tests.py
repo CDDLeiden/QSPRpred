@@ -21,7 +21,7 @@ from ..logs.stopwatch import StopWatch
 from ..models.models import QSPRsklearn
 from ..models.tasks import TargetTasks
 from .data import QSPRDataset, TargetProperty
-from .utils.datafilters import CategoryFilter
+from .utils.datafilters import CategoryFilter, DuplicateFilter
 from .utils.datasplitters import (
     ClusterSplit,
     ManualSplit,
@@ -166,6 +166,7 @@ class DataSetsMixIn(PathMixIn):
         feature_filters = [None, HighCorrelationFilter(0.9)]
         data_filters = [
             None,
+            DuplicateFilter(),
             # FIXME: this needs to be made more general and not specific to one dataset
             # CategoryFilter(
             #     name="moka_ionState7.4",
@@ -1037,6 +1038,54 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         )
         df_cation = only_cation(self.getBigDF())
         self.assertTrue((df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
+
+    def test_Duplicatefilter(self):
+        """Test the duplicate filter, which drops rows with identical descriptors
+        from dataset."""
+        df = self.getBigDF()
+        
+        # add duplicates of first 3 rows
+        df_test = df.loc[[0, 1, 2]]
+        df_test[["VDss", "CL", "Year of first disclosure"]
+               ] = df_test[["VDss", "CL", "Year of first disclosure"]] + 1
+        df_test.index = "duplicate" + df_test.index.astype(str)
+        df = pd.concat([df, df_test], ignore_index=False)
+        
+        # add random descriptors and duplicate the first 3 rows to duplicate rows
+        descriptor_names = [f"Descriptor_F{i}" for i in range(100)]
+        descriptors = pd.DataFrame(
+            data=np.random.rand(len(df), 100), columns=descriptor_names
+        )
+        descriptors.iloc[-3:] = descriptors.iloc[[0, 1, 2]]
+        descriptors.index = df.index # copy index from df
+
+        # only warnings
+        df_copy = copy.deepcopy(df); descriptors_copy = copy.deepcopy(descriptors)
+        dup_filter1 = DuplicateFilter(keep=True)
+        df_copy = dup_filter1(df_copy, descriptors_copy)
+        self.assertEqual(len(df_copy), len(df))
+        self.assertTrue(df_copy.equals(df))
+
+        # drop duplicates
+        df_copy = copy.deepcopy(df); descriptors_copy = copy.deepcopy(descriptors)
+        dup_filter2 = DuplicateFilter(keep=False)
+        df_copy = dup_filter2(df_copy, descriptors_copy)
+        self.assertEqual(len(df_copy), len(df) - 6)
+        # assert that the first 3 rows and their duplicates are dropped
+        # so index 0,1,2 and duplicate0, duplicate1, duplicate2 are dropped
+        self.assertTrue(all([i not in df_copy.index for i in [0, 1, 2, "duplicate0", "duplicate1", "duplicate2"]]))
+
+        # keep first, by year
+        df_copy = copy.deepcopy(df); descriptors_copy = copy.deepcopy(descriptors)
+        dup_filter3 = DuplicateFilter(
+            keep="first", year_name="Year of first disclosure"
+        )
+        df_copy = dup_filter3(df_copy, descriptors_copy)
+        self.assertEqual(len(df_copy), len(df) - 3)
+        # assert that only the last 3 rows are dropped
+        # so index 0,1,2 are kept
+        self.assertTrue(all([i in df_copy.index for i in [0, 1, 2]]))
+        self.assertTrue(all([i not in df_copy.index for i in ["duplicate0", "duplicate1", "duplicate2"]]))
 
 
 class TestTargetImputation(PathMixIn, TestCase):

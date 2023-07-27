@@ -22,6 +22,7 @@ from ..logs import logger
 from ..models.tasks import TargetTasks
 from ..utils.inspect import import_class
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
+from .utils.datafilters import DuplicateFilter
 from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -393,9 +394,21 @@ class PandasDataSet(DataSet):
         of the `MoleculeTable`."""
         df_filtered = None
         for table_filter in table_filters:
-            df_filtered = table_filter(self.df)
-        if df_filtered is not None:
-            self.df = df_filtered.copy()
+            if len(self.df) == 0:
+                logger.warning("Dataframe is empty")
+            if table_filter.__class__.__name__ == "CategoryFilter":
+                df_filtered = table_filter(self.df)
+            elif table_filter.__class__.__name__ == "DuplicateFilter":
+                descriptors = self.getDescriptors()
+                if len(descriptors.columns) == 0:
+                    logger.warning(
+                        "Removing duplicates based on descriptors does not \
+                                    work if there are no descriptors"
+                    )
+                else: 
+                    df_filtered = table_filter(self.df, descriptors)
+            if df_filtered is not None:
+                self.df = df_filtered.copy()
 
     def save(self):
         """Save the data frame to disk and all associated files.
@@ -2066,7 +2079,7 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: Optional[list] = None,
+        datafilters: list = [DuplicateFilter(keep=True)],
         split=None,
         fold=None,
         feature_calculators: Optional[list] = None,
