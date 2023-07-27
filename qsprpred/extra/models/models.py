@@ -182,9 +182,8 @@ class PyBoostModel(QSPRModel):
             estimator = joblib.load(path)
             new_parameters = self.getParameters(params)
             if new_parameters is not None:
-                return estimator.params.update(new_parameters)
-            else:
-                return estimator
+                estimator.params.update(new_parameters)
+            return estimator
         elif fallback_load:
             return self.loadEstimator(params)
         else:
