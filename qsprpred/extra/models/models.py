@@ -19,8 +19,15 @@ from ...models.interfaces import QSPRModel
 
 
 class PyBoostModel(QSPRModel):
-    """PyBoostModel class for gradient boosting with option to do multioutput and
-    customizable loss and evaluation."""
+    """PyBoostModel class for pyboost models.
+    Pyboost does gradient boosting with option to do multioutput and
+    customizable loss and evaluation.
+    For more information and tutorials see: https://github.com/sb-ai-lab/Py-Boost
+
+    Wrap your pyboost model class in this class
+    to use it with the `QSPRModel` interface.
+
+    """
     def __init__(
         self,
         base_dir: str,
