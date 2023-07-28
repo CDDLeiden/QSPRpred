@@ -121,8 +121,18 @@ class PyBoostModel(QSPRModel):
 
         if self.task.isClassification():
             if preds.shape[1] == 1:
-                preds = np.concatenate((preds, 1 - preds), axis=1)
-            return np.argmax(preds, axis=1, keepdims=True)
+                preds = np.concatenate(
+                    (1 - preds, preds), axis=1
+                )  # return 1 if predict proba > 0.5
+                return np.argmax(preds, axis=1, keepdims=True)
+            elif preds.shape[1] > 1:  #multitask
+                preds_mt = np.array([]).reshape(preds.shape[0], 0)
+                for i in range(preds.shape[1]):
+                    preds_task = preds[:, i].reshape(-1, 1)
+                    preds_task = np.concatenate((1 - preds_task, preds_task), axis=1)
+                    preds_task = np.argmax(preds_task, axis=1, keepdims=True)
+                    preds_mt = np.hstack([preds_mt, preds_task])
+                return preds_mt
         else:
             return preds
 
@@ -135,8 +145,18 @@ class PyBoostModel(QSPRModel):
         X = self.convertToNumpy(X)
 
         preds = estimator.predict(X)
-        if self.task.isClassification() and preds.shape[1] == 1:
-            preds = np.concatenate((preds, 1 - preds), axis=1)
+        if self.task.isClassification():
+            if preds.shape[1] == 1:
+                preds = np.concatenate((preds, 1 - preds), axis=1)
+            elif preds.shape[1] > 1:  #multitask
+                preds_mt = []
+                for i in range(preds.shape[1]):
+                    preds_task = preds[:, i].reshape(-1, 1)
+                    preds_mt.append(
+                        np.concatenate((preds_task, 1 - preds_task), axis=1)
+                    )
+                return preds_mt
+
         # if preds is a numpy array, convert it to a list
         # to be consistent with the multiclass-multitask case
         if isinstance(preds, np.ndarray):
