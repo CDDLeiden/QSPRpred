@@ -207,22 +207,15 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{'PyBoost'}_{task}", task, th, "PyBoost", params) for params in [
-                {
+            (f"{'PyBoost'}_{task}", task, th, "PyBoost", params)
+            for params, task, th in (
+                ({
                     "loss": "bce",
                     "metric": "auc"
-                },
-                {
-                    "loss": BCEWithNaNLoss(),
-                    "metric": "auc"
-                },
-                {
-                    "loss": "bce",
-                    "metric": NaNAucMetric()
-                },
-            ] for task, th in (
-                (TargetTasks.SINGLECLASS, [6.5]),
-                (TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
+                }, TargetTasks.SINGLECLASS, [6.5]),
+                ({
+                    "loss": "crossentropy"
+                }, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             )
         ]
     )

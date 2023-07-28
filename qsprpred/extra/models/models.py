@@ -16,6 +16,7 @@ from sklearn.model_selection import train_test_split
 
 from ...data.data import QSPRDataset
 from ...models.interfaces import QSPRModel
+from ...models.tasks import ModelTasks
 
 
 class PyBoostModel(QSPRModel):
@@ -86,6 +87,9 @@ class PyBoostModel(QSPRModel):
         estimator = self.estimator if estimator is None else estimator
         X, y = self.convertToNumpy(X, y)
 
+        if self.task == ModelTasks.MULTICLASS:
+            y = np.squeeze(y)
+
         if early_stopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
@@ -125,7 +129,7 @@ class PyBoostModel(QSPRModel):
                     (1 - preds, preds), axis=1
                 )  # return 1 if predict proba > 0.5
                 return np.argmax(preds, axis=1, keepdims=True)
-            elif preds.shape[1] > 1:  #multitask
+            elif self.task.isMultiTask():  #multitask
                 preds_mt = np.array([]).reshape(preds.shape[0], 0)
                 for i in range(preds.shape[1]):
                     preds_task = preds[:, i].reshape(-1, 1)
@@ -133,6 +137,8 @@ class PyBoostModel(QSPRModel):
                     preds_task = np.argmax(preds_task, axis=1, keepdims=True)
                     preds_mt = np.hstack([preds_mt, preds_task])
                 return preds_mt
+            else:  # multiclass
+                return np.argmax(preds, axis=1, keepdims=True)
         else:
             return preds
 
@@ -148,7 +154,7 @@ class PyBoostModel(QSPRModel):
         if self.task.isClassification():
             if preds.shape[1] == 1:
                 preds = np.concatenate((preds, 1 - preds), axis=1)
-            elif preds.shape[1] > 1:  #multitask
+            elif self.task.isMultiTask():  #multitask
                 preds_mt = []
                 for i in range(preds.shape[1]):
                     preds_task = preds[:, i].reshape(-1, 1)
