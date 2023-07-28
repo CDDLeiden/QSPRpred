@@ -15,7 +15,7 @@ stages:
       - export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
       - clustalo --version  # For debugging clustalo version
       - mafft --version  # For debugging mafft version
-      - python -m pip install cupy-cuda11x
+      - python -m pip install cupy-cuda111
       - python -m pip install ".[full]" --no-cache-dir
       - python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
       - python -m pip install pytest
