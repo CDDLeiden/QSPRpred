@@ -8,23 +8,25 @@ import os
 
 import numpy as np
 import pandas as pd
-from sklearn.impute import SimpleImputer
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.sources.papyrus import Papyrus
 from qsprpred.models.tasks import TargetTasks
+from sklearn.impute import SimpleImputer
 
 
-def A2AR(data_dir='data'):
+def A2AR(data_dir="data"):
     """A classification dataset that contains activity data on the adenosine A2A receptor loaded from the Papyrus database
     using the built-in Papyrus wrapper.
 
     Returns:
         a `QSPRDataset` instance with the loaded data
     """
-    acc_keys = ["P29274"]  # Adenosine receptor A2A (https://www.uniprot.org/uniprotkb/P29274/entry)
+    acc_keys = [
+        "P29274"
+    ]  # Adenosine receptor A2A (https://www.uniprot.org/uniprotkb/P29274/entry)
     dataset_name = "A2A_LIGANDS"  # name of the file to be generated
     quality = "high"  # choose minimum quality from {"high", "medium", "low"}
-    papyrus_version = '05.6'  # Papyrus database version
+    papyrus_version = "05.6"  # Papyrus database version
 
     papyrus = Papyrus(
         data_dir=data_dir,
@@ -34,47 +36,59 @@ def A2AR(data_dir='data'):
     )
 
     dataset = papyrus.getData(
-        acc_keys,
-        quality,
-        name=dataset_name,
-        use_existing=True
+        acc_keys, quality, name=dataset_name, use_existing=True, overwrite=True
     )
 
     print(f"Number of samples loaded: {len(dataset.getDF())}")
     return QSPRDataset.fromMolTable(
-        dataset, [{"name": "pchembl_value_Median", "task": TargetTasks.SINGLECLASS, "th": [6.5]}])
+        dataset, [
+            {
+                "name": "pchembl_value_Median",
+                "task": TargetTasks.SINGLECLASS,
+                "th": [6.5]
+            }
+        ],
+        overwrite=True
+    )
 
 
 def Parkinsons(singletask=True):
     """Parkinson's disease dataset that contains data for multiple targets related to the disease.
 
     It is loaded from a CSV file into pandas `DataFrame`. This is then converted to `QSPRDataset`
-    regression data set with 'GABAAalpha' activity as the target property for single task & the 
+    regression data set with 'GABAAalpha' activity as the target property for single task & the
     mGLU receptors for multitask.
 
     Returns:
         a `QSPRDataset` instance with the loaded data
     """
-    os.makedirs('qspr/data', exist_ok=True)
+    os.makedirs("qspr/data", exist_ok=True)
 
     # Load in the data
-    df = pd.read_csv('data/parkinsons_dp_original.csv', sep=',')
+    df = pd.read_csv("data/parkinsons_dp_original.csv", sep=",")
 
-    smiles_col = 'SMILES'
-    activity_col = 'pchembl_value_Mean'
-    target_col = 'accession'
+    smiles_col = "SMILES"
+    activity_col = "pchembl_value_Mean"
+    target_col = "accession"
 
     # combine uniprot accessions of same protein
-    df = df.loc[df['accession'].isin(
-        ['P14867', 'P31644', 'P34903', 'P47869', 'P48169', 'Q16445', 'O15399', 'O60391', 'Q05586', 'Q12879', 'Q13224',
-         'Q14957', 'Q8TCU5', 'Q14643', 'O00222', 'O15303', 'P41594', 'Q13255', 'Q14416', 'Q14831', 'Q14832', 'Q14833'])]
-    df.loc[
-        df['accession'].isin(['P14867', 'P31644', 'P34903', 'P47869', 'P48169', 'Q16445']), 'accession'] = 'GABAAalpha'
-    df.loc[df['accession'].isin(
-        ['O15399', 'O60391', 'Q05586', 'Q12879', 'Q13224', 'Q14957', 'Q8TCU5']), 'accession'] = 'NMDA'
+    df = df.loc[df["accession"].isin(
+        [
+            "P14867", "P31644", "P34903", "P47869", "P48169", "Q16445", "O15399",
+            "O60391", "Q05586", "Q12879", "Q13224", "Q14957", "Q8TCU5", "Q14643",
+            "O00222", "O15303", "P41594", "Q13255", "Q14416", "Q14831", "Q14832",
+            "Q14833"
+        ]
+    )]
+    df.loc[df["accession"].
+           isin(["P14867", "P31644", "P34903", "P47869", "P48169", "Q16445"]),
+           "accession"] = "GABAAalpha"
+    df.loc[df["accession"].
+           isin(["O15399", "O60391", "Q05586", "Q12879", "Q13224", "Q14957", "Q8TCU5"]),
+           "accession"] = "NMDA"
 
     # drop columns without pchembl value
-    df = df.dropna(subset=['pchembl_value_Mean'])
+    df = df.dropna(subset=["pchembl_value_Mean"])
 
     if singletask:
         # print number of samples per target
@@ -82,35 +96,44 @@ def Parkinsons(singletask=True):
         print(df[target_col].value_counts())
 
     # Get data in correct format and taking the mean if multiple activatie values per smiles
-    df = df.pivot_table(index=[smiles_col], columns=[target_col], values=activity_col, aggfunc=np.mean).reset_index()
-    df.to_csv('data/parkinsons_pivot.tsv', sep='\t', index=False)
+    df = df.pivot_table(
+        index=[smiles_col], columns=[target_col], values=activity_col, aggfunc=np.mean
+    ).reset_index()
+    df.to_csv("data/parkinsons_pivot.tsv", sep="\t", index=False)
 
     if singletask:
         return QSPRDataset(
-            name='tutorial_data',
+            name="tutorial_data",
             df=df,
-            smilescol=smiles_col,
-            target_props=[{"name": "GABAAalpha", "task": TargetTasks.REGRESSION}],
+            smiles_col=smiles_col,
+            target_props=[{
+                "name": "GABAAalpha",
+                "task": TargetTasks.REGRESSION
+            }],
             store_dir="qspr/data"
         )
 
     else:
         target_props = []
         # for target in list of mGLU receptors
-        for target in ['O00222', 'O15303', 'P41594', 'Q13255', 'Q14416', 'Q14831', 'Q14832', 'Q14833']:
+        for target in [
+            "O00222", "O15303", "P41594", "Q13255", "Q14416", "Q14831", "Q14832",
+            "Q14833"
+        ]:
             target_props.append({"name": target, "task": TargetTasks.REGRESSION})
-            
+
         return QSPRDataset(
-            name='tutorial_data',
+            name="tutorial_data",
             df=df,
-            smilescol=smiles_col,
+            smiles_col=smiles_col,
             target_props=target_props,
             store_dir="qspr/data",
-            target_imputer=SimpleImputer(strategy='mean'),
+            target_imputer=SimpleImputer(strategy="mean"),
             overwrite=True
         )
 
-def AR_PCM(data_dir='data'):
+
+def AR_PCM(data_dir="data"):
     """
     A classification dataset that contains activity data for a PCM approach to model activity for a selection of adenosine receptors. The function recreates steps from data_preparation_advanced.ipynb.
 
@@ -118,12 +141,12 @@ def AR_PCM(data_dir='data'):
         a `QSPRDataset` instance with the loaded data
     """
 
-    from qsprpred.extra.data.data import PCMDataset
+    from qsprpred.extra.data.data import PCMDataSet
 
     acc_keys = ["P29274", "P29275", "P30542", "P0DMS8"]
     dataset_name = "AR_LIGANDS"  # name of the file to be generated
     quality = "high"  # choose minimum quality from {"high", "medium", "low"}
-    papyrus_version = '05.6'  # Papyrus database version
+    papyrus_version = "05.6"  # Papyrus database version
 
     papyrus = Papyrus(
         data_dir=data_dir,
@@ -132,12 +155,7 @@ def AR_PCM(data_dir='data'):
         plus_only=True,
     )
 
-    mt = papyrus.getData(
-        acc_keys,
-        quality,
-        name=dataset_name,
-        use_existing=True
-    )
+    mt = papyrus.getData(acc_keys, quality, name=dataset_name, use_existing=True)
     ds_seq = papyrus.getProteinData(acc_keys, name=f"{mt.name}_seqs", use_existing=True)
 
     def sequence_provider(acc_keys):
@@ -151,20 +169,20 @@ def AR_PCM(data_dir='data'):
             (dict) : Mapping of accession keys to protein sequences.
             (dict) : Additional information to pass to the MSA provider (can be empty).
         """
-        map = dict()
-        info = dict()
+        map = {}
+        info = {}
         for i, row in ds_seq.iterrows():
-            map[row['accession']] = row['Sequence']
+            map[row["accession"]] = row["Sequence"]
 
             # can be omitted
-            info[row['accession']] = {
-                'Organism': row['Organism'],
-                'UniProtID': row['UniProtID'],
+            info[row["accession"]] = {
+                "Organism": row["Organism"],
+                "UniProtID": row["UniProtID"],
             }
 
         return map, info
 
-    return PCMDataset.fromMolTable(
+    return PCMDataSet.fromMolTable(
         mt,
         target_props=[
             {
@@ -173,6 +191,6 @@ def AR_PCM(data_dir='data'):
                 "th": [6.5]
             }
         ],
-        proteincol="accession",
-        proteinseqprovider=sequence_provider,
+        protein_col="accession",
+        protein_seq_provider=sequence_provider,
     )

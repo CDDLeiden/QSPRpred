@@ -1,175 +1,234 @@
 """Abstract base classes for data preparation classes."""
 from abc import ABC, abstractmethod
-from typing import List, Callable
+from typing import Callable, Iterable
 
+import numpy as np
 import pandas as pd
-
-from qsprpred.data.utils.descriptorcalculator import DescriptorsCalculator
 
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
-
     @abstractmethod
     def save(self):
-        pass
+        """Save the table to a file."""
 
     @abstractmethod
     def reload(self):
-        pass
+        """Reload the table from a file."""
 
     @abstractmethod
     def clearFiles(self):
-        pass
+        """Delete the files associated with the table."""
 
     @staticmethod
     @abstractmethod
-    def fromFile(filename) -> 'StoredTable':
-        pass
+    def fromFile(filename: str) -> "StoredTable":
+        """Load a `StoredTable` object from a file.
+
+        Args:
+            filename (str): The name of the file to load the object from.
+
+        Returns:
+            The `StoredTable` object itself.
+        """
+
 
 class DataSet(StoredTable):
-
     @abstractmethod
     def __len__(self):
         pass
 
     @abstractmethod
     def getProperties(self):
-        pass
+        """Get the properties of the dataset."""
 
     @abstractmethod
-    def addProperty(self, name, data):
-        pass
+    def addProperty(self, name: str, data: list):
+        """Add a property to the dataset.
+
+        Args:
+            name (str): The name of the property.
+            data (list): The data of the property.
+        """
 
     @abstractmethod
-    def removeProperty(self, name):
-        pass
+    def removeProperty(self, name: str):
+        """Remove a property from the dataset.
+
+        Args:
+            name (str): The name of the property.
+        """
 
     @abstractmethod
-    def getSubset(self, prefix : str):
-        pass
+    def getSubset(self, prefix: str):
+        """Get a subset of the dataset.
+
+        Args:
+            prefix (str): The prefix of the subset.
+        """
 
     @abstractmethod
-    def apply(self, func, func_args=None, func_kwargs=None, *args, **kwargs):
-        pass
+    def apply(
+        self,
+        func: callable,
+        func_args: list | None = None,
+        func_kwargs: dict | None = None,
+        *args,
+        **kwargs
+    ):
+        """Apply a function to the dataset.
+
+        Args:
+            func (callable): The function to apply.
+            func_args (list, optional): The positional arguments of the function.
+            func_kwargs (dict, optional): The keyword arguments of the function.
+        """
 
     @abstractmethod
     def transform(self, targets, transformers):
         pass
 
     @abstractmethod
-    def filter(self, table_filters: List[Callable]):
-        pass
+    def filter(self, table_filters: list[Callable]):
+        """Filter the dataset.
+
+        Args:
+            table_filters (List[Callable]): The filters to apply.
+        """
+
 
 class MoleculeDataSet(DataSet):
-
     @abstractmethod
-    def addDescriptors(self, calculator : DescriptorsCalculator):
+    def addDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
         """
         Add descriptors to the dataset.
 
         Args:
-            calculator: The descriptor calculator class wrapping the descriptors to calculate.
-        Returns:
-            `None`
+            calculator (DescriptorsCalculator): An instance of the
+                `DescriptorsCalculator` class that wraps the descriptors to be
+                calculated.
         """
-        pass
 
     @abstractmethod
-    def getDescriptors(self):
+    def getDescriptors(self) -> pd.DataFrame:
         """
         Get the table of descriptors that are currently in the dataset.
 
         Returns:
-            a `DataFrame` with the descriptors
+            a pd.DataFrame with the descriptors
         """
 
-        pass
-
     @abstractmethod
-    def getDescriptorNames(self):
+    def getDescriptorNames(self) -> list[str]:
         """
         Get the names of the descriptors that are currently in the dataset.
 
         Returns:
             a `list` of descriptor names
         """
-        pass
 
     @property
     @abstractmethod
     def hasDescriptors(self):
-        pass
+        """Indicates if the dataset has descriptors."""
 
-class DataSetDependant(ABC):
-    """
-    Classes that need a data set to operate have to implement this.
-    """
 
-    def __init__(self, dataset) -> None:
-        self.dataset = dataset
+class DataSetDependant:
+    """Classes that need a data set to operate have to implement this."""
+    def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
+        self.dataSet = dataset
 
-    def setDataSet(self, dataset : MoleculeDataSet):
+    def setDataSet(self, dataset: MoleculeDataSet):
         """
         Set the data sets.
         """
-
-        self.dataset = dataset
+        self.dataSet = dataset
 
     @property
     def hasDataSet(self):
-        return self.dataset is not None
+        return self.dataSet is not None
 
     def getDataSet(self):
         if self.hasDataSet:
-            return self.dataset
+            return self.dataSet
         else:
             raise ValueError("Data set not set.")
 
-class datasplit(ABC):
-    """Defines a function split a dataframe into train and test set."""
 
-    @abstractmethod
-    def split(self, X, y):
-        """
-        Split the given data into multiple subsets.
+class DataSplit(ABC, DataSetDependant):
+    """
+    Defines a function split a dataframe into train and test set.
+
+    Attributes:
+        dataset (MoleculeDataSet): The dataset to split.
+    """
+    def __init__(self, dataset: MoleculeDataSet) -> None:
+        super().__init__(dataset)
+
+    def split(
+        self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
+    ) -> Iterable[tuple[list[int], list[int]]]:
+        """Split the given data into one or multiple train/test subsets.
+
+        These classes handle partitioning of a feature matrix
+        by returning an iterator of train
+        and test indices. It is compatible with the approach taken
+        in the `sklearn` package (see `sklearn.model_selection._BaseKFold`).
+        This can be used for both cross-validation or a one time train/test split.
 
         Args:
-            X (DataFrame): the input data matrix
-            y (Series): the target variable
+            X (np.ndarray | pd.DataFrame): the input data matrix
+            y (np.ndarray | pd.DataFrame | pd.Series): the target variable(s)
 
         Returns:
-            an iterator over the generated subsets represented as a tuple of (train_indices, test_indices) where
-            the indices are the row indices of the input data matrix X
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix X (note that these are integer indices, rather than a
+            pandas index!)
         """
-        pass
 
-class datafilter(ABC):
+        self.X = X
+        self.y = y
+
+        self.dataset = self.getDataSet()
+        self.df = self.dataset.getDF()
+        self.tasks = self.dataset.targetProperties
+
+        assert len(self.tasks) > 0, "No target properties found."
+        assert len(X) == len(self.df),\
+            "X and the current data in the dataset must have same length"
+
+        if len(self.tasks) == 1:
+            return self._singletask_split()
+        else:
+            self.df.reset_index(drop=True, inplace=True)  # need numeric index splits
+            return self._multitask_split()
+
+
+class DataFilter(ABC):
     """Filter out some rows from a dataframe."""
-
     @abstractmethod
-    def __call__(self, df):
+    def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
         """Filter out some rows from a dataframe.
 
         Args:
-            df: pandas dataframe to filter
+            df (pd.DataFrame): dataframe to be filtered
 
         Returns:
-            df: filtered pandas dataframe
+            The filtered pd.DataFrame
         """
-        pass
 
-class featurefilter(ABC):
+
+class FeatureFilter(ABC):
     """Filter out uninformative featureNames from a dataframe."""
-
     @abstractmethod
-    def __call__(self, df, y_col : pd.DataFrame = None):
+    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None):
         """Filter out uninformative features from a dataframe.
-        
-        Args:
-            df: pandas dataframe to filter
-            y_col: output variable column name if the method requires it
-        Returns:
-            df: filtered pandas dataframe
-        """
-        pass
 
+        Args:
+            df (pd.DataFrame): dataframe to be filtered
+            y_col (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
+
+        Returns:
+            The filtered pd.DataFrame
+        """

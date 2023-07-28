@@ -6,9 +6,9 @@ On: 06.04.22, 16:51
 """
 from rdkit import rdBase
 
-rdBase.DisableLog('rdApp.error')
-rdBase.DisableLog('rdApp.info')
-rdBase.DisableLog('rdApp.warning')
+rdBase.DisableLog("rdApp.error")
+rdBase.DisableLog("rdApp.info")
+rdBase.DisableLog("rdApp.warning")
 
-__version__ = "2.0.0.dev3"
+__version__ = "2.0.1"
 VERSION = __version__

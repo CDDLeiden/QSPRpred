@@ -7,8 +7,8 @@ name = "qsprpred"
 dynamic = ["version"]
 description = "A cheminformatics package for training and testing QSAR/QSPR models"
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.7"
-license = { file = "LICENSE" } # Can anybody add the license?
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
 keywords = ["qsar", "machine learning", "cheminformatics"]
 authors = [{name = "Helle van den Maagdenberg", email = "h.w.van.den.maagdenberg@lacdr.leidenuniv.nl"},
            {name = "Linde Schoenmaker", email = "l.schoenmaker@lacdr.leidenuniv.nl"},
@@ -33,8 +33,6 @@ classifiers = [
     "Operating System :: OS Independent", # We tested it on Mac and Windows as well?
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Scientific/Engineering :: Chemistry",
@@ -54,20 +52,24 @@ dependencies = [
     "tqdm",
     "sklearn-json @ git+https://github.com/OlivierBeq/sklearn-json.git#egg=sklearn-json",
     "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
+    "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits",
 ]
 
 [project.optional-dependencies]
-dev = ["pre-commit", "isort", "yapf", "ruff"]
+dev = [
+  "pre-commit", "isort", "yapf", "ruff", "torch >= 1.7.0",
+  "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
+  "padel-pywrapper >= 1.0.2.post1", "Signature-pywrapper", "Mordred", "biopython", "prodec",
+]
 deep = ["torch >= 1.7.0"]
-extra = ["mold2-pywrapper", "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper"]
+extra = [
+  "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
+  "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper"
+]
 full = [
-    "torch >= 1.7.0",
-    "mold2-pywrapper",
-    "padel-pywrapper >= 1.0.2.post1",
-    "Signature-pywrapper",
-    "Mordred",
-    "biopython",
-    "prodec",
+  "torch >= 1.7.0",
+  "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
+  "padel-pywrapper >= 1.0.2.post1", "Signature-pywrapper", "Mordred", "biopython", "prodec",
 ]
 
 [tool.setuptools.packages.find]
@@ -141,6 +143,8 @@ known_first_party = 'qsprpred'
  ]
 
  ignore = [
+   # we decided on having relative rather than absolute imports
+   "TID252",
    # module level import not at top of file
    "E402",
    # do not assign a lambda expression, use a def

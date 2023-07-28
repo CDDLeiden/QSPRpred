@@ -1,101 +1,120 @@
-"""
-papyrus_class
+"""  Creating dataset from Papyrus database.  """
 
-Created by: Martin Sicho
-On: 06.10.22, 14:28
-"""
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import Optional
 
 import pandas as pd
 import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
-from qsprpred.data.data import MoleculeTable
-from qsprpred.data.sources.papyrus.papyrus_filter import papyrus_filter
+from ...data import MoleculeTable
+from .papyrus_filter import papyrus_filter
+
 
 class Papyrus:
-    DEFAULT_DIR = os.path.join(Path.home(), '.Papyrus')
+    """ Create new instance of Papyrus dataset.
+    See `papyrus_filter` and `Papyrus.download` and `Papyrus.getData` for more details.
+
+    Attributes:
+        DEFAULT_DIR (str): default directory for Papyrus database and the extracted data
+        dataDir (str): storage directory for Papyrus database and the extracted data
+        version (list): Papyrus database version
+        descriptors (list, str, None): descriptors to download if not already present
+        stereo (bool): use version with stereochemistry
+        nostereo (bool): use version without stereochemistry
+        plusplus (bool): use plusplus version
+        diskMargin (float): the disk space margin to leave free
+    """
+
+    DEFAULT_DIR = os.path.join(Path.home(), ".Papyrus")
 
     def __init__(
-            self,
-            data_dir : str = DEFAULT_DIR,
-            version : str = 'latest',
-            descriptors : list = tuple(),
-            stereo : bool = False,
-            plus_only: bool = True,
-            disk_margin : float = 0.01,
+        self,
+        data_dir: str = DEFAULT_DIR,
+        version: str = "latest",
+        descriptors: str | list[str] | None = None,
+        stereo: bool = False,
+        disk_margin: float = 0.01,
+        plus_only: bool = True,
     ):
-        """
-        Create new instance of Papyrus dataset. See `papyrus_filter` and `Papyrus.download` and `Papyrus.getData` for more details.
+        """Create new instance of Papyrus dataset. See `papyrus_filter` and
+        `Papyrus.download` and `Papyrus.getData` for more details.
 
         Args:
-            data_dir: storage directory for Papyrus database and the extracted data files
-            version: Papyrus database version
-            descriptors: descriptors to download if not already present
-            stereo: include stereochemistry in the database
-            disk_margin: the disk space margin to leave free
+            data_dir (str):
+                storage directory for Papyrus database and the extracted data
+            version (str):
+                Papyrus database version
+            descriptors (str, list, None):
+                descriptors to download if not already present (set to 'all' for
+                all descriptors, otherwise a list of descriptor names, see
+                https://github.com/OlivierBeq/Papyrus-scripts)
+            stereo (str):
+                include stereochemistry in the database
+            disk_margin (float):
+                the disk space margin to leave free
+            plus_only (bool):
+                use only plusplus version, only high quality data
         """
-        self.data_dir = data_dir
+        self.dataDir = data_dir
         self.version = version
         self.descriptors = descriptors
         self.stereo = stereo
         self.nostereo = not self.stereo
         self.plusplus = plus_only
-        self.disk_margin = disk_margin
+        self.diskMargin = disk_margin
 
     def download(self):
-        """
-        Download Papyrus database with the required information. Only newly requested data is downloaded.
+        """Download Papyrus database with the required information.
 
-        Returns:
-            `None`
+        Only newly requested data is downloaded. Remove the files if you want to
+        reload the data completely.
         """
-
-        os.makedirs(self.data_dir, exist_ok=True)
+        os.makedirs(self.dataDir, exist_ok=True)
         download_papyrus(
-            outdir=self.data_dir,
+            outdir=self.dataDir,
             version=self.version,
             descriptors=self.descriptors,
             stereo=self.stereo,
             nostereo=self.nostereo,
-            disk_margin=self.disk_margin,
+            disk_margin=self.diskMargin,
             only_pp=self.plusplus,
         )
 
     def getData(
-            self,
-            acc_keys: List[str],
-            quality: str,
-            activity_types: Union[List[str], str] = 'all',
-            output_dir: str = None,
-            name : str = None,
-            drop_duplicates: bool = False,
-            chunk_size : int = 1e5,
-            use_existing : bool = True,
-    ):
-        """
-        Get the data from the Papyrus database as a `DataSetTSV` instance.
+        self,
+        acc_keys: list[str],
+        quality: str,
+        activity_types: list[str] | str = "all",
+        output_dir: Optional[str] = None,
+        name: Optional[str] = None,
+        drop_duplicates: bool = False,
+        chunk_size: int = 1e5,
+        use_existing: bool = True,
+        **kwargs
+    ) -> MoleculeTable:
+        """Get the data from the Papyrus database as a `DataSetTSV` instance.
 
         Args:
-            acc_keys: protein accession keys
-            quality: desired minimum quality of the dataset
-            activity_types: list of activity types to include in the dataset
-            output_dir: path to the directory where the data set will be stored
-            name: name of the dataset (this is the prefix of the generated .tsv file)
-            drop_duplicates: remove duplicates after filtering
-            chunk_size: data is read in chunks of this size (see `papyrus_filter`)
-            use_existing: if the data is already present, use it instead of extracting it again
+            acc_keys (list): protein accession keys
+            quality (str): desired minimum quality of the dataset
+            activity_types (list, str): list of activity types to include in the dataset
+            output_dir (str): path to the directory where the data set will be stored
+            name (str): name of the dataset (the prefix of the generated .tsv file)
+            drop_duplicates (bool): remove duplicates after filtering
+            chunk_size (int): data is read in chunks of this size (see `papyrus_filter`)
+            use_existing (bool): use existing if available
+            kwargs: additional keyword arguments passed to `MoleculeTable.fromTableFile`
+
         Returns:
-
+            MolculeTable: the filtered data set
         """
-
         self.download()
-        output_dir = output_dir or self.data_dir
+        output_dir = output_dir or self.dataDir
         if not os.path.exists(output_dir):
             raise ValueError(f"Output directory '{output_dir}' does not exist.")
-        data, path =  papyrus_filter(
+        data, path = papyrus_filter(
             acc_key=acc_keys,
             quality=quality,
             outdir=output_dir,
@@ -106,14 +125,30 @@ class Papyrus:
             use_existing=use_existing,
             stereo=self.stereo,
             plusplus=self.plusplus,
-            papyrus_dir=self.data_dir,
+            papyrus_dir=self.dataDir,
         )
-        return MoleculeTable.fromTableFile(name, path, store_dir=output_dir)
+        return MoleculeTable.fromTableFile(name, path, store_dir=output_dir, **kwargs)
 
-    def getProteinData(self, acc_keys: List[str], output_dir: str = None, name : str = None,
-            use_existing : bool = True):
+    def getProteinData(
+        self,
+        acc_keys: list[str],
+        output_dir: Optional[str] = None,
+        name: Optional[str] = None,
+        use_existing: bool = True,
+    ) -> pd.DataFrame:
+        """Get the protein data from the Papyrus database.
+
+        Args:
+            acc_keys (list): protein accession keys
+            output_dir (str): path to the directory where the data set will be stored
+            name (str): name of the dataset (the prefix of the generated .tsv file)
+            use_existing (bool): use existing if available
+
+        Returns:
+            pd.DataFrame: the protein data
+        """
         self.download()
-        output_dir = output_dir or self.data_dir
+        output_dir = output_dir or self.dataDir
         if not os.path.exists(output_dir):
             raise ValueError(f"Output directory '{output_dir}' does not exist.")
         path = os.path.join(output_dir, f"{name or os.path.basename(output_dir)}.tsv")
@@ -121,7 +156,9 @@ class Papyrus:
             return pd.read_table(path)
         else:
             protein_data = papyrus_scripts.read_protein_set(version=self.version)
-            protein_data["accession"] = protein_data["target_id"].apply(lambda x: x.split("_")[0])
+            protein_data["accession"] = protein_data["target_id"].apply(
+                lambda x: x.split("_")[0]
+            )
             targets = protein_data[protein_data.accession.isin(acc_keys)]
             targets.to_csv(path, sep="\t", header=True, index=False)
             return targets
