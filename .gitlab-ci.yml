@@ -9,7 +9,7 @@ stages:
    stage: test
    before_script:
       - python --version  # For debugging python version
-      - nvcc --version # For debudding cuda version
+      - nvidia-smi  # For debudding cuda version
       - wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
       - wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
       - export PATH=$PATH:$PWD/mafft-linux64/mafftdir/bin/:$PWD
