@@ -54,6 +54,15 @@ class PyBoostModel(QSPRModel):
                 if it exists, otherwise a new instance of alg is created
         """
         super().__init__(base_dir, GradientBoosting, data, name, parameters, autoload)
+        if self.task == ModelTasks.MULTITASK_MIXED:
+            raise ValueError(
+                "MultiTask with a mix of classification and regression tasks "
+                "is not supported for pyboost models."
+            )
+        if self.task == ModelTasks.MULTITASK_MULTICLASS:
+            raise NotImplementedError(
+                "Multi-task multi-class is not supported for pyboost models."
+            )
 
     @property
     def supportsEarlyStopping(self) -> bool:
