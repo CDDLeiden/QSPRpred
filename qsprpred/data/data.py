@@ -22,6 +22,7 @@ from ..logs import logger
 from ..models.tasks import TargetTasks
 from ..utils.inspect import import_class
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
+from .utils.datafilters import DuplicateFilter
 from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -367,7 +368,9 @@ class PandasDataSet(DataSet):
 
         return pd.concat(results, axis=0)
 
-    def transform(self, targets: list, transformer: Callable, addAs: Optional[list] = None):
+    def transform(
+        self, targets: list, transformer: Callable, addAs: Optional[list] = None
+    ):
         """Transform the data frame (or its part) using a list of transformers.
 
         Each transformer is a function that takes the data frame (or a subset of it as
@@ -400,9 +403,21 @@ class PandasDataSet(DataSet):
         of the `MoleculeTable`."""
         df_filtered = None
         for table_filter in table_filters:
-            df_filtered = table_filter(self.df)
-        if df_filtered is not None:
-            self.df = df_filtered.copy()
+            if len(self.df) == 0:
+                logger.warning("Dataframe is empty")
+            if table_filter.__class__.__name__ == "CategoryFilter":
+                df_filtered = table_filter(self.df)
+            elif table_filter.__class__.__name__ == "DuplicateFilter":
+                descriptors = self.getDescriptors()
+                if len(descriptors.columns) == 0:
+                    logger.warning(
+                        "Removing duplicates based on descriptors does not \
+                                    work if there are no descriptors"
+                    )
+                else: 
+                    df_filtered = table_filter(self.df, descriptors)
+            if df_filtered is not None:
+                self.df = df_filtered.copy()
 
     def save(self):
         """Save the data frame to disk and all associated files.
@@ -784,7 +799,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
     def addCustomDescriptors(
         self,
         calculator: "CustomDescriptorsCalculator",  # noqa: F821
-        recalculate: bool = False
+        recalculate: bool = False,
+        **kwargs,
     ):
         """
         Add custom descriptors to the data frame using a `CustomDescriptorsCalculator`
@@ -796,6 +812,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             recalculate (bool): Whether to recalculate descriptors even if they are
                 already present in the data frame. If `False`, existing descriptors
                 are kept and no calculation takes place.
+            **kwargs: Additional keyword arguments to pass to the calculator.
         """
         if recalculate:
             self.dropDescriptors(calculator)
@@ -805,7 +822,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 "Use `recalculate=True` to overwrite them."
             )
             return
-        descriptors = calculator(self.df.index)
+        descriptors = calculator(self.df.index, **kwargs)
         descriptors[self.indexCols] = self.df[self.indexCols]
         self.attachDescriptors(calculator, descriptors, self.indexCols)
 
@@ -1112,8 +1129,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             bool: Whether the data frame contains scaffold groups.
         """
         return (
-            len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")])
-            > 0
+            len([col
+                 for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
         )
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
@@ -1291,10 +1308,8 @@ class TargetProperty:
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{
-                    k: TargetTasks[v] if k == "task" else v
-                    for k, v in d.items()
-                }
+                **{k: TargetTasks[v] if k == "task" else v
+                   for k, v in d.items()}
             )
         else:
             return TargetProperty(**d)
@@ -1314,10 +1329,8 @@ class TargetProperty:
         if task_from_str:
             return [
                 TargetProperty(
-                    **{
-                        k: TargetTasks[v] if k == "task" else v
-                        for k, v in d.items()
-                    }
+                    **{k: TargetTasks[v] if k == "task" else v
+                       for k, v in d.items()}
                 ) for d in _list
             ]
         else:
@@ -1834,7 +1847,8 @@ class QSPRDataset(MoleculeTable):
         self,
         calculator: "CustomDescriptorsCalculator",  # noqa: F821
         recalculate: bool = False,
-        featurize: bool = True
+        featurize: bool = True,
+        **kwargs
     ):
         """Add custom descriptors to the data set.
 
@@ -1848,8 +1862,9 @@ class QSPRDataset(MoleculeTable):
                 are already present. Defaults to `False`.
             featurize (bool, optional): whether to featurize the data set splits
                 after adding descriptors. Defaults to `True`.
+            kwargs: additional keyword arguments to pass to the calculator
         """
-        super().addCustomDescriptors(calculator, recalculate)
+        super().addCustomDescriptors(calculator, recalculate, **kwargs)
         self.featurize(update_splits=featurize)
 
     def addDescriptors(
@@ -1985,9 +2000,9 @@ class QSPRDataset(MoleculeTable):
             self.X_ind = self.X.drop(self.X.index)
             self.y_ind = self.y.drop(self.y.index)
 
-    def loadDescriptorsToSplits(self,
-                                shuffle: bool = True,
-                                random_state: Optional[int] = None):
+    def loadDescriptorsToSplits(
+        self, shuffle: bool = True, random_state: Optional[int] = None
+    ):
         """Load all available descriptors into the train and test splits.
 
         If no descriptors are available, an exception will be raised.
@@ -2128,7 +2143,7 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: Optional[list] = None,
+        datafilters: list = [DuplicateFilter(keep=True)],
         split=None,
         fold=None,
         feature_calculators: Optional[list] = None,
@@ -2274,7 +2289,7 @@ class QSPRDataset(MoleculeTable):
         """
         # do some checks and give split tha data set if required
         self.checkFeatures()
-        if hasattr(split, 'setDataSet'):
+        if hasattr(split, "setDataSet"):
             split.setDataSet(self)
         # choose the fold generator
         if split is None and not self.fold_generator:
