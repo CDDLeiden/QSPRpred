@@ -1,8 +1,8 @@
 """QSPRpred implementation of Chemprop model."""
 
 import os
-from logging import Logger
-from typing import Any, Dict, List, Optional
+from copy import deepcopy
+from typing import Any
 
 import chemprop
 import numpy as np
@@ -10,7 +10,7 @@ import pandas as pd
 import torch
 from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
-from tqdm import trange
+from tqdm import tqdm, trange
 
 from ...data.data import QSPRDataset
 from ...models.interfaces import QSPRModel
@@ -94,6 +94,7 @@ class MoleculeModel(chemprop.models.MoleculeModel):
             obj, chemprop.models.MoleculeModel
         ), "obj is not a chemprop.models.MoleculeModel instance."
         obj.__class__ = cls
+        obj.args = None
         obj.setScalers()
         return obj
 
@@ -209,7 +210,217 @@ class Chemprop(QSPRModel):
         if self.chempropLogger is not None:
             debug, info = self.chempropLogger.debug, self.chempropLogger.info
         else:
-            pass
+            debug = info = print
+
+        data = self.convertToMoleculeDataset(X, y)
+
+        info("temp")
+        args = estimator.args
+
+        # Set pytorch seed for random initial weights
+        torch.manual_seed(estimator.args.pytorch_seed)
+
+        # Split data
+        debug(f"Splitting data with seed {args.seed}")
+
+        # Set pytorch seed for random initial weights
+        torch.manual_seed(args.pytorch_seed)
+
+        # set task names
+        args.task_names = [prop.name for prop in self.data.targetProperties]
+
+        # Split data
+        debug(f"Splitting data with seed {args.seed}")
+        train_data, val_data, _ = chemprop.data.utils.split_data(
+            data=data,
+            split_type=args.split_type,
+            sizes=args.split_sizes if args.split_sizes[2] == 0 else [0.9, 0.1, 0],
+            key_molecule_index=args.split_key_molecule,
+            seed=args.seed,
+            num_folds=args.num_folds,
+            args=args,
+            logger=self.chempropLogger
+        )
+
+        # Get number of molecules per class in training data
+        if args.dataset_type == "classification":
+            class_sizes = chemprop.data.utils.get_class_sizes(data)
+            debug("Class sizes")
+            for i, task_class_sizes in enumerate(class_sizes):
+                debug(
+                    f"{args.task_names[i]} "
+                    f"{', '.join(f'{cls}: {size * 100:.2f}%' for cls, size in enumerate(task_class_sizes))}"
+                )
+            train_class_sizes = chemprop.data.utils.get_class_sizes(
+                train_data, proportion=False
+            )
+            args.train_class_sizes = train_class_sizes
+
+        # Fit feature scaler on train data and scale data
+        if args.features_scaling:
+            features_scaler = train_data.normalize_features(replace_nan_token=0)
+            val_data.normalize_features(features_scaler)
+        else:
+            features_scaler = None
+
+        # Fit atom descriptor scaler on train data and scale data
+        if args.atom_descriptor_scaling and args.atom_descriptors is not None:
+            atom_descriptor_scaler = train_data.normalize_features(
+                replace_nan_token=0, scale_atom_descriptors=True
+            )
+            val_data.normalize_features(
+                atom_descriptor_scaler, scale_atom_descriptors=True
+            )
+        else:
+            atom_descriptor_scaler = None
+
+        # Fit bond descriptor scaler on train data and scale data
+        if args.bond_descriptor_scaling and args.bond_descriptors is not None:
+            bond_descriptor_scaler = train_data.normalize_features(
+                replace_nan_token=0, scale_bond_descriptors=True
+            )
+            val_data.normalize_features(
+                bond_descriptor_scaler, scale_bond_descriptors=True
+            )
+        else:
+            bond_descriptor_scaler = None
+
+        # Get length of training data
+        args.train_data_size = len(train_data)
+
+        debug(
+            f"Total size = {len(data):,} | "
+            f"train size = {len(train_data):,} | val size = {len(val_data):,}"
+        )
+
+        # Initialize scaler and standard scale training targets (regression only)
+        if args.dataset_type == "regression":
+            debug("Fitting scaler")
+            scaler = train_data.normalize_targets()
+            atom_bond_scaler = None
+        else:
+            scaler = None
+            atom_bond_scaler = None
+
+        # attach scalers to estimator
+        estimator.setScalers(
+            scaler, features_scaler, atom_descriptor_scaler, bond_descriptor_scaler,
+            atom_bond_scaler
+        )
+
+        # Get loss function
+        loss_func = chemprop.train.loss_functions.get_loss_func(args)
+
+        # Automatically determine whether to cache
+        if len(data) <= args.cache_cutoff:
+            chemprop.data.set_cache_graph(True)
+            num_workers = 0
+        else:
+            chemprop.data.set_cache_graph(False)
+            num_workers = args.num_workers
+
+        # Create data loaders
+        train_data_loader = chemprop.data.MoleculeDataLoader(
+            dataset=train_data,
+            batch_size=args.batch_size,
+            num_workers=num_workers,
+            class_balance=args.class_balance,
+            shuffle=True,
+            seed=args.seed
+        )
+        val_data_loader = chemprop.data.MoleculeDataLoader(
+            dataset=val_data, batch_size=args.batch_size, num_workers=num_workers
+        )
+
+        if args.class_balance:
+            debug(
+                f"With class_balance, effective train size = {train_data_loader.iter_size:,}"
+            )
+
+        # Tensorboard writer
+        save_dir = os.path.join(self.outDir, "temp")
+        os.makedirs(save_dir)
+        try:
+            writer = SummaryWriter(log_dir=save_dir)
+        except:  # noqa: E722
+            writer = SummaryWriter(logdir=save_dir)
+
+        debug(
+            f"Number of parameters = {chemprop.nn_utils.param_count_all(estimator):,}"
+        )
+
+        if args.cuda:
+            debug("Moving model to cuda")
+        estimator = estimator.to(args.device)
+
+        # Optimizers
+        optimizer = chemprop.utils.build_optimizer(estimator, args)
+
+        # Learning rate schedulers
+        scheduler = chemprop.utils.build_lr_scheduler(optimizer, args)
+
+        # Run training
+        best_score = float("inf") if args.minimize_score else -float("inf")
+        best_epoch, n_iter = 0, 0
+        for epoch in trange(args.epochs):
+            debug(f"Epoch {epoch}")
+            n_iter = chemprop.train.train(
+                model=estimator,
+                data_loader=train_data_loader,
+                loss_func=loss_func,
+                optimizer=optimizer,
+                scheduler=scheduler,
+                args=args,
+                n_iter=n_iter,
+                atom_bond_scaler=atom_bond_scaler,
+                logger=self.chempropLogger,
+                writer=writer
+            )
+            if isinstance(scheduler, ExponentialLR):
+                scheduler.step()
+            val_scores = chemprop.train.evaluate(
+                model=estimator,
+                data_loader=val_data_loader,
+                num_tasks=args.num_tasks,
+                metrics=args.metrics,
+                dataset_type=args.dataset_type,
+                scaler=scaler,
+                atom_bond_scaler=atom_bond_scaler,
+                logger=self.chempropLogger
+            )
+
+            for metric, scores in val_scores.items():
+                # Average validation score\
+                mean_val_score = chemprop.utils.multitask_mean(scores, metric=metric)
+                debug(f"Validation {metric} = {mean_val_score:.6f}")
+                writer.add_scalar(f"validation_{metric}", mean_val_score, n_iter)
+
+                if args.show_individual_scores:
+                    # Individual validation scores
+                    for task_name, val_score in zip(args.task_names, scores):
+                        debug(f"Validation {task_name} {metric} = {val_score:.6f}")
+                        writer.add_scalar(
+                            f"validation_{task_name}_{metric}", val_score, n_iter
+                        )
+
+            # Save model checkpoint if improved validation score
+            mean_val_score = chemprop.utils.multitask_mean(
+                val_scores[args.metric], metric=args.metric
+            )
+            if args.minimize_score and mean_val_score < best_score or \
+                    not args.minimize_score and mean_val_score > best_score:
+                best_score, best_epoch = mean_val_score, epoch
+                best_estimator = deepcopy(estimator)
+            # Evaluate on test set using model with best validation score
+            info(
+                f"Model best validation {args.metric} = {best_score:.6f} on epoch {best_epoch}"
+            )
+
+            writer.close()
+
+            if early_stopping:
+                return best_estimator, best_epoch
+            return best_estimator
 
     def predict(
         self,
@@ -233,7 +444,29 @@ class Chemprop(QSPRModel):
                 2D array containing the predictions, where each row corresponds
                 to a sample in the data and each column to a target property
         """
-        raise NotImplementedError("Not implemented yet.")
+        X = self.convertToMoleculeDataset(X)
+
+        if self.estimator.args.features_scaling:
+            X.normalize_features(self.estimator.features_scaler)
+        if self.estimator.args.atom_descriptor_scaling and self.estimator.args.atom_descriptors is not None:
+            X.normalize_features(
+                self.estimator.atom_descriptor_scaler, scale_atom_descriptors=True
+            )
+        if self.estimator.args.bond_descriptor_scaling and self.estimator.args.bond_descriptors_size > 0:
+            X.normalize_features(
+                self.estimator.bond_descriptor_scaler, scale_bond_descriptors=True
+            )
+
+        X_loader = chemprop.data.MoleculeDataLoader(dataset=X, batch_size=500)
+
+        preds = chemprop.train.predict(
+            model=estimator,
+            data_loader=X_loader,
+            scaler=estimator.scaler,
+            disable_progress_bar=True
+        )
+
+        return preds
 
     def predictProba(
         self,
@@ -319,270 +552,113 @@ class Chemprop(QSPRModel):
             self.estimator.args
         )
 
-    def run_training(
-        args: chemprop.args.TrainArgs,
-        data: chemprop.data.MoleculeDataset,
-        logger: Optional[Logger] = None
-    ) -> Dict[str, List[float]]:
+    def convertToMoleculeDataset(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None
+    ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
+        """Convert the given data matrix and target matrix to chemprop Molecule Dataset.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix
+            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix
+
+        Returns:
+                data matrix and/or target matrix in np.ndarray format
         """
-        Loads data, trains a Chemprop model, and returns test scores for the model checkpoint with the highest validation score.
-
-        :param args: A :class:`~chemprop.args.TrainArgs` object containing arguments for
-                    loading data and training the Chemprop model.
-        :param data: A :class:`~chemprop.data.MoleculeDataset` containing the data.
-        :param logger: A logger to record output.
-        :return: A dictionary mapping each metric in :code:`args.metrics` to a list of values for each task.
-
-        """
-        if logger is not None:
-            debug, info = logger.debug, logger.info
+        if y is not None:
+            X, y = self.convertToNumpy(X, y)
         else:
-            debug = info = print
-
-        # Set pytorch seed for random initial weights
-        torch.manual_seed(args.pytorch_seed)
-
-        # Split data
-        debug(f"Splitting data with seed {args.seed}")
-        train_data, val_data, _ = chemprop.data.utils.split_data(
-            data=data,
-            split_type=args.split_type,
-            sizes=args.split_sizes,
-            key_molecule_index=args.split_key_molecule,
-            seed=args.seed,
-            num_folds=args.num_folds,
-            args=args,
-            logger=logger
-        )
-
-        # Get number of molecules per class in training data
-        if args.dataset_type == "classification":
-            class_sizes = chemprop.data.utils.get_class_sizes(data)
-            debug("Class sizes")
-            for i, task_class_sizes in enumerate(class_sizes):
-                debug(
-                    f"{args.task_names[i]} "
-                    f"{', '.join(f'{cls}: {size * 100:.2f}%' for cls, size in enumerate(task_class_sizes))}"
-                )
-            train_class_sizes = chemprop.data.utils.get_class_sizes(
-                train_data, proportion=False
+            X = self.convertToNumpy(X)
+            return chemprop.data.get_data_from_smiles(
+                smiles=X[:, 0],
+                skip_invalid_smiles=False,
+                features_generator=self.parameters.features_generator
             )
-            args.train_class_sizes = train_class_sizes
 
-        # Fit feature scaler on train data and scale data
-        if args.features_scaling:
-            features_scaler = train_data.normalize_features(replace_nan_token=0)
-            val_data.normalize_features(features_scaler)
+        # Load features
+        if self.parameters.features_path is not None:
+            features_data = []
+            for feat_path in self.parameters.features_path:
+                features_data.append(
+                    chemprop.features.load_features(feat_path)
+                )  # each is num_data x num_features
+            features_data = np.concatenate(features_data, axis=1)
         else:
-            features_scaler = None
+            features_data = None
 
-        # Fit atom descriptor scaler on train data and scale data
-        if args.atom_descriptor_scaling and args.atom_descriptors is not None:
-            atom_descriptor_scaler = train_data.normalize_features(
-                replace_nan_token=0, scale_atom_descriptors=True
-            )
-            val_data.normalize_features(
-                atom_descriptor_scaler, scale_atom_descriptors=True
+        # Load constraints
+        if self.parameters.constraints_path is not None:
+            constraints_data, raw_constraints_data = chemprop.data.get_constraints(
+                path=self.parameters.constraints_path,
+                target_columns=self.parameters.target_columns,
+                save_raw_data=self.parameters.save_smiles_splits
             )
         else:
-            atom_descriptor_scaler = None
+            constraints_data = None
+            raw_constraints_data = None
 
-        # Fit bond descriptor scaler on train data and scale data
-        if args.bond_descriptor_scaling and args.bond_descriptors is not None:
-            bond_descriptor_scaler = train_data.normalize_features(
-                replace_nan_token=0, scale_bond_descriptors=True
-            )
-            val_data.normalize_features(
-                bond_descriptor_scaler, scale_bond_descriptors=True
-            )
-        else:
-            bond_descriptor_scaler = None
-
-        # Get length of training data
-        args.train_data_size = len(train_data)
-
-        debug(
-            f"Total size = {len(data):,} | "
-            f"train size = {len(train_data):,} | val size = {len(val_data):,}"
-        )
-
-        if len(val_data) == 0:
-            raise ValueError(
-                "The validation data split is empty. During normal chemprop training (non-sklearn functions), \
-                a validation set is required to conduct early stopping according to the selected evaluation metric. This \
-                may have occurred because validation data provided with `--separate_val_path` was empty or contained only invalid molecules."
-            )
-
-        # Initialize scaler and scale training targets by subtracting mean and dividing standard deviation (regression only)
-        if args.dataset_type == "regression":
-            debug("Fitting scaler")
-            if args.is_atom_bond_targets:
-                scaler = None
-                atom_bond_scaler = train_data.normalize_atom_bond_targets()
-            else:
-                scaler = train_data.normalize_targets()
-                atom_bond_scaler = None
-        else:
-            scaler = None
-            atom_bond_scaler = None
-
-        # Get loss function
-        loss_func = chemprop.train.loss_functions.get_loss_func(args)
-
-        # Automatically determine whether to cache
-        if len(data) <= args.cache_cutoff:
-            chemprop.data.set_cache_graph(True)
-            num_workers = 0
-        else:
-            chemprop.data.set_cache_graph(False)
-            num_workers = args.num_workers
-
-        # Create data loaders
-        train_data_loader = chemprop.data.MoleculeDataLoader(
-            dataset=train_data,
-            batch_size=args.batch_size,
-            num_workers=num_workers,
-            class_balance=args.class_balance,
-            shuffle=True,
-            seed=args.seed
-        )
-        val_data_loader = chemprop.data.MoleculeDataLoader(
-            dataset=val_data, batch_size=args.batch_size, num_workers=num_workers
-        )
-
-        if args.class_balance:
-            debug(
-                f"With class_balance, effective train size = {train_data_loader.iter_size:,}"
-            )
-
-        # Train ensemble of models
-        for model_idx in range(args.ensemble_size):
-            # Tensorboard writer
-            save_dir = os.path.join(args.save_dir, f"model_{model_idx}")
-            os.makedirs(save_dir)
+        # Load custom atom or bond features
+        atom_features = None
+        atom_descriptors = None
+        if self.parameters.atom_descriptors is not None:
             try:
-                writer = SummaryWriter(log_dir=save_dir)
-            except:  # noqa: E722
-                writer = SummaryWriter(logdir=save_dir)
-
-            # Load/build model
-            if args.checkpoint_paths is not None:
-                debug(
-                    f"Loading model {model_idx} from {args.checkpoint_paths[model_idx]}"
+                descriptors = chemprop.features.load_valid_atom_or_bond_features(
+                    self.parameters.atom_descriptors_path, X[:, 0]
                 )
-                model = chemprop.utils.load_checkpoint(
-                    args.checkpoint_paths[model_idx], logger=logger
-                )
-            else:
-                debug(f"Building model {model_idx}")
-                model = chemprop.models.MoleculeModel(args)
-
-            # Optionally, overwrite weights:
-            if args.checkpoint_frzn is not None:
-                debug(f"Loading and freezing parameters from {args.checkpoint_frzn}.")
-                model = chemprop.utils.load_frzn_model(
-                    model=model,
-                    path=args.checkpoint_frzn,
-                    current_args=args,
-                    logger=logger
+            except Exception as e:
+                raise ValueError(
+                    f"Failed to load or validate custom atomic descriptors or features: {e}"
                 )
 
-            debug(model)
+            if self.paramters.atom_descriptors == "feature":
+                atom_features = descriptors
+            elif self.parameters.atom_descriptors == "descriptor":
+                atom_descriptors = descriptors
 
-            if args.checkpoint_frzn is not None:
-                debug(
-                    f"Number of unfrozen parameters = {chemprop.nn_utils.param_count(model):,}"
+        bond_features = None
+        bond_descriptors = None
+        if self.parameters.bond_descriptors is not None:
+            try:
+                descriptors = chemprop.featuresload_valid_atom_or_bond_features(
+                    self.paramters.bond_descriptors_path, X[:, 0]
                 )
-                debug(
-                    f"Total number of parameters = {chemprop.nn_utils.param_count_all(model):,}"
-                )
-            else:
-                debug(
-                    f"Number of parameters = {chemprop.nn_utils.param_count_all(model):,}"
-                )
-
-            if args.cuda:
-                debug("Moving model to cuda")
-            model = model.to(args.device)
-
-            # Ensure that model is saved in correct location for evaluation if 0 epochs
-            chemprop.utils.save_checkpoint(
-                os.path.join(save_dir, chemprop.constants.MODEL_FILE_NAME), model,
-                scaler, features_scaler, atom_descriptor_scaler, bond_descriptor_scaler,
-                atom_bond_scaler, args
-            )
-
-            # Optimizers
-            optimizer = chemprop.utils.build_optimizer(model, args)
-
-            # Learning rate schedulers
-            scheduler = chemprop.utils.build_lr_scheduler(optimizer, args)
-
-            # Run training
-            best_score = float("inf") if args.minimize_score else -float("inf")
-            best_epoch, n_iter = 0, 0
-            for epoch in trange(args.epochs):
-                debug(f"Epoch {epoch}")
-                n_iter = chemprop.train.train(
-                    model=model,
-                    data_loader=train_data_loader,
-                    loss_func=loss_func,
-                    optimizer=optimizer,
-                    scheduler=scheduler,
-                    args=args,
-                    n_iter=n_iter,
-                    atom_bond_scaler=atom_bond_scaler,
-                    logger=logger,
-                    writer=writer
-                )
-                if isinstance(scheduler, ExponentialLR):
-                    scheduler.step()
-                val_scores = chemprop.train.evaluate(
-                    model=model,
-                    data_loader=val_data_loader,
-                    num_tasks=args.num_tasks,
-                    metrics=args.metrics,
-                    dataset_type=args.dataset_type,
-                    scaler=scaler,
-                    atom_bond_scaler=atom_bond_scaler,
-                    logger=logger
+            except Exception as e:
+                raise ValueError(
+                    f"Failed to load or validate custom bond descriptors or features: {e}"
                 )
 
-                for metric, scores in val_scores.items():
-                    # Average validation score\
-                    mean_val_score = chemprop.utils.multitask_mean(
-                        scores, metric=metric
-                    )
-                    debug(f"Validation {metric} = {mean_val_score:.6f}")
-                    writer.add_scalar(f"validation_{metric}", mean_val_score, n_iter)
+            if self.parameters.bond_descriptors == "feature":
+                bond_features = descriptors
+            elif self.parameters.bond_descriptors == "descriptor":
+                bond_descriptors = descriptors
 
-                    if args.show_individual_scores:
-                        # Individual validation scores
-                        for task_name, val_score in zip(args.task_names, scores):
-                            debug(f"Validation {task_name} {metric} = {val_score:.6f}")
-                            writer.add_scalar(
-                                f"validation_{task_name}_{metric}", val_score, n_iter
-                            )
+        # Create MoleculeDataset
+        data = chemprop.data.MoleculeDataset(
+            [
+                chemprop.data.MoleculeDatapoint(
+                    smiles=smiles,
+                    targets=targets,
+                    features_generator=self.parameters.features_generator,
+                    features=features_data[i] if features_data is not None else None,
+                    atom_features=atom_features[i]
+                    if atom_features is not None else None,
+                    atom_descriptors=atom_descriptors[i]
+                    if atom_descriptors is not None else None,
+                    bond_features=bond_features[i]
+                    if bond_features is not None else None,
+                    bond_descriptors=bond_descriptors[i]
+                    if bond_descriptors is not None else None,
+                    constraints=constraints_data[i]
+                    if constraints_data is not None else None,
+                    raw_constraints=raw_constraints_data[i]
+                    if raw_constraints_data is not None else None,
+                    overwrite_default_atom_features=self.parameters.
+                    overwrite_default_atom_features,
+                    overwrite_default_bond_features=self.parameters.
+                    overwrite_default_bond_features
+                ) for i, (smiles, targets) in tqdm(enumerate(zip(X, y)), total=len(X))
+            ]
+        )
 
-                # Save model checkpoint if improved validation score
-                mean_val_score = chemprop.utils.multitask_mean(
-                    val_scores[args.metric], metric=args.metric
-                )
-                if args.minimize_score and mean_val_score < best_score or \
-                        not args.minimize_score and mean_val_score > best_score:
-                    best_score, best_epoch = mean_val_score, epoch
-                    chemprop.utils.save_checkpoint(
-                        os.path.join(save_dir, chemprop.constants.MODEL_FILE_NAME),
-                        model, scaler, features_scaler, atom_descriptor_scaler,
-                        bond_descriptor_scaler, atom_bond_scaler, args
-                    )
-
-            # Evaluate on test set using model with best validation score
-            info(
-                f"Model {model_idx} best validation {args.metric} = {best_score:.6f} on epoch {best_epoch}"
-            )
-            return chemprop.utils.load_checkpoint(
-                os.path.join(save_dir, chemprop.constants.MODEL_FILE_NAME),
-                device=args.device,
-                logger=logger
-            )
+        return data
