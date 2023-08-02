@@ -110,6 +110,7 @@ class MoleculeModel(chemprop.models.MoleculeModel):
         """
         train_args = chemprop.args.TrainArgs()
         train_args.from_dict(args, skip_unsettable=True)
+        train_args.process_args()
         return train_args
 
 
@@ -213,8 +214,6 @@ class Chemprop(QSPRModel):
             debug = info = print
 
         data = self.convertToMoleculeDataset(X, y)
-
-        info("temp")
         args = estimator.args
 
         # Set pytorch seed for random initial weights
@@ -237,7 +236,6 @@ class Chemprop(QSPRModel):
             sizes=args.split_sizes if args.split_sizes[2] == 0 else [0.9, 0.1, 0],
             key_molecule_index=args.split_key_molecule,
             seed=args.seed,
-            num_folds=args.num_folds,
             args=args,
             logger=self.chempropLogger
         )
@@ -249,7 +247,7 @@ class Chemprop(QSPRModel):
             for i, task_class_sizes in enumerate(class_sizes):
                 debug(
                     f"{args.task_names[i]} "
-                    f"{', '.join(f'{cls}: {size * 100:.2f}%' for cls, size in enumerate(task_class_sizes))}"
+                    f"{', '.join(f'{cls}: {size * 100:.2f}%' for cls, size in enumerate(task_class_sizes))}"  # noqa: E501
                 )
             train_class_sizes = chemprop.data.utils.get_class_sizes(
                 train_data, proportion=False
@@ -334,7 +332,8 @@ class Chemprop(QSPRModel):
 
         if args.class_balance:
             debug(
-                f"With class_balance, effective train size = {train_data_loader.iter_size:,}"
+                f"With class_balance, \
+                effective train size = {train_data_loader.iter_size:,}"
             )
 
         # Tensorboard writer
@@ -413,7 +412,8 @@ class Chemprop(QSPRModel):
                 best_estimator = deepcopy(estimator)
             # Evaluate on test set using model with best validation score
             info(
-                f"Model best validation {args.metric} = {best_score:.6f} on epoch {best_epoch}"
+                f"Model best validation {args.metric} = {best_score:.6f} on epoch \
+                {best_epoch}"
             )
 
             writer.close()
@@ -507,6 +507,7 @@ class Chemprop(QSPRModel):
             object: initialized estimator instance
         """
         new_parameters = self.getParameters(params)
+        self.checkArgs(new_parameters)
         return self.alg(MoleculeModel.getTrainArgs(new_parameters))
 
     def loadEstimatorFromFile(self, params: dict | None = None) -> object:
@@ -530,6 +531,7 @@ class Chemprop(QSPRModel):
             loaded_params = chemprop.utils.load_args(path).as_dict()
             if params is not None:
                 loaded_params.update(params)
+            self.checkArgs(loaded_params)
             self.parameters = self.getParameters(loaded_params)
 
             # Set train args
@@ -662,3 +664,97 @@ class Chemprop(QSPRModel):
         )
 
         return data
+
+    @staticmethod
+    def checkArgs(args: chemprop.args.TrainArgs | dict):
+        """Check if the given arguments are valid.
+
+        Args:
+            args (chemprop.args.TrainArgs, dict): arguments to check
+        """
+        unused_common_args = [
+            "smiles_columns", "number_of_molecules", "checkpoint_dir",
+            "checkpoint_path", "checkpoint_paths", "gpu", "phase_features_path",
+            "max_data_size", "num_workers"
+        ]
+        unused_general_train_args = [
+            "data_path", "target_columns", "ignore_columns", "dataset_type",
+            "multiclass_num_classes", "separate_val_path", "separate_test_path",
+            "spectra_phase_mask_path", "data_weights_path", "target_weights",
+            "split_type", "split_key_molecule", "num_folds", "folds_file",
+            "val_fold_index", "test_fold_index", "crossval_index_dir",
+            "crossval_index_file", "extra_metrics", "save_dir", "save_smiles_split",
+            "test", "quiet", "log_frequency", "show_individual_scores", "cache_cutoff",
+            "save_preds", "resume_experiment"
+        ]
+        unused_model_train_args = [
+            "separate_val_features_path", "separate_test_features_path",
+            "separate_val_phase_features_path", "separate_test_phase_features_path",
+            "separate_val_atom_descriptors_path", "separate_test_atom_descriptors_path",
+            "separate_val_bond_features_path", "separate_test_bond_features_path",
+            "config_path", "ensemble_size", "aggregation", "aggregation_norm",
+            "reaction", "reaction_mode", "reaction_solvent"
+        ]
+
+        unused_training_train_args = ["frzn_ffn_layers", "freeze_first_only"]
+        if isinstance(args, dict):
+            # check if any key in args is in unused_common_args
+            set_unused_common_args = [key in unused_common_args for key in args.keys()]
+            if any(set_unused_common_args):
+                print(
+                    "Warning: unused common arguments sets: "
+                    f"{np.array(list(args.keys()))[set_unused_common_args]}"
+                )
+
+            # check if any key in args is in unused_general_train_args
+            set_unused_general_train_args = [
+                key in unused_general_train_args for key in args.keys()
+            ]
+            if any(set_unused_general_train_args):
+                print(
+                    "Warning: unused general train arguments sets: "
+                    f"{np.array(list(args.keys()))[set_unused_general_train_args]}"
+                )
+
+            # check if any key in args is in unused_model_train_args
+            set_unused_model_train_args = [
+                key in unused_model_train_args for key in args.keys()
+            ]
+
+            if any(set_unused_model_train_args):
+                print(
+                    "Warning: unused model train arguments sets: "
+                    f"{np.array(list(args.keys()))[set_unused_model_train_args]}"
+                )
+
+            # check if any key in args is in unused_training_train_args
+            set_unused_training_train_args = [
+                key in unused_training_train_args for key in args.keys()
+            ]
+
+            if any(set_unused_training_train_args):
+                print(
+                    "Warning: unused training train arguments sets:"
+                    f"{np.array(list(args.keys()))[set_unused_training_train_args]}"
+                )
+
+            # add data_path to args
+            args["data_path"] = ""
+
+            if "dataset_type" not in args.keys():
+                args["dataset_type"] = ""
+
+            args = chemprop.args.TrainArgs().from_dict(args, skip_unsettable=True)
+            args.process_args()
+
+        assert args.split_key_molecule == 0, (
+            "split_key_molecule must be 0, as QSPRpred does not support data with "
+            "multiple molecules, i.e. reactions."
+        )
+
+        assert args.split_type in [
+            "random", "scaffold_balanced", "random_with_repeated_smiles"
+        ], (
+            "split_type must be 'random', 'scaffold_balanced' or "
+            "random_with_repeated_smiles'."
+        )
