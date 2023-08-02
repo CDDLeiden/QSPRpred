@@ -85,15 +85,14 @@ class DuplicateFilter(DataFilter):
             df (pandas dataframe): dataframe to filter
             descriptors (pandas dataframe): dataframe containing descriptors
         """
-
         def group_duplicate_index(df) -> list[list[int]]:
             """Group indices of duplicate rows
-            
+
             From https://stackoverflow.com/a/46629623
-            
+
             Args:
                 a (numpy array): array of fingerprints
-            
+
             Returns:
                 list[list[int]]: list of lists of indices of duplicate rows
             """
@@ -103,16 +102,16 @@ class DuplicateFilter(DataFilter):
             b = a[sidx]
 
             # Get unique row mask
-            m = np.concatenate(([False], (b[1:] == b[:-1]).all(1), [False] ))
-            
+            m = np.concatenate(([False], (b[1:] == b[:-1]).all(1), [False]))
+
             # Get start and stop indices for each group of duplicates
             idx = np.flatnonzero(m[1:] != m[:-1])
-            
+
             # Get sorted indices
             I = df.index[sidx].tolist()
-            
-            # Return list of lists of indices of duplicate rows    
-            return [I[i:j] for i,j in zip(idx[::2],idx[1::2]+1)]
+
+            # Return list of lists of indices of duplicate rows
+            return [I[i:j] for i, j in zip(idx[::2], idx[1::2] + 1)]
 
         allrepeats = group_duplicate_index(descriptors)
 
@@ -133,11 +132,12 @@ class DuplicateFilter(DataFilter):
             )
             for repeat in allrepeats:
                 years = df.loc[repeat, self.year_name]
+                years = pd.to_numeric(years, errors="coerce")
                 if self.keep == "first":
                     tokeep = years.idxmin()  # Use the first occurance
                 else:
                     tokeep = years.idxmax()
-                repeat.remove(tokeep) # Remove the one to keep from the allrepeats list
+                repeat.remove(tokeep)  # Remove the one to keep from the allrepeats list
             df = df.drop(list(chain(*allrepeats)))
 
         return df
