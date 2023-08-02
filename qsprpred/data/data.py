@@ -22,7 +22,7 @@ from ..logs import logger
 from ..models.tasks import TargetTasks
 from ..utils.inspect import import_class
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
-from .utils.datafilters import DuplicateFilter
+from .utils.datafilters import RepeatsFilter
 from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -2097,7 +2097,7 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: list = [DuplicateFilter(keep=True)],
+        datafilters: list = [RepeatsFilter(keep=True)],
         split=None,
         fold=None,
         feature_calculators: Optional[list] = None,
