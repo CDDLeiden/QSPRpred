@@ -21,7 +21,7 @@ from ..logs.stopwatch import StopWatch
 from ..models.models import QSPRsklearn
 from ..models.tasks import TargetTasks
 from .data import QSPRDataset, TargetProperty
-from .utils.datafilters import CategoryFilter, DuplicateFilter
+from .utils.datafilters import CategoryFilter, RepeatsFilter
 from .utils.datasplitters import (
     ClusterSplit,
     ManualSplit,
@@ -171,7 +171,7 @@ class DataSetsMixIn(PathMixIn):
         feature_filters = [None, HighCorrelationFilter(0.9)]
         data_filters = [
             None,
-            DuplicateFilter(),
+            RepeatsFilter(),
             # FIXME: this needs to be made more general and not specific to one dataset
             # CategoryFilter(
             #     name="moka_ionState7.4",
@@ -788,7 +788,8 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
 class TestTargetProperty(TestCase):
     """Test the TargetProperty class."""
     def test_target_property(self):
-        """Check the TargetProperty class on target property creation and serialization."""
+        """Check the TargetProperty class on target property creation and serialization.
+        """
         def check_target_property(targetprop, name, task, original_name, th):
             # Check the target property creation consistency
             self.assertEqual(targetprop.name, name)
@@ -1105,7 +1106,7 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         df_cation = only_cation(self.getBigDF())
         self.assertTrue((df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
 
-    def test_Duplicatefilter(self):
+    def test_Repeatsfilter(self):
         """Test the duplicate filter, which drops rows with identical descriptors
         from dataset."""
         descriptor_names = [f"Descriptor_{i}" for i in range(3)]
@@ -1125,21 +1126,21 @@ class TestDataFilters(DataSetsMixIn, TestCase):
 
         # only warnings
         df_copy = copy.deepcopy(df)
-        dup_filter1 = DuplicateFilter(keep=True)
+        dup_filter1 = RepeatsFilter(keep=True)
         df_copy = dup_filter1(df_copy, df_copy[descriptor_names])
         self.assertEqual(len(df_copy), len(df))
         self.assertTrue(df_copy.equals(df))
 
         # drop duplicates
         df_copy = copy.deepcopy(df)
-        dup_filter2 = DuplicateFilter(keep=False)
+        dup_filter2 = RepeatsFilter(keep=False)
         df_copy = dup_filter2(df_copy, df_copy[descriptor_names])
         self.assertEqual(len(df_copy), 1)  # only CCC has one occurence
         self.assertTrue(df_copy.equals(df.iloc[[2]]))
 
         # keep first, by year
         df_copy = copy.deepcopy(df)
-        dup_filter3 = DuplicateFilter(keep="first", year_name="Year")
+        dup_filter3 = RepeatsFilter(keep="first", year_name="Year")
         df_copy = dup_filter3(df_copy, df_copy[descriptor_names])
         self.assertEqual(len(df_copy), 3)  # three unique SMILES
         self.assertTrue(df_copy.equals(df.iloc[[0, 1, 2]]))  # keep first by year

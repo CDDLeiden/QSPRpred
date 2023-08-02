@@ -22,7 +22,7 @@ from ..logs import logger
 from ..models.tasks import TargetTasks
 from ..utils.inspect import import_class
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
-from .utils.datafilters import DuplicateFilter
+from .utils.datafilters import RepeatsFilter
 from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -405,7 +405,7 @@ class PandasDataSet(DataSet):
                         "Removing duplicates based on descriptors does not \
                                     work if there are no descriptors"
                     )
-                else: 
+                else:
                     df_filtered = table_filter(self.df, descriptors)
             if df_filtered is not None:
                 self.df = df_filtered.copy()
@@ -1088,8 +1088,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             bool: Whether the data frame contains scaffold groups.
         """
         return (
-            len([col
-                 for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
+            len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")])
+            > 0
         )
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
@@ -1267,8 +1267,10 @@ class TargetProperty:
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{k: TargetTasks[v] if k == "task" else v
-                   for k, v in d.items()}
+                **{
+                    k: TargetTasks[v] if k == "task" else v
+                    for k, v in d.items()
+                }
             )
         else:
             return TargetProperty(**d)
@@ -1288,8 +1290,10 @@ class TargetProperty:
         if task_from_str:
             return [
                 TargetProperty(
-                    **{k: TargetTasks[v] if k == "task" else v
-                       for k, v in d.items()}
+                    **{
+                        k: TargetTasks[v] if k == "task" else v
+                        for k, v in d.items()
+                    }
                 ) for d in _list
             ]
         else:
@@ -2079,7 +2083,7 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: list = [DuplicateFilter(keep=True)],
+        datafilters: list = [RepeatsFilter(keep=True)],
         split=None,
         fold=None,
         feature_calculators: Optional[list] = None,

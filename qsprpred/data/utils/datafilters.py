@@ -62,7 +62,7 @@ class CategoryFilter(DataFilter):
 papyrusLowQualityFilter = partial(CategoryFilter, name="Quality", values=["Low"])
 
 
-class DuplicateFilter(DataFilter):
+class RepeatsFilter(DataFilter):
     """To filter out duplicate molecules based on descriptor values
 
     Attributes:
@@ -108,10 +108,10 @@ class DuplicateFilter(DataFilter):
             idx = np.flatnonzero(m[1:] != m[:-1])
 
             # Get sorted indices
-            I = df.index[sidx].tolist()
+            sort_idxs = df.index[sidx].tolist()
 
             # Return list of lists of indices of duplicate rows
-            return [I[i:j] for i, j in zip(idx[::2], idx[1::2] + 1)]
+            return [sort_idxs[i:j] for i, j in zip(idx[::2], idx[1::2] + 1)]
 
         allrepeats = group_duplicate_index(descriptors)
 
