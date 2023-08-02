@@ -20,8 +20,8 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from .data.data import QSPRDataset
 from .deep.models.models import QSPRDNN
-from .logs.utils import backup_files, commit_hash, enable_file_logger
-from .models.evaluation_methods import CrossValidation, EvaluateTestSetPerformance
+from .logs.utils import backup_files, enable_file_logger
+from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from .models.metrics import SklearnMetric
 from .models.models import QSPRModel, QSPRsklearn
@@ -377,8 +377,8 @@ def QSPR_modelling(args):
             # initialize models from saved or default parameters
 
             if args.model_evaluation:
-                CrossValidation()(QSPRmodel)
-                EvaluateTestSetPerformance()(QSPRmodel)
+                CrossValAssessor()(QSPRmodel)
+                TestSetAssessor()(QSPRmodel)
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):
@@ -387,7 +387,7 @@ def QSPR_modelling(args):
                         "for determining optimal number of epochs to stop training."
                     )
                 else:
-                    QSPRmodel.fitAllData()
+                    QSPRmodel.fitAttached()
 
 
 if __name__ == "__main__":
@@ -419,8 +419,6 @@ if __name__ == "__main__":
         "QSPRmodel.log",
         args.debug,
         __name__,
-        commit_hash(os.path.dirname(os.path.realpath(__file__)))
-        if not args.no_git else None,
         vars(args),
         disable_existing_loggers=False,
     )

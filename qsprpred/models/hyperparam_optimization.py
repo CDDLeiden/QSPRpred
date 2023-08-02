@@ -8,8 +8,8 @@ import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
 from ..logs import logger
-from ..models.evaluation_methods import CrossValidation
-from ..models.interfaces import EvaluationMethod, HyperParameterOptimization, QSPRModel
+from ..models.assessment_methods import CrossValAssessor
+from ..models.interfaces import HyperParameterOptimization, ModelAssessor, QSPRModel
 
 
 class OptunaOptimization(HyperParameterOptimization):
@@ -47,7 +47,7 @@ class OptunaOptimization(HyperParameterOptimization):
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
-        evaluation_method: EvaluationMethod = CrossValidation(),
+        model_assessor: ModelAssessor = CrossValAssessor(),
         score_aggregation: Callable[[Iterable], float] = np.mean,
         n_trials: int = 100,
         n_jobs: int = 1,
@@ -62,11 +62,10 @@ class OptunaOptimization(HyperParameterOptimization):
                 search space for bayesian optimization, keys are the parameter names,
                 values are lists with first element the type of the parameter and the
                 following elements the parameter bounds or values.
-            evaluation_method (EvaluationMethod): evaluation method to use for the
-                                                  optimization
-                                                  (default: CrossValidation)
+            model_assessor (ModelAssessor): assessment method to use for the
+                                            optimization (default: CrossValAssessor)
             score_aggregation (Callable): function to aggregate the scores of different
-                                          folds if the evaluation method returns
+                                          folds if the assessment method returns
                                           multiple predictions
             n_trials (int):
                 number of trials for bayes optimization
@@ -74,7 +73,7 @@ class OptunaOptimization(HyperParameterOptimization):
                 number of jobs to run in parallel.
                 At the moment only n_jobs=1 is supported.
         """
-        super().__init__(scoring, param_grid, evaluation_method, score_aggregation)
+        super().__init__(scoring, param_grid, model_assessor, score_aggregation)
         search_space_types = [
             "categorical", "discrete_uniform", "float", "int", "loguniform", "uniform"
         ]
@@ -107,9 +106,7 @@ class OptunaOptimization(HyperParameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
-        self.scoreFunc.checkMetricCompatibility(
-            model.task, self.evaluationMethod.useProba
-        )
+        self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
         import optuna
 
         logger.info(
@@ -167,11 +164,9 @@ class OptunaOptimization(HyperParameterOptimization):
                 )
             elif value[0] == "uniform":
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
-        # evaluate the model with the current parameters and return the score
+        # assess the model with the current parameters and return the score
         y, y_ind = model.data.getTargetPropertiesValues()
-        predictions = self.evaluationMethod(
-            model, save=False, parameters=bayesian_params
-        )
+        predictions = self.runAssessment(model, save=False, parameters=bayesian_params)
         scores = []
         # TODO: this should be removed once random seeds are fixed
         for pred in predictions:
@@ -195,7 +190,7 @@ class GridSearchOptimization(HyperParameterOptimization):
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
-        evaluation_method: EvaluationMethod = CrossValidation(),
+        model_assessor: ModelAssessor = CrossValAssessor(),
         score_aggregation: Callable = np.mean,
     ):
         """Initialize the class.
@@ -206,13 +201,13 @@ class GridSearchOptimization(HyperParameterOptimization):
             param_grid (dict):
                 dictionary with parameter names as keys and lists
                 of parameter settings to try as values
-            evaluation_method (EvaluationMethod): evaluation method to use for the
+            model_assessor (ModelAssessor): assessment method to use for the
                                                   optimization
             score_aggregation (Callable): function to aggregate the scores of different
-                                          folds if the evaluation method returns
+                                          folds if the assessment method returns
                                           multiple predictions (default: np.mean)
         """
-        super().__init__(scoring, param_grid, evaluation_method, score_aggregation)
+        super().__init__(scoring, param_grid, model_assessor, score_aggregation)
 
     def optimize(self, model: QSPRModel, save_params: bool = True) -> dict:
         """Optimize the hyperparameters of the model.
@@ -227,15 +222,13 @@ class GridSearchOptimization(HyperParameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
-        self.scoreFunc.checkMetricCompatibility(
-            model.task, self.evaluationMethod.useProba
-        )
+        self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
         logger.info(
             "Grid search started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         for params in ParameterGrid(self.paramGrid):
             logger.info(params)
-            predictions = self.evaluationMethod(model, save=False, parameters=params)
+            predictions = self.runAssessment(model, save=False, parameters=params)
             scores = []
             # TODO: this should be removed once random seeds are fixed
             for pred in predictions:

@@ -5,6 +5,7 @@
 !.pre-commit-config.yaml
 /build/
 /docs/_build
+/qsprpred/_version.py
 *.pkg
 *.tgz
 *.gzip

@@ -22,7 +22,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from ..data.data import QSPRDataset
 from ..data.tests import DataSetsMixIn
-from ..models.evaluation_methods import CrossValidation, EvaluateTestSetPerformance
+from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
@@ -96,19 +96,19 @@ class ModelTestMixIn:
             scoring=score_func,
             param_grid=search_space_gs,
             score_aggregation=np.median,
-            evaluation_method=EvaluateTestSetPerformance(use_proba=False)
+            model_assessor=TestSetAssessor(use_proba=False)
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        CrossValidation()(model)
-        EvaluateTestSetPerformance()(model)
+        CrossValAssessor()(model)
+        TestSetAssessor()(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
-        model.fitAllData()
+        model.fitAttached()
         self.assertTrue(exists(model.metaFile))
         self.assertTrue(exists(f"{model.baseDir}/{model.metaInfo['estimator_path']}"))
         self.assertTrue(exists(f"{model.baseDir}/{model.metaInfo['parameters_path']}"))

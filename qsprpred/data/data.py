@@ -22,6 +22,7 @@ from ..logs import logger
 from ..models.tasks import TargetTasks
 from ..utils.inspect import import_class
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
+from .utils.datafilters import DuplicateFilter
 from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -233,8 +234,15 @@ class PandasDataSet(DataSet):
 
         Args:
             name (str): Name of the property.
-            data (List): List of values for the property.
+            data (list): List of values for the property.
         """
+        if isinstance(data, pd.Series):
+            if not np.array_equal(data.index.txt, self.df.index.txt):
+                logger.info(
+                    f"Adding property '{name}' to data set might be introducing 'nan' "
+                    "values due to index with pandas series. Make sure the index of "
+                    "the data frame and the series match or convert series to list."
+                )
         self.df[name] = data
 
     def removeProperty(self, name: str):
@@ -393,9 +401,21 @@ class PandasDataSet(DataSet):
         of the `MoleculeTable`."""
         df_filtered = None
         for table_filter in table_filters:
-            df_filtered = table_filter(self.df)
-        if df_filtered is not None:
-            self.df = df_filtered.copy()
+            if len(self.df) == 0:
+                logger.warning("Dataframe is empty")
+            if table_filter.__class__.__name__ == "CategoryFilter":
+                df_filtered = table_filter(self.df)
+            elif table_filter.__class__.__name__ == "DuplicateFilter":
+                descriptors = self.getDescriptors()
+                if len(descriptors.columns) == 0:
+                    logger.warning(
+                        "Removing duplicates based on descriptors does not \
+                                    work if there are no descriptors"
+                    )
+                else:
+                    df_filtered = table_filter(self.df, descriptors)
+            if df_filtered is not None:
+                self.df = df_filtered.copy()
 
     def save(self):
         """Save the data frame to disk and all associated files.
@@ -932,13 +952,20 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         """
         return name in self.df.columns
 
-    def addProperty(self, name, data):
+    def addProperty(self, name: str, data: list):
         """Add a property to the data frame.
 
         Args:
             name (str): Name of the property.
             data (list): list of property values.
         """
+        if isinstance(data, pd.Series):
+            if not np.array_equal(data.index.txt, self.df.index.txt):
+                logger.info(
+                    f"Adding property '{name}' to data set might be introducing 'nan' "
+                    "values due to index with pandas series. Make sure the index of "
+                    "the data frame and the series match or convert series to list."
+                )
         self.df[name] = data
 
     def removeProperty(self, name):
@@ -1075,8 +1102,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             bool: Whether the data frame contains scaffold groups.
         """
         return (
-            len([col
-                 for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
+            len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")])
+            > 0
         )
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
@@ -1254,8 +1281,10 @@ class TargetProperty:
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{k: TargetTasks[v] if k == "task" else v
-                   for k, v in d.items()}
+                **{
+                    k: TargetTasks[v] if k == "task" else v
+                    for k, v in d.items()
+                }
             )
         else:
             return TargetProperty(**d)
@@ -1275,8 +1304,10 @@ class TargetProperty:
         if task_from_str:
             return [
                 TargetProperty(
-                    **{k: TargetTasks[v] if k == "task" else v
-                       for k, v in d.items()}
+                    **{
+                        k: TargetTasks[v] if k == "task" else v
+                        for k, v in d.items()
+                    }
                 ) for d in _list
             ]
         else:
@@ -2066,7 +2097,7 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: Optional[list] = None,
+        datafilters: list = [DuplicateFilter(keep=True)],
         split=None,
         fold=None,
         feature_calculators: Optional[list] = None,

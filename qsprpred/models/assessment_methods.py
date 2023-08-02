@@ -1,4 +1,4 @@
-"""This module holds evaluation methods for QSPRModels"""
+"""This module holds assessment methods for QSPRModels"""
 
 import math
 from datetime import datetime
@@ -7,10 +7,10 @@ import numpy as np
 import pandas as pd
 
 from ..logs import logger
-from .interfaces import EvaluationMethod, QSPRModel
+from .interfaces import ModelAssessor, QSPRModel
 
 
-class CrossValidation(EvaluationMethod):
+class CrossValAssessor(ModelAssessor):
     """Perform cross validation on a model.
 
     Attributes:
@@ -25,18 +25,16 @@ class CrossValidation(EvaluationMethod):
     ) -> float | np.ndarray:
         """Perform cross validation on the model with the given parameters.
 
-        If save is True, the predictions on the validation set are saved to a file in
-        the output directory.
-
         Arguments:
-            save (bool): don't save predictions when used in bayesian optimization
-            parameters (dict): optional model parameters to use for evaluation
-            score_func (str or callable): scoring function to use for evaluation
+            model (QSPRModel): model to assess
+            save (bool): whether to save predictions to file
+            parameters (dict): optional model parameters to use in assessment
             use_proba (bool): use predictProba instead of predict for classification
             **kwargs: additional keyword arguments for the fit function
 
         Returns:
-            float | np.ndarray: predictions on the validation set"""
+            float | np.ndarray: predictions on the validation set
+        """
         evalparams = model.parameters if parameters is None else parameters
         # check if data is available
         model.checkForData()
@@ -113,7 +111,7 @@ class CrossValidation(EvaluationMethod):
         return output
 
 
-class EvaluateTestSetPerformance(EvaluationMethod):
+class TestSetAssessor(ModelAssessor):
     def __call__(
         self,
         model: QSPRModel,
@@ -123,13 +121,12 @@ class EvaluateTestSetPerformance(EvaluationMethod):
     ):
         """Make predictions for independent test set.
 
-        If save is True, the predictions are saved to a file in the output directory.
-
         Arguments:
-            save (bool): don't save predictions when used in bayesian optimization
-            parameters (dict): optional model parameters to use for evaluation
+            model (QSPRModel): model to assess
+            save (bool): whether to save predictions to file
+            parameters (dict): optional model parameters to use in assessment
             use_proba (bool): use predictProba instead of predict for classification
-            **kwargs: additional keyword arguments for the evaluation function
+            **kwargs: additional keyword arguments for the fit function
 
         Returns:
             float | np.ndarray: predictions for evaluation
