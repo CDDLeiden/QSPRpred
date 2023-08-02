@@ -17,6 +17,8 @@ From v2.0.1 to v2.1.0.dev0
 
 ## New Features
 - `ClusterSplit` - splits data based clustering of molecular fingerprints.
+- Raise error if search space for optuna optimization is missing search space type annotation or if type not in list.
+- When installing package with pip, the commit hash and date of the installation is saved into `qsprpred._version`
 - `HyperParameterOptimization` classes now accept a `evaluation_method` argument, which is an instance of `EvaluationMethod` (see above). This allows for hyperparameter optimization to be performed on a test set, or on a cross-validation set. (#11)
 - `HyperParameterOptimization` now accepts `score_aggregation` argument, which is a function that takes a list of scores and returns a single score. This allows for the use of different aggregation functions, such as `np.mean` or `np.median` to combine scores from different folds. (#45)
 - A new tutorial `adding_new_components.ipynb` has been added to the `tutorials` folder, which demonstrates how to add new model to QSPRpred.
