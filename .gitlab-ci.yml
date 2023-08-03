@@ -21,7 +21,7 @@ stages:
       - python -m pip install jupyterlab
       - python -m pip freeze # For debugging environment
    script:
-      - pytest qsprpred
+      - pytest qsprpred -k "not gpu"
       - cd clitest && ./run.sh
       - cd ../tutorial && ./run_all.sh
 

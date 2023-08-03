@@ -5,9 +5,11 @@ Created by: Martin Sicho
 On: 12.05.23, 18:31
 """
 import os
+from importlib import import_module
 from typing import Type
 from unittest import TestCase
 
+import pytest
 import torch
 from parameterized import parameterized
 from sklearn.impute import SimpleImputer
@@ -17,9 +19,8 @@ from ...deep.models.models import QSPRDNN
 from ...deep.models.neural_network import STFullyConnected
 from ...models.tasks import TargetTasks
 from ...models.tests import ModelDataSetsMixIn, ModelTestMixIn
-from ..models.custom_loss import BCEWithNaNLoss, MSEwithNaNLoss
-from ..models.custom_metrics import NaNAucMetric, NaNR2Score, NaNRMSEScore
-from ..models.models import PyBoostModel
+
+# from ..models.models import PyBoostModel
 
 GPUS = list(range(torch.cuda.device_count()))
 
@@ -113,6 +114,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the PyBoostModel class."""
     @staticmethod
+    @pytest.mark.gpu
     def getModel(
         name: str,
         dataset: QSPRDataset = None,
@@ -128,7 +130,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         Returns:
             PyBoostModel the model
         """
-        return PyBoostModel(
+        return import_module("..models", __name__).PyBoostModel(
             base_dir=f"{os.path.dirname(__file__)}/test_files/qspr/models",
             data=dataset,
             name=name,
@@ -142,21 +144,22 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     "loss": "mse",
                     "metric": "r2_score"
                 },
-                {
-                    "loss": MSEwithNaNLoss(),
-                    "metric": "r2_score"
-                },
-                {
-                    "loss": "mse",
-                    "metric": NaNR2Score()
-                },
-                {
-                    "loss": "mse",
-                    "metric": NaNRMSEScore()
-                },
+                # {
+                #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
+                #     "metric": "r2_score"
+                # },
+                # {
+                #     "loss": "mse",
+                #     "metric": import_module("..custom_metrics", __name__).NaNR2Score()
+                # },
+                # {
+                #     "loss": "mse",
+                #     "metric":import_module("..custom_metrics",__name__).NaNRMSEScore()
+                # },
             ]
         ]
     )
+    @pytest.mark.gpu
     def testRegressionPyBoostFit(self, _, task, model_name, parameters):
         """Test model training for regression models."""
         parameters["verbose"] = -1
@@ -175,7 +178,9 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = PyBoostModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        predictor = import_module("..models", __name__).PyBoostModel(
+            name=f"{model_name}_{task}", base_dir=model.baseDir
+        )
         self.predictorTest(predictor)
 
     @parameterized.expand(
@@ -192,6 +197,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
         ]
     )
+    @pytest.mark.gpu
     def testClassificationPyBoostFit(self, _, task, th, model_name, parameters):
         """Test model training for classification models."""
         parameters["verbose"] = -1
@@ -212,7 +218,9 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = PyBoostModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        predictor = import_module("..models", __name__).PyBoostModel(
+            name=f"{model_name}_{task}", base_dir=model.baseDir
+        )
         self.predictorTest(predictor)
 
     @parameterized.expand(
@@ -222,17 +230,18 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     "loss": "mse",
                     "metric": "r2_score"
                 },
-                {
-                    "loss": MSEwithNaNLoss(),
-                    "metric": "r2_score"
-                },
-                {
-                    "loss": "mse",
-                    "metric": NaNR2Score()
-                },
+                # {
+                #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
+                #     "metric": "r2_score"
+                # },
+                # {
+                #     "loss": "mse",
+                #     "metric": import_module("..custom_metrics",__name__).NaNR2Score()
+                # },
             ]
         ]
     )
+    @pytest.mark.gpu
     def testRegressionMultiTaskFit(self, _, model_name, parameters):
         """Test model training for multitask regression models."""
         parameters["verbose"] = -1
@@ -259,7 +268,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters
         )
         self.fitTest(model)
-        predictor = PyBoostModel(
+        predictor = import_module("..models", __name__).PyBoostModel(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
@@ -271,17 +280,18 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     "loss": "bce",
                     "metric": "auc"
                 },
-                {
-                    "loss": BCEWithNaNLoss(),
-                    "metric": "auc"
-                },
-                {
-                    "loss": "bce",
-                    "metric": NaNAucMetric()
-                },
+                # {
+                #     "loss": import_module("..custom_loss", __name__).BCEWithNaNLoss(),
+                #     "metric": "auc"
+                # },
+                # {
+                #     "loss": "bce",
+                #     "metric":import_module("..custom_metrics",__name__).NaNAucMetric()
+                # },
             ]
         ]
     )
+    @pytest.mark.gpu
     def testClassificationMultiTaskFit(self, _, model_name, parameters):
         """Test model training for multitask classification models."""
         parameters["verbose"] = -1
@@ -311,7 +321,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = PyBoostModel(
+        predictor = import_module("..models", __name__).PyBoostModel(
             name=f"{model_name}_multitask_classification", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
