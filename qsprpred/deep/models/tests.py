@@ -24,6 +24,8 @@ from ...models.tests import ModelDataSetsMixIn, ModelTestMixIn
 
 GPUS = list(range(torch.cuda.device_count()))
 
+pytest.skip(reason="requires cupy & gpu", allow_module_level=True)
+
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRDNN class."""
@@ -111,7 +113,6 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.predictorTest(predictor)
 
 
-@pytest.mark.skip(reason="requires gpu")
 class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the PyBoostModel class."""
     @staticmethod
