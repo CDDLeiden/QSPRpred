@@ -3,6 +3,7 @@
 import os
 from copy import deepcopy
 from typing import Any
+import shutil
 
 import chemprop
 import numpy as np
@@ -14,6 +15,7 @@ from tqdm import tqdm, trange
 
 from ...data.data import QSPRDataset
 from ...models.interfaces import QSPRModel
+from ...models.tasks import ModelTasks
 
 
 class MoleculeModel(chemprop.models.MoleculeModel):
@@ -186,7 +188,8 @@ class Chemprop(QSPRModel):
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
-        early_stopping: bool | None = None
+        early_stopping: bool | None = None,
+        keep_logs: bool = False
     ) -> Any | tuple[Any, int] | None:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -213,7 +216,7 @@ class Chemprop(QSPRModel):
         else:
             debug = info = print
 
-        data = self.convertToMoleculeDataset(X, y)
+        data = self.convertToMoleculeDataset(estimator, X, y)
         args = estimator.args
 
         # Set pytorch seed for random initial weights
@@ -417,6 +420,9 @@ class Chemprop(QSPRModel):
             )
 
         writer.close()
+        if not keep_logs:
+            # remove temp directory with logs
+            shutil.rmtree(save_dir)
 
         if early_stopping:
             return best_estimator, best_epoch
@@ -444,7 +450,7 @@ class Chemprop(QSPRModel):
                 2D array containing the predictions, where each row corresponds
                 to a sample in the data and each column to a target property
         """
-        X = self.convertToMoleculeDataset(X)
+        X = self.convertToMoleculeDataset(estimator, X)
         args = estimator.args
 
         if args.features_scaling:
@@ -513,7 +519,22 @@ class Chemprop(QSPRModel):
         """
         new_parameters = self.getParameters(params)
         self.checkArgs(new_parameters)
-        return self.alg(MoleculeModel.getTrainArgs(new_parameters))
+        args = MoleculeModel.getTrainArgs(new_parameters)
+
+        # set task names
+        args.task_names = [prop.name for prop in self.data.targetProperties]
+
+        # set dataset type
+        if self.task == ModelTasks.REGRESSION:
+            args.dataset_type = "regression"
+        elif self.task == ModelTasks.SINGLECLASS:
+            args.dataset_type = "classification"
+        elif self.task == ModelTasks.MULTICLASS:
+            args.dataset_type = "multiclass"
+        else:
+            raise ValueError(f"Task type {self.task} not supported.")
+
+        return self.alg(args)
 
     def loadEstimatorFromFile(self, params: dict | None = None) -> object:
         """Load estimator instance from file and apply the given parameters.
@@ -561,6 +582,7 @@ class Chemprop(QSPRModel):
 
     def convertToMoleculeDataset(
         self,
+        estimator: MoleculeModel,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset | None = None
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
@@ -580,13 +602,13 @@ class Chemprop(QSPRModel):
             return chemprop.data.get_data_from_smiles(
                 smiles=[[X[i, 0]] for i in range(X.shape[0])],
                 skip_invalid_smiles=False,
-                features_generator=self.parameters.features_generator
+                features_generator=estimator.args.features_generator
             )
 
         # Load features
-        if self.parameters.features_path is not None:
+        if estimator.args.features_path is not None:
             features_data = []
-            for feat_path in self.parameters.features_path:
+            for feat_path in estimator.args.features_path:
                 features_data.append(
                     chemprop.features.load_features(feat_path)
                 )  # each is num_data x num_features
@@ -595,11 +617,11 @@ class Chemprop(QSPRModel):
             features_data = None
 
         # Load constraints
-        if self.parameters.constraints_path is not None:
+        if estimator.args.constraints_path is not None:
             constraints_data, raw_constraints_data = chemprop.data.get_constraints(
-                path=self.parameters.constraints_path,
-                target_columns=self.parameters.target_columns,
-                save_raw_data=self.parameters.save_smiles_splits
+                path=estimator.args.constraints_path,
+                target_columns=estimator.args.target_columns,
+                save_raw_data=estimator.args.save_smiles_splits
             )
         else:
             constraints_data = None
@@ -608,36 +630,36 @@ class Chemprop(QSPRModel):
         # Load custom atom or bond features
         atom_features = None
         atom_descriptors = None
-        if self.parameters.atom_descriptors is not None:
+        if estimator.args.atom_descriptors is not None:
             try:
                 descriptors = chemprop.features.load_valid_atom_or_bond_features(
-                    self.parameters.atom_descriptors_path, X[:, 0]
+                    estimator.args.atom_descriptors_path, X[:, 0]
                 )
             except Exception as e:
                 raise ValueError(
                     f"Failed to load or validate custom atomic descriptors or features: {e}"
                 )
 
-            if self.paramters.atom_descriptors == "feature":
+            if estimator.args.atom_descriptors == "feature":
                 atom_features = descriptors
-            elif self.parameters.atom_descriptors == "descriptor":
+            elif estimator.args.atom_descriptors == "descriptor":
                 atom_descriptors = descriptors
 
         bond_features = None
         bond_descriptors = None
-        if self.parameters.bond_descriptors is not None:
+        if estimator.args.bond_descriptors is not None:
             try:
-                descriptors = chemprop.featuresload_valid_atom_or_bond_features(
-                    self.paramters.bond_descriptors_path, X[:, 0]
+                descriptors = chemprop.features.load_valid_atom_or_bond_features(
+                    estimator.args.bond_descriptors_path, X[:, 0]
                 )
             except Exception as e:
                 raise ValueError(
                     f"Failed to load or validate custom bond descriptors or features: {e}"
                 )
 
-            if self.parameters.bond_descriptors == "feature":
+            if estimator.args.bond_descriptors == "feature":
                 bond_features = descriptors
-            elif self.parameters.bond_descriptors == "descriptor":
+            elif estimator.args.bond_descriptors == "descriptor":
                 bond_descriptors = descriptors
 
         # Create MoleculeDataset
@@ -646,7 +668,7 @@ class Chemprop(QSPRModel):
                 chemprop.data.MoleculeDatapoint(
                     smiles=smiles,
                     targets=targets,
-                    features_generator=self.parameters.features_generator,
+                    features_generator=estimator.args.features_generator,
                     features=features_data[i] if features_data is not None else None,
                     atom_features=atom_features[i]
                     if atom_features is not None else None,
@@ -660,9 +682,9 @@ class Chemprop(QSPRModel):
                     if constraints_data is not None else None,
                     raw_constraints=raw_constraints_data[i]
                     if raw_constraints_data is not None else None,
-                    overwrite_default_atom_features=self.parameters.
+                    overwrite_default_atom_features=estimator.args.
                     overwrite_default_atom_features,
-                    overwrite_default_bond_features=self.parameters.
+                    overwrite_default_bond_features=estimator.args.
                     overwrite_default_bond_features
                 ) for i, (smiles, targets) in tqdm(enumerate(zip(X, y)), total=len(X))
             ]
