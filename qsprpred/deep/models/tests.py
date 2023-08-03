@@ -130,7 +130,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         Returns:
             PyBoostModel the model
         """
-        return import_module("..models_cupy", __name__).PyBoostModel(
+        return import_module("..models", __name__).PyBoostModel(
             base_dir=f"{os.path.dirname(__file__)}/test_files/qspr/models",
             data=dataset,
             name=name,
@@ -177,7 +177,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = import_module("..models_cupy", __name__).PyBoostModel(
+        predictor = import_module("..models", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
@@ -216,7 +216,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = import_module("..models_cupy", __name__).PyBoostModel(
+        predictor = import_module("..models", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
@@ -265,7 +265,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters
         )
         self.fitTest(model)
-        predictor = import_module("..models_cupy", __name__).PyBoostModel(
+        predictor = import_module("..models", __name__).PyBoostModel(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
@@ -317,7 +317,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = import_module("..models_cupy", __name__).PyBoostModel(
+        predictor = import_module("..models", __name__).PyBoostModel(
             name=f"{model_name}_multitask_classification", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
