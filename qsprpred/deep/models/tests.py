@@ -5,7 +5,7 @@ Created by: Martin Sicho
 On: 12.05.23, 18:31
 """
 import os
-from importlib import import_module
+from importlib import import_module, util
 from typing import Type
 from unittest import TestCase
 
@@ -23,8 +23,6 @@ from ...models.tests import ModelDataSetsMixIn, ModelTestMixIn
 # from ..models.models import PyBoostModel
 
 GPUS = list(range(torch.cuda.device_count()))
-
-pytest.skip(reason="requires cupy & gpu", allow_module_level=True)
 
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
@@ -113,6 +111,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.predictorTest(predictor)
 
 
+@pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
 class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the PyBoostModel class."""
     @staticmethod
