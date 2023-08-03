@@ -303,6 +303,16 @@ class PyBoostModel(QSPRModel):
     Wrap your pyboost model class in this class
     to use it with the `QSPRModel` interface.
 
+    Example
+    --------
+    >>> from qsprpred.deep.models.models import PyBoostModel
+    >>> parameters = {'loss':  'mse', 'metric': 'r2_score', 'verbose': -1}
+    >>> model = PyBoostModel(
+    ...     base_dir='qspr/models/',
+    ...     data=dataset,
+    ...     name="PyBoost",
+    ...     parameters=parameters
+    ... )
     """
     def __init__(
         self,
