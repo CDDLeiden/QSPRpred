@@ -28,12 +28,15 @@ Note that this will install the basic dependencies, but not the optional depende
 
 ```bash
 # include deep neural network models and their dependencies
-# before installing QSPRpred deep via pip you should have cupy installed:
-pip install cupy-cuda110 # replace with your cuda version, see https://docs.cupy.dev/en/stable/install.html
 pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[deep] 
 
 # include extra dependencies for PCM models and extra descriptor sets from packages other than RDKit
-pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[extra]
+pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[extra_cpu]
+
+# include py-boost and other models with GPU dependencies
+# before installing QSPRpred extra_gpu via pip you should have cupy installed:
+pip install cupy-cuda110 # replace with your cuda version, see https://docs.cupy.dev/en/stable/install.html
+pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[extra_gpu] 
 
 # include all optional dependencies
 # before installing QSPRpred full via pip you should have cupy installed:

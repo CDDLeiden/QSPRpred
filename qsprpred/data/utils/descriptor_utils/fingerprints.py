@@ -45,9 +45,9 @@ class MorganFP(Fingerprint):
     def getKey(self):
         return "MorganFP"
 
+
 class RDKitMACCSFP(Fingerprint):
     """RDKits implementation of MACCS keys fingerprint."""
-
     def getFingerprints(self, mols):
         """Return the MACCS fingerprints for the input molecules.
 
@@ -77,6 +77,7 @@ class RDKitMACCSFP(Fingerprint):
 
     def getKey(self):
         return "RDKitMACCSFP"
+
 
 class MaccsFP(Fingerprint):
     def __init__(self, nBits=167, **kwargs):
@@ -299,6 +300,7 @@ class _FingerprintRetriever:
 
     def getMorganFP(self, *args, **kwargs):
         return MorganFP(*args, **kwargs)
+
     def getMaccsFP(self, *args, **kwargs):
         return MaccsFP(*args, **kwargs)
 
@@ -319,60 +321,58 @@ class _FingerprintRetriever:
 
     def getLayeredFP(self, *args, **kwargs):
         return LayeredFP(*args, **kwargs)
-    
+
     def getRDKitMACCSFP(self, *args, **kwargs):
         return RDKitMACCSFP(*args, **kwargs)
 
     def getCDKFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKFP
+        from ....extra_cpu.data.utils.descriptor_utils.fingerprints import CDKFP
 
         return CDKFP(*args, **kwargs)
 
     def getCDKExtendedFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import (
-            CDKExtendedFP,
-        )
+        from ....extra_cpu.data.utils.descriptor_utils.fingerprints import CDKExtendedFP
 
         return CDKExtendedFP(*args, **kwargs)
 
     def getCDKEStateFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKEStateFP
+        from ....extra_cpu.data.utils.descriptor_utils.fingerprints import CDKEStateFP
 
         return CDKEStateFP()
 
     def getCDKGraphOnlyFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import (
+        from ....extra_cpu.data.utils.descriptor_utils.fingerprints import (
             CDKGraphOnlyFP,
         )
 
         return CDKGraphOnlyFP(*args, **kwargs)
 
     def getCDKMACCSFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKMACCSFP
+        from ....extra_cpu.data.utils.descriptor_utils.fingerprints import CDKMACCSFP
 
         return CDKMACCSFP()
 
     def getCDKPubchemFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKPubchemFP
+        from ....extra_cpu.data.utils.descriptor_utils.fingerprints import CDKPubchemFP
 
         return CDKPubchemFP()
 
     def getCDKSubstructureFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import (
+        from ....extra_cpu.data.utils.descriptor_utils.fingerprints import (
             CDKSubstructureFP,
         )
 
         return CDKSubstructureFP(*args, **kwargs)
 
     def getCDKKlekotaRothFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import (
+        from ....extra_cpu.data.utils.descriptor_utils.fingerprints import (
             CDKKlekotaRothFP,
         )
 
         return CDKKlekotaRothFP(*args, **kwargs)
 
     def getCDKAtomPairs2DFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import (
+        from ....extra_cpu.data.utils.descriptor_utils.fingerprints import (
             CDKAtomPairs2DFP,
         )
 

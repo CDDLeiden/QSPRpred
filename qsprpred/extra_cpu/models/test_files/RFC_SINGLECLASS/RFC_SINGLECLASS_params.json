@@ -1,0 +1,6 @@
+{
+    "n_jobs": 2,
+    "n_estimators": 10,
+    "min_samples_split": 11,
+    "max_depth": null
+}

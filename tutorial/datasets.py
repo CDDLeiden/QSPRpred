@@ -8,15 +8,16 @@ import os
 
 import numpy as np
 import pandas as pd
+from sklearn.impute import SimpleImputer
+
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.sources.papyrus import Papyrus
 from qsprpred.models.tasks import TargetTasks
-from sklearn.impute import SimpleImputer
 
 
 def A2AR(data_dir="data"):
-    """A classification dataset that contains activity data on the adenosine A2A receptor loaded from the Papyrus database
-    using the built-in Papyrus wrapper.
+    """A classification dataset that contains activity data on the adenosine A2A
+    receptor loaded from the Papyrus database using the built-in Papyrus wrapper.
 
     Returns:
         a `QSPRDataset` instance with the loaded data
@@ -53,11 +54,12 @@ def A2AR(data_dir="data"):
 
 
 def Parkinsons(singletask=True):
-    """Parkinson's disease dataset that contains data for multiple targets related to the disease.
+    """Parkinson's disease dataset that contains data for multiple targets related to
+    the disease.
 
-    It is loaded from a CSV file into pandas `DataFrame`. This is then converted to `QSPRDataset`
-    regression data set with 'GABAAalpha' activity as the target property for single task & the
-    mGLU receptors for multitask.
+    It is loaded from a CSV file into pandas `DataFrame`. This is then converted to
+    `QSPRDataset` regression data set with 'GABAAalpha' activity as the target property
+    for single task & the mGLU receptors for multitask.
 
     Returns:
         a `QSPRDataset` instance with the loaded data
@@ -95,7 +97,7 @@ def Parkinsons(singletask=True):
         print("Number of samples per target:")
         print(df[target_col].value_counts())
 
-    # Get data in correct format and taking the mean if multiple activatie values per smiles
+    # Get data in correct format and taking the mean if multiple values per smiles
     df = df.pivot_table(
         index=[smiles_col], columns=[target_col], values=activity_col, aggfunc=np.mean
     ).reset_index()
@@ -135,13 +137,15 @@ def Parkinsons(singletask=True):
 
 def AR_PCM(data_dir="data"):
     """
-    A classification dataset that contains activity data for a PCM approach to model activity for a selection of adenosine receptors. The function recreates steps from data_preparation_advanced.ipynb.
+    A classification dataset that contains activity data for a PCM approach to model
+    activity for a selection of adenosine receptors. The function recreates steps from
+    data_preparation_advanced.ipynb.
 
     Returns:
         a `QSPRDataset` instance with the loaded data
     """
 
-    from qsprpred.extra.data.data import PCMDataSet
+    from qsprpred.extra_cpu.data.data import PCMDataSet
 
     acc_keys = ["P29274", "P29275", "P30542", "P0DMS8"]
     dataset_name = "AR_LIGANDS"  # name of the file to be generated
@@ -163,7 +167,7 @@ def AR_PCM(data_dir="data"):
         A function that provides a mapping from accession key to a protein sequence.
 
         Args:
-            acc_keys (list): Accession keys of the protein to get a mapping of sequences for.
+            acc_keys (list): Accession keys of the protein to get a mapping for.
 
         Returns:
             (dict) : Mapping of accession keys to protein sequences.

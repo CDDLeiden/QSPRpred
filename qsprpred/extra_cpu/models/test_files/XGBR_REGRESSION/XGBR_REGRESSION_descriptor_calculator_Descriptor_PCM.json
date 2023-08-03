@@ -1,0 +1,1 @@
+{"0": {"name": "ProDec", "settings": {"sets": ["Sneath"]}, "descriptors": ["Sneath_1", "Sneath_13", "Sneath_18", "Sneath_21"], "class": "ProDec"}, "calculator": "qsprpred.extra_cpu.data.utils.descriptorcalculator.ProteinDescriptorCalculator"}

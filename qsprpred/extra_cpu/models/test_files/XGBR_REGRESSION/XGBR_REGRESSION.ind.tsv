@@ -1,0 +1,4 @@
+QSPRID	pchembl_value_Median_Label	pchembl_value_Median_Prediction
+XGBR_REGRESSION_pcm_16	8.92	3.9857183
+XGBR_REGRESSION_pcm_8	6.58	4.0588617
+XGBR_REGRESSION_pcm_0	6.92	4.0588617

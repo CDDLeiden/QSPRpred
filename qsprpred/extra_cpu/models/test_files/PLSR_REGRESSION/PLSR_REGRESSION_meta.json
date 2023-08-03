@@ -1,0 +1,19 @@
+{
+    "name": "PLSR_REGRESSION",
+    "version": "2.0.1",
+    "model_class": "qsprpred.extra_cpu.models.pcm.QSPRsklearnPCM",
+    "target_properties": [
+        {
+            "name": "pchembl_value_Median",
+            "task": "REGRESSION",
+            "original_name": "pchembl_value_Median"
+        }
+    ],
+    "parameters_path": "PLSR_REGRESSION/PLSR_REGRESSION_params.json",
+    "feature_calculator_paths": [
+        "PLSR_REGRESSION/PLSR_REGRESSION_descriptor_calculator_Descriptor.json",
+        "PLSR_REGRESSION/PLSR_REGRESSION_descriptor_calculator_Descriptor_PCM.json"
+    ],
+    "feature_standardizer_path": "PLSR_REGRESSION/PLSR_REGRESSION_feature_standardizer.json",
+    "estimator_path": "PLSR_REGRESSION/PLSR_REGRESSION.json"
+}

@@ -1,0 +1,1 @@
+{"out_dir": "/zfsdata/data/linde/QSPRpred/qsprpred/extra_cpu/data/test_files/qspr/data", "fname": "alignment.aln-fasta.fasta", "current": "XGBC_SINGLECLASS_descriptor_calculator_Descriptor_PCM.json.msaprovider.msa", "class": "qsprpred.extra_cpu.data.utils.descriptor_utils.msa_calculator.ClustalMSA"}
