@@ -111,10 +111,10 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.predictorTest(predictor)
 
 
+@pytest.mark.skip(reason="requires gpu")
 class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the PyBoostModel class."""
     @staticmethod
-    @pytest.mark.skip(reason="requires gpu")
     def getModel(
         name: str,
         dataset: QSPRDataset = None,
@@ -159,7 +159,6 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             ]
         ]
     )
-    @pytest.mark.skip(reason="requires gpu")
     def testRegressionPyBoostFit(self, _, task, model_name, parameters):
         """Test model training for regression models."""
         parameters["verbose"] = -1
@@ -197,7 +196,6 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
         ]
     )
-    @pytest.mark.skip(reason="requires gpu")
     def testClassificationPyBoostFit(self, _, task, th, model_name, parameters):
         """Test model training for classification models."""
         parameters["verbose"] = -1
@@ -241,7 +239,6 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             ]
         ]
     )
-    @pytest.mark.skip(reason="requires gpu")
     def testRegressionMultiTaskFit(self, _, model_name, parameters):
         """Test model training for multitask regression models."""
         parameters["verbose"] = -1
@@ -291,7 +288,6 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             ]
         ]
     )
-    @pytest.mark.skip(reason="requires gpu")
     def testClassificationMultiTaskFit(self, _, model_name, parameters):
         """Test model training for multitask classification models."""
         parameters["verbose"] = -1
