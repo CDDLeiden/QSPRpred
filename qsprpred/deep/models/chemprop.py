@@ -338,7 +338,7 @@ class Chemprop(QSPRModel):
 
         # Tensorboard writer
         save_dir = os.path.join(self.outDir, "temp")
-        os.makedirs(save_dir)
+        os.makedirs(save_dir, exist_ok=True)
         try:
             writer = SummaryWriter(log_dir=save_dir)
         except:  # noqa: E722
@@ -573,7 +573,7 @@ class Chemprop(QSPRModel):
         else:
             X = self.convertToNumpy(X)
             return chemprop.data.get_data_from_smiles(
-                smiles=X[:, 0],
+                smiles=[[X[i, 0]] for i in range(X.shape[0])],
                 skip_invalid_smiles=False,
                 features_generator=self.parameters.features_generator
             )
