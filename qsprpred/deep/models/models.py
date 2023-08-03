@@ -10,13 +10,13 @@ On: 12.05.23, 16:39
 """
 import os
 from copy import deepcopy
+from importlib import import_module
 from typing import Any, Optional, Type
 
 import joblib
 import numpy as np
 import pandas as pd
 import torch
-from py_boost import GradientBoosting
 from sklearn.model_selection import train_test_split
 
 from ...data.data import QSPRDataset
@@ -338,7 +338,10 @@ class PyBoostModel(QSPRModel):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
         """
-        super().__init__(base_dir, GradientBoosting, data, name, parameters, autoload)
+        super().__init__(
+            base_dir,
+            import_module("py_boost").GradientBoosting, data, name, parameters, autoload
+        )
         if self.task == ModelTasks.MULTITASK_MIXED:
             raise ValueError(
                 "MultiTask with a mix of classification and regression tasks "
@@ -362,10 +365,10 @@ class PyBoostModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Optional[Type[GradientBoosting]] = None,
+        estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
         early_stopping: bool = False,
         **kwargs
-    ) -> GradientBoosting:
+    ) -> import_module("py_boost").GradientBoosting:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
         Args:
