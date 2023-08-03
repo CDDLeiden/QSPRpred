@@ -416,11 +416,11 @@ class Chemprop(QSPRModel):
                 {best_epoch}"
             )
 
-            writer.close()
+        writer.close()
 
-            if early_stopping:
-                return best_estimator, best_epoch
-            return best_estimator
+        if early_stopping:
+            return best_estimator, best_epoch
+        return best_estimator
 
     def predict(
         self,
@@ -445,24 +445,29 @@ class Chemprop(QSPRModel):
                 to a sample in the data and each column to a target property
         """
         X = self.convertToMoleculeDataset(X)
+        args = estimator.args
 
-        if self.estimator.args.features_scaling:
-            X.normalize_features(self.estimator.features_scaler)
-        if self.estimator.args.atom_descriptor_scaling and self.estimator.args.atom_descriptors is not None:
+        if args.features_scaling:
+            X.normalize_features(estimator.features_scaler)
+        if args.atom_descriptor_scaling and args.atom_descriptors is not None:
             X.normalize_features(
-                self.estimator.atom_descriptor_scaler, scale_atom_descriptors=True
+                estimator.atom_descriptor_scaler, scale_atom_descriptors=True
             )
-        if self.estimator.args.bond_descriptor_scaling and self.estimator.args.bond_descriptors_size > 0:
+        if args.bond_descriptor_scaling and args.bond_descriptors_size > 0:
             X.normalize_features(
-                self.estimator.bond_descriptor_scaler, scale_bond_descriptors=True
+                estimator.bond_descriptor_scaler,
+                scale_bond_descriptors=True,
             )
 
-        X_loader = chemprop.data.MoleculeDataLoader(dataset=X, batch_size=500)
+        X_loader = chemprop.data.MoleculeDataLoader(
+            dataset=X, batch_size=args.batch_size
+        )
 
         preds = chemprop.train.predict(
             model=estimator,
             data_loader=X_loader,
             scaler=estimator.scaler,
+            atom_bond_scaler=estimator.atom_bond_scaler,
             disable_progress_bar=True
         )
 
