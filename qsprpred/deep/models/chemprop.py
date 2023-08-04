@@ -188,7 +188,7 @@ class Chemprop(QSPRModel):
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
-        early_stopping: bool | None = None,
+        early_stopping: bool = True,
         keep_logs: bool = False
     ) -> Any | tuple[Any, int] | None:
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -329,9 +329,10 @@ class Chemprop(QSPRModel):
             shuffle=True,
             seed=args.seed
         )
-        val_data_loader = chemprop.data.MoleculeDataLoader(
-            dataset=val_data, batch_size=args.batch_size, num_workers=num_workers
-        )
+        if early_stopping:
+            val_data_loader = chemprop.data.MoleculeDataLoader(
+                dataset=val_data, batch_size=args.batch_size, num_workers=num_workers
+            )
 
         if args.class_balance:
             debug(
@@ -380,44 +381,47 @@ class Chemprop(QSPRModel):
             )
             if isinstance(scheduler, ExponentialLR):
                 scheduler.step()
-            val_scores = chemprop.train.evaluate(
-                model=estimator,
-                data_loader=val_data_loader,
-                num_tasks=args.num_tasks,
-                metrics=args.metrics,
-                dataset_type=args.dataset_type,
-                scaler=scaler,
-                atom_bond_scaler=atom_bond_scaler,
-                logger=self.chempropLogger
-            )
+            if early_stopping:
+                val_scores = chemprop.train.evaluate(
+                    model=estimator,
+                    data_loader=val_data_loader,
+                    num_tasks=args.num_tasks,
+                    metrics=args.metrics,
+                    dataset_type=args.dataset_type,
+                    scaler=scaler,
+                    atom_bond_scaler=atom_bond_scaler,
+                    logger=self.chempropLogger
+                )
 
-            for metric, scores in val_scores.items():
-                # Average validation score\
-                mean_val_score = chemprop.utils.multitask_mean(scores, metric=metric)
-                debug(f"Validation {metric} = {mean_val_score:.6f}")
-                writer.add_scalar(f"validation_{metric}", mean_val_score, n_iter)
+                for metric, scores in val_scores.items():
+                    # Average validation score\
+                    mean_val_score = chemprop.utils.multitask_mean(
+                        scores, metric=metric
+                    )
+                    debug(f"Validation {metric} = {mean_val_score:.6f}")
+                    writer.add_scalar(f"validation_{metric}", mean_val_score, n_iter)
 
-                if args.show_individual_scores:
-                    # Individual validation scores
-                    for task_name, val_score in zip(args.task_names, scores):
-                        debug(f"Validation {task_name} {metric} = {val_score:.6f}")
-                        writer.add_scalar(
-                            f"validation_{task_name}_{metric}", val_score, n_iter
-                        )
+                    if args.show_individual_scores:
+                        # Individual validation scores
+                        for task_name, val_score in zip(args.task_names, scores):
+                            debug(f"Validation {task_name} {metric} = {val_score:.6f}")
+                            writer.add_scalar(
+                                f"validation_{task_name}_{metric}", val_score, n_iter
+                            )
 
-            # Save model checkpoint if improved validation score
-            mean_val_score = chemprop.utils.multitask_mean(
-                val_scores[args.metric], metric=args.metric
-            )
-            if args.minimize_score and mean_val_score < best_score or \
-                    not args.minimize_score and mean_val_score > best_score:
-                best_score, best_epoch = mean_val_score, epoch
-                best_estimator = deepcopy(estimator)
-            # Evaluate on test set using model with best validation score
-            info(
-                f"Model best validation {args.metric} = {best_score:.6f} on epoch \
-                {best_epoch}"
-            )
+                # Save model checkpoint if improved validation score
+                mean_val_score = chemprop.utils.multitask_mean(
+                    val_scores[args.metric], metric=args.metric
+                )
+                if args.minimize_score and mean_val_score < best_score or \
+                        not args.minimize_score and mean_val_score > best_score:
+                    best_score, best_epoch = mean_val_score, epoch
+                    best_estimator = deepcopy(estimator)
+                # Evaluate on test set using model with best validation score
+                info(
+                    f"Model best validation {args.metric} = {best_score:.6f} on epoch \
+                    {best_epoch}"
+                )
 
         writer.close()
         if not keep_logs:
