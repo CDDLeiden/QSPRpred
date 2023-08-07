@@ -173,6 +173,7 @@ class Chemprop(QSPRModel):
                 if `True`, the logger is set to quiet mode (no debug messages)
         """
         alg = MoleculeModel  # wrapper for chemprop.models.MoleculeModel
+        self.quietLogger = quiet_logger
         super().__init__(base_dir, alg, data, name, parameters, autoload)
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
@@ -194,7 +195,7 @@ class Chemprop(QSPRModel):
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         keep_logs: bool = False
-    ) -> Any | tuple[Any, int] | None:
+    ) -> Any | tuple[MoleculeModel, int | None]:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
         Note. convertToNumpy can be called here, to convert the input data to
@@ -301,10 +302,10 @@ class Chemprop(QSPRModel):
         # Get length of training data
         args.train_data_size = len(train_data)
 
-        debug(
-            f"Total size = {len(data):,} | "
-            f"train size = {len(train_data):,} | val size = {len(val_data):,}"
-        )
+        # log data size
+        debug(f"Total size = {len(data):,}")
+        if self.earlyStopping:
+            debug(f"train size = {len(train_data):,} | val size = {len(val_data):,}")
 
         # Initialize scaler and standard scale training targets (regression only)
         if args.dataset_type == "regression":
@@ -446,7 +447,7 @@ class Chemprop(QSPRModel):
 
         if self.earlyStopping:
             return best_estimator, best_epoch
-        return best_estimator
+        return estimator, None
 
     def predict(
         self,
@@ -576,6 +577,13 @@ class Chemprop(QSPRModel):
         path = f"{self.outPrefix}.pt"
         # load model state from file
         if os.path.isfile(path):
+            if not hasattr(self, "chempropLogger"):
+                self.chempropLogger = chemprop.utils.create_logger(
+                    name="chemprop_logger",
+                    save_dir=self.outDir,
+                    quiet=self.quietLogger
+                )
+
             estimator = MoleculeModel.cast(
                 chemprop.utils.load_checkpoint(path, logger=self.chempropLogger)
             )
@@ -609,6 +617,7 @@ class Chemprop(QSPRModel):
             f"{self.outPrefix}.pt", self.estimator, *self.estimator.getScalers(),
             self.estimator.args
         )
+        return f"{self.outPrefix}.pt"
 
     def convertToMoleculeDataset(
         self,
@@ -721,6 +730,13 @@ class Chemprop(QSPRModel):
         )
 
         return data
+
+    def cleanFiles(self):
+        handlers = self.chempropLogger.handlers[:]
+        for handler in handlers:
+            self.chempropLogger.removeHandler(handler)
+            handler.close()
+        return super().cleanFiles()
 
     @staticmethod
     def checkArgs(args: chemprop.args.TrainArgs | dict):

@@ -119,9 +119,12 @@ class ModelTestMixIn:
                 for x in model.metaInfo["feature_calculator_paths"]
             )
         )
-        self.assertTrue(
-            exists(f"{model.baseDir}/{model.metaInfo['feature_standardizer_path']}")
-        )
+        if model.metaInfo["feature_standardizer_path"] is not None:
+            self.assertTrue(
+                exists(
+                    f"{model.baseDir}/{model.metaInfo['feature_standardizer_path']}"
+                )
+            )
 
     def predictorTest(self, predictor: QSPRModel, **pred_kwargs):
         """Test a model as predictor.

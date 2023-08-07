@@ -26,6 +26,7 @@ from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimi
 from .models.metrics import SklearnMetric
 from .models.models import QSPRModel, QSPRsklearn
 from .models.tasks import TargetTasks
+from .models.early_stopping import EarlyStoppingMode
 
 
 def QSPRArgParser(txt=None):
@@ -377,7 +378,7 @@ def QSPR_modelling(args):
             # initialize models from saved or default parameters
 
             if args.model_evaluation:
-                CrossValAssessor()(QSPRmodel)
+                CrossValAssessor()(QSPRmodel, mode=EarlyStoppingMode.RECORDING)
                 TestSetAssessor()(QSPRmodel)
 
             if args.save_model:

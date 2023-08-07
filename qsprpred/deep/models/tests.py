@@ -175,7 +175,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             }],
             preparation_settings=None
         )
-        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.2))
+        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.2), )
         # Set SMILES as custom descriptor
         feature_calculator = CustomDescriptorsCalculator(
             desc_sets=[
