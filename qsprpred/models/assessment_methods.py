@@ -1,6 +1,5 @@
 """This module holds assessment methods for QSPRModels"""
 
-import math
 from datetime import datetime
 
 import numpy as np
@@ -40,58 +39,40 @@ class CrossValAssessor(ModelAssessor):
         model.checkForData()
         X, _ = model.data.getFeatures()
         y, _ = model.data.getTargetPropertiesValues()
-        # prepare arrays to store molecule ids
+        # prepare arrays to store molecule ids and predictions
         cvs_ids = np.array([None] * len(X))
-        # cvs and inds are used to store the predictions for the cross validation
-        # and the independent test set
         if model.task.isRegression() or not self.useProba:
             cvs = np.zeros((y.shape[0], model.nTargets))
         else:
-            # cvs, inds need to be lists of arrays
-            # for multiclass-multitask classification
             cvs = [
                 np.zeros((y.shape[0], prop.nClasses)) for prop in model.targetProperties
             ]
         # cross validation
         folds = model.data.createFolds()
         fold_counter = np.zeros(y.shape[0])
-        last_save_epochs = 0
         for i, (X_train, X_test, y_train, y_test, idx_train,
                 idx_test) in enumerate(folds):
-            crossvalmodel = model.loadEstimator(evalparams)
             logger.debug(
                 "cross validation fold %s started: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
-            # store molecule indices
-            fold_counter[idx_test] = i
             # fit model
-            if model.supportsEarlyStopping:
-                crossvalmodel, last_save_epoch = model.fit(
-                    X_train, y_train, crossvalmodel
-                )
-                last_save_epochs += last_save_epoch
-                logger.info(
-                    f"cross validation fold {i}: last save epoch {last_save_epoch}"
-                )
-            else:
-                model.fit(X_train, y_train, crossvalmodel)
+            crossval_estimator = model.loadEstimator(evalparams)
+            model.fit(X_train, y_train, crossval_estimator, **kwargs)
             # make predictions
             if model.task.isRegression() or not self.useProba:
-                cvs[idx_test] = model.predict(X_test, crossvalmodel)
+                cvs[idx_test] = model.predict(X_test, crossval_estimator)
             else:
-                preds = model.predictProba(X_test, crossvalmodel)
+                preds = model.predictProba(X_test, crossval_estimator)
                 for idx in range(model.nTargets):
                     cvs[idx][idx_test] = preds[idx]
-
+            # save molecule ids and fold number
+            fold_counter[idx_test] = i
             cvs_ids[idx_test] = X.iloc[idx_test].index.to_numpy()
             logger.debug(
                 "cross validation fold %s ended: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
-            if model.supportsEarlyStopping:
-                n_folds = max(fold_counter) + 1
-                model.optimalEpochs = int(math.ceil(last_save_epochs / n_folds)) + 1
         # save results
         if save:
             index_name = model.data.getDF().index.name
@@ -132,7 +113,6 @@ class TestSetAssessor(ModelAssessor):
             float | np.ndarray: predictions for evaluation
         """
         evalparams = model.parameters if parameters is None else parameters
-
         # check if data is available
         model.checkForData()
         X, X_ind = model.data.getFeatures()
@@ -144,19 +124,15 @@ class TestSetAssessor(ModelAssessor):
                 np.zeros((y_ind.shape[0], prop.nClasses))
                 for prop in model.targetProperties
             ]
-
-        indmodel = model.loadEstimator(evalparams)
-        # fitting on whole trainingset and predicting on test set
-        if model.supportsEarlyStopping:
-            indmodel = indmodel.set_params(n_epochs=model.optimalEpochs)
-
-        indmodel = model.fit(X, y, indmodel, early_stopping=False)
+        # fit model
+        ind_estimator = model.loadEstimator(evalparams)
+        ind_estimator = model.fit(X, y, ind_estimator, **kwargs)
         # if independent test set is available, predict on it
         if X_ind.shape[0] > 0:
             if model.task.isRegression() or not self.useProba:
-                inds = model.predict(X_ind, indmodel)
+                inds = model.predict(X_ind, ind_estimator)
             else:
-                preds = model.predictProba(X_ind, indmodel)
+                preds = model.predictProba(X_ind, ind_estimator)
                 for idx in range(model.nTargets):
                     inds[idx] = preds[idx]
         else:
@@ -164,7 +140,6 @@ class TestSetAssessor(ModelAssessor):
                 "No independent test set available. "
                 "Skipping prediction on independent test set."
             )
-
         # predict values for independent test set and save results
         if save:
             index_name = model.data.getDF().index.name
