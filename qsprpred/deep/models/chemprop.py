@@ -212,7 +212,7 @@ class Chemprop(QSPRModel):
 
         Returns:
             Any: fitted estimator instance
-            int]: in case of early stopping, the number of iterations
+            int: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
         if self.chempropLogger is not None:
@@ -375,7 +375,10 @@ class Chemprop(QSPRModel):
         # Run training
         best_score = float("inf") if args.minimize_score else -float("inf")
         best_epoch, n_iter = 0, 0
-        n_epochs = self.earlyStopping.getEpochs()
+        # Get early stopping number of epochs early stopping in case of FIXED or OPTIMAL
+        # mode
+        n_epochs = self.earlyStopping.getEpochs(
+        ) if not self.earlyStopping else args.epochs
         for epoch in trange(n_epochs):
             debug(f"Epoch {epoch}")
             n_iter = chemprop.train.train(
