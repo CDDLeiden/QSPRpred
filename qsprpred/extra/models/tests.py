@@ -3,7 +3,6 @@ Test module for testing extra models.
 
 """
 
-import os
 from typing import Type
 from unittest import TestCase
 
@@ -27,12 +26,11 @@ from ..models.pcm import QSPRsklearnPCM
 class ModelDataSetsMixInExtras(ModelDataSetsMixIn, DataSetsMixInExtras):
     """This class holds the tests for testing models in extras."""
 
-    qsprModelsPath = f"{os.path.dirname(__file__)}/test_files/qspr/models"
-
 
 class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
-    @staticmethod
+
     def getModel(
+        self,
         name: str,
         alg: Type | None = None,
         dataset: PCMDataSet | None = None,
@@ -50,7 +48,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             QSPRsklearnPCM: Initialized model.
         """
         return QSPRsklearnPCM(
-            base_dir=f"{os.path.dirname(__file__)}/test_files/",
+            base_dir=self.qsprModelsPath,
             alg=alg,
             data=dataset,
             name=name,

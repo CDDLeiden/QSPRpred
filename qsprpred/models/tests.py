@@ -3,7 +3,6 @@
 import logging
 import numbers
 import os
-import shutil
 from os.path import exists
 from typing import Type
 from unittest import TestCase
@@ -36,20 +35,12 @@ logging.basicConfig(level=logging.DEBUG)
 class ModelDataSetsMixIn(DataSetsMixIn):
     """This class sets up the datasets for the model tests."""
 
-    qsprModelsPath = f"{os.path.dirname(__file__)}/test_files/qspr/models/"
-
     def setUp(self):
         """Set up the test environment."""
         super().setUp()
+        self.qsprModelsPath = f"{self.generatedPath}/models/"
         if not os.path.exists(self.qsprModelsPath):
             os.makedirs(self.qsprModelsPath)
-
-    @classmethod
-    def clean_directories(cls):
-        """Clean the directories."""
-        super().clean_directories()
-        if os.path.exists(cls.qsprModelsPath):
-            shutil.rmtree(cls.qsprModelsPath)
 
 
 class ModelTestMixIn:
@@ -210,8 +201,9 @@ class ModelTestMixIn:
 
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRsklearn class."""
-    @staticmethod
+
     def getModel(
+        self,
         name: str,
         alg: Type | None = None,
         dataset: QSPRDataset = None,
@@ -229,7 +221,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             QSPRsklearn: the model
         """
         return QSPRsklearn(
-            base_dir=f"{os.path.dirname(__file__)}/test_files/qspr/models",
+            base_dir=self.qsprModelsPath,
             alg=alg,
             data=dataset,
             name=name,

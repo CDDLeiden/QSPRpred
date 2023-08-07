@@ -63,8 +63,11 @@ from ...models.tasks import TargetTasks
 
 
 class DataSetsMixInExtras(DataSetsMixIn):
-    dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
-    qsprdatapath = f"{os.path.dirname(__file__)}/test_files/qspr/data"
+    """MixIn class for testing data sets in extras."""
+
+    def setUp(self):
+        super().setUp()
+        self.dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
 
     @classmethod
     def get_all_descriptors(cls) -> list[MoleculeDescriptorSet]:
@@ -191,9 +194,8 @@ class DataSetsMixInExtras(DataSetsMixIn):
         )
 
 
-    @classmethod
-    def getMSAProvider(cls):
-        return ClustalMSA(out_dir=cls.qsprdatapath)
+    def getMSAProvider(self):
+        return ClustalMSA(out_dir=self.qsprdatapath)
 
     def createPCMDataSet(
             self,

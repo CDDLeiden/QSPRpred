@@ -1,7 +1,6 @@
 """This module holds the test for functions regarding QSPR data preparation."""
 
 import copy
-import glob
 import itertools
 import logging
 import os
@@ -55,35 +54,41 @@ logging.basicConfig(level=logging.DEBUG)
 
 class PathMixIn:
     """Mix-in class that provides paths to test files and directories and handles their
-    creation and deletion."""
+    creation and deletion.
 
-    datapath = f"{os.path.dirname(__file__)}/test_files/data"
-    qsprdatapath = f"{os.path.dirname(__file__)}/test_files/qspr/data"
+    Attributes:
+        generatedPath (str):
+            path to the directory where generated files are stored, this directory is
+            created before and cleared after each test
+
+    """
 
     def setUp(self):
         """Create the directories that are used for testing."""
-        self.tearDown()
-        if not os.path.exists(self.qsprdatapath):
-            os.makedirs(self.qsprdatapath)
+        self.generatedPath = f"{os.path.dirname(__file__)}/test_files/generated"
+        self.clearGenerated()
+        if not os.path.exists(self.generatedPath):
+            os.makedirs(self.generatedPath)
 
     def tearDown(self):
         """Remove all files and directories that are used for testing."""
-        self.clean_directories()
-        if os.path.exists(self.qsprdatapath):
-            shutil.rmtree(self.qsprdatapath)
-        for extension in ["log", "pkg", "json"]:
-            globs = glob.glob(f"{self.datapath}/*.{extension}")
-            for path in globs:
-                os.remove(path)
+        self.clearGenerated()
 
-    @classmethod
-    def clean_directories(cls):
+    def clearGenerated(self):
         """Remove the directories that are used for testing."""
-        if os.path.exists(cls.qsprdatapath):
-            shutil.rmtree(cls.qsprdatapath)
+        if os.path.exists(self.generatedPath):
+            shutil.rmtree(self.generatedPath)
 
 
 class DataSetsMixIn(PathMixIn):
+
+    def setUp(self):
+        super().setUp()
+        self.datapath = f"{os.path.dirname(__file__)}/test_files/data"
+        self.qsprdatapath = f"{self.generatedPath}/datasets"
+        if not os.path.exists(self.qsprdatapath):
+            os.makedirs(self.qsprdatapath)
+
     """Mix-in class that provides a small and large testing data set and some common
     preparation settings to use in tests."""
     @staticmethod
@@ -121,7 +126,8 @@ class DataSetsMixIn(PathMixIn):
             DrugExPhyschem(),
             PredictorDesc(
                 QSPRsklearn.fromFile(
-                    f"{os.path.dirname(__file__)}/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json"
+                    f"{os.path.dirname(__file__)}/test_files/test_predictor/"
+                    f"qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json"
                 )
             ),
             TanimotoDistances(
@@ -1187,7 +1193,7 @@ class TestTargetImputation(PathMixIn, TestCase):
                 },
             ],
             df=self.df,
-            store_dir=self.qsprdatapath,
+            store_dir=self.generatedPath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
             target_imputer=SimpleImputer(strategy="mean"),
@@ -1235,7 +1241,7 @@ class TestFeatureFilters(PathMixIn, TestCase):
                 "task": TargetTasks.REGRESSION
             }],
             df=self.df,
-            store_dir=self.qsprdatapath,
+            store_dir=self.generatedPath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
         )
@@ -1454,10 +1460,10 @@ class TestFeatureStandardizer(DataSetsMixIn, TestCase):
         scaler = SKLearnStandardizer.fromFit(self.dataset.X, StandardScaler())
         scaled_features = scaler(self.dataset.X)
         scaler.toFile(
-            f"{os.path.dirname(__file__)}/test_files/qspr/data/test_scaler.json"
+            f"{self.generatedPath}/test_scaler.json"
         )
         scaler_fromfile = SKLearnStandardizer.fromFile(
-            f"{os.path.dirname(__file__)}/test_files/qspr/data/test_scaler.json"
+            f"{self.generatedPath}/test_scaler.json"
         )
         scaled_features_fromfile = scaler_fromfile(self.dataset.X)
         self.assertIsInstance(scaled_features, np.ndarray)
