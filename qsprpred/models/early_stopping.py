@@ -34,7 +34,18 @@ class EarlyStoppingMode(Enum):
 
 
 class EarlyStopping():
-    """Early stopping for training of models.
+    """Early stopping tracker for training of QSPRpred models.
+
+    An instance of this class is used to track the number of epochs trained in a model
+    when early stopping (mode RECORDING) is used. This information can then be used
+    to determine the optimal number of epochs to train in a model training without
+    early stopping (mode OPTIMAL). The optimal number of epochs is determined by
+    aggregating the number of epochs trained in previous model trainings with early
+    stopping. The aggregation function can be specified by the user.
+    The number of epochs to train in a model training without early stopping can also
+    be specified manually (mode FIXED). Models can also be trained with early stopping
+    without recording the number of epochs trained (mode NOT_RECORDING), e.g. useful
+    when hyperparameter tuning is performed with early stopping.
 
     Attributes:
         mode (EarlyStoppingMode): early stopping mode
@@ -55,7 +66,7 @@ class EarlyStopping():
         Args:
             mode (EarlyStoppingMode): early stopping mode
             num_epochs (int, optional): number of epochs to train in FIXED mode.
-            aggregatefunc (function, optional): numpy function to aggregate trained
+            aggregate_func (function, optional): numpy function to aggregate trained
                 epochs in OPTIMAL mode. Note, non-numpy functions are not supported.
         """
         self.mode = mode
@@ -65,7 +76,7 @@ class EarlyStopping():
 
     @property
     def optimalEpochs(self) -> int:
-        """Number of epochs to train in OPTIMAL mode."""
+        """Return number of epochs to train in OPTIMAL mode."""
         if len(self._trainedEpochs) == 0:
             raise ValueError(
                 "No number of epochs have been recorded yet, first run fit with early "
@@ -76,19 +87,19 @@ class EarlyStopping():
 
     @property
     def trainedEpochs(self) -> list[int]:
-        """"List of number of epochs trained in a model training with early stopping."""
+        """"Return list of number of epochs trained in early stopping mode RECORDING."""
         return self._trainedEpochs.copy()
 
     @trainedEpochs.setter
     def trainedEpochs(self, epochs: list[int]):
-        """Set number of epochs trained in a model training with early stopping.
+        """Set list of number of epochs trained in early stopping mode RECORDING."
 
         Args:
             epochs (list[int]): list of number of epochs
         """
         self._trainedEpochs = epochs
 
-    def recordEpochs(self, epochs):
+    def recordEpochs(self, epochs: int):
         """Record number of epochs.
 
         Args:
@@ -143,8 +154,12 @@ class EarlyStopping():
         return self.mode.__bool__()
 
 
-def early_stopping(func):
-    """Early stopping decorator for fit method of models that support early stopping."""
+def early_stopping(func: Callable) -> Callable:
+    """Early stopping decorator for fit method of models that support early stopping.
+
+    Returns:
+        function: decorated fit method
+    """
     def wrapper_fit(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
@@ -152,20 +167,18 @@ def early_stopping(func):
         estimator: Any | None = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         **kwargs
-    ):
+    ) -> Any:
         """Wrapper for fit method of models that support early stopping.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
-            early_stopping (EarlyStopping): early stopping object
+            mode (EarlyStoppingMode): early stopping mode
             kwargs (dict): additional keyword arguments for the estimator's fit method
 
         Returns:
             Any: fitted estimator instance
-            int, optional: in case of early stopping, the number of iterations
-                after which the model stopped training
         """
         assert self.supportsEarlyStopping, (
             "early_stopping decorator can only be used for models that support"
