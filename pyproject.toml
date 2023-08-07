@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "setuptools_scm[toml]>=7.1"]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -89,7 +89,6 @@ version = { attr = "qsprpred.__version__"}
 
 [tool.setuptools_scm]
 write_to = "qsprpred/_version.py"
-version_scheme = "post-release"
 
 [tool.yapf]
 based_on_style = "facebook"
