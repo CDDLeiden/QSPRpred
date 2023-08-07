@@ -12,6 +12,9 @@ import torch
 from parameterized import parameterized
 
 from ...data.data import QSPRDataset
+from ...data.utils.datasplitters import RandomSplit
+from ...data.utils.descriptorcalculator import CustomDescriptorsCalculator
+from ...data.utils.descriptorsets import DataFrameDescriptorSet
 from ...deep.models.models import QSPRDNN
 from ...deep.models.chemprop import Chemprop
 from ...deep.models.neural_network import STFullyConnected
@@ -97,6 +100,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             }],
             preparation_settings=self.get_default_prep(),
         )
+
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
@@ -169,8 +173,16 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "task": task,
                 "th": th
             }],
-            preparation_settings=self.get_default_prep(),
+            preparation_settings=None
         )
+        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.2))
+        # Set SMILES as custom descriptor
+        feature_calculator = CustomDescriptorsCalculator(
+            desc_sets=[
+                DataFrameDescriptorSet(dataset.getDF()[["SMILES"]]),
+            ]
+        )
+        dataset.addCustomDescriptors(feature_calculator, dtype=str)
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
