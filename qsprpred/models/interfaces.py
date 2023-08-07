@@ -790,20 +790,25 @@ class QSPRModel(ABC):
         """Fit the model to the given data matrix or `QSPRDataset`.
 
         Note. convertToNumpy can be called here, to convert the input data to
-        np.ndarray format.
+            np.ndarray format.
 
-        Note. if no estimator is given, the estimator instance of the model
-              is used.
+        Note. if no estimator is given, the estimator instance of the model is used.
+
+        Note. if a model supports early stopping, the fit function should have the
+            `early_stopping` decorator and the mode argument should be used to set the
+            early stopping mode. If the model does not support early stopping, the mode
+            argument is ignored.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
+            kwargs: additional arguments to pass to the fit method of the estimator
 
         Returns:
             Any: fitted estimator instance
-            int]: in case of early stopping, the number of iterations
+            int: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
 
