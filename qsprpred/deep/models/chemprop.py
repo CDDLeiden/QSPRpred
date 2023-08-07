@@ -220,6 +220,8 @@ class Chemprop(QSPRModel):
         else:
             debug = info = print
 
+        estimator = self.estimator if estimator is None else estimator
+
         data = self.convertToMoleculeDataset(estimator, X, y)
         args = estimator.args
 
@@ -494,6 +496,11 @@ class Chemprop(QSPRModel):
             atom_bond_scaler=estimator.atom_bond_scaler,
             disable_progress_bar=True
         )
+
+        # change list of lists to 2D array
+        preds = np.array(preds)
+
+        print(preds.shape)
 
         return preds
 
