@@ -89,6 +89,7 @@ version = { attr = "qsprpred.__version__"}
 
 [tool.setuptools_scm]
 write_to = "qsprpred/_version.py"
+version_scheme = "post-release"
 
 [tool.yapf]
 based_on_style = "facebook"
