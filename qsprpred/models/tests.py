@@ -28,6 +28,7 @@ from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
 from ..models.models import QSPRsklearn
 from ..models.tasks import ModelTasks, TargetTasks
+from ..models.early_stopping import EarlyStoppingMode
 
 N_CPUS = 2
 logging.basicConfig(level=logging.DEBUG)
@@ -103,7 +104,7 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        CrossValAssessor()(model)
+        CrossValAssessor()(model, mode=EarlyStoppingMode.RECORDING)
         TestSetAssessor()(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))

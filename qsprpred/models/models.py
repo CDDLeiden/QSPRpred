@@ -128,7 +128,7 @@ class QSPRsklearn(QSPRModel):
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
-        early_stopping: Any = None
+        mode: Any = None
     ):
         """See `QSPRModel.fit`."""
         estimator = self.estimator if estimator is None else estimator
