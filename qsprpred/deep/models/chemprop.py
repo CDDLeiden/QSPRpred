@@ -16,6 +16,7 @@ from tqdm import tqdm, trange
 from ...data.data import QSPRDataset
 from ...models.interfaces import QSPRModel
 from ...models.tasks import ModelTasks
+from ...models.early_stopping import EarlyStoppingMode, early_stopping
 
 
 class MoleculeModel(chemprop.models.MoleculeModel):
@@ -101,7 +102,7 @@ class MoleculeModel(chemprop.models.MoleculeModel):
         return obj
 
     @staticmethod
-    def getTrainArgs(args: dict) -> chemprop.args.TrainArgs:
+    def getTrainArgs(args: dict | None) -> chemprop.args.TrainArgs:
         """Get a chemprop.args.TrainArgs instance from a dictionary.
 
         Args:
@@ -110,6 +111,8 @@ class MoleculeModel(chemprop.models.MoleculeModel):
         Returns:
             chemprop.args.TrainArgs: arguments for training the model
         """
+        if args is None:
+            args = {"dataset_type": "regression", "data_path": ""}
         train_args = chemprop.args.TrainArgs()
         train_args.from_dict(args, skip_unsettable=True)
         train_args.process_args()
@@ -183,12 +186,13 @@ class Chemprop(QSPRModel):
         """
         return True
 
+    @early_stopping
     def fit(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
-        early_stopping: bool = True,
+        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         keep_logs: bool = False
     ) -> Any | tuple[Any, int] | None:
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -231,17 +235,20 @@ class Chemprop(QSPRModel):
         # set task names
         args.task_names = [prop.name for prop in self.data.targetProperties]
 
-        # Split data
-        debug(f"Splitting data with seed {args.seed}")
-        train_data, val_data, _ = chemprop.data.utils.split_data(
-            data=data,
-            split_type=args.split_type,
-            sizes=args.split_sizes if args.split_sizes[2] == 0 else [0.9, 0.1, 0],
-            key_molecule_index=args.split_key_molecule,
-            seed=args.seed,
-            args=args,
-            logger=self.chempropLogger
-        )
+        if self.earlyStopping:
+            # Split data
+            debug(f"Splitting data with seed {args.seed}")
+            train_data, val_data, _ = chemprop.data.utils.split_data(
+                data=data,
+                split_type=args.split_type,
+                sizes=args.split_sizes if args.split_sizes[2] == 0 else [0.9, 0.1, 0],
+                key_molecule_index=args.split_key_molecule,
+                seed=args.seed,
+                args=args,
+                logger=self.chempropLogger
+            )
+        else:
+            train_data = data
 
         # Get number of molecules per class in training data
         if args.dataset_type == "classification":
@@ -260,7 +267,8 @@ class Chemprop(QSPRModel):
         # Fit feature scaler on train data and scale data
         if args.features_scaling:
             features_scaler = train_data.normalize_features(replace_nan_token=0)
-            val_data.normalize_features(features_scaler)
+            if self.earlyStopping:
+                val_data.normalize_features(features_scaler)
         else:
             features_scaler = None
 
@@ -269,9 +277,10 @@ class Chemprop(QSPRModel):
             atom_descriptor_scaler = train_data.normalize_features(
                 replace_nan_token=0, scale_atom_descriptors=True
             )
-            val_data.normalize_features(
-                atom_descriptor_scaler, scale_atom_descriptors=True
-            )
+            if self.earlyStopping:
+                val_data.normalize_features(
+                    atom_descriptor_scaler, scale_atom_descriptors=True
+                )
         else:
             atom_descriptor_scaler = None
 
@@ -280,9 +289,10 @@ class Chemprop(QSPRModel):
             bond_descriptor_scaler = train_data.normalize_features(
                 replace_nan_token=0, scale_bond_descriptors=True
             )
-            val_data.normalize_features(
-                bond_descriptor_scaler, scale_bond_descriptors=True
-            )
+            if self.earlyStopping:
+                val_data.normalize_features(
+                    bond_descriptor_scaler, scale_bond_descriptors=True
+                )
         else:
             bond_descriptor_scaler = None
 
@@ -329,7 +339,7 @@ class Chemprop(QSPRModel):
             shuffle=True,
             seed=args.seed
         )
-        if early_stopping:
+        if self.earlyStopping:
             val_data_loader = chemprop.data.MoleculeDataLoader(
                 dataset=val_data, batch_size=args.batch_size, num_workers=num_workers
             )
@@ -365,7 +375,8 @@ class Chemprop(QSPRModel):
         # Run training
         best_score = float("inf") if args.minimize_score else -float("inf")
         best_epoch, n_iter = 0, 0
-        for epoch in trange(args.epochs):
+        n_epochs = self.earlyStopping.getEpochs()
+        for epoch in trange(n_epochs):
             debug(f"Epoch {epoch}")
             n_iter = chemprop.train.train(
                 model=estimator,
@@ -381,7 +392,7 @@ class Chemprop(QSPRModel):
             )
             if isinstance(scheduler, ExponentialLR):
                 scheduler.step()
-            if early_stopping:
+            if self.earlyStopping:
                 val_scores = chemprop.train.evaluate(
                     model=estimator,
                     data_loader=val_data_loader,
@@ -428,7 +439,7 @@ class Chemprop(QSPRModel):
             # remove temp directory with logs
             shutil.rmtree(save_dir)
 
-        if early_stopping:
+        if self.earlyStopping:
             return best_estimator, best_epoch
         return best_estimator
 
@@ -540,11 +551,14 @@ class Chemprop(QSPRModel):
 
         return self.alg(args)
 
-    def loadEstimatorFromFile(self, params: dict | None = None) -> object:
+    def loadEstimatorFromFile(
+        self, params: dict | None = None, fallback_load=True
+    ) -> object:
         """Load estimator instance from file and apply the given parameters.
 
-        self.parameters:
+        Args:
             params (dict): algorithm parameters
+            fallback_load (bool): if `True`, init estimator from alg if path not found
 
         Returns:
             object: initialized estimator instance
@@ -566,6 +580,8 @@ class Chemprop(QSPRModel):
 
             # Set train args
             estimator.args = MoleculeModel.getTrainArgs(loaded_params)
+        elif fallback_load:
+            return self.loadEstimator(params)
         else:
             raise FileNotFoundError(
                 f"No estimator found at {path}, loading estimator from file failed."
@@ -703,77 +719,78 @@ class Chemprop(QSPRModel):
         Args:
             args (chemprop.args.TrainArgs, dict): arguments to check
         """
-        unused_common_args = [
-            "smiles_columns", "number_of_molecules", "checkpoint_dir",
-            "checkpoint_path", "checkpoint_paths", "gpu", "phase_features_path",
-            "max_data_size", "num_workers"
+        unused_args = [
+            "smiles_columns",
+            "number_of_molecules",
+            "checkpoint_dir",
+            "checkpoint_path",
+            "checkpoint_paths",
+            "gpu",
+            "phase_features_path",
+            "max_data_size",
+            "num_workers",  # common args
+            "data_path",
+            "target_columns",
+            "ignore_columns",
+            "dataset_type",
+            "multiclass_num_classes",
+            "separate_val_path",
+            "separate_test_path",
+            "spectra_phase_mask_path",
+            "data_weights_path",
+            "target_weights",
+            "split_type",
+            "split_key_molecule",
+            "num_folds",
+            "folds_file",
+            "val_fold_index",
+            "test_fold_index",
+            "crossval_index_dir",
+            "crossval_index_file",
+            "extra_metrics",
+            "save_dir",
+            "save_smiles_split",
+            "test",
+            "quiet",
+            "log_frequency",
+            "show_individual_scores",
+            "cache_cutoff",
+            "save_preds",
+            "resume_experiment"  # general train args
+            "separate_val_features_path",
+            "separate_test_features_path",
+            "separate_val_phase_features_path",
+            "separate_test_phase_features_path",
+            "separate_val_atom_descriptors_path",
+            "separate_test_atom_descriptors_path",
+            "separate_val_bond_features_path",
+            "separate_test_bond_features_path",
+            "config_path",
+            "ensemble_size",
+            "aggregation",
+            "aggregation_norm",
+            "reaction",
+            "reaction_mode",
+            "reaction_solvent"  # model train args
+            "frzn_ffn_layers",
+            "freeze_first_only"  # training train args
         ]
-        unused_general_train_args = [
-            "data_path", "target_columns", "ignore_columns", "dataset_type",
-            "multiclass_num_classes", "separate_val_path", "separate_test_path",
-            "spectra_phase_mask_path", "data_weights_path", "target_weights",
-            "split_type", "split_key_molecule", "num_folds", "folds_file",
-            "val_fold_index", "test_fold_index", "crossval_index_dir",
-            "crossval_index_file", "extra_metrics", "save_dir", "save_smiles_split",
-            "test", "quiet", "log_frequency", "show_individual_scores", "cache_cutoff",
-            "save_preds", "resume_experiment"
-        ]
-        unused_model_train_args = [
-            "separate_val_features_path", "separate_test_features_path",
-            "separate_val_phase_features_path", "separate_test_phase_features_path",
-            "separate_val_atom_descriptors_path", "separate_test_atom_descriptors_path",
-            "separate_val_bond_features_path", "separate_test_bond_features_path",
-            "config_path", "ensemble_size", "aggregation", "aggregation_norm",
-            "reaction", "reaction_mode", "reaction_solvent"
-        ]
-
-        unused_training_train_args = ["frzn_ffn_layers", "freeze_first_only"]
-        if isinstance(args, dict):
-            # check if any key in args is in unused_common_args
-            set_unused_common_args = [key in unused_common_args for key in args.keys()]
-            if any(set_unused_common_args):
-                print(
-                    "Warning: unused common arguments sets: "
-                    f"{np.array(list(args.keys()))[set_unused_common_args]}"
-                )
-
-            # check if any key in args is in unused_general_train_args
-            set_unused_general_train_args = [
-                key in unused_general_train_args for key in args.keys()
-            ]
-            if any(set_unused_general_train_args):
-                print(
-                    "Warning: unused general train arguments sets: "
-                    f"{np.array(list(args.keys()))[set_unused_general_train_args]}"
-                )
-
-            # check if any key in args is in unused_model_train_args
-            set_unused_model_train_args = [
-                key in unused_model_train_args for key in args.keys()
-            ]
-
-            if any(set_unused_model_train_args):
-                print(
-                    "Warning: unused model train arguments sets: "
-                    f"{np.array(list(args.keys()))[set_unused_model_train_args]}"
-                )
-
-            # check if any key in args is in unused_training_train_args
-            set_unused_training_train_args = [
-                key in unused_training_train_args for key in args.keys()
-            ]
-
-            if any(set_unused_training_train_args):
-                print(
-                    "Warning: unused training train arguments sets:"
-                    f"{np.array(list(args.keys()))[set_unused_training_train_args]}"
-                )
-
+        if isinstance(args, dict) or args is None:
+            if isinstance(args, dict):
+                # check if any key in args is in unused_common_args
+                set_unused_args = [key in unused_args for key in args.keys()]
+                if any(set_unused_args):
+                    print(
+                        "Warning: unused common arguments sets: "
+                        f"{np.array(list(args.keys()))[set_unused_args]}"
+                    )
+            else:
+                args = {}
             # add data_path to args
             args["data_path"] = ""
 
             if "dataset_type" not in args.keys():
-                args["dataset_type"] = ""
+                args["dataset_type"] = "regression"
 
             args = chemprop.args.TrainArgs().from_dict(args, skip_unsettable=True)
             args.process_args()
