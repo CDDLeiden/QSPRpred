@@ -1,9 +1,11 @@
 """Early stopping for training of models."""
-from enum import Enum
-import numpy as np
 import json
-from typing import Callable, Any
+from enum import Enum
+from typing import Any, Callable
+
+import numpy as np
 import pandas as pd
+
 from ..data.data import QSPRDataset
 
 
@@ -33,7 +35,7 @@ class EarlyStoppingMode(Enum):
         return self in [EarlyStoppingMode.NOT_RECORDING, EarlyStoppingMode.RECORDING]
 
 
-class EarlyStopping():
+class EarlyStopping:
     """Early stopping tracker for training of QSPRpred models.
 
     An instance of this class is used to track the number of epochs trained in a model
@@ -59,7 +61,7 @@ class EarlyStopping():
         self,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         num_epochs: int | None = None,
-        aggregate_func: Callable[[list[int]], int] = np.mean
+        aggregate_func: Callable[[list[int]], int] = np.mean,
     ):
         """Initialize early stopping.
 
@@ -87,7 +89,7 @@ class EarlyStopping():
 
     @property
     def trainedEpochs(self) -> list[int]:
-        """"Return list of number of epochs trained in early stopping mode RECORDING."""
+        """Return list of number of epochs trained in early stopping mode RECORDING."""
         return self._trainedEpochs.copy()
 
     @trainedEpochs.setter
@@ -131,7 +133,8 @@ class EarlyStopping():
                     "num_epochs": self.numEpochs,
                     "trained_epochs": self.trainedEpochs,
                     "aggregate_func_name": self.aggregateFunc.__name__,
-                }, f
+                },
+                f,
             )
 
     @classmethod
