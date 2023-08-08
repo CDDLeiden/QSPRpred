@@ -1,4 +1,0 @@
-QSPRID	pchembl_value_Median_class_Label	pchembl_value_Median_class_Prediction	pchembl_value_Median_class_ProbabilityClass_0	pchembl_value_Median_class_ProbabilityClass_1
-XGBC_SINGLECLASS_pcm_10	True	1	0.47576356	0.52423644
-XGBC_SINGLECLASS_pcm_14	False	1	0.48056185	0.51943815
-XGBC_SINGLECLASS_pcm_3	True	0	0.5174738	0.4825262
