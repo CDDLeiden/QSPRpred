@@ -12,14 +12,14 @@ import torch
 from parameterized import parameterized
 
 from ...data.data import QSPRDataset
-from ...data.utils.datasplitters import RandomSplit
-from ...data.utils.descriptorcalculator import CustomDescriptorsCalculator
-from ...data.utils.descriptorsets import DataFrameDescriptorSet
 from ...deep.models.models import QSPRDNN
 from ...deep.models.chemprop import Chemprop
 from ...deep.models.neural_network import STFullyConnected
 from ...models.tasks import TargetTasks
 from ...models.tests import ModelDataSetsMixIn, ModelTestMixIn
+from ...data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
+from ...data.utils.descriptorsets import SmilesDesc
+from ...data.utils.datasplitters import RandomSplit
 
 GPUS = list(range(torch.cuda.device_count()))
 
@@ -175,14 +175,12 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             }],
             preparation_settings=None
         )
-        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.2), )
-        # Set SMILES as custom descriptor
-        feature_calculator = CustomDescriptorsCalculator(
-            desc_sets=[
-                DataFrameDescriptorSet(dataset.getDF()[["SMILES"]]),
-            ]
+        dataset.prepareDataset(
+            feature_calculators=[
+                MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
+            ],
+            split=RandomSplit(test_fraction=0.1)
         )
-        dataset.addCustomDescriptors(feature_calculator, dtype=str)
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
