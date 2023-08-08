@@ -474,6 +474,10 @@ class SmilesDesc(MoleculeDescriptorSet):
     def descriptors(self):
         return ["SMILES"]
 
+    @descriptors.setter
+    def descriptors(self, descriptors):
+        pass
+
     def __str__(self):
         return "SmilesDesc"
 
