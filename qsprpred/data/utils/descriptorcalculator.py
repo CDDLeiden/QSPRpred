@@ -217,15 +217,17 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
             values = pd.DataFrame(values, columns=descset.descriptors)
             if descset.isFP:
                 values.add_prefix(f"{descset.fingerprintType}_")
-            values = values.astype(dtype)
-            # if dtype is numeric
-            if np.issubdtype(dtype, np.number):
+            try:
+                values = values.astype(dtype)
                 values = self.treatInfs(values)
+            except ValueError:
+                logger.warning(
+                    f"Could not convert descriptor values to {dtype}. "
+                    "Keeping original dtype."
+                )
             df = pd.concat(
                 [df, values.add_prefix(f"{self.getPrefix()}_{descset}_")], axis=1
             )
-        # replace errors by nan values
-        df = df.apply(pd.to_numeric, errors="coerce")
         return df
 
     def getPrefix(self) -> str:

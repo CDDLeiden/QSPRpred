@@ -35,13 +35,8 @@ from .utils.descriptorcalculator import (
     MoleculeDescriptorsCalculator,
 )
 from .utils.descriptorsets import (
-    DataFrameDescriptorSet,
-    DescriptorSet,
-    DrugExPhyschem,
-    FingerprintSet,
-    PredictorDesc,
-    RDKitDescs,
-    TanimotoDistances,
+    DataFrameDescriptorSet, DescriptorSet, DrugExPhyschem, FingerprintSet,
+    PredictorDesc, RDKitDescs, TanimotoDistances, SmilesDesc
 )
 from .utils.feature_standardization import SKLearnStandardizer
 from .utils.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
@@ -1399,6 +1394,14 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
         self.assertEqual(
             self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList) + 10)
         )
+
+    def test_SmilesDesc(self):
+        """Test the smiles descriptors calculator."""
+        desc_calc = MoleculeDescriptorsCalculator([SmilesDesc()])
+        self.dataset.addDescriptors(desc_calc)
+
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
+        self.assertTrue(self.dataset.X.any().any())
 
     def test_consistency(self):
         """Test if the descriptor calculator is consistent with the dataset."""
