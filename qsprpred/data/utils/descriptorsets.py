@@ -68,7 +68,7 @@ class MoleculeDescriptorSet(DescriptorSet):
     Descriptorset: a collection of descriptors that can be calculated for a molecule.
     """
     @abstractmethod
-    def __call__(self, mols: list[str | Mol]):
+    def __call__(self, mols: list[str | Mol]) -> np.ndarray | pd.DataFrame:
         """
         Calculate the descriptor for a molecule.
 
@@ -442,6 +442,40 @@ class PredictorDesc(MoleculeDescriptorSet):
 
     def __str__(self):
         return "PredictorDesc"
+
+
+class SmilesDesc(MoleculeDescriptorSet):
+    """Descriptorset that calculates descriptors from a SMILES sequence."""
+    def __call__(self, mols: list[str | Mol]):
+        """Return smiles as descriptors.
+
+        Args:
+            mols (list): list of smiles or rdkit molecules
+
+        Returns:
+            an array or data frame of descriptor values of shape (n_mols, n_descriptors)
+        """
+        if all(isinstance(mol, str) for mol in mols):
+            return np.array(mols)
+        elif all(isinstance(mol, Mol) for mol in mols):
+            return np.array([Chem.MolToSmiles(mol) for mol in mols])
+        else:
+            raise ValueError("Molecules should be either SMILES or RDKit Mol objects.")
+
+    @property
+    def isFP(self):
+        return False
+
+    @property
+    def settings(self):
+        return {}
+
+    @property
+    def descriptors(self):
+        return ["SMILES"]
+
+    def __str__(self):
+        return "SmilesDesc"
 
 
 class _DescriptorSetRetriever:
