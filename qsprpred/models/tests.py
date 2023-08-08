@@ -23,12 +23,12 @@ from xgboost import XGBClassifier, XGBRegressor
 from ..data.data import QSPRDataset
 from ..data.tests import DataSetsMixIn
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
+from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
 from ..models.models import QSPRsklearn
 from ..models.tasks import ModelTasks, TargetTasks
-from ..models.early_stopping import EarlyStoppingMode, EarlyStopping, early_stopping
 
 N_CPUS = 2
 logging.basicConfig(level=logging.DEBUG)
@@ -97,7 +97,7 @@ class ModelTestMixIn:
             scoring=score_func,
             param_grid=search_space_gs,
             score_aggregation=np.median,
-            model_assessor=TestSetAssessor(use_proba=False)
+            model_assessor=TestSetAssessor(use_proba=False),
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)
