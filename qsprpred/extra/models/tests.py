@@ -48,7 +48,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             QSPRsklearnPCM: Initialized model.
         """
         return QSPRsklearnPCM(
-            base_dir=self.qsprModelsPath,
+            base_dir=self.generatedModelsPath,
             alg=alg,
             data=dataset,
             name=name,
@@ -105,11 +105,11 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
         else:
             parameters = None
         # initialize dataset
-        prep = self.get_default_prep()
+        prep = self.getDefaultPrep()
         prep["feature_calculators"] = prep["feature_calculators"] + [
             ProteinDescriptorCalculator(
                 desc_sets=[ProDec(sets=["Sneath"])],
-                msa_provider=ClustalMSA(self.qsprdatapath),
+                msa_provider=ClustalMSA(self.generatedDataPath),
             )
         ]
         dataset = self.createPCMDataSet(

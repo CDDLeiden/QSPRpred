@@ -85,19 +85,19 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             th: Threshold to use for classification models.
         """
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
             target_props=[{
                 "name": "CL",
                 "task": task,
                 "th": th
             }],
-            preparation_settings=self.get_default_prep(),
+            preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
-            base_dir=self.qsprModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset
+            base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset
         )
         self.fitTest(model)
         predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)

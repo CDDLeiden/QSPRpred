@@ -44,7 +44,7 @@ class ModelRetriever(ModelDataSetsMixIn):
         return QSPRsklearn(
             name=name,
             data=dataset,
-            base_dir=self.qsprModelsPath,
+            base_dir=self.generatedModelsPath,
             alg=alg,
         )
 
@@ -54,14 +54,14 @@ class ROCPlotTest(ModelRetriever, TestCase):
 
     def testPlotSingle(self):
         """Test plotting ROC curve for single task."""
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataSet(
             "test_roc_plot_single_data",
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
                 "th": [50]
             }],
-            preparation_settings=self.get_default_prep(),
+            preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
         CrossValAssessor()(model)
@@ -84,14 +84,14 @@ class MetricsPlotTest(ModelRetriever, TestCase):
 
     def testPlotSingle(self):
         """Test plotting metrics for single task."""
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataSet(
             "test_metrics_plot_single_data",
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
                 "th": [50]
             }],
-            preparation_settings=self.get_default_prep(),
+            preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_metrics_plot_single_model")
         CrossValAssessor()(model)
@@ -112,8 +112,8 @@ class CorrPlotTest(ModelRetriever, TestCase):
 
     def testPlotSingle(self):
         """Test plotting correlation for single task."""
-        dataset = self.create_large_dataset(
-            "test_corr_plot_single_data", preparation_settings=self.get_default_prep()
+        dataset = self.createLargeTestDataSet(
+            "test_corr_plot_single_data", preparation_settings=self.getDefaultPrep()
         )
         model = self.getModel(
             dataset,
