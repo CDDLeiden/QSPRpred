@@ -31,7 +31,7 @@ Note that this will install the basic dependencies, but not the optional depende
 pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[deep] 
 
 # include extra dependencies for PCM models and extra descriptor sets from packages other than RDKit
-pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[extra_cpu]
+pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[extra]
 
 # include py-boost and other models with GPU dependencies
 # before installing QSPRpred extra_gpu via pip you should have cupy installed:
