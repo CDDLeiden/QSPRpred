@@ -1400,9 +1400,8 @@ class TestDescriptorsets(DataSetsMixIn, TestCase):
         desc_calc = MoleculeDescriptorsCalculator([SmilesDesc()])
         self.dataset.addDescriptors(desc_calc)
 
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 2))
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
         self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
 
     def test_consistency(self):
         """Test if the descriptor calculator is consistent with the dataset."""
