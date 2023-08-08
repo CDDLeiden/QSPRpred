@@ -8,6 +8,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from sklearn.impute import SimpleImputer
 
 from qsprpred.data.data import QSPRDataset
 from qsprpred.data.sources.papyrus import Papyrus
@@ -129,7 +130,7 @@ def Parkinsons(singletask=True):
             smiles_col=smiles_col,
             target_props=target_props,
             store_dir="qspr/data",
-            target_imputer=None,
+            target_imputer=SimpleImputer(strategy="mean"),
             overwrite=True
         )
 
