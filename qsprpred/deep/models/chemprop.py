@@ -471,6 +471,7 @@ class Chemprop(QSPRModel):
                 2D array containing the predictions, where each row corresponds
                 to a sample in the data and each column to a target property
         """
+        estimator = self.estimator if estimator is None else estimator
         X = self.convertToMoleculeDataset(estimator, X)
         args = estimator.args
 
@@ -588,7 +589,7 @@ class Chemprop(QSPRModel):
                 chemprop.utils.load_checkpoint(path, logger=self.chempropLogger)
             )
             # load scalers from file
-            estimator.setScalers(chemprop.utils.load_scalers(path))
+            estimator.setScalers(*chemprop.utils.load_scalers(path))
             # load parameters from file
             loaded_params = chemprop.utils.load_args(path).as_dict()
             if params is not None:
