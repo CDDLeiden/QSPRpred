@@ -165,7 +165,7 @@ def early_stopping(func: Callable) -> Callable:
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any | None = None,
-        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        mode: EarlyStoppingMode | None = None,
         **kwargs
     ) -> Any:
         """Wrapper for fit method of models that support early stopping.
@@ -182,11 +182,11 @@ def early_stopping(func: Callable) -> Callable:
         """
         assert self.supportsEarlyStopping, (
             "early_stopping decorator can only be used for models that support"
-            "early stopping."
+            " early stopping."
         )
-        self.earlyStopping.mode = mode
+        self.earlyStopping.mode = mode if mode is not None else self.earlyStopping.mode
         estimator, best_epoch = func(self, X, y, estimator, mode, **kwargs)
-        if mode == EarlyStoppingMode.RECORDING:
+        if self.earlyStopping.mode == EarlyStoppingMode.RECORDING:
             self.earlyStopping.recordEpochs(best_epoch)
         return estimator
 
