@@ -144,7 +144,7 @@ def AR_PCM(data_dir="data"):
         a `QSPRDataset` instance with the loaded data
     """
 
-    from qsprpred.extra_cpu.data.data import PCMDataSet
+    from qsprpred.extra.data.data import PCMDataSet
 
     acc_keys = ["P29274", "P29275", "P30542", "P0DMS8"]
     dataset_name = "AR_LIGANDS"  # name of the file to be generated

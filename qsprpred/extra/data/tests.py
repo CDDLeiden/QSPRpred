@@ -36,14 +36,14 @@ from ...data.utils.descriptorsets import (
 )
 from ...data.utils.feature_standardization import SKLearnStandardizer
 from ...data.utils.featurefilters import HighCorrelationFilter, LowVarianceFilter
-from ...extra_cpu.data.data import PCMDataSet
-from ...extra_cpu.data.utils.descriptor_utils.msa_calculator import (
+from ...extra.data.data import PCMDataSet
+from ...extra.data.utils.descriptor_utils.msa_calculator import (
     MAFFT,
     BioPythonMSA,
     ClustalMSA,
 )
-from ...extra_cpu.data.utils.descriptorcalculator import ProteinDescriptorCalculator
-from ...extra_cpu.data.utils.descriptorsets import (
+from ...extra.data.utils.descriptorcalculator import ProteinDescriptorCalculator
+from ...extra.data.utils.descriptorsets import (
     ExtendedValenceSignature,
     Mold2,
     Mordred,
