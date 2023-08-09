@@ -1,5 +1,9 @@
-"""
-models
+"""Here the DNN model originally from DrugEx can be found.
+
+At the moment this contains a class for fully-connected DNNs.
+To add more a model class implementing the `QSPRModel` interface can be added,
+see tutorial adding_new_components.
+
 
 Created by: Martin Sicho
 On: 12.05.23, 16:39
