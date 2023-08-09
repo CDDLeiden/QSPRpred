@@ -1536,7 +1536,7 @@ class DataPrepTestMixIn(DescriptorCheckMixIn):
         # save the dataset
         dataset.save()
         # reload the dataset and check consistency again
-        dataset = QSPRDataset.fromFile(dataset.storePath)
+        dataset = dataset.__class__.fromFile(dataset.storePath)
         self.assertEqual(dataset.name, name)
         self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
         for idx, prop in enumerate(expected_target_props):

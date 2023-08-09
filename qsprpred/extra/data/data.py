@@ -4,6 +4,10 @@ data
 Created by: Martin Sicho
 On: 12.05.23, 17:14
 """
+import base64
+import marshal
+import os
+import types
 from typing import Callable
 
 import pandas as pd
@@ -181,6 +185,49 @@ class PCMDataSet(QSPRDataset):
             f"SDF loading not implemented for {PCMDataSet.__name__}, yet. "
             f"Use `PCMDataSet.fromMolTable` to convert a `MoleculeTable`"
             f"read from an SDF instead."
+        )
+
+    def generateMetadata(self):
+        meta = super().generateMetadata()
+        meta["init"]["protein_col"] = self.proteinCol
+        meta["init"]["protein_seq_provider"] = base64.b64encode(
+            marshal.dumps(
+                self.proteinSeqProvider.__code__ if self.proteinSeqProvider else None
+            )
+        ).decode('ascii')
+        return meta
+
+    @staticmethod
+    def loadMetadata(name: str, store_dir: str):
+        meta = QSPRDataset.loadMetadata(name, store_dir)
+        if meta["init"]["protein_seq_provider"] is not None:
+            seq_provider = marshal.loads(
+                base64.b64decode(meta["init"]["protein_seq_provider"])
+            )
+            try:
+                seq_provider = types.FunctionType(
+                    seq_provider, globals()
+                )
+                meta["init"]["protein_seq_provider"] = seq_provider
+            except Exception as e:
+                logger.warning(
+                    "Failed to load protein sequence provider from metadata. "
+                    f"The function object could not be recreated from the code. "
+                    f"\nError: {e}"
+                    f"\nDeserialized Code: {seq_provider}"
+                    f"\nSetting protein sequence provider to `None` for now."
+                )
+                meta["init"]["protein_seq_provider"] = None
+
+        return meta
+
+    @staticmethod
+    def fromFile(filename: str, *args, **kwargs) -> "QSPRDataset":
+        store_dir = os.path.dirname(filename)
+        name = os.path.basename(filename).rsplit("_", 1)[0]
+        meta = PCMDataSet.loadMetadata(name, store_dir)
+        return PCMDataSet(
+            *args, name=name, store_dir=store_dir, **meta["init"], **kwargs
         )
 
     @staticmethod
