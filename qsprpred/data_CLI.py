@@ -19,9 +19,9 @@ from sklearn.preprocessing import StandardScaler
 from .data.data import QSPRDataset
 from .data.utils.datafilters import papyrusLowQualityFilter
 from .data.utils.datasplitters import (
+    ClusterSplit,
     ManualSplit,
     RandomSplit,
-    ClusterSplit,
     ScaffoldSplit,
     TemporalSplit,
 )
@@ -141,7 +141,13 @@ def QSPRArgParser(txt=None):
         "-sp",
         "--split",
         type=str,
-        choices=["random", "cluster", "scaffold", "time", "manual",],
+        choices=[
+            "random",
+            "cluster",
+            "scaffold",
+            "time",
+            "manual",
+        ],
         default="random",
         help=(
             "Split type. If 'random', 'cluster' or 'scaffold', you can specify the"
@@ -358,7 +364,9 @@ def QSPR_dataprep(args):
                     dataset=mydataset,
                 )
             else:
-                split = RandomSplit(test_fraction=args.split_fraction, dataset=mydataset)
+                split = RandomSplit(
+                    test_fraction=args.split_fraction, dataset=mydataset
+                )
             # feature calculator
             descriptorsets = []
             # Avoid importing optional dependencies if not needed
