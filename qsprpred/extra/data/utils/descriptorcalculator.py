@@ -22,8 +22,8 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
     """
     def __init__(
         self,
-            desc_sets: list[ProteinDescriptorSet],
-            msa_provider: MSAProvider = ClustalMSA()
+        desc_sets: list[ProteinDescriptorSet],
+        msa_provider: MSAProvider = ClustalMSA()
     ) -> None:
         """Initialize the protein descriptor calculator.
 
@@ -108,7 +108,7 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
         """
 
         ret = super().fromFile(fname)
-        with open(f"{fname}.msaprovider", "r") as fh: # file handle
+        with open(f"{fname}.msaprovider", "r") as fh:  # file handle
             msa_provider_cls = json.load(fh)["class"]
         msa_provider_cls = import_class(msa_provider_cls)
         ret.msaProvider = msa_provider_cls.fromFile(f"{fname}.msaprovider")

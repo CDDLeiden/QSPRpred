@@ -127,14 +127,16 @@ class PCMDataSet(QSPRDataset):
             sequences (dict): Dictionary of protein sequences.
         """
         if not self.proteinSeqProvider:
-            raise ValueError("Protein sequence provider not set. Cannot get protein sequences.")
+            raise ValueError(
+                "Protein sequence provider not set. Cannot get protein sequences."
+            )
         return self.proteinSeqProvider(self.getProteinKeys())
 
     def addProteinDescriptors(
-            self,
-            calculator: ProteinDescriptorCalculator,
-            recalculate=False,
-            featurize=True
+        self,
+        calculator: ProteinDescriptorCalculator,
+        recalculate=False,
+        featurize=True
     ):
         """
         Add protein descriptors to the data frame.

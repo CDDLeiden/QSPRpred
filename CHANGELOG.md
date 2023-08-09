@@ -25,6 +25,7 @@ From v2.0.1 to v2.1.0.dev0
 - A new function `Metrics.checkMetricCompatibility` has been added, which checks if a metric is compatible with a given task and a given prediction methods (i.e. `predict` or `predictProba`)
 - In `EvaluationMethod` (see above), an attribute `use_proba` has been added, which determines whether the `predict` or `predictProba` method is used to make predictions (#56).
 - Add new descriptorset `SmilesDesc` to use the smiles strings as a descriptor.
+- `PyBoostModel` - QSPRpred wrapper for py-boost models.
 
 ## Removed Features
 - `StratifiedPerTarget` is replaced by `PCMSplit`.
