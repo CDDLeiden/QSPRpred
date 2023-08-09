@@ -1,9 +1,3 @@
-"""
-data
-
-Created by: Martin Sicho
-On: 12.05.23, 17:14
-"""
 from typing import Callable
 
 import pandas as pd

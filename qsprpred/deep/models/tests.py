@@ -1,9 +1,3 @@
-"""
-tests
-
-Created by: Martin Sicho
-On: 12.05.23, 18:31
-"""
 import os
 from typing import Type
 from unittest import TestCase
