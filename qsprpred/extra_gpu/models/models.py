@@ -126,7 +126,7 @@ class PyBoostModel(QSPRModel):
 
             return estimator, estimator.best_round
 
-        estimator.ntrees = self.earlyStopping.getEpochs()
+        estimator.params.update({'ntrees': self.earlyStopping.getEpochs()})
         estimator.fit(X, y)
 
         return estimator, estimator.ntrees
