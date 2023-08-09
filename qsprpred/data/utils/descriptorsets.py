@@ -383,7 +383,7 @@ class TanimotoDistances(MoleculeDescriptorSet):
 class PredictorDesc(MoleculeDescriptorSet):
     """MoleculeDescriptorSet that uses a Predictor object to calculate descriptors from
     a molecule."""
-    def __init__(self, model: list[QSPRModel | str]):
+    def __init__(self, model: QSPRModel | str):
         """
         Initialize the descriptorset with a `QSPRModel` object.
 
