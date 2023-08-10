@@ -338,6 +338,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         dataset.save()
         # load dataset and test if all checks out after loading
         dataset_new = PCMDataSet.fromFile(dataset.storePath)
+        self.assertIsInstance(dataset_new, PCMDataSet)
         self.validate_split(dataset_new)
         self.assertEqual(dataset.X_ind.shape[0], round(ndata * 0.2))
         self.assertEqual(
