@@ -14,7 +14,7 @@ from qsprpred.models.tasks import TargetTasks
 from sklearn.impute import SimpleImputer
 
 
-def A2AR(data_dir="data"):
+def A2AR(data_dir="data", random_state=None):
     """A classification dataset that contains activity data on the adenosine A2A receptor loaded from the Papyrus database
     using the built-in Papyrus wrapper.
 
@@ -48,11 +48,12 @@ def A2AR(data_dir="data"):
                 "th": [6.5]
             }
         ],
-        overwrite=True
+        overwrite=True,
+        random_state=random_state
     )
 
 
-def Parkinsons(singletask=True):
+def Parkinsons(singletask=True, random_state=None):
     """Parkinson's disease dataset that contains data for multiple targets related to the disease.
 
     It is loaded from a CSV file into pandas `DataFrame`. This is then converted to `QSPRDataset`
@@ -111,7 +112,7 @@ def Parkinsons(singletask=True):
                 "task": TargetTasks.REGRESSION
             }],
             store_dir="qspr/data",
-            random_state=42
+            random_state=random_state
         )
 
     else:
@@ -131,11 +132,11 @@ def Parkinsons(singletask=True):
             store_dir="qspr/data",
             target_imputer=SimpleImputer(strategy="mean"),
             overwrite=True,
-            random_state=42
+            random_state=random_state
         )
 
 
-def AR_PCM(data_dir="data"):
+def AR_PCM(data_dir="data", random_state=None):
     """
     A classification dataset that contains activity data for a PCM approach to model activity for a selection of adenosine receptors. The function recreates steps from data_preparation_advanced.ipynb.
 
@@ -195,4 +196,5 @@ def AR_PCM(data_dir="data"):
         ],
         protein_col="accession",
         protein_seq_provider=sequence_provider,
+        random_state=random_state
     )

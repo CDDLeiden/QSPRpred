@@ -329,6 +329,7 @@ def QSPR_modelling(args):
                     gpus=args.gpus,
                     patience=args.patience,
                     tol=args.tolerance,
+                    random_state=args.random_state
                 )
             else:
                 QSPRmodel = QSPRsklearn(
@@ -337,6 +338,7 @@ def QSPR_modelling(args):
                     alg=alg_dict[model_type],
                     name=f"{model_type}_{data_prefix}",
                     parameters=parameters,
+                    random_state=args.random_state
                 )
 
             # if desired run parameter optimization

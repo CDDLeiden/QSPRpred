@@ -1821,6 +1821,7 @@ class QSPRDataset(MoleculeTable):
         mol_table: MoleculeTable,
         target_props: list[TargetProperty | dict],
         name=None,
+        random_state=None,
         **kwargs,
     ) -> "QSPRDataset":
         """Create QSPRDataset from a MoleculeTable.
@@ -1838,7 +1839,7 @@ class QSPRDataset(MoleculeTable):
             mol_table.storeDir if "store_dir" not in kwargs else kwargs["store_dir"]
         )
         name = mol_table.name if name is None else name
-        ds = QSPRDataset(name, target_props, mol_table.getDF(), random_state=42, **kwargs)
+        ds = QSPRDataset(name, target_props, mol_table.getDF(), random_state=random_state, **kwargs)
         ds.descriptorCalculators = mol_table.descriptorCalculators
         ds.descriptors = mol_table.descriptors
         return ds

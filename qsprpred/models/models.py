@@ -13,6 +13,7 @@ import pandas as pd
 import sklearn_json as skljson
 from sklearn.svm import SVC, SVR
 from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
+from xgboost import XGBClassifier, XGBRegressor
 
 from ..data.data import QSPRDataset
 from ..logs import logger
@@ -45,6 +46,7 @@ class QSPRsklearn(QSPRModel):
             name (str): customized model name
             parameters (dict): model parameters
             autoload (bool): load model from file
+            random_state (int): seed for the random state
         """
         super().__init__(base_dir, alg, data, name, parameters, autoload)
         # check for incompatible tasks
@@ -68,13 +70,21 @@ class QSPRsklearn(QSPRModel):
                 self.parameters.update({"max_iter": 10000})
             else:
                 self.parameters = {"max_iter": 10000}
-        # TODO: should check a list of algs with random state
-        # also I think logic should be inverted so it is opt-out of random state
-        if self.alg in [RandomForestClassifier, ExtraTreesClassifier] and random_state is not None:
-            if self.parameters:
-                self.parameters.update({"random_state": random_state})
+        algs_with_random_state = [
+            RandomForestClassifier,
+            ExtraTreesClassifier,
+            SVC,
+            XGBClassifier,
+            XGBRegressor]
+        if random_state is not None:
+            if self.alg in algs_with_random_state:
+                if self.parameters:
+                    self.parameters.update({"random_state": random_state})
+                else:
+                    self.parameters = {"random_state": random_state}
             else:
-                self.parameters = {"random_state": random_state}
+                logger.warning(f"Random state supplied, but alg {alg} does not support it. \
+                               Ignoring this setting.")
         # set parameters if defined
         if self.parameters not in [None, {}] and hasattr(self, "estimator"):
             self.estimator.set_params(**self.parameters)

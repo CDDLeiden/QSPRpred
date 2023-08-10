@@ -65,6 +65,7 @@ class QSPRDNN(QSPRModel):
             if no progress on validation set score
         optimalEpochs (int):
             number of epochs to train the model for optimal performance
+        random_state (int): seed for the random state
     """
     def __init__(
         self,
@@ -78,6 +79,7 @@ class QSPRDNN(QSPRModel):
         gpus: list[int] = DEFAULT_GPUS,
         patience: int = 50,
         tol: float = 0,
+        random_state: int | None = None
     ):
         """Initialize a QSPRDNN model.
 
@@ -105,6 +107,8 @@ class QSPRDNN(QSPRModel):
             tol (float, optional):
                 minimum absolute improvement of loss necessary to count as progress
                 on best validation score. Defaults to 0.
+            random_state (int):
+                seed for the random state
         """
         self.device = device
         self.gpus = gpus
@@ -112,6 +116,7 @@ class QSPRDNN(QSPRModel):
         self.tol = tol
         self.nClass = None
         self.nDim = None
+        self.random_state = random_state
         super().__init__(base_dir, alg, data, name, parameters, autoload=autoload)
         if self.task.isMultiTask():
             raise NotImplementedError(
@@ -255,7 +260,8 @@ class QSPRDNN(QSPRModel):
         if early_stopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
-            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
+            # TODO: is this random_state assignment correct? might be that it should not be set every time
+            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1, random_state=self.random_state)
             return estimator.fit(X_train, y_train, X_val, y_val, **kwargs)
 
         estimator, _ = estimator.fit(X, y, **kwargs)
