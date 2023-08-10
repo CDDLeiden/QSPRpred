@@ -95,7 +95,7 @@ class RandomSplit(DataSplit):
     ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
-        self.seed = seed or (dataset.randomState if dataset else None)
+        self.seed = seed or (dataset.randomState if dataset is not None else None)
         self.nInitialClusters = n_initial_clusters
 
     def _singletask_split(self) -> Iterable[tuple[list[int], list[int]]]:
