@@ -466,7 +466,7 @@ class DescriptorCheckMixIn:
         self.checkFeatures(dataset, expected_length)
         # save to file, check if it can be loaded, and if the features are consistent
         dataset.save()
-        ds_loaded = QSPRDataset.fromFile(
+        ds_loaded = dataset.__class__.fromFile(
             dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE
         )
         for ds_loaded_prop, target_prop in zip(
@@ -1536,7 +1536,7 @@ class DataPrepTestMixIn(DescriptorCheckMixIn):
         # save the dataset
         dataset.save()
         # reload the dataset and check consistency again
-        dataset = QSPRDataset.fromFile(dataset.storePath)
+        dataset = dataset.__class__.fromFile(dataset.storePath)
         self.assertEqual(dataset.name, name)
         self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
         for idx, prop in enumerate(expected_target_props):
