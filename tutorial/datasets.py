@@ -110,7 +110,8 @@ def Parkinsons(singletask=True):
                 "name": "GABAAalpha",
                 "task": TargetTasks.REGRESSION
             }],
-            store_dir="qspr/data"
+            store_dir="qspr/data",
+            random_state=42
         )
 
     else:
@@ -129,7 +130,8 @@ def Parkinsons(singletask=True):
             target_props=target_props,
             store_dir="qspr/data",
             target_imputer=SimpleImputer(strategy="mean"),
-            overwrite=True
+            overwrite=True,
+            random_state=42
         )
 
 

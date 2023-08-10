@@ -323,6 +323,7 @@ def QSPR_dataprep(args):
                 store_dir=f"{args.base_dir}/qspr/data/",
                 overwrite=True,
                 target_imputer=imputer if args.imputation is not None else None,
+                random_state=args.random_state if args.random_state is not None else None
             )
             # data filters
             datafilters = []

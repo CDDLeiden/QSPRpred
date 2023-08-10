@@ -288,6 +288,8 @@ def QSPR_modelling(args):
                 parameters["probability"] = True
             if model_type not in ["NB", "PLS", "SVM", "DNN"]:
                 parameters["n_jobs"] = args.ncpu
+            # if args.random_state:
+            #     parameters["random_state"] = args.random_state
 
             # class_weight and scale_pos_weight are only used for RF, XGB and SVM
             if not reg:

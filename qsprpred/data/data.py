@@ -1838,7 +1838,7 @@ class QSPRDataset(MoleculeTable):
             mol_table.storeDir if "store_dir" not in kwargs else kwargs["store_dir"]
         )
         name = mol_table.name if name is None else name
-        ds = QSPRDataset(name, target_props, mol_table.getDF(), **kwargs)
+        ds = QSPRDataset(name, target_props, mol_table.getDF(), random_state=42, **kwargs)
         ds.descriptorCalculators = mol_table.descriptorCalculators
         ds.descriptors = mol_table.descriptors
         return ds

@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import sklearn_json as skljson
 from sklearn.svm import SVC, SVR
+from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
 
 from ..data.data import QSPRDataset
 from ..logs import logger
@@ -32,7 +33,8 @@ class QSPRsklearn(QSPRModel):
         data: QSPRDataset = None,
         name: str | None = None,
         parameters: dict | None = None,
-        autoload: bool = True
+        autoload: bool = True,
+        random_state: int | None = None,
     ):
         """Initialize QSPRsklearn model.
 
@@ -66,6 +68,13 @@ class QSPRsklearn(QSPRModel):
                 self.parameters.update({"max_iter": 10000})
             else:
                 self.parameters = {"max_iter": 10000}
+        # TODO: should check a list of algs with random state
+        # also I think logic should be inverted so it is opt-out of random state
+        if self.alg in [RandomForestClassifier, ExtraTreesClassifier] and random_state is not None:
+            if self.parameters:
+                self.parameters.update({"random_state": random_state})
+            else:
+                self.parameters = {"random_state": random_state}
         # set parameters if defined
         if self.parameters not in [None, {}] and hasattr(self, "estimator"):
             self.estimator.set_params(**self.parameters)
