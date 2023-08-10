@@ -90,12 +90,12 @@ class RandomSplit(DataSplit):
             self,
             dataset: QSPRDataset | None = None,
             test_fraction: float = 0.1,
-            seed: int = 42,
+            seed: int | None = None,
             n_initial_clusters: int | None = None,
     ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
-        self.seed = seed
+        self.seed = seed or dataset.randomState
         self.nInitialClusters = n_initial_clusters
 
     def _singletask_split(self) -> Iterable[tuple[list[int], list[int]]]:
