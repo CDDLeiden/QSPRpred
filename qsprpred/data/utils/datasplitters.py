@@ -98,6 +98,15 @@ class RandomSplit(DataSplit):
         self.seed = seed or (dataset.randomState if dataset is not None else None)
         self.nInitialClusters = n_initial_clusters
 
+    def setSeed(self, seed: int | None):
+        """Set the seed for this instance.
+
+        Args:
+            seed (int):
+                Random state to use for shuffling and other random operations.
+        """
+        self.seed = seed
+
     def _singletask_split(self) -> Iterable[tuple[list[int], list[int]]]:
         """
         Split single-task dataset in two subsets with shuffled random sampling.

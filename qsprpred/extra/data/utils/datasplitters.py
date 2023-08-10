@@ -32,6 +32,9 @@ class PCMSplit(DataSplit):
         # Check that splitter is either RandomSplit, ScaffoldSplit or ClusterSplit
         assert isinstance(self.splitter, (RandomSplit, ScaffoldSplit, ClusterSplit)), \
             "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
+        
+        if isinstance(self.splitter, RandomSplit):
+            self.splitter.setSeed(dataset.randomState)
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
         """
