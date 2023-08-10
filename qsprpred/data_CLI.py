@@ -19,9 +19,9 @@ from sklearn.preprocessing import StandardScaler
 from .data.data import QSPRDataset
 from .data.utils.datafilters import papyrusLowQualityFilter
 from .data.utils.datasplitters import (
+    ClusterSplit,
     ManualSplit,
     RandomSplit,
-    ClusterSplit,
     ScaffoldSplit,
     TemporalSplit,
 )
@@ -39,7 +39,7 @@ from .data.utils.featurefilters import (
 )
 from .data.utils.scaffolds import Murcko
 from .deep.models.models import QSPRDNN
-from .logs.utils import backup_files, commit_hash, enable_file_logger
+from .logs.utils import backup_files, enable_file_logger
 from .models.models import QSPRsklearn
 from .models.tasks import TargetTasks
 
@@ -141,7 +141,13 @@ def QSPRArgParser(txt=None):
         "-sp",
         "--split",
         type=str,
-        choices=["random", "cluster", "scaffold", "time", "manual",],
+        choices=[
+            "random",
+            "cluster",
+            "scaffold",
+            "time",
+            "manual",
+        ],
         default="random",
         help=(
             "Split type. If 'random', 'cluster' or 'scaffold', you can specify the"
@@ -359,7 +365,9 @@ def QSPR_dataprep(args):
                     dataset=mydataset,
                 )
             else:
-                split = RandomSplit(test_fraction=args.split_fraction, dataset=mydataset)
+                split = RandomSplit(
+                    test_fraction=args.split_fraction, dataset=mydataset
+                )
             # feature calculator
             descriptorsets = []
             # Avoid importing optional dependencies if not needed
@@ -477,8 +485,6 @@ if __name__ == "__main__":
         "QSPRdata.log",
         args.debug,
         __name__,
-        commit_hash(os.path.dirname(os.path.realpath(__file__)))
-        if not args.no_git else None,
         vars(args),
         disable_existing_loggers=False,
     )

@@ -3,7 +3,6 @@
 import logging
 import numbers
 import os
-import shutil
 from os.path import exists
 from typing import Type
 from unittest import TestCase
@@ -36,20 +35,12 @@ logging.basicConfig(level=logging.DEBUG)
 class ModelDataSetsMixIn(DataSetsMixIn):
     """This class sets up the datasets for the model tests."""
 
-    qsprModelsPath = f"{os.path.dirname(__file__)}/test_files/qspr/models/"
-
     def setUp(self):
         """Set up the test environment."""
         super().setUp()
-        if not os.path.exists(self.qsprModelsPath):
-            os.makedirs(self.qsprModelsPath)
-
-    @classmethod
-    def clean_directories(cls):
-        """Clean the directories."""
-        super().clean_directories()
-        if os.path.exists(cls.qsprModelsPath):
-            shutil.rmtree(cls.qsprModelsPath)
+        self.generatedModelsPath = f"{self.generatedPath}/models/"
+        if not os.path.exists(self.generatedModelsPath):
+            os.makedirs(self.generatedModelsPath)
 
 
 class ModelTestMixIn:
@@ -210,8 +201,9 @@ class ModelTestMixIn:
 
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRsklearn class."""
-    @staticmethod
+
     def getModel(
+        self,
         name: str,
         alg: Type | None = None,
         dataset: QSPRDataset = None,
@@ -229,7 +221,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             QSPRsklearn: the model
         """
         return QSPRsklearn(
-            base_dir=f"{os.path.dirname(__file__)}/test_files/qspr/models",
+            base_dir=self.generatedModelsPath,
             alg=alg,
             data=dataset,
             name=name,
@@ -254,12 +246,12 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         else:
             parameters = None
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataSet(
             target_props=[{
                 "name": "CL",
                 "task": task
             }],
-            preparation_settings=self.get_default_prep(),
+            preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
         model = self.getModel(
@@ -299,13 +291,13 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             else:
                 parameters = {"probability": True}
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataSet(
             target_props=[{
                 "name": "CL",
                 "task": task,
                 "th": th
             }],
-            preparation_settings=self.get_default_prep(),
+            preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
         # initialize model for training from class
@@ -330,7 +322,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     def testRegressionMultiTaskFit(self, _, model_name, model_class):
         """Test model training for multitask regression models."""
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataSet(
             target_props=[
                 {
                     "name": "fu",
@@ -342,7 +334,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 },
             ],
             target_imputer=SimpleImputer(strategy="mean"),
-            preparation_settings=self.get_default_prep(),
+            preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
         # initialize model for training from class
@@ -375,7 +367,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         if model_name == "SVC":
             parameters.update({"probability": True})
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataSet(
             target_props=[
                 {
                     "name": "fu",
@@ -389,7 +381,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 },
             ],
             target_imputer=SimpleImputer(strategy="mean"),
-            preparation_settings=self.get_default_prep(),
+            preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
         # initialize model for training from class

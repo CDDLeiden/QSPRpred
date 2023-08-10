@@ -7,10 +7,9 @@ from typing import Iterable
 
 import numpy as np
 
-from ....data.data import TargetProperty
-from ....data.data import QSPRDataset
+from ....data.data import QSPRDataset, TargetProperty
 from ....data.interfaces import DataSplit
-from ....data.utils.datasplitters import  RandomSplit, ScaffoldSplit, ClusterSplit
+from ....data.utils.datasplitters import ClusterSplit, RandomSplit, ScaffoldSplit
 from ..data import PCMDataSet
 
 
@@ -26,7 +25,7 @@ class PCMSplit(DataSplit):
         dataset (PCMDataSet): The dataset to split.
         splitter (DataSplit): The splitter to use on the initial clusters.
     """
-    def __init__(self, splitter : DataSplit, dataset: PCMDataSet | None = None) -> None:
+    def __init__(self, splitter: DataSplit, dataset: PCMDataSet | None = None) -> None:
         super().__init__(dataset)
         self.splitter = splitter
 
@@ -64,9 +63,9 @@ class PCMSplit(DataSplit):
 
         assert len(ds.targetProperties) == 1, \
             "PCMSplit only works for single-task datasets!"
-            # TODO: Add support for multi-target PCM datasets: creta a multi-task dataset
-            # with all target-task combinations as different columns and split that
-            # dataset with the given splitter
+        # TODO: Add support for multi-target PCM datasets: creta a multi-task dataset
+        # with all target-task combinations as different columns and split that
+        # dataset with the given splitter
 
         # Pivot dataframe to get a matrix with protein targets as columns
         df_mt = df.pivot(
@@ -98,9 +97,8 @@ class PCMSplit(DataSplit):
             targets = [col for col in cols if col in proteins]
             for target in targets:
                 # Get index in the original PCM dataset the SMILES-target pair
-                ds_idx = df[
-                    (df[ds.proteinCol] == target) & (df[ds.smilesCol] == smiles)
-                ].index.astype(str)[0]
+                ds_idx = df[(df[ds.proteinCol] == target) &
+                            (df[ds.smilesCol] == smiles)].index.astype(str)[0]
                 # Convert to numeric index
                 test_indices.append(indices.index(ds_idx))
 
@@ -133,6 +131,7 @@ class LeaveTargetsOut(DataSplit):
         test = indices[~mask]
         return iter([(train, test)])
 
+
 class TemporalPerTarget(DataSplit):
     def __init__(
         self,
@@ -151,7 +150,8 @@ class TemporalPerTarget(DataSplit):
                 a dictionary with target keys as keys
                 and split years as values
             firts_year_per_compound (bool):
-                if True, the first year a compound appears in the dataset is used for all targets
+                if True, the first year a compound appears in the dataset is used
+                for all targets
             dataset (PCMDataset):
                 a `PCMDataset` instance to split
         """

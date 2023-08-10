@@ -14,11 +14,6 @@ import pandas as pd
 from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
-from .utils.datasplitters import (
-    PCMSplit,
-    TemporalPerTarget,
-    LeaveTargetsOut
-)
 from ...data.data import TargetProperty
 from ...data.interfaces import DataSplit
 from ...data.tests import (
@@ -28,11 +23,7 @@ from ...data.tests import (
     DataSetsMixIn,
     TestDescriptorInDataMixIn,
 )
-from ...data.utils.datasplitters import (
-    RandomSplit,
-    ScaffoldSplit,
-    ClusterSplit,
-)
+from ...data.utils.datasplitters import ClusterSplit, RandomSplit, ScaffoldSplit
 from ...data.utils.descriptorcalculator import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
@@ -40,7 +31,8 @@ from ...data.utils.descriptorcalculator import (
 from ...data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
-    MoleculeDescriptorSet, RDKitDescs,
+    MoleculeDescriptorSet,
+    RDKitDescs,
 )
 from ...data.utils.feature_standardization import SKLearnStandardizer
 from ...data.utils.featurefilters import HighCorrelationFilter, LowVarianceFilter
@@ -52,22 +44,26 @@ from ...extra.data.utils.descriptor_utils.msa_calculator import (
 )
 from ...extra.data.utils.descriptorcalculator import ProteinDescriptorCalculator
 from ...extra.data.utils.descriptorsets import (
+    ExtendedValenceSignature,
     Mold2,
     Mordred,
     PaDEL,
     ProDec,
     ProteinDescriptorSet,
-    ExtendedValenceSignature,
 )
 from ...models.tasks import TargetTasks
+from .utils.datasplitters import LeaveTargetsOut, PCMSplit, TemporalPerTarget
 
 
 class DataSetsMixInExtras(DataSetsMixIn):
-    dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
-    qsprdatapath = f"{os.path.dirname(__file__)}/test_files/qspr/data"
+    """MixIn class for testing data sets in extras."""
+
+    def setUp(self):
+        super().setUp()
+        self.dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
 
     @classmethod
-    def get_all_descriptors(cls) -> list[MoleculeDescriptorSet]:
+    def getAllDescriptors(cls) -> list[MoleculeDescriptorSet]:
         """Return a list of all available molecule descriptor sets.
 
         Returns:
@@ -108,31 +104,19 @@ class DataSetsMixInExtras(DataSetsMixIn):
         ]
 
     @classmethod
-    def get_desc_calculators(cls):
-        mol_descriptor_calculators = super().get_desc_calculators()
+    def getDefaultCalculatorCombo(cls):
+        mol_descriptor_calculators = super().getDefaultCalculatorCombo()
         feature_sets_pcm = [
             ProDec(sets=["Zscale Hellberg"]),
             ProDec(sets=["Sneath"]),
         ]
         protein_descriptor_calculators = [
-             [
-                 ProteinDescriptorCalculator(
-                    combo,
-                    msa_provider=cls.getMSAProvider())
-             ] for combo in
-             itertools.combinations(
-                 feature_sets_pcm, 1
-             )] + [
-             [
-                 ProteinDescriptorCalculator(
-                    combo,
-                    msa_provider=cls.getMSAProvider()
-                 )
-             ] for combo in
-             itertools.combinations(
-                 feature_sets_pcm, 2
-             )
-         ]
+            [ProteinDescriptorCalculator(combo, msa_provider=cls.getMSAProvider())]
+            for combo in itertools.combinations(feature_sets_pcm, 1)
+        ] + [
+            [ProteinDescriptorCalculator(combo, msa_provider=cls.getMSAProvider())]
+            for combo in itertools.combinations(feature_sets_pcm, 2)
+        ]
         descriptor_calculators = \
             mol_descriptor_calculators + protein_descriptor_calculators
         # make combinations of molecular and PCM descriptor calculators
@@ -191,22 +175,21 @@ class DataSetsMixInExtras(DataSetsMixIn):
         )
 
 
-    @classmethod
-    def getMSAProvider(cls):
-        return ClustalMSA(out_dir=cls.qsprdatapath)
+    def getMSAProvider(self):
+        return ClustalMSA(out_dir=self.generatedDataPath)
 
     def createPCMDataSet(
-            self,
-            name: str = "QSPRDataset_test_pcm",
-            target_props: TargetProperty | list[dict] = [
-                {
-                    "name": "pchembl_value_Median",
-                    "task": TargetTasks.REGRESSION
-                }
-            ],
-            target_imputer: Callable[[pd.Series], pd.Series] | None = None,
-            preparation_settings: dict | None = None,
-            protein_col: str = "accession",
+        self,
+        name: str = "QSPRDataset_test_pcm",
+        target_props: TargetProperty | list[dict] = [
+            {
+                "name": "pchembl_value_Median",
+                "task": TargetTasks.REGRESSION
+            }
+        ],
+        target_imputer: Callable[[pd.Series], pd.Series] | None = None,
+        preparation_settings: dict | None = None,
+        protein_col: str = "accession",
     ):
         """Create a small dataset for testing purposes.
 
@@ -231,7 +214,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
             protein_seq_provider=self.getPCMSeqProvider(),
             target_props=target_props,
             df=df,
-            store_dir=self.qsprdatapath,
+            store_dir=self.generatedDataPath,
             target_imputer=target_imputer,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
@@ -249,7 +232,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
     """
     def setUp(self):
         super().setUp()
-        self.dataset = self.create_small_dataset(self.__class__.__name__)
+        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
         self.dataset.shuffle()
 
     def testMold2(self):
@@ -285,7 +268,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
         desc_calc = MoleculeDescriptorsCalculator(
             [FingerprintSet(fingerprint_type=fp_type)]
         )
-        dataset = self.create_small_dataset(f"{self.__class__.__name__}_{fp_type}")
+        dataset = self.createSmallTestDataSet(f"{self.__class__.__name__}_{fp_type}")
         dataset.addDescriptors(desc_calc)
         self.assertEqual(dataset.X.shape, (len(dataset), nbits))
         self.assertTrue(dataset.X.any().any())
@@ -342,7 +325,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         Args:
             msa_provider_cls (BioPythonMSA): MSA provider class
         """
-        provider = msa_provider_cls(out_dir=self.qsprdatapath)
+        provider = msa_provider_cls(out_dir=self.generatedDataPath)
         dataset = self.createPCMDataSet(self.__class__.__name__)
         split = RandomSplit(test_fraction=0.2)
         calculator = ProteinDescriptorCalculator([self.sampleDescSet], provider)
@@ -355,14 +338,15 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         )
         ndata = dataset.getDF().shape[0]
         self.validate_split(dataset)
-        self.assertEqual(dataset.X_ind.shape[0], round(ndata*0.2))
+        self.assertEqual(dataset.X_ind.shape[0], round(ndata * 0.2))
         test_ids = dataset.X_ind.index.values
         train_ids = dataset.y_ind.index.values
         dataset.save()
         # load dataset and test if all checks out after loading
         dataset_new = PCMDataSet.fromFile(dataset.storePath)
+        self.assertIsInstance(dataset_new, PCMDataSet)
         self.validate_split(dataset_new)
-        self.assertEqual(dataset.X_ind.shape[0], round(ndata*0.2))
+        self.assertEqual(dataset.X_ind.shape[0], round(ndata * 0.2))
         self.assertEqual(
             len(dataset_new.descriptorCalculators), len(dataset_new.descriptors)
         )
@@ -396,7 +380,9 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         )
         ndata = dataset.getDF().shape[0]
         self.assertEqual(len(dataset.descriptorCalculators), len(dataset.descriptors))
-        self.assertEqual(dataset.X_ind.shape, (round(ndata*0.5), len(self.sampleDescSet))) 
+        self.assertEqual(
+            dataset.X_ind.shape, (round(ndata * 0.5), len(self.sampleDescSet))
+        )
         # create new dataset with different feature calculator
         dataset_next = self.createPCMDataSet(f"{self.__class__.__name__}_next")
         dataset_next.prepareDataset(
@@ -409,8 +395,12 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         self.assertEqual(
             len(dataset_next.descriptorCalculators), len(dataset_next.descriptors)
         )
-        self.assertEqual(dataset_next.X_ind.shape, (round(ndata*0.5), len(self.sampleDescSet)))
-        self.assertEqual(dataset_next.X.shape, (round(ndata*0.5), len(self.sampleDescSet)))
+        self.assertEqual(
+            dataset_next.X_ind.shape, (round(ndata * 0.5), len(self.sampleDescSet))
+        )
+        self.assertEqual(
+            dataset_next.X.shape, (round(ndata * 0.5), len(self.sampleDescSet))
+        )
 
     def testWithMolDescriptors(self):
         """Test the calculation of protein and molecule descriptors."""
@@ -451,7 +441,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         ("ClustalMSA", ClustalMSA),
     ])
     def testProDec(self, _, provider_class):
-        provider = provider_class(out_dir=self.qsprdatapath)
+        provider = provider_class(out_dir=self.generatedDataPath)
         descset = ProDec(sets=["Zscale Hellberg"])
         protein_feature_calculator = ProteinDescriptorCalculator(
             desc_sets=[descset],
@@ -477,7 +467,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepTestMixIn, TestCase
         return self.createPCMDataSet(name)
 
     @parameterized.expand(
-        DataSetsMixInExtras.get_prep_combinations()
+        DataSetsMixInExtras.getPrepCombos()
     )  # add @skip("Not now...") below this line to skip these tests
     def testPrepCombinations(
         self,
@@ -504,7 +494,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepTestMixIn, TestCase
             data_filter (Callable): Data filter.
         """
         dataset = self.createPCMDataSet(name=name)
-        self.check_prep(
+        self.checkPrep(
             dataset,
             feature_calculators,
             split,
@@ -532,7 +522,7 @@ class TestDescriptorsExtra(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestC
                         "th": [0.3]
                     },
                 ],
-            ) for desc_set in DataSetsMixInExtras.get_all_descriptors()
+            ) for desc_set in DataSetsMixInExtras.getAllDescriptors()
         ]
     )
     def testDescriptorsExtraAll(
@@ -541,11 +531,11 @@ class TestDescriptorsExtra(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestC
     ):
         """Test the calculation of extra descriptors with data preparation."""
         np.random.seed(42)
-        dataset = self.create_large_dataset(
-            name=self.get_ds_name(desc_set, target_props), target_props=target_props
+        dataset = self.createLargeTestDataSet(
+            name=self.getDatSetName(desc_set, target_props), target_props=target_props
         )
-        self.check_desc_in_dataset(
-            dataset, desc_set, self.get_default_prep(), target_props
+        self.checkDataSetContainsDescriptorSet(
+            dataset, desc_set, self.getDefaultPrep(), target_props
         )
 
 
@@ -559,7 +549,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
         super().setUp()
         self.defaultMSA = self.getMSAProvider()
 
-    def get_calculators(self, desc_sets):
+    def getCalculators(self, desc_sets):
         return [
             ProteinDescriptorCalculator(
                 desc_sets=desc_sets, msa_provider=self.defaultMSA
@@ -612,29 +602,28 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
         Note that they are not checked with all possible settings
         and all possible preparations,
         but only with the default settings provided
-        by `DataSetsMixIn.get_default_prep()`.
+        by `DataSetsMixIn.getDefaultPrep()`.
         The list itself is defined and configured
-        by `DataSetsMixIn.get_all_descriptors()`,
+        by `DataSetsMixIn.getAllDescriptors()`,
         so if you need a specific descriptor tested, add it there.
         """
         np.random.seed(42)
         dataset = self.createPCMDataSet(
-            name=f"{self.get_ds_name(desc_set, target_props)}_pcm",
+            name=f"{self.getDatSetName(desc_set, target_props)}_pcm",
             target_props=target_props,
         )
-        self.check_desc_in_dataset(
-            dataset, desc_set, self.get_default_prep(), target_props
+        self.checkDataSetContainsDescriptorSet(
+            dataset, desc_set, self.getDefaultPrep(), target_props
         )
-        self.check_desc_in_dataset(
+        self.checkDataSetContainsDescriptorSet(
             dataset,
             desc_set,
-            self.get_default_prep(),
+            self.getDefaultPrep(),
             target_props
         )
 
 
 class TestPCMSplitters(DataSetsMixInExtras, TestCase):
-
     def setUp(self):
         super().setUp()
         self.dataset = self.createPCMDataSet(f"{self.__class__.__name__}_test")
@@ -645,19 +634,10 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
             )
         )
         self.dataset.addDescriptors(
-            calculator=MoleculeDescriptorsCalculator(
-                desc_sets=[RDKitDescs()]
-            )
+            calculator=MoleculeDescriptorsCalculator(desc_sets=[RDKitDescs()])
         )
 
-    @parameterized.expand(
-        [
-            (RandomSplit(),),
-            (ScaffoldSplit(),),
-            (ClusterSplit(),)
-        ]
-    )
-
+    @parameterized.expand([(RandomSplit(), ), (ScaffoldSplit(), ), (ClusterSplit(), )])
     def test_PCMSplit(self, splitter):
         splitter = PCMSplit(splitter)
         self.dataset.split(splitter, featurize=True)
@@ -672,7 +652,6 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.assertTrue(
             set(test_smiles.unique()).isdisjoint(set(train_smiles.unique()))
         )
-
 
     def test_LeaveTargetOut(self):
         target = self.dataset.getProteinKeys()[0:2]
@@ -693,7 +672,8 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         year = 2015
         splitter = TemporalPerTarget(
             year_col=year_col,
-            split_years={key: year for key in self.dataset.getProteinKeys()}
+            split_years={key: year
+                         for key in self.dataset.getProteinKeys()}
         )
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()

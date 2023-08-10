@@ -14,14 +14,18 @@ From v2.0.1 to v2.1.0.dev0
 - `SKlearnMetrics.supportsTask` now uses a dictionary like dict[ModelTasks, list[str]] to map tasks to supported metric names. (#53)
 - `PCMSplit` replaces `StratifiedPerTarget` and is compatible with `RandomSplit`, `ScaffoldSplit` and `ClusterSplit`.
 - In the case single-task dataset, the `RandomSplit` now uses `StratifiedShuffleSplit` in case of classification.
-
+- `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captrues scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
 ## New Features
 - `ClusterSplit` - splits data based clustering of molecular fingerprints.
+- Raise error if search space for optuna optimization is missing search space type annotation or if type not in list.
+- When installing package with pip, the commit hash and date of the installation is saved into `qsprpred._version`
 - `HyperParameterOptimization` classes now accept a `evaluation_method` argument, which is an instance of `EvaluationMethod` (see above). This allows for hyperparameter optimization to be performed on a test set, or on a cross-validation set. (#11)
 - `HyperParameterOptimization` now accepts `score_aggregation` argument, which is a function that takes a list of scores and returns a single score. This allows for the use of different aggregation functions, such as `np.mean` or `np.median` to combine scores from different folds. (#45)
 - A new tutorial `adding_new_components.ipynb` has been added to the `tutorials` folder, which demonstrates how to add new model to QSPRpred.
 - A new function `Metrics.checkMetricCompatibility` has been added, which checks if a metric is compatible with a given task and a given prediction methods (i.e. `predict` or `predictProba`)
 - In `EvaluationMethod` (see above), an attribute `use_proba` has been added, which determines whether the `predict` or `predictProba` method is used to make predictions (#56).
+- Refactoring of the test suite under `qsprpred.data` and improvement of temporary file handling (!114).
+- `PyBoostModel` - QSPRpred wrapper for py-boost models.
 
 ## Removed Features
 - `StratifiedPerTarget` is replaced by `PCMSplit`.

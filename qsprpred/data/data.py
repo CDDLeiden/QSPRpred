@@ -22,7 +22,7 @@ from ..logs import logger
 from ..models.tasks import TargetTasks
 from ..utils.inspect import import_class
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
-from .utils.datafilters import DuplicateFilter
+from .utils.datafilters import RepeatsFilter
 from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -243,8 +243,15 @@ class PandasDataSet(DataSet):
 
         Args:
             name (str): Name of the property.
-            data (List): List of values for the property.
+            data (list): List of values for the property.
         """
+        if isinstance(data, pd.Series):
+            if not np.array_equal(data.index.txt, self.df.index.txt):
+                logger.info(
+                    f"Adding property '{name}' to data set might be introducing 'nan' "
+                    "values due to index with pandas series. Make sure the index of "
+                    "the data frame and the series match or convert series to list."
+                )
         self.df[name] = data
 
     def removeProperty(self, name: str):
@@ -414,7 +421,7 @@ class PandasDataSet(DataSet):
                         "Removing duplicates based on descriptors does not \
                                     work if there are no descriptors"
                     )
-                else: 
+                else:
                     df_filtered = table_filter(self.df, descriptors)
             if df_filtered is not None:
                 self.df = df_filtered.copy()
@@ -986,13 +993,20 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         """
         return name in self.df.columns
 
-    def addProperty(self, name, data):
+    def addProperty(self, name: str, data: list):
         """Add a property to the data frame.
 
         Args:
             name (str): Name of the property.
             data (list): list of property values.
         """
+        if isinstance(data, pd.Series):
+            if not np.array_equal(data.index.txt, self.df.index.txt):
+                logger.info(
+                    f"Adding property '{name}' to data set might be introducing 'nan' "
+                    "values due to index with pandas series. Make sure the index of "
+                    "the data frame and the series match or convert series to list."
+                )
         self.df[name] = data
 
     def removeProperty(self, name):
@@ -1129,8 +1143,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             bool: Whether the data frame contains scaffold groups.
         """
         return (
-            len([col
-                 for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
+            len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")])
+            > 0
         )
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
@@ -1308,8 +1322,10 @@ class TargetProperty:
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{k: TargetTasks[v] if k == "task" else v
-                   for k, v in d.items()}
+                **{
+                    k: TargetTasks[v] if k == "task" else v
+                    for k, v in d.items()
+                }
             )
         else:
             return TargetProperty(**d)
@@ -1329,8 +1345,10 @@ class TargetProperty:
         if task_from_str:
             return [
                 TargetProperty(
-                    **{k: TargetTasks[v] if k == "task" else v
-                       for k, v in d.items()}
+                    **{
+                        k: TargetTasks[v] if k == "task" else v
+                        for k, v in d.items()
+                    }
                 ) for d in _list
             ]
         else:
@@ -1500,12 +1518,12 @@ class QSPRDataset(MoleculeTable):
             id_prefix,
             random_state
         )
+        # load metadata if saved already
         self.metaInfo = None
         try:
             self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
         except FileNotFoundError:
             pass
-
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
         # load target properties
@@ -2144,7 +2162,7 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: list = [DuplicateFilter(keep=True)],
+        datafilters: list = [RepeatsFilter(keep=True)],
         split=None,
         fold=None,
         feature_calculators: Optional[list] = None,
@@ -2431,7 +2449,6 @@ class QSPRDataset(MoleculeTable):
             `str`: paths to the saved standardizers
         """
         path = f"{self.storePrefix}_feature_standardizer.json"
-
         if (
             self.feature_standardizer and self.featureNames is not None and
             len(self.featureNames) > 0
@@ -2444,14 +2461,13 @@ class QSPRDataset(MoleculeTable):
             self.feature_standardizer.toFile(path)
             return path
 
-    def saveMetadata(self):
-        """Save metadata to file.
+    def generateMetadata(self):
+        """Generate metadata of the dataset.
 
         Returns:
-            `str`: path to the saved metadata file
+            `dict`: metadata of the dataset
         """
-        path = self.saveFeatureStandardizer()
-
+        stanadardizer_path = self.saveFeatureStandardizer()
         meta_init = {
             "target_props":
                 TargetProperty.toList(
@@ -2464,17 +2480,25 @@ class QSPRDataset(MoleculeTable):
             "init":
                 meta_init,
             "standardizer_path":
-                path.replace(self.storePrefix, "") if path else None,
+                stanadardizer_path.replace(self.storePrefix, "") if stanadardizer_path else None,
             "descriptorcalculator_path":
                 self.descriptorCalculatorsPathPrefix.replace(self.storePrefix, "")
                 if self.descriptorCalculatorsPathPrefix else None,
             "feature_names":
                 list(self.featureNames) if self.featureNames is not None else None,
         }
+        return ret
+
+    def saveMetadata(self):
+        """Save metadata to file.
+
+        Returns:
+            `str`: path to the saved metadata file
+        """
+        ret = self.generateMetadata()
         path = f"{self.storePrefix}_meta.json"
         with open(path, "w") as f:
             json.dump(ret, f)
-
         return path
 
     @property

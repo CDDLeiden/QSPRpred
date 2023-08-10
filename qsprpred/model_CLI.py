@@ -20,7 +20,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from .data.data import QSPRDataset
 from .deep.models.models import QSPRDNN
-from .logs.utils import backup_files, commit_hash, enable_file_logger
+from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from .models.metrics import SklearnMetric
@@ -423,8 +423,6 @@ if __name__ == "__main__":
         "QSPRmodel.log",
         args.debug,
         __name__,
-        commit_hash(os.path.dirname(os.path.realpath(__file__)))
-        if not args.no_git else None,
         vars(args),
         disable_existing_loggers=False,
     )

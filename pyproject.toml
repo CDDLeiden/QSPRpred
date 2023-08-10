@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -64,12 +64,14 @@ dev = [
 deep = ["torch >= 1.7.0"]
 extra = [
   "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
-  "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper"
+  "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper",
 ]
+extra_gpu = ["py-boost",]
 full = [
   "torch >= 1.7.0",
   "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
   "padel-pywrapper >= 1.0.2.post1", "Signature-pywrapper", "Mordred", "biopython", "prodec",
+  "py-boost", 
 ]
 
 [tool.setuptools.packages.find]
@@ -78,13 +80,16 @@ where = ["."]
 [project.urls]
 homepage = "https://github.com/CDDLeiden/QSPRPred"
 repository = "https://github.com/CDDLeiden/QSPRPred"
-# documentation = "https://readthedocs.org" # Can anybody add the link?
+documentation = "https://cddleiden.github.io/QSPRPred/docs/"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.dynamic]
-version = {attr = "qsprpred.__version__"}
+version = { attr = "qsprpred.__version__"}
+
+[tool.setuptools_scm]
+write_to = "qsprpred/_version.py"
 
 [tool.yapf]
 based_on_style = "facebook"
