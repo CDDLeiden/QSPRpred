@@ -162,7 +162,7 @@ class DataSetsMixIn(PathMixIn):
         descriptor_calculators = cls.get_desc_calculators()
 
         # lists with common preparation settings
-        splits = [None, RandomSplit(0.1)]
+        splits = [None, RandomSplit(test_fraction=0.1)]
         feature_standardizers = [None, StandardScaler()]
         feature_filters = [None, HighCorrelationFilter(0.9)]
         data_filters = [
