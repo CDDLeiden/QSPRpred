@@ -73,7 +73,7 @@ class QSPRsklearn(QSPRModel):
         # set random state, either from constructor or from dataset, if applicable
         constructor_params = [name for name, _ in inspect.signature(alg.__init__).parameters.items()]
         if "random_state" in constructor_params:
-            new_random_state = random_state or (data.random_state if data is not None else None)
+            new_random_state = random_state or (data.randomState if data is not None else None)
             if self.parameters:
                 self.parameters.update({"random_state": new_random_state})
             else:
