@@ -66,7 +66,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         """Test model training for regression models."""
         parameters["verbose"] = -1
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataset(
             target_props=[{
                 "name": "CL",
                 "task": task
@@ -103,7 +103,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         """Test model training for classification models."""
         parameters["verbose"] = -1
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataset(
             target_props=[{
                 "name": "CL",
                 "task": task,
@@ -146,7 +146,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         """Test model training for multitask regression models."""
         parameters["verbose"] = -1
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataset(
             target_props=[
                 {
                     "name": "fu",
@@ -196,7 +196,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         parameters["verbose"] = -1
 
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataset(
             target_props=[
                 {
                     "name": "fu",

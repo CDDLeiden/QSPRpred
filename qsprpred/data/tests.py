@@ -831,7 +831,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         self.assertEqual(dataset.df.shape[0], all_mols - 1)
 
     def test_random_state_shuffle(self):
-        dataset = self.create_large_dataset()
+        dataset = self.createLargeTestDataSet()
         seed = dataset.randomState
         dataset.shuffle()
         order = dataset.getDF().index.tolist()
@@ -848,7 +848,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
 
     def test_random_state_featurization(self):
         # create and save the data set
-        dataset = self.create_large_dataset()
+        dataset = self.createLargeTestDataSet()
         dataset.addDescriptors(
             MoleculeDescriptorsCalculator(
                 [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
@@ -875,7 +875,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
 
     def test_random_state_folds(self):
         # create and save the data set (fixes the seed)
-        dataset = self.create_large_dataset()
+        dataset = self.createLargeTestDataSet()
         dataset.save()
         # calculate descriptors and iterate over folds
         dataset.prepareDataset(

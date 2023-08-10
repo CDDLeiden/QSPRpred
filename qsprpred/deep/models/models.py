@@ -264,7 +264,6 @@ class QSPRDNN(QSPRModel):
         if early_stopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
-            # TODO: is this random_state assignment correct? might be that it should not be set every time
             X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1, random_state=self.random_state)
             return estimator.fit(X_train, y_train, X_val, y_val, **kwargs)
 
