@@ -420,7 +420,7 @@ class ClusterSplit(DataSplit):
         self.customTestList = custom_test_list
         self.fpCalculator = fp_calculator
         self.nInitialClusters = n_initial_clusters
-        self.seed = seed
+        self.seed = seed or (dataset.randomState if dataset is not None else None)
         self.similarityThreshold = similarity_threshold
         self.clusteringAlgorithm = clustering_algorithm
 

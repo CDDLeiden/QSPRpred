@@ -69,16 +69,20 @@ class QSPRsklearn(QSPRModel):
                 self.parameters.update({"max_iter": 10000})
             else:
                 self.parameters = {"max_iter": 10000}
-        if random_state is not None:
-            constructor_params = [name for name, _ in inspect.signature(alg.__init__).parameters.items()]
-            if "random_state" in constructor_params:
-                if self.parameters:
-                    self.parameters.update({"random_state": random_state})
-                else:
-                    self.parameters = {"random_state": random_state}
+
+        # set random state, either from constructor or from dataset, if applicable
+        constructor_params = [name for name, _ in inspect.signature(alg.__init__).parameters.items()]
+        if "random_state" in constructor_params:
+            new_random_state = random_state or (data.random_state if data is not None else None)
+            if self.parameters:
+                self.parameters.update({"random_state": new_random_state})
             else:
+                self.parameters = {"random_state": new_random_state}
+        else:
+            if random_state:
                 logger.warning(f"Random state supplied, but alg {alg} does not support it."
-                               " Ignoring this setting.")
+                                " Ignoring this setting.")
+                
         # set parameters if defined
         if self.parameters not in [None, {}] and hasattr(self, "estimator"):
             self.estimator.set_params(**self.parameters)
