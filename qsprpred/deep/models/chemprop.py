@@ -102,7 +102,7 @@ class MoleculeModel(chemprop.models.MoleculeModel):
         return obj
 
     @staticmethod
-    def getTrainArgs(args: dict | None) -> chemprop.args.TrainArgs:
+    def getTrainArgs(args: dict | None, task: ModelTasks) -> chemprop.args.TrainArgs:
         """Get a chemprop.args.TrainArgs instance from a dictionary.
 
         Args:
@@ -112,7 +112,18 @@ class MoleculeModel(chemprop.models.MoleculeModel):
             chemprop.args.TrainArgs: arguments for training the model
         """
         if args is None:
-            args = {"dataset_type": "regression", "data_path": ""}
+            args = {"data_path": ""}
+
+        # set dataset type
+        if task == ModelTasks.REGRESSION:
+            args["dataset_type"] = "regression"
+        elif task == ModelTasks.SINGLECLASS:
+            args["dataset_type"] = "classification"
+        elif task == ModelTasks.MULTICLASS:
+            args["dataset_type"] = "multiclass"
+        else:
+            raise ValueError(f"Task type {task} not supported.")
+
         train_args = chemprop.args.TrainArgs()
         train_args.from_dict(args, skip_unsettable=True)
         train_args.process_args()
@@ -471,6 +482,35 @@ class Chemprop(QSPRModel):
                 2D array containing the predictions, where each row corresponds
                 to a sample in the data and each column to a target property
         """
+        if self.task == ModelTasks.SINGLECLASS:
+            return np.argmax(self.predictProba(X, estimator)[0], axis=1, keepdims=True)
+        return self.predictProba(X, estimator)
+
+    def predictProba(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> list[np.ndarray]:
+        """Make predictions for the given data matrix or `QSPRDataset`,
+        but use probabilities for classification models. Does not work with
+        regression models.
+
+        Note. convertToNumpy can be called here, to convert the input data to
+        np.ndarray format.
+
+        Note. if no estimator is given, the estimator instance of the model
+              is used.
+
+        self.parameters:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
+            estimator (Any): estimator instance to use for fitting
+
+        Returns:
+            list[np.ndarray]:
+                a list of 2D arrays containing the probabilities for each class,
+                where each array corresponds to a target property, each row
+                to a sample in the data and each column to a class
+        """
         estimator = self.estimator if estimator is None else estimator
         X = self.convertToMoleculeDataset(estimator, X)
         args = estimator.args
@@ -502,36 +542,16 @@ class Chemprop(QSPRModel):
         # change list of lists to 2D array
         preds = np.array(preds)
 
+        if self.task.isClassification():
+            # add second column for binary classification
+            if preds.shape[1] == 1:
+                preds = np.hstack([1 - preds, preds])
+            return [preds]
+
+        print(preds)
         print(preds.shape)
 
         return preds
-
-    def predictProba(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
-    ) -> list[np.ndarray]:
-        """Make predictions for the given data matrix or `QSPRDataset`,
-        but use probabilities for classification models. Does not work with
-        regression models.
-
-        Note. convertToNumpy can be called here, to convert the input data to
-        np.ndarray format.
-
-        Note. if no estimator is given, the estimator instance of the model
-              is used.
-
-        self.parameters:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
-            estimator (Any): estimator instance to use for fitting
-
-        Returns:
-            list[np.ndarray]:
-                a list of 2D arrays containing the probabilities for each class,
-                where each array corresponds to a target property, each row
-                to a sample in the data and each column to a class
-        """
-        raise NotImplementedError("Not implemented yet.")
 
     def loadEstimator(self, params: dict | None = None) -> object:
         """Initialize estimator instance with the given parameters.
@@ -546,20 +566,10 @@ class Chemprop(QSPRModel):
         """
         new_parameters = self.getParameters(params)
         self.checkArgs(new_parameters)
-        args = MoleculeModel.getTrainArgs(new_parameters)
+        args = MoleculeModel.getTrainArgs(new_parameters, self.task)
 
         # set task names
         args.task_names = [prop.name for prop in self.data.targetProperties]
-
-        # set dataset type
-        if self.task == ModelTasks.REGRESSION:
-            args.dataset_type = "regression"
-        elif self.task == ModelTasks.SINGLECLASS:
-            args.dataset_type = "classification"
-        elif self.task == ModelTasks.MULTICLASS:
-            args.dataset_type = "multiclass"
-        else:
-            raise ValueError(f"Task type {self.task} not supported.")
 
         return self.alg(args)
 
@@ -598,7 +608,7 @@ class Chemprop(QSPRModel):
             self.parameters = self.getParameters(loaded_params)
 
             # Set train args
-            estimator.args = MoleculeModel.getTrainArgs(loaded_params)
+            estimator.args = MoleculeModel.getTrainArgs(loaded_params, self.task)
         elif fallback_load:
             return self.loadEstimator(params)
         else:
@@ -637,6 +647,8 @@ class Chemprop(QSPRModel):
         """
         if y is not None:
             X, y = self.convertToNumpy(X, y)
+            if y.dtype == bool:
+                y = y.astype(float)  # BCEWithLogitsLoss expects float
         else:
             X = self.convertToNumpy(X)
             return chemprop.data.get_data_from_smiles(
