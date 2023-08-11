@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from ..data.data import QSPRDataset
+from ..logs import logger
 
 
 class EarlyStoppingMode(Enum):
@@ -85,7 +86,9 @@ class EarlyStopping:
                 "stopping mode set to RECORDING or set the optimal number of epochs "
                 "manually."
             )
-        return int(np.round(self.aggregateFunc(self._trainedEpochs)))
+        optimal_epochs = int(np.round(self.aggregateFunc(self._trainedEpochs)))
+        logger.debug(f"Optimal number of epochs: {optimal_epochs}")
+        return optimal_epochs
 
     @property
     def trainedEpochs(self) -> list[int]:
@@ -107,6 +110,7 @@ class EarlyStopping:
         Args:
             epochs (int): number of epochs
         """
+        logger.debug(f"Recorded best epoch: {epochs}")
         self._trainedEpochs.append(epochs)
 
     def getEpochs(self) -> int:
@@ -190,7 +194,7 @@ def early_stopping(func: Callable) -> Callable:
         self.earlyStopping.mode = mode if mode is not None else self.earlyStopping.mode
         estimator, best_epoch = func(self, X, y, estimator, mode, **kwargs)
         if self.earlyStopping.mode == EarlyStoppingMode.RECORDING:
-            self.earlyStopping.recordEpochs(best_epoch)
+            self.earlyStopping.recordEpochs(best_epoch + 1)  # +1 for 0-indexing
         return estimator
 
     return wrapper_fit
