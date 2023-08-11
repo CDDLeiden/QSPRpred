@@ -21,6 +21,7 @@ from ...deep import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
 from ...deep.models.neural_network import STFullyConnected
 from ...models.interfaces import QSPRModel
 from ...models.tasks import ModelTasks
+from ...models.early_stopping import EarlyStoppingMode, early_stopping
 
 
 class QSPRDNN(QSPRModel):
@@ -121,10 +122,6 @@ class QSPRDNN(QSPRModel):
             raise NotImplementedError(
                 "Multitask modelling is not implemented for QSPRDNN models."
             )
-        self.optimalEpochs = (
-            self.parameters["n_epochs"]
-            if self.parameters is not None and "n_epochs" in self.parameters else -1
-        )
 
     @property
     def supportsEarlyStopping(self) -> bool:
@@ -231,12 +228,13 @@ class QSPRDNN(QSPRModel):
         self.metaInfo["n_class"] = self.nClass
         return super().save()
 
+    @early_stopping
     def fit(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any | None = None,
-        early_stopping: bool | None = True,
+        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         **kwargs
     ):
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -245,7 +243,7 @@ class QSPRDNN(QSPRModel):
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
-            early_stopping (bool): if True, early stopping is used
+            mode (EarlyStoppingMode): early stopping mode
             kwargs (dict): additional keyword arguments for the estimator's fit method
 
         Returns:
@@ -256,14 +254,15 @@ class QSPRDNN(QSPRModel):
         estimator = self.estimator if estimator is None else estimator
         X, y = self.convertToNumpy(X, y)
 
-        if early_stopping:
+        if self.earlyStopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
             X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
             return estimator.fit(X_train, y_train, X_val, y_val, **kwargs)
 
-        estimator, _ = estimator.fit(X, y, **kwargs)
-        return estimator
+        # set fixed number of epochs if early stopping is not used
+        estimator.n_epochs = self.earlyStopping.getEpochs()
+        return estimator.fit(X, y, **kwargs)
 
     def predict(
         self,
