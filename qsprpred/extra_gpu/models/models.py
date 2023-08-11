@@ -19,6 +19,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from ...data.data import QSPRDataset
+from ...models.early_stopping import EarlyStoppingMode, early_stopping
 from ...models.interfaces import QSPRModel
 from ...models.tasks import ModelTasks
 
@@ -88,14 +89,15 @@ class PyBoostModel(QSPRModel):
         Returns:
             (bool): whether the model supports early stopping or not
         """
-        return False
+        return True
 
+    @early_stopping
     def fit(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
-        early_stopping: bool = False,
+        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         **kwargs
     ) -> import_module("py_boost").GradientBoosting:
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -116,7 +118,7 @@ class PyBoostModel(QSPRModel):
         if self.task == ModelTasks.MULTICLASS:
             y = np.squeeze(y)
 
-        if early_stopping:
+        if self.earlyStopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
             X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
@@ -124,9 +126,10 @@ class PyBoostModel(QSPRModel):
 
             return estimator, estimator.best_round
 
+        estimator.params.update({'ntrees': self.earlyStopping.getEpochs()})
         estimator.fit(X, y)
 
-        return estimator
+        return estimator, self.earlyStopping.getEpochs()
 
     def predict(
         self,

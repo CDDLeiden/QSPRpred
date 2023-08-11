@@ -14,7 +14,8 @@ From v2.0.1 to v2.1.0.dev0
 - `SKlearnMetrics.supportsTask` now uses a dictionary like dict[ModelTasks, list[str]] to map tasks to supported metric names. (#53)
 - `PCMSplit` replaces `StratifiedPerTarget` and is compatible with `RandomSplit`, `ScaffoldSplit` and `ClusterSplit`.
 - In the case single-task dataset, the `RandomSplit` now uses `StratifiedShuffleSplit` in case of classification.
-- `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captrues scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
+- `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captures scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
+
 ## New Features
 - `ClusterSplit` - splits data based clustering of molecular fingerprints.
 - Raise error if search space for optuna optimization is missing search space type annotation or if type not in list.
@@ -25,6 +26,7 @@ From v2.0.1 to v2.1.0.dev0
 - A new function `Metrics.checkMetricCompatibility` has been added, which checks if a metric is compatible with a given task and a given prediction methods (i.e. `predict` or `predictProba`)
 - In `EvaluationMethod` (see above), an attribute `use_proba` has been added, which determines whether the `predict` or `predictProba` method is used to make predictions (#56).
 - Add new descriptorset `SmilesDesc` to use the smiles strings as a descriptor.
+- New module `early_stopping` with classes `EarlyStopping` and `EarlyStoppingMode` has been added. This module allows for more control over early stopping in models that support it.
 - Refactoring of the test suite under `qsprpred.data` and improvement of temporary file handling (!114).
 - `PyBoostModel` - QSPRpred wrapper for py-boost models.
 
