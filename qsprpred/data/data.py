@@ -1463,12 +1463,12 @@ class QSPRDataset(MoleculeTable):
             name, df, smiles_col, add_rdkit, store_dir, overwrite, n_jobs, chunk_size,
             drop_invalids, index_cols
         )
+        # load metadata if saved already
         self.metaInfo = None
         try:
             self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
         except FileNotFoundError:
             pass
-
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
         # load target properties
@@ -2381,7 +2381,6 @@ class QSPRDataset(MoleculeTable):
             `str`: paths to the saved standardizers
         """
         path = f"{self.storePrefix}_feature_standardizer.json"
-
         if (
             self.feature_standardizer and self.featureNames is not None and
             len(self.featureNames) > 0
@@ -2394,14 +2393,13 @@ class QSPRDataset(MoleculeTable):
             self.feature_standardizer.toFile(path)
             return path
 
-    def saveMetadata(self):
-        """Save metadata to file.
+    def generateMetadata(self):
+        """Generate metadata of the dataset.
 
         Returns:
-            `str`: path to the saved metadata file
+            `dict`: metadata of the dataset
         """
-        path = self.saveFeatureStandardizer()
-
+        stanadardizer_path = self.saveFeatureStandardizer()
         meta_init = {
             "target_props":
                 TargetProperty.toList(
@@ -2414,17 +2412,25 @@ class QSPRDataset(MoleculeTable):
             "init":
                 meta_init,
             "standardizer_path":
-                path.replace(self.storePrefix, "") if path else None,
+                stanadardizer_path.replace(self.storePrefix, "") if stanadardizer_path else None,
             "descriptorcalculator_path":
                 self.descriptorCalculatorsPathPrefix.replace(self.storePrefix, "")
                 if self.descriptorCalculatorsPathPrefix else None,
             "feature_names":
                 list(self.featureNames) if self.featureNames is not None else None,
         }
+        return ret
+
+    def saveMetadata(self):
+        """Save metadata to file.
+
+        Returns:
+            `str`: path to the saved metadata file
+        """
+        ret = self.generateMetadata()
         path = f"{self.storePrefix}_meta.json"
         with open(path, "w") as f:
             json.dump(ret, f)
-
         return path
 
     @property

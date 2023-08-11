@@ -64,13 +64,15 @@ dev = [
 deep = ["torch >= 1.7.0", "chemprop >= 1.6.0"]
 extra = [
   "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
-  "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper"
+  "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper",
 ]
+extra_gpu = ["py-boost",]
 full = [
   "torch >= 1.7.0",
   "chemprop >= 1.6.0",
   "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
   "padel-pywrapper >= 1.0.2.post1", "Signature-pywrapper", "Mordred", "biopython", "prodec",
+  "py-boost", 
 ]
 
 [tool.setuptools.packages.find]
