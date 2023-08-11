@@ -26,7 +26,6 @@ GPUS = list(range(torch.cuda.device_count()))
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRDNN class."""
-
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -102,7 +101,10 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
-            base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset
+            base_dir=self.generatedModelsPath,
+            name=f"{alg_name}",
+            alg=alg,
+            dataset=dataset
         )
         self.fitTest(model)
         predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)
@@ -164,7 +166,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             th: Threshold to use for classification models.
         """
         # initialize dataset
-        dataset = self.create_large_dataset(
+        dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
             target_props=[{
                 "name": "CL",
@@ -182,7 +184,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
-            base_dir=self.qsprModelsPath, name=f"{alg_name}", dataset=dataset
+            base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
         )
         self.fitTest(model)
         predictor = Chemprop(name=alg_name, base_dir=model.baseDir)
