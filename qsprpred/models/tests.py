@@ -535,17 +535,17 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
 
         # check saving
         earlystopping.toFile(
-            f"{os.path.dirname(__file__)}/test_files/qspr/models/earlystopping.json"
+            f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
         )
         self.assertTrue(
             os.path.exists(
-                f"{os.path.dirname(__file__)}/test_files/qspr/models/earlystopping.json"
+                f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
             )
         )
 
         # check loading
         earlystopping2 = EarlyStopping.fromFile(
-            f"{os.path.dirname(__file__)}/test_files/qspr/models/earlystopping.json"
+            f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
         )
         self.assertEqual(earlystopping2.trainedEpochs, [10, 20, 30, 40, 60])
         self.assertEqual(earlystopping2.mode, EarlyStoppingMode.OPTIMAL)
