@@ -1,9 +1,5 @@
-"""
-interfaces
+"""Definitions of interfaces pertaining to descriptor and fingerprint sets."""
 
-Created by: Martin Sicho
-On: 25.11.22, 13:36
-"""
 from abc import ABC, abstractmethod
 
 
