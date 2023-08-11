@@ -1,9 +1,3 @@
-"""
-stopwatch
-
-Created by: Martin Sicho
-On: 14.02.23, 12:39
-"""
 import time
 
 

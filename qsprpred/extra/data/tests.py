@@ -1,9 +1,3 @@
-"""
-tests
-
-Created by: Martin Sicho
-On: 12.05.23, 17:46
-"""
 import itertools
 import os
 from typing import Callable, Type

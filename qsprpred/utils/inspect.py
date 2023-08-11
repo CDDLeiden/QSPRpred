@@ -1,9 +1,3 @@
-"""
-inspect
-
-Created by: Martin Sicho
-On: 23.02.23, 15:22
-"""
 import importlib
 
 
