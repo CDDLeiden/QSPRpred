@@ -902,22 +902,24 @@ class ModelAssessor(ABC):
     Attributes:
         useProba (bool): use probabilities for classification models
     """
-    def __init__(self, use_proba: bool = True):
+    def __init__(self, use_proba: bool = True, mode: EarlyStoppingMode | None = None):
         """Initialize the evaluation method class.
 
         Args:
             use_proba (bool): use probabilities for classification models
+            mode (EarlyStoppingMode): early stopping mode for fitting
         """
         self.useProba = use_proba
+        self.mode = mode
 
     @abstractmethod
-    def __call__(
-        self, model: QSPRModel
-    ) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
+    def __call__(self, model: QSPRModel,
+                 **kwargs) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
         """Evaluate the model.
 
         Args:
             model (QSPRModel): model to evaluate
+            kwargs: additional arguments for fit function of the model
 
         Returns:
             list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]:

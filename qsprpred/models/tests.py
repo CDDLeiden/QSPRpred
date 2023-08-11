@@ -35,7 +35,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 class ModelDataSetsMixIn(DataSetsMixIn):
     """This class sets up the datasets for the model tests."""
-
     def setUp(self):
         """Set up the test environment."""
         super().setUp()
@@ -75,7 +74,10 @@ class ModelTestMixIn:
         score_func = SklearnMetric.getDefaultMetric(model.task)
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
-            scoring=score_func, param_grid=search_space_bs, n_trials=1
+            scoring=score_func,
+            param_grid=search_space_bs,
+            n_trials=1,
+            model_assessor=CrossValAssessor(mode=EarlyStoppingMode.NOT_RECORDING)
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
@@ -88,15 +90,17 @@ class ModelTestMixIn:
             scoring=score_func,
             param_grid=search_space_gs,
             score_aggregation=np.median,
-            model_assessor=TestSetAssessor(use_proba=False),
+            model_assessor=TestSetAssessor(
+                use_proba=False, mode=EarlyStoppingMode.NOT_RECORDING
+            ),
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        CrossValAssessor()(model, mode=EarlyStoppingMode.RECORDING)
-        TestSetAssessor()(model)
+        CrossValAssessor(mode=EarlyStoppingMode.RECORDING)(model)
+        TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING)(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
@@ -202,7 +206,6 @@ class ModelTestMixIn:
 
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRsklearn class."""
-
     def getModel(
         self,
         name: str,
@@ -538,9 +541,8 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
             f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
         )
         self.assertTrue(
-            os.path.exists(
-                f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
-            )
+            os.path.
+            exists(f"{os.path.dirname(__file__)}/test_files/earlystopping.json")
         )
 
         # check loading
