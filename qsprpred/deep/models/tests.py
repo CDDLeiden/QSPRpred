@@ -15,11 +15,12 @@ from ...data.data import QSPRDataset
 from ...deep.models.models import QSPRDNN
 from ...deep.models.chemprop import Chemprop
 from ...deep.models.neural_network import STFullyConnected
-from ...models.tasks import TargetTasks
+from ...models.tasks import TargetTasks, ModelTasks
 from ...models.tests import ModelDataSetsMixIn, ModelTestMixIn
 from ...data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
 from ...data.utils.descriptorsets import SmilesDesc
 from ...data.utils.datasplitters import RandomSplit
+from sklearn.impute import SimpleImputer
 
 GPUS = list(range(torch.cuda.device_count()))
 
@@ -76,7 +77,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
         ]
     )
-    def test_qsprpred_model(
+    def testSingleTaskmodel(
         self, _, task: TargetTasks, alg_name: str, alg: Type, th: float
     ):
         """Test the QSPRDNN model in one configuration.
@@ -113,9 +114,6 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRDNN class."""
-
-    qsprModelsPath = f"{os.path.dirname(__file__)}/test_files/qspr/models"
-
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -148,15 +146,11 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             (f"{alg_name}_{task}", task, alg_name, th) for alg_name, task, th in (
                 ("MoleculeModel", TargetTasks.REGRESSION, None),
                 ("MoleculeModel", TargetTasks.SINGLECLASS, [6.5]),
-                (
-                    "MoleculeModel",
-                    TargetTasks.MULTICLASS,
-                    [0, 1, 10, 1100],
-                ),
+                ("MoleculeModel", TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             )
         ]
     )
-    def test_qsprpred_model(self, _, task: TargetTasks, alg_name: str, th: float):
+    def testSingleTaskmodel(self, _, task: TargetTasks, alg_name: str, th: float):
         """Test the QSPRDNN model in one configuration.
 
         Args:
@@ -183,6 +177,71 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
+        model = self.getModel(
+            base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
+        )
+        self.fitTest(model)
+        predictor = Chemprop(name=alg_name, base_dir=model.baseDir)
+        self.predictorTest(predictor)
+
+    @parameterized.expand(
+        [
+            (f"{alg_name}_{task}", task, alg_name) for alg_name, task in (
+                ("MoleculeModel", ModelTasks.MULTITASK_REGRESSION),
+                ("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS),
+            )
+        ]
+    )
+    def testMultiTaskmodel(self, _, task: TargetTasks, alg_name: str):
+        """Test the QSPRDNN model in one configuration.
+
+            Args:
+                task: Task to test.
+                alg_name: Name of the algorithm.
+                alg: Algorithm to use.
+                th: Threshold to use for classification models.
+            """
+        if task == ModelTasks.MULTITASK_REGRESSION:
+            target_props = [
+                {
+                    "name": "fu",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [0.3]
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [6.5]
+                },
+            ]
+        else:
+            target_props = [
+                {
+                    "name": "fu",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [0.3]
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [6.5]
+                },
+            ]
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            name=f"{alg_name}_{task}",
+            target_props=target_props,
+            target_imputer=SimpleImputer(strategy="mean"),
+            preparation_settings=None
+        )
+        dataset.prepareDataset(
+            feature_calculators=[
+                MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
+            ],
+            split=RandomSplit(test_fraction=0.1)
+        )
+        # initialize model for training from class
+        alg_name = f"{alg_name}_{task}"
         model = self.getModel(
             base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
         )

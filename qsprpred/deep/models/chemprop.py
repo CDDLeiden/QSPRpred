@@ -115,14 +115,14 @@ class MoleculeModel(chemprop.models.MoleculeModel):
             args = {"data_path": ""}
 
         # set dataset type
-        if task == ModelTasks.REGRESSION:
+        if task in [ModelTasks.REGRESSION, ModelTasks.MULTITASK_REGRESSION]:
             args["dataset_type"] = "regression"
-        elif task == ModelTasks.SINGLECLASS:
+        elif task in [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]:
             args["dataset_type"] = "classification"
-        elif task == ModelTasks.MULTICLASS:
+        elif task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_MULTICLASS]:
             args["dataset_type"] = "multiclass"
         else:
-            raise ValueError(f"Task type {task} not supported.")
+            raise ValueError(f"Task {task} not supported.")
 
         train_args = chemprop.args.TrainArgs()
         train_args.from_dict(args, skip_unsettable=True)
@@ -483,7 +483,14 @@ class Chemprop(QSPRModel):
                 to a sample in the data and each column to a target property
         """
         if self.task.isClassification():
-            return np.argmax(self.predictProba(X, estimator)[0], axis=1, keepdims=True)
+            preds = self.predictProba(X, estimator)
+            preds = [
+                np.argmax(preds[i], axis=1, keepdims=True) for i in range(len(preds))
+            ]
+            # change preds from list of 2D arrays to 2D array
+            preds = np.concatenate(preds, axis=1)
+            print(preds.shape)
+            return preds
         return self.predictProba(X, estimator)
 
     def predictProba(
@@ -543,13 +550,19 @@ class Chemprop(QSPRModel):
         preds = np.array(preds)
 
         if self.task.isClassification():
-            if self.task == ModelTasks.MULTICLASS or self.task.isMultiTask():
+            if self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_MULTICLASS]:
                 print(preds.shape)
                 # chemprop returns 3D array (samples, targets, classes)
                 # split into list of 2D arrays (samples, classes), length = n targets
                 preds = np.split(preds, preds.shape[1], axis=1)
                 preds = [np.squeeze(pred, axis=1) for pred in preds]
                 return preds
+            elif self.task == ModelTasks.MULTITASK_SINGLECLASS:
+                # Chemprop returns 2D array (samples, classes),
+                # split into list of 2D arrays (samples, 1), length = n targets
+                preds = np.split(preds, preds.shape[1], axis=1)
+                # add second column (negative class probability)
+                preds = [np.hstack([1 - pred, pred]) for pred in preds]
             else:
                 # chemprop returns 2D array (samples, 1), here convert to list and
                 # add second column (negative class probability)
