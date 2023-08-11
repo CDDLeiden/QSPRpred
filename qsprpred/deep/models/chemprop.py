@@ -482,7 +482,7 @@ class Chemprop(QSPRModel):
                 2D array containing the predictions, where each row corresponds
                 to a sample in the data and each column to a target property
         """
-        if self.task == ModelTasks.SINGLECLASS:
+        if self.task.isClassification():
             return np.argmax(self.predictProba(X, estimator)[0], axis=1, keepdims=True)
         return self.predictProba(X, estimator)
 
@@ -543,13 +543,17 @@ class Chemprop(QSPRModel):
         preds = np.array(preds)
 
         if self.task.isClassification():
-            # add second column for binary classification
-            if preds.shape[1] == 1:
-                preds = np.hstack([1 - preds, preds])
-            return [preds]
-
-        print(preds)
-        print(preds.shape)
+            if self.task == ModelTasks.MULTICLASS or self.task.isMultiTask():
+                print(preds.shape)
+                # chemprop returns 3D array (samples, targets, classes)
+                # split into list of 2D arrays (samples, classes), length = n targets
+                preds = np.split(preds, preds.shape[1], axis=1)
+                preds = [np.squeeze(pred, axis=1) for pred in preds]
+                return preds
+            else:
+                # chemprop returns 2D array (samples, 1), here convert to list and
+                # add second column (negative class probability)
+                return [np.hstack([1 - preds, preds])]
 
         return preds
 
