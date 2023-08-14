@@ -669,94 +669,49 @@ class Chemprop(QSPRModel):
                 y = y.astype(float)  # BCEWithLogitsLoss expects float
         else:
             X = self.convertToNumpy(X)
-            return chemprop.data.get_data_from_smiles(
-                smiles=[[X[i, 0]] for i in range(X.shape[0])],
-                skip_invalid_smiles=False,
-                features_generator=estimator.args.features_generator
+            y = [None] * len(X)  # dummy targets
+
+        # find which column contains the SMILES strings
+        prev_len = 0
+        for calc in self.featureCalculators:
+            names = calc.getDescriptorNames()
+            if "SMILES" in names:
+                smiles_column = names.index("SMILES") + prev_len
+                break
+            else:
+                prev_len += len(names)
+        else:
+            raise ValueError(
+                "No SMILES column found in feature calculators, Chemprop "
+                "requires SMILES, make sure to add SMILES calculator to "
+                "the feature calculators."
             )
 
-        # Load features
-        if estimator.args.features_path is not None:
-            features_data = []
-            for feat_path in estimator.args.features_path:
-                features_data.append(
-                    chemprop.features.load_features(feat_path)
-                )  # each is num_data x num_features
-            features_data = np.concatenate(features_data, axis=1)
+        # features data all but smiles column
+        smiles = X[:, smiles_column]
+        if X.shape[1] > 1:
+            features_data = X[:, np.arange(X.shape[1]) != smiles_column]
+            # try to convert to float else raise error
+            try:
+                features_data = features_data.astype(np.float32)
+            except ValueError:
+                raise ValueError(
+                    "Features data could not be converted to float, make sure "
+                    "that all features are numeric."
+                )
         else:
             features_data = None
-
-        # Load constraints
-        if estimator.args.constraints_path is not None:
-            constraints_data, raw_constraints_data = chemprop.data.get_constraints(
-                path=estimator.args.constraints_path,
-                target_columns=estimator.args.target_columns,
-                save_raw_data=estimator.args.save_smiles_splits
-            )
-        else:
-            constraints_data = None
-            raw_constraints_data = None
-
-        # Load custom atom or bond features
-        atom_features = None
-        atom_descriptors = None
-        if estimator.args.atom_descriptors is not None:
-            try:
-                descriptors = chemprop.features.load_valid_atom_or_bond_features(
-                    estimator.args.atom_descriptors_path, X[:, 0]
-                )
-            except Exception as e:
-                raise ValueError(
-                    f"Failed to load or validate custom atomic descriptors or features: {e}"
-                )
-
-            if estimator.args.atom_descriptors == "feature":
-                atom_features = descriptors
-            elif estimator.args.atom_descriptors == "descriptor":
-                atom_descriptors = descriptors
-
-        bond_features = None
-        bond_descriptors = None
-        if estimator.args.bond_descriptors is not None:
-            try:
-                descriptors = chemprop.features.load_valid_atom_or_bond_features(
-                    estimator.args.bond_descriptors_path, X[:, 0]
-                )
-            except Exception as e:
-                raise ValueError(
-                    f"Failed to load or validate custom bond descriptors or features: {e}"
-                )
-
-            if estimator.args.bond_descriptors == "feature":
-                bond_features = descriptors
-            elif estimator.args.bond_descriptors == "descriptor":
-                bond_descriptors = descriptors
 
         # Create MoleculeDataset
         data = chemprop.data.MoleculeDataset(
             [
                 chemprop.data.MoleculeDatapoint(
-                    smiles=smiles,
+                    smiles=[smile],
                     targets=targets,
-                    features_generator=estimator.args.features_generator,
                     features=features_data[i] if features_data is not None else None,
-                    atom_features=atom_features[i]
-                    if atom_features is not None else None,
-                    atom_descriptors=atom_descriptors[i]
-                    if atom_descriptors is not None else None,
-                    bond_features=bond_features[i]
-                    if bond_features is not None else None,
-                    bond_descriptors=bond_descriptors[i]
-                    if bond_descriptors is not None else None,
-                    constraints=constraints_data[i]
-                    if constraints_data is not None else None,
-                    raw_constraints=raw_constraints_data[i]
-                    if raw_constraints_data is not None else None,
-                    overwrite_default_atom_features=estimator.args.
-                    overwrite_default_atom_features,
-                    overwrite_default_bond_features=estimator.args.
-                    overwrite_default_bond_features
-                ) for i, (smiles, targets) in tqdm(enumerate(zip(X, y)), total=len(X))
+                )
+                for i, (smile,
+                        targets) in tqdm(enumerate(zip(smiles, y)), total=len(smiles))
             ]
         )
 
