@@ -570,12 +570,12 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
         recording = EarlyStoppingMode.RECORDING
         not_recording = EarlyStoppingMode.NOT_RECORDING
         # epochs are recorded as self.earlyStopping.mode is set to RECORDING
-        _ = test_obj.test_func(None, None, None, best_epoch=30)
+        _ = test_obj.test_func(None, None, None, best_epoch=29)
         # epochs are not recorded as mode is set to NOT_RECORDING in the decorator
-        _ = test_obj.test_func(None, None, None, not_recording, best_epoch=50)
+        _ = test_obj.test_func(None, None, None, not_recording, best_epoch=49)
         self.assertEqual(test_obj.earlyStopping.mode, not_recording)
         # epochs are recorded as mode is now set to RECORDING in the decorator
-        _ = test_obj.test_func(None, None, None, recording, best_epoch=40)
+        _ = test_obj.test_func(None, None, None, recording, best_epoch=39)
         self.assertEqual(test_obj.earlyStopping.mode, recording)
 
         # Check if the best epochs are recorded with mode RECORDING using the decorator
@@ -583,13 +583,13 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
 
         # Check if the best epochs are not recorded with other modes using the decorator
         test_obj.earlyStopping.mode = EarlyStoppingMode.FIXED
-        _ = test_obj.test_func(None, None, None, best_epoch=50)
+        _ = test_obj.test_func(None, None, None, best_epoch=49)
         self.assertEqual(test_obj.earlyStopping.optimalEpochs, 35)
         test_obj.earlyStopping.mode = EarlyStoppingMode.OPTIMAL
-        _ = test_obj.test_func(None, None, None, best_epoch=60)
+        _ = test_obj.test_func(None, None, None, best_epoch=59)
         self.assertEqual(test_obj.earlyStopping.optimalEpochs, 35)
         test_obj.earlyStopping.mode = EarlyStoppingMode.NOT_RECORDING
-        _ = test_obj.test_func(None, None, None, best_epoch=70)
+        _ = test_obj.test_func(None, None, None, best_epoch=69)
         self.assertEqual(test_obj.earlyStopping.optimalEpochs, 35)
 
         # check decorator raises error when early stopping is not supported
