@@ -293,10 +293,7 @@ def QSPR_modelling(args):
             # class_weight and scale_pos_weight are only used for RF, XGB and SVM
             if not reg:
                 class_weight = "balanced" if args.sample_weighing else None
-                if (
-                    alg_dict[model_type] == RandomForestClassifier or
-                    alg_dict[model_type] == SVC
-                ):
+                if alg_dict[model_type] in [RandomForestClassifier, SVC]:
                     parameters["class_weight"] = class_weight
                 counts = mydataset.y.value_counts()
                 scale_pos_weight = (
