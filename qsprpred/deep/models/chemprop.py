@@ -42,6 +42,9 @@ class MoleculeModel(chemprop.models.MoleculeModel):
                 scaler for scaling the atom descriptors
             bond_descriptor_scaler (chemprop.data.scaler.StandardScaler):
                 scaler for scaling the bond descriptors
+            atom_bond_scaler (chemprop.data.scaler.StandardScaler):
+                scaler for scaling the atom/bond targets,
+                unused in QSPRpred
         """
         super().__init__(args)
         self.args = args
@@ -70,6 +73,9 @@ class MoleculeModel(chemprop.models.MoleculeModel):
                 scaler for scaling the atom descriptors
             bond_descriptor_scaler (chemprop.data.scaler.StandardScaler):
                 scaler for scaling the bond descriptors
+            atom_bond_scaler (chemprop.data.scaler.StandardScaler):
+                scaler for scaling the atom/bond targets,
+                unused in QSPRpred
         """
         self.scaler = scaler
         self.features_scaler = features_scaler
@@ -322,15 +328,13 @@ class Chemprop(QSPRModel):
         if args.dataset_type == "regression":
             debug("Fitting scaler")
             scaler = train_data.normalize_targets()
-            atom_bond_scaler = None
         else:
             scaler = None
-            atom_bond_scaler = None
 
         # attach scalers to estimator
         estimator.setScalers(
             scaler, features_scaler, atom_descriptor_scaler, bond_descriptor_scaler,
-            atom_bond_scaler
+            None
         )
 
         # Get loss function
@@ -403,7 +407,6 @@ class Chemprop(QSPRModel):
                 scheduler=scheduler,
                 args=args,
                 n_iter=n_iter,
-                atom_bond_scaler=atom_bond_scaler,
                 logger=self.chempropLogger,
                 writer=writer
             )
@@ -417,7 +420,6 @@ class Chemprop(QSPRModel):
                     metrics=args.metrics,
                     dataset_type=args.dataset_type,
                     scaler=scaler,
-                    atom_bond_scaler=atom_bond_scaler,
                     logger=self.chempropLogger
                 )
 
@@ -542,7 +544,6 @@ class Chemprop(QSPRModel):
             model=estimator,
             data_loader=X_loader,
             scaler=estimator.scaler,
-            atom_bond_scaler=estimator.atom_bond_scaler,
             disable_progress_bar=True
         )
 
