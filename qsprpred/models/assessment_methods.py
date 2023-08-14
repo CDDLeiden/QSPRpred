@@ -58,7 +58,7 @@ class CrossValAssessor(ModelAssessor):
             )
             # fit model
             crossval_estimator = model.loadEstimator(evalparams)
-            model.fit(X_train, y_train, crossval_estimator, **kwargs)
+            model.fit(X_train, y_train, crossval_estimator, mode=self.mode, **kwargs)
             # make predictions
             if model.task.isRegression() or not self.useProba:
                 cvs[idx_test] = model.predict(X_test, crossval_estimator)
@@ -126,7 +126,7 @@ class TestSetAssessor(ModelAssessor):
             ]
         # fit model
         ind_estimator = model.loadEstimator(evalparams)
-        ind_estimator = model.fit(X, y, ind_estimator, **kwargs)
+        ind_estimator = model.fit(X, y, ind_estimator, mode=self.mode, **kwargs)
         # if independent test set is available, predict on it
         if X_ind.shape[0] > 0:
             if model.task.isRegression() or not self.useProba:
