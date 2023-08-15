@@ -397,12 +397,6 @@ class Chemprop(QSPRModel):
         args = estimator.args
 
         # Set pytorch seed for random initial weights
-        torch.manual_seed(estimator.args.pytorch_seed)
-
-        # Split data
-        self.chempropLogger.debug(f"Splitting data with seed {args.seed}")
-
-        # Set pytorch seed for random initial weights
         torch.manual_seed(args.pytorch_seed)
 
         # set task names
