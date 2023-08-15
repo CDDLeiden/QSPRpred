@@ -1,3 +1,5 @@
+import os
+
 from rdkit import rdBase
 
 rdBase.DisableLog("rdApp.error")
@@ -6,3 +8,6 @@ rdBase.DisableLog("rdApp.warning")
 
 __version__ = "2.1.0"
 VERSION = __version__
+if os.path.exists(os.path.join(os.path.dirname(__file__), '_version.py')):
+    from ._version import version
+    VERSION = version
