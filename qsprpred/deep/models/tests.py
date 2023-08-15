@@ -130,6 +130,10 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset: Data set to use.
             parameters: Parameters to use.
         """
+        if parameters is None:
+            parameters = {"gpu": GPUS[0]}
+        else:
+            parameters["gpu"] = GPUS[0]
         return Chemprop(
             base_dir=base_dir, data=dataset, name=name, parameters=parameters
         )
