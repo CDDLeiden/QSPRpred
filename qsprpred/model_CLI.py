@@ -378,8 +378,8 @@ def QSPR_modelling(args):
             # initialize models from saved or default parameters
 
             if args.model_evaluation:
-                CrossValAssessor()(QSPRmodel, mode=EarlyStoppingMode.RECORDING)
-                TestSetAssessor()(QSPRmodel)
+                CrossValAssessor(mode=EarlyStoppingMode.RECORDING)(QSPRmodel)
+                TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING)(QSPRmodel)
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):
