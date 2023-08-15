@@ -6,8 +6,7 @@ import torch
 from parameterized import parameterized
 
 from ...data.data import QSPRDataset
-from ...deep.models.models import QSPRDNN
-from ...deep.models.chemprop import Chemprop
+from ...deep.models.models import QSPRDNN, Chemprop
 from ...deep.models.neural_network import STFullyConnected
 from ...models.tasks import TargetTasks, ModelTasks
 from ...models.tests import ModelDataSetsMixIn, ModelTestMixIn
