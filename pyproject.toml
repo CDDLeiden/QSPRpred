@@ -85,9 +85,6 @@ documentation = "https://cddleiden.github.io/QSPRPred/docs/"
 [tool.setuptools]
 include-package-data = true
 
-[tool.setuptools.dynamic]
-version = { attr = "qsprpred.__version__"}
-
 [tool.setuptools_scm]
 write_to = "qsprpred/_version.py"
 
