@@ -11,7 +11,7 @@ import pandas as pd
 import torch
 from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
-from tqdm import tqdm, trange
+from tqdm import trange
 
 from ...data.data import QSPRDataset
 from ...models.interfaces import QSPRModel
@@ -24,11 +24,7 @@ class MoleculeModel(chemprop.models.MoleculeModel):
     def __init__(
         self,
         args: chemprop.args.TrainArgs,
-        scaler: chemprop.data.scaler.StandardScaler | None = None,
-        features_scaler: chemprop.data.scaler.StandardScaler | None = None,
-        atom_descriptor_scaler: chemprop.data.scaler.StandardScaler | None = None,
-        bond_descriptor_scaler: chemprop.data.scaler.StandardScaler | None = None,
-        atom_bond_scaler: chemprop.data.scaler.StandardScaler | None = None,
+        scaler: chemprop.data.scaler.StandardScaler | None = None
     ):
         """Initialize a MoleculeModel instance.
 
@@ -36,58 +32,10 @@ class MoleculeModel(chemprop.models.MoleculeModel):
             args (chemprop.args.TrainArgs): arguments for training the model,
             scaler (chemprop.data.scaler.StandardScaler):
                 scaler for scaling the targets
-            features_scaler (chemprop.data.scaler.StandardScaler):
-                scaler for scaling the features
-            atom_descriptor_scaler (chemprop.data.scaler.StandardScaler):
-                scaler for scaling the atom descriptors
-            bond_descriptor_scaler (chemprop.data.scaler.StandardScaler):
-                scaler for scaling the bond descriptors
-            atom_bond_scaler (chemprop.data.scaler.StandardScaler):
-                scaler for scaling the atom/bond targets,
-                unused in QSPRpred
         """
         super().__init__(args)
         self.args = args
         self.scaler = scaler
-        self.features_scaler = features_scaler
-        self.atom_descriptor_scaler = atom_descriptor_scaler
-        self.bond_descriptor_scaler = bond_descriptor_scaler
-        self.atom_bond_scaler = atom_bond_scaler
-
-    def setScalers(
-        self,
-        scaler: chemprop.data.scaler.StandardScaler | None = None,
-        features_scaler: chemprop.data.scaler.StandardScaler | None = None,
-        atom_descriptor_scaler: chemprop.data.scaler.StandardScaler | None = None,
-        bond_descriptor_scaler: chemprop.data.scaler.StandardScaler | None = None,
-        atom_bond_scaler: chemprop.data.scaler.StandardScaler | None = None,
-    ):
-        """Set the scalers of the model.
-
-        self.parameters:
-            scaler (chemprop.data.scaler.StandardScaler):
-                scaler for scaling the targets
-            features_scaler (chemprop.data.scaler.StandardScaler):
-                scaler for scaling the features
-            atom_descriptor_scaler (chemprop.data.scaler.StandardScaler):
-                scaler for scaling the atom descriptors
-            bond_descriptor_scaler (chemprop.data.scaler.StandardScaler):
-                scaler for scaling the bond descriptors
-            atom_bond_scaler (chemprop.data.scaler.StandardScaler):
-                scaler for scaling the atom/bond targets,
-                unused in QSPRpred
-        """
-        self.scaler = scaler
-        self.features_scaler = features_scaler
-        self.atom_descriptor_scaler = atom_descriptor_scaler
-        self.bond_descriptor_scaler = bond_descriptor_scaler
-        self.atom_bond_scaler = atom_bond_scaler
-
-    def getScalers(self):
-        return [
-            self.scaler, self.features_scaler, self.atom_descriptor_scaler,
-            self.bond_descriptor_scaler, self.atom_bond_scaler
-        ]
 
     @classmethod
     def cast(cls, obj: chemprop.models.MoleculeModel) -> "MoleculeModel":
@@ -104,7 +52,7 @@ class MoleculeModel(chemprop.models.MoleculeModel):
         ), "obj is not a chemprop.models.MoleculeModel instance."
         obj.__class__ = cls
         obj.args = None
-        obj.setScalers()
+        obj.scaler = None
         return obj
 
     @staticmethod
@@ -240,7 +188,7 @@ class Chemprop(QSPRModel):
 
         estimator = self.estimator if estimator is None else estimator
 
-        data = self.convertToMoleculeDataset(estimator, X, y)
+        data = self.convertToMoleculeDataset(X, y)
         args = estimator.args
 
         # Set pytorch seed for random initial weights
@@ -262,7 +210,6 @@ class Chemprop(QSPRModel):
                 data=data,
                 split_type=args.split_type,
                 sizes=args.split_sizes if args.split_sizes[2] == 0 else [0.9, 0.1, 0],
-                key_molecule_index=args.split_key_molecule,
                 seed=args.seed,
                 args=args,
                 logger=self.chempropLogger
@@ -284,38 +231,6 @@ class Chemprop(QSPRModel):
             )
             args.train_class_sizes = train_class_sizes
 
-        # Fit feature scaler on train data and scale data
-        if args.features_scaling:
-            features_scaler = train_data.normalize_features(replace_nan_token=0)
-            if self.earlyStopping:
-                val_data.normalize_features(features_scaler)
-        else:
-            features_scaler = None
-
-        # Fit atom descriptor scaler on train data and scale data
-        if args.atom_descriptor_scaling and args.atom_descriptors is not None:
-            atom_descriptor_scaler = train_data.normalize_features(
-                replace_nan_token=0, scale_atom_descriptors=True
-            )
-            if self.earlyStopping:
-                val_data.normalize_features(
-                    atom_descriptor_scaler, scale_atom_descriptors=True
-                )
-        else:
-            atom_descriptor_scaler = None
-
-        # Fit bond descriptor scaler on train data and scale data
-        if args.bond_descriptor_scaling and args.bond_descriptors is not None:
-            bond_descriptor_scaler = train_data.normalize_features(
-                replace_nan_token=0, scale_bond_descriptors=True
-            )
-            if self.earlyStopping:
-                val_data.normalize_features(
-                    bond_descriptor_scaler, scale_bond_descriptors=True
-                )
-        else:
-            bond_descriptor_scaler = None
-
         # Get length of training data
         args.train_data_size = len(train_data)
 
@@ -327,15 +242,9 @@ class Chemprop(QSPRModel):
         # Initialize scaler and standard scale training targets (regression only)
         if args.dataset_type == "regression":
             debug("Fitting scaler")
-            scaler = train_data.normalize_targets()
+            estimator.scaler = train_data.normalize_targets()
         else:
-            scaler = None
-
-        # attach scalers to estimator
-        estimator.setScalers(
-            scaler, features_scaler, atom_descriptor_scaler, bond_descriptor_scaler,
-            None
-        )
+            estimator.scaler = None
 
         # Get loss function
         loss_func = chemprop.train.loss_functions.get_loss_func(args)
@@ -369,7 +278,7 @@ class Chemprop(QSPRModel):
             )
 
         # Tensorboard writer
-        save_dir = os.path.join(self.outDir, "temp")
+        save_dir = os.path.join(self.outDir, "tensorboard")
         os.makedirs(save_dir, exist_ok=True)
         try:
             writer = SummaryWriter(log_dir=save_dir)
@@ -419,7 +328,7 @@ class Chemprop(QSPRModel):
                     num_tasks=args.num_tasks,
                     metrics=args.metrics,
                     dataset_type=args.dataset_type,
-                    scaler=scaler,
+                    scaler=estimator.scaler,
                     logger=self.chempropLogger
                 )
 
@@ -521,20 +430,8 @@ class Chemprop(QSPRModel):
                 to a sample in the data and each column to a class
         """
         estimator = self.estimator if estimator is None else estimator
-        X = self.convertToMoleculeDataset(estimator, X)
+        X = self.convertToMoleculeDataset(X)
         args = estimator.args
-
-        if args.features_scaling:
-            X.normalize_features(estimator.features_scaler)
-        if args.atom_descriptor_scaling and args.atom_descriptors is not None:
-            X.normalize_features(
-                estimator.atom_descriptor_scaler, scale_atom_descriptors=True
-            )
-        if args.bond_descriptor_scaling and args.bond_descriptors_size > 0:
-            X.normalize_features(
-                estimator.bond_descriptor_scaler,
-                scale_bond_descriptors=True,
-            )
 
         X_loader = chemprop.data.MoleculeDataLoader(
             dataset=X, batch_size=args.batch_size
@@ -552,7 +449,6 @@ class Chemprop(QSPRModel):
 
         if self.task.isClassification():
             if self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_MULTICLASS]:
-                print(preds.shape)
                 # chemprop returns 3D array (samples, targets, classes)
                 # split into list of 2D arrays (samples, classes), length = n targets
                 preds = np.split(preds, preds.shape[1], axis=1)
@@ -582,8 +478,8 @@ class Chemprop(QSPRModel):
         Returns:
             object: initialized estimator instance
         """
+        self.checkArgs(params)
         new_parameters = self.getParameters(params)
-        self.checkArgs(new_parameters)
         args = MoleculeModel.getTrainArgs(new_parameters, self.task)
 
         # set task names
@@ -616,18 +512,18 @@ class Chemprop(QSPRModel):
             estimator = MoleculeModel.cast(
                 chemprop.utils.load_checkpoint(path, logger=self.chempropLogger)
             )
-            # load scalers from file
-            estimator.setScalers(*chemprop.utils.load_scalers(path))
+            # load scalers from file and use only the target scaler (first element)
+            estimator.scaler = chemprop.utils.load_scalers(path)[0]
             # load parameters from file
             loaded_params = chemprop.utils.load_args(path).as_dict()
             if params is not None:
                 loaded_params.update(params)
-            self.checkArgs(loaded_params)
             self.parameters = self.getParameters(loaded_params)
 
             # Set train args
             estimator.args = MoleculeModel.getTrainArgs(loaded_params, self.task)
         elif fallback_load:
+            self.parameters = self.getParameters(params)
             return self.loadEstimator(params)
         else:
             raise FileNotFoundError(
@@ -643,14 +539,15 @@ class Chemprop(QSPRModel):
             path (str): path to the saved estimator
         """
         chemprop.utils.save_checkpoint(
-            f"{self.outPrefix}.pt", self.estimator, *self.estimator.getScalers(),
-            self.estimator.args
+            f"{self.outPrefix}.pt",
+            self.estimator,
+            scaler=self.estimator.scaler,
+            args=self.estimator.args
         )
         return f"{self.outPrefix}.pt"
 
     def convertToMoleculeDataset(
         self,
-        estimator: MoleculeModel,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset | None = None
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
@@ -692,6 +589,8 @@ class Chemprop(QSPRModel):
         if X.shape[1] > 1:
             features_data = X[:, np.arange(X.shape[1]) != smiles_column]
             # try to convert to float else raise error
+            # Note, in this case features have not been previously converted to float in
+            # QSPRpred as SMILES features are not numeric
             try:
                 features_data = features_data.astype(np.float32)
             except ValueError:
@@ -709,9 +608,7 @@ class Chemprop(QSPRModel):
                     smiles=[smile],
                     targets=targets,
                     features=features_data[i] if features_data is not None else None,
-                )
-                for i, (smile,
-                        targets) in tqdm(enumerate(zip(smiles, y)), total=len(smiles))
+                ) for i, (smile, targets) in enumerate(zip(smiles, y))
             ]
         )
 
@@ -724,93 +621,66 @@ class Chemprop(QSPRModel):
             handler.close()
         return super().cleanFiles()
 
-    @staticmethod
-    def checkArgs(args: chemprop.args.TrainArgs | dict):
+    def checkArgs(self, args: chemprop.args.TrainArgs | dict):
         """Check if the given arguments are valid.
 
         Args:
             args (chemprop.args.TrainArgs, dict): arguments to check
         """
-        unused_args = [
-            "smiles_columns",
-            "number_of_molecules",
-            "checkpoint_dir",
-            "checkpoint_path",
-            "checkpoint_paths",
-            "gpu",
-            "phase_features_path",
-            "max_data_size",
-            "num_workers",  # common args
-            "data_path",
-            "target_columns",
-            "ignore_columns",
-            "dataset_type",
-            "multiclass_num_classes",
-            "separate_val_path",
-            "separate_test_path",
-            "spectra_phase_mask_path",
-            "data_weights_path",
-            "target_weights",
-            "split_type",
-            "split_key_molecule",
-            "num_folds",
-            "folds_file",
-            "val_fold_index",
-            "test_fold_index",
-            "crossval_index_dir",
-            "crossval_index_file",
-            "extra_metrics",
-            "save_dir",
-            "save_smiles_split",
-            "test",
-            "quiet",
-            "log_frequency",
-            "show_individual_scores",
-            "cache_cutoff",
-            "save_preds",
-            "resume_experiment"  # general train args
-            "separate_val_features_path",
-            "separate_test_features_path",
-            "separate_val_phase_features_path",
-            "separate_test_phase_features_path",
-            "separate_val_atom_descriptors_path",
-            "separate_test_atom_descriptors_path",
-            "separate_val_bond_features_path",
-            "separate_test_bond_features_path",
-            "config_path",
-            "ensemble_size",
-            "aggregation",
-            "aggregation_norm",
-            "reaction",
-            "reaction_mode",
-            "reaction_solvent"  # model train args
-            "frzn_ffn_layers",
-            "freeze_first_only"  # training train args
+        used_args = [
+            "no_cuda", "gpu", "num_workers", "batch_size", "no_cache_mol",
+            "empty_cache", "loss_function", "split_sizes", "seed", "pytorch_seed",
+            "metric", "bias", "hidden_size", "depth", "mpn_shared", "dropout",
+            "activation", "atom_messages", "undirected", "ffn_hidden_size",
+            "ffn_num_layers", "explicit_h", "adding_h", "epochs", "warmup_epochs",
+            "init_lr", "max_lr", "final_lr", "grad_clip", "class_balance",
+            "evidential_regularization", "minimize_score", "num_tasks", "dataset_type",
+            "metrics", "task_names"
         ]
+
+        default_args = chemprop.args.TrainArgs().from_dict(
+            args_dict={
+                "dataset_type": "regression",
+                "data_path": ""
+            }
+        )
+        default_args.process_args()
+        default_args = default_args.as_dict()
+
         if isinstance(args, dict) or args is None:
             if isinstance(args, dict):
-                # check if any key in args is in unused_common_args
-                set_unused_args = [key in unused_args for key in args.keys()]
-                if any(set_unused_args):
-                    print(
-                        "Warning: unused common arguments sets: "
-                        f"{np.array(list(args.keys()))[set_unused_args]}"
-                    )
+                for key, value in args.items():
+                    if key in default_args:
+                        if default_args[key] != value and key not in used_args:
+                            print(
+                                f"Warning: argument {key} has been set to {value} "
+                                f"but is not used in QSPRpred, it will be ignored."
+                            )
+                    else:
+                        print(
+                            f"Warning: argument {key} is not a valid argument, it "
+                            f"will be ignored."
+                        )
             else:
                 args = {}
+
             # add data_path to args
             args["data_path"] = ""
 
-            if "dataset_type" not in args.keys():
+            # set dataset type
+            if self.task in [ModelTasks.REGRESSION, ModelTasks.MULTITASK_REGRESSION]:
                 args["dataset_type"] = "regression"
+            elif self.task in [
+                ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS
+            ]:
+                args["dataset_type"] = "classification"
+            elif self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_MULTICLASS]:
+                args["dataset_type"] = "multiclass"
+            else:
+                raise ValueError(f"Task {self.task} not supported.")
 
             args = chemprop.args.TrainArgs().from_dict(args, skip_unsettable=True)
             args.process_args()
-
-        assert args.split_key_molecule == 0, (
-            "split_key_molecule must be 0, as QSPRpred does not support data with "
-            "multiple molecules, i.e. reactions."
-        )
 
         assert args.split_type in [
             "random", "scaffold_balanced", "random_with_repeated_smiles"
