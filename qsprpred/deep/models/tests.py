@@ -70,7 +70,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
         ]
     )
-    def testSingleTaskmodel(
+    def testSingleTaskModel(
         self, _, task: TargetTasks, alg_name: str, alg: Type, th: float
     ):
         """Test the QSPRDNN model in one configuration.
@@ -147,7 +147,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
         ]
     )
-    def testSingleTaskmodel(self, _, task: TargetTasks, alg_name: str, th: float):
+    def testSingleTaskModel(self, _, task: TargetTasks, alg_name: str, th: float):
         """Test the QSPRDNN model in one configuration.
 
         Args:
