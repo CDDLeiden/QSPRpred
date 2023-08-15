@@ -400,7 +400,7 @@ class Chemprop(QSPRModel):
         torch.manual_seed(estimator.args.pytorch_seed)
 
         # Split data
-        debug(f"Splitting data with seed {args.seed}")
+        self.chempropLogger.debug(f"Splitting data with seed {args.seed}")
 
         # Set pytorch seed for random initial weights
         torch.manual_seed(args.pytorch_seed)
@@ -410,7 +410,7 @@ class Chemprop(QSPRModel):
 
         # Create validation data when using early stopping
         if self.earlyStopping:
-            debug(f"Splitting data with seed {args.seed}")
+            self.chempropLogger.debug(f"Splitting data with seed {args.seed}")
             train_data, val_data, _ = chemprop.data.utils.split_data(
                 data=data,
                 split_type=args.split_type,
@@ -425,9 +425,9 @@ class Chemprop(QSPRModel):
         # Get number of molecules per class in training data
         if args.dataset_type == "classification":
             class_sizes = chemprop.data.utils.get_class_sizes(data)
-            debug("Class sizes")
+            self.chempropLogger.debug("Class sizes")
             for i, task_class_sizes in enumerate(class_sizes):
-                debug(
+                self.chempropLogger.debug(
                     f"{args.task_names[i]} "
                     f"{', '.join(f'{cls}: {size * 100:.2f}%' for cls, size in enumerate(task_class_sizes))}"  # noqa: E501
                 )
@@ -440,13 +440,16 @@ class Chemprop(QSPRModel):
         args.train_data_size = len(train_data)
 
         # log data size
-        debug(f"Total size = {len(data):,}")
+        self.chempropLogger.debug(f"Total size = {len(data):,}")
         if self.earlyStopping:
-            debug(f"train size = {len(train_data):,} | val size = {len(val_data):,}")
+            self.chempropLogger.debug(
+                f"train size = {len(train_data):,}"
+                f" | val size = {len(val_data):,}"
+            )
 
         # Initialize scaler and standard scale training targets (regression only)
         if args.dataset_type == "regression":
-            debug("Fitting scaler")
+            self.chempropLogger.debug("Fitting scaler")
             estimator.scaler = train_data.normalize_targets()
         else:
             estimator.scaler = None
@@ -477,7 +480,7 @@ class Chemprop(QSPRModel):
             )
 
         if args.class_balance:
-            debug(
+            self.chempropLogger.debug(
                 f"With class_balance, \
                 effective train size = {train_data_loader.iter_size:,}"
             )
@@ -490,12 +493,12 @@ class Chemprop(QSPRModel):
         except:  # noqa: E722
             writer = SummaryWriter(logdir=save_dir)
 
-        debug(
+        self.chempropLogger.debug(
             f"Number of parameters = {chemprop.nn_utils.param_count_all(estimator):,}"
         )
 
         if args.cuda:
-            debug("Moving model to cuda")
+            self.chempropLogger.debug("Moving model to cuda")
         estimator = estimator.to(args.device)
 
         # Optimizers
@@ -512,7 +515,7 @@ class Chemprop(QSPRModel):
         n_epochs = self.earlyStopping.getEpochs(
         ) if not self.earlyStopping else args.epochs
         for epoch in trange(n_epochs):
-            debug(f"Epoch {epoch}")
+            self.chempropLogger.debug(f"Epoch {epoch}")
             n_iter = chemprop.train.train(
                 model=estimator,
                 data_loader=train_data_loader,
@@ -542,13 +545,19 @@ class Chemprop(QSPRModel):
                     mean_val_score = chemprop.utils.multitask_mean(
                         scores, metric=metric
                     )
-                    debug(f"Validation {metric} = {mean_val_score:.6f}")
+                    self.chempropLogger.debug(
+                        f"Validation {metric} = "
+                        f"{mean_val_score:.6f}"
+                    )
                     writer.add_scalar(f"validation_{metric}", mean_val_score, n_iter)
 
                     if args.show_individual_scores:
                         # Individual validation scores
                         for task_name, val_score in zip(args.task_names, scores):
-                            debug(f"Validation {task_name} {metric} = {val_score:.6f}")
+                            self.chempropLogger.debug(
+                                f"Validation {task_name} {metric}"
+                                f" = {val_score:.6f}"
+                            )
                             writer.add_scalar(
                                 f"validation_{task_name}_{metric}", val_score, n_iter
                             )
@@ -562,7 +571,7 @@ class Chemprop(QSPRModel):
                     best_score, best_epoch = mean_val_score, epoch
                     best_estimator = deepcopy(estimator)
                 # Evaluate on test set using model with best validation score
-                info(
+                self.chempropLogger.info(
                     f"Model best validation {args.metric} = {best_score:.6f} on epoch \
                     {best_epoch}"
                 )
