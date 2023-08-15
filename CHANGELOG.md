@@ -15,6 +15,7 @@ From v2.0.1 to v2.1.0.dev0
 - `PCMSplit` replaces `StratifiedPerTarget` and is compatible with `RandomSplit`, `ScaffoldSplit` and `ClusterSplit`.
 - In the case single-task dataset, the `RandomSplit` now uses `StratifiedShuffleSplit` in case of classification.
 - `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captures scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
+- The versioning scheme of development snapshots has changed from `devX` to `alphaX`/`betaX`, where `X` is an integer that increments with each release.
 
 ## New Features
 - `ClusterSplit` - splits data based clustering of molecular fingerprints.
