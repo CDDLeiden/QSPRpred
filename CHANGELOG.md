@@ -30,6 +30,7 @@ From v2.0.1 to v2.1.0.dev0
 - Add new descriptorset `SmilesDesc` to use the smiles strings as a descriptor.
 - Refactoring of the test suite under `qsprpred.data` and improvement of temporary file handling (!114).
 - `PyBoostModel` - QSPRpred wrapper for py-boost models.
+- `Chemprop` - QSPRpred wrapper for Chemprop model.
 
 ## Removed Features
 - `StratifiedPerTarget` is replaced by `PCMSplit`.
