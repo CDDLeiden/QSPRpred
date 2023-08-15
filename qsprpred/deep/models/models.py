@@ -390,12 +390,6 @@ class Chemprop(QSPRModel):
             int: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
-        # initialize logger settings for fit
-        if self.chempropLogger is not None:
-            debug, info = self.chempropLogger.debug, self.chempropLogger.info
-        else:
-            debug = info = print
-
         estimator = self.estimator if estimator is None else estimator
 
         # convert data to chemprop MoleculeDataset
