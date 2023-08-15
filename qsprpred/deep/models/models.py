@@ -328,15 +328,15 @@ class Chemprop(QSPRModel):
         autoload=True,
         quiet_logger: bool = True
     ):
-        """Initialize a QSPR model instance.
+        """Initialize a Chemprop instance.
 
         If the model is loaded from file, the data set is not required.
         Note that the data set is required for fitting and optimization.
 
-        self.parameters:
+        Args:
             base_dir (str):
-                base directory of the model,
-                the model files are stored in a subdirectory `{baseDir}/{outDir}/`
+                base directory of the model, the model files are stored in a
+                subdirectory `{baseDir}/{outDir}/`
             data (QSPRDataset): data set used to train the model
             name (str): name of the model
             parameters (dict): dictionary of algorithm specific parameters
@@ -344,7 +344,7 @@ class Chemprop(QSPRModel):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
             quiet_logger (bool):
-                if `True`, the logger is set to quiet mode (no debug messages)
+                if `True`, the chemprop logger is set to quiet mode (no debug messages)
         """
         alg = MoleculeModel  # wrapper for chemprop.models.MoleculeModel
         self.quietLogger = quiet_logger
@@ -390,6 +390,7 @@ class Chemprop(QSPRModel):
             int: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
+        # initialize logger settings for fit
         if self.chempropLogger is not None:
             debug, info = self.chempropLogger.debug, self.chempropLogger.info
         else:
@@ -397,6 +398,7 @@ class Chemprop(QSPRModel):
 
         estimator = self.estimator if estimator is None else estimator
 
+        # convert data to chemprop MoleculeDataset
         data = self.convertToMoleculeDataset(X, y)
         args = estimator.args
 
@@ -412,8 +414,8 @@ class Chemprop(QSPRModel):
         # set task names
         args.task_names = [prop.name for prop in self.data.targetProperties]
 
+        # Create validation data when using early stopping
         if self.earlyStopping:
-            # Split data
             debug(f"Splitting data with seed {args.seed}")
             train_data, val_data, _ = chemprop.data.utils.split_data(
                 data=data,
@@ -583,19 +585,13 @@ class Chemprop(QSPRModel):
     def predict(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
+        estimator: MoleculeModel | None = None
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
-        Note. convertToNumpy can be called here, to convert the input data to
-        np.ndarray format.
-
-        Note. if no estimator is given, the estimator instance of the model
-              is used.
-
-        self.parameters:
+        Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
-            estimator (Any): estimator instance to use for fitting
+            estimator (MoleculeModel): estimator instance to use for fitting
 
         Returns:
             np.ndarray:
@@ -603,34 +599,28 @@ class Chemprop(QSPRModel):
                 to a sample in the data and each column to a target property
         """
         if self.task.isClassification():
+            # convert predictions from predictProba to class labels
             preds = self.predictProba(X, estimator)
             preds = [
                 np.argmax(preds[i], axis=1, keepdims=True) for i in range(len(preds))
             ]
             # change preds from list of 2D arrays to 2D array
             preds = np.concatenate(preds, axis=1)
-            print(preds.shape)
             return preds
         return self.predictProba(X, estimator)
 
     def predictProba(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
+        estimator: MoleculeModel | None = None
     ) -> list[np.ndarray]:
         """Make predictions for the given data matrix or `QSPRDataset`,
         but use probabilities for classification models. Does not work with
         regression models.
 
-        Note. convertToNumpy can be called here, to convert the input data to
-        np.ndarray format.
-
-        Note. if no estimator is given, the estimator instance of the model
-              is used.
-
-        self.parameters:
+        Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
-            estimator (Any): estimator instance to use for fitting
+            estimator (MoleculeModel, None): estimator instance to use for fitting
 
         Returns:
             list[np.ndarray]:
@@ -638,6 +628,7 @@ class Chemprop(QSPRModel):
                 where each array corresponds to a target property, each row
                 to a sample in the data and each column to a class
         """
+        # Prepare estimator and data
         estimator = self.estimator if estimator is None else estimator
         X = self.convertToMoleculeDataset(X)
         args = estimator.args
@@ -646,6 +637,7 @@ class Chemprop(QSPRModel):
             dataset=X, batch_size=args.batch_size
         )
 
+        # Make predictions
         preds = chemprop.train.predict(
             model=estimator,
             data_loader=X_loader,
@@ -824,11 +816,16 @@ class Chemprop(QSPRModel):
         return data
 
     def cleanFiles(self):
+        """Clean up the model files.
+
+        Removes the model directory and all its contents.
+        Handles closing the chemprop logger as well.
+        """
         handlers = self.chempropLogger.handlers[:]
         for handler in handlers:
             self.chempropLogger.removeHandler(handler)
             handler.close()
-        return super().cleanFiles()
+        super().cleanFiles()
 
     def checkArgs(self, args: chemprop.args.TrainArgs | dict):
         """Check if the given arguments are valid.
@@ -836,6 +833,7 @@ class Chemprop(QSPRModel):
         Args:
             args (chemprop.args.TrainArgs, dict): arguments to check
         """
+        # List of arguments from chemprop that are using in the QSPRpred implementation.
         used_args = [
             "no_cuda", "gpu", "num_workers", "batch_size", "no_cache_mol",
             "empty_cache", "loss_function", "split_sizes", "seed", "pytorch_seed",
@@ -847,6 +845,7 @@ class Chemprop(QSPRModel):
             "metrics", "task_names"
         ]
 
+        # Create dummy args to check what default argument values are in chemprop
         default_args = chemprop.args.TrainArgs().from_dict(
             args_dict={
                 "dataset_type": "regression",
@@ -856,6 +855,7 @@ class Chemprop(QSPRModel):
         default_args.process_args()
         default_args = default_args.as_dict()
 
+        # Check if args are valid and warn if changed but not used in QSPRpred
         if isinstance(args, dict) or args is None:
             if isinstance(args, dict):
                 for key, value in args.items():
@@ -873,7 +873,7 @@ class Chemprop(QSPRModel):
             else:
                 args = {}
 
-            # add data_path to args
+            # add data_path to args as it is required by chemprop
             args["data_path"] = ""
 
             # set dataset type

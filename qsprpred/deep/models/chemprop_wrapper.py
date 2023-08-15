@@ -6,7 +6,13 @@ from ...models.tasks import ModelTasks
 
 
 class MoleculeModel(chemprop.models.MoleculeModel):
-    """Wrapper for chemprop.models.MoleculeModel."""
+    """Wrapper for chemprop.models.MoleculeModel.
+
+    Attributes:
+        args (chemprop.args.TrainArgs): arguments for training the model,
+        scaler (chemprop.data.scaler.StandardScaler):
+            scaler for scaling the targets
+    """
     def __init__(
         self,
         args: chemprop.args.TrainArgs,
@@ -14,7 +20,7 @@ class MoleculeModel(chemprop.models.MoleculeModel):
     ):
         """Initialize a MoleculeModel instance.
 
-        self.parameters:
+        Args:
             args (chemprop.args.TrainArgs): arguments for training the model,
             scaler (chemprop.data.scaler.StandardScaler):
                 scaler for scaling the targets
@@ -47,10 +53,12 @@ class MoleculeModel(chemprop.models.MoleculeModel):
 
         Args:
             args (dict): dictionary of arguments
+            task (ModelTasks): task type
 
         Returns:
             chemprop.args.TrainArgs: arguments for training the model
         """
+        # chemprop TrainArgs requires a dictionary with a "data_path" key
         if args is None:
             args = {"data_path": ""}
 
@@ -64,6 +72,7 @@ class MoleculeModel(chemprop.models.MoleculeModel):
         else:
             raise ValueError(f"Task {task} not supported.")
 
+        # create TrainArgs instance from dictionary
         train_args = chemprop.args.TrainArgs()
         train_args.from_dict(args, skip_unsettable=True)
         train_args.process_args()
