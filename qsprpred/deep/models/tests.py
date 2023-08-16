@@ -131,9 +131,9 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters: Parameters to use.
         """
         if parameters is None:
-            parameters = {"gpu": GPUS[0] if GPUS is not None else None}
+            parameters = {"gpu": GPUS[0] if len(GPUS) > 0 else None}
         else:
-            parameters["gpu"] = GPUS[0] if GPUS is not None else None
+            parameters["gpu"] = GPUS[0] if len(GPUS) > 0 else None
         return Chemprop(
             base_dir=base_dir, data=dataset, name=name, parameters=parameters
         )
