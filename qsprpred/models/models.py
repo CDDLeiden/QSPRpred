@@ -11,7 +11,6 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import sklearn_json as skljson
-from sklearn.svm import SVC, SVR
 
 from ..data.data import QSPRDataset
 from ..logs import logger
@@ -56,16 +55,6 @@ class QSPRsklearn(QSPRModel):
                 "At the moment there are no supported metrics "
                 "for multi-task multi-class/mix multi-and-single class classification."
             )
-        # initialize models with defined parameters
-        if type(self.estimator) in [SVC, SVR]:
-            logger.warning(
-                "parameter max_iter set to 10000 to avoid training getting stuck. \
-                            Manually set this parameter if this is not desired."
-            )
-            if self.parameters:
-                self.parameters.update({"max_iter": 10000})
-            else:
-                self.parameters = {"max_iter": 10000}
         # set parameters if defined
         if self.parameters not in [None, {}] and hasattr(self, "estimator"):
             self.estimator.set_params(**self.parameters)
