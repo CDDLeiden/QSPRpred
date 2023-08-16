@@ -612,8 +612,9 @@ class Chemprop(QSPRModel):
         estimator: ChempropMoleculeModel | None = None
     ) -> list[np.ndarray]:
         """Make predictions for the given data matrix or `QSPRDataset`,
-        but use probabilities for classification models. Does not work with
-        regression models.
+        but use probabilities for classification models.
+
+        In case of regression models, this method is equivalent to `predict`.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
