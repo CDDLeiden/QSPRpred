@@ -5,7 +5,7 @@ import chemprop
 from ...models.tasks import ModelTasks
 
 
-class MoleculeModel(chemprop.models.MoleculeModel):
+class ChempropMoleculeModel(chemprop.models.MoleculeModel):
     """Wrapper for chemprop.models.MoleculeModel.
 
     Attributes:
@@ -30,7 +30,7 @@ class MoleculeModel(chemprop.models.MoleculeModel):
         self.scaler = scaler
 
     @classmethod
-    def cast(cls, obj: chemprop.models.MoleculeModel) -> "MoleculeModel":
+    def cast(cls, obj: chemprop.models.MoleculeModel) -> "ChempropMoleculeModel":
         """Cast a chemprop.models.MoleculeModel instance to a MoleculeModel instance.
 
         Args:

@@ -24,7 +24,7 @@ from tqdm import trange
 from copy import deepcopy
 import shutil
 import chemprop
-from ...deep.models.chemprop_wrapper import MoleculeModel
+from ...deep.models.chemprop_wrapper import ChempropMoleculeModel
 
 
 class QSPRDNN(QSPRModel):
@@ -346,7 +346,7 @@ class Chemprop(QSPRModel):
             quiet_logger (bool):
                 if `True`, the chemprop logger is set to quiet mode (no debug messages)
         """
-        alg = MoleculeModel  # wrapper for chemprop.models.MoleculeModel
+        alg = ChempropMoleculeModel  # wrapper for chemprop.models.MoleculeModel
         self.quietLogger = quiet_logger
         super().__init__(base_dir, alg, data, name, parameters, autoload)
         self.chempropLogger = chemprop.utils.create_logger(
@@ -369,7 +369,7 @@ class Chemprop(QSPRModel):
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         keep_logs: bool = False
-    ) -> Any | tuple[MoleculeModel, int | None]:
+    ) -> Any | tuple[ChempropMoleculeModel, int | None]:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
         Note. convertToNumpy can be called here, to convert the input data to
@@ -582,7 +582,7 @@ class Chemprop(QSPRModel):
     def predict(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: MoleculeModel | None = None
+        estimator: ChempropMoleculeModel | None = None
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
@@ -609,7 +609,7 @@ class Chemprop(QSPRModel):
     def predictProba(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: MoleculeModel | None = None
+        estimator: ChempropMoleculeModel | None = None
     ) -> list[np.ndarray]:
         """Make predictions for the given data matrix or `QSPRDataset`,
         but use probabilities for classification models. Does not work with
@@ -678,7 +678,7 @@ class Chemprop(QSPRModel):
         """
         self.checkArgs(params)
         new_parameters = self.getParameters(params)
-        args = MoleculeModel.getTrainArgs(new_parameters, self.task)
+        args = ChempropMoleculeModel.getTrainArgs(new_parameters, self.task)
 
         # set task names
         args.task_names = [prop.name for prop in self.data.targetProperties]
@@ -707,7 +707,7 @@ class Chemprop(QSPRModel):
                     quiet=self.quietLogger
                 )
 
-            estimator = MoleculeModel.cast(
+            estimator = ChempropMoleculeModel.cast(
                 chemprop.utils.load_checkpoint(path, logger=self.chempropLogger)
             )
             # load scalers from file and use only the target scaler (first element)
@@ -719,7 +719,9 @@ class Chemprop(QSPRModel):
             self.parameters = self.getParameters(loaded_params)
 
             # Set train args
-            estimator.args = MoleculeModel.getTrainArgs(loaded_params, self.task)
+            estimator.args = ChempropMoleculeModel.getTrainArgs(
+                loaded_params, self.task
+            )
         elif fallback_load:
             self.parameters = self.getParameters(params)
             return self.loadEstimator(params)
