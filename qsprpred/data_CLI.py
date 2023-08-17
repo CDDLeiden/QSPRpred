@@ -38,7 +38,7 @@ from .data.utils.featurefilters import (
     LowVarianceFilter,
 )
 from .data.utils.scaffolds import Murcko
-from .deep.models.models import QSPRDNN
+from .deep.models.dnn import QSPRDNN
 from .logs.utils import backup_files, enable_file_logger
 from .models.sklearn import QSPRsklearn
 from .models.tasks import TargetTasks
