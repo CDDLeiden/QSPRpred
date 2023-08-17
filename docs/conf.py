@@ -11,9 +11,8 @@ project = 'QSPRpred'
 author = 'Helle van den Maagdenberg, Linde Schoenmaker, Martin Sicho'
 
 # The full version, including alpha/beta/rc tags
-import qsprpred
-
-release = qsprpred.VERSION
+from importlib.metadata import version
+release = version('qsprpred')
 version = f'v{release}'
 
 # -- General configuration ---------------------------------------------------
@@ -31,7 +30,7 @@ extensions = [
     'sphinx.ext.viewcode'
 ]
 
-intersphinx_mapping = {'python': ('https://docs.python.org/3.9', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3.10', None)}
 
 autodoc_default_options = {
     "members": True,
