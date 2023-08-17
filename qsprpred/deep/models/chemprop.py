@@ -2,17 +2,15 @@
 import shutil
 import chemprop
 
+from copy import deepcopy
+from tensorboardX import SummaryWriter
+from torch.optim.lr_scheduler import ExponentialLR
+from tqdm import trange
+
 from ...data.data import QSPRDataset
 from ...models.interfaces import QSPRModel
 from ...models.tasks import ModelTasks
 from ...models.early_stopping import EarlyStoppingMode, early_stopping
-from tensorboardX import SummaryWriter
-from torch.optim.lr_scheduler import ExponentialLR
-from tqdm import trange
-from copy import deepcopy
-import chemprop
-from ...deep.models.chemprop_wrapper import ChempropMoleculeModel
-
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):
     """Wrapper for chemprop.models.MoleculeModel.
