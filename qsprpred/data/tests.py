@@ -17,7 +17,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from ..logs.stopwatch import StopWatch
-from ..models.models import QSPRsklearn
+from ..models.sklearn import QSPRsklearn
 from ..models.tasks import TargetTasks
 from .data import QSPRDataset, TargetProperty
 from .utils.datafilters import CategoryFilter, RepeatsFilter

@@ -15,8 +15,8 @@ from sklearn.svm import SVC, SVR
 
 from ..data.data import QSPRDataset
 from ..logs import logger
-from ..models.interfaces import QSPRModel
-from ..models.tasks import ModelTasks
+from .interfaces import QSPRModel
+from .tasks import ModelTasks
 
 
 class QSPRsklearn(QSPRModel):

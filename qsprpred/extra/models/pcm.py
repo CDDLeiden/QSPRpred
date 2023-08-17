@@ -9,7 +9,7 @@ import numpy as np
 
 from ...data.data import MoleculeTable
 from ...models.interfaces import QSPRModel
-from ...models.models import QSPRsklearn
+from ...models.sklearn import QSPRsklearn
 from ..data.data import PCMDataSet
 from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
 

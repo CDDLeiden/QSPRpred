@@ -26,7 +26,7 @@ from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stop
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
-from ..models.models import QSPRsklearn
+from .sklearn import QSPRsklearn
 from ..models.tasks import ModelTasks, TargetTasks
 
 N_CPUS = 2

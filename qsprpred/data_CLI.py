@@ -40,7 +40,7 @@ from .data.utils.featurefilters import (
 from .data.utils.scaffolds import Murcko
 from .deep.models.models import QSPRDNN
 from .logs.utils import backup_files, enable_file_logger
-from .models.models import QSPRsklearn
+from .models.sklearn import QSPRsklearn
 from .models.tasks import TargetTasks
 
 

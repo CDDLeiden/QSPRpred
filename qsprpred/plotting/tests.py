@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from ..data.data import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
-from ..models.models import QSPRsklearn
+from ..models.sklearn import QSPRsklearn
 from ..models.tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
 from ..plotting.classification import MetricsPlot, ROCPlot
