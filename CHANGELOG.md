@@ -28,8 +28,10 @@ From v2.0.1 to v2.1.0.dev0
 - In `EvaluationMethod` (see above), an attribute `use_proba` has been added, which determines whether the `predict` or `predictProba` method is used to make predictions (#56).
 - Add new descriptorset `SmilesDesc` to use the smiles strings as a descriptor.
 - New module `early_stopping` with classes `EarlyStopping` and `EarlyStoppingMode` has been added. This module allows for more control over early stopping in models that support it.
+- Add new descriptorset `SmilesDesc` to use the smiles strings as a descriptor.
 - Refactoring of the test suite under `qsprpred.data` and improvement of temporary file handling (!114).
 - `PyBoostModel` - QSPRpred wrapper for py-boost models.
+- `Chemprop` - QSPRpred wrapper for Chemprop model.
 
 ## Removed Features
 - `StratifiedPerTarget` is replaced by `PCMSplit`.

@@ -171,12 +171,19 @@ class DescriptorsCalculator(ABC):
         # remove all descriptorsets that are not in the list of descriptors to keep
         self.descSets = [x for i, x in enumerate(self.descSets) if i not in to_remove]
 
-    def get_len(self):
+    def getLen(self) -> int:
         """Return number of descriptors calculated by all descriptorsets."""
         length = 0
         for descset in self.descSets:
-            length += descset.get_len()
+            length += descset.getLen()
         return length
+
+    def getDescriptorNames(self) -> list[str]:
+        """Return list of descriptor names calculated by all descriptorsets."""
+        names = []
+        for descset in self.descSets:
+            names += descset.descriptors
+        return names
 
     @staticmethod
     def treatInfs(df: pd.DataFrame) -> pd.DataFrame:

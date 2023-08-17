@@ -57,7 +57,6 @@ class PathMixIn:
             created before and cleared after each test
 
     """
-
     def setUp(self):
         """Create the directories that are used for testing."""
         self.generatedPath = f"{os.path.dirname(__file__)}/test_files/generated"
@@ -78,7 +77,6 @@ class PathMixIn:
 class DataSetsMixIn(PathMixIn):
     """Mix-in class that provides a small and large testing data set and some common
     preparation settings to use in tests."""
-
     def setUp(self):
         """Create the directories that are used for testing."""
         super().setUp()
@@ -247,8 +245,7 @@ class DataSetsMixIn(PathMixIn):
                 return get_name(obj)
 
         ret = [
-            2 * [get_name_list(x)] + list(x)
-            for x in DataSetsMixIn.getDataPrepGrid()
+            2 * [get_name_list(x)] + list(x) for x in DataSetsMixIn.getDataPrepGrid()
         ]
         return ret
 
@@ -404,7 +401,6 @@ class DataSetsMixIn(PathMixIn):
 
 class DescriptorCheckMixIn:
     """Mixin class for common descriptor checks."""
-
     def checkFeatures(self, ds: QSPRDataset, expected_length: int):
         """Check if the feature names and the feature matrix of a data set is consistent
         with expected number of variables.
@@ -435,9 +431,7 @@ class DescriptorCheckMixIn:
             self.assertRaises(ValueError, ds.createFolds)
 
     def checkDescriptors(
-            self,
-            dataset: QSPRDataset,
-            target_props: list[dict | TargetProperty]
+        self, dataset: QSPRDataset, target_props: list[dict | TargetProperty]
     ):
         """
         Check if information about descriptors is consistent in the data set. Checks
@@ -481,14 +475,11 @@ class DescriptorCheckMixIn:
 class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
     """Simple tests for dataset creation and serialization under different conditions
     and error states."""
-
     def checkConsistency(self, ds: QSPRDataset):
         self.assertNotIn("Notes", ds.getProperties())
         self.assertNotIn("HBD", ds.getProperties())
         self.assertTrue(len(self.getSmallDF()) - 1 == len(ds))
-        self.assertEqual(
-            ds.targetProperties[0].task, TargetTasks.REGRESSION
-        )
+        self.assertEqual(ds.targetProperties[0].task, TargetTasks.REGRESSION)
         self.assertTrue(ds.hasProperty("CL"))
         self.assertEqual(ds.targetProperties[0].name, "CL")
         self.assertEqual(ds.targetProperties[0].originalName, "CL")
@@ -546,7 +537,9 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
             if target_prop.task == TargetTasks.SINGLECLASS:
                 self.assertEqual(y[target_prop.name].unique().shape[0], 2)
             else:
-                self.assertEqual(y[target_prop.name].unique().shape[0], (len(ths[idx]) - 1))
+                self.assertEqual(
+                    y[target_prop.name].unique().shape[0], (len(ths[idx]) - 1)
+                )
             self.assertEqual(target_prop.th, ths[idx])
 
     def checkRegression(self, ds, target_names):
@@ -827,7 +820,6 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
 
 class TestTargetProperty(TestCase):
     """Test the TargetProperty class."""
-
     def checkTargetProperty(self, target_prop, name, task, original_name, th):
         # Check the target property creation consistency
         self.assertEqual(target_prop.name, name)
@@ -887,8 +879,12 @@ class TestTargetProperty(TestCase):
                 },
             ]
         )
-        self.checkTargetProperty(targetprops[0], "CL", TargetTasks.REGRESSION, "CL", None)
-        self.checkTargetProperty(targetprops[1], "fu", TargetTasks.REGRESSION, "fu", None)
+        self.checkTargetProperty(
+            targetprops[0], "CL", TargetTasks.REGRESSION, "CL", None
+        )
+        self.checkTargetProperty(
+            targetprops[1], "fu", TargetTasks.REGRESSION, "fu", None
+        )
         self.assertEqual(
             TargetProperty.selectFromList(targetprops, "CL")[0], targetprops[0]
         )
@@ -1100,11 +1096,13 @@ class TestFoldSplitters(DataSetsMixIn, TestCase):
         MIN_VAL = 1
         scaler = MinMaxScaler(feature_range=(MIN_VAL, MAX_VAL))
         dataset.prepareDataset(feature_standardizer=scaler)
+
         def check_min_max(X_train, X_test, *args, **kwargs):
             self.assertTrue(np.max(X_train) == MAX_VAL)
             self.assertTrue(np.min(X_train) == MIN_VAL)
             self.assertTrue(np.max(X_test) == MAX_VAL)
             self.assertTrue(np.min(X_test) == MIN_VAL)
+
         self.validateFolds(dataset, more=check_min_max)
 
 
@@ -1464,9 +1462,7 @@ class TestFeatureStandardizer(DataSetsMixIn, TestCase):
         """Test the feature standardizer fitting, transforming and serialization."""
         scaler = SKLearnStandardizer.fromFit(self.dataset.X, StandardScaler())
         scaled_features = scaler(self.dataset.X)
-        scaler.toFile(
-            f"{self.generatedPath}/test_scaler.json"
-        )
+        scaler.toFile(f"{self.generatedPath}/test_scaler.json")
         scaler_fromfile = SKLearnStandardizer.fromFile(
             f"{self.generatedPath}/test_scaler.json"
         )
@@ -1480,14 +1476,13 @@ class TestFeatureStandardizer(DataSetsMixIn, TestCase):
 
 class TestStandardizers(DataSetsMixIn, TestCase):
     """Test the standardizers."""
-
     def testInvalidFilter(self):
         """Test the invalid filter."""
         df = self.getSmallDF()
         orig_len = len(df)
         mask = [False] * orig_len
         mask[0] = True
-        df.loc[mask, "SMILES"] = "C(C)(C)(C)(C)(C)(C)(C)(C)(C)" # bad valence example
+        df.loc[mask, "SMILES"] = "C(C)(C)(C)(C)(C)(C)(C)(C)(C)"  # bad valence example
         dataset = QSPRDataset(
             "standardization_test_invalid_filter",
             df=df,
@@ -1506,7 +1501,6 @@ class TestStandardizers(DataSetsMixIn, TestCase):
 
 class DataPrepTestMixIn(DescriptorCheckMixIn):
     """Mixin for testing data preparation."""
-
     def checkPrep(
         self,
         dataset,
@@ -1557,10 +1551,7 @@ class TestDataSetPreparation(DataSetsMixIn, DataPrepTestMixIn, TestCase):
     """Test as many possible combinations of data sets and their preparation
     settings. These can run potentially for a long time so use the `skip` decorator
     if you want to skip all these tests to speed things up during development."""
-
-    @parameterized.expand(
-        DataSetsMixIn.getPrepCombos()
-    )
+    @parameterized.expand(DataSetsMixIn.getPrepCombos())
     def testPrepCombos(
         self,
         _,
@@ -1591,7 +1582,6 @@ class TestDataSetPreparation(DataSetsMixIn, DataPrepTestMixIn, TestCase):
 
 class TestDescriptorInDataMixIn(DescriptorCheckMixIn):
     """Mixin for testing descriptor sets in data sets."""
-
     @staticmethod
     def getDatSetName(desc_set, target_props):
         """Get a unique name for a data set."""
@@ -1606,11 +1596,7 @@ class TestDescriptorInDataMixIn(DescriptorCheckMixIn):
         return [MoleculeDescriptorsCalculator(desc_sets)]
 
     def checkDataSetContainsDescriptorSet(
-            self,
-            dataset,
-            desc_set,
-            prep_combo,
-            target_props
+        self, dataset, desc_set, prep_combo, target_props
     ):
         """Check if a descriptor set is in a data set."""
         # run the preparation
@@ -1626,7 +1612,6 @@ class TestDescriptorInDataMixIn(DescriptorCheckMixIn):
 
 class TestDescriptorsAll(DataSetsMixIn, TestDescriptorInDataMixIn, TestCase):
     """Test all descriptor sets in all data sets."""
-
     @parameterized.expand(
         [
             (
