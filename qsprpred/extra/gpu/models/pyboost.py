@@ -9,23 +9,27 @@ Created by: Linde Schoenmaker
 On: 03.08.2023, 15:26
 """
 import os
+import joblib
+import cupy as cp
+import numpy as np
+import pandas as pd
+
 from copy import deepcopy
 from importlib import import_module
 from typing import Any, Optional, Type
-
-import joblib
-import numpy as np
-import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from ...data.data import QSPRDataset
-from ...models.early_stopping import EarlyStoppingMode, early_stopping
-from ...models.interfaces import QSPRModel
-from ...models.tasks import ModelTasks
+from py_boost.gpu.losses import BCELoss, MSELoss
+from py_boost.gpu.losses.metrics import Metric, auc
+
+from ....data.data import QSPRDataset
+from ....models.early_stopping import EarlyStoppingMode, early_stopping
+from ....models.interfaces import QSPRModel
+from ....models.tasks import ModelTasks
 
 
 class PyBoostModel(QSPRModel):
-    """PyBoostModel class for pyboost models.
+    """PyBoostModel class for pyboost that can handle missing data models.
     Pyboost does gradient boosting with option to do multioutput and
     customizable loss and evaluation.
     For more information and tutorials see: https://github.com/sb-ai-lab/Py-Boost
@@ -75,11 +79,11 @@ class PyBoostModel(QSPRModel):
         if self.task == ModelTasks.MULTITASK_MIXED:
             raise ValueError(
                 "MultiTask with a mix of classification and regression tasks "
-                "is not supported for pyboost models."
+                "is not supported for pyboost that can handle missing data models."
             )
         if self.task == ModelTasks.MULTITASK_MULTICLASS:
             raise NotImplementedError(
-                "Multi-task multi-class is not supported for pyboost models."
+                "Multi-task multi-class is not supported for pyboost that can handle missing data models."
             )
 
     @property
@@ -257,3 +261,127 @@ class PyBoostModel(QSPRModel):
         joblib.dump(self.estimator, estimator_path)
 
         return estimator_path
+    
+class MSEwithNaNLoss(MSELoss):
+    """ 
+    Masked MSE loss function. Custom loss wrapper for pyboost that can handle missing data, 
+    as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
+    """
+    def base_score(self, y_true):
+        # Replace .mean with nanmean function to calc base score
+        return cp.nanmean(y_true, axis=0)
+
+    def get_grad_hess(self, y_true, y_pred):
+        # first, get nan mask for y_true
+        mask = cp.isnan(y_true)
+        # then, compute loss with any values at nan places just to prevent the exception
+        grad, hess = super().get_grad_hess(cp.where(mask, 0, y_true), y_pred)
+        # invert mask
+        mask = (~mask).astype(cp.float32)
+        # multiply grad and hess on inverted mask
+        # now grad and hess eq. 0 on NaN points
+        # that actually means that prediction on that place should not be updated
+        grad = grad * mask
+        hess = hess * mask
+
+        return grad, hess
+
+
+class BCEWithNaNLoss(BCELoss):
+    """
+    Masked BCE loss function. Custom loss wrapper for pyboost that can handle missing data, 
+    as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
+    """
+
+    def base_score(self, y_true):
+        # Replace .mean with nanmean function to calc base score
+        means = cp.clip(
+            cp.nanmean(y_true, axis=0), self.clip_value, 1 - self.clip_value
+        )
+        return cp.log(means / (1 - means))
+
+    def get_grad_hess(self, y_true, y_pred):
+        # first, get nan mask for y_true
+        mask = cp.isnan(y_true)
+        # then, compute loss with any values at nan places just to prevent the exception
+        grad, hess = super().get_grad_hess(cp.where(mask, 0, y_true), y_pred)
+        # invert mask
+        mask = (~mask).astype(cp.float32)
+        # multiply grad and hess on inverted mask
+        # now grad and hess eq. 0 on NaN points
+        # that actually means that prediction on that place should not be updated
+        grad = grad * mask
+        hess = hess * mask
+
+        return grad, hess
+    
+class NaNRMSEScore(Metric):
+    """
+    Masked RMSE score with weights based on number of non-zero values per task. 
+    Custom metric wrapper for pyboost that can handle missing data, 
+    as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
+    """
+    def __call__(self, y_true, y_pred, sample_weight=None):
+        mask = ~np.isnan(y_true)
+
+        if sample_weight is not None:
+            err = ((y_true - y_pred)[mask]**2 *
+                   sample_weight[mask]).sum(axis=0) / sample_weight[mask].sum()
+        else:
+            err = np.nanmean((np.where(mask, (y_true - y_pred), np.nan)**2), axis=0)
+
+        return np.average(err, weights=np.count_nonzero(mask, axis=0))
+
+    def compare(self, v0, v1):
+
+        return v0 > v1
+
+
+class NaNR2Score(Metric):
+    """
+    Masked R2 score with weights based on number of non-zero values per task. 
+    Custom metric wrapper for pyboost that can handle missing data, 
+    as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
+    """
+    def __call__(self, y_true, y_pred, sample_weight=None):
+        mask = ~np.isnan(y_true)
+
+        if sample_weight is not None:
+            err = ((y_true - y_pred)[mask]**2 *
+                   sample_weight[mask]).sum(axis=0) / sample_weight[mask].sum()
+            std = ((y_true[mask] - y_true[mask].mean(axis=0))**2 *
+                   sample_weight[mask]).sum(axis=0) / sample_weight[mask].sum()
+        else:
+            err = np.nanmean((np.where(mask, (y_true - y_pred), np.nan)**2), axis=0)
+            std = np.nanvar(np.where(mask, y_true, np.nan), axis=0)
+
+        return np.average(1 - err / std, weights=np.count_nonzero(mask, axis=0))
+
+    def compare(self, v0, v1):
+
+        return v0 > v1
+
+
+class NaNAucMetric(Metric):
+    """
+    Masked AUC score with weights based on number of non-zero values per task. 
+    Custom metric wrapper for pyboost that can handle missing data, 
+    as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
+    """
+    def __call__(self, y_true, y_pred, sample_weight=None):
+
+        aucs = []
+        mask = ~cp.isnan(y_true)
+
+        for i in range(y_true.shape[1]):
+            m = mask[:, i]
+            w = None if sample_weight is None else sample_weight[:, 0][m]
+            aucs.append(auc(y_true[:, i][m], y_pred[:, i][m], w))
+
+        return np.mean(aucs)
+
+    def compare(self, v0, v1):
+
+        return v0 > v1
+
+
