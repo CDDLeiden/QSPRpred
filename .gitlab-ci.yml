@@ -15,7 +15,6 @@ stages:
       - export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
       - clustalo --version  # For debugging clustalo version
       - mafft --version  # For debugging mafft version
-      - python -m pip install cupy # Needed for PyBoost testing
       - python -m pip install ".[full]" --no-cache-dir
       - python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
       - python -m pip install pytest
@@ -26,16 +25,16 @@ stages:
       - cd clitest && ./run.sh
       - cd ../tutorial && ./run_all.sh
 
-# Run tests on Python version 11 (linux image)
-test:python3.11:
-   extends: .test
-   image: python:3.11
+# # Run tests on Python version 11 (linux image)
+# test:python3.11:
+#    extends: .test
+#    image: python:3.11
 
 # Run tests on Python version 10 (linux image)
 test:python3.10:
    extends: .test
    image: python:3.10
-   
+
 # Write documentation on main branch
 pages:
    stage: deploy

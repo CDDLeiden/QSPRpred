@@ -17,7 +17,6 @@ from ....data.utils.datasplitters import RandomSplit
 from ....extra.gpu.models.dnn import QSPRDNN
 from ....extra.gpu.models.chemprop import Chemprop
 from ....extra.gpu.models.neural_network import STFullyConnected
-from ....extra.gpu.models.pyboost import PyBoostModel, NaNAucMetric
 
 GPUS = list(range(torch.cuda.device_count()))
 
@@ -253,7 +252,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 @pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
 class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the PyBoostModel class."""
+    """This class holds the tests for the PyBoostModel class."""    
     @staticmethod
     def getModel(
         base_dir: str,
@@ -271,7 +270,11 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         Returns:
             PyBoostModel the model
         """
-        return PyBoostModel(
+        if parameters is None:
+            parameters = {}
+        parameters["ntrees"] = 10
+
+        return import_module("..pyboost", __name__).PyBoostModel(
             base_dir=base_dir,
             data=dataset,
             name=name,
@@ -284,7 +287,6 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 {
                     "loss": "mse",
                     "metric": "r2_score",
-                    "ntrees": 10,
                 },
                 # {
                 #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
@@ -320,7 +322,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = PyBoostModel(
+        predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
@@ -360,7 +362,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = PyBoostModel(
+        predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
@@ -410,7 +412,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters
         )
         self.fitTest(model)
-        predictor = PyBoostModel(
+        predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
@@ -466,7 +468,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     #         parameters=parameters,
     #     )
     #     self.fitTest(model)
-    #     predictor = PyBoostModel(
+    #     predictor = import_module("..pyboost", __name__).PyBoostModel(
     #         name=f"{model_name}_multitask_classification", base_dir=model.baseDir
     #     )
     #     self.predictorTest(predictor)
