@@ -16,6 +16,7 @@ From v2.0.1 to v2.1.0.dev0
 - In the case single-task dataset, the `RandomSplit` now uses `StratifiedShuffleSplit` in case of classification.
 - `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captures scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
 - The versioning scheme of development snapshots has changed from `devX` to `alphaX`/`betaX`, where `X` is an integer that increments with each release.
+- The `deep` optional installation has been replaces by `extra_gpu` optional installation.
 
 ## New Features
 - `ClusterSplit` - splits data based clustering of molecular fingerprints.
@@ -30,8 +31,8 @@ From v2.0.1 to v2.1.0.dev0
 - New module `early_stopping` with classes `EarlyStopping` and `EarlyStoppingMode` has been added. This module allows for more control over early stopping in models that support it.
 - Add new descriptorset `SmilesDesc` to use the smiles strings as a descriptor.
 - Refactoring of the test suite under `qsprpred.data` and improvement of temporary file handling (!114).
-- `PyBoostModel` - QSPRpred wrapper for py-boost models.
-- `Chemprop` - QSPRpred wrapper for Chemprop model.
+- `PyBoostModel` - QSPRpred wrapper for py-boost models. Requires `extra_gpu` dependencies.
+- `Chemprop` - QSPRpred wrapper for Chemprop model. Requires `extra_gpu` dependencies.
 
 ## Removed Features
 - `StratifiedPerTarget` is replaced by `PCMSplit`.
