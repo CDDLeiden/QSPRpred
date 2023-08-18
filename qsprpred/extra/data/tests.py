@@ -653,6 +653,25 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
             set(test_smiles.unique()).isdisjoint(set(train_smiles.unique()))
         )
 
+    def test_PCMSplit_random_shuffle(self):
+        splitter = PCMSplit(RandomSplit(), dataset=self.dataset)
+        self.dataset.split(splitter, featurize=True)
+        seed = self.dataset.randomState
+        train, test = self.dataset.getFeatures()
+        train_order = train.index.tolist()
+        test_order = test.index.tolist()
+        self.dataset.save()
+        # reload and check if orders are the same if we redo the split
+        # and featurization with the same random state
+        dataset = PCMDataSet.fromFile(self.dataset.storePath)
+        splitter = PCMSplit(RandomSplit(), dataset=dataset)
+        self.dataset.split(splitter, featurize=True)
+        train, test = self.dataset.getFeatures()
+        
+        self.assertEqual(dataset.randomState, seed)
+        self.assertListEqual(train.index.tolist(), train_order)
+        self.assertListEqual(test.index.tolist(), test_order)
+
     def test_LeaveTargetOut(self):
         target = self.dataset.getProteinKeys()[0:2]
         splitter = LeaveTargetsOut(targets=target)
