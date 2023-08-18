@@ -14,10 +14,10 @@ from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import trange
 
-from ...data.data import QSPRDataset
-from ...models.interfaces import QSPRModel
-from ...models.tasks import ModelTasks
-from ...models.early_stopping import EarlyStoppingMode, early_stopping
+from ....data.data import QSPRDataset
+from ....models.interfaces import QSPRModel
+from ....models.tasks import ModelTasks
+from ....models.early_stopping import EarlyStoppingMode, early_stopping
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):
     """Wrapper for chemprop.models.MoleculeModel.

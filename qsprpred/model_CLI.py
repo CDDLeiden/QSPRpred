@@ -19,7 +19,7 @@ from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 from .data.data import QSPRDataset
-from .deep.models.dnn import QSPRDNN
+from .extra.gpu.models.dnn import QSPRDNN
 from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization

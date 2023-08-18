@@ -5,15 +5,16 @@ from unittest import TestCase
 import torch
 from parameterized import parameterized
 
-from ...data.data import QSPRDataset
-from ...deep.models.dnn import QSPRDNN
-from ...deep.models.chemprop import Chemprop
-from ...deep.models.neural_network import STFullyConnected
-from ...models.tasks import TargetTasks, ModelTasks
-from ...models.tests import ModelDataSetsMixIn, ModelTestMixIn
-from ...data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
-from ...data.utils.descriptorsets import SmilesDesc
-from ...data.utils.datasplitters import RandomSplit
+from ....data.data import QSPRDataset
+from ....models.tasks import TargetTasks, ModelTasks
+from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn
+from ....data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
+from ....data.utils.descriptorsets import SmilesDesc
+from ....data.utils.datasplitters import RandomSplit
+from ....extra.gpu.models.dnn import QSPRDNN
+from ....extra.gpu.models.chemprop import Chemprop
+from ....extra.gpu.models.neural_network import STFullyConnected
+
 from sklearn.impute import SimpleImputer
 
 GPUS = list(range(torch.cuda.device_count()))
@@ -132,9 +133,10 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters: Parameters to use.
         """
         if parameters is None:
-            parameters = {"gpu": GPUS[0] if len(GPUS) > 0 else None}
-        else:
-            parameters["gpu"] = GPUS[0] if len(GPUS) > 0 else None
+            parameters = {}
+
+        parameters["gpu"] = GPUS[0] if len(GPUS) > 0 else None
+        parameters["epochs"] = 2
         return Chemprop(
             base_dir=base_dir, data=dataset, name=name, parameters=parameters
         )

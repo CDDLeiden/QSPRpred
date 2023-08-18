@@ -12,12 +12,12 @@ import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
 
-from ...data.data import QSPRDataset
-from ...deep import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
-from ...deep.models.neural_network import STFullyConnected
-from ...models.interfaces import QSPRModel
-from ...models.tasks import ModelTasks
-from ...models.early_stopping import EarlyStoppingMode, early_stopping
+from ....data.data import QSPRDataset
+from ....models.interfaces import QSPRModel
+from ....models.tasks import ModelTasks
+from ....models.early_stopping import EarlyStoppingMode, early_stopping
+from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
+from ....extra.gpu.models.neural_network import STFullyConnected
 
 
 class QSPRDNN(QSPRModel):
