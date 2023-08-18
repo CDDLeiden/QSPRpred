@@ -10,6 +10,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 from parameterized import parameterized
+from sklearn import metrics
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
@@ -64,7 +65,7 @@ class ModelTestMixIn:
         grid_params = model.__class__.loadParamsGrid(self.gridFile, grid, mname)
         return grid_params[grid_params[:, 0] == mname, 1][0]
 
-    def fitTest(self, model: QSPRModel):
+    def fitTest(self, model: QSPRModel, random_state: int | None = None):
         """Test model fitting, optimization and evaluation.
 
         Args:
@@ -74,7 +75,7 @@ class ModelTestMixIn:
         score_func = SklearnMetric.getDefaultMetric(model.task)
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
-            scoring=score_func, param_grid=search_space_bs, n_trials=1
+            scoring=score_func, param_grid=search_space_bs, n_trials=1, random_state=random_state
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
@@ -198,6 +199,36 @@ class ModelTestMixIn:
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
+    # NOTE: below code is taken from regression without the plotting code
+    # Would be nice if the summary code without plot was available regardless
+    def summaryTest(self, model, expected_summary):
+        cv_path = f"{model.outPrefix}.cv.tsv"
+        ind_path = f"{model.outPrefix}.ind.tsv"
+
+        cate = [cv_path, ind_path]
+        cate_names = ["cv", "ind"]
+        #TODO: fix hardcoded property_name
+        property_name = "CL"
+        summary = {"ModelName": [], "R2": [], "RMSE": [], "Set": []}
+        for j, _ in enumerate(["Cross Validation", "Independent Test"]):
+            df = pd.read_table(cate[j])
+            coef = metrics.r2_score(
+                df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]
+            )
+            rmse = metrics.mean_squared_error(
+                df[f"{property_name}_Label"],
+                df[f"{property_name}_Prediction"],
+                squared=False,
+            )
+            summary["R2"].append(coef)
+            summary["RMSE"].append(rmse)
+            summary["Set"].append(cate_names[j])
+            summary["ModelName"].append(model.name)
+
+        self.assertAlmostEqual(summary["R2"][0], expected_summary["R2"][0], places=5)
+        self.assertAlmostEqual(summary["R2"][1], expected_summary["R2"][1], places=5)
+        self.assertAlmostEqual(summary["RMSE"][0], expected_summary["RMSE"][0], places=5)
+        self.assertAlmostEqual(summary["RMSE"][1], expected_summary["RMSE"][1], places=5)
 
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRsklearn class."""
@@ -263,6 +294,34 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.fitTest(model)
         predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
         self.predictorTest(predictor)
+
+    def testPLSRegressionFitWithSeed(self):
+        """Test model training for regression models."""
+        task = TargetTasks.REGRESSION
+        model_name = "PLSR"
+        model_class = PLSRegression
+        parameters = None
+        dataset = self.createLargeTestDataSet(
+            target_props=[{
+                "name": "CL",
+                "task": task
+            }],
+            preparation_settings=self.getDefaultPrep(random_state=42),
+            random_state=42
+        )
+        model = self.getModel(
+            name=f"{model_name}_{task}",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters,
+        )
+        self.fitTest(model, random_state=42)
+        self.summaryTest(model, expected_summary={
+            "ModelName": ["PLS_REG", "PLS_REG"],
+            "R2": [-0.18672, -36.50015],
+            "RMSE": [91.87000, 43.23890],
+            "Set": ["cv", "ind"]
+        })
 
     @parameterized.expand(
         [

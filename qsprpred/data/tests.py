@@ -94,7 +94,7 @@ class DataSetsMixIn(PathMixIn):
             os.makedirs(self.generatedDataPath)
 
     @staticmethod
-    def getDefaultPrep():
+    def getDefaultPrep(random_state: int | None = None):
         """Return a dictionary with default preparation settings."""
         return {
             "feature_calculators":
@@ -107,7 +107,7 @@ class DataSetsMixIn(PathMixIn):
                         ]
                     )
                 ],
-            "split": RandomSplit(test_fraction=0.1),
+            "split": RandomSplit(test_fraction=0.1, seed=random_state),
             "feature_standardizer": StandardScaler(),
             "feature_filters": [LowVarianceFilter(0.05),
                                 HighCorrelationFilter(0.8)],
@@ -283,6 +283,7 @@ class DataSetsMixIn(PathMixIn):
         }],
         target_imputer=None,
         preparation_settings=None,
+        random_state: int | None = None
     ):
         """Create a large dataset for testing purposes.
 
@@ -300,6 +301,7 @@ class DataSetsMixIn(PathMixIn):
             target_props=target_props,
             target_imputer=target_imputer,
             prep=preparation_settings,
+            random_state=random_state
         )
 
     def createSmallTestDataSet(
@@ -311,6 +313,7 @@ class DataSetsMixIn(PathMixIn):
         }],
         target_imputer=None,
         preparation_settings=None,
+        random_state: int | None = None
     ):
         """Create a small dataset for testing purposes.
 
@@ -328,6 +331,7 @@ class DataSetsMixIn(PathMixIn):
             target_props=target_props,
             target_imputer=target_imputer,
             prep=preparation_settings,
+            random_state=random_state
         )
 
     def createTestDataSetFromFrame(
@@ -340,6 +344,7 @@ class DataSetsMixIn(PathMixIn):
         }],
         target_imputer=None,
         prep=None,
+        random_state: int | None = None
     ):
         """Create a dataset for testing purposes from the given data frame.
 
@@ -360,6 +365,7 @@ class DataSetsMixIn(PathMixIn):
             target_imputer=target_imputer,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
+            random_state=random_state
         )
         if prep:
             ret.prepareDataset(**prep)
@@ -381,6 +387,7 @@ class DataSetsMixIn(PathMixIn):
         ],
         target_imputer=None,
         preparation_settings=None,
+        random_state: int | None = None
     ):
         """Create a large dataset for testing purposes.
 
@@ -398,6 +405,7 @@ class DataSetsMixIn(PathMixIn):
             target_props=target_props,
             target_imputer=target_imputer,
             prep=preparation_settings,
+            random_state=random_state
         )
 
     def validate_split(self, dataset):
