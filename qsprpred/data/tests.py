@@ -34,8 +34,14 @@ from .utils.descriptorcalculator import (
     MoleculeDescriptorsCalculator,
 )
 from .utils.descriptorsets import (
-    DataFrameDescriptorSet, DescriptorSet, DrugExPhyschem, FingerprintSet,
-    PredictorDesc, RDKitDescs, TanimotoDistances, SmilesDesc
+    DataFrameDescriptorSet,
+    DescriptorSet,
+    DrugExPhyschem,
+    FingerprintSet,
+    PredictorDesc,
+    RDKitDescs,
+    SmilesDesc,
+    TanimotoDistances,
 )
 from .utils.feature_standardization import SKLearnStandardizer
 from .utils.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
@@ -830,8 +836,7 @@ class TestTargetProperty(TestCase):
             self.assertEqual(target_prop.th, th)
 
     def testTargetProperty(self):
-        """Check the TargetProperty class on target property creation and serialization.
-        """
+        """Check the TargetProperty class on target property creation and serialization."""
         # Check the different task types
         targetprop = TargetProperty("CL", TargetTasks.REGRESSION)
         self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, "CL", None)

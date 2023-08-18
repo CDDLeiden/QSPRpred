@@ -151,7 +151,7 @@ class ROCPlot(ClassifierPlot):
         self,
         save: bool = True,
         show: bool = False,
-        property_name: str = None,
+        property_name: str | None = None,
         validation: str = "cv",
         fig_size: tuple = (6, 6),
     ) -> list[plt.Axes]:
@@ -291,7 +291,7 @@ class PRCPlot(ClassifierPlot):
         self,
         save: bool = True,
         show: bool = False,
-        property_name: str = None,
+        property_name: str | None = None,
         validation: str = "cv",
         fig_size: tuple = (6, 6),
     ):
@@ -434,7 +434,7 @@ class CalibrationPlot(ClassifierPlot):
         self,
         save: bool = True,
         show: bool = False,
-        property_name: str = None,
+        property_name: str | None = None,
         validation: str = "cv",
         fig_size: tuple = (6, 6),
     ) -> list[plt.Axes]:
@@ -516,7 +516,7 @@ class MetricsPlot(ClassifierPlot):
         self,
         save: bool = True,
         show: bool = False,
-        property_name: str = None,
+        property_name: str | None = None,
         filename_prefix: str = "metrics",
         out_dir: str = ".",
     ) -> [list[tuple[Any, Any]], pd.DataFrame]:

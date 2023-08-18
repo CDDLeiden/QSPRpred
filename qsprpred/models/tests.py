@@ -26,7 +26,7 @@ from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stop
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
-from .sklearn import QSPRsklearn
+from ..models.sklearn import QSPRsklearn
 from ..models.tasks import ModelTasks, TargetTasks
 
 N_CPUS = 2
@@ -77,7 +77,7 @@ class ModelTestMixIn:
             scoring=score_func,
             param_grid=search_space_bs,
             n_trials=1,
-            model_assessor=CrossValAssessor(mode=EarlyStoppingMode.NOT_RECORDING)
+            model_assessor=CrossValAssessor(mode=EarlyStoppingMode.NOT_RECORDING),
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)

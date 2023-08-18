@@ -122,7 +122,7 @@ def backup_files_in_folder(
     backup_id: int,
     output_prefixes,
     output_extensions="dummy",
-    cp_suffix=None
+    cp_suffix=None,
 ):
     """Backs up files in a specified directory to a backup directory.
 

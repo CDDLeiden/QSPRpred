@@ -32,7 +32,7 @@ class QSPRsklearn(QSPRModel):
         data: QSPRDataset = None,
         name: str | None = None,
         parameters: dict | None = None,
-        autoload: bool = True
+        autoload: bool = True,
     ):
         """Initialize QSPRsklearn model.
 
@@ -128,7 +128,7 @@ class QSPRsklearn(QSPRModel):
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
-        mode: Any = None
+        mode: Any = None,
     ):
         """See `QSPRModel.fit`."""
         estimator = self.estimator if estimator is None else estimator

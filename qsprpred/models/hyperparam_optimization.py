@@ -75,7 +75,12 @@ class OptunaOptimization(HyperParameterOptimization):
         """
         super().__init__(scoring, param_grid, model_assessor, score_aggregation)
         search_space_types = [
-            "categorical", "discrete_uniform", "float", "int", "loguniform", "uniform"
+            "categorical",
+            "discrete_uniform",
+            "float",
+            "int",
+            "loguniform",
+            "uniform",
         ]
         if not all(v[0] in search_space_types for v in param_grid.values()):
             logger.error(
@@ -181,7 +186,7 @@ class OptunaOptimization(HyperParameterOptimization):
                     pass
             scores.append(self.scoreFunc(*pred))
         assert len(scores) > 0, "No scores calculated, all folds skipped."
-        #scores = [self.scoreFunc(*pred) for pred in predictions]
+        # scores = [self.scoreFunc(*pred) for pred in predictions]
         score = self.scoreAggregation(scores)
         logger.info(bayesian_params)
         logger.info(f"Score: {score}, std: {np.std(scores)}")
@@ -246,7 +251,7 @@ class GridSearchOptimization(HyperParameterOptimization):
                         pass
                 scores.append(self.scoreFunc(*pred))
             assert len(scores) > 0, "No scores calculated, all folds skipped."
-            #scores = [self.scoreFunc(*pred) for pred in predictions]
+            # scores = [self.scoreFunc(*pred) for pred in predictions]
             score = self.scoreAggregation(scores)
             logger.info(f"Score: {score}, std: {np.std(scores)}")
             if score > self.bestScore:
