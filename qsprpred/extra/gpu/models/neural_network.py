@@ -13,7 +13,7 @@ from torch.nn import functional as f
 from torch.utils.data import DataLoader, TensorDataset
 
 from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS
-from ...logs import logger
+from ....logs import logger
 
 
 class Base(nn.Module):
