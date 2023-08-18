@@ -51,22 +51,22 @@ def QSPRArgParser(txt=None):
     )
     # base arguments
     parser.add_argument(
-        "-b",
-        "--base_dir",
+        "-i",
+        "--input",
+        type=str,
+        default="./dataset.tsv",
+        help="path to tsv file that contains SMILES and property value column",
+    )
+    parser.add_argument(
+        "-o",
+        "--output_dir",
         type=str,
         default=".",
-        help="Base directory which contains a folder 'data' with input files",
+        help="Directory to write output files to.",
     )
     parser.add_argument("-de", "--debug", action="store_true")
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
-    )
-    parser.add_argument(
-        "-i",
-        "--input",
-        type=str,
-        default="dataset.tsv",
-        help="tsv file name that contains SMILES and property value column",
     )
     parser.add_argument("-ncpu", "--ncpu", type=int, default=8, help="Number of CPUs")
     # model target arguments
@@ -132,7 +132,7 @@ def QSPRArgParser(txt=None):
             "For each property if its values need to be log-tranformed. This arg only "
             "has an effect when mode is regression, otherwise will be ignored! This "
             "needs to be given for each property included in any of the models as "
-            "follows, e.g. -lt \"{'CL':True,'fu':False}\". Note: no spaces and "
+            "follows, e.g. -lt \"{'CL':true,'fu':false}\". Note: no spaces and "
             "surround by single quotes"
         ),
     )
@@ -264,16 +264,14 @@ def QSPRArgParser(txt=None):
 
 def QSPR_dataprep(args):
     """Optimize, evaluate and train estimators."""
-    if not os.path.exists(args.base_dir + "/qspr/data"):
-        os.makedirs(args.base_dir + "/qspr/data")
     for reg in args.regression:
         for props in args.properties:
             props_name = "_".join(props)
             log.info(f"Property: {props_name}")
             try:
-                df = pd.read_csv(f"{args.base_dir}/data/{args.input}", sep="\t")
-            except BaseException:
-                log.error(f"Dataset file ({args.base_dir}/data/{args.input}) not found")
+                df = pd.read_csv(args.input, sep="\t")
+            except FileNotFoundError:
+                log.error(f"Dataset file ({args.input}) not found")
                 sys.exit()
             # prepare dataset for training QSPR model
             target_props = []
@@ -326,7 +324,7 @@ def QSPR_dataprep(args):
                 df=df,
                 smiles_col=args.smiles_col,
                 n_jobs=args.ncpu,
-                store_dir=f"{args.base_dir}/qspr/data/",
+                store_dir=args.output_dir,
                 overwrite=True,
                 target_imputer=imputer if args.imputation is not None else None,
             )
@@ -464,23 +462,25 @@ if __name__ == "__main__":
         torch.manual_seed(args.random_state)
     os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
+    # check input file and output directory exist
+    if not os.path.exists(args.input):
+        raise FileNotFoundError(f"Input file {args.input} not found.")
+    if not os.path.exists(args.output_dir):
+        raise FileNotFoundError(f"Output directory {args.output_dir} not found.")
+
     # Backup files
     tasks = ["REG" if reg is True else "CLS" for reg in args.regression]
     file_prefixes = [
         f"{property}_{task}" for task in tasks for property in args.properties
     ]
     backup_msg = backup_files(
-        args.base_dir,
-        "qspr/data",
+        args.output_dir,
         tuple(file_prefixes),
         cp_suffix=["calculators", "standardizer", "meta"],
     )
 
-    if not os.path.exists(f"{args.base_dir}/qspr/data"):
-        os.makedirs(f"{args.base_dir}/qspr/data")
-
     logSettings = enable_file_logger(
-        os.path.join(args.base_dir, "qspr/data"),
+        args.output_dir,
         "QSPRdata.log",
         args.debug,
         __name__,
@@ -498,7 +498,7 @@ if __name__ == "__main__":
 
     # Create json log file with used commandline arguments
     print(json.dumps(vars(args), sort_keys=False, indent=2))
-    with open(f"{args.base_dir}/qspr/data/QSPRdata.json", "w") as f:
+    with open(f"{args.output_dir}/QSPRdata.json", "w") as f:
         json.dump(vars(args), f)
 
     # Optimize, evaluate and train estimators according to QSPR arguments
