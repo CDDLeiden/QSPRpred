@@ -85,7 +85,12 @@ class PyBoostModel(QSPRModel):
             raise NotImplementedError(
                 "Multi-task multi-class is not supported for pyboost that can handle missing data models."
             )
-
+        if self.task == ModelTasks.MULTITASK_SINGLECLASS:
+            # FIX ME:  PyBoost default auc loss does not handle multitask data 
+            # and the custom NaN AUC metric is not JSON serializable.
+            raise NotImplementedError(
+                "Multi-class is not supported for pyboost that can handle missing data models."
+            )
     @property
     def supportsEarlyStopping(self) -> bool:
         """Check if the model supports early stopping.
