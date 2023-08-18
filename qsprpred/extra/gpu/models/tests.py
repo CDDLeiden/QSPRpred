@@ -1,22 +1,22 @@
 import os
-import torch
-import pytest
-
+from importlib import import_module, util
 from typing import Type
 from unittest import TestCase
+
+import pytest
+import torch
 from parameterized import parameterized
-from importlib import import_module, util
 from sklearn.impute import SimpleImputer
 
 from ....data.data import QSPRDataset
-from ....models.tasks import TargetTasks, ModelTasks
-from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn
+from ....data.utils.datasplitters import RandomSplit
 from ....data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
 from ....data.utils.descriptorsets import SmilesDesc
-from ....data.utils.datasplitters import RandomSplit
-from ....extra.gpu.models.dnn import QSPRDNN
 from ....extra.gpu.models.chemprop import Chemprop
+from ....extra.gpu.models.dnn import QSPRDNN
 from ....extra.gpu.models.neural_network import STFullyConnected
+from ....models.tasks import ModelTasks, TargetTasks
+from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn
 
 GPUS = list(range(torch.cuda.device_count()))
 
@@ -250,9 +250,10 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         predictor = Chemprop(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
 
+
 @pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
 class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the PyBoostModel class."""    
+    """This class holds the tests for the PyBoostModel class."""
     @staticmethod
     def getModel(
         base_dir: str,
@@ -417,9 +418,9 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         self.predictorTest(predictor)
 
-    # FIX ME: This test fails because the PyBoost default auc does not handle 
+    # FIX ME: This test fails because the PyBoost default auc does not handle
     # mutlitask data and the custom NaN AUC metric is not JSON serializable.
-     
+
     # @parameterized.expand(
     #     [
     #         ("PyBoost", "PyBoost", params) for params in [
