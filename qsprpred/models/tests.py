@@ -19,6 +19,16 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
+from sklearn.metrics import (
+    PrecisionRecallDisplay,
+    RocCurveDisplay,
+    accuracy_score,
+    auc,
+    f1_score,
+    matthews_corrcoef,
+    precision_score,
+    recall_score,
+)
 
 from ..data.data import QSPRDataset
 from ..data.tests import DataSetsMixIn
@@ -199,16 +209,15 @@ class ModelTestMixIn:
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
-    # NOTE: below code is taken from regression without the plotting code
+    # NOTE: below code is taken from CorrelationPlot without the plotting code
     # Would be nice if the summary code without plot was available regardless
-    def summaryTest(self, model, expected_summary):
+    def createCorrelationSummary(self, model):
         cv_path = f"{model.outPrefix}.cv.tsv"
         ind_path = f"{model.outPrefix}.ind.tsv"
 
         cate = [cv_path, ind_path]
         cate_names = ["cv", "ind"]
-        #TODO: fix hardcoded property_name
-        property_name = "CL"
+        property_name = model.targetProperties[0].name
         summary = {"ModelName": [], "R2": [], "RMSE": [], "Set": []}
         for j, _ in enumerate(["Cross Validation", "Independent Test"]):
             df = pd.read_table(cate[j])
@@ -224,11 +233,55 @@ class ModelTestMixIn:
             summary["RMSE"].append(rmse)
             summary["Set"].append(cate_names[j])
             summary["ModelName"].append(model.name)
+            
+        return summary
 
-        self.assertAlmostEqual(summary["R2"][0], expected_summary["R2"][0], places=5)
-        self.assertAlmostEqual(summary["R2"][1], expected_summary["R2"][1], places=5)
-        self.assertAlmostEqual(summary["RMSE"][0], expected_summary["RMSE"][0], places=5)
-        self.assertAlmostEqual(summary["RMSE"][1], expected_summary["RMSE"][1], places=5)
+    # NOTE: below code is taken from MetricsPlot without the plotting code
+    # Would be nice if the summary code without plot was available regardless
+    def createMetricsSummary(self, model):
+        decision_threshold: float = 0.5
+        metrics = [
+            f1_score,
+            matthews_corrcoef,
+            precision_score,
+            recall_score,
+            accuracy_score,
+            #calibration_error
+        ]
+        summary = {"Metric": [], "Model": [], "TestSet": [], "Value": []}
+        property_name = model.targetProperties[0].name
+
+        cv_path = f"{model.outPrefix}.cv.tsv"
+        ind_path = f"{model.outPrefix}.ind.tsv"
+
+        df = pd.read_table(cv_path)
+
+        # cross-validation
+        for fold in sorted(df.Fold.unique()):
+            y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
+            y_pred_values = [1 if x > decision_threshold else 0 for x in y_pred]
+            y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            for metric in metrics:
+                val = metric(y_true, y_pred_values)
+                summary["Metric"].append(metric.__name__)
+                summary["Model"].append(model.name)
+                summary["TestSet"].append(f"CV{fold + 1}")
+                summary["Value"].append(val)
+
+        # independent test set
+        df = pd.read_table(ind_path)
+        y_pred = df[f"{property_name}_ProbabilityClass_1"]
+        th = 0.5
+        y_pred_values = [1 if x > th else 0 for x in y_pred]
+        y_true = df[f"{property_name}_Label"]
+        for metric in metrics:
+            val = metric(y_true, y_pred_values)
+            summary["Metric"].append(metric.__name__)
+            summary["Model"].append(model.name)
+            summary["TestSet"].append("IND")
+            summary["Value"].append(val)
+
+        return summary
 
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRsklearn class."""
@@ -316,12 +369,23 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model, random_state=42)
-        self.summaryTest(model, expected_summary={
-            "ModelName": ["PLS_REG", "PLS_REG"],
-            "R2": [-0.18672, -36.50015],
-            "RMSE": [91.87000, 43.23890],
-            "Set": ["cv", "ind"]
-        })
+        expected_summary = self.createCorrelationSummary(model)
+
+        #Generate summary again, check that the result is identical
+        model = self.getModel(
+            name=f"{model_name}_{task}",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters,
+        )
+        self.fitTest(model, random_state=42)
+        summary = self.createCorrelationSummary(model)
+
+        self.assertListEqual(summary["ModelName"], expected_summary["ModelName"])
+        self.assertListEqual(summary["R2"], expected_summary["R2"])
+        self.assertListEqual(summary["RMSE"], expected_summary["RMSE"])
+        self.assertListEqual(summary["Set"], expected_summary["Set"])
+
 
     @parameterized.expand(
         [
@@ -369,6 +433,49 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.fitTest(model)
         predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
         self.predictorTest(predictor)
+
+    def testRandomForestClassifierFitWithSeed(self):
+        random_state=42
+        parameters = {
+            "n_jobs": N_CPUS,
+            "random_state": random_state
+        }
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.SINGLECLASS,
+                "th": [6.5]
+            }],
+            preparation_settings=self.getDefaultPrep(random_state=42),
+            random_state=random_state
+        )
+        # test classifier
+        # initialize model for training from class
+        model = self.getModel(
+            name=f"RFC_{TargetTasks.SINGLECLASS}",
+            alg=RandomForestClassifier,
+            dataset=dataset,
+            parameters=parameters,
+        )
+        self.fitTest(model, random_state=42)
+        expected_summary = self.createMetricsSummary(model)
+
+        #Generate summary again, check that the result is identical
+        model = self.getModel(
+            name=f"RFC_{TargetTasks.SINGLECLASS}",
+            alg=RandomForestClassifier,
+            dataset=dataset,
+            parameters=parameters,
+        )
+        self.fitTest(model, random_state=42)
+        summary = self.createMetricsSummary(model)
+
+        self.assertListEqual(summary["Metric"], expected_summary["Metric"])
+        self.assertListEqual(summary["Model"], expected_summary["Model"])
+        self.assertListEqual(summary["TestSet"], expected_summary["TestSet"])
+        self.assertListEqual(summary["Value"], expected_summary["Value"])
+
 
     @parameterized.expand(
         [
