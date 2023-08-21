@@ -40,7 +40,7 @@ from .data.utils.featurefilters import (
 from .data.utils.scaffolds import Murcko
 from .extra.gpu.models.dnn import QSPRDNN
 from .logs.utils import backup_files, enable_file_logger
-from .models.sklearn import QSPRsklearn
+from .models.sklearn import SklearnModel
 from .models.tasks import TargetTasks
 
 
@@ -419,7 +419,7 @@ def QSPR_dataprep(args):
                         )
                     else:
                         descriptorsets.append(
-                            PredictorDesc(QSPRsklearn.fromFile(predictor_path))
+                            PredictorDesc(SklearnModel.fromFile(predictor_path))
                         )
             # feature filters
             featurefilters = []

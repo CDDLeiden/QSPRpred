@@ -24,7 +24,7 @@ from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from .models.metrics import SklearnMetric
-from .models.sklearn import QSPRModel, QSPRsklearn
+from .models.sklearn import QSPRModel, SklearnModel
 from .models.tasks import TargetTasks
 from .models.early_stopping import EarlyStoppingMode
 
@@ -327,7 +327,7 @@ def QSPR_modelling(args):
                     tol=args.tolerance,
                 )
             else:
-                QSPRmodel = QSPRsklearn(
+                QSPRmodel = SklearnModel(
                     base_dir=f"{args.base_dir}/qspr/models/",
                     data=mydataset,
                     alg=alg_dict[model_type],

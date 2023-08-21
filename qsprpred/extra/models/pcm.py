@@ -9,7 +9,7 @@ import numpy as np
 
 from ...data.data import MoleculeTable
 from ...models.interfaces import QSPRModel
-from ...models.sklearn import QSPRsklearn
+from ...models.sklearn import SklearnModel
 from ..data.data import PCMDataSet
 from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
 
@@ -152,8 +152,8 @@ class ModelPCM(QSPRModel, ABC):
         return predictions
 
 
-class QSPRsklearnPCM(QSPRsklearn, ModelPCM):
+class SklearnModelPCM(SklearnModel, ModelPCM):
     """Wrapper for sklearn models for PCM.
 
-    Just replaces some methods in `QSPRsklearn` with those in `ModelPCM`.
+    Just replaces some methods in `SklearnModel` with those in `ModelPCM`.
     """
