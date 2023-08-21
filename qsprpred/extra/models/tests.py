@@ -20,7 +20,7 @@ from ..data.tests import DataSetsMixInExtras
 from ..data.utils.descriptor_utils.msa_calculator import ClustalMSA
 from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
 from ..data.utils.descriptorsets import ProDec
-from ..models.pcm import SklearnModelPCM
+from ..models.pcm import SklearnPCMModel
 
 
 class ModelDataSetsMixInExtras(ModelDataSetsMixIn, DataSetsMixInExtras):
@@ -44,9 +44,9 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             parameters (dict | None): Parameters to use.
 
         Returns:
-            SklearnModelPCM: Initialized model.
+            SklearnPCMModel: Initialized model.
         """
-        return SklearnModelPCM(
+        return SklearnPCMModel(
             base_dir=self.generatedModelsPath,
             alg=alg,
             data=dataset,
@@ -124,7 +124,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = SklearnModelPCM(
+        predictor = SklearnPCMModel(
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
         self.predictorTest(predictor, protein_id=dataset.getDF()["accession"].iloc[0])

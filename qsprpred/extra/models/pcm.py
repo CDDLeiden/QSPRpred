@@ -14,7 +14,7 @@ from ..data.data import PCMDataSet
 from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
 
 
-class ModelPCM(QSPRModel, ABC):
+class PCMModel(QSPRModel, ABC):
     """Base class for PCM models.
 
     Extension of `QSPRModel` for proteochemometric models (PCM). It modifies
@@ -152,8 +152,8 @@ class ModelPCM(QSPRModel, ABC):
         return predictions
 
 
-class SklearnModelPCM(SklearnModel, ModelPCM):
+class SklearnPCMModel(SklearnModel, PCMModel):
     """Wrapper for sklearn models for PCM.
 
-    Just replaces some methods in `SklearnModel` with those in `ModelPCM`.
+    Just replaces some methods in `SklearnModel` with those in `PCMModel`.
     """
