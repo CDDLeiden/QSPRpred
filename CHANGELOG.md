@@ -17,11 +17,11 @@ From v2.0.1 to v2.1.0.a2
 - `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captures scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
 - The versioning scheme of development snapshots has changed from `devX` to `alphaX`/`betaX`, where `X` is an integer that increments with each release.
 - The `deep` optional installation has been replaces by `extra_gpu` optional installation.
-- The following model class have been renamed:
-    - `QSPRsklearn` > `SklearnModel`
-    - `QSPRDNN` > `DNNModel`
-    - `ModelPCM` > `PCMModel`
-    - `QSPRsklearnPCM` > `SklearnPCMModel`
+- The following model class have been renamed and moved:
+    - `models.models.QSPRsklearn` > `models.sklearn.SklearnModel`
+    - `deep.models.QSPRDNN` > `extra.gpu.models.dnn.DNNModel`
+    - `extra.models.pcm.ModelPCM` > `extra.models.pcm.PCMModel`
+    - `extra.models.pcm.QSPRsklearnPCM` > `extra.models.pcm.SklearnPCMModel`
 
 ## New Features
 - `ClusterSplit` - splits data based clustering of molecular fingerprints.
