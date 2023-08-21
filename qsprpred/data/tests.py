@@ -100,7 +100,7 @@ class DataSetsMixIn(PathMixIn):
                     MoleculeDescriptorsCalculator(
                         [
                             FingerprintSet(
-                                fingerprint_type="MorganFP", radius=3, nBits=1024
+                                fingerprint_type="MorganFP", radius=2, nBits=256
                             )
                         ]
                     )
