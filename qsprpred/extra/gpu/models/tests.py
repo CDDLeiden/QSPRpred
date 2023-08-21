@@ -13,7 +13,7 @@ from ....data.utils.datasplitters import RandomSplit
 from ....data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
 from ....data.utils.descriptorsets import SmilesDesc
 from ....extra.gpu.models.chemprop import ChempropModel
-from ....extra.gpu.models.dnn import QSPRDNN
+from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.tasks import ModelTasks, TargetTasks
 from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn
@@ -22,7 +22,7 @@ GPUS = list(range(torch.cuda.device_count()))
 
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the QSPRDNN class."""
+    """This class holds the tests for the DNNModel class."""
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -47,7 +47,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset: Data set to use.
             parameters: Parameters to use.
         """
-        return QSPRDNN(
+        return DNNModel(
             base_dir=base_dir,
             alg=alg,
             data=dataset,
@@ -76,7 +76,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     def testSingleTaskModel(
         self, _, task: TargetTasks, alg_name: str, alg: Type, th: float
     ):
-        """Test the QSPRDNN model in one configuration.
+        """Test the DNNModel model in one configuration.
 
         Args:
             task: Task to test.
@@ -104,12 +104,12 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset
         )
         self.fitTest(model)
-        predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)
+        predictor = DNNModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
 
 
 class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the QSPRDNN class."""
+    """This class holds the tests for the DNNModel class."""
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -152,7 +152,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         ]
     )
     def testSingleTaskModel(self, _, task: TargetTasks, alg_name: str, th: float):
-        """Test the QSPRDNN model in one configuration.
+        """Test the DNNModel model in one configuration.
 
         Args:
             task: Task to test.
@@ -194,7 +194,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         ]
     )
     def testMultiTaskmodel(self, _, task: TargetTasks, alg_name: str):
-        """Test the QSPRDNN model in one configuration.
+        """Test the DNNModel model in one configuration.
 
             Args:
                 task: Task to test.

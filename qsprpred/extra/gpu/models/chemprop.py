@@ -1,23 +1,22 @@
 """QSPRPpred wrapper for chemprop models."""
-import shutil
-import chemprop
-
 import os
-import torch
+import shutil
+from copy import deepcopy
 from typing import Any
 
+import chemprop
 import numpy as np
 import pandas as pd
-
-from copy import deepcopy
+import torch
 from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import trange
 
 from ....data.data import QSPRDataset
+from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import QSPRModel
 from ....models.tasks import ModelTasks
-from ....models.early_stopping import EarlyStoppingMode, early_stopping
+
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):
     """Wrapper for chemprop.models.MoleculeModel.
@@ -91,7 +90,8 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         train_args.from_dict(args, skip_unsettable=True)
         train_args.process_args()
         return train_args
-    
+
+
 class ChempropModel(QSPRModel):
     """QSPRpred implementation of Chemprop model.
 

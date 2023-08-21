@@ -38,7 +38,7 @@ from .data.utils.featurefilters import (
     LowVarianceFilter,
 )
 from .data.utils.scaffolds import Murcko
-from .extra.gpu.models.dnn import QSPRDNN
+from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
 from .models.sklearn import SklearnModel
 from .models.tasks import TargetTasks
@@ -415,7 +415,7 @@ def QSPR_dataprep(args):
                     # load in predictor from files
                     if "DNN" in predictor_path:
                         descriptorsets.append(
-                            PredictorDesc(QSPRDNN.fromFile(predictor_path))
+                            PredictorDesc(DNNModel.fromFile(predictor_path))
                         )
                     else:
                         descriptorsets.append(
