@@ -92,7 +92,7 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         train_args.process_args()
         return train_args
     
-class Chemprop(QSPRModel):
+class ChempropModel(QSPRModel):
     """QSPRpred implementation of Chemprop model.
 
     Attributes:

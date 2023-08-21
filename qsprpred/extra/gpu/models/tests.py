@@ -12,7 +12,7 @@ from ....data.data import QSPRDataset
 from ....data.utils.datasplitters import RandomSplit
 from ....data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
 from ....data.utils.descriptorsets import SmilesDesc
-from ....extra.gpu.models.chemprop import Chemprop
+from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import QSPRDNN
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.tasks import ModelTasks, TargetTasks
@@ -138,7 +138,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
         parameters["gpu"] = GPUS[0] if len(GPUS) > 0 else None
         parameters["epochs"] = 2
-        return Chemprop(
+        return ChempropModel(
             base_dir=base_dir, data=dataset, name=name, parameters=parameters
         )
 
@@ -182,7 +182,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
         )
         self.fitTest(model)
-        predictor = Chemprop(name=alg_name, base_dir=model.baseDir)
+        predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
 
     @parameterized.expand(
@@ -247,7 +247,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
         )
         self.fitTest(model)
-        predictor = Chemprop(name=alg_name, base_dir=model.baseDir)
+        predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
 
 

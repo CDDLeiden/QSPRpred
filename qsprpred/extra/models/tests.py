@@ -28,7 +28,6 @@ class ModelDataSetsMixInExtras(ModelDataSetsMixIn, DataSetsMixInExtras):
 
 
 class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
-
     def getModel(
         self,
         name: str,
