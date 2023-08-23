@@ -243,9 +243,6 @@ def QSPRArgParser(txt=None):
         default=np.nan,
         help="Fill value for missing values in the calculated features",
     )
-    parser.add_argument(
-        "-ng", "--no_git", action="store_true", help="If on, git hash is not retrieved"
-    )
     if txt:
         args = parser.parse_args(txt)
     else:

@@ -79,9 +79,6 @@ def QSPRArgParser(txt=None):
 
     # other
     parser.add_argument(
-        "-ng", "--no_git", action="store_true", help="If on, git hash is not retrieved"
-    )
-    parser.add_argument(
         "-fv",
         "--fill_value",
         type=float,
