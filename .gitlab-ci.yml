@@ -1,8 +1,10 @@
 # This workflow will install Python dependencies, run tests, and write documentation
 
-options:
-   clone:
-      depth: full
+variables:
+   GIT_STRATEGY: clone
+   GIT_CHECKOUT: "false" # https://docs.gitlab.com/ee/ci/runners/configure_runners.html#git-checkout
+   GIT_DEPTH: "0"
+
 
 stages:
    - test
