@@ -2,7 +2,6 @@
 
 variables:
    GIT_STRATEGY: clone
-   GIT_CHECKOUT: "false" # https://docs.gitlab.com/ee/ci/runners/configure_runners.html#git-checkout
    GIT_DEPTH: "0"
 
 
