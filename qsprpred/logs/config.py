@@ -160,8 +160,8 @@ def get_git_info():
         except TypeError:
             branch = "detached HEAD"
         # Get git tag
-        logging.info('TOTO', repo.tags)
-        print('TATA', repo.tags)
+        # logging.info('TOTO', repo.tags)
+        print("TATA", repo.tags)
 
         tag = repo.tags[-1].name
         # Get number of commits between current commit and last tag
