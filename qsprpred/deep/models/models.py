@@ -131,9 +131,6 @@ class QSPRDNN(QSPRModel):
             if self.parameters is not None and "n_epochs" in self.parameters else -1
         )
 
-        # check if alg can be initialized with parameters
-        super().validate_parameters()
-
     def init_random_state(self, random_state):
         self.random_state = random_state
 
