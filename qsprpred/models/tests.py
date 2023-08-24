@@ -124,7 +124,12 @@ class ModelTestMixIn:
             exists(f"{model.baseDir}/{model.metaInfo['feature_standardizer_path']}")
         )
 
-    def predictorTest(self, predictor: QSPRModel, **pred_kwargs):
+    def predictorTest(
+            self,
+            predictor: QSPRModel,
+            expected_pred_use_probas=None,
+            expected_pred_not_use_probas=None,
+            **pred_kwargs):
         """Test a model as predictor.
 
         Args:
@@ -154,6 +159,7 @@ class ModelTestMixIn:
                 )
 
         # predict the property
+        pred = []
         for use_probas in [True, False]:
             predictions = predictor.predictMols(
                 df.SMILES.to_list(), use_probas=use_probas, **pred_kwargs
@@ -184,6 +190,7 @@ class ModelTestMixIn:
                 self.assertIn(singleoutput, [1, 0])
             else:
                 return AssertionError(f"Unknown task: {predictor.task}")
+            pred.append(singleoutput)
             # test with an invalid smiles
             invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
             predictions = predictor.predictMols(
@@ -208,6 +215,13 @@ class ModelTestMixIn:
                 self.assertIn(singleoutput, [0, 1])
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
+
+        if expected_pred_use_probas is not None:
+            self.assertEqual(pred[0], expected_pred_use_probas)
+        if expected_pred_not_use_probas is not None:
+            self.assertEqual(pred[1], expected_pred_not_use_probas)
+
+        return pred[0], pred[1]
 
     # NOTE: below code is taken from CorrelationPlot without the plotting code
     # Would be nice if the summary code without plot was available regardless
@@ -292,6 +306,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         alg: Type | None = None,
         dataset: QSPRDataset = None,
         parameters: dict | None = None,
+        random_state: int | None = None
     ):
         """Create a QSPRsklearn model.
 
@@ -310,20 +325,21 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             data=dataset,
             name=name,
             parameters=parameters,
+            random_state=random_state
         )
 
     @parameterized.expand(
         [
-            (alg_name, TargetTasks.REGRESSION, alg_name, alg) for alg, alg_name in (
+            (alg_name, TargetTasks.REGRESSION, alg_name, alg, random_state) for alg, alg_name in (
                 (PLSRegression, "PLSR"),
                 (SVR, "SVR"),
                 (RandomForestRegressor, "RFR"),
                 (XGBRegressor, "XGBR"),
                 (KNeighborsRegressor, "KNNR"),
-            )
+            ) for random_state in (None, 42)
         ]
     )
-    def testRegressionBasicFit(self, _, task, model_name, model_class):
+    def testRegressionBasicFit(self, alg_name, task, model_name, model_class, random_state):
         """Test model training for regression models."""
         if model_name not in ["SVR", "PLSR"]:
             parameters = {"n_jobs": N_CPUS}
@@ -336,19 +352,38 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "task": task
             }],
             preparation_settings=self.getDefaultPrep(),
+            random_state=random_state
         )
         # initialize model for training from class
+        model_random_state = random_state if alg_name in ["RFR", "XGBR"] else None
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
+            random_state=model_random_state
         )
-        self.fitTest(model)
+        self.fitTest(model, random_state)
         predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
-        self.predictorTest(predictor)
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
-    def testPLSRegressionFitWithSeed(self):
+        if random_state is not None:
+            model = self.getModel(
+                name=f"{model_name}_{task}",
+                alg=model_class,
+                dataset=dataset,
+                parameters=parameters,
+                random_state=model_random_state
+            )
+            self.fitTest(model, random_state)
+            predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
+            self.predictorTest(
+                predictor,
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas)
+
+
+    def testPLSRegressionSummaryWithSeed(self):
         """Test model training for regression models."""
         task = TargetTasks.REGRESSION
         model_name = "PLSR"
