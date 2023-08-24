@@ -248,6 +248,17 @@ class QSPRModel(ABC):
                 logger.warning(f"Random state supplied, but alg {self.alg} does not support it."
                                 " Ignoring this setting.")
 
+    def validate_parameters(self):
+        # check if alg can be initialized with parameters
+        try:
+            if self.parameters is not None:
+                self.alg(**self.parameters)
+            else:
+                self.alg()
+        except:
+            logger.error(f"Cannot initialize alg {self.alg} with parameters {self.parameters}.")
+            raise
+
     def __init__(
         self,
         base_dir: str,
