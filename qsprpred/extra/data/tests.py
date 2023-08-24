@@ -190,6 +190,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
         target_imputer: Callable[[pd.Series], pd.Series] | None = None,
         preparation_settings: dict | None = None,
         protein_col: str = "accession",
+        random_state: int | None = None
     ):
         """Create a small dataset for testing purposes.
 
@@ -204,6 +205,8 @@ class DataSetsMixInExtras(DataSetsMixIn):
                 preparation settings. Defaults to None.
             protein_col (str, optional):
                 name of the column with protein accessions. Defaults to "accession".
+            random_state (int, optional):
+                random seed to use in the dataset. Defaults to `None`
         Returns:
             QSPRDataset: a `QSPRDataset` object
         """
@@ -218,6 +221,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
             target_imputer=target_imputer,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
+            random_state=random_state
         )
         if preparation_settings:
             ret.prepareDataset(**preparation_settings)

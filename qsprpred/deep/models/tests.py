@@ -37,6 +37,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         alg: Type | None = None,
         dataset: QSPRDataset = None,
         parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Initialize model with data set.
 
@@ -56,11 +57,12 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             gpus=GPUS,
             patience=3,
             tol=0.02,
+            random_state=random_state
         )
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name, alg, th)
+            (f"{alg_name}_{task}", task, alg_name, alg, th, random_state)
             for alg, alg_name, task, th in (
                 (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
                 (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
@@ -71,10 +73,15 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     [0, 1, 10, 1100],
                 ),
             )
+            for random_state in (
+                None,
+                # TODO: fix random_state
+                # 42
+            )
         ]
     )
     def test_qsprpred_model(
-        self, _, task: TargetTasks, alg_name: str, alg: Type, th: float
+        self, _, task: TargetTasks, alg_name: str, alg: Type, th: float, random_state: int | None
     ):
         """Test the QSPRDNN model in one configuration.
 
@@ -93,12 +100,22 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "th": th
             }],
             preparation_settings=self.getDefaultPrep(),
+            random_state=random_state
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
-            base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset
+            base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset, random_state=random_state
         )
-        self.fitTest(model)
+        self.fitTest(model, random_state)
         predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)
-        self.predictorTest(predictor)
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        if random_state is not None:
+            model = self.getModel(
+                base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset, random_state=random_state
+            )
+            self.fitTest(model, random_state)
+            predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)
+            self.predictorTest(predictor,
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas)
