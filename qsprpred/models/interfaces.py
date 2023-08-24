@@ -11,6 +11,7 @@ from typing import Any, Callable, Iterable, List, Type, Union
 
 import numpy as np
 import pandas as pd
+import inspect
 
 from .. import VERSION
 from ..data.data import MoleculeTable, QSPRDataset, TargetProperty
@@ -233,6 +234,20 @@ class QSPRModel(ABC):
             raise FileNotFoundError(f"Metadata file '{path}' does not exist.")
         return meta_info
 
+    def init_random_state(self, random_state):
+        # set random state, either from constructor or from dataset, if applicable
+        constructor_params = [name for name, _ in inspect.signature(self.alg.__init__).parameters.items()]
+        if "random_state" in constructor_params:
+            new_random_state = random_state or (self.data.randomState if self.data is not None else None)
+            if self.parameters:
+                self.parameters.update({"random_state": new_random_state})
+            else:
+                self.parameters = {"random_state": new_random_state}
+        else:
+            if random_state:
+                logger.warning(f"Random state supplied, but alg {self.alg} does not support it."
+                                " Ignoring this setting.")
+
     def __init__(
         self,
         base_dir: str,
@@ -240,7 +255,8 @@ class QSPRModel(ABC):
         data: QSPRDataset | None = None,
         name: str | None = None,
         parameters: dict | None = None,
-        autoload=True
+        autoload=True,
+        random_state: int | None = None
     ):
         """Initialize a QSPR model instance.
 
@@ -308,6 +324,8 @@ class QSPRModel(ABC):
         self.alg = alg
         if autoload:
             self.estimator = self.loadEstimatorFromFile(params=self.parameters)
+
+        self.init_random_state(random_state)
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""

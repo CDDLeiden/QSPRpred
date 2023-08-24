@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 import sklearn_json as skljson
 from sklearn.svm import SVC, SVR
-import inspect
 
 from ..data.data import QSPRDataset
 from ..logs import logger
@@ -47,7 +46,7 @@ class QSPRsklearn(QSPRModel):
             autoload (bool): load model from file
             random_state (int): seed for the random state
         """
-        super().__init__(base_dir, alg, data, name, parameters, autoload)
+        super().__init__(base_dir, alg, data, name, parameters, autoload, random_state)
         # check for incompatible tasks
         if self.task == ModelTasks.MULTITASK_MIXED:
             raise ValueError(
@@ -70,19 +69,6 @@ class QSPRsklearn(QSPRModel):
             else:
                 self.parameters = {"max_iter": 10000}
 
-        # set random state, either from constructor or from dataset, if applicable
-        constructor_params = [name for name, _ in inspect.signature(alg.__init__).parameters.items()]
-        if "random_state" in constructor_params:
-            new_random_state = random_state or (data.randomState if data is not None else None)
-            if self.parameters:
-                self.parameters.update({"random_state": new_random_state})
-            else:
-                self.parameters = {"random_state": new_random_state}
-        else:
-            if random_state:
-                logger.warning(f"Random state supplied, but alg {alg} does not support it."
-                                " Ignoring this setting.")
-                
         # set parameters if defined
         if self.parameters not in [None, {}] and hasattr(self, "estimator"):
             self.estimator.set_params(**self.parameters)
@@ -96,12 +82,14 @@ class QSPRsklearn(QSPRModel):
         except:
             logger.error(f"Cannot initialize alg {self.alg} with parameters {self.parameters}.")
             raise
-            
 
         # log some things
         logger.info("parameters: %s" % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
 
+    def init_random_state(self, random_state):
+        return super().init_random_state(random_state)
+    
     @property
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""

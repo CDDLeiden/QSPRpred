@@ -120,8 +120,8 @@ class QSPRDNN(QSPRModel):
         self.tol = tol
         self.nClass = None
         self.nDim = None
-        self.random_state = random_state
-        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload)
+        
+        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload, random_state=random_state)
         if self.task.isMultiTask():
             raise NotImplementedError(
                 "Multitask modelling is not implemented for QSPRDNN models."
@@ -130,6 +130,9 @@ class QSPRDNN(QSPRModel):
             self.parameters["n_epochs"]
             if self.parameters is not None and "n_epochs" in self.parameters else -1
         )
+
+    def init_random_state(self, random_state):
+        self.random_state = random_state
 
     @property
     def supportsEarlyStopping(self) -> bool:
