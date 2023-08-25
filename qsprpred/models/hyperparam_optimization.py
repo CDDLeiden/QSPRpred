@@ -51,7 +51,6 @@ class OptunaOptimization(HyperParameterOptimization):
         score_aggregation: Callable[[Iterable], float] = np.mean,
         n_trials: int = 100,
         n_jobs: int = 1,
-        random_state: int | None = None
     ):
         """Initialize the class for hyperparameter optimization
         of QSPRModels using Optuna.
@@ -97,7 +96,6 @@ class OptunaOptimization(HyperParameterOptimization):
         self.nJobs = 1
         self.bestScore = -np.inf
         self.bestParams = None
-        self.random_state = random_state
 
     def optimize(self, model: QSPRModel, **kwargs) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
@@ -117,7 +115,7 @@ class OptunaOptimization(HyperParameterOptimization):
             "for some hyperparameter combinations"
         )
         # create optuna study
-        study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=self.random_state))
+        study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=model.random_state))
         logger.info(
             "Bayesian optimization started: %s" %
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")

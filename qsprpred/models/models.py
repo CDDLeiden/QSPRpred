@@ -87,9 +87,6 @@ class QSPRsklearn(QSPRModel):
         logger.info("parameters: %s" % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
 
-    def init_random_state(self, random_state):
-        return super().init_random_state(random_state)
-    
     @property
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""

@@ -253,9 +253,11 @@ class QSPRModel(ABC):
 
     def init_random_state(self, random_state):
         # set random state, either from constructor or from dataset, if applicable
+        new_random_state = random_state or (self.data.randomState if self.data is not None else np.random.randint(0, 2 ** 32 - 1))
+        self.random_state = new_random_state
+        
         constructor_params = [name for name, _ in inspect.signature(self.alg.__init__).parameters.items()]
         if "random_state" in constructor_params:
-            new_random_state = random_state or (self.data.randomState if self.data is not None else None)
             if self.parameters:
                 self.parameters.update({"random_state": new_random_state})
             else:

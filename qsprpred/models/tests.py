@@ -86,7 +86,6 @@ class ModelTestMixIn:
             param_grid=search_space_bs,
             n_trials=1,
             model_assessor=CrossValAssessor(mode=EarlyStoppingMode.NOT_RECORDING),
-            random_state=random_state
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
