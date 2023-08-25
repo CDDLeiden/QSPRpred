@@ -94,7 +94,7 @@ class DataSetsMixIn(PathMixIn):
             os.makedirs(self.generatedDataPath)
 
     @staticmethod
-    def getDefaultPrep(random_state: int | None = None):
+    def getDefaultPrep():
         """Return a dictionary with default preparation settings."""
         return {
             "feature_calculators":
@@ -107,7 +107,7 @@ class DataSetsMixIn(PathMixIn):
                         ]
                     )
                 ],
-            "split": RandomSplit(test_fraction=0.1, seed=random_state),
+            "split": RandomSplit(test_fraction=0.1),
             "feature_standardizer": StandardScaler(),
             "feature_filters": [LowVarianceFilter(0.05),
                                 HighCorrelationFilter(0.8)],
@@ -311,7 +311,6 @@ class DataSetsMixIn(PathMixIn):
         }],
         target_imputer=None,
         preparation_settings=None,
-        random_state: int | None = None
     ):
         """Create a small dataset for testing purposes.
 
@@ -329,7 +328,6 @@ class DataSetsMixIn(PathMixIn):
             target_props=target_props,
             target_imputer=target_imputer,
             prep=preparation_settings,
-            random_state=random_state
         )
 
     def createTestDataSetFromFrame(
