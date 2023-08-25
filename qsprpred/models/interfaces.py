@@ -21,6 +21,7 @@ from ..models import SSPACE
 from ..models.metrics import SklearnMetric
 from ..models.tasks import ModelTasks
 from ..utils.inspect import import_class
+from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 
 
 class QSPRModel(ABC):
@@ -113,6 +114,22 @@ class QSPRModel(ABC):
                     f"Descriptor calculator file '{path}' not found."
                 )
         return calcs
+
+    @staticmethod
+    def readEarlyStopping(path):
+        """Read early stopping settings from file.
+
+        If the file does not exist, None is returned.
+
+        Args:
+            path (str): absolute path to the JSON file
+
+        Returns:
+            EarlyStopping:
+                Early stopping instance or None if the file does not exist
+        """
+        if os.path.exists(path):
+            return EarlyStopping.fromFile(path)
 
     @staticmethod
     def handleInvalidsInPredictions(
@@ -320,6 +337,14 @@ class QSPRModel(ABC):
                 os.path.join(self.baseDir, self.metaInfo["feature_standardizer_path"])
             ) if self.metaInfo["feature_standardizer_path"] else None
         )
+        # Initialize early stopping tracker if model supports early stopping
+        if self.supportsEarlyStopping:
+            self.earlyStopping = (
+                self.readEarlyStopping(
+                    os.path.join(self.baseDir, self.metaInfo["early_stopping_path"])
+                ) if "early_stopping_path" in self.metaInfo else EarlyStopping()
+            )
+
         # initialize a estimator instance with the given parameters
         self.alg = alg
         if autoload:
@@ -424,6 +449,24 @@ class QSPRModel(ABC):
             bool: True if the model supports early stopping
         """
 
+    @property
+    def optimalEpochs(self) -> int | None:
+        """Return the optimal number of epochs for early stopping.
+
+        Returns:
+            int | None: optimal number of epochs
+        """
+        return self._optimalEpochs
+
+    @optimalEpochs.setter
+    def optimalEpochs(self, value: int | None = None):
+        """Set the optimal number of epochs for early stopping.
+
+        Args:
+            value (int | None, optional): optimal number of epochs
+        """
+        self._optimalEpochs = value
+
     def saveParams(self, params: dict) -> str:
         """Save model parameters to a JSON file.
 
@@ -482,6 +525,11 @@ class QSPRModel(ABC):
         self.featureStandardizer.toFile(path)
         return path
 
+    def saveEarlyStopping(self) -> str:
+        path = f"{self.outDir}/{self.name}_early_stopping.json"
+        self.earlyStopping.toFile(path)
+        return path
+
     def saveMetadata(self) -> str:
         """Save model metadata to a JSON file.
 
@@ -524,6 +572,10 @@ class QSPRModel(ABC):
         self.metaInfo["estimator_path"] = self.saveEstimator().replace(
             f"{self.baseDir}/", ""
         )
+        if self.supportsEarlyStopping:
+            self.metaInfo["early_stopping_path"] = self.saveEarlyStopping().replace(
+                f"{self.baseDir}/", ""
+            )
         return self.saveMetadata()
 
     def checkForData(self, exception: bool = True) -> bool:
@@ -727,26 +779,17 @@ class QSPRModel(ABC):
         # get data
         X_all = self.data.getFeatures(concat=True).values
         y_all = self.data.getTargetPropertiesValues(concat=True).values
-        # Check and set some things for models with early stopping
-        if self.supportsEarlyStopping:
-            if self.optimalEpochs == -1:
-                logger.error(
-                    "Cannot fit final model without first determining "
-                    "the optimal number of epochs for fitting. \
-                            Run the `evaluate` method first."
-                )
-                sys.exit()
-            if self.parameters is not None:
-                self.parameters.update({"n_epochs": self.optimalEpochs})
-            else:
-                self.parameters = {"n_epochs": self.optimalEpochs}
         # load estimator
         self.estimator = self.loadEstimator(self.parameters)
         # fit model
         logger.info(
             "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-        self.estimator = self.fit(X_all, y_all, early_stopping=False, **kwargs)
+        # Use early stopping false here, since we are fitting on the whole data set
+        # the number of epochs is already determined from the cross-validation
+        self.estimator = self.fit(
+            X_all, y_all, mode=EarlyStoppingMode.OPTIMAL, **kwargs
+        )
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
@@ -759,26 +802,31 @@ class QSPRModel(ABC):
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
-        early_stopping: bool | None = None
+        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        **kwargs
     ) -> Any | tuple[Any, int] | None:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
         Note. convertToNumpy can be called here, to convert the input data to
-        np.ndarray format.
+            np.ndarray format.
 
-        Note. if no estimator is given, the estimator instance of the model
-              is used.
+        Note. if no estimator is given, the estimator instance of the model is used.
+
+        Note. if a model supports early stopping, the fit function should have the
+            `early_stopping` decorator and the mode argument should be used to set the
+            early stopping mode. If the model does not support early stopping, the mode
+            argument is ignored.
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
-            early_stopping (bool): if True, early stopping is used,
-                                   only applies to models that support early stopping.
+            mode (EarlyStoppingMode): early stopping mode
+            kwargs: additional arguments to pass to the fit method of the estimator
 
         Returns:
             Any: fitted estimator instance
-            int]: in case of early stopping, the number of iterations
+            int: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
 
@@ -872,22 +920,24 @@ class ModelAssessor(ABC):
     Attributes:
         useProba (bool): use probabilities for classification models
     """
-    def __init__(self, use_proba: bool = True):
+    def __init__(self, use_proba: bool = True, mode: EarlyStoppingMode | None = None):
         """Initialize the evaluation method class.
 
         Args:
             use_proba (bool): use probabilities for classification models
+            mode (EarlyStoppingMode): early stopping mode for fitting
         """
         self.useProba = use_proba
+        self.mode = mode
 
     @abstractmethod
-    def __call__(
-        self, model: QSPRModel
-    ) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
+    def __call__(self, model: QSPRModel,
+                 **kwargs) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
         """Evaluate the model.
 
         Args:
             model (QSPRModel): model to evaluate
+            kwargs: additional arguments for fit function of the model
 
         Returns:
             list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]:

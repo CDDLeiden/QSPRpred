@@ -99,11 +99,12 @@ class OptunaOptimization(HyperParameterOptimization):
         self.bestParams = None
         self.random_state = random_state
 
-    def optimize(self, model: QSPRModel) -> dict:
+    def optimize(self, model: QSPRModel, **kwargs) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
 
         Args:
             model (QSPRModel): the model to optimize
+            **kwargs: additional arguments for the assessment method
 
         Returns:
             dict: best parameters found during optimization
@@ -137,12 +138,13 @@ class OptunaOptimization(HyperParameterOptimization):
         self.bestParams = trial.params
         return self.bestParams
 
-    def objective(self, trial: optuna.trial.Trial, model: QSPRModel) -> float:
+    def objective(self, trial: optuna.trial.Trial, model: QSPRModel, **kwargs) -> float:
         """Objective for bayesian optimization.
 
         Arguments:
             trial (optuna.trial.Trial): trial object for the optimization
             model (QSPRModel): the model to optimize
+            **kwargs: additional arguments for the assessment method
 
         Returns:
             float: score of the model with the current parameters
@@ -168,7 +170,9 @@ class OptunaOptimization(HyperParameterOptimization):
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
         # assess the model with the current parameters and return the score
         y, y_ind = model.data.getTargetPropertiesValues()
-        predictions = self.runAssessment(model, save=False, parameters=bayesian_params)
+        predictions = self.runAssessment(
+            model, save=False, parameters=bayesian_params, **kwargs
+        )
         scores = []
         # TODO: this should be removed once random seeds are fixed
         for pred in predictions:
@@ -211,7 +215,7 @@ class GridSearchOptimization(HyperParameterOptimization):
         """
         super().__init__(scoring, param_grid, model_assessor, score_aggregation)
 
-    def optimize(self, model: QSPRModel, save_params: bool = True) -> dict:
+    def optimize(self, model: QSPRModel, save_params: bool = True, **kwargs) -> dict:
         """Optimize the hyperparameters of the model.
 
         Args:
@@ -220,6 +224,7 @@ class GridSearchOptimization(HyperParameterOptimization):
             save_params (bool):
                 whether to set and save the best parameters to the model
                 after optimization
+            **kwargs: additional arguments for the assessment method
 
         Returns:
             dict: best parameters found during optimization
@@ -230,7 +235,9 @@ class GridSearchOptimization(HyperParameterOptimization):
         )
         for params in ParameterGrid(self.paramGrid):
             logger.info(params)
-            predictions = self.runAssessment(model, save=False, parameters=params)
+            predictions = self.runAssessment(
+                model, save=False, parameters=params, **kwargs
+            )
             scores = []
             # TODO: this should be removed once random seeds are fixed
             for pred in predictions:

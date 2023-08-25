@@ -84,7 +84,10 @@ class RandomSplit(DataSplit):
         testFraction (float): fraction of total dataset to testset
         seed (int): random seed for reproducibility
         nInitialClusters (int): number of initial random clusters used by
-        the multitask splitter
+            the multitask splitter
+        timeLimitSeconds (float): time limit in seconds for the combining of the
+            clusters. Defaults to None, if which case the a default value based on the
+            number of molecules and target is used.
     """
     def __init__(
             self,
@@ -92,11 +95,13 @@ class RandomSplit(DataSplit):
             test_fraction: float = 0.1,
             seed: int | None = None,
             n_initial_clusters: int | None = None,
+            time_limit_seconds: float | None = None,
     ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
         self.seed = seed or (dataset.randomState if dataset is not None else None)
         self.nInitialClusters = n_initial_clusters
+        self.timeLimitSeconds = time_limit_seconds
 
     def setSeed(self, seed: int | None):
         """Set the seed for this instance.
@@ -153,7 +158,7 @@ class RandomSplit(DataSplit):
             sizes=[1 - self.testFraction, self.testFraction],
             clusters=clusters,
             clustering_method=None,
-            time_limit_seconds=60 * len(self.tasks),
+            time_limit_seconds=self.timeLimitSeconds,
         )
         df = splitter(self.df, smiles_col, target_cols)
 
@@ -263,6 +268,9 @@ class ScaffoldSplit(DataSplit):
         customTestList (list): list of molecule indexes to force in test set. If
             forced test contains the totality of the molecules in the dataset, the
             custom_test_list reverts to default None.
+        timeLimitSeconds (float): time limit in seconds for the combining of the
+            clusters. Defaults to None, if which case the a default value based on the
+            number of molecules and target is used.
     """
     def __init__(
         self,
@@ -271,12 +279,14 @@ class ScaffoldSplit(DataSplit):
         shuffle: bool = True,
         custom_test_list: list | None = None,
         dataset: QSPRDataset | None = None,
+        time_limit_seconds: float | None = None,
     ) -> None:
         super().__init__(dataset)
         self.scaffold = scaffold
         self.testFraction = test_fraction
         self.shuffle = shuffle
         self.customTestList = custom_test_list
+        self.timeLimitSeconds = time_limit_seconds
 
     def _singletask_split(self) -> Iterable[tuple[list[int], list[int]]]:
         """
@@ -377,7 +387,7 @@ class ScaffoldSplit(DataSplit):
             sizes=[1 - self.testFraction, self.testFraction],
             clusters=clusters,
             clustering_method=None,
-            time_limit_seconds=60 * len(self.tasks),
+            time_limit_seconds=self.timeLimitSeconds,
         )
         df = splitter(df, smiles_col, target_cols)
 
@@ -410,6 +420,11 @@ class ClusterSplit(DataSplit):
         seed (int): random seed. Used in case of 'MaxMin' clustering. Defaults to 42.
         similarityThreshold (float): similarity threshold for clustering. Used in case
             of 'LeaderPicker' clustering. Defaults to 0.7.
+        clusteringAlgorithm (str): clustering algorithm. Can be 'MaxMin' or
+            'LeaderPicker'. Defaults to 'MaxMin'.
+        timeLimitSeconds (float): time limit in seconds for the combining of the
+            clusters. Defaults to None, if which case the a default value based on the
+            number of molecules and target is used.
     """
     def __init__(
         self,
@@ -423,6 +438,7 @@ class ClusterSplit(DataSplit):
         seed: int = 42,
         similarity_threshold: float = 0.7,
         clustering_algorithm: Literal["MaxMin", "LeaderPicker"] = "MaxMin",
+        time_limit_seconds: float | None = None,
     ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
@@ -432,6 +448,7 @@ class ClusterSplit(DataSplit):
         self.seed = seed or (dataset.randomState if dataset is not None else None)
         self.similarityThreshold = similarity_threshold
         self.clusteringAlgorithm = clustering_algorithm
+        self.timeLimitSeconds = time_limit_seconds
 
     def _cluster_molecules(self):
         """
@@ -551,7 +568,7 @@ class ClusterSplit(DataSplit):
             sizes=[1 - self.testFraction, self.testFraction],
             clusters=clusters,
             clustering_method=None,
-            time_limit_seconds=60 * len(self.tasks),
+            time_limit_seconds=self.timeLimitSeconds,
         )
         df = splitter(
             self.df,

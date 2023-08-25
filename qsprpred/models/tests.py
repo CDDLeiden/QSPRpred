@@ -30,6 +30,7 @@ from sklearn.metrics import (
 from ..data.data import QSPRDataset
 from ..data.tests import DataSetsMixIn
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
+from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
@@ -42,7 +43,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 class ModelDataSetsMixIn(DataSetsMixIn):
     """This class sets up the datasets for the model tests."""
-
     def setUp(self):
         """Set up the test environment."""
         super().setUp()
@@ -82,7 +82,11 @@ class ModelTestMixIn:
         score_func = SklearnMetric.getDefaultMetric(model.task)
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
-            scoring=score_func, param_grid=search_space_bs, n_trials=1, random_state=random_state
+            scoring=score_func,
+            param_grid=search_space_bs,
+            n_trials=1,
+            model_assessor=CrossValAssessor(mode=EarlyStoppingMode.NOT_RECORDING),
+            random_state=random_state
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
@@ -95,15 +99,17 @@ class ModelTestMixIn:
             scoring=score_func,
             param_grid=search_space_gs,
             score_aggregation=np.median,
-            model_assessor=TestSetAssessor(use_proba=False)
+            model_assessor=TestSetAssessor(
+                use_proba=False, mode=EarlyStoppingMode.NOT_RECORDING
+            ),
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        CrossValAssessor(mode=EarlyStoppingMode.RECORDING)(model)
+        TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING)(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
@@ -117,9 +123,12 @@ class ModelTestMixIn:
                 for x in model.metaInfo["feature_calculator_paths"]
             )
         )
-        self.assertTrue(
-            exists(f"{model.baseDir}/{model.metaInfo['feature_standardizer_path']}")
-        )
+        if model.metaInfo["feature_standardizer_path"] is not None:
+            self.assertTrue(
+                exists(
+                    f"{model.baseDir}/{model.metaInfo['feature_standardizer_path']}"
+                )
+            )
 
     #TODO: expand test to check predicted values are NOT equal in case random_states differ.
     #Should only apply to numeric predictions, as class results still have a large probability
@@ -300,7 +309,6 @@ class ModelTestMixIn:
 
 class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the QSPRsklearn class."""
-
     def getModel(
         self,
         name: str,
@@ -725,3 +733,121 @@ class TestMetrics(TestCase):
             self.checkMetric(
                 metric, ModelTasks.MULTITASK_SINGLECLASS, y_true, y_pred, y_pred_proba
             )
+
+
+class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
+    def test_earlyStoppingMode(self):
+        """Test the early stopping mode enum."""
+        # get the enum values
+        recording = EarlyStoppingMode.RECORDING
+        not_recording = EarlyStoppingMode.NOT_RECORDING
+        fixed = EarlyStoppingMode.FIXED
+        optimal = EarlyStoppingMode.OPTIMAL
+
+        # check if the enum bools are correct
+        self.assertTrue(recording and not_recording)
+        self.assertFalse(fixed)
+        self.assertFalse(optimal)
+
+        # check if the string representation is correct
+        self.assertTrue("RECORDING" == str(recording))
+        self.assertTrue("NOT_RECORDING" == str(not_recording))
+        self.assertTrue("FIXED" == str(fixed))
+        self.assertTrue("OPTIMAL" == str(optimal))
+
+    def test_EarlyStopping(self):
+        """Test the early stopping class."""
+
+        earlystopping = EarlyStopping(EarlyStoppingMode.RECORDING)
+
+        # check value error is raised when calling optimal epochs without recording
+        with self.assertRaises(ValueError):
+            earlystopping.optimalEpochs
+
+        # record some epochs
+        earlystopping.recordEpochs(10)
+        earlystopping.recordEpochs(20)
+        earlystopping.recordEpochs(30)
+        earlystopping.recordEpochs(40)
+        earlystopping.recordEpochs(60)
+
+        # check if epochs are recorded correctly
+        self.assertEqual(earlystopping.trainedEpochs, [10, 20, 30, 40, 60])
+
+        # check if the optimal epochs are correct
+        self.assertEqual(earlystopping.optimalEpochs, 32)
+
+        # check if optimal epochs are correct when using a different aggregate function
+        earlystopping.aggregateFunc = np.median
+        self.assertEqual(earlystopping.optimalEpochs, 30)
+
+        # check set num epochs manually
+        earlystopping.numEpochs = 100
+        self.assertEqual(earlystopping.numEpochs, 100)
+
+        # check correct epochs are returned when using fixed mode and optimal mode
+        earlystopping.mode = EarlyStoppingMode.FIXED
+        self.assertEqual(earlystopping.getEpochs(), 100)
+        earlystopping.mode = EarlyStoppingMode.OPTIMAL
+        self.assertEqual(earlystopping.getEpochs(), 30)
+
+        # check saving
+        earlystopping.toFile(
+            f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
+        )
+        self.assertTrue(
+            os.path.
+            exists(f"{os.path.dirname(__file__)}/test_files/earlystopping.json")
+        )
+
+        # check loading
+        earlystopping2 = EarlyStopping.fromFile(
+            f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
+        )
+        self.assertEqual(earlystopping2.trainedEpochs, [10, 20, 30, 40, 60])
+        self.assertEqual(earlystopping2.mode, EarlyStoppingMode.OPTIMAL)
+        self.assertEqual(earlystopping2.aggregateFunc, np.median)
+        self.assertEqual(earlystopping2.optimalEpochs, 30)
+        self.assertEqual(earlystopping.numEpochs, 100)
+
+    def test_early_stopping_decorator(self):
+        """Test the early stopping decorator."""
+        class test_class:
+            def __init__(self, support=True):
+                self.earlyStopping = EarlyStopping(EarlyStoppingMode.RECORDING)
+                self.supportsEarlyStopping = support
+
+            @early_stopping
+            def test_func(self, X, y, estimator, mode, **kwargs):
+                return None, kwargs["best_epoch"]
+
+        test_obj = test_class()
+        recording = EarlyStoppingMode.RECORDING
+        not_recording = EarlyStoppingMode.NOT_RECORDING
+        # epochs are recorded as self.earlyStopping.mode is set to RECORDING
+        _ = test_obj.test_func(None, None, None, best_epoch=29)
+        # epochs are not recorded as mode is set to NOT_RECORDING in the decorator
+        _ = test_obj.test_func(None, None, None, not_recording, best_epoch=49)
+        self.assertEqual(test_obj.earlyStopping.mode, not_recording)
+        # epochs are recorded as mode is now set to RECORDING in the decorator
+        _ = test_obj.test_func(None, None, None, recording, best_epoch=39)
+        self.assertEqual(test_obj.earlyStopping.mode, recording)
+
+        # Check if the best epochs are recorded with mode RECORDING using the decorator
+        self.assertEqual(test_obj.earlyStopping.optimalEpochs, 35)
+
+        # Check if the best epochs are not recorded with other modes using the decorator
+        test_obj.earlyStopping.mode = EarlyStoppingMode.FIXED
+        _ = test_obj.test_func(None, None, None, best_epoch=49)
+        self.assertEqual(test_obj.earlyStopping.optimalEpochs, 35)
+        test_obj.earlyStopping.mode = EarlyStoppingMode.OPTIMAL
+        _ = test_obj.test_func(None, None, None, best_epoch=59)
+        self.assertEqual(test_obj.earlyStopping.optimalEpochs, 35)
+        test_obj.earlyStopping.mode = EarlyStoppingMode.NOT_RECORDING
+        _ = test_obj.test_func(None, None, None, best_epoch=69)
+        self.assertEqual(test_obj.earlyStopping.optimalEpochs, 35)
+
+        # check decorator raises error when early stopping is not supported
+        test_obj = test_class(support=False)
+        with self.assertRaises(AssertionError):
+            _ = test_obj.test_func(None, None, None, best_epoch=40)

@@ -1,9 +1,3 @@
-"""
-Module with some example datasets.
-
-Created by: Martin Sicho
-On: 11.01.23, 15:17
-"""
 import os
 
 import numpy as np

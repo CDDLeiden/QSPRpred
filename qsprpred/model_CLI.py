@@ -26,6 +26,7 @@ from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimi
 from .models.metrics import SklearnMetric
 from .models.models import QSPRModel, QSPRsklearn
 from .models.tasks import TargetTasks
+from .models.early_stopping import EarlyStoppingMode
 
 
 def QSPRArgParser(txt=None):
@@ -292,10 +293,7 @@ def QSPR_modelling(args):
             # class_weight and scale_pos_weight are only used for RF, XGB and SVM
             if not reg:
                 class_weight = "balanced" if args.sample_weighing else None
-                if (
-                    alg_dict[model_type] == RandomForestClassifier or
-                    alg_dict[model_type] == SVC
-                ):
+                if alg_dict[model_type] in [RandomForestClassifier, SVC]:
                     parameters["class_weight"] = class_weight
                 counts = mydataset.y.value_counts()
                 scale_pos_weight = (
@@ -379,8 +377,8 @@ def QSPR_modelling(args):
             # initialize models from saved or default parameters
 
             if args.model_evaluation:
-                CrossValAssessor()(QSPRmodel)
-                TestSetAssessor()(QSPRmodel)
+                CrossValAssessor(mode=EarlyStoppingMode.RECORDING)(QSPRmodel)
+                TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING)(QSPRmodel)
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):
