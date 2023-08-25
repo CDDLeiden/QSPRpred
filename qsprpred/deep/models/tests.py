@@ -75,8 +75,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
             for random_state in (
                 None,
-                # TODO: fix random_state
-                # 42
+                42
             )
         ]
     )
@@ -90,6 +89,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg_name: Name of the algorithm.
             alg: Algorithm to use.
             th: Threshold to use for classification models.
+            random_state: Seed to be used for random operations.
         """
         # initialize dataset
         dataset = self.createLargeTestDataSet(
@@ -100,7 +100,6 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "th": th
             }],
             preparation_settings=self.getDefaultPrep(),
-            random_state=random_state
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
@@ -108,14 +107,15 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset, random_state=random_state
         )
         self.fitTest(model, random_state)
-        predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)
+        predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir, random_state=random_state)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
         if random_state is not None:
+            model.cleanFiles()
             model = self.getModel(
                 base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset, random_state=random_state
             )
             self.fitTest(model, random_state)
-            predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)
+            predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir, random_state=random_state)
             self.predictorTest(predictor,
                 expected_pred_use_probas=pred_use_probas,
                 expected_pred_not_use_probas=pred_not_use_probas)

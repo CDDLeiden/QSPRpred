@@ -15,7 +15,6 @@ import numpy as np
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
-
 from ...data.data import QSPRDataset
 from ...deep import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
 from ...deep.models.neural_network import STFullyConnected
@@ -133,6 +132,8 @@ class QSPRDNN(QSPRModel):
 
     def init_random_state(self, random_state):
         self.random_state = random_state
+        if random_state is not None:
+            torch.manual_seed(random_state)
 
     @property
     def supportsEarlyStopping(self) -> bool:
