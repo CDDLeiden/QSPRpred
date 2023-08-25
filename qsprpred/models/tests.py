@@ -20,10 +20,7 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 from sklearn.metrics import (
-    PrecisionRecallDisplay,
-    RocCurveDisplay,
     accuracy_score,
-    auc,
     f1_score,
     matthews_corrcoef,
     precision_score,
@@ -124,8 +121,8 @@ class ModelTestMixIn:
             exists(f"{model.baseDir}/{model.metaInfo['feature_standardizer_path']}")
         )
 
-    #TODO: expand test to check predicted values are NOT equal in case random_states differ
-    #should only apply to numeric predictions, as class results still have a large probability
+    #TODO: expand test to check predicted values are NOT equal in case random_states differ.
+    #Should only apply to numeric predictions, as class results still have a large probability
     #to be equal
     def predictorTest(
             self,
@@ -356,7 +353,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "task": task
             }],
             preparation_settings=self.getDefaultPrep(),
-            random_state=random_state
         )
         # initialize model for training from class
         model_random_state = random_state if alg_name in ["RFR", "XGBR"] else None
@@ -389,6 +385,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     def testPLSRegressionSummaryWithSeed(self):
         """Test model training for regression models."""
+        random_state=42
         task = TargetTasks.REGRESSION
         model_name = "PLSR"
         model_class = PLSRegression
@@ -398,8 +395,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "name": "CL",
                 "task": task
             }],
-            preparation_settings=self.getDefaultPrep(random_state=42),
-            random_state=42
+            preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(
             name=f"{model_name}_{task}",
@@ -407,7 +403,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model, random_state=42)
+        self.fitTest(model, random_state=random_state)
         expected_summary = self.createCorrelationSummary(model)
 
         #Generate summary again, check that the result is identical
@@ -417,7 +413,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model, random_state=42)
+        self.fitTest(model, random_state=random_state)
         summary = self.createCorrelationSummary(model)
 
         self.assertListEqual(summary["ModelName"], expected_summary["ModelName"])
@@ -460,7 +456,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "th": th
             }],
             preparation_settings=self.getDefaultPrep(),
-            random_state=random_state
         )
         # test classifier
         # initialize model for training from class
@@ -496,7 +491,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         random_state=42
         parameters = {
             "n_jobs": N_CPUS,
-            "random_state": random_state
         }
         # initialize dataset
         dataset = self.createLargeTestDataSet(
@@ -505,8 +499,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "task": TargetTasks.SINGLECLASS,
                 "th": [6.5]
             }],
-            preparation_settings=self.getDefaultPrep(random_state=42),
-            random_state=random_state
+            preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
         # initialize model for training from class
@@ -516,7 +509,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model, random_state=42)
+        self.fitTest(model, random_state=random_state)
         expected_summary = self.createMetricsSummary(model)
 
         #Generate summary again, check that the result is identical
@@ -526,7 +519,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model, random_state=42)
+        self.fitTest(model, random_state=random_state)
         summary = self.createMetricsSummary(model)
 
         self.assertListEqual(summary["Metric"], expected_summary["Metric"])
@@ -559,7 +552,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             ],
             target_imputer=SimpleImputer(strategy="mean"),
             preparation_settings=self.getDefaultPrep(),
-            random_state=random_state
         )
         # test classifier
         # initialize model for training from class
@@ -625,7 +617,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             ],
             target_imputer=SimpleImputer(strategy="mean"),
             preparation_settings=self.getDefaultPrep(),
-            random_state=random_state
         )
         # test classifier
         # initialize model for training from class
