@@ -141,6 +141,7 @@ def backup_files_in_folder(
     """
     message = ""
     existing_files = os.listdir(_dir)
+    # if only files with cp_suffix are already existing, only return empty message
     if cp_suffix and all(
         any(_file.split(".")[0].endswith(suff) for suff in cp_suffix)
         for _file in existing_files
@@ -148,8 +149,10 @@ def backup_files_in_folder(
         return message
     for _file in existing_files:
         if _file.startswith(output_prefixes) or _file.endswith(output_extensions):
+            # create backup directory
             backup_dir = generate_backup_dir(_dir, backup_id)
             backup_log = open(os.path.join(backup_dir, "backuplog.log"), "w")
+            # copy file if it has a suffix in cp_suffix
             if cp_suffix is not None and any(
                 _file.split(".")[0].endswith(suff) for suff in cp_suffix
             ):
@@ -160,6 +163,7 @@ def backup_files_in_folder(
                     f"Already existing '{_file}' "
                     f"was copied to {os.path.abspath(backup_dir)}\n"
                 )
+            # move file otherwise
             else:
                 os.rename(os.path.join(_dir, _file), os.path.join(backup_dir, _file))
                 backup_log.write(
