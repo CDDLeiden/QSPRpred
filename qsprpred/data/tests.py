@@ -1000,7 +1000,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             test_fraction=0.1,
             clustering_algorithm=clustering_algorithm,
             custom_test_list=custom_test_list,
-            n_initial_clusters=10,
+            time_limit_seconds=10,
         )
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)

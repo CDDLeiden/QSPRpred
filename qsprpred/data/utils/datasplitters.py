@@ -279,6 +279,73 @@ class ScaffoldSplit(DataSplit):
         self.customTestList = custom_test_list
         self.timeLimitSeconds = time_limit_seconds
 
+    def split(self, X, y):
+
+        self.X = X
+        self.y = y
+
+        ds = self.getDataSet()
+        df = ds.getDF()
+        df.reset_index(drop=True, inplace=True)  # need numeric index splits
+        self.tasks = ds.targetProperties
+
+        assert len(self.tasks) > 0, "No target properties found."
+        assert len(X) == len(df),\
+            "X and the current data in the dataset must have same length"
+
+        # Generate scaffolds
+        ds.addScaffolds([self.scaffold])
+        scaffolds_list = df[[f"Scaffold_{self.scaffold}"]]
+        scaffolds = defaultdict(list)
+        for idx, scaffold in scaffolds_list.itertuples():
+            if scaffold:
+                scaffolds[scaffold].append(idx)
+            else:
+                scaffolds["None"].append(idx)
+                logger.warning(
+                    f"Invalid scaffold for molecule with index: {idx} - scaffold set to 'None' for splitting"
+                )
+
+        # Pre-assign smiles of custom_test_list to test set
+        preassigned_smiles = {
+            df.loc[df.QSPRID == qspridx][ds.smilesCol].values[0] : 1 for qspridx in self.customTestList
+        } if self.customTestList else None
+
+        # Transform scaffolds dictionnary into cluster dictionnary 
+        clusters = { iscaffold : indices for iscaffold, indices in enumerate(scaffolds.values()) }
+        
+        # Split dataset
+        splitter = GloballyBalancedSplit(
+            sizes=[1 - self.testFraction, self.testFraction],
+            clusters=clusters,
+            clustering_method=None,
+            time_limit_seconds=self.timeLimitSeconds,
+        )
+        df = splitter(
+            df, 
+            ds.smilesCol, 
+            [TargetProperty.name for TargetProperty in self.tasks],
+            preassigned_smiles=preassigned_smiles,
+        )
+
+        if self.customTestList is not None:
+            for qspridx in self.customTestList:
+                assert df.loc[df.QSPRID == qspridx]["Split"].values[0] == 1, \
+                    f"Custom test list molecule {qspridx} not assigned to test set"
+            
+        # Get indices
+        train_indices = df[df["Split"] == 0].index.values
+        test_indices = df[df["Split"] == 1].index.values
+
+        # assert len(train_indices) + len(test_indices) == len(df), \
+        #     "Not all samples were assigned to a split"
+
+        # # Reset index back to QSPRID
+        # df.set_index(ds.indexCols, inplace=True, drop=False)
+
+        return iter([(train_indices, test_indices)])
+        
+
     def _singletask_split(self) -> Iterable[tuple[list[int], list[int]]]:
         """
         Single-task dataset split based on scaffold.

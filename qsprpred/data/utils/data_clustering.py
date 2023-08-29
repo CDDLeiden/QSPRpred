@@ -29,7 +29,7 @@ class MoleculeClusters(ABC):
         """
 
     def _set_nClusters(self, N: int) -> None:
-        self.nClusters = self.nClusters if self.nClusters is not None else N // 100
+        self.nClusters = self.nClusters if self.nClusters is not None else N // 10
         if self.nClusters < 10:
             self.nClusters = 10
             logger.warning(
