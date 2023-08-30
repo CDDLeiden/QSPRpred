@@ -8,6 +8,7 @@ from ...logs import logger
 from .descriptorsets import FingerprintSet
 from .scaffolds import Murcko
 
+
 class MoleculeClusters(ABC):
     """
     Abstract base class for clustering molecules.

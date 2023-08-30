@@ -4,7 +4,7 @@ To add a new data splitter:
 * Add a DataSplit subclass for your new splitter
 """
 from collections import defaultdict
-from typing import Iterable, Literal, Optional
+from typing import Iterable, Literal
 
 import numpy as np
 import pandas as pd
@@ -76,6 +76,7 @@ class ManualSplit(DataSplit):
         test = self.splitCol[self.splitCol == self.testVal].index.values
         return iter([(train, test)])
 
+
 class RandomSplit(DataSplit):
     """Splits dataset in random train and test subsets.
 
@@ -90,12 +91,12 @@ class RandomSplit(DataSplit):
             number of molecules and target is used.
     """
     def __init__(
-            self,
-            dataset: QSPRDataset | None = None,
-            test_fraction: float = 0.1,
-            seed: int = 42,
-            n_initial_clusters: int | None = None,
-            time_limit_seconds: float | None = None,
+        self,
+        dataset: QSPRDataset | None = None,
+        test_fraction: float = 0.1,
+        seed: int = 42,
+        n_initial_clusters: int | None = None,
+        time_limit_seconds: float | None = None,
     ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
@@ -176,7 +177,10 @@ class TemporalSplit(DataSplit):
         timeCol (str): name of the column within the dataframe with timepoints
     """
     def __init__(
-            self,timesplit: float, timeprop: str, dataset: QSPRDataset | None = None
+        self,
+        timesplit: float,
+        timeprop: str,
+        dataset: QSPRDataset | None = None
     ) -> None:
         """Initialize a TemporalSplit object.
 
@@ -280,7 +284,6 @@ class ScaffoldSplit(DataSplit):
         self.timeLimitSeconds = time_limit_seconds
 
     def split(self, X, y):
-
         self.X = X
         self.y = y
 
@@ -307,13 +310,16 @@ class ScaffoldSplit(DataSplit):
                 )
 
         # Pre-assign smiles of custom_test_list to test set
-        preassigned_smiles = {
-            df.loc[df.QSPRID == qspridx][ds.smilesCol].values[0] : 1 for qspridx in self.customTestList
-        } if self.customTestList else None
+        preassigned_smiles = (
+            {
+                df.loc[df.QSPRID == qspridx][ds.smilesCol].values[0]: 1
+                for qspridx in self.customTestList
+            } if self.customTestList else None
+        )
 
-        # Transform scaffolds dictionnary into cluster dictionnary 
-        clusters = { iscaffold : indices for iscaffold, indices in enumerate(scaffolds.values()) }
-        
+        # Transform scaffolds dictionnary into cluster dictionnary
+        clusters = dict(enumerate(scaffolds.values()))
+
         # Split dataset
         splitter = GloballyBalancedSplit(
             sizes=[1 - self.testFraction, self.testFraction],
@@ -322,8 +328,8 @@ class ScaffoldSplit(DataSplit):
             time_limit_seconds=self.timeLimitSeconds,
         )
         df = splitter(
-            df, 
-            ds.smilesCol, 
+            df,
+            ds.smilesCol,
             [TargetProperty.name for TargetProperty in self.tasks],
             preassigned_smiles=preassigned_smiles,
         )
@@ -332,7 +338,7 @@ class ScaffoldSplit(DataSplit):
             for qspridx in self.customTestList:
                 assert df.loc[df.QSPRID == qspridx]["Split"].values[0] == 1, \
                     f"Custom test list molecule {qspridx} not assigned to test set"
-            
+
         # Get indices
         train_indices = df[df["Split"] == 0].index.values
         test_indices = df[df["Split"] == 1].index.values
@@ -344,7 +350,6 @@ class ScaffoldSplit(DataSplit):
         # df.set_index(ds.indexCols, inplace=True, drop=False)
 
         return iter([(train_indices, test_indices)])
-        
 
     def _singletask_split(self) -> Iterable[tuple[list[int], list[int]]]:
         """
@@ -602,7 +607,7 @@ class ClusterSplit(DataSplit):
 
         return iter([(train_idx, test_idx)])
 
-    def _multitask_split(self,) -> Iterable[tuple[list[int], list[int]]]:
+    def _multitask_split(self, ) -> Iterable[tuple[list[int], list[int]]]:
         """
         Split multi-task dataset in two subsets based on clusters of fingerprints
         with globally balanced split from https://github.com/sohviluukkonen/gbmt-splits

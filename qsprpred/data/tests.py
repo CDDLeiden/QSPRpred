@@ -34,8 +34,14 @@ from .utils.descriptorcalculator import (
     MoleculeDescriptorsCalculator,
 )
 from .utils.descriptorsets import (
-    DataFrameDescriptorSet, DescriptorSet, DrugExPhyschem, FingerprintSet,
-    PredictorDesc, RDKitDescs, TanimotoDistances, SmilesDesc
+    DataFrameDescriptorSet,
+    DescriptorSet,
+    DrugExPhyschem,
+    FingerprintSet,
+    PredictorDesc,
+    RDKitDescs,
+    SmilesDesc,
+    TanimotoDistances,
 )
 from .utils.feature_standardization import SKLearnStandardizer
 from .utils.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
