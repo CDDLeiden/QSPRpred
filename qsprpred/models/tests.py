@@ -72,7 +72,7 @@ class ModelTestMixIn:
         grid_params = model.__class__.loadParamsGrid(self.gridFile, grid, mname)
         return grid_params[grid_params[:, 0] == mname, 1][0]
 
-    def fitTest(self, model: QSPRModel, random_state: int | None = None):
+    def fitTest(self, model: QSPRModel):
         """Test model fitting, optimization and evaluation.
 
         Args:
@@ -129,12 +129,10 @@ class ModelTestMixIn:
                 )
             )
 
-    #TODO: expand test to check predicted values are NOT equal in case random_states differ.
-    #Should only apply to numeric predictions, as class results still have a large probability
-    #to be equal
     def predictorTest(
             self,
             predictor: QSPRModel,
+            expect_equal_result=True,
             expected_pred_use_probas=None,
             expected_pred_not_use_probas=None,
             **pred_kwargs):
@@ -224,12 +222,17 @@ class ModelTestMixIn:
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
-        # TODO: assertEqual failed once because of a missing digit
-        # investigate if there is a real problem
-        if expected_pred_use_probas is not None:
-            self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=5)
-        if expected_pred_not_use_probas is not None:
-            self.assertAlmostEqual(pred[1], expected_pred_not_use_probas, places=5)
+        if expect_equal_result:
+            if expected_pred_use_probas is not None:
+                self.assertEqual(pred[0], expected_pred_use_probas)
+            if expected_pred_not_use_probas is not None:
+                self.assertEqual(pred[1], expected_pred_not_use_probas)
+        else:
+            if expected_pred_use_probas is not None:
+                self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=5)
+            if expected_pred_not_use_probas is not None:
+                self.assertNotAlmostEqual(pred[1], expected_pred_not_use_probas, places=5)
+
 
         return pred[0], pred[1]
 
@@ -339,15 +342,18 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     @parameterized.expand(
         [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, random_state) for alg, alg_name in (
-                (PLSRegression, "PLSR"),
-                (SVR, "SVR"),
                 (RandomForestRegressor, "RFR"),
                 (XGBRegressor, "XGBR"),
+            ) for random_state in ([None], [1, 42], [42, 42])
+        ] + [
+            (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None]) for alg, alg_name in (
+                (PLSRegression, "PLSR"),
+                (SVR, "SVR"),
                 (KNeighborsRegressor, "KNNR"),
-            ) for random_state in (None, 42)
+            )
         ]
     )
-    def testRegressionBasicFit(self, alg_name, task, model_name, model_class, random_state):
+    def testRegressionBasicFit(self, _, task, model_name, model_class, random_state):
         """Test model training for regression models."""
         if model_name not in ["SVR", "PLSR"]:
             parameters = {"n_jobs": N_CPUS}
@@ -362,37 +368,36 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
-        model_random_state = random_state if alg_name in ["RFR", "XGBR"] else None
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
-            random_state=model_random_state
+            random_state=random_state[0]
         )
-        self.fitTest(model, random_state)
+        self.fitTest(model)
         predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
-        if random_state is not None:
+        if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
                 alg=model_class,
                 dataset=dataset,
                 parameters=parameters,
-                random_state=model_random_state
+                random_state=random_state[1]
             )
-            self.fitTest(model, random_state)
+            self.fitTest(model)
             predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
             self.predictorTest(
                 predictor,
+                expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
                 expected_pred_not_use_probas=pred_not_use_probas)
 
 
     def testPLSRegressionSummaryWithSeed(self):
         """Test model training for regression models."""
-        random_state=42
         task = TargetTasks.REGRESSION
         model_name = "PLSR"
         model_class = PLSRegression
@@ -410,7 +415,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model, random_state=random_state)
+        self.fitTest(model)
         expected_summary = self.createCorrelationSummary(model)
 
         #Generate summary again, check that the result is identical
@@ -420,7 +425,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model, random_state=random_state)
+        self.fitTest(model)
         summary = self.createCorrelationSummary(model)
 
         self.assertListEqual(summary["ModelName"], expected_summary["ModelName"])
@@ -435,12 +440,18 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 (SVC, "SVC"),
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
+            ) for task, th in (
+                (TargetTasks.SINGLECLASS, [6.5]),
+                (TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
+            ) for random_state in (None, 42)
+        ] + [
+            (f"{alg_name}_{task}", task, th, alg_name, alg, None) for alg, alg_name in (
                 (KNeighborsClassifier, "KNNC"),
                 (GaussianNB, "NB"),
             ) for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
-            ) for random_state in (None, 42)
+            )
         ]
     )
     def testClassificationBasicFit(self, _, task, th, model_name, model_class, random_state):
@@ -474,7 +485,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
             random_state=model_random_state
         )
-        self.fitTest(model, random_state)
+        self.fitTest(model)
         predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
@@ -486,7 +497,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 parameters=parameters,
                 random_state=model_random_state
             )
-            self.fitTest(model, random_state)
+            self.fitTest(model)
             predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
             self.predictorTest(
                 predictor,
@@ -495,7 +506,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 
     def testRandomForestClassifierFitWithSeed(self):
-        random_state=42
         parameters = {
             "n_jobs": N_CPUS,
         }
@@ -516,7 +526,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model, random_state=random_state)
+        self.fitTest(model)
         expected_summary = self.createMetricsSummary(model)
 
         #Generate summary again, check that the result is identical
@@ -526,7 +536,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model, random_state=random_state)
+        self.fitTest(model)
         summary = self.createMetricsSummary(model)
 
         self.assertListEqual(summary["Metric"], expected_summary["Metric"])
@@ -539,8 +549,11 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         [
             (alg_name, alg_name, alg, random_state) for alg, alg_name in (
                 (RandomForestRegressor, "RFR"),
+            ) for random_state in ([None], [1, 42], [42, 42])
+        ] + [
+            (alg_name, alg_name, alg, [None]) for alg, alg_name in (
                 (KNeighborsRegressor, "KNNR"),
-            ) for random_state in (None, 42)
+            )
         ]
     )
     def testRegressionMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -562,31 +575,31 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         # test classifier
         # initialize model for training from class
-        model_random_state = random_state if model_name in ["RFR"] else None
         model = self.getModel(
             name=f"{model_name}_multitask_regression",
             alg=model_class,
             dataset=dataset,
-            random_state=model_random_state
+            random_state=random_state[0]
         )
-        self.fitTest(model, random_state)
+        self.fitTest(model)
         predictor = QSPRsklearn(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
-        if random_state is not None:
+        if random_state[0] is not None and model_name in ["RFR"]:
             model = self.getModel(
                 name=f"{model_name}_multitask_regression",
                 alg=model_class,
                 dataset=dataset,
-                random_state=model_random_state
+                random_state=random_state[1]
             )
-            self.fitTest(model, random_state)
+            self.fitTest(model)
             predictor = QSPRsklearn(
                 name=f"{model_name}_multitask_regression", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
+                expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
                 expected_pred_not_use_probas=pred_not_use_probas)
 
@@ -595,8 +608,11 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         [
             (alg_name, alg_name, alg, random_state) for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
-                (KNeighborsClassifier, "KNNC"),
             ) for random_state in (None, 42)
+        ] + [
+            (alg_name, alg_name, alg, None) for alg, alg_name in (
+                (KNeighborsClassifier, "KNNC"),
+            )
         ]
     )
     def testClassificationMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -635,7 +651,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
             random_state=model_random_state
         )
-        self.fitTest(model, random_state)
+        self.fitTest(model)
         predictor = QSPRsklearn(
             name=f"{model_name}_multitask_classification", base_dir=model.baseDir
         )
@@ -648,7 +664,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 parameters=parameters,
                 random_state=model_random_state
             )
-            self.fitTest(model, random_state)
+            self.fitTest(model)
             predictor = QSPRsklearn(
                 name=f"{model_name}_multitask_classification", base_dir=model.baseDir
             )

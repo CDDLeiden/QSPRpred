@@ -59,9 +59,8 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name, alg, th, random_state)
+            (f"{alg_name}_{task}", task, alg_name, alg, th, [None])
             for alg, alg_name, task, th in (
-                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
                 (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
                 (
                     STFullyConnected,
@@ -69,15 +68,22 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     TargetTasks.MULTICLASS,
                     [0, 1, 10, 1100],
                 ),
+
+            )
+        ] + [
+            (f"{alg_name}_{task}", task, alg_name, alg, th, random_state)
+            for alg, alg_name, task, th in (
+                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
             )
             for random_state in (
-                None,
-                42
+                [None],
+                [1, 42],
+                [42, 42]
             )
         ]
     )
     def testSingleTaskModel(
-        self, _, task: TargetTasks, alg_name: str, alg: Type, th: float, random_state: int | None
+        self, _, task: TargetTasks, alg_name: str, alg: Type, th: float, random_state
     ):
         """Test the QSPRDNN model in one configuration.
 
@@ -106,19 +112,20 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name=f"{alg_name}",
             alg=alg,
             dataset=dataset,
-            random_state=random_state
+            random_state=random_state[0]
         )
-        self.fitTest(model, random_state)
-        predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir, random_state=random_state)
+        self.fitTest(model)
+        predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir, random_state=random_state[0])
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
-        if random_state is not None:
+        if random_state[0] is not None:
             model.cleanFiles()
             model = self.getModel(
-                base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset, random_state=random_state
+                base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset, random_state=random_state[1]
             )
-            self.fitTest(model, random_state)
-            predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir, random_state=random_state)
+            self.fitTest(model)
+            predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir, random_state=random_state[1])
             self.predictorTest(predictor,
+                expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
                 expected_pred_not_use_probas=pred_not_use_probas)
 
