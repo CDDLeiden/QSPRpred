@@ -394,12 +394,7 @@ if __name__ == "__main__":
     args = QSPRArgParser()
 
     # Set random seeds
-    random.seed(args.random_state)
-    np.random.seed(args.random_state)
-    if find_spec("torch") is not None:
-        import torch
-
-        torch.manual_seed(args.random_state)
+    # TODO: is this necessary?
     os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
     # Backup files
