@@ -157,10 +157,6 @@ def QSPR_predict(args):
 if __name__ == "__main__":
     args = QSPRArgParser()
 
-    # Set random seeds
-    # TODO: is this necessary?
-    os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
-
     # Backup files
     backup_msg = backup_files(
         args.base_dir, "qspr/predictions", tuple(args.output), cp_suffix="_params"

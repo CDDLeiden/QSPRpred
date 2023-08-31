@@ -393,10 +393,6 @@ def QSPR_modelling(args):
 if __name__ == "__main__":
     args = QSPRArgParser()
 
-    # Set random seeds
-    # TODO: is this necessary?
-    os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
-
     # Backup files
     file_prefixes = [
         f"{alg}_{data_prefix}" for alg in args.model_types

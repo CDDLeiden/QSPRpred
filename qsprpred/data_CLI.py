@@ -456,10 +456,6 @@ def QSPR_dataprep(args):
 if __name__ == "__main__":
     args = QSPRArgParser()
     
-    # Set random seeds
-    # TODO: is this necessary?
-    os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
-
     # Backup files
     tasks = ["REG" if reg is True else "CLS" for reg in args.regression]
     file_prefixes = [
