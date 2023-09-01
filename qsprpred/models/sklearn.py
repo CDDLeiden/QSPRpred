@@ -19,7 +19,7 @@ from .interfaces import QSPRModel
 from .tasks import ModelTasks
 
 
-class QSPRsklearn(QSPRModel):
+class SklearnModel(QSPRModel):
     """QSPRModel class for sklearn type models.
 
     Wrap your sklearn model class in this class
@@ -34,7 +34,7 @@ class QSPRsklearn(QSPRModel):
         parameters: dict | None = None,
         autoload: bool = True,
     ):
-        """Initialize QSPRsklearn model.
+        """Initialize SklearnModel model.
 
         Args:
             base_dir (str): base directory for model

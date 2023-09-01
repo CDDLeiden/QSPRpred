@@ -19,14 +19,14 @@ from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 from .data.data import QSPRDataset
-from .extra.gpu.models.dnn import QSPRDNN
+from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor
+from .models.early_stopping import EarlyStoppingMode
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from .models.metrics import SklearnMetric
-from .models.sklearn import QSPRModel, QSPRsklearn
+from .models.sklearn import QSPRModel, SklearnModel
 from .models.tasks import TargetTasks
-from .models.early_stopping import EarlyStoppingMode
 
 
 def QSPRArgParser(txt=None):
@@ -195,11 +195,6 @@ def QSPRArgParser(txt=None):
         ),
     )
 
-    # other
-    parser.add_argument(
-        "-ng", "--no_git", action="store_true", help="If on, git hash is not retrieved"
-    )
-
     if txt:
         args = parser.parse_args(txt)
     else:
@@ -317,7 +312,7 @@ def QSPR_modelling(args):
 
             # Create QSPR model object
             if model_type == "DNN":
-                QSPRmodel = QSPRDNN(
+                QSPRmodel = DNNModel(
                     base_dir=f"{args.base_dir}/qspr/models/",
                     data=mydataset,
                     parameters=parameters,
@@ -327,7 +322,7 @@ def QSPR_modelling(args):
                     tol=args.tolerance,
                 )
             else:
-                QSPRmodel = QSPRsklearn(
+                QSPRmodel = SklearnModel(
                     base_dir=f"{args.base_dir}/qspr/models/",
                     data=mydataset,
                     alg=alg_dict[model_type],

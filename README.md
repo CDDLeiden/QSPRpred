@@ -24,22 +24,17 @@ QSPRpred can be installed with pip like so (with python >= 3.10):
 pip install git+https://github.com/CDDLeiden/QSPRPred.git@main
 ```
 
-Note that this will install the basic dependencies, but not the optional dependencies. If you want to use the optional dependencies, you can install the package with the following installation options:
+Note that this will install the basic dependencies, but not the optional dependencies. If you want to use the optional dependencies, you can install the package with an option:
 
 ```bash
-# include extra dependencies for PCM models and extra descriptor sets from packages other than RDKit
-pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[extra]
-
-# include models (torch, chemprop, pyboost) with GPU dependencies
-# before installing QSPRpred extra_gpu via pip you should have cupy installed:
-pip install cupy-cuda110 # replace with your cuda version, see https://docs.cupy.dev/en/stable/install.html
-pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[extra_gpu] 
-
-# include all optional dependencies
-# before installing QSPRpred full via pip you should have cupy installed:
-pip install cupy-cuda110 # replace with your cuda version, see https://docs.cupy.dev/en/stable/install.html
-pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[full]
+pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[<option>]
 ```
+
+The following options are available:
+- extra : include extra dependencies for PCM models and extra descriptor sets from packages other than RDKit
+- deep : include deep learning models (torch and chemprop)
+- pyboost : include pyboost model (requires cupy, `pip install cupy-cudaX`, replace X with your [cuda version](https://docs.cupy.dev/en/stable/install.html))
+- full : include all optional dependecies (requires cupy, `pip install cupy-cudaX`, replace X with your [cuda version](https://docs.cupy.dev/en/stable/install.html))
 
 ### Multiple Sequence Alignment Provider for Protein Descriptors
 

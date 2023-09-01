@@ -26,7 +26,7 @@ class OptunaOptimization(HyperParameterOptimization):
             best parameters found during optimization
 
     Example of OptunaOptimization for scikit-learn's MLPClassifier:
-        >>> model = QSPRsklearn(base_dir=".", data=dataset,
+        >>> model = SklearnModel(base_dir=".", data=dataset,
         >>>                     alg = MLPClassifier(), alg_name="MLP")
         >>> search_space = {
         >>>    "learning_rate_init": ["float", 1e-5, 1e-3,],

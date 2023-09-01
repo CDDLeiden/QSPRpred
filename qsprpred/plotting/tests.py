@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from ..data.data import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
-from ..models.sklearn import QSPRsklearn
+from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
 from ..plotting.classification import MetricsPlot, ROCPlot
@@ -24,7 +24,7 @@ class ModelRetriever(ModelDataSetsMixIn):
         dataset: QSPRDataset,
         name: str,
         alg: Type = RandomForestClassifier
-    ) -> QSPRsklearn:
+    ) -> SklearnModel:
         """Get a model for testing.
 
         Args:
@@ -36,11 +36,11 @@ class ModelRetriever(ModelDataSetsMixIn):
                 Algorithm to use for model. Defaults to `RandomForestClassifier`.
 
         Returns:
-            QSPRsklearn:
+            SklearnModel:
                 The new model.
 
         """
-        return QSPRsklearn(
+        return SklearnModel(
             name=name,
             data=dataset,
             base_dir=self.generatedModelsPath,

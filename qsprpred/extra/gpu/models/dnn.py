@@ -13,14 +13,14 @@ import torch
 from sklearn.model_selection import train_test_split
 
 from ....data.data import QSPRDataset
-from ....models.interfaces import QSPRModel
-from ....models.tasks import ModelTasks
-from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
 from ....extra.gpu.models.neural_network import STFullyConnected
+from ....models.early_stopping import EarlyStoppingMode, early_stopping
+from ....models.interfaces import QSPRModel
+from ....models.tasks import ModelTasks
 
 
-class QSPRDNN(QSPRModel):
+class DNNModel(QSPRModel):
     """This class holds the methods for training and fitting a
     Deep Neural Net QSPR model initialization.
 
@@ -80,7 +80,7 @@ class QSPRDNN(QSPRModel):
         patience: int = 50,
         tol: float = 0,
     ):
-        """Initialize a QSPRDNN model.
+        """Initialize a DNNModel model.
 
         Args:
             base_dir (str):
@@ -116,7 +116,7 @@ class QSPRDNN(QSPRModel):
         super().__init__(base_dir, alg, data, name, parameters, autoload=autoload)
         if self.task.isMultiTask():
             raise NotImplementedError(
-                "Multitask modelling is not implemented for QSPRDNN models."
+                "Multitask modelling is not implemented for DNNModel models."
             )
 
     @property
@@ -188,7 +188,7 @@ class QSPRDNN(QSPRModel):
         return estimator
 
     def saveEstimator(self) -> str:
-        """Save the QSPRDNN model.
+        """Save the DNNModel model.
 
         Returns:
             str: path to the saved model
@@ -215,7 +215,7 @@ class QSPRDNN(QSPRModel):
         )
 
     def save(self) -> str:
-        """Save the QSPRDNN model and meta information.
+        """Save the DNNModel model and meta information.
 
         Returns:
             str: path to the saved model

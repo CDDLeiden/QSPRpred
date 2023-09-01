@@ -1,28 +1,28 @@
 import os
-import torch
-import pytest
-
+from importlib import import_module, util
 from typing import Type
 from unittest import TestCase
+
+import pytest
+import torch
 from parameterized import parameterized
-from importlib import import_module, util
 from sklearn.impute import SimpleImputer
 
 from ....data.data import QSPRDataset
-from ....models.tasks import TargetTasks, ModelTasks
-from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn
+from ....data.utils.datasplitters import RandomSplit
 from ....data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
 from ....data.utils.descriptorsets import SmilesDesc
-from ....data.utils.datasplitters import RandomSplit
-from ....extra.gpu.models.dnn import QSPRDNN
-from ....extra.gpu.models.chemprop import Chemprop
+from ....extra.gpu.models.chemprop import ChempropModel
+from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
+from ....models.tasks import ModelTasks, TargetTasks
+from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn
 
 GPUS = list(range(torch.cuda.device_count()))
 
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the QSPRDNN class."""
+    """This class holds the tests for the DNNModel class."""
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -47,7 +47,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset: Data set to use.
             parameters: Parameters to use.
         """
-        return QSPRDNN(
+        return DNNModel(
             base_dir=base_dir,
             alg=alg,
             data=dataset,
@@ -76,7 +76,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     def testSingleTaskModel(
         self, _, task: TargetTasks, alg_name: str, alg: Type, th: float
     ):
-        """Test the QSPRDNN model in one configuration.
+        """Test the DNNModel model in one configuration.
 
         Args:
             task: Task to test.
@@ -104,12 +104,12 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset
         )
         self.fitTest(model)
-        predictor = QSPRDNN(name=alg_name, base_dir=model.baseDir)
+        predictor = DNNModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
 
 
 class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the QSPRDNN class."""
+    """This class holds the tests for the DNNModel class."""
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -138,7 +138,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
         parameters["gpu"] = GPUS[0] if len(GPUS) > 0 else None
         parameters["epochs"] = 2
-        return Chemprop(
+        return ChempropModel(
             base_dir=base_dir, data=dataset, name=name, parameters=parameters
         )
 
@@ -152,7 +152,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         ]
     )
     def testSingleTaskModel(self, _, task: TargetTasks, alg_name: str, th: float):
-        """Test the QSPRDNN model in one configuration.
+        """Test the DNNModel model in one configuration.
 
         Args:
             task: Task to test.
@@ -182,7 +182,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
         )
         self.fitTest(model)
-        predictor = Chemprop(name=alg_name, base_dir=model.baseDir)
+        predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
 
     @parameterized.expand(
@@ -194,7 +194,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         ]
     )
     def testMultiTaskmodel(self, _, task: TargetTasks, alg_name: str):
-        """Test the QSPRDNN model in one configuration.
+        """Test the DNNModel model in one configuration.
 
             Args:
                 task: Task to test.
@@ -247,12 +247,13 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
         )
         self.fitTest(model)
-        predictor = Chemprop(name=alg_name, base_dir=model.baseDir)
+        predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
+
 
 @pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
 class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the PyBoostModel class."""    
+    """This class holds the tests for the PyBoostModel class."""
     @staticmethod
     def getModel(
         base_dir: str,
@@ -417,9 +418,9 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         self.predictorTest(predictor)
 
-    # FIX ME: This test fails because the PyBoost default auc does not handle 
+    # FIX ME: This test fails because the PyBoost default auc does not handle
     # mutlitask data and the custom NaN AUC metric is not JSON serializable.
-     
+
     # @parameterized.expand(
     #     [
     #         ("PyBoost", "PyBoost", params) for params in [
