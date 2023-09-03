@@ -8,6 +8,7 @@ import random
 import sys
 from datetime import datetime
 from importlib.util import find_spec
+from copy import deepcopy
 
 import numpy as np
 import optuna
@@ -202,9 +203,14 @@ def QSPR_modelling(args):
                 args.model_types,
             )
         else:
-            grid_params = QSPRModel.loadParamsGrid(
-                None, args.optimization, args.model_types
-            )
+            # Get default search space
+            model_types = deepcopy(args.model_types)
+            if "DNN" in args.model_types:
+                dnn_grid_params = QSPRDNN.loadParamsGrid(None, args.optimization, "DNN")
+                model_types.remove("DNN")
+            grid_params = QSPRModel.loadParamsGrid(None, args.optimization, model_types)
+            if "DNN" in args.model_types:
+                grid_params = np.concatenate((grid_params, dnn_grid_params))
 
     for dataset in args.datasets:
         log.info(f"Dataset: {dataset.name}")
