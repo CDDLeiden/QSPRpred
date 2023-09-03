@@ -16,6 +16,9 @@ From v2.0.1 to v2.1.0.dev0
 - In the case single-task dataset, the `RandomSplit` now uses `StratifiedShuffleSplit` in case of classification.
 - `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captures scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
 - The versioning scheme of development snapshots has changed from `devX` to `alphaX`/`betaX`, where `X` is an integer that increments with each release.
+- The command line interface modules now use input and output file paths instead
+  of automatically placing all files in a subfolder `qspr`, allowing for more
+  control over the output and input paths.
 
 ## New Features
 - `ClusterSplit` - splits data based clustering of molecular fingerprints.
