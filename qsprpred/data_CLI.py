@@ -466,7 +466,7 @@ if __name__ == "__main__":
     if not os.path.exists(args.input):
         raise FileNotFoundError(f"Input file {args.input} not found.")
     if not os.path.exists(args.output_dir):
-        raise FileNotFoundError(f"Output directory {args.output_dir} not found.")
+        os.makedirs(args.output_dir)
 
     # Backup files
     tasks = ["REG" if reg is True else "CLS" for reg in args.regression]

@@ -48,17 +48,18 @@ here we use morgan fingerprints.
 ..  code-block::
 
     # input is in ./data/parkinsons_pivot.tsv
-        python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan
+    python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan
 
-Running this command will create a subfolder 'qspr'. The qspr/data folder should contain 4 files for
-each property (8 in total), prefixed by the property identifiers (i.e. GABAAalpha/NMDA), the model task (REGRESSION),
+Running this command will create folders 'cli_tutorial/data'. The cli_tutorial/data folder should contain 5 files for
+each property (10 in total), prefixed by the property identifiers (i.e. GABAAalpha/NMDA), the model task (REGRESSION),
 e.g. GABAAalpha_REGRESSION. As well as an log file and a run settings file.
 
 +--------------------------------------------------+-------------------------------------------------------+
 | File                                             | Function                                              |
 +==================================================+=======================================================+
 || {prefixes}_df.pkl                               || Dataframe                                            |
-|| {prefixes}_feature_calculators.json             || re-instantiate feature calculator                    |
+|| {prefixes}_descriptor_calculator_Descriptor.json|| re-instantiate descriptor calculator                    |
+|| {prefixes}_Descriptor_df.pkl                    || re-instantiate descriptor dataframe                   |
 || {prefixes}_feature_standardizer.json            || re-instantiate feature standardizer                  |
 || {prefixes}_meta.json                            || Meta data, also used to instantiate QSAR data object |
 || QSPRdata.json                                   || Command Line interface settings                      |
@@ -79,7 +80,7 @@ can be indicated with `-sm` (default SMILES).
 ..  code-block::
 
     # input is in tutorial/data/parkinsons_pivot.tsv, setting debug flag, smiles column, random seed, number of cpu's
-        python -m qsprpred.data_CLI -b tutorial -i parkinsons_pivot.tsv -sm SMILES -de -ran 42 -ncpu 5 -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan
+        python -m qsprpred.data_CLI -b tutorial -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -sm SMILES -de -ran 42 -ncpu 5 -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan
 
 
 Log-transform data
@@ -89,7 +90,9 @@ To log (-lt) transform data specific properties, indicate this in the CLI as fol
 ..  code-block::
 
     # Log transform data for GABAAalpha
-        python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha -pr NMDA -lt '{"GABAAalpha":true,"NMDA":false}' -r REG -sp random -sf 0.15 -fe Morgan
+        python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -lt '{"GABAAalpha":true,"NMDA":false}' -r REG -sp random -sf 0.15 -fe Morgan
+
+note. on windows remove the single quotes around the dictionary and add backslashes before the double quotes, e.g. -lt {\"GABAAalpha\":true,\"NMDA\":false}
 
 Train test split
 """"""""""""""""
@@ -100,7 +103,7 @@ namely a scaffold split, where the data is split into a test and train set rando
 ..  code-block::
 
     # Scaffold split
-        python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha -pr NMDA -r REG -sp scaffold -sf 0.15 -fe Morgan
+        python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -r REG -sp scaffold -sf 0.15 -fe Morgan
 
 The third option is a temporal split, where a column needs to be indicated which holds information on the time each
 sample was observed and split based on threshold in a column. In this example, all samples after 2015 (in column 'year')
@@ -109,7 +112,7 @@ make up the test set. NOTE: this example will not work on the example set as it 
 ..  code-block::
 
     # Time split
-        python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha -pr NMDA -r REG  -sp time -st 2015 -stc year -fe Morgan
+        python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -r REG  -sp time -st 2015 -stc year -fe Morgan
 
 
 Data for classification models
@@ -125,7 +128,9 @@ the bins need to be given. For binary classification only give 1 threshold per p
 ..  code-block::
 
     # Classification and regression
-        python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha -pr NMDA -r CLS -sp random -sf 0.15 -fe Morgan -th '{"GABAAalpha":[6.5],"NMDA":[0, 4, 6, 10]}'
+        python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -r CLS -sp random -sf 0.15 -fe Morgan -th '{"GABAAalpha":[6.5],"NMDA":[0,4,6,10]}'
+
+note. on windows remove the single quotes around the dictionary and add backslashes before the double quotes, e.g. -th {\"GABAAalpha\":[6.5],\"NMDA\":[0,4,6,10]}
 
 Feature calculation
 """""""""""""""""""
@@ -138,7 +143,7 @@ be combined. For more control over the descriptorcalculator settings use the pyt
 ..  code-block::
 
     # With Morgan, RDkit, Mordred, Mold2, PaDEL and DrugEx descriptors
-        python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan RDkit Mordred Mold2 PaDEL DrugEx
+        python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan RDkit Mordred Mold2 PaDEL DrugEx
 
 Feature filtering
 """""""""""""""""
@@ -150,7 +155,7 @@ for filtering.
 ..  code-block::
 
     # input is in ./data/LIGAND_RAW_small.tsv
-       python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan -lv 0.1 -hc 0.9 -bf
+       python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan -lv 0.1 -hc 0.9 -bf
 
 Papyrus Low quality filter
 """"""""""""""""""""""""""
@@ -170,7 +175,7 @@ a combination of regression and classification tasks, the multitask modelling is
 ..  code-block::
 
     # input is in ./data/parkinsons_pivot.tsv
-        python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha NMDA -r REG -sp random -sf 0.15 -fe Morgan -im mean
+        python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha NMDA -r REG -sp random -sf 0.15 -fe Morgan -im mean
 
 Model Training
 --------------
@@ -179,7 +184,7 @@ Basics
 ^^^^^^
 
 Finally, we need to indicate what models we want to train and which steps to take in the training.
-In this example, we will build regression random forest models through passing the prepared regression datasets prefixes
+In this example, we will build regression random forest models through passing the prepared regression datasets files
 `GABAAalpha_REGRESSION` and `NMDA_REGRESSION` to the `-dp` argument. If you wish to train classification models, you
 can pass the classification datasets `GABAAalpha_CLASSIFICATION` and `NMDA_CLASSIFICATION` to the `-dp` argument
 (or any combination thereof). The model type is set with `-m`. 
@@ -187,8 +192,8 @@ We will also evaluate the model through cross-validation (-me) and train the mod
 
 ..  code-block::
 
-    # input is in ./data/parkinsons_pivot.tsv
-        python -m qsprpred.model_CLI -dp GABAAalpha_REGRESSION NMDA_REGRESSION -mt RF -me -s
+    # Using the prepared datasets GABAAalpha_REGRESSION and NMDA_REGRESSION
+        python -m qsprpred.model_CLI -dp ./cli_tutorial/data/GABAAalpha_REGRESSION_df.pkl ./cli_tutorial/data/NMDA_REGRESSION_df.pkl -o ./cli_tutorial/models -mt RF -me -s
 
 More
 ^^^^
@@ -197,7 +202,7 @@ Here you can find a short overview.
 
 run settings arguments
 ^^^^^^^^^^^^^^^^^^^^^^^
-As with the data preparation including `-d`, will print debug information to the log file. The random 
+As with the data preparation including `-de`, will print debug information to the log file. The random 
 seed can also be set manually (although identical results are not guaranteed while keeping
 the same random seed). Furthermore, the number of cpu's used for model training and the
 gpu number for training pytorch models can be set.
@@ -205,7 +210,7 @@ gpu number for training pytorch models can be set.
 ..  code-block::
 
     # Setting debug flag, random seed, number of cpu's and a specific gpu (for now multiple gpu's not possible)
-        python -m qsprpred.model_CLI -de -ran 42 -ncpu 5 -gpus [3] -dp GABAAalpha_REGRESSION NMDA_REGRESSION -mt RF -me -s
+        python -m qsprpred.model_CLI -de -ran 42 -ncpu 5 -gpus [3] -dp ./cli_tutorial/data/GABAAalpha_REGRESSION_df.pkl ./cli_tutorial/data/NMDA_REGRESSION_df.pkl -o ./cli_tutorial/models -mt RF -me -s
 
 model types
 """""""""""
@@ -217,7 +222,7 @@ The default is to run all the different model types.
 ..  code-block::
 
     # Training a RF, SVM and PLS model
-        python -m qsprpred.model_CLI -dp GABAAalpha_REGRESSION NMDA_REGRESSION -me -s -mt RF SVM PLS
+        python -m qsprpred.model_CLI -dp ./cli_tutorial/data/GABAAalpha_REGRESSION_df.pkl ./cli_tutorial/data/NMDA_REGRESSION_df.pkl -o ./cli_tutorial/models -me -s -mt RF SVM PLS
 
 Defining model parameters
 """""""""""""""""""""""""
@@ -235,7 +240,7 @@ Specific model parameters can be set with the parameters argument by passing a j
 ..  code-block::
 
     # Setting some parameter values for a Random Forest and k-nearest neighbours model
-        python -m qsprpred.model_CLI -dp GABAAalpha_REGRESSION NMDA_REGRESSION -mt RF KNN -me -s -p myparams
+        python -m qsprpred.model_CLI -dp ./cli_tutorial/data/GABAAalpha_REGRESSION_df.pkl ./cli_tutorial/data/NMDA_REGRESSION_df.pkl -o ./cli_tutorial/models -mt RF KNN -me -s -p myparams
 
 Specifically for the training of the DNN model, you can set the tolerance and the patience from the CLI.
 Tolerance gives the mimimum decrease in loss needed to count as an improvement and 
@@ -244,7 +249,7 @@ patience is the number of training epochs without improvement in loss to stop th
 ..  code-block::
 
     # Setting the tolerance and patience for training a DNN model
-        python -m qsprpred.model_CLI -dp GABAAalpha_REGRESSION NMDA_REGRESSION -mt DNN -me -s -tol 0.02 -pat 100
+        python -m qsprpred.model_CLI -dp ./cli_tutorial/data/GABAAalpha_REGRESSION_df.pkl ./cli_tutorial/data/NMDA_REGRESSION_df.pkl -o ./cli_tutorial/models -mt DNN -me -s -tol 0.02 -pat 100
 
 Hyperparameter optimization
 """""""""""""""""""""""""""
@@ -276,7 +281,7 @@ as third list item. The search space file should always include all models to be
 ..  code-block::
 
     # Bayesian optimization
-        python -m qsprpred.model_CLI -dp GABAAalpha_REGRESSION NMDA_REGRESSION -mt RF -me -s -o bayes -nt 50 -ss mysearchspace -me -s
+        python -m qsprpred.model_CLI -dp ./cli_tutorial/data/GABAAalpha_REGRESSION_df.pkl ./cli_tutorial/data/NMDA_REGRESSION_df.pkl -o ./cli_tutorial/models -mt RF -me -s -o bayes -nt 50 -ss mysearchspace -me -s
 
 Multitask modelling
 """""""""""""""""""
@@ -299,7 +304,7 @@ models we want to use for prediction relative to the base-directory subfolder qs
 ..  code-block::
     
     # input is in ./data/parkinsons_pivot.tsv
-    python -m qsprpred.predict_CLI -i parkinsons_pivot.tsv -mp RF_GABAAalpha_REGRESSION/RF_GABAAalpha_REGRESSION_meta.json RF_NMDA_REGRESSION/RF_NMDA_REGRESSION_meta.json
+    python -m qsprpred.predict_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/predictions/parkinsons_preds.tsv -mp ./cli_tutorial/models/RF_GABAAalpha_REGRESSION/RF_GABAAalpha_REGRESSION_meta.json ./cli_tutorial/models/RF_NMDA_REGRESSION/RF_NMDA_REGRESSION_meta.json
 
 More
 ^^^^
@@ -316,7 +321,7 @@ gpu number for prediction with pytorch models can be set.
 ..  code-block::
 
     # Setting debug flag, random seed, output file name, number of cpu's and a specific gpu (for now multiple gpu's not possible)
-        python -m qsprpred.predict_CLI -i parkinsons_pivot.tsv -mp RF_GABAAalpha_REGRESSION/RF_GABAAalpha_REGRESSION_meta.json RF_NMDA_REGRESSION/RF_NMDA_REGRESSION_meta.json -o mypredictions -de -ran 42 -ncpu 5 -gpus [3]
+        python -m qsprpred.predict_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/predictions/parkinsons_preds.tsv -mp ./cli_tutorial/models/RF_GABAAalpha_REGRESSION/RF_GABAAalpha_REGRESSION_meta.json ./cli_tutorial/models/RF_NMDA_REGRESSION/RF_NMDA_REGRESSION_meta.json -o mypredictions -de -ran 42 -ncpu 5 -gpus [3]
 
     
 Adding probability predictions
@@ -326,5 +331,5 @@ When using a classification model, the probability of the predicted class can be
 ..  code-block::
     
     # Do not standardize and sanitize SMILES
-    python -m qsprpred.predict_CLI -i parkinsons_pivot.tsv -mp RF_GABAAalpha_SINGLECLASS/RF_GABAAalpha_SINGLECLASS_meta.json RF_NMDA_MULTICLASS/RF_NMDA_MULTICLASS_meta.json -pr
+    python -m qsprpred.predict_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/predictions/parkinsons_preds.tsv -mp ./cli_tutorial/models/RF_GABAAalpha_SINGLECLASS/RF_GABAAalpha_SINGLECLASS_meta.json ./cli_tutorial/models/RF_NMDA_MULTICLASS/RF_NMDA_MULTICLASS_meta.json -pr
 

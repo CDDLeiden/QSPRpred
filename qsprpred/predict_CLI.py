@@ -36,7 +36,7 @@ def QSPRArgParser(txt=None):
     )
     parser.add_argument(
         "-i",
-        "--input_path",
+        "--input",
         type=str,
         default="./dataset.tsv",
         help="path to tsv file name that contains SMILES",
@@ -93,9 +93,9 @@ def QSPRArgParser(txt=None):
 def QSPR_predict(args):
     """Make predictions with pre-trained QSPR models for a set of smiles."""
     try:
-        df = pd.read_csv(args.input_path, sep="\t")
+        df = pd.read_csv(args.input, sep="\t")
     except FileNotFoundError:
-        log.error(f"Dataset file ({args.input_path}) not found")
+        log.error(f"Dataset file ({args.input}) not found")
         sys.exit()
 
     smiles_list = df[args.smiles_col].tolist()

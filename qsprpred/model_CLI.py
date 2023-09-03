@@ -36,8 +36,8 @@ def QSPRArgParser(txt=None):
     )
     # base arguments
     parser.add_argument(
-        "-df",
-        "--data_files",
+        "-dp",
+        "--data_paths",
         type=str,
         nargs="*",
         help=(
@@ -68,19 +68,6 @@ def QSPRArgParser(txt=None):
         default=None,
         help="Suffix of the model to be saved"
     )
-    parser.add_argument(
-        "-lt",
-        "--log_transform",
-        type=json.loads,
-        help=(
-            "For each property if its values need to be log-transformed. This arg only "
-            "has an effect when mode is regression, otherwise will be ignored! This "
-            "needs to be given for each property included in any of the models as "
-            "follows, e.g. -lt \"{'CL':True,'fu':False}\". Note. no spaces and "
-            "surround by single quotes"
-        ),
-    )
-
     # model type arguments
     parser.add_argument(
         "-mt",
@@ -382,7 +369,7 @@ if __name__ == "__main__":
     os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
     # Backup files
-    datasets = [QSPRDataset.fromFile(data_file) for data_file in args.data_files]
+    datasets = [QSPRDataset.fromFile(data_file) for data_file in args.data_paths]
     file_prefixes = [
         f"{alg}_{dataset.name}" for alg in args.model_types for dataset in datasets
     ]
