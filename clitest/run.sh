@@ -32,9 +32,9 @@ export N_TRIALS=2
 # DATA #
 ###############
 python -m qsprpred.data_CLI \
--b ${TEST_BASE} \
 -de \
--i ${TEST_DATA} \
+-i ${TEST_BASE}/${TEST_DATA} \
+-o ${TEST_BASE}/qspr/data/ \
 -ncpu ${N_CPUS} \
 -sm  ${SMILES} \
 -pr  CL fu \
@@ -54,9 +54,9 @@ python -m qsprpred.data_CLI \
 # MODELLING #
 ###############
 python -m qsprpred.model_CLI \
--b ${TEST_BASE} \
+-o ${TEST_BASE}/qspr/models \
 -de \
--dp CL_fu_SINGLECLASS \
+-dp ${TEST_BASE}/qspr/data/CL_fu_SINGLECLASS_df.pkl \
 -ncpu ${N_CPUS} \
 --model_types RF \
 -s \
@@ -72,8 +72,9 @@ python -m qsprpred.predict_CLI \
 -b ${TEST_BASE} \
 -de \
 -i ${TEST_DATA} \
+-o ${TEST_BASE}/qspr/predictions \
 -ncpu ${N_CPUS} \
--mp ./qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
+-mp ${TEST_BASE}/qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
 -pr \
 -fv 0.0
 
