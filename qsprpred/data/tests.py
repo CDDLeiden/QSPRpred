@@ -31,7 +31,7 @@ from .utils.datasplitters import (
 from .utils.data_clustering import (
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
-    MurckoScaffoldClusters,
+    ScaffoldClusters,
     RandomClusters,
 )
 from .utils.descriptorcalculator import (
@@ -923,40 +923,35 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
-    def testRandomSplitSingletask(self):
-        """Test the random split function for single-task dataset."""
+    @parameterized.expand(
+        [
+            (False,),
+            (True,),
+        ]
+    )
+    def testRandomSplit(self, multitask):
+        """Test the random split function."""
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet()
+        else:
+            dataset = self.createLargeTestDataSet()
         dataset = self.createLargeTestDataSet()
         dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.1))
         self.validate_split(dataset)
 
-    def testRandomSplitMultitask(self):
-        """Test the random split function for multi-task dataset."""
-        dataset = self.createLargeMultitaskDataSet()
-        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.1))
-        self.validate_split(dataset)
-
-    def testTemporalSplitSingletask(self):
+    @parameterized.expand(
+        [
+            (False,),
+            (True,),
+        ]
+    )
+    def testTemporalSplit(self, multitask):
         """Test the temporal split function, where the split is done based on a time
         property."""
-        dataset = self.createLargeTestDataSet()
-        split = TemporalSplit(
-            dataset=dataset,
-            timesplit=TIME_SPLIT_YEAR,
-            timeprop="Year of first disclosure",
-        )
-
-        dataset.prepareDataset(split=split)
-        self.validate_split(dataset)
-        # test if dates higher than 2000 are in test set
-        self.assertTrue(
-            sum(dataset.X_ind["Year of first disclosure"] > TIME_SPLIT_YEAR) ==
-            len(dataset.X_ind)
-        )
-
-    def testTemporalSplitMultitask(self):
-        """Test the temporal split function, where the split is done based on a time
-        property."""
-        dataset = self.createLargeMultitaskDataSet()
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet()
+        else:
+            dataset = self.createLargeTestDataSet()
         split = TemporalSplit(
             dataset=dataset,
             timesplit=TIME_SPLIT_YEAR,
@@ -973,14 +968,21 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (Murcko(), True, None),
-            (BemisMurcko(), False, ["ScaffoldSplit_0", "ScaffoldSplit_1"]),
+            (False, Murcko(), None),
+            (False, BemisMurcko(), ["ScaffoldSplit_0", "ScaffoldSplit_1"]),
+            (True, Murcko(), None),
         ]
     )
-    def testScaffoldSplitSingletask(self, scaffold, shuffle, custom_test_list):
-        """Test the scaffold split function for single-task dataset."""
-        dataset = self.createLargeTestDataSet(name="ScaffoldSplit")
-        split = ScaffoldSplit(scaffold, 0.1, shuffle, custom_test_list)
+    def testScaffoldSplit(self, multitask, scaffold, custom_test_list):
+        """Test the scaffold split function."""
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet(name="ScaffoldSplit")
+        else:
+            dataset = self.createLargeTestDataSet(name="ScaffoldSplit")
+        split = ScaffoldSplit(
+            scaffold=scaffold,
+            custom_test_list=custom_test_list,
+        )
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
         # check that smiles in custom_test_list are in the test set
@@ -988,16 +990,6 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             self.assertTrue(
                 all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
             )
-
-    @parameterized.expand([
-        (Murcko(), True, None),
-    ])
-    def testScaffoldSplitMultitask(self, scaffold, shuffle, custom_test_list):
-        """Test the scaffold split function for multi-task dataset."""
-        dataset = self.createLargeMultitaskDataSet(name="ScaffoldSplit")
-        split = ScaffoldSplit(scaffold, 0.1, shuffle, custom_test_list)
-        dataset.prepareDataset(split=split)
-        self.validate_split(dataset)
 
     @parameterized.expand(
         [
@@ -1008,13 +1000,12 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         ]
     )
     def testClusterSplit(self, multitask, clustering_algorithm, custom_test_list):
-        """Test the cluster split function for single-task dataset."""
+        """Test the cluster split function."""
         if multitask:
             dataset = self.createLargeMultitaskDataSet(name="ClusterSplit")
         else:
             dataset = self.createLargeTestDataSet(name="ClusterSplit")
         split = ClusterSplit(
-            test_fraction=0.1,
             clustering = clustering_algorithm,
             custom_test_list=custom_test_list,
             time_limit_seconds = 10,
@@ -1030,7 +1021,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
     def testSerialization(self):
         """Test the serialization of dataset with datasplit."""
         dataset = self.createLargeTestDataSet()
-        split = ScaffoldSplit(Murcko(), 0.1)
+        split = ScaffoldSplit()
         N_BITS = 1024
         calculator = MoleculeDescriptorsCalculator(
             [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=N_BITS)]
