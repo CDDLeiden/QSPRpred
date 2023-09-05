@@ -83,16 +83,16 @@ can be indicated with `-sm` (default SMILES).
         python -m qsprpred.data_CLI -b tutorial -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -sm SMILES -de -ran 42 -ncpu 5 -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan
 
 
-Log-transform data
-""""""""""""""""""
-To log (-lt) transform data specific properties, indicate this in the CLI as follows:
+Transform target property
+"""""""""""""""""""""""""
+To apply (-tr) transformations to target properties, indicate this in the CLI as follows:
 
 ..  code-block::
 
     # Log transform data for GABAAalpha
-        python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -lt '{"GABAAalpha":true,"NMDA":false}' -r REG -sp random -sf 0.15 -fe Morgan
+        python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -tr '{"GABAAalpha":"log"}' -r REG -sp random -sf 0.15 -fe Morgan
 
-note. on windows remove the single quotes around the dictionary and add backslashes before the double quotes, e.g. -lt {\"GABAAalpha\":true,\"NMDA\":false}
+note. on windows remove the single quotes around the dictionary and add backslashes before the double quotes, e.g. -tt {\"GABAAalpha\":\"log\"}
 
 Train test split
 """"""""""""""""

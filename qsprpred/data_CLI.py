@@ -125,16 +125,18 @@ def QSPRArgParser(txt=None):
                         should be a column 'Quality' where all 'Low' will be removed",
     )
     parser.add_argument(
-        "-lt",
-        "--log_transform",
+        "-tr",
+        "--transform_data",
         type=json.loads,
         help=(
-            "For each property if its values need to be log-tranformed. This arg only "
-            "has an effect when mode is regression, otherwise will be ignored! This "
-            "needs to be given for each property included in any of the models as "
-            "follows, e.g. -lt \"{'CL':true,'fu':false}\". Note: no spaces and "
-            "surround by single quotes"
+            "Transformation of the output property. This arg only has an effect when"
+            "task is regression, otherwise will be ignored! Specify the transformation "
+            "as a dictionary with the property name as key and the transformation as "
+            "value, e.g. -tr \"{'CL':'log10','fu':'sqrt'}\". Note: no spaces and "
+            "surrounded by single quotes. Choose from 'log10', 'log2', 'log', 'sqrt',"
+            "'cbrt', 'exp', 'square', 'cube', 'reciprocal'"
         ),
+        default={}
     )
     # Data set split arguments
     parser.add_argument(
@@ -297,15 +299,28 @@ def QSPR_dataprep(args):
                         "Threshold will be ignored."
                     )
                     th = None
-                log_transform = (
-                    np.log if args.log_transform and args.log_transform[prop] else None
-                )
+                transform_dict = {
+                    "log10": np.log10,
+                    "log2": np.log2,
+                    "log": np.log,
+                    "sqrt": np.sqrt,
+                    "cbrt": np.cbrt,
+                    "exp": np.exp,
+                    "square": np.square,
+                    "cube": np.power(3),
+                    "reciprocal": np.reciprocal
+                }
                 target_props.append(
                     {
-                        "name": prop,
-                        "task": task,
-                        "th": th,
-                        "transformer": log_transform
+                        "name":
+                            prop,
+                        "task":
+                            task,
+                        "th":
+                            th,
+                        "transformer":
+                            transform_dict[args.transform_data[prop]]
+                            if prop in args.transform_data else None,
                     }
                 )
             # missing value imputation
