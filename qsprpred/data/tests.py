@@ -28,6 +28,12 @@ from .utils.datasplitters import (
     ScaffoldSplit,
     TemporalSplit,
 )
+from .utils.data_clustering import (
+    FPSimilarityLeaderPickerClusters,
+    FPSimilarityMaxMinClusters,
+    MurckoScaffoldClusters,
+    RandomClusters,
+)
 from .utils.descriptorcalculator import (
     CustomDescriptorsCalculator,
     DescriptorsCalculator,
@@ -995,41 +1001,31 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     @parameterized.expand(
         [
-            ("MaxMin", ["ClusterSplit_0", "ClusterSplit_1"]),
-            ("LeaderPicker", None),
+            (False, FPSimilarityLeaderPickerClusters(), None),
+            (False, FPSimilarityMaxMinClusters(), ["ClusterSplit_0", "ClusterSplit_1"]),
+            (True, FPSimilarityMaxMinClusters(), None),
+            (True, FPSimilarityLeaderPickerClusters(), ["ClusterSplit_0", "ClusterSplit_1"]),
         ]
     )
-    def testClusterSplitSingletask(self, clustering_algorithm, custom_test_list):
+    def testClusterSplit(self, multitask, clustering_algorithm, custom_test_list):
         """Test the cluster split function for single-task dataset."""
-        dataset = self.createLargeTestDataSet(name="ClusterSplit")
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet(name="ClusterSplit")
+        else:
+            dataset = self.createLargeTestDataSet(name="ClusterSplit")
         split = ClusterSplit(
             test_fraction=0.1,
-            clustering_algorithm=clustering_algorithm,
+            clustering = clustering_algorithm,
             custom_test_list=custom_test_list,
-            time_limit_seconds=10,
+            time_limit_seconds = 10,
         )
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
         # check that smiles in custom_test_list are in the test set
         if custom_test_list:
-            # print(custom_test_list, dataset.X_ind.index)
             self.assertTrue(
                 all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
             )
-
-    @parameterized.expand([
-        ("MaxMin", ),
-        ("LeaderPicker", ),
-    ])
-    def testClusterSplitMultitask(self, clustering_algorithm):
-        """Test the cluster split function for multi-task dataset."""
-        dataset = self.createLargeMultitaskDataSet(name="ClusterSplit")
-        split = ClusterSplit(
-            test_fraction=0.1,
-            clustering_algorithm=clustering_algorithm,
-            custom_test_list=None,
-        )
-        dataset.prepareDataset(split=split)
 
     def testSerialization(self):
         """Test the serialization of dataset with datasplit."""

@@ -15,6 +15,7 @@ from ...logs import logger
 from ..data import QSPRDataset
 from ..interfaces import DataSplit
 from .data_clustering import (
+    MoleculeClusters,
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
     MurckoScaffoldClusters,
@@ -476,46 +477,74 @@ class ClusterSplit(DataSplit):
     Attributes:
         dataSet: QSPRDataset object.
         testFraction (float): fraction of the test set. Defaults to 0.1.
-        fpCalculator (FingerprintSet): fingerprint calculator.
-            Defaults to MorganFP with radius 3 and 2048 bits.
         customTestList (list): list of molecule indexes to force in test set.
             If forced test contains the totality of the molecules in the dataset,
             the custom_test_list reverts to default None.
-        nInitialClusters (int): number of initial clusters. Defaults to None.
-        seed (int): random seed. Used in case of 'MaxMin' clustering. Defaults to 42.
-        similarityThreshold (float): similarity threshold for clustering. Used in case
-            of 'LeaderPicker' clustering. Defaults to 0.7.
-        clusteringAlgorithm (str): clustering algorithm. Can be 'MaxMin' or
-            'LeaderPicker'. Defaults to 'MaxMin'.
-        timeLimitSeconds (float): time limit in seconds for the combining of the
-            clusters. Defaults to None, if which case the a default value based on the
-            number of molecules and target is used.
+        clusteringAlgorithm (MoleculeClusters): clustering algorithm to use.
+            Defaults to FPSimilarityMaxMinClusters().
+        split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
     """
     def __init__(
         self,
+        dataset: QSPRDataset = None,
         test_fraction: float = 0.1,
         custom_test_list: list[str] | None = None,
-        dataset: QSPRDataset = None,
-        fp_calculator: FingerprintSet = FingerprintSet(
-            fingerprint_type="MorganFP", radius=3, nBits=2048
-        ),
-        n_initial_clusters: int | None = None,
-        seed: int = 42,
-        similarity_threshold: float = 0.7,
-        clustering_algorithm: Literal["MaxMin", "LeaderPicker"] = "MaxMin",
-        time_limit_seconds: float | None = None,
+        clustering : MoleculeClusters = FPSimilarityMaxMinClusters(),
+        **split_kwargs,
     ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
         self.customTestList = custom_test_list
-        self.fpCalculator = fp_calculator
-        self.nInitialClusters = n_initial_clusters
-        self.seed = seed
-        self.similarityThreshold = similarity_threshold
-        self.clusteringAlgorithm = clustering_algorithm
-        self.timeLimitSeconds = time_limit_seconds
+        self.clustering = clustering
+        self.split_kwargs = split_kwargs if split_kwargs else {}
 
-    def _cluster_molecules(self):
+    def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
+
+        # Get dataset, dataframe and tasks
+        ds = self.getDataSet()
+        df = ds.getDF().copy().reset_index(drop=True) # need numeric index splits
+        tasks_names = [TargetProperty.name for TargetProperty in ds.targetProperties]
+
+        assert len(tasks_names) > 0, "No target properties found."
+        assert len(X) == len(df),\
+            "X and the current data in the dataset must have same length"
+
+        # Get clusters
+        clusters = self.clustering.get_clusters(df[ds.smilesCol].tolist())
+
+        # Pre-assign smiles of custom_test_list to test set
+        preassigned_smiles = (
+            {
+                df.loc[df.QSPRID == qspridx][ds.smilesCol].values[0]: 1
+                for qspridx in self.customTestList
+            } if self.customTestList else None
+        )
+
+        print(self.split_kwargs)
+        # Split dataset
+        splitter = GloballyBalancedSplit(
+            sizes=[1 - self.testFraction, self.testFraction],
+            clusters=clusters,
+            clustering_method=None, # As precomputed clusters are provided
+            **self.split_kwargs,
+        )
+        df_split = splitter(
+            df,
+            ds.smilesCol,
+            tasks_names,
+            preassigned_smiles=preassigned_smiles,
+        )
+
+        # Get indices
+        train_indices = df_split[df_split["Split"] == 0].index.values
+        test_indices = df_split[df_split["Split"] == 1].index.values
+
+        assert len(train_indices) + len(test_indices) == len(df), \
+            "Not all samples were assigned to a split"
+
+        return iter([(train_indices, test_indices)])
+
+    def _cluster_molecules(self, kwargs=None):
         """
         Cluster molecules based on fingerprints.
 
