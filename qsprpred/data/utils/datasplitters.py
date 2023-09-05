@@ -381,6 +381,8 @@ class ScaffoldSplit(DataSplit):
                     f"Invalid scaffold skipped for molecule with index: {idx}"
                 )
                 invalid_idx.append(idx)
+        # Order scaffolds dictionary by size
+        scaffolds = dict(sorted(scaffolds.items(), key=lambda item: len(item[1])))
         # Fill test set with groups of smiles with the same scaffold
         max_in_test = np.ceil(len(df) * self.testFraction)
         test_idx = []
@@ -517,6 +519,11 @@ class ClusterSplit(DataSplit):
         """
         Cluster molecules based on fingerprints.
 
+        If custom_test_list is provided, the clusters with the custom_test_list
+        molecules will be forced are at the beginning of the dictionary and will be
+        used to fill the test set first. Else, the clusters are sorted by size from the
+        smallest to the largest.
+
         Returns:
             dict: dictionary of clusters. Keys are cluster indexes and values are lists
                 of molecule indexes.
@@ -540,6 +547,10 @@ class ClusterSplit(DataSplit):
                     or 'LeaderPicker', got {self.clusteringAlgorithm}"
             )
         clusters = clustering.get_clusters(self.df[self.dataset.smilesCol].tolist())
+
+        if not self.customTestList:
+            # Sort clusters by size from the smallest to the largest
+            clusters = dict(sorted(clusters.items(), key=lambda item: len(item[1])))
 
         return clusters
 
