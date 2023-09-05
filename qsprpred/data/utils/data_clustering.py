@@ -6,7 +6,7 @@ from rdkit.SimDivFilters import rdSimDivPickers
 
 from ...logs import logger
 from .descriptorsets import FingerprintSet
-from .scaffolds import Murcko
+from .scaffolds import Scaffold, Murcko
 
 
 class MoleculeClusters(ABC):
@@ -76,13 +76,13 @@ class RandomClusters(MoleculeClusters):
         return clusters
 
 
-class MurckoScaffoldClusters(MoleculeClusters):
+class ScaffoldClusters(MoleculeClusters):
     """
     Cluster molecules based on Murcko scaffolds.
     """
-    def __init__(self):
+    def __init__(self, scaffold: Scaffold = Murcko()):
         super().__init__()
-        self.scaffold = Murcko()
+        self.scaffold = scaffold
 
     def get_clusters(self, smiles_list: list[str]) -> dict:
         """
