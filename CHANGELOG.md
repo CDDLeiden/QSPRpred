@@ -12,13 +12,14 @@ From v2.0.1 to v2.1.0.dev0
 - `QSPRModel` attribute `scoreFunc` is removed.
 - 'qspr/models' is no longer added to the output path of `QSPRModel.save`, allowing for complete control over the output path.
 - `SKlearnMetrics.supportsTask` now uses a dictionary like dict[ModelTasks, list[str]] to map tasks to supported metric names. (#53)
+- `RandomSplit` and `ScaffoldSplit` uses the `GBMTDataSplit` to create balanced splits.
 - `PCMSplit` replaces `StratifiedPerTarget` and is compatible with `RandomSplit`, `ScaffoldSplit` and `ClusterSplit`.
-- In the case single-task dataset, the `RandomSplit` now uses `StratifiedShuffleSplit` in case of classification.
 - `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captures scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
 - The versioning scheme of development snapshots has changed from `devX` to `alphaX`/`betaX`, where `X` is an integer that increments with each release.
 
 ## New Features
-- `ClusterSplit` - splits data based clustering of molecular fingerprints.
+- `GBMTDataSplit` - parent class to create globally balanced splits with the [gbmt-split](https://github.com/sohviluukkonen/gbmt-splits) package.
+- `ClusterSplit` - splits data based clustering of molecular fingerprints (uses `GBMTDataSplit`).
 - Raise error if search space for optuna optimization is missing search space type annotation or if type not in list.
 - When installing package with pip, the commit hash and date of the installation is saved into `qsprpred._version`
 - `HyperParameterOptimization` classes now accept a `evaluation_method` argument, which is an instance of `EvaluationMethod` (see above). This allows for hyperparameter optimization to be performed on a test set, or on a cross-validation set. (#11)
