@@ -22,11 +22,11 @@ from .data.data import QSPRDataset
 from .deep.models.models import QSPRDNN
 from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor
+from .models.early_stopping import EarlyStoppingMode
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from .models.metrics import SklearnMetric
 from .models.models import QSPRModel, QSPRsklearn
 from .models.tasks import TargetTasks
-from .models.early_stopping import EarlyStoppingMode
 
 
 def QSPRArgParser(txt=None):
