@@ -19,8 +19,6 @@ from .data_clustering import (
 )
 from .scaffolds import Murcko, Scaffold
 
-# TODO: Check if the order of molecules in (X,y) is the same as in the dataframe from dataset
-
 class ManualSplit(DataSplit):
     """Splits dataset in train and test subsets based on a column in the dataframe.
 
@@ -72,10 +70,11 @@ class ManualSplit(DataSplit):
         return iter([(train, test)])
 
 class TemporalSplit(DataSplit):
-    """Splits dataset train and test subsets based on a threshold in time.
+    """
+    Splits dataset train and test subsets based on a threshold in time.
 
     Attributes:
-        dataSet (QSPRDataset): dataset that this splitter will be acting on
+        dataset (QSPRDataset): dataset that this splitter will be acting on
         timeSplit(float): time point after which sample to test set
         timeCol (str): name of the column within the dataframe with timepoints
     """
@@ -139,6 +138,17 @@ class TemporalSplit(DataSplit):
         return iter([(train, test)])
 
 class GBMTDataSplit(DataSplit):
+    """
+    Splits dataset into balanced train and test subsets
+    based on an initial clustering algorithm.
+
+    Attributes:
+        dataset (QSPRDataset): dataset that this splitter will be acting on
+        clustering (MoleculeClusters): clustering algorithm to use
+        testFraction (float): fraction of total dataset to testset
+        customTestList (list): list of molecule indexes to force in test set
+        split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
+    """
 
     def __init__(
         self,
@@ -157,6 +167,19 @@ class GBMTDataSplit(DataSplit):
     def split(
         self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
     ) -> Iterable[tuple[list[int], list[int]]]:
+        """
+        Split dataset into balanced train and test subsets
+        based on an initial clustering algorithm.
+
+        Args:
+            X (np.ndarray | pd.DataFrame): the input data matrix
+            y (np.ndarray | pd.DataFrame | pd.Series): the target variable(s)
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
+        """
 
         # Get dataset, dataframe and tasks
         ds = self.getDataSet()
@@ -206,17 +229,14 @@ class GBMTDataSplit(DataSplit):
         return iter([(train_indices, test_indices)])
 
 class RandomSplit(GBMTDataSplit):
-    """Splits dataset in random train and test subsets.
+    """
+    Splits dataset into balanced random train and test subsets.
 
     Attributes:
-        dataSet (QSPRDataset): dataset that this splitter will be acting on
+        dataset (QSPRDataset): dataset that this splitter will be acting on
         testFraction (float): fraction of total dataset to testset
-        seed (int): random seed for reproducibility
-        nInitialClusters (int): number of initial random clusters used by
-            the multitask splitter
-        timeLimitSeconds (float): time limit in seconds for the combining of the
-            clusters. Defaults to None, if which case the a default value based on the
-            number of molecules and target is used.
+        customTestList (list): list of molecule indexes to force in test set
+        split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
     """
     def __init__(
         self,
@@ -236,21 +256,14 @@ class RandomSplit(GBMTDataSplit):
         )
 
 class ScaffoldSplit(GBMTDataSplit):
-    """Splits dataset in train and test subsets based on their Murcko scaffold.
+    """
+    Splits dataset into balanced train and test subsets based on molecular scaffolds.
 
     Attributes:
-        dataSet: QSPRDataset object.
-        scaffold (qsprpred.data.utils.scaffolds.Scaffold()): `Murcko()` and
-            `BemisMurcko()` are currently available, other types can be added through
-            the abstract class `Scaffold`. Defaults to Murcko().
-        testFraction (float): fraction of the test set. Defaults to 0.1.
-        shuffle (bool): whether to shuffle the data or not. Defaults to True.
-        customTestList (list): list of molecule indexes to force in test set. If
-            forced test contains the totality of the molecules in the dataset, the
-            custom_test_list reverts to default None.
-        timeLimitSeconds (float): time limit in seconds for the combining of the
-            clusters. Defaults to None, if which case the a default value based on the
-            number of molecules and target is used.
+        dataset (QSPRDataset): dataset that this splitter will be acting on
+        testFraction (float): fraction of total dataset to testset
+        customTestList (list): list of molecule indexes to force in test set
+        split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
     """
     def __init__(
         self,
@@ -270,16 +283,13 @@ class ScaffoldSplit(GBMTDataSplit):
 
 class ClusterSplit(GBMTDataSplit):
     """
-    Splits dataset in train and test subsets based on MaxMin clustering of the features.
+    Splits dataset into balanced train and test subsets based on clusters of similar
+    molecules.
 
     Attributes:
-        dataSet: QSPRDataset object.
-        testFraction (float): fraction of the test set. Defaults to 0.1.
-        customTestList (list): list of molecule indexes to force in test set.
-            If forced test contains the totality of the molecules in the dataset,
-            the custom_test_list reverts to default None.
-        clusteringAlgorithm (MoleculeClusters): clustering algorithm to use.
-            Defaults to FPSimilarityMaxMinClusters().
+        dataset (QSPRDataset): dataset that this splitter will be acting on
+        testFraction (float): fraction of total dataset to testset
+        customTestList (list): list of molecule indexes to force in test set
         split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
     """
     def __init__(

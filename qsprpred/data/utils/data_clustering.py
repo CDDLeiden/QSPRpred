@@ -78,7 +78,10 @@ class RandomClusters(MoleculeClusters):
 
 class ScaffoldClusters(MoleculeClusters):
     """
-    Cluster molecules based on Murcko scaffolds.
+    Cluster molecules based on scaffolds.
+
+    Attributes:
+        scaffold (Scaffold): scaffold generator
     """
     def __init__(self, scaffold: Scaffold = Murcko()):
         super().__init__()

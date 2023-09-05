@@ -186,7 +186,6 @@ class DataSplit(ABC, DataSetDependant):
             input data matrix X (note that these are integer indices, rather than a
             pandas index!)
         """
-        pass
 
 
 class DataFilter(ABC):
