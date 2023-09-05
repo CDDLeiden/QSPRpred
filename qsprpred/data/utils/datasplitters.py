@@ -4,7 +4,7 @@ To add a new data splitter:
 * Add a DataSplit subclass for your new splitter
 """
 from collections import defaultdict
-from typing import Iterable, Literal, Optional
+from typing import Iterable, Literal
 
 import numpy as np
 import pandas as pd
@@ -76,6 +76,7 @@ class ManualSplit(DataSplit):
         test = self.splitCol[self.splitCol == self.testVal].index.values
         return iter([(train, test)])
 
+
 class RandomSplit(DataSplit):
     """Splits dataset in random train and test subsets.
 
@@ -90,12 +91,12 @@ class RandomSplit(DataSplit):
             number of molecules and target is used.
     """
     def __init__(
-            self,
-            dataset: QSPRDataset | None = None,
-            test_fraction: float = 0.1,
-            seed: int = 42,
-            n_initial_clusters: int | None = None,
-            time_limit_seconds: float | None = None,
+        self,
+        dataset: QSPRDataset | None = None,
+        test_fraction: float = 0.1,
+        seed: int = 42,
+        n_initial_clusters: int | None = None,
+        time_limit_seconds: float | None = None,
     ) -> None:
         super().__init__(dataset)
         self.testFraction = test_fraction
@@ -176,7 +177,10 @@ class TemporalSplit(DataSplit):
         timeCol (str): name of the column within the dataframe with timepoints
     """
     def __init__(
-            self,timesplit: float, timeprop: str, dataset: QSPRDataset | None = None
+        self,
+        timesplit: float,
+        timeprop: str,
+        dataset: QSPRDataset | None = None
     ) -> None:
         """Initialize a TemporalSplit object.
 
@@ -309,6 +313,8 @@ class ScaffoldSplit(DataSplit):
                     f"Invalid scaffold skipped for molecule with index: {idx}"
                 )
                 invalid_idx.append(idx)
+        # Order scaffolds dictionary by size
+        scaffolds = dict(sorted(scaffolds.items(), key=lambda item: len(item[1])))
         # Fill test set with groups of smiles with the same scaffold
         max_in_test = np.ceil(len(df) * self.testFraction)
         test_idx = []
@@ -445,6 +451,11 @@ class ClusterSplit(DataSplit):
         """
         Cluster molecules based on fingerprints.
 
+        If custom_test_list is provided, the clusters with the custom_test_list
+        molecules will be forced are at the beginning of the dictionary and will be
+        used to fill the test set first. Else, the clusters are sorted by size from the
+        smallest to the largest.
+
         Returns:
             dict: dictionary of clusters. Keys are cluster indexes and values are lists
                 of molecule indexes.
@@ -468,6 +479,10 @@ class ClusterSplit(DataSplit):
                     or 'LeaderPicker', got {self.clusteringAlgorithm}"
             )
         clusters = clustering.get_clusters(self.df[self.dataset.smilesCol].tolist())
+
+        if not self.customTestList:
+            # Sort clusters by size from the smallest to the largest
+            clusters = dict(sorted(clusters.items(), key=lambda item: len(item[1])))
 
         return clusters
 
@@ -535,7 +550,7 @@ class ClusterSplit(DataSplit):
 
         return iter([(train_idx, test_idx)])
 
-    def _multitask_split(self,) -> Iterable[tuple[list[int], list[int]]]:
+    def _multitask_split(self, ) -> Iterable[tuple[list[int], list[int]]]:
         """
         Split multi-task dataset in two subsets based on clusters of fingerprints
         with globally balanced split from https://github.com/sohviluukkonen/gbmt-splits
