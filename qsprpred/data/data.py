@@ -1009,7 +1009,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 func_args=(scaffold, ),
                 subset=[self.smilesCol],
                 axis=1,
-                raw=True
+                raw=False
             )
             if add_rdkit_scaffold:
                 PandasTools.AddMoleculeColumnToFrame(
