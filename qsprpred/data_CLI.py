@@ -307,7 +307,7 @@ def QSPR_dataprep(args):
                     "cbrt": np.cbrt,
                     "exp": np.exp,
                     "square": np.square,
-                    "cube": np.power(3),
+                    "cube": lambda x: np.power(x, 3),
                     "reciprocal": np.reciprocal
                 }
                 target_props.append(
