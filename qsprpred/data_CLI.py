@@ -460,7 +460,7 @@ def QSPR_dataprep(args):
                 datafilters=datafilters,
                 split=split,
                 feature_filters=featurefilters,
-                feature_standardizer=StandardScaler() if "Smiles" not in args.features else None,
+                feature_standardizer=StandardScaler(),
                 feature_fill_value=0.0,
             )
 
