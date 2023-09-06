@@ -1,4 +1,4 @@
-accession,SMILES,pchembl_value_Median,Year
+accession,SMILES,pchembl_value_Mean,Year
 P29274,CC(C)(C)n1cc2c(n1)nc(NC(=O)Nc1cccc(Cl)c1)n1nc(-c3ccco3)nc21,6.1,2000.0
 P29274,COc1cc(Cn2cc3nc(-c4ccc(C)o4)nc(N)c3n2)ccc1,8.28,2016.0
 P29275,Cn1c(=O)c2c(cc(-c3ccc(OCC(=O)N4CCN(c5ccc(Cl)cc5)CC4)cc3)[nH]2)n(C)c1=O,8.47,2008.0

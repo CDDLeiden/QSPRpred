@@ -559,7 +559,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
                     {
                         "name": "pchembl_value_Median",
                         "task": TargetTasks.MULTICLASS,
-                        "th": [5.0, 5.5, 6.5, 12.0],
+                        "th": [2.0, 5.5, 6.5, 12.0],
                     }
                 ],
             ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
