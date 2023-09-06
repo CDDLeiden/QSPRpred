@@ -39,7 +39,7 @@ python -m qsprpred.data_CLI \
 -sm  ${SMILES} \
 -pr  CL fu \
 -th '{"CL":[6.5],"fu":[0.3]}' \
--tr '{"CL":log}' \
+-tr '{"CL":"log"}' \
 -sp 'time' \
 -stc 'Year of first disclosure' \
 -st 2000 \

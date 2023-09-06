@@ -36,6 +36,7 @@ From v2.0.1 to v2.1.0.dev0
 - Refactoring of the test suite under `qsprpred.data` and improvement of temporary file handling (!114).
 - `PyBoostModel` - QSPRpred wrapper for py-boost models.
 - `Chemprop` - QSPRpred wrapper for Chemprop model.
+- The `data_CLI` argument `--log_transform` (`-lt`) has been changed to `--transform_data` (`-t`), which now accepts a number of transformations to apply to the target data. Available transformations are `log`, `log10`, `log2`, `sqrt`, `cbrt`, `exp`, `exp2`, `exp10`, `square`, `cube`, `reciprocal`.
 
 ## Removed Features
 - `StratifiedPerTarget` is replaced by `PCMSplit`.
