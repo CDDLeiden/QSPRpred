@@ -17,7 +17,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from ..logs.stopwatch import StopWatch
-from ..models.models import QSPRsklearn
+from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from .data import QSPRDataset, TargetProperty
 from .utils.datafilters import CategoryFilter, RepeatsFilter
@@ -34,8 +34,14 @@ from .utils.descriptorcalculator import (
     MoleculeDescriptorsCalculator,
 )
 from .utils.descriptorsets import (
-    DataFrameDescriptorSet, DescriptorSet, DrugExPhyschem, FingerprintSet,
-    PredictorDesc, RDKitDescs, TanimotoDistances, SmilesDesc
+    DataFrameDescriptorSet,
+    DescriptorSet,
+    DrugExPhyschem,
+    FingerprintSet,
+    PredictorDesc,
+    RDKitDescs,
+    SmilesDesc,
+    TanimotoDistances,
 )
 from .utils.feature_standardization import SKLearnStandardizer
 from .utils.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
@@ -94,7 +100,7 @@ class DataSetsMixIn(PathMixIn):
                     MoleculeDescriptorsCalculator(
                         [
                             FingerprintSet(
-                                fingerprint_type="MorganFP", radius=3, nBits=1024
+                                fingerprint_type="MorganFP", radius=2, nBits=256
                             )
                         ]
                     )
@@ -120,7 +126,7 @@ class DataSetsMixIn(PathMixIn):
             RDKitDescs(),
             DrugExPhyschem(),
             PredictorDesc(
-                QSPRsklearn.fromFile(
+                SklearnModel.fromFile(
                     f"{os.path.dirname(__file__)}/test_files/test_predictor/"
                     f"qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json"
                 )
@@ -830,8 +836,7 @@ class TestTargetProperty(TestCase):
             self.assertEqual(target_prop.th, th)
 
     def testTargetProperty(self):
-        """Check the TargetProperty class on target property creation and serialization.
-        """
+        """Check the TargetProperty class on target property creation and serialization."""
         # Check the different task types
         targetprop = TargetProperty("CL", TargetTasks.REGRESSION)
         self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, "CL", None)
@@ -1338,7 +1343,7 @@ class TestDescriptorSets(DataSetsMixIn, TestCase):
             f"{os.path.dirname(__file__)}/test_files/test_predictor/"
             "qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json"
         )
-        model = QSPRsklearn.fromFile(meta_path)
+        model = SklearnModel.fromFile(meta_path)
         desc_calc = MoleculeDescriptorsCalculator([PredictorDesc(model)])
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))

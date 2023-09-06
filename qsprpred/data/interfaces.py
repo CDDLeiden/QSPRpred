@@ -5,6 +5,7 @@ from typing import Callable, Iterable
 import numpy as np
 import pandas as pd
 
+
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
     @abstractmethod
@@ -73,7 +74,7 @@ class DataSet(StoredTable):
         func_args: list | None = None,
         func_kwargs: dict | None = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Apply a function to the dataset.
 

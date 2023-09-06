@@ -1,0 +1,1 @@
+{"mode": "OPTIMAL", "num_epochs": 100, "trained_epochs": [10, 20, 30, 40, 60], "aggregate_func_name": "median"}

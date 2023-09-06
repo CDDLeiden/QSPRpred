@@ -15,11 +15,11 @@ from sklearn.svm import SVC, SVR
 
 from ..data.data import QSPRDataset
 from ..logs import logger
-from ..models.interfaces import QSPRModel
-from ..models.tasks import ModelTasks
+from .interfaces import QSPRModel
+from .tasks import ModelTasks
 
 
-class QSPRsklearn(QSPRModel):
+class SklearnModel(QSPRModel):
     """QSPRModel class for sklearn type models.
 
     Wrap your sklearn model class in this class
@@ -32,9 +32,9 @@ class QSPRsklearn(QSPRModel):
         data: QSPRDataset = None,
         name: str | None = None,
         parameters: dict | None = None,
-        autoload: bool = True
+        autoload: bool = True,
     ):
-        """Initialize QSPRsklearn model.
+        """Initialize SklearnModel model.
 
         Args:
             base_dir (str): base directory for model
@@ -128,7 +128,7 @@ class QSPRsklearn(QSPRModel):
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
-        mode: Any = None
+        mode: Any = None,
     ):
         """See `QSPRModel.fit`."""
         estimator = self.estimator if estimator is None else estimator

@@ -38,9 +38,9 @@ from .data.utils.featurefilters import (
     LowVarianceFilter,
 )
 from .data.utils.scaffolds import Murcko
-from .deep.models.models import QSPRDNN
+from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
-from .models.models import QSPRsklearn
+from .models.sklearn import SklearnModel
 from .models.tasks import TargetTasks
 
 
@@ -243,9 +243,6 @@ def QSPRArgParser(txt=None):
         default=np.nan,
         help="Fill value for missing values in the calculated features",
     )
-    parser.add_argument(
-        "-ng", "--no_git", action="store_true", help="If on, git hash is not retrieved"
-    )
     if txt:
         args = parser.parse_args(txt)
     else:
@@ -415,11 +412,11 @@ def QSPR_dataprep(args):
                     # load in predictor from files
                     if "DNN" in predictor_path:
                         descriptorsets.append(
-                            PredictorDesc(QSPRDNN.fromFile(predictor_path))
+                            PredictorDesc(DNNModel.fromFile(predictor_path))
                         )
                     else:
                         descriptorsets.append(
-                            PredictorDesc(QSPRsklearn.fromFile(predictor_path))
+                            PredictorDesc(SklearnModel.fromFile(predictor_path))
                         )
             # feature filters
             featurefilters = []
