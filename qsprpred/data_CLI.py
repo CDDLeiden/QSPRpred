@@ -31,6 +31,7 @@ from .data.utils.descriptorsets import (
     FingerprintSet,
     PredictorDesc,
     RDKitDescs,
+    SmilesDesc
 )
 from .data.utils.featurefilters import (
     BorutaFilter,
@@ -199,7 +200,7 @@ def QSPRArgParser(txt=None):
         choices=[
             "Morgan", "RDkit", "Mordred", "Mold2", "PaDEL", "DrugEx", "Signature"
             "MaccsFP", "AvalonFP", "TopologicalFP", "AtomPairFP", "RDKitFP",
-            "PatternFP", "LayeredFP"
+            "PatternFP", "LayeredFP", "Smiles"
         ],
         nargs="*",
     )
@@ -423,6 +424,8 @@ def QSPR_dataprep(args):
                 descriptorsets.append(FingerprintSet(fingerprint_type="PatternFP"))
             if "LayeredFP" in args.features:
                 descriptorsets.append(FingerprintSet(fingerprint_type="LayeredFP"))
+            if "Smiles" in args.features:
+                descriptorsets.append(SmilesDesc())
             if args.predictor_descs:
                 for predictor_path in args.predictor_descs:
                     # load in predictor from files
