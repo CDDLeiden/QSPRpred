@@ -6,6 +6,7 @@ From v2.0.1 to v2.1.0.dev0
 
 - fixed error with serialization of the `DataFrameDescriptorSet` (#63)
 - Papyrus descriptors are not fetched by default anymore from the `Papyrus`  adapter, which caused fetching of unnecessary data.
+- A [potential bug in new version of pandas](https://github.com/pandas-dev/pandas/issues/55009)  broke scaffold generation so a workaround was implemented.
 
 ## Changes
 - `QSPRModel.evaluate` moved to a separate class `EvaluationMethod` in `qsprpred.models.interfaces`, with subclasses for cross-validation and making predictions on a test set in `qsprpred.models.evaluation_methods` (`CrossValidation` and `EvaluateTestSetPerformance` respectively).
