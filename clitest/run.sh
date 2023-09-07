@@ -6,7 +6,7 @@ export PYTHONPATH=".."
 
 # input data and base directory
 export TEST_BASE="."
-export TEST_DATA='test_data_large.tsv'
+export TEST_DATA='data/test_data_large.tsv'
 
 function cleanup() {
   rm -rf ${TEST_BASE}/data/backup_*;
@@ -25,7 +25,7 @@ export TRAIN_BATCH=32
 export TRAIN_GPUS=0
 export N_CPUS=2
 export OPTIMIZATION='bayes'
-export SEARCH_SPACE='data/search_space/search_space_test'
+export SEARCH_SPACE='./data/search_space/search_space_test.json'
 export N_TRIALS=2
 
 ###############
@@ -60,7 +60,7 @@ python -m qsprpred.model_CLI \
 -ncpu ${N_CPUS} \
 --model_types RF \
 -s \
--o ${OPTIMIZATION} \
+-op ${OPTIMIZATION} \
 -ss ${SEARCH_SPACE} \
 -nt ${N_TRIALS} \
 -me
@@ -69,10 +69,9 @@ python -m qsprpred.model_CLI \
 # PREDICTING #
 ###############
 python -m qsprpred.predict_CLI \
--b ${TEST_BASE} \
 -de \
 -i ${TEST_DATA} \
--o ${TEST_BASE}/qspr/predictions \
+-o ${TEST_BASE}/qspr/predictions.tsv \
 -ncpu ${N_CPUS} \
 -mp ${TEST_BASE}/qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
 -pr \

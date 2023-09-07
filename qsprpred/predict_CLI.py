@@ -154,7 +154,6 @@ if __name__ == "__main__":
         torch.manual_seed(args.random_state)
     os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
-    print(tuple(os.path.basename(args.output_path)))
     # Backup files
     backup_msg = backup_files(
         os.path.dirname(args.output_path), (os.path.basename(args.output_path)),
