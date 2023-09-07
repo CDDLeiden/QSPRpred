@@ -20,7 +20,7 @@ class CrossValAssessor(ModelAssessor):
         model: QSPRModel,
         save: bool = True,
         parameters: dict | None = None,
-        **kwargs
+        **kwargs,
     ) -> float | np.ndarray:
         """Perform cross validation on the model with the given parameters.
 
@@ -98,7 +98,7 @@ class TestSetAssessor(ModelAssessor):
         model: QSPRModel,
         save: bool = True,
         parameters: dict | None = None,
-        **kwargs
+        **kwargs,
     ):
         """Make predictions for independent test set.
 

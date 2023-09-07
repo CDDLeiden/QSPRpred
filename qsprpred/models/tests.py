@@ -26,7 +26,7 @@ from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stop
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
-from ..models.models import QSPRsklearn
+from ..models.sklearn import SklearnModel
 from ..models.tasks import ModelTasks, TargetTasks
 
 N_CPUS = 2
@@ -77,7 +77,7 @@ class ModelTestMixIn:
             scoring=score_func,
             param_grid=search_space_bs,
             n_trials=1,
-            model_assessor=CrossValAssessor(mode=EarlyStoppingMode.NOT_RECORDING)
+            model_assessor=CrossValAssessor(mode=EarlyStoppingMode.NOT_RECORDING),
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
@@ -207,8 +207,8 @@ class ModelTestMixIn:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
 
-class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the QSPRsklearn class."""
+class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+    """This class holds the tests for the SklearnModel class."""
     def getModel(
         self,
         name: str,
@@ -216,7 +216,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         dataset: QSPRDataset = None,
         parameters: dict | None = None,
     ):
-        """Create a QSPRsklearn model.
+        """Create a SklearnModel model.
 
         Args:
             name (str): the name of the model
@@ -225,9 +225,9 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters (dict, optional): the parameters to use. Defaults to None.
 
         Returns:
-            QSPRsklearn: the model
+            SklearnModel: the model
         """
-        return QSPRsklearn(
+        return SklearnModel(
             base_dir=self.generatedModelsPath,
             alg=alg,
             data=dataset,
@@ -268,7 +268,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
         self.predictorTest(predictor)
 
     @parameterized.expand(
@@ -315,7 +315,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
         self.predictorTest(predictor)
 
     @parameterized.expand(
@@ -351,7 +351,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset=dataset,
         )
         self.fitTest(model)
-        predictor = QSPRsklearn(
+        predictor = SklearnModel(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
         self.predictorTest(predictor)
@@ -399,7 +399,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters=parameters,
         )
         self.fitTest(model)
-        predictor = QSPRsklearn(
+        predictor = SklearnModel(
             name=f"{model_name}_multitask_classification", base_dir=model.baseDir
         )
         self.predictorTest(predictor)

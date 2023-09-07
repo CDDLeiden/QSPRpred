@@ -17,10 +17,10 @@ from ..data.data import MoleculeTable, QSPRDataset, TargetProperty
 from ..data.utils.feature_standardization import SKLearnStandardizer
 from ..logs import logger
 from ..models import SSPACE
+from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..models.metrics import SklearnMetric
 from ..models.tasks import ModelTasks
 from ..utils.inspect import import_class
-from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 
 
 class QSPRModel(ABC):
@@ -257,7 +257,7 @@ class QSPRModel(ABC):
         data: QSPRDataset | None = None,
         name: str | None = None,
         parameters: dict | None = None,
-        autoload=True
+        autoload=True,
     ):
         """Initialize a QSPR model instance.
 
@@ -581,7 +581,7 @@ class QSPRModel(ABC):
     def convertToNumpy(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None
+        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to np.ndarray format.
 
@@ -669,7 +669,7 @@ class QSPRModel(ABC):
             feature_calculators=self.featureCalculators,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value,
-            shuffle=False
+            shuffle=False,
         )
         return dataset, failed_mask
 
@@ -694,7 +694,7 @@ class QSPRModel(ABC):
             if self.task.isClassification():
                 predictions = predictions.astype(int)
         else:
-            #return a list of 2D arrays
+            # return a list of 2D arrays
             predictions = self.predictProba(dataset)
         return predictions
 
@@ -785,7 +785,7 @@ class QSPRModel(ABC):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        **kwargs
+        **kwargs,
     ) -> Any | tuple[Any, int] | None:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -934,7 +934,7 @@ class ModelAssessor(ABC):
         predictions: np.ndarray | list[np.ndarray],
         index: pd.Series,
         file_suffix: str,
-        extra_columns: dict[str, np.ndarray] | None = None
+        extra_columns: dict[str, np.ndarray] | None = None,
     ):
         """Save predictions to file.
 
@@ -989,8 +989,11 @@ class HyperParameterOptimization(ABC):
         bestParams (dict): best parameters found during optimization
     """
     def __init__(
-        self, scoring: str | Callable[[Iterable, Iterable], float], param_grid: dict,
-        model_assessor: ModelAssessor, score_aggregation: Callable[[Iterable], float]
+        self,
+        scoring: str | Callable[[Iterable, Iterable], float],
+        param_grid: dict,
+        model_assessor: ModelAssessor,
+        score_aggregation: Callable[[Iterable], float],
     ):
         """Initialize the hyperparameter optimization class.
 

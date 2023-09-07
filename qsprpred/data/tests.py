@@ -17,7 +17,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from ..logs.stopwatch import StopWatch
-from ..models.models import QSPRsklearn
+from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from .data import QSPRDataset, TargetProperty
 from .utils.datafilters import CategoryFilter, RepeatsFilter
@@ -28,14 +28,26 @@ from .utils.datasplitters import (
     ScaffoldSplit,
     TemporalSplit,
 )
+from .utils.data_clustering import (
+    FPSimilarityLeaderPickerClusters,
+    FPSimilarityMaxMinClusters,
+    ScaffoldClusters,
+    RandomClusters,
+)
 from .utils.descriptorcalculator import (
     CustomDescriptorsCalculator,
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
 from .utils.descriptorsets import (
-    DataFrameDescriptorSet, DescriptorSet, DrugExPhyschem, FingerprintSet,
-    PredictorDesc, RDKitDescs, TanimotoDistances, SmilesDesc
+    DataFrameDescriptorSet,
+    DescriptorSet,
+    DrugExPhyschem,
+    FingerprintSet,
+    PredictorDesc,
+    RDKitDescs,
+    SmilesDesc,
+    TanimotoDistances,
 )
 from .utils.feature_standardization import SKLearnStandardizer
 from .utils.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
@@ -94,7 +106,7 @@ class DataSetsMixIn(PathMixIn):
                     MoleculeDescriptorsCalculator(
                         [
                             FingerprintSet(
-                                fingerprint_type="MorganFP", radius=3, nBits=1024
+                                fingerprint_type="MorganFP", radius=2, nBits=256
                             )
                         ]
                     )
@@ -120,7 +132,7 @@ class DataSetsMixIn(PathMixIn):
             RDKitDescs(),
             DrugExPhyschem(),
             PredictorDesc(
-                QSPRsklearn.fromFile(
+                SklearnModel.fromFile(
                     f"{os.path.dirname(__file__)}/test_files/test_predictor/"
                     f"qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json"
                 )
@@ -830,8 +842,7 @@ class TestTargetProperty(TestCase):
             self.assertEqual(target_prop.th, th)
 
     def testTargetProperty(self):
-        """Check the TargetProperty class on target property creation and serialization.
-        """
+        """Check the TargetProperty class on target property creation and serialization."""
         # Check the different task types
         targetprop = TargetProperty("CL", TargetTasks.REGRESSION)
         self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, "CL", None)
@@ -911,40 +922,35 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
-    def testRandomSplitSingletask(self):
-        """Test the random split function for single-task dataset."""
+    @parameterized.expand(
+        [
+            (False,),
+            (True,),
+        ]
+    )
+    def testRandomSplit(self, multitask):
+        """Test the random split function."""
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet()
+        else:
+            dataset = self.createLargeTestDataSet()
         dataset = self.createLargeTestDataSet()
         dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.1))
         self.validate_split(dataset)
 
-    def testRandomSplitMultitask(self):
-        """Test the random split function for multi-task dataset."""
-        dataset = self.createLargeMultitaskDataSet()
-        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.1))
-        self.validate_split(dataset)
-
-    def testTemporalSplitSingletask(self):
+    @parameterized.expand(
+        [
+            (False,),
+            (True,),
+        ]
+    )
+    def testTemporalSplit(self, multitask):
         """Test the temporal split function, where the split is done based on a time
         property."""
-        dataset = self.createLargeTestDataSet()
-        split = TemporalSplit(
-            dataset=dataset,
-            timesplit=TIME_SPLIT_YEAR,
-            timeprop="Year of first disclosure",
-        )
-
-        dataset.prepareDataset(split=split)
-        self.validate_split(dataset)
-        # test if dates higher than 2000 are in test set
-        self.assertTrue(
-            sum(dataset.X_ind["Year of first disclosure"] > TIME_SPLIT_YEAR) ==
-            len(dataset.X_ind)
-        )
-
-    def testTemporalSplitMultitask(self):
-        """Test the temporal split function, where the split is done based on a time
-        property."""
-        dataset = self.createLargeMultitaskDataSet()
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet()
+        else:
+            dataset = self.createLargeTestDataSet()
         split = TemporalSplit(
             dataset=dataset,
             timesplit=TIME_SPLIT_YEAR,
@@ -961,74 +967,60 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (Murcko(), True, None),
-            (BemisMurcko(), False, ["ScaffoldSplit_0", "ScaffoldSplit_1"]),
+            (False, Murcko(), None),
+            (False, BemisMurcko(), ["ScaffoldSplit_0", "ScaffoldSplit_1"]),
+            (True, Murcko(), None),
         ]
     )
-    def testScaffoldSplitSingletask(self, scaffold, shuffle, custom_test_list):
-        """Test the scaffold split function for single-task dataset."""
-        dataset = self.createLargeTestDataSet(name="ScaffoldSplit")
-        split = ScaffoldSplit(scaffold, 0.1, shuffle, custom_test_list)
-        dataset.prepareDataset(split=split)
-        self.validate_split(dataset)
-        # check that smiles in custom_test_list are in the test set
-        if custom_test_list:
-            self.assertTrue(
-                all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
-            )
-
-    @parameterized.expand([
-        (Murcko(), True, None),
-    ])
-    def testScaffoldSplitMultitask(self, scaffold, shuffle, custom_test_list):
-        """Test the scaffold split function for multi-task dataset."""
-        dataset = self.createLargeMultitaskDataSet(name="ScaffoldSplit")
-        split = ScaffoldSplit(scaffold, 0.1, shuffle, custom_test_list)
-        dataset.prepareDataset(split=split)
-        self.validate_split(dataset)
-
-    @parameterized.expand(
-        [
-            ("MaxMin", ["ClusterSplit_0", "ClusterSplit_1"]),
-            ("LeaderPicker", None),
-        ]
-    )
-    def testClusterSplitSingletask(self, clustering_algorithm, custom_test_list):
-        """Test the cluster split function for single-task dataset."""
-        dataset = self.createLargeTestDataSet(name="ClusterSplit")
-        split = ClusterSplit(
-            test_fraction=0.1,
-            clustering_algorithm=clustering_algorithm,
+    def testScaffoldSplit(self, multitask, scaffold, custom_test_list):
+        """Test the scaffold split function."""
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet(name="ScaffoldSplit")
+        else:
+            dataset = self.createLargeTestDataSet(name="ScaffoldSplit")
+        split = ScaffoldSplit(
+            scaffold=scaffold,
             custom_test_list=custom_test_list,
-            n_initial_clusters=10,
         )
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
         # check that smiles in custom_test_list are in the test set
         if custom_test_list:
-            # print(custom_test_list, dataset.X_ind.index)
             self.assertTrue(
                 all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
             )
 
-    @parameterized.expand([
-        ("MaxMin", ),
-        ("LeaderPicker", ),
-    ])
-    def testClusterSplitMultitask(self, clustering_algorithm):
-        """Test the cluster split function for multi-task dataset."""
-        dataset = self.createLargeMultitaskDataSet(name="ClusterSplit")
+    @parameterized.expand(
+        [
+            (False, FPSimilarityLeaderPickerClusters(), None),
+            (False, FPSimilarityMaxMinClusters(), ["ClusterSplit_0", "ClusterSplit_1"]),
+            (True, FPSimilarityMaxMinClusters(), None),
+            (True, FPSimilarityLeaderPickerClusters(), ["ClusterSplit_0", "ClusterSplit_1"]),
+        ]
+    )
+    def testClusterSplit(self, multitask, clustering_algorithm, custom_test_list):
+        """Test the cluster split function."""
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet(name="ClusterSplit")
+        else:
+            dataset = self.createLargeTestDataSet(name="ClusterSplit")
         split = ClusterSplit(
-            test_fraction=0.1,
-            clustering_algorithm=clustering_algorithm,
-            custom_test_list=None,
+            clustering = clustering_algorithm,
+            custom_test_list=custom_test_list,
+            time_limit_seconds = 10,
         )
         dataset.prepareDataset(split=split)
+        self.validate_split(dataset)
+        # check that smiles in custom_test_list are in the test set
+        if custom_test_list:
+            self.assertTrue(
+                all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
+            )
 
     def testSerialization(self):
         """Test the serialization of dataset with datasplit."""
         dataset = self.createLargeTestDataSet()
-        split = ScaffoldSplit(Murcko(), 0.1)
+        split = ScaffoldSplit()
         N_BITS = 1024
         calculator = MoleculeDescriptorsCalculator(
             [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=N_BITS)]
@@ -1338,7 +1330,7 @@ class TestDescriptorSets(DataSetsMixIn, TestCase):
             f"{os.path.dirname(__file__)}/test_files/test_predictor/"
             "qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json"
         )
-        model = QSPRsklearn.fromFile(meta_path)
+        model = SklearnModel.fromFile(meta_path)
         desc_calc = MoleculeDescriptorsCalculator([PredictorDesc(model)])
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))

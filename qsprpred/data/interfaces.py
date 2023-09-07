@@ -5,6 +5,7 @@ from typing import Callable, Iterable
 import numpy as np
 import pandas as pd
 
+
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
     @abstractmethod
@@ -73,7 +74,7 @@ class DataSet(StoredTable):
         func_args: list | None = None,
         func_kwargs: dict | None = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Apply a function to the dataset.
 
@@ -164,6 +165,7 @@ class DataSplit(ABC, DataSetDependant):
     def __init__(self, dataset: MoleculeDataSet) -> None:
         super().__init__(dataset)
 
+    @abstractmethod
     def split(
         self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
     ) -> Iterable[tuple[list[int], list[int]]]:
@@ -185,23 +187,6 @@ class DataSplit(ABC, DataSetDependant):
             input data matrix X (note that these are integer indices, rather than a
             pandas index!)
         """
-
-        self.X = X
-        self.y = y
-
-        self.dataset = self.getDataSet()
-        self.df = self.dataset.getDF()
-        self.tasks = self.dataset.targetProperties
-
-        assert len(self.tasks) > 0, "No target properties found."
-        assert len(X) == len(self.df),\
-            "X and the current data in the dataset must have same length"
-
-        if len(self.tasks) == 1:
-            return self._singletask_split()
-        else:
-            self.df.reset_index(drop=True, inplace=True)  # need numeric index splits
-            return self._multitask_split()
 
 
 class DataFilter(ABC):
