@@ -73,6 +73,9 @@ def QSPRArgParser(txt=None):
         help="Suffix to add to the dataset name."
     )
     parser.add_argument("-de", "--debug", action="store_true")
+    parser.add_argument("sb", "--skip_backup", action="store_true",
+                    help="Skip backup of files. WARNING: this may overwrite "
+                    "previous results, use with caution.")
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
     )
@@ -497,11 +500,12 @@ if __name__ == "__main__":
     file_prefixes = [
         f"{property}_{task}" for task in tasks for property in args.properties
     ]
-    backup_msg = backup_files(
-        args.output_dir,
-        tuple(file_prefixes),
-        cp_suffix=["calculators", "standardizer", "meta"],
-    )
+    if not args.skip_backup:
+        backup_msg = backup_files(
+            args.output_dir,
+            tuple(file_prefixes),
+            cp_suffix=["calculators", "standardizer", "meta"],
+        )
 
     logSettings = enable_file_logger(
         args.output_dir,
@@ -513,7 +517,8 @@ if __name__ == "__main__":
     )
 
     log = logSettings.log
-    log.info(backup_msg)
+    if not args.skip_backup:
+        log.info(backup_msg)
 
     # Add optuna logging
     optuna.logging.enable_propagation()  # Propagate logs to the root logger.

@@ -54,6 +54,9 @@ def QSPRArgParser(txt=None):
         help="Directory to write the output model files to",
     )
     parser.add_argument("-de", "--debug", action="store_true")
+    parser.add_argument("sb", "--skip_backup", action="store_true",
+                        help="Skip backup of files. WARNING: this may overwrite "
+                        "previous results, use with caution.")
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
     )
@@ -201,7 +204,7 @@ def QSPR_modelling(args):
             # Get default search space
             model_types = deepcopy(args.model_types)
             if "DNN" in args.model_types:
-                dnn_grid_params = QSPRDNN.loadParamsGrid(None, args.optimization, "DNN")
+                dnn_grid_params = DNNModel.loadParamsGrid(None, args.optimization, "DNN")
                 model_types.remove("DNN")
             grid_params = QSPRModel.loadParamsGrid(None, args.optimization, model_types)
             if "DNN" in args.model_types:
@@ -377,9 +380,10 @@ if __name__ == "__main__":
     if args.model_suffix:
         file_prefixes = [f"{prefix}_{args.model_suffix}" for prefix in file_prefixes]
 
-    backup_msg = backup_files(
-        args.output_dir, tuple(file_prefixes), cp_suffix="_params"
-    )
+    if not args.skip_backup:
+        backup_msg = backup_files(
+            args.output_dir, tuple(file_prefixes), cp_suffix="_params"
+        )
 
     if not os.path.exists(args.output_dir):
         os.mkdir(args.output_dir)
@@ -394,7 +398,8 @@ if __name__ == "__main__":
     )
 
     log = logSettings.log
-    log.info(backup_msg)
+    if not args.skip_backup:
+        log.info(backup_msg)
 
     # Add optuna logging
     optuna.logging.enable_propagation()  # Propagate logs to the root logger.
