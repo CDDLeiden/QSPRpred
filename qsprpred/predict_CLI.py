@@ -30,7 +30,7 @@ def QSPRArgParser(txt=None):
         default="./predictions.tsv",
         help="Output path to save results",
     )
-    parser.add_argument("sb", "--skip_backup", action="store_true",
+    parser.add_argument("-sb", "--skip_backup", action="store_true",
                 help="Skip backup of files. WARNING: this may overwrite "
                 "previous results, use with caution.")
     parser.add_argument("-de", "--debug", action="store_true")
