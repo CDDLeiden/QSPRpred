@@ -67,7 +67,7 @@ def QSPRArgParser(txt=None):
         "--model_suffix",
         type=str,
         default=None,
-        help="Suffix of the model to be saved"
+        help="Suffix to add to model name",
     )
     # model type arguments
     parser.add_argument(

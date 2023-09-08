@@ -65,6 +65,13 @@ def QSPRArgParser(txt=None):
         default=".",
         help="Directory to write output files to.",
     )
+    parser.add_argument(
+        "-ds",
+        "--data_suffix",
+        type=str,
+        default=None,
+        help="Suffix to add to the dataset name."
+    )
     parser.add_argument("-de", "--debug", action="store_true")
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
@@ -331,8 +338,10 @@ def QSPR_dataprep(args):
                     imputer = SimpleImputer(strategy="most_frequent")
                 else:
                     sys.exit("invalid impute arg given")
+            dataset_name = (f"{props_name}_{task}_{args.data_suffix}"
+                            if args.data_suffix else f"{props_name}_{task}")
             mydataset = QSPRDataset(
-                f"{props_name}_{task}",
+                dataset_name,
                 target_props=target_props,
                 df=df,
                 smiles_col=args.smiles_col,
