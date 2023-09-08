@@ -44,20 +44,21 @@ If you plan to optionally use QSPRPred to calculate protein descriptors for PCM,
 
 conda install -c bioconda clustalo
 ```
-
-This is needed to provide multiple sequence alignments for the PCM descriptors. Clustal Omega does not, however, work on Windows. In that case, you can use MAFFT instead: 
+or install MAFFT instead:
 
 ```bash
 conda install -c biocore mafft
 ```
+This is needed to provide multiple sequence alignments for the PCM descriptors.
+At the moment, we do not support protein descriptor calculation for PCM on Windows.
 
 ## Use
 After installation, you will have access to various command line features, but you can also use the Python API directly (see [Documentation](https://cddleiden.github.io/QSPRPred/docs/)). For a quick start, you can also check out the  [Jupyter notebook tutorials](./tutorial), which documents the use of the Python API to build different types of models. [This tutorial](./tutorial/tutorial_training.ipynb) shows how a QSAR model can be trained. [This tutorial](./tutorial/tutorial_usage.ipynb) shows how to use a QSAR model to predict the bioactivity of a set of molecules. The tutorials as well as the [documentation](https://cddleiden.github.io/QSPRPred/docs/use.html) are still work in progress, and we will be happy for any contributions where it is still lacking.
 
 To use the commandline to train the same QSAR model as in the tutorial use (run from tutorial folder):
 ```bash
-python -m qsprpred.data_CLI -i parkinsons_pivot.tsv -pr GABAAalpha -r true -sf 0.15 -fe Morgan
-python -m qsprpred.model_CLI -pr GABAAalpha -r true -m PLS -s -o bayes -nt 10 -me
+python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o qspr/data -pr GABAAalpha -pr NMDA -r true -sp random -sf 0.15 -fe Morgan
+python -m qsprpred.model_CLI -dp ./qspr/data/GABAAalpha_REGRESSION_df.pkl -o ./qspr/models -m PLS -o bayes -nt 5 -me -s
 ```
 
 Workflow
