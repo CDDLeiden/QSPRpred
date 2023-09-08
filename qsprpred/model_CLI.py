@@ -8,6 +8,7 @@ import random
 import sys
 from datetime import datetime
 from importlib.util import find_spec
+from copy import deepcopy
 
 import numpy as np
 import optuna
@@ -34,16 +35,28 @@ def QSPRArgParser(txt=None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-
     # base arguments
     parser.add_argument(
-        "-b",
-        "--base_dir",
+        "-dp",
+        "--data_paths",
+        type=str,
+        nargs="*",
+        help=(
+            "Each data file path to be used as input for the model, "
+            "e.g ./target1_MULTICLASS_df.pkl"
+        ),
+    )
+    parser.add_argument(
+        "-o",
+        "--output_dir",
         type=str,
         default=".",
-        help="Base directory which contains a folder 'data' with input files",
+        help="Directory to write the output model files to",
     )
     parser.add_argument("-de", "--debug", action="store_true")
+    parser.add_argument("-sb", "--skip_backup", action="store_true",
+                        help="Skip backup of files. WARNING: this may overwrite "
+                        "previous results, use with caution.")
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
     )
@@ -51,46 +64,14 @@ def QSPRArgParser(txt=None):
     parser.add_argument(
         "-gpus", "--gpus", nargs="*", default=["0"], help="List of GPUs"
     )
-
-    # model target arguments
+    # model arguments
     parser.add_argument(
-        "-dp",
-        "--data_prefixes",
+        "-ms",
+        "--model_suffix",
         type=str,
-        nargs="*",
-        help=(
-            "Prefix of each data file to be used as input for the model, "
-            "e.g. target1_MULTICLASS for a file named target1_MULTICLASS_df.pkl"
-        ),
+        default=None,
+        help="Suffix to add to model name",
     )
-    parser.add_argument(
-        "-ms", "--model_suffix", type=str, help="Suffix of the model to be saved"
-    )
-    parser.add_argument(
-        "-pr",
-        "--properties",
-        type=str,
-        nargs="+",
-        action="append",
-        help=(
-            "properties to be predicted identifiers. Add this argument for each model "
-            "to be trained e.g. for one multi-task model for CL and Fu and one single "
-            "task for CL do -pr CL Fu -pr CL"
-        ),
-    )
-    parser.add_argument(
-        "-lt",
-        "--log_transform",
-        type=json.loads,
-        help=(
-            "For each property if its values need to be log-transformed. This arg only "
-            "has an effect when mode is regression, otherwise will be ignored! This "
-            "needs to be given for each property included in any of the models as "
-            "follows, e.g. -lt \"{'CL':True,'fu':False}\". Note. no spaces and "
-            "surround by single quotes"
-        ),
-    )
-
     # model type arguments
     parser.add_argument(
         "-mt",
@@ -112,12 +93,8 @@ def QSPRArgParser(txt=None):
         type=str,
         default=None,
         help=(
-            "file name of json file with non-default parameter settings "
-            "(base_dir/qspr/models/[-p]_params.json). NB. If json file with name "
-            "{model_type}_{REG/CLS}_{property}_params.json) present in "
-            "qspr/models folder those settings will also be used, but if the same "
-            "parameter is present in both files the settings from "
-            "(base_dir/[-p]_params.json) will be used."
+            "file path of json file with non-default parameter settings, "
+            "e.g. ./parameters.json"
         ),
     )
     parser.add_argument(
@@ -149,7 +126,7 @@ def QSPRArgParser(txt=None):
         help="If included then the model will be trained on all data and saved",
     )
     parser.add_argument(
-        "-o",
+        "-op",
         "--optimization",
         type=str,
         default=None,
@@ -164,7 +141,7 @@ def QSPRArgParser(txt=None):
         default=None,
         help=(
             "search_space hyperparameter optimization json file location "
-            "(base_dir/[name].json). If None, default "
+            "(./my_search_space.json). If None, default "
             "qsprpred.models.search_space.json used."
         ),
     )
@@ -205,42 +182,38 @@ def QSPRArgParser(txt=None):
 
 def QSPR_modelling(args):
     """Optimize, evaluate and train estimators."""
-    if not os.path.exists(args.base_dir + "/qspr/models"):
-        os.makedirs(args.base_dir + "/qspr/models")
 
     # read in file with specified parameters for model fitting
     parameters = None
     if args.parameters:
         try:
-            with open(f"{args.base_dir}/{args.parameters}.json") as json_file:
+            with open(f"{args.parameters}") as json_file:
                 par_dicts = np.array(json.load(json_file))
         except FileNotFoundError:
-            log.error(
-                "Parameter settings file (%s/%s.json) not found." %
-                (args.base_dir, args.parameters)
-            )
+            log.error(f"Parameter settings file ({args.parameters}) not found.")
             sys.exit()
 
     if args.optimization in ["grid", "bayes"]:
         if args.search_space:
             grid_params = QSPRModel.loadParamsGrid(
-                f"{args.base_dir}/{args.search_space}.json",
+                args.search_space,
                 args.optimization,
                 args.model_types,
             )
         else:
-            grid_params = QSPRModel.loadParamsGrid(
-                None, args.optimization, args.model_types
-            )
+            # Get default search space
+            model_types = deepcopy(args.model_types)
+            if "DNN" in args.model_types:
+                dnn_grid_params = DNNModel.loadParamsGrid(None, args.optimization, "DNN")
+                model_types.remove("DNN")
+            grid_params = QSPRModel.loadParamsGrid(None, args.optimization, model_types)
+            if "DNN" in args.model_types:
+                grid_params = np.concatenate((grid_params, dnn_grid_params))
 
-    for data_prefix in args.data_prefixes:
-        log.info(f"Data file: {data_prefix}_df.pkl")
+    for dataset in args.datasets:
+        log.info(f"Dataset: {dataset.name}")
 
-        mydataset = QSPRDataset.fromFile(
-            f"{args.base_dir}/qspr/data/{data_prefix}_df.pkl"
-        )
-
-        tasks = [prop.task for prop in mydataset.targetProperties]
+        tasks = [prop.task for prop in dataset.targetProperties]
         if all(TargetTasks.REGRESSION == task for task in tasks):
             reg = True
         elif all(task.isClassification() for task in tasks):
@@ -250,7 +223,6 @@ def QSPR_modelling(args):
         reg_abbr = "regression" if reg else "classification"
 
         for model_type in args.model_types:
-            print(model_type)
             log.info(f"Model: {model_type} {reg_abbr}")
 
             if model_type not in ["RF", "XGB", "DNN", "SVM", "PLS", "NB", "KNN"]:
@@ -270,6 +242,7 @@ def QSPR_modelling(args):
                 "PLS": PLSRegression,
                 "NB": GaussianNB,
                 "KNN": KNeighborsRegressor if reg else KNeighborsClassifier,
+                "DNN": None,
             }
 
             # setting some default parameters
@@ -290,7 +263,7 @@ def QSPR_modelling(args):
                 class_weight = "balanced" if args.sample_weighing else None
                 if alg_dict[model_type] in [RandomForestClassifier, SVC]:
                     parameters["class_weight"] = class_weight
-                counts = mydataset.y.value_counts()
+                counts = dataset.y.value_counts()
                 scale_pos_weight = (
                     counts[0] / counts[1] if (
                         args.sample_weighing and len(tasks) == 1 and
@@ -311,22 +284,26 @@ def QSPR_modelling(args):
                     )
 
             # Create QSPR model object
+            model_name = (
+                f"{model_type}_{dataset.name}" if not args.model_suffix else
+                f"{model_type}_{dataset.name}_{args.model_suffix}"
+            )
             if model_type == "DNN":
                 QSPRmodel = DNNModel(
-                    base_dir=f"{args.base_dir}/qspr/models/",
-                    data=mydataset,
+                    base_dir=f"{args.output_dir}",
+                    data=dataset,
                     parameters=parameters,
-                    name=f"{model_type}_{data_prefix}",
+                    name=model_name,
                     gpus=args.gpus,
                     patience=args.patience,
                     tol=args.tolerance,
                 )
             else:
                 QSPRmodel = SklearnModel(
-                    base_dir=f"{args.base_dir}/qspr/models/",
-                    data=mydataset,
+                    base_dir=f"{args.output_dir}",
+                    data=dataset,
                     alg=alg_dict[model_type],
-                    name=f"{model_type}_{data_prefix}",
+                    name=model_name,
                     parameters=parameters,
                 )
 
@@ -344,7 +321,7 @@ def QSPR_modelling(args):
                 search_space_bs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_bs)
                 if reg and model_type == "RF":
-                    if mydataset.y.min()[0] < 0 or mydataset.y_ind.min()[0] < 0:
+                    if dataset.y.min()[0] < 0 or dataset.y_ind.min()[0] < 0:
                         search_space_bs.update(
                             {"criterion": ["categorical", ["squared_error"]]}
                         )
@@ -396,19 +373,23 @@ if __name__ == "__main__":
     os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
     # Backup files
+    datasets = [QSPRDataset.fromFile(data_file) for data_file in args.data_paths]
     file_prefixes = [
-        f"{alg}_{data_prefix}" for alg in args.model_types
-        for data_prefix in args.data_prefixes
+        f"{alg}_{dataset.name}" for alg in args.model_types for dataset in datasets
     ]
-    backup_msg = backup_files(
-        args.base_dir, "qspr/models", tuple(file_prefixes), cp_suffix="_params"
-    )
+    if args.model_suffix:
+        file_prefixes = [f"{prefix}_{args.model_suffix}" for prefix in file_prefixes]
 
-    if not os.path.exists(f"{args.base_dir}/qspr/models"):
-        os.makedirs(f"{args.base_dir}/qspr/models")
+    if not args.skip_backup:
+        backup_msg = backup_files(
+            args.output_dir, tuple(file_prefixes), cp_suffix="_params"
+        )
+
+    if not os.path.exists(args.output_dir):
+        os.mkdir(args.output_dir)
 
     logSettings = enable_file_logger(
-        os.path.join(args.base_dir, "qspr/models"),
+        args.output_dir,
         "QSPRmodel.log",
         args.debug,
         __name__,
@@ -417,7 +398,8 @@ if __name__ == "__main__":
     )
 
     log = logSettings.log
-    log.info(backup_msg)
+    if not args.skip_backup:
+        log.info(backup_msg)
 
     # Add optuna logging
     optuna.logging.enable_propagation()  # Propagate logs to the root logger.
@@ -426,15 +408,16 @@ if __name__ == "__main__":
     optuna.logging.set_verbosity(optuna.logging.DEBUG)
 
     # Create json log file with used commandline arguments
-    print(json.dumps(vars(args), sort_keys=False, indent=2))
-    with open(f"{args.base_dir}/qspr/models/QSPRmodel.json", "w") as f:
+    with open(f"{args.output_dir}/QSPRmodel.json", "w") as f:
         json.dump(vars(args), f)
+    log.info(f"Command line arguments written to {args.output_dir}/QSPRmodel.json")
 
     # Optimize, evaluate and train estimators according to QSPR arguments
     log.info(
         "QSPR modelling started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     )
 
+    args.datasets = datasets
     QSPR_modelling(args)
 
     log.info(

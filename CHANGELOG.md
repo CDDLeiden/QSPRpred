@@ -22,6 +22,9 @@ From v2.0.1 to v2.1.0.a2
     - `deep.models.QSPRDNN` > `extra.gpu.models.dnn.DNNModel`
     - `extra.models.pcm.ModelPCM` > `extra.models.pcm.PCMModel`
     - `extra.models.pcm.QSPRsklearnPCM` > `extra.models.pcm.SklearnPCMModel`
+- The command line interface modules now use input and output file paths instead
+  of automatically placing all files in a subfolder `qspr`, allowing for more
+  control over the output and input paths.
 
 ## New Features
 - `GBMTDataSplit` - parent class to create globally balanced splits with the [gbmt-split](https://github.com/sohviluukkonen/gbmt-splits) package.
@@ -39,6 +42,8 @@ From v2.0.1 to v2.1.0.a2
 - Refactoring of the test suite under `qsprpred.data` and improvement of temporary file handling (!114).
 - `PyBoostModel` - QSPRpred wrapper for py-boost models. Requires optional `pyboost` dependencies.
 - `ChempropModel` - QSPRpred wrapper for Chemprop models. Requires optional `deep` dependencies.
+- The `data_CLI` argument `--log_transform` (`-lt`) has been changed to `--transform_data` (`-t`), which now accepts a number of transformations to apply to the target data. Available transformations are `log`, `log10`, `log2`, `sqrt`, `cbrt`, `exp`, `exp2`, `exp10`, `square`, `cube`, `reciprocal`.
+- New `data_CLI`, `model_CLI` and `predict_CLI` argument `--skip_backup` (`-sb`) to skip the backup of the output files. WARNING: This will overwrite existing files.
 
 ## Removed Features
 - `StratifiedPerTarget` is replaced by `PCMSplit`.
