@@ -58,8 +58,8 @@ e.g. GABAAalpha_REGRESSION. As well as an log file and a run settings file.
 | File                                             | Function                                              |
 +==================================================+=======================================================+
 || {prefixes}_df.pkl                               || Dataframe                                            |
-|| {prefixes}_descriptor_calculator_Descriptor.json|| re-instantiate descriptor calculator                    |
-|| {prefixes}_Descriptor_df.pkl                    || re-instantiate descriptor dataframe                   |
+|| {prefixes}_descriptor_calculator_Descriptor.json|| re-instantiate descriptor calculator                 |
+|| {prefixes}_Descriptor_df.pkl                    || re-instantiate descriptor dataframe                  |
 || {prefixes}_feature_standardizer.json            || re-instantiate feature standardizer                  |
 || {prefixes}_meta.json                            || Meta data, also used to instantiate QSAR data object |
 || QSPRdata.json                                   || Command Line interface settings                      |
