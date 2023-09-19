@@ -3,6 +3,7 @@
 To add a new data splitter:
 * Add a DataSplit subclass for your new splitter
 """
+import platform
 from typing import Iterable
 
 import numpy as np
@@ -203,6 +204,12 @@ class GBMTDataSplit(DataSplit):
             (train_indices, test_indices) where the indices are the row indices of the
             input data matrix
         """
+        # if we are on Windows, raise an error
+        if platform.system() == "Windows":
+            logger.warning(
+                "The GBMTDataSplit currently has a problem on Windows:"
+                "https://github.com/coin-or/pulp/issues/671 and might hang up..."
+            )
 
         # Get dataset, dataframe and tasks
         ds = self.getDataSet()
