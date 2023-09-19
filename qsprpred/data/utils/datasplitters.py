@@ -7,6 +7,7 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 from gbmtsplits import GloballyBalancedSplit
+from sklearn.model_selection import ShuffleSplit
 
 from ...logs import logger
 from ..data import QSPRDataset
@@ -18,6 +19,19 @@ from .data_clustering import (
     RandomClusters,
 )
 from .scaffolds import Murcko, Scaffold
+
+
+class RandomSplit(DataSplit):
+    """Splits dataset in random train and test subsets.
+
+    Attributes:
+        testFraction (float): fraction of total dataset to testset
+    """
+    def __init__(self, test_fraction=0.1) -> None:
+        self.testFraction = test_fraction
+
+    def split(self, X, y):
+        return ShuffleSplit(1, test_size=self.testFraction).split(X, y)
 
 class ManualSplit(DataSplit):
     """Splits dataset in train and test subsets based on a column in the dataframe.
@@ -228,7 +242,7 @@ class GBMTDataSplit(DataSplit):
 
         return iter([(train_indices, test_indices)])
 
-class RandomSplit(GBMTDataSplit):
+class GBMTRandomSplit(GBMTDataSplit):
     """
     Splits dataset into balanced random train and test subsets.
 

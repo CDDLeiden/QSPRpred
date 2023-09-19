@@ -935,7 +935,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         else:
             dataset = self.createLargeTestDataSet()
         dataset = self.createLargeTestDataSet()
-        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.1))
+        dataset.prepareDataset(split=RandomSplit(test_fraction=0.1))
         self.validate_split(dataset)
 
     @parameterized.expand(
@@ -952,7 +952,6 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         else:
             dataset = self.createLargeTestDataSet()
         split = TemporalSplit(
-            dataset=dataset,
             timesplit=TIME_SPLIT_YEAR,
             timeprop="Year of first disclosure",
         )
