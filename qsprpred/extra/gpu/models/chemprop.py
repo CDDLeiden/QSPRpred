@@ -29,7 +29,7 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
     def __init__(
         self,
         args: chemprop.args.TrainArgs,
-        scaler: chemprop.data.scaler.StandardScaler | None = None
+        scaler: chemprop.data.scaler.StandardScaler | None = None,
     ):
         """Initialize a MoleculeModel instance.
 
@@ -125,7 +125,7 @@ class ChempropModel(QSPRModel):
         name: str | None = None,
         parameters: dict | None = None,
         autoload=True,
-        quiet_logger: bool = True
+        quiet_logger: bool = True,
     ):
         """Initialize a Chemprop instance.
 
@@ -167,7 +167,7 @@ class ChempropModel(QSPRModel):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        keep_logs: bool = False
+        keep_logs: bool = False,
     ) -> Any | tuple[ChempropMoleculeModel, int | None]:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -210,7 +210,7 @@ class ChempropModel(QSPRModel):
                 sizes=args.split_sizes if args.split_sizes[2] == 0 else [0.9, 0.1, 0],
                 seed=args.seed,
                 args=args,
-                logger=self.chempropLogger
+                logger=self.chempropLogger,
             )
         else:
             train_data = data
@@ -265,7 +265,7 @@ class ChempropModel(QSPRModel):
             num_workers=num_workers,
             class_balance=args.class_balance,
             shuffle=True,
-            seed=args.seed
+            seed=args.seed,
         )
         if self.earlyStopping:
             val_data_loader = chemprop.data.MoleculeDataLoader(
@@ -305,8 +305,9 @@ class ChempropModel(QSPRModel):
         best_epoch, n_iter = 0, 0
         # Get early stopping number of epochs early stopping in case of FIXED or OPTIMAL
         # mode
-        n_epochs = self.earlyStopping.getEpochs(
-        ) if not self.earlyStopping else args.epochs
+        n_epochs = (
+            self.earlyStopping.getEpochs() if not self.earlyStopping else args.epochs
+        )
         for epoch in trange(n_epochs):
             self.chempropLogger.debug(f"Epoch {epoch}")
             n_iter = chemprop.train.train(
@@ -318,7 +319,7 @@ class ChempropModel(QSPRModel):
                 args=args,
                 n_iter=n_iter,
                 logger=self.chempropLogger,
-                writer=writer
+                writer=writer,
             )
             if isinstance(scheduler, ExponentialLR):
                 scheduler.step()
@@ -330,7 +331,7 @@ class ChempropModel(QSPRModel):
                     metrics=args.metrics,
                     dataset_type=args.dataset_type,
                     scaler=estimator.scaler,
-                    logger=self.chempropLogger
+                    logger=self.chempropLogger,
                 )
 
                 for metric, scores in val_scores.items():
@@ -359,8 +360,10 @@ class ChempropModel(QSPRModel):
                 mean_val_score = chemprop.utils.multitask_mean(
                     val_scores[args.metric], metric=args.metric
                 )
-                if args.minimize_score and mean_val_score < best_score or \
-                        not args.minimize_score and mean_val_score > best_score:
+                if (
+                    args.minimize_score and mean_val_score < best_score or
+                    not args.minimize_score and mean_val_score > best_score
+                ):
                     best_score, best_epoch = mean_val_score, epoch
                     best_estimator = deepcopy(estimator)
                 # Evaluate on test set using model with best validation score
@@ -381,7 +384,7 @@ class ChempropModel(QSPRModel):
     def predict(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: ChempropMoleculeModel | None = None
+        estimator: ChempropMoleculeModel | None = None,
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
@@ -408,7 +411,7 @@ class ChempropModel(QSPRModel):
     def predictProba(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: ChempropMoleculeModel | None = None
+        estimator: ChempropMoleculeModel | None = None,
     ) -> list[np.ndarray]:
         """Make predictions for the given data matrix or `QSPRDataset`,
         but use probabilities for classification models.
@@ -439,7 +442,7 @@ class ChempropModel(QSPRModel):
             model=estimator,
             data_loader=X_loader,
             scaler=estimator.scaler,
-            disable_progress_bar=True
+            disable_progress_bar=True,
         )
 
         # change list of lists to 2D array
@@ -542,14 +545,14 @@ class ChempropModel(QSPRModel):
             f"{self.outPrefix}.pt",
             self.estimator,
             scaler=self.estimator.scaler,
-            args=self.estimator.args
+            args=self.estimator.args,
         )
         return f"{self.outPrefix}.pt"
 
     def convertToMoleculeDataset(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None
+        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to chemprop Molecule Dataset.
 
@@ -634,14 +637,42 @@ class ChempropModel(QSPRModel):
         """
         # List of arguments from chemprop that are using in the QSPRpred implementation.
         used_args = [
-            "no_cuda", "gpu", "num_workers", "batch_size", "no_cache_mol",
-            "empty_cache", "loss_function", "split_sizes", "seed", "pytorch_seed",
-            "metric", "bias", "hidden_size", "depth", "mpn_shared", "dropout",
-            "activation", "atom_messages", "undirected", "ffn_hidden_size",
-            "ffn_num_layers", "explicit_h", "adding_h", "epochs", "warmup_epochs",
-            "init_lr", "max_lr", "final_lr", "grad_clip", "class_balance",
-            "evidential_regularization", "minimize_score", "num_tasks", "dataset_type",
-            "metrics", "task_names"
+            "no_cuda",
+            "gpu",
+            "num_workers",
+            "batch_size",
+            "no_cache_mol",
+            "empty_cache",
+            "loss_function",
+            "split_sizes",
+            "seed",
+            "pytorch_seed",
+            "metric",
+            "bias",
+            "hidden_size",
+            "depth",
+            "mpn_shared",
+            "dropout",
+            "activation",
+            "atom_messages",
+            "undirected",
+            "ffn_hidden_size",
+            "ffn_num_layers",
+            "explicit_h",
+            "adding_h",
+            "epochs",
+            "warmup_epochs",
+            "init_lr",
+            "max_lr",
+            "final_lr",
+            "grad_clip",
+            "class_balance",
+            "evidential_regularization",
+            "minimize_score",
+            "num_tasks",
+            "dataset_type",
+            "metrics",
+            "task_names",
         ]
 
         # Create dummy args to check what default argument values are in chemprop
@@ -679,7 +710,8 @@ class ChempropModel(QSPRModel):
             if self.task in [ModelTasks.REGRESSION, ModelTasks.MULTITASK_REGRESSION]:
                 args["dataset_type"] = "regression"
             elif self.task in [
-                ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS
+                ModelTasks.SINGLECLASS,
+                ModelTasks.MULTITASK_SINGLECLASS,
             ]:
                 args["dataset_type"] = "classification"
             elif self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_MULTICLASS]:
@@ -691,7 +723,9 @@ class ChempropModel(QSPRModel):
             args.process_args()
 
         assert args.split_type in [
-            "random", "scaffold_balanced", "random_with_repeated_smiles"
+            "random",
+            "scaffold_balanced",
+            "random_with_repeated_smiles",
         ], (
             "split_type must be 'random', 'scaffold_balanced' or "
             "random_with_repeated_smiles'."

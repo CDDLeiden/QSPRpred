@@ -510,7 +510,7 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
 
         # check value error is raised when calling optimal epochs without recording
         with self.assertRaises(ValueError):
-            earlystopping.optimalEpochs
+            print(earlystopping.optimalEpochs)
 
         # record some epochs
         earlystopping.recordEpochs(10)

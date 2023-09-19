@@ -33,7 +33,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
         name: str,
         alg: Type | None = None,
         dataset: PCMDataSet | None = None,
-        parameters: dict | None = None
+        parameters: dict | None = None,
     ):
         """Initialize dataset and model.
 

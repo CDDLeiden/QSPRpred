@@ -23,7 +23,7 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
     def __init__(
         self,
         desc_sets: list[ProteinDescriptorSet],
-        msa_provider: MSAProvider = ClustalMSA()
+        msa_provider: MSAProvider = ClustalMSA(),
     ) -> None:
         """Initialize the protein descriptor calculator.
 
@@ -41,7 +41,7 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
         acc_keys: list[str],
         sequences: dict[str:str] | None = None,
         dtype: type = np.float32,
-        **kwargs
+        **kwargs,
     ) -> pd.DataFrame:
         """
         Calculates descriptors for the given protein accession keys.
