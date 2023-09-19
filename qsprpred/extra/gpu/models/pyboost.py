@@ -9,18 +9,17 @@ Created by: Linde Schoenmaker
 On: 03.08.2023, 15:26
 """
 import os
-import joblib
-import cupy as cp
-import numpy as np
-import pandas as pd
-
 from copy import deepcopy
 from importlib import import_module
 from typing import Any, Optional, Type
-from sklearn.model_selection import train_test_split
 
+import cupy as cp
+import joblib
+import numpy as np
+import pandas as pd
 from py_boost.gpu.losses import BCELoss, MSELoss
 from py_boost.gpu.losses.metrics import Metric, auc
+from sklearn.model_selection import train_test_split
 
 from ....data.data import QSPRDataset
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
@@ -54,7 +53,7 @@ class PyBoostModel(QSPRModel):
         data: Optional[QSPRDataset] = None,
         name: Optional[str] = None,
         parameters: Optional[dict] = None,
-        autoload=True
+        autoload=True,
     ):
         """Initialize a QSPR model instance.
 
@@ -74,7 +73,11 @@ class PyBoostModel(QSPRModel):
         """
         super().__init__(
             base_dir,
-            import_module("py_boost").GradientBoosting, data, name, parameters, autoload
+            import_module("py_boost").GradientBoosting,
+            data,
+            name,
+            parameters,
+            autoload,
         )
         if self.task == ModelTasks.MULTITASK_MIXED:
             raise ValueError(
@@ -83,14 +86,17 @@ class PyBoostModel(QSPRModel):
             )
         if self.task == ModelTasks.MULTITASK_MULTICLASS:
             raise NotImplementedError(
-                "Multi-task multi-class is not supported for pyboost that can handle missing data models."
+                "Multi-task multi-class is not supported for "
+                "pyboost that can handle missing data models."
             )
         if self.task == ModelTasks.MULTITASK_SINGLECLASS:
-            # FIX ME:  PyBoost default auc loss does not handle multitask data 
+            # FIX ME:  PyBoost default auc loss does not handle multitask data
             # and the custom NaN AUC metric is not JSON serializable.
             raise NotImplementedError(
-                "Multi-class is not supported for pyboost that can handle missing data models."
+                "Multi-class is not supported for pyboost "
+                "that can handle missing data models."
             )
+
     @property
     def supportsEarlyStopping(self) -> bool:
         """Check if the model supports early stopping.
@@ -107,7 +113,7 @@ class PyBoostModel(QSPRModel):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        **kwargs
+        **kwargs,
     ) -> import_module("py_boost").GradientBoosting:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -135,7 +141,7 @@ class PyBoostModel(QSPRModel):
 
             return estimator, estimator.best_round
 
-        estimator.params.update({'ntrees': self.earlyStopping.getEpochs()})
+        estimator.params.update({"ntrees": self.earlyStopping.getEpochs()})
         estimator.fit(X, y)
 
         return estimator, self.earlyStopping.getEpochs()
@@ -167,7 +173,7 @@ class PyBoostModel(QSPRModel):
                     (1 - preds, preds), axis=1
                 )  # return 1 if predict proba > 0.5
                 return np.argmax(preds, axis=1, keepdims=True)
-            elif self.task.isMultiTask():  #multitask
+            elif self.task.isMultiTask():  # multitask
                 preds_mt = np.array([]).reshape(preds.shape[0], 0)
                 for i in range(preds.shape[1]):
                     preds_task = preds[:, i].reshape(-1, 1)
@@ -192,7 +198,7 @@ class PyBoostModel(QSPRModel):
         if self.task.isClassification():
             if preds.shape[1] == 1:
                 preds = np.concatenate((preds, 1 - preds), axis=1)
-            elif self.task.isMultiTask():  #multitask
+            elif self.task.isMultiTask():  # multitask
                 preds_mt = []
                 for i in range(preds.shape[1]):
                     preds_task = preds[:, i].reshape(-1, 1)
@@ -266,11 +272,12 @@ class PyBoostModel(QSPRModel):
         joblib.dump(self.estimator, estimator_path)
 
         return estimator_path
-    
+
+
 class MSEwithNaNLoss(MSELoss):
-    """ 
-    Masked MSE loss function. Custom loss wrapper for pyboost that can handle missing data, 
-    as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
+    """
+    Masked MSE loss function. Custom loss wrapper for pyboost that can handle
+    missing data, as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
     def base_score(self, y_true):
         # Replace .mean with nanmean function to calc base score
@@ -294,10 +301,9 @@ class MSEwithNaNLoss(MSELoss):
 
 class BCEWithNaNLoss(BCELoss):
     """
-    Masked BCE loss function. Custom loss wrapper for pyboost that can handle missing data, 
-    as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
+    Masked BCE loss function. Custom loss wrapper for pyboost that can handle missing
+    data, as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
-
     def base_score(self, y_true):
         # Replace .mean with nanmean function to calc base score
         means = cp.clip(
@@ -319,11 +325,12 @@ class BCEWithNaNLoss(BCELoss):
         hess = hess * mask
 
         return grad, hess
-    
+
+
 class NaNRMSEScore(Metric):
     """
-    Masked RMSE score with weights based on number of non-zero values per task. 
-    Custom metric wrapper for pyboost that can handle missing data, 
+    Masked RMSE score with weights based on number of non-zero values per task.
+    Custom metric wrapper for pyboost that can handle missing data,
     as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
     def __call__(self, y_true, y_pred, sample_weight=None):
@@ -338,14 +345,13 @@ class NaNRMSEScore(Metric):
         return np.average(err, weights=np.count_nonzero(mask, axis=0))
 
     def compare(self, v0, v1):
-
         return v0 > v1
 
 
 class NaNR2Score(Metric):
     """
-    Masked R2 score with weights based on number of non-zero values per task. 
-    Custom metric wrapper for pyboost that can handle missing data, 
+    Masked R2 score with weights based on number of non-zero values per task.
+    Custom metric wrapper for pyboost that can handle missing data,
     as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
     def __call__(self, y_true, y_pred, sample_weight=None):
@@ -363,18 +369,16 @@ class NaNR2Score(Metric):
         return np.average(1 - err / std, weights=np.count_nonzero(mask, axis=0))
 
     def compare(self, v0, v1):
-
         return v0 > v1
 
 
 class NaNAucMetric(Metric):
     """
-    Masked AUC score with weights based on number of non-zero values per task. 
-    Custom metric wrapper for pyboost that can handle missing data, 
+    Masked AUC score with weights based on number of non-zero values per task.
+    Custom metric wrapper for pyboost that can handle missing data,
     as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
     def __call__(self, y_true, y_pred, sample_weight=None):
-
         aucs = []
         mask = ~cp.isnan(y_true)
 
@@ -386,7 +390,4 @@ class NaNAucMetric(Metric):
         return np.mean(aucs)
 
     def compare(self, v0, v1):
-
         return v0 > v1
-
-

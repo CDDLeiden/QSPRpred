@@ -231,7 +231,7 @@ class DNNModel(QSPRModel):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any | None = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        **kwargs
+        **kwargs,
     ):
         """Fit the model to the given data matrix or `QSPRDataset`.
 

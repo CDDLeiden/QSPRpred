@@ -8,6 +8,7 @@
 """
 
 from abc import abstractmethod
+from typing import Optional
 
 import mordred
 import numpy as np
@@ -21,7 +22,6 @@ from rdkit import Chem
 from Signature_pywrapper import Signature as Signature_calculator
 
 from ....data.utils.descriptorsets import DescriptorSet, MoleculeDescriptorSet
-from typing import Optional
 
 
 class Mordred(MoleculeDescriptorSet):
@@ -42,7 +42,7 @@ class Mordred(MoleculeDescriptorSet):
         descs: list[str] | None = None,
         version: str | None = None,
         ignore_3D: bool = False,
-        config: str | None = None
+        config: str | None = None,
     ):
         """
         Initialize the descriptor with the same arguments as you would pass

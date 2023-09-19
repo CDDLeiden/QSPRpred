@@ -31,7 +31,7 @@ from .data.utils.descriptorsets import (
     FingerprintSet,
     PredictorDesc,
     RDKitDescs,
-    SmilesDesc
+    SmilesDesc,
 )
 from .data.utils.featurefilters import (
     BorutaFilter,
@@ -70,12 +70,16 @@ def QSPRArgParser(txt=None):
         "--data_suffix",
         type=str,
         default=None,
-        help="Suffix to add to the dataset name."
+        help="Suffix to add to the dataset name.",
     )
     parser.add_argument("-de", "--debug", action="store_true")
-    parser.add_argument("-sb", "--skip_backup", action="store_true",
-                    help="Skip backup of files. WARNING: this may overwrite "
-                    "previous results, use with caution.")
+    parser.add_argument(
+        "-sb",
+        "--skip_backup",
+        action="store_true",
+        help="Skip backup of files. WARNING: this may overwrite "
+        "previous results, use with caution.",
+    )
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
     )
@@ -147,7 +151,7 @@ def QSPRArgParser(txt=None):
             "surrounded by single quotes. Choose from 'log10', 'log2', 'log', 'sqrt',"
             "'cbrt', 'exp', 'square', 'cube', 'reciprocal'"
         ),
-        default={}
+        default={},
     )
     # Data set split arguments
     parser.add_argument(
@@ -208,9 +212,21 @@ def QSPRArgParser(txt=None):
         "--features",
         type=str,
         choices=[
-            "Morgan", "RDkit", "Mordred", "Mold2", "PaDEL", "DrugEx", "Signature"
-            "MaccsFP", "AvalonFP", "TopologicalFP", "AtomPairFP", "RDKitFP",
-            "PatternFP", "LayeredFP", "Smiles"
+            "Morgan",
+            "RDkit",
+            "Mordred",
+            "Mold2",
+            "PaDEL",
+            "DrugEx",
+            "Signature"
+            "MaccsFP",
+            "AvalonFP",
+            "TopologicalFP",
+            "AtomPairFP",
+            "RDKitFP",
+            "PatternFP",
+            "LayeredFP",
+            "Smiles",
         ],
         nargs="*",
     )
@@ -316,7 +332,7 @@ def QSPR_dataprep(args):
                     "exp": np.exp,
                     "square": np.square,
                     "cube": lambda x: np.power(x, 3),
-                    "reciprocal": np.reciprocal
+                    "reciprocal": np.reciprocal,
                 }
                 target_props.append(
                     {
@@ -341,8 +357,10 @@ def QSPR_dataprep(args):
                     imputer = SimpleImputer(strategy="most_frequent")
                 else:
                     sys.exit("invalid impute arg given")
-            dataset_name = (f"{props_name}_{task}_{args.data_suffix}"
-                            if args.data_suffix else f"{props_name}_{task}")
+            dataset_name = (
+                f"{props_name}_{task}_{args.data_suffix}"
+                if args.data_suffix else f"{props_name}_{task}"
+            )
             mydataset = QSPRDataset(
                 dataset_name,
                 target_props=target_props,
@@ -469,7 +487,8 @@ def QSPR_dataprep(args):
                 datafilters=datafilters,
                 split=split,
                 feature_filters=featurefilters,
-                feature_standardizer=StandardScaler() if "Smiles" not in args.features else None,
+                feature_standardizer=StandardScaler()
+                if "Smiles" not in args.features else None,
                 feature_fill_value=0.0,
             )
 

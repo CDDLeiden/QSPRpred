@@ -101,7 +101,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             base_dir=self.generatedModelsPath,
             name=f"{alg_name}",
             alg=alg,
-            dataset=dataset
+            dataset=dataset,
         )
         self.fitTest(model)
         predictor = DNNModel(name=alg_name, base_dir=model.baseDir)
@@ -168,13 +168,13 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "task": task,
                 "th": th
             }],
-            preparation_settings=None
+            preparation_settings=None,
         )
         dataset.prepareDataset(
             feature_calculators=[
                 MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
             ],
-            split=RandomSplit(test_fraction=0.1)
+            split=RandomSplit(test_fraction=0.1),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
@@ -196,12 +196,12 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     def testMultiTaskmodel(self, _, task: TargetTasks, alg_name: str):
         """Test the DNNModel model in one configuration.
 
-            Args:
-                task: Task to test.
-                alg_name: Name of the algorithm.
-                alg: Algorithm to use.
-                th: Threshold to use for classification models.
-            """
+        Args:
+            task: Task to test.
+            alg_name: Name of the algorithm.
+            alg: Algorithm to use.
+            th: Threshold to use for classification models.
+        """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
                 {
@@ -233,13 +233,13 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name=f"{alg_name}_{task}",
             target_props=target_props,
             target_imputer=SimpleImputer(strategy="mean"),
-            preparation_settings=None
+            preparation_settings=None,
         )
         dataset.prepareDataset(
             feature_calculators=[
                 MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
             ],
-            split=RandomSplit(test_fraction=0.1)
+            split=RandomSplit(test_fraction=0.1),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
@@ -410,7 +410,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             base_dir=self.generatedModelsPath,
             name=f"{model_name}_multitask_regression",
             dataset=dataset,
-            parameters=parameters
+            parameters=parameters,
         )
         self.fitTest(model)
         predictor = import_module("..pyboost", __name__).PyBoostModel(
@@ -418,7 +418,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         self.predictorTest(predictor)
 
-    # FIX ME: This test fails because the PyBoost default auc does not handle
+    # FIXME: This test fails because the PyBoost default auc does not handle
     # mutlitask data and the custom NaN AUC metric is not JSON serializable.
 
     # @parameterized.expand(

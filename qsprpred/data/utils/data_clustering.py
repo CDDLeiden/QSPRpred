@@ -6,7 +6,7 @@ from rdkit.SimDivFilters import rdSimDivPickers
 
 from ...logs import logger
 from .descriptorsets import FingerprintSet
-from .scaffolds import Scaffold, Murcko
+from .scaffolds import Murcko, Scaffold
 
 
 class MoleculeClusters(ABC):

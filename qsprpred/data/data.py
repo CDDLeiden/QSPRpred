@@ -756,7 +756,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
 
     def dropDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
         """
-        Drop descriptors from the data frame that were calculated using a specific calculator.
+        Drop descriptors from the data frame
+        that were calculated with a specific calculator.
 
         Args:
             calculator (DescriptorsCalculator): DescriptorsCalculator object to
@@ -991,7 +992,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
 
     @staticmethod
     def _scaffold_calculator(mol, scaffold: Scaffold):
-        """Just a helper function to calculate the scaffold of a molecule more easily."""
+        """Just a helper method to calculate the scaffold of a molecule more easily."""
         return scaffold(mol[0])
 
     def addScaffolds(
@@ -1021,7 +1022,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 func_args=(scaffold, ),
                 subset=[self.smilesCol],
                 axis=1,
-                raw=False
+                raw=False,
             )
             if add_rdkit_scaffold:
                 PandasTools.AddMoleculeColumnToFrame(
