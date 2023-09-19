@@ -13,7 +13,7 @@ From v2.0.1 to v2.1.0.a2
 - `QSPRModel` attribute `scoreFunc` is removed.
 - 'qspr/models' is no longer added to the output path of `QSPRModel.save`, allowing for complete control over the output path.
 - `SKlearnMetrics.supportsTask` now uses a dictionary like dict[ModelTasks, list[str]] to map tasks to supported metric names. (#53)
-- `RandomSplit` and `ScaffoldSplit` uses the `GBMTDataSplit` to create balanced splits.
+- `GBMTRandomSplit` and `ScaffoldSplit` now use the `GBMTDataSplit` to create balanced splits. `RandomSplit` still functions the same way as a completely random test split.
 - `PCMSplit` replaces `StratifiedPerTarget` and is compatible with `RandomSplit`, `ScaffoldSplit` and `ClusterSplit`.
 - `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captures scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
 - The versioning scheme of development snapshots has changed from `devX` to `alphaX`/`betaX`, where `X` is an integer that increments with each release.

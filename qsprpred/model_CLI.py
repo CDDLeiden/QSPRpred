@@ -6,9 +6,9 @@ import os
 import os.path
 import random
 import sys
+from copy import deepcopy
 from datetime import datetime
 from importlib.util import find_spec
-from copy import deepcopy
 
 import numpy as np
 import optuna
@@ -54,9 +54,13 @@ def QSPRArgParser(txt=None):
         help="Directory to write the output model files to",
     )
     parser.add_argument("-de", "--debug", action="store_true")
-    parser.add_argument("-sb", "--skip_backup", action="store_true",
-                        help="Skip backup of files. WARNING: this may overwrite "
-                        "previous results, use with caution.")
+    parser.add_argument(
+        "-sb",
+        "--skip_backup",
+        action="store_true",
+        help="Skip backup of files. WARNING: this may overwrite "
+        "previous results, use with caution.",
+    )
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
     )
@@ -204,7 +208,9 @@ def QSPR_modelling(args):
             # Get default search space
             model_types = deepcopy(args.model_types)
             if "DNN" in args.model_types:
-                dnn_grid_params = DNNModel.loadParamsGrid(None, args.optimization, "DNN")
+                dnn_grid_params = DNNModel.loadParamsGrid(
+                    None, args.optimization, "DNN"
+                )
                 model_types.remove("DNN")
             grid_params = QSPRModel.loadParamsGrid(None, args.optimization, model_types)
             if "DNN" in args.model_types:

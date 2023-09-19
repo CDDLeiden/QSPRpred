@@ -133,8 +133,9 @@ def get_git_info():
     """
     Get information of the current git commit
 
-    If the package is installed with pip, read detailed version extracted by setuptools_scm.
-    Otherwise, use gitpython to get the information from the git repo.
+    If the package is installed with pip, read the detailed version extracted
+    by setuptools_scm. Otherwise, use gitpython to get the information from
+    the git repo.
     """
 
     import qsprpred

@@ -1,1 +1,1 @@
-from .papyrus_class import Papyrus # noqa: F401
+from .papyrus_class import Papyrus  # noqa: F401

@@ -20,6 +20,10 @@ from ..logs.stopwatch import StopWatch
 from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from .data import QSPRDataset, TargetProperty
+from .utils.data_clustering import (
+    FPSimilarityLeaderPickerClusters,
+    FPSimilarityMaxMinClusters,
+)
 from .utils.datafilters import CategoryFilter, RepeatsFilter
 from .utils.datasplitters import (
     ClusterSplit,
@@ -27,12 +31,6 @@ from .utils.datasplitters import (
     RandomSplit,
     ScaffoldSplit,
     TemporalSplit,
-)
-from .utils.data_clustering import (
-    FPSimilarityLeaderPickerClusters,
-    FPSimilarityMaxMinClusters,
-    ScaffoldClusters,
-    RandomClusters,
 )
 from .utils.descriptorcalculator import (
     CustomDescriptorsCalculator,
@@ -669,8 +667,9 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         self.checkConsistencyMulticlass(dataset)
 
     def testTargetProperty(self):
-        """Test target property creation and serialization in the context of a
-        dataset."""
+        """Test target property creation and serialization
+        in the context of a dataset.
+        """
         dataset = QSPRDataset(
             "testTargetProperty",
             [
@@ -842,7 +841,9 @@ class TestTargetProperty(TestCase):
             self.assertEqual(target_prop.th, th)
 
     def testTargetProperty(self):
-        """Check the TargetProperty class on target property creation and serialization."""
+        """Check the TargetProperty class on target
+        property creation and serialization.
+        """
         # Check the different task types
         targetprop = TargetProperty("CL", TargetTasks.REGRESSION)
         self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, "CL", None)
@@ -922,12 +923,10 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
-    @parameterized.expand(
-        [
-            (False,),
-            (True,),
-        ]
-    )
+    @parameterized.expand([
+        (False, ),
+        (True, ),
+    ])
     def testRandomSplit(self, multitask):
         """Test the random split function."""
         if multitask:
@@ -935,15 +934,13 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         else:
             dataset = self.createLargeTestDataSet()
         dataset = self.createLargeTestDataSet()
-        dataset.prepareDataset(split=RandomSplit(dataset=dataset, test_fraction=0.1))
+        dataset.prepareDataset(split=RandomSplit(test_fraction=0.1))
         self.validate_split(dataset)
 
-    @parameterized.expand(
-        [
-            (False,),
-            (True,),
-        ]
-    )
+    @parameterized.expand([
+        (False, ),
+        (True, ),
+    ])
     def testTemporalSplit(self, multitask):
         """Test the temporal split function, where the split is done based on a time
         property."""
@@ -952,7 +949,6 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         else:
             dataset = self.createLargeTestDataSet()
         split = TemporalSplit(
-            dataset=dataset,
             timesplit=TIME_SPLIT_YEAR,
             timeprop="Year of first disclosure",
         )
@@ -995,7 +991,11 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             (False, FPSimilarityLeaderPickerClusters(), None),
             (False, FPSimilarityMaxMinClusters(), ["ClusterSplit_0", "ClusterSplit_1"]),
             (True, FPSimilarityMaxMinClusters(), None),
-            (True, FPSimilarityLeaderPickerClusters(), ["ClusterSplit_0", "ClusterSplit_1"]),
+            (
+                True,
+                FPSimilarityLeaderPickerClusters(),
+                ["ClusterSplit_0", "ClusterSplit_1"],
+            ),
         ]
     )
     def testClusterSplit(self, multitask, clustering_algorithm, custom_test_list):
@@ -1005,9 +1005,9 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         else:
             dataset = self.createLargeTestDataSet(name="ClusterSplit")
         split = ClusterSplit(
-            clustering = clustering_algorithm,
+            clustering=clustering_algorithm,
             custom_test_list=custom_test_list,
-            time_limit_seconds = 10,
+            time_limit_seconds=10,
         )
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)

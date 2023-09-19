@@ -199,8 +199,9 @@ class BioPythonMSA(MSAProvider, ABC):
                     "out_dir": self.outDir,
                     "fname": self.fName,
                     "current": current_path,
-                    "class": f"{self.__class__.__module__}.{self.__class__.__name__}"
-                }, f
+                    "class": f"{self.__class__.__module__}.{self.__class__.__name__}",
+                },
+                f,
             )
         self.currentToFile(os.path.join(os.path.dirname(fname), current_path))
 

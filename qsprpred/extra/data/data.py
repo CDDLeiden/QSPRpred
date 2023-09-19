@@ -188,7 +188,7 @@ class PCMDataSet(QSPRDataset):
             marshal.dumps(
                 self.proteinSeqProvider.__code__ if self.proteinSeqProvider else None
             )
-        ).decode('ascii')
+        ).decode("ascii")
         return meta
 
     @staticmethod
@@ -199,9 +199,7 @@ class PCMDataSet(QSPRDataset):
                 base64.b64decode(meta["init"]["protein_seq_provider"])
             )
             try:
-                seq_provider = types.FunctionType(
-                    seq_provider, globals()
-                )
+                seq_provider = types.FunctionType(seq_provider, globals())
                 meta["init"]["protein_seq_provider"] = seq_provider
             except Exception as e:
                 logger.warning(
@@ -272,7 +270,7 @@ class PCMDataSet(QSPRDataset):
     def addFeatures(
         self,
         feature_calculators: list[DescriptorsCalculator] | None = None,
-        recalculate: bool = False
+        recalculate: bool = False,
     ):
         """Add features to the feature matrix.
 
