@@ -9,7 +9,13 @@ from sklearn.model_selection import ParameterGrid
 
 from ..logs import logger
 from ..models.assessment_methods import CrossValAssessor
-from ..models.interfaces import HyperParameterOptimization, ModelAssessor, QSPRModel
+from ..models.interfaces import (
+    HyperParameterOptimization,
+    HyperParameterOptimizationMonitor,
+    ModelAssessor,
+    QSPRModel,
+)
+from ..models.monitors import NullMonitor
 
 
 class OptunaOptimization(HyperParameterOptimization):
@@ -49,6 +55,7 @@ class OptunaOptimization(HyperParameterOptimization):
         param_grid: dict,
         model_assessor: ModelAssessor = CrossValAssessor(),
         score_aggregation: Callable[[Iterable], float] = np.mean,
+        monitor: HyperParameterOptimizationMonitor = NullMonitor(),
         n_trials: int = 100,
         n_jobs: int = 1,
     ):
@@ -73,7 +80,9 @@ class OptunaOptimization(HyperParameterOptimization):
                 number of jobs to run in parallel.
                 At the moment only n_jobs=1 is supported.
         """
-        super().__init__(scoring, param_grid, model_assessor, score_aggregation)
+        super().__init__(
+            scoring, param_grid, model_assessor, score_aggregation, monitor
+        )
         search_space_types = [
             "categorical",
             "discrete_uniform",
@@ -101,6 +110,16 @@ class OptunaOptimization(HyperParameterOptimization):
         self.nJobs = 1
         self.bestScore = -np.inf
         self.bestParams = None
+        self.monitor.on_optimization_start(
+            {
+                "scoring": scoring,
+                "param_grid": param_grid,
+                "model_assessor": model_assessor,
+                "score_aggregation": score_aggregation,
+                "n_trials": n_trials,
+                "n_jobs": n_jobs,
+            }
+        )
 
     def optimize(self, model: QSPRModel, **kwargs) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
@@ -139,6 +158,8 @@ class OptunaOptimization(HyperParameterOptimization):
         # save the best score and parameters, return the best parameters
         self.bestScore = trial.value
         self.bestParams = trial.params
+
+        self.monitor.on_optimization_end(self.bestScore, self.bestParams)
         return self.bestParams
 
     def objective(self, trial: optuna.trial.Trial, model: QSPRModel, **kwargs) -> float:
@@ -171,8 +192,8 @@ class OptunaOptimization(HyperParameterOptimization):
                 )
             elif value[0] == "uniform":
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
+        self.monitor.on_iteration_start(bayesian_params)
         # assess the model with the current parameters and return the score
-        y, y_ind = model.data.getTargetPropertiesValues()
         predictions = self.runAssessment(
             model, save=False, parameters=bayesian_params, **kwargs
         )
@@ -186,10 +207,11 @@ class OptunaOptimization(HyperParameterOptimization):
                     pass
             scores.append(self.scoreFunc(*pred))
         assert len(scores) > 0, "No scores calculated, all folds skipped."
-        # scores = [self.scoreFunc(*pred) for pred in predictions]
+
         score = self.scoreAggregation(scores)
         logger.info(bayesian_params)
         logger.info(f"Score: {score}, std: {np.std(scores)}")
+        self.monitor.on_iteration_end(score, scores, predictions)
         return score
 
 

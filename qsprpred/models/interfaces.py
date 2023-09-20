@@ -896,6 +896,54 @@ class QSPRModel(ABC):
         """
 
 
+class BaseMonitor():
+    """Base class for monitoring the training of a model.
+
+    Attributes:
+    """
+
+
+
+class HyperParameterOptimizationMonitor(ABC, BaseMonitor):
+    """Base class for monitoring the hyperparameter optimization of a model."""
+    @abstractmethod
+    def on_optimization_start(self, config: dict):
+        """Called before the hyperparameter optimization has started.
+
+        Args:
+            config (dict): configuration of the hyperparameter optimization
+        """
+
+    @abstractmethod
+    def on_optimization_end(self, best_score: float, best_parameters: dict):
+        """Called after the hyperparameter optimization has finished.
+
+        Args:
+            best_score (float): best score found during optimization
+            best_parameters (dict): best parameters found during optimization
+        """
+
+    @abstractmethod
+    def on_iteration_start(self, params: dict):
+        """Called before each iteration of the hyperparameter optimization.
+
+        Args:
+            params (dict): parameters used for the current iteration
+        """
+
+    @abstractmethod
+    def on_iteration_end(self, score: float, scores: list[float],
+                         predictions: list[np.ndarray]):
+        """Called after each iteration of the hyperparameter optimization.
+
+        Args:
+            score (float): (aggregated) score of the current iteration
+            scores (list[float]): scores of the current iteration
+                                  (e.g for cross-validation)
+            predictions (list[np.ndarray]): predictions of the current iteration
+        """
+
+
 class ModelAssessor(ABC):
     """Base class for assessment methods.
 
@@ -985,6 +1033,7 @@ class HyperParameterOptimization(ABC):
         runAssessment (ModelAssessor): evaluation method to use
         scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
         paramGrid (dict): dictionary of parameters to optimize
+        monitor (HyperParameterOptimizationMonitor): monitor to track the optimization
         bestScore (float): best score found during optimization
         bestParams (dict): best parameters found during optimization
     """
@@ -994,6 +1043,7 @@ class HyperParameterOptimization(ABC):
         param_grid: dict,
         model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float],
+        monitor: HyperParameterOptimizationMonitor,
     ):
         """Initialize the hyperparameter optimization class.
 
@@ -1004,15 +1054,17 @@ class HyperParameterOptimization(ABC):
         model_assessor (ModelAssessor):
             assessment method to use for determining the best parameters
         score_aggregation (Callable[[Iterable], float]): function to aggregate scores
+        monitor (HyperParameterOptimizationMonitor): monitor to track the optimization
         """
         self.scoreFunc = (
-            SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
+            SklearnMetric.getMetric(scoring) if isinstance(scoring, str) else scoring
         )
         self.runAssessment = model_assessor
         self.scoreAggregation = score_aggregation
         self.paramGrid = param_grid
         self.bestScore = -np.inf
         self.bestParams = None
+        self.monitor = monitor
 
     @abstractmethod
     def optimize(self, model: QSPRModel) -> dict:
