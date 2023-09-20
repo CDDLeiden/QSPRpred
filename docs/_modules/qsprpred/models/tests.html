@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.tests &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.models.tests &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -93,7 +93,6 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numbers</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">exists</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
 <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
@@ -112,10 +111,12 @@
 
 <span class="kn">from</span> <span class="nn">..data.data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
 <span class="kn">from</span> <span class="nn">..data.tests</span> <span class="kn">import</span> <span class="n">DataSetsMixIn</span>
+<span class="kn">from</span> <span class="nn">..models.assessment_methods</span> <span class="kn">import</span> <span class="n">CrossValAssessor</span><span class="p">,</span> <span class="n">TestSetAssessor</span>
+<span class="kn">from</span> <span class="nn">..models.early_stopping</span> <span class="kn">import</span> <span class="n">EarlyStopping</span><span class="p">,</span> <span class="n">EarlyStoppingMode</span><span class="p">,</span> <span class="n">early_stopping</span>
 <span class="kn">from</span> <span class="nn">..models.hyperparam_optimization</span> <span class="kn">import</span> <span class="n">GridSearchOptimization</span><span class="p">,</span> <span class="n">OptunaOptimization</span>
 <span class="kn">from</span> <span class="nn">..models.interfaces</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
 <span class="kn">from</span> <span class="nn">..models.metrics</span> <span class="kn">import</span> <span class="n">SklearnMetric</span>
-<span class="kn">from</span> <span class="nn">..models.models</span> <span class="kn">import</span> <span class="n">QSPRsklearn</span>
+<span class="kn">from</span> <span class="nn">..models.sklearn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
 <span class="kn">from</span> <span class="nn">..models.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span><span class="p">,</span> <span class="n">TargetTasks</span>
 
 <span class="n">N_CPUS</span> <span class="o">=</span> <span class="mi">2</span>
@@ -124,21 +125,12 @@
 
 <div class="viewcode-block" id="ModelDataSetsMixIn"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn">[docs]</a><span class="k">class</span> <span class="nc">ModelDataSetsMixIn</span><span class="p">(</span><span class="n">DataSetsMixIn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class sets up the datasets for the model tests.&quot;&quot;&quot;</span>
-
-    <span class="n">qsprModelsPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/qspr/models&quot;</span>
-
 <div class="viewcode-block" id="ModelDataSetsMixIn.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the test environment.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsprModelsPath</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsprModelsPath</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="ModelDataSetsMixIn.clean_directories"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelDataSetsMixIn.clean_directories">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">clean_directories</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean the directories.&quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean_directories</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">qsprModelsPath</span><span class="p">):</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">qsprModelsPath</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models/&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ModelTestMixIn"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn">[docs]</a><span class="k">class</span> <span class="nc">ModelTestMixIn</span><span class="p">:</span>
@@ -169,31 +161,40 @@
 <span class="sd">            model (QSPRModel): The model to test.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># perform bayes optimization</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getDefaultMetric</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="p">)</span>
         <span class="n">search_space_bs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParamGrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;bayes&quot;</span><span class="p">)</span>
         <span class="n">bayesoptimizer</span> <span class="o">=</span> <span class="n">OptunaOptimization</span><span class="p">(</span>
-            <span class="n">scoring</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">scoreFunc</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
             <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_bs</span><span class="p">,</span>
-            <span class="n">n_trials</span><span class="o">=</span><span class="mi">1</span>
+            <span class="n">n_trials</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">model_assessor</span><span class="o">=</span><span class="n">CrossValAssessor</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="n">best_params</span> <span class="o">=</span> <span class="n">bayesoptimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">saveParams</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_params.json&quot;</span><span class="p">))</span>
         <span class="c1"># perform grid search</span>
         <span class="n">search_space_gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParamGrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+            <span class="n">score_func</span> <span class="o">=</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getMetric</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span>
         <span class="n">gridsearcher</span> <span class="o">=</span> <span class="n">GridSearchOptimization</span><span class="p">(</span>
-            <span class="n">scoring</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">scoreFunc</span><span class="p">,</span>
-            <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_gs</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
+            <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_gs</span><span class="p">,</span>
+            <span class="n">score_aggregation</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+            <span class="n">model_assessor</span><span class="o">=</span><span class="n">TestSetAssessor</span><span class="p">(</span>
+                <span class="n">use_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span>
+            <span class="p">),</span>
         <span class="p">)</span>
         <span class="n">best_params</span> <span class="o">=</span> <span class="n">gridsearcher</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">saveParams</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_params.json&quot;</span><span class="p">))</span>
         <span class="n">model</span><span class="o">.</span><span class="n">cleanFiles</span><span class="p">()</span>
         <span class="c1"># perform crossvalidation</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+        <span class="n">CrossValAssessor</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">TestSetAssessor</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">)(</span><span class="n">model</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.ind.tsv&quot;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.cv.tsv&quot;</span><span class="p">))</span>
         <span class="c1"># train the model on all data</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">fitAttached</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;estimator_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;parameters_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
@@ -203,9 +204,12 @@
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;feature_calculator_paths&quot;</span><span class="p">]</span>
             <span class="p">)</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
-            <span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_standardizer_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s2">&quot;feature_standardizer_path&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+                <span class="n">exists</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">metaInfo</span><span class="p">[</span><span class="s1">&#39;feature_standardizer_path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ModelTestMixIn.predictorTest"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.ModelTestMixIn.predictorTest">[docs]</a>    <span class="k">def</span> <span class="nf">predictorTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictor</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test a model as predictor.</span>
@@ -225,17 +229,11 @@
         <span class="c1"># define checks of the shape of the predictions</span>
         <span class="k">def</span> <span class="nf">check_shape</span><span class="p">(</span><span class="n">input_smiles</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span> <span class="ow">and</span> <span class="n">use_probas</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">predictor</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">))</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
-                        <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-                        <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_smiles</span><span class="p">),</span> <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nClasses</span><span class="p">),</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
-                        <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-                        <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_smiles</span><span class="p">),</span> <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nClasses</span><span class="p">),</span>
-                    <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                    <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_smiles</span><span class="p">),</span> <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nClasses</span><span class="p">),</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
                     <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
@@ -299,16 +297,16 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">singleoutput</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="TestQSPRsklearn"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn">[docs]</a><span class="k">class</span> <span class="nc">TestQSPRsklearn</span><span class="p">(</span><span class="n">ModelDataSetsMixIn</span><span class="p">,</span> <span class="n">ModelTestMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the QSPRsklearn class.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TestQSPRsklearn.getModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestQSPRsklearn.getModel">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+<div class="viewcode-block" id="TestSklearnModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnModel">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnModel</span><span class="p">(</span><span class="n">ModelDataSetsMixIn</span><span class="p">,</span> <span class="n">ModelTestMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the SklearnModel class.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="TestSklearnModel.getModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnModel.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a QSPRsklearn model.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a SklearnModel model.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): the name of the model</span>
@@ -317,10 +315,10 @@
 <span class="sd">            parameters (dict, optional): the parameters to use. Defaults to None.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            QSPRsklearn: the model</span>
+<span class="sd">            SklearnModel: the model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">QSPRsklearn</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/&quot;</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">SklearnModel</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
@@ -345,12 +343,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># initialize dataset</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
                 <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span>
             <span class="p">}],</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">(),</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="c1"># initialize model for training from class</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
@@ -360,7 +358,7 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span>
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
@@ -390,13 +388,13 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;probability&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
         <span class="c1"># initialize dataset</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
                 <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
                 <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span>
             <span class="p">}],</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">(),</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
         <span class="c1"># initialize model for training from class</span>
@@ -407,7 +405,7 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span>
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
@@ -421,7 +419,7 @@
     <span class="k">def</span> <span class="nf">testRegressionMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for multitask regression models.&quot;&quot;&quot;</span>
         <span class="c1"># initialize dataset</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
                 <span class="p">{</span>
                     <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
@@ -433,7 +431,7 @@
                 <span class="p">},</span>
             <span class="p">],</span>
             <span class="n">target_imputer</span><span class="o">=</span><span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">(),</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
         <span class="c1"># initialize model for training from class</span>
@@ -443,7 +441,7 @@
             <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">(</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_regression&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span>
@@ -466,7 +464,7 @@
         <span class="k">if</span> <span class="n">model_name</span> <span class="o">==</span> <span class="s2">&quot;SVC&quot;</span><span class="p">:</span>
             <span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;probability&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
         <span class="c1"># initialize dataset</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_large_dataset</span><span class="p">(</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
                 <span class="p">{</span>
                     <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
@@ -480,7 +478,7 @@
                 <span class="p">},</span>
             <span class="p">],</span>
             <span class="n">target_imputer</span><span class="o">=</span><span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">(),</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
         <span class="c1"># initialize model for training from class</span>
@@ -491,7 +489,7 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">(</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_classification&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span></div>
@@ -503,7 +501,6 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the metric is correctly implemented.&quot;&quot;&quot;</span>
         <span class="n">scorer</span> <span class="o">=</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getMetric</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">scorer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">scorer</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;supports_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">scorer</span><span class="o">.</span><span class="n">supportsTask</span><span class="p">(</span><span class="n">task</span><span class="p">))</span>
         <span class="c1"># lambda function to get the sklearn scoring function from the scorer object</span>
         <span class="n">sklearn_scorer</span> <span class="o">=</span> <span class="n">get_sklearn_scorer</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
@@ -574,6 +571,124 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">checkMetric</span><span class="p">(</span>
                 <span class="n">metric</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">y_pred_proba</span>
             <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestEarlyStopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping">[docs]</a><span class="k">class</span> <span class="nc">TestEarlyStopping</span><span class="p">(</span><span class="n">ModelDataSetsMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping.test_earlyStoppingMode"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_earlyStoppingMode">[docs]</a>    <span class="k">def</span> <span class="nf">test_earlyStoppingMode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping mode enum.&quot;&quot;&quot;</span>
+        <span class="c1"># get the enum values</span>
+        <span class="n">recording</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span>
+        <span class="n">not_recording</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span>
+        <span class="n">fixed</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">FIXED</span>
+        <span class="n">optimal</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">OPTIMAL</span>
+
+        <span class="c1"># check if the enum bools are correct</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">recording</span> <span class="ow">and</span> <span class="n">not_recording</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">fixed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">optimal</span><span class="p">)</span>
+
+        <span class="c1"># check if the string representation is correct</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s2">&quot;RECORDING&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">recording</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s2">&quot;NOT_RECORDING&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_recording</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s2">&quot;FIXED&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">fixed</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s2">&quot;OPTIMAL&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">optimal</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TestEarlyStopping.test_EarlyStopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_EarlyStopping">[docs]</a>    <span class="k">def</span> <span class="nf">test_EarlyStopping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping class.&quot;&quot;&quot;</span>
+
+        <span class="n">earlystopping</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">)</span>
+
+        <span class="c1"># check value error is raised when calling optimal epochs without recording</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">)</span>
+
+        <span class="c1"># record some epochs</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">recordEpochs</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">recordEpochs</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">recordEpochs</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">recordEpochs</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">recordEpochs</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+
+        <span class="c1"># check if epochs are recorded correctly</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">trainedEpochs</span><span class="p">,</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">])</span>
+
+        <span class="c1"># check if the optimal epochs are correct</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+
+        <span class="c1"># check if optimal epochs are correct when using a different aggregate function</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">aggregateFunc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+
+        <span class="c1"># check set num epochs manually</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">numEpochs</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">numEpochs</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+        <span class="c1"># check correct epochs are returned when using fixed mode and optimal mode</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">FIXED</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">getEpochs</span><span class="p">(),</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">OPTIMAL</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">getEpochs</span><span class="p">(),</span> <span class="mi">30</span><span class="p">)</span>
+
+        <span class="c1"># check saving</span>
+        <span class="n">earlystopping</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/earlystopping.json&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span>
+            <span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/earlystopping.json&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># check loading</span>
+        <span class="n">earlystopping2</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/earlystopping.json&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping2</span><span class="o">.</span><span class="n">trainedEpochs</span><span class="p">,</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping2</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">OPTIMAL</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping2</span><span class="o">.</span><span class="n">aggregateFunc</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping2</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">numEpochs</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestEarlyStopping.test_early_stopping_decorator"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_early_stopping_decorator">[docs]</a>    <span class="k">def</span> <span class="nf">test_early_stopping_decorator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping decorator.&quot;&quot;&quot;</span>
+        <span class="k">class</span> <span class="nc">test_class</span><span class="p">:</span>
+            <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">support</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">supportsEarlyStopping</span> <span class="o">=</span> <span class="n">support</span>
+
+            <span class="nd">@early_stopping</span>
+            <span class="k">def</span> <span class="nf">test_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;best_epoch&quot;</span><span class="p">]</span>
+
+        <span class="n">test_obj</span> <span class="o">=</span> <span class="n">test_class</span><span class="p">()</span>
+        <span class="n">recording</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span>
+        <span class="n">not_recording</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span>
+        <span class="c1"># epochs are recorded as self.earlyStopping.mode is set to RECORDING</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">29</span><span class="p">)</span>
+        <span class="c1"># epochs are not recorded as mode is set to NOT_RECORDING in the decorator</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">not_recording</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">49</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">test_obj</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="n">not_recording</span><span class="p">)</span>
+        <span class="c1"># epochs are recorded as mode is now set to RECORDING in the decorator</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">recording</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">39</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">test_obj</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="n">recording</span><span class="p">)</span>
+
+        <span class="c1"># Check if the best epochs are recorded with mode RECORDING using the decorator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">test_obj</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">,</span> <span class="mi">35</span><span class="p">)</span>
+
+        <span class="c1"># Check if the best epochs are not recorded with other modes using the decorator</span>
+        <span class="n">test_obj</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">FIXED</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">49</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">test_obj</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">,</span> <span class="mi">35</span><span class="p">)</span>
+        <span class="n">test_obj</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">OPTIMAL</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">test_obj</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">,</span> <span class="mi">35</span><span class="p">)</span>
+        <span class="n">test_obj</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">69</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">test_obj</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">,</span> <span class="mi">35</span><span class="p">)</span>
+
+        <span class="c1"># check decorator raises error when early stopping is not supported</span>
+        <span class="n">test_obj</span> <span class="o">=</span> <span class="n">test_class</span><span class="p">(</span><span class="n">support</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">):</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

@@ -12,6 +12,14 @@ Subpackages
 Submodules
 ----------
 
+qsprpred.data.utils.data\_clustering module
+-------------------------------------------
+
+.. automodule:: qsprpred.data.utils.data_clustering
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 qsprpred.data.utils.datafilters module
 --------------------------------------
 

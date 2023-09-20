@@ -1,5 +1,5 @@
-qsprpred.deep package
-=====================
+qsprpred.extra.gpu package
+==========================
 
 Subpackages
 -----------
@@ -7,12 +7,12 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   qsprpred.deep.models
+   qsprpred.extra.gpu.models
 
 Module contents
 ---------------
 
-.. automodule:: qsprpred.deep
+.. automodule:: qsprpred.extra.gpu
    :members:
    :undoc-members:
    :show-inheritance:

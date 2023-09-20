@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.data &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.extra.data.data &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -88,12 +88,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.extra.data.data</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">data</span>
-
-<span class="sd">Created by: Martin Sicho</span>
-<span class="sd">On: 12.05.23, 17:14</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">marshal</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">types</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -217,14 +215,16 @@
 <span class="sd">            sequences (dict): Dictionary of protein sequences.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proteinSeqProvider</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Protein sequence provider not set. Cannot get protein sequences.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Protein sequence provider not set. Cannot get protein sequences.&quot;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proteinSeqProvider</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="PCMDataSet.addProteinDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.addProteinDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">addProteinDescriptors</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">calculator</span><span class="p">:</span> <span class="n">ProteinDescriptorCalculator</span><span class="p">,</span>
-            <span class="n">recalculate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">calculator</span><span class="p">:</span> <span class="n">ProteinDescriptorCalculator</span><span class="p">,</span>
+        <span class="n">recalculate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add protein descriptors to the data frame.</span>
@@ -269,6 +269,47 @@
             <span class="sa">f</span><span class="s2">&quot;SDF loading not implemented for </span><span class="si">{</span><span class="n">PCMDataSet</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">, yet. &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Use `PCMDataSet.fromMolTable` to convert a `MoleculeTable`&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;read from an SDF instead.&quot;</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PCMDataSet.generateMetadata"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.generateMetadata">[docs]</a>    <span class="k">def</span> <span class="nf">generateMetadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">generateMetadata</span><span class="p">()</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;init&quot;</span><span class="p">][</span><span class="s2">&quot;protein_col&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proteinCol</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;init&quot;</span><span class="p">][</span><span class="s2">&quot;protein_seq_provider&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span>
+            <span class="n">marshal</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proteinSeqProvider</span><span class="o">.</span><span class="vm">__code__</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proteinSeqProvider</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">meta</span></div>
+
+<div class="viewcode-block" id="PCMDataSet.loadMetadata"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.loadMetadata">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">loadMetadata</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">store_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">loadMetadata</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">store_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;init&quot;</span><span class="p">][</span><span class="s2">&quot;protein_seq_provider&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">seq_provider</span> <span class="o">=</span> <span class="n">marshal</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+                <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;init&quot;</span><span class="p">][</span><span class="s2">&quot;protein_seq_provider&quot;</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">seq_provider</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">(</span><span class="n">seq_provider</span><span class="p">,</span> <span class="nb">globals</span><span class="p">())</span>
+                <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;init&quot;</span><span class="p">][</span><span class="s2">&quot;protein_seq_provider&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">seq_provider</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Failed to load protein sequence provider from metadata. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;The function object could not be recreated from the code. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Deserialized Code: </span><span class="si">{</span><span class="n">seq_provider</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Setting protein sequence provider to `None` for now.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;init&quot;</span><span class="p">][</span><span class="s2">&quot;protein_seq_provider&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">meta</span></div>
+
+<div class="viewcode-block" id="PCMDataSet.fromFile"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.fromFile">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;QSPRDataset&quot;</span><span class="p">:</span>
+        <span class="n">store_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">PCMDataSet</span><span class="o">.</span><span class="n">loadMetadata</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">store_dir</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">PCMDataSet</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">store_dir</span><span class="o">=</span><span class="n">store_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;init&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="PCMDataSet.fromMolTable"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.fromMolTable">[docs]</a>    <span class="nd">@staticmethod</span>
@@ -319,7 +360,7 @@
 <div class="viewcode-block" id="PCMDataSet.addFeatures"><a class="viewcode-back" href="../../../../api/qsprpred.extra.data.html#qsprpred.extra.data.data.PCMDataSet.addFeatures">[docs]</a>    <span class="k">def</span> <span class="nf">addFeatures</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">feature_calculators</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorsCalculator</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add features to the feature matrix.</span>
 

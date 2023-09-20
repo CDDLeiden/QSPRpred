@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.models.assessment_methods &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v2.1.0a1.dev131+g15e3f33
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.models.assessment_methods</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.models.assessment_methods</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This module holds assessment methods for QSPRModels&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">..logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">.interfaces</span> <span class="kn">import</span> <span class="n">ModelAssessor</span><span class="p">,</span> <span class="n">QSPRModel</span>
+
+
+<div class="viewcode-block" id="CrossValAssessor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.assessment_methods.CrossValAssessor">[docs]</a><span class="k">class</span> <span class="nc">CrossValAssessor</span><span class="p">(</span><span class="n">ModelAssessor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform cross validation on a model.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        useProba (bool): use predictProba instead of predict for classification</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform cross validation on the model with the given parameters.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            model (QSPRModel): model to assess</span>
+<span class="sd">            save (bool): whether to save predictions to file</span>
+<span class="sd">            parameters (dict): optional model parameters to use in assessment</span>
+<span class="sd">            use_proba (bool): use predictProba instead of predict for classification</span>
+<span class="sd">            **kwargs: additional keyword arguments for the fit function</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float | np.ndarray: predictions on the validation set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">evalparams</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parameters</span>
+        <span class="c1"># check if data is available</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">checkForData</span><span class="p">()</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">getTargetPropertiesValues</span><span class="p">()</span>
+        <span class="c1"># prepare arrays to store molecule ids and predictions</span>
+        <span class="n">cvs_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">useProba</span><span class="p">:</span>
+            <span class="n">cvs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">model</span><span class="o">.</span><span class="n">nTargets</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cvs</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">prop</span><span class="o">.</span><span class="n">nClasses</span><span class="p">))</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span>
+            <span class="p">]</span>
+        <span class="c1"># cross validation</span>
+        <span class="n">folds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">createFolds</span><span class="p">()</span>
+        <span class="n">fold_counter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">idx_train</span><span class="p">,</span>
+                <span class="n">idx_test</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">folds</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;cross validation fold </span><span class="si">%s</span><span class="s2"> started: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="c1"># fit model</span>
+            <span class="n">crossval_estimator</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="n">evalparams</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">crossval_estimator</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1"># make predictions</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">useProba</span><span class="p">:</span>
+                <span class="n">cvs</span><span class="p">[</span><span class="n">idx_test</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">crossval_estimator</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictProba</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">crossval_estimator</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nTargets</span><span class="p">):</span>
+                    <span class="n">cvs</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="n">idx_test</span><span class="p">]</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="c1"># save molecule ids and fold number</span>
+            <span class="n">fold_counter</span><span class="p">[</span><span class="n">idx_test</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">cvs_ids</span><span class="p">[</span><span class="n">idx_test</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx_test</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;cross validation fold </span><span class="si">%s</span><span class="s2"> ended: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="c1"># save results</span>
+        <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+            <span class="n">index_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">cvs_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">cvs_ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">index_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">savePredictionsToFile</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cvs</span><span class="p">,</span> <span class="n">cvs_index</span><span class="p">,</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span> <span class="n">extra_columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Fold&quot;</span><span class="p">:</span> <span class="n">fold_counter</span><span class="p">}</span>
+            <span class="p">)</span>
+        <span class="c1"># create output list with tuples of true values and predictions for each fold</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">():</span>
+                <span class="n">predictions</span> <span class="o">=</span> <span class="n">cvs</span><span class="p">[</span><span class="n">fold_counter</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">predictions</span> <span class="o">=</span> <span class="p">[</span><span class="n">cvs_task</span><span class="p">[</span><span class="n">fold_counter</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">cvs_task</span> <span class="ow">in</span> <span class="n">cvs</span><span class="p">]</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">y</span><span class="p">[</span><span class="n">fold_counter</span> <span class="o">==</span> <span class="n">i</span><span class="p">],</span> <span class="n">predictions</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="TestSetAssessor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.assessment_methods.TestSetAssessor">[docs]</a><span class="k">class</span> <span class="nc">TestSetAssessor</span><span class="p">(</span><span class="n">ModelAssessor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make predictions for independent test set.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            model (QSPRModel): model to assess</span>
+<span class="sd">            save (bool): whether to save predictions to file</span>
+<span class="sd">            parameters (dict): optional model parameters to use in assessment</span>
+<span class="sd">            use_proba (bool): use predictProba instead of predict for classification</span>
+<span class="sd">            **kwargs: additional keyword arguments for the fit function</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float | np.ndarray: predictions for evaluation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">evalparams</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parameters</span>
+        <span class="c1"># check if data is available</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">checkForData</span><span class="p">()</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">X_ind</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="n">y</span><span class="p">,</span> <span class="n">y_ind</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">getTargetPropertiesValues</span><span class="p">()</span>
+        <span class="c1"># prepare arrays to store molecule ids and predictions</span>
+        <span class="n">inds_ids</span> <span class="o">=</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">useProba</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">prop</span><span class="o">.</span><span class="n">nClasses</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span>
+            <span class="p">]</span>
+        <span class="c1"># fit model</span>
+        <span class="n">ind_estimator</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="n">evalparams</span><span class="p">)</span>
+        <span class="n">ind_estimator</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ind_estimator</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># if independent test set is available, predict on it</span>
+        <span class="k">if</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">useProba</span><span class="p">:</span>
+                <span class="n">inds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_ind</span><span class="p">,</span> <span class="n">ind_estimator</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictProba</span><span class="p">(</span><span class="n">X_ind</span><span class="p">,</span> <span class="n">ind_estimator</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nTargets</span><span class="p">):</span>
+                    <span class="n">inds</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No independent test set available. &quot;</span>
+                <span class="s2">&quot;Skipping prediction on independent test set.&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># predict values for independent test set and save results</span>
+        <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+            <span class="n">index_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">ind_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">inds_ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">index_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">savePredictionsToFile</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">y_ind</span><span class="p">,</span> <span class="n">inds</span><span class="p">,</span> <span class="n">ind_index</span><span class="p">,</span> <span class="s2">&quot;ind&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">y_ind</span><span class="p">,</span> <span class="n">inds</span><span class="p">)]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

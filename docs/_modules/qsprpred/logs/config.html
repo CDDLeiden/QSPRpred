@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.logs.config &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.logs.config &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -95,6 +95,8 @@
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">config</span>
 
+<span class="kn">import</span> <span class="nn">git</span>
+
 <span class="c1"># Maximum runid is 9999</span>
 <span class="n">MAX_ID</span> <span class="o">=</span> <span class="mi">10000</span>
 
@@ -139,13 +141,11 @@
 <span class="sd">    Debug entries are saved to a separate file if debug is True</span>
 <span class="sd">    Debug and warning and above are save in a verbose format.</span>
 <span class="sd">    Warning and above are also printed to std.out</span>
-<span class="sd">    ...</span>
 
-<span class="sd">    Arguments</span>
-<span class="sd">    ----------</span>
-<span class="sd">    log_file_path (str): Folder where all logs for this run are saved</span>
-<span class="sd">    debug (bool): if true, debug messages are saved</span>
-<span class="sd">    no_exist_log (bool): if true, existing loggers are disabled</span>
+<span class="sd">    Args:</span>
+<span class="sd">        log_file_path (str): Folder where all logs for this run are saved</span>
+<span class="sd">        debug (bool): if true, debug messages are saved</span>
+<span class="sd">        no_exist_log (bool): if true, existing loggers are disabled</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">debug_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">log_file_path</span><span class="p">),</span> <span class="s2">&quot;debug.log&quot;</span><span class="p">)</span>
     <span class="n">simple_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span>
@@ -220,16 +220,54 @@
     <span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">LOGGING_CONFIG</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="init_logfile"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.init_logfile">[docs]</a><span class="k">def</span> <span class="nf">init_logfile</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">githash</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_git_info"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.get_git_info">[docs]</a><span class="k">def</span> <span class="nf">get_git_info</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get information of the current git commit</span>
+
+<span class="sd">    If the package is installed with pip, read the detailed version extracted</span>
+<span class="sd">    by setuptools_scm. Otherwise, use gitpython to get the information from</span>
+<span class="sd">    the git repo.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">qsprpred</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Package path: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">is_pip_package</span> <span class="o">=</span> <span class="s2">&quot;site-packages&quot;</span> <span class="ow">in</span> <span class="n">path</span>
+
+    <span class="k">if</span> <span class="n">is_pip_package</span><span class="p">:</span>
+        <span class="c1"># Version info is extracted by setuptools_scm (default format)</span>
+        <span class="kn">from</span> <span class="nn">.._version</span> <span class="kn">import</span> <span class="n">__version__</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="n">__version__</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Version info [from pip]: </span><span class="si">{</span><span class="n">info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># If git repo</span>
+        <span class="n">repo</span> <span class="o">=</span> <span class="n">git</span><span class="o">.</span><span class="n">Repo</span><span class="p">(</span><span class="n">search_parent_directories</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Get git hash</span>
+        <span class="n">git_hash</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">hexsha</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span>
+        <span class="c1"># Get git branch</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">branch</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">active_branch</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">branch</span> <span class="o">=</span> <span class="s2">&quot;detached HEAD&quot;</span>
+        <span class="c1"># Get git tag</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+        <span class="c1"># Get number of commits between current commit and last tag</span>
+        <span class="n">ncommits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">iter_commits</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">..HEAD&quot;</span><span class="p">)))</span>
+        <span class="c1"># Check if repo is dirty</span>
+        <span class="n">dirty</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">is_dirty</span><span class="p">()</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s2">) </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">+</span><span class="si">{</span><span class="n">ncommits</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">git_hash</span><span class="si">}</span><span class="s2">]+</span><span class="si">{</span><span class="s1">&#39;dirty&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">dirty</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2"> &quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Version info [from git repo]: </span><span class="si">{</span><span class="n">info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="init_logfile"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.init_logfile">[docs]</a><span class="k">def</span> <span class="nf">init_logfile</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Put some intial information in the logfile</span>
-<span class="sd">    ...</span>
 
-<span class="sd">    Arguments</span>
-<span class="sd">    ----------</span>
-<span class="sd">    log : Logging instance</span>
-<span class="sd">    runid (str): the current runid</span>
-<span class="sd">    githash (str): githash</span>
+<span class="sd">    Args:</span>
+<span class="sd">        log : Logging instance</span>
+<span class="sd">        args (dict): Dictionary with all command line arguments</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">baseFilename</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creation date: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
@@ -237,24 +275,25 @@
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Continued at: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
         <span class="p">)</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;git hash: </span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">githash</span><span class="p">)</span>
+
+    <span class="n">get_git_info</span><span class="p">()</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Run settings:&quot;</span><span class="p">)</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_runid"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.get_runid">[docs]</a><span class="k">def</span> <span class="nf">get_runid</span><span class="p">(</span><span class="n">log_folder</span><span class="o">=</span><span class="s2">&quot;logs&quot;</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_runid"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.get_runid">[docs]</a><span class="k">def</span> <span class="nf">get_runid</span><span class="p">(</span><span class="n">log_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;logs&quot;</span><span class="p">,</span> <span class="n">old</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Fetch runid that is used in all logfiles to identifiy a specific run</span>
-<span class="sd">    ...</span>
+<span class="sd">    Fetch runid that is used in all logfiles to identifiy a specific run.</span>
 
-<span class="sd">    Arguments</span>
-<span class="sd">    ----------</span>
-<span class="sd">    log_folder (str): Folder where all logs are saved</span>
-<span class="sd">    old (bool): if true, fetches the last used runid</span>
-<span class="sd">    id (int): If included, returns this runid number</span>
+<span class="sd">    Args:</span>
+<span class="sd">        log_folder (str): Folder where all logs are saved</span>
+<span class="sd">        old (bool): if true, fetches the last used runid</span>
+<span class="sd">        id (int): If included, returns this runid number</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        runid (str): runid in the format &quot;0001&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_folder</span><span class="p">,</span> <span class="s2">&quot;runid.txt&quot;</span><span class="p">)</span>
 
     <span class="c1"># Determine the runid to fetch</span>

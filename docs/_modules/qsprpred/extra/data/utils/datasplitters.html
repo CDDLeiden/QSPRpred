@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.utils.datasplitters &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.extra.data.utils.datasplitters &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -97,14 +97,109 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">qsprpred.data.data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.interfaces</span> <span class="kn">import</span> <span class="n">DataSetDependant</span><span class="p">,</span> <span class="n">DataSplit</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.utils.datasplitters</span> <span class="kn">import</span> <span class="n">TemporalSplit</span>
-<span class="kn">from</span> <span class="nn">qsprpred.extra.data.data</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
+<span class="kn">from</span> <span class="nn">....data.data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">TargetProperty</span>
+<span class="kn">from</span> <span class="nn">....data.interfaces</span> <span class="kn">import</span> <span class="n">DataSplit</span>
+<span class="kn">from</span> <span class="nn">....data.utils.datasplitters</span> <span class="kn">import</span> <span class="n">ClusterSplit</span><span class="p">,</span> <span class="n">RandomSplit</span><span class="p">,</span> <span class="n">ScaffoldSplit</span>
+<span class="kn">from</span> <span class="nn">..data</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
 
 
-<div class="viewcode-block" id="LeaveTargetsOut"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut">[docs]</a><span class="k">class</span> <span class="nc">LeaveTargetsOut</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">DataSetDependant</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PCMSplit"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.PCMSplit">[docs]</a><span class="k">class</span> <span class="nc">PCMSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits a dataset into train and test set such that the subset are balanced with</span>
+<span class="sd">    respect to each of the protein targets.</span>
+
+<span class="sd">    This is done with https://github.com/sohviluukkonen/gbmt-splits, linear programming</span>
+<span class="sd">    of initial clusters (random-, scaffold- or cluster-based) to get a balanced split.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        dataset (PCMDataSet): The dataset to split.</span>
+<span class="sd">        splitter (DataSplit): The splitter to use on the initial clusters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">splitter</span><span class="p">:</span> <span class="n">DataSplit</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="o">=</span> <span class="n">splitter</span>
+
+        <span class="c1"># Check that splitter is either RandomSplit, ScaffoldSplit or ClusterSplit</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">,</span> <span class="p">(</span><span class="n">RandomSplit</span><span class="p">,</span> <span class="n">ScaffoldSplit</span><span class="p">,</span> <span class="n">ClusterSplit</span><span class="p">)</span>
+        <span class="p">),</span> <span class="s2">&quot;Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!&quot;</span>
+
+<div class="viewcode-block" id="PCMSplit.split"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.PCMSplit.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Split the PCM dataset into train and test set such that the subsets are balanced</span>
+<span class="sd">        with respect to the protein targets and there is not data leakage between the</span>
+<span class="sd">        train and test set.</span>
+
+<span class="sd">        Converts the PCM dataset into a multi-task dataset with protein targets as</span>
+<span class="sd">        columns and uses the given splitter to split the multi-task dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (np.ndarray | pd.DataFrame): the input data matrix</span>
+<span class="sd">            y (np.ndarray | pd.DataFrame | pd.Series): the target variable(s)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            an iterator over the generated subsets represented as a tuple of</span>
+<span class="sd">            (train_indices, test_indices) where the indices are the row indices of the</span>
+<span class="sd">            input data matrix X (note that these are integer indices, rather than a</span>
+<span class="sd">            pandas index!)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">proteins</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span>
+        <span class="n">th</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">th</span> <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">),</span> <span class="s2">&quot;PCMSplit only works for single-task datasets!&quot;</span>
+        <span class="c1"># TODO: Add support for multi-target PCM datasets: creta a multi-task dataset</span>
+        <span class="c1"># with all target-task combinations as different columns and split that</span>
+        <span class="c1"># dataset with the given splitter</span>
+
+        <span class="c1"># Pivot dataframe to get a matrix with protein targets as columns</span>
+        <span class="n">df_mt</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">,</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">,</span>
+            <span class="n">values</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+        <span class="c1"># Create target properties for multi-task dataset</span>
+        <span class="n">mt_targetProperties</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">TargetProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="n">th</span><span class="p">)</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">proteins</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Create multi-task dataset and split it with the given splitter</span>
+        <span class="n">ds_mt</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;PCM_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">df_mt</span><span class="p">,</span>
+            <span class="n">smiles_col</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="n">mt_targetProperties</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ds_mt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">)</span>
+
+        <span class="c1"># Convert MT indices to indices of original PCM dataset</span>
+        <span class="n">test_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ds_mt</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="c1"># Get SMILES and non-NaN targets for index i</span>
+            <span class="n">smiles</span> <span class="o">=</span> <span class="n">df_mt</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ds_mt</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">]</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">df_mt</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">proteins</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+                <span class="c1"># Get index in the original PCM dataset the SMILES-target pair</span>
+                <span class="n">ds_idx</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">]</span> <span class="o">==</span> <span class="n">target</span><span class="p">)</span> <span class="o">&amp;</span>
+                            <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">]</span> <span class="o">==</span> <span class="n">smiles</span><span class="p">)]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># Convert to numeric index</span>
+                <span class="n">test_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ds_idx</span><span class="p">))</span>
+
+        <span class="n">train_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">test_indices</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">test_indices</span><span class="p">)])</span></div></div>
+
+
+<div class="viewcode-block" id="LeaveTargetsOut"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.LeaveTargetsOut">[docs]</a><span class="k">class</span> <span class="nc">LeaveTargetsOut</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a leave target out splitter.</span>
 
 <span class="sd">        Args:</span>
@@ -128,59 +223,13 @@
         <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)])</span></div></div>
 
 
-<div class="viewcode-block" id="StratifiedPerTarget"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget">[docs]</a><span class="k">class</span> <span class="nc">StratifiedPerTarget</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">DataSetDependant</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Splits dataset in train and test subsets based on the specified splitter.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="TemporalPerTarget"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget">[docs]</a><span class="k">class</span> <span class="nc">TemporalPerTarget</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">splitter</span><span class="p">:</span> <span class="n">DataSplit</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">splitters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataSplit</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a split that is consistent across targets.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            splitter: a `datasplit` instance to split the target subsets of the dataset</span>
-<span class="sd">            splitters (dict[str, datasplit]): a dictionary with target keys as keys and</span>
-<span class="sd">                splitters to use on each protein target as values</span>
-<span class="sd">            dataset (PCMDataset): a `PCMDataset` instance to split</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="o">=</span> <span class="n">splitter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">splitters</span> <span class="o">=</span> <span class="n">splitters</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> \
-            <span class="s2">&quot;Either a splitter or multiple splitters must be specified!&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span><span class="n">splitter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">splitters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span> \
-            <span class="s2">&quot;Either one splitter or multiple splitters must be specified, but not both!&quot;</span>
-
-<div class="viewcode-block" id="StratifiedPerTarget.split"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.StratifiedPerTarget.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">()</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span>
-        <span class="n">train</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">test</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">))))</span>
-        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">():</span>
-            <span class="n">splitter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitters</span><span class="p">[</span>
-                <span class="n">target</span><span class="p">]</span>
-            <span class="n">df_target</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">]</span> <span class="o">==</span> <span class="n">target</span><span class="p">]</span>
-            <span class="n">ds_target</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">_scaff_split_</span><span class="si">{</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">df</span><span class="o">=</span><span class="n">df_target</span><span class="p">,</span>
-                <span class="n">smiles_col</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">,</span>
-                <span class="n">target_props</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span>
-                <span class="n">index_cols</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">indexCols</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">ds_target</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">)</span>
-            <span class="n">train</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">ds_target</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">)])</span>
-            <span class="n">test</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">ds_target</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">)])</span>
-
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">train</span><span class="p">))</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">test</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">),</span> \
-            <span class="s2">&quot;Train and test set do not cover the whole dataset!&quot;</span>
-        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)])</span></div></div>
-
-
-<div class="viewcode-block" id="TemporalPerTarget"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget">[docs]</a><span class="k">class</span> <span class="nc">TemporalPerTarget</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">DataSetDependant</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">year_col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">split_years</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">year_col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">split_years</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">firts_year_per_compound</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a temporal split that is consistent across targets.</span>
 
@@ -191,21 +240,55 @@
 <span class="sd">            split_years (dict[str,int]):</span>
 <span class="sd">                a dictionary with target keys as keys</span>
 <span class="sd">                and split years as values</span>
+<span class="sd">            firts_year_per_compound (bool):</span>
+<span class="sd">                if True, the first year a compound appears in the dataset is used</span>
+<span class="sd">                for all targets</span>
 <span class="sd">            dataset (PCMDataset):</span>
 <span class="sd">                a `PCMDataset` instance to split</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">splitYears</span> <span class="o">=</span> <span class="n">split_years</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span> <span class="o">=</span> <span class="n">year_col</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">firstYearPerCompound</span> <span class="o">=</span> <span class="n">firts_year_per_compound</span>
 
 <div class="viewcode-block" id="TemporalPerTarget.split"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.datasplitters.TemporalPerTarget.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
-        <span class="n">splitters</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">target</span><span class="p">:</span>
-                <span class="n">TemporalSplit</span><span class="p">(</span><span class="n">timeprop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span><span class="p">,</span> <span class="n">timesplit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">splitYears</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">target</span><span class="p">,</span> <span class="n">year</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitYears</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="n">StratifiedPerTarget</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">(),</span>
-                                   <span class="n">splitters</span><span class="o">=</span><span class="n">splitters</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div></div>
+        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="c1"># Set the first year a compound appears in the dataset as the year</span>
+        <span class="c1"># of the compound for all targets</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">firstYearPerCompound</span><span class="p">:</span>
+            <span class="n">first_years</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span> <span class="o">+</span> <span class="s2">&quot;_first&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">first_years</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span> <span class="o">+=</span> <span class="s2">&quot;_first&quot;</span>
+
+        <span class="n">train_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">test_indices</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">target</span><span class="p">,</span> <span class="n">split_year</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitYears</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">df_target</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">]</span> <span class="o">==</span> <span class="n">target</span><span class="p">]</span>
+            <span class="c1"># Get indices of the train and test set</span>
+            <span class="n">train</span> <span class="o">=</span> <span class="n">df_target</span><span class="p">[</span><span class="n">df_target</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">split_year</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="n">df_target</span><span class="p">[</span><span class="n">df_target</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">split_year</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="c1"># Check if there is data for the target before/after the split year</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;No training data for target </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> before </span><span class="si">{</span><span class="n">split_year</span><span class="si">}</span><span class="s2">!&quot;</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;No test data for target </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> after </span><span class="si">{</span><span class="n">split_year</span><span class="si">}</span><span class="s2">!&quot;</span>
+                <span class="p">)</span>
+            <span class="c1"># Convert to numeric indices</span>
+            <span class="n">train_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">indices</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">train</span><span class="p">])</span>
+            <span class="n">test_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">indices</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">test</span><span class="p">])</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">train_indices</span><span class="p">))</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">test_indices</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">),</span> <span class="s2">&quot;Train and test set do not cover the whole dataset!&quot;</span>
+
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">test_indices</span><span class="p">)])</span></div></div>
 </pre></div>
 
            </div>

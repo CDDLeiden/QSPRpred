@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.model_CLI &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.model_CLI &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -96,6 +96,7 @@
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">importlib.util</span> <span class="kn">import</span> <span class="n">find_spec</span>
 
@@ -109,10 +110,13 @@
 <span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span><span class="p">,</span> <span class="n">XGBRegressor</span>
 
 <span class="kn">from</span> <span class="nn">.data.data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
-<span class="kn">from</span> <span class="nn">.deep.models.models</span> <span class="kn">import</span> <span class="n">QSPRDNN</span>
-<span class="kn">from</span> <span class="nn">.logs.utils</span> <span class="kn">import</span> <span class="n">backup_files</span><span class="p">,</span> <span class="n">commit_hash</span><span class="p">,</span> <span class="n">enable_file_logger</span>
+<span class="kn">from</span> <span class="nn">.extra.gpu.models.dnn</span> <span class="kn">import</span> <span class="n">DNNModel</span>
+<span class="kn">from</span> <span class="nn">.logs.utils</span> <span class="kn">import</span> <span class="n">backup_files</span><span class="p">,</span> <span class="n">enable_file_logger</span>
+<span class="kn">from</span> <span class="nn">.models.assessment_methods</span> <span class="kn">import</span> <span class="n">CrossValAssessor</span><span class="p">,</span> <span class="n">TestSetAssessor</span>
+<span class="kn">from</span> <span class="nn">.models.early_stopping</span> <span class="kn">import</span> <span class="n">EarlyStoppingMode</span>
 <span class="kn">from</span> <span class="nn">.models.hyperparam_optimization</span> <span class="kn">import</span> <span class="n">GridSearchOptimization</span><span class="p">,</span> <span class="n">OptunaOptimization</span>
-<span class="kn">from</span> <span class="nn">.models.models</span> <span class="kn">import</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">QSPRsklearn</span>
+<span class="kn">from</span> <span class="nn">.models.metrics</span> <span class="kn">import</span> <span class="n">SklearnMetric</span>
+<span class="kn">from</span> <span class="nn">.models.sklearn</span> <span class="kn">import</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">SklearnModel</span>
 <span class="kn">from</span> <span class="nn">.models.tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
 
 
@@ -121,16 +125,32 @@
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
         <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span>
     <span class="p">)</span>
-
     <span class="c1"># base arguments</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-b&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;--base_dir&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-dp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--data_paths&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Each data file path to be used as input for the model, &quot;</span>
+            <span class="s2">&quot;e.g ./target1_MULTICLASS_df.pkl&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--output_dir&quot;</span><span class="p">,</span>
         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Base directory which contains a folder &#39;data&#39; with input files&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Directory to write the output model files to&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-de&quot;</span><span class="p">,</span> <span class="s2">&quot;--debug&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-sb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--skip_backup&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Skip backup of files. WARNING: this may overwrite &quot;</span>
+        <span class="s2">&quot;previous results, use with caution.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;-ran&quot;</span><span class="p">,</span> <span class="s2">&quot;--random_state&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Seed for the random state&quot;</span>
     <span class="p">)</span>
@@ -138,46 +158,14 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;-gpus&quot;</span><span class="p">,</span> <span class="s2">&quot;--gpus&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;List of GPUs&quot;</span>
     <span class="p">)</span>
-
-    <span class="c1"># model target arguments</span>
+    <span class="c1"># model arguments</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-dp&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;--data_prefixes&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-ms&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--model_suffix&quot;</span><span class="p">,</span>
         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
-        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Prefix of each data file to be used as input for the model, &quot;</span>
-            <span class="s2">&quot;e.g. target1_MULTICLASS for a file named target1_MULTICLASS_df.pkl&quot;</span>
-        <span class="p">),</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Suffix to add to model name&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-ms&quot;</span><span class="p">,</span> <span class="s2">&quot;--model_suffix&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Suffix of the model to be saved&quot;</span>
-    <span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-pr&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;--properties&quot;</span><span class="p">,</span>
-        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
-        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
-        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;append&quot;</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;properties to be predicted identifiers. Add this argument for each model &quot;</span>
-            <span class="s2">&quot;to be trained e.g. for one multi-task model for CL and Fu and one single &quot;</span>
-            <span class="s2">&quot;task for CL do -pr CL Fu -pr CL&quot;</span>
-        <span class="p">),</span>
-    <span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-lt&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;--log_transform&quot;</span><span class="p">,</span>
-        <span class="nb">type</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;For each property if its values need to be log-transformed. This arg only &quot;</span>
-            <span class="s2">&quot;has an effect when mode is regression, otherwise will be ignored! This &quot;</span>
-            <span class="s2">&quot;needs to be given for each property included in any of the models as &quot;</span>
-            <span class="s2">&quot;follows, e.g. -lt </span><span class="se">\&quot;</span><span class="s2">{&#39;CL&#39;:True,&#39;fu&#39;:False}</span><span class="se">\&quot;</span><span class="s2">. Note. no spaces and &quot;</span>
-            <span class="s2">&quot;surround by single quotes&quot;</span>
-        <span class="p">),</span>
-    <span class="p">)</span>
-
     <span class="c1"># model type arguments</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;-mt&quot;</span><span class="p">,</span>
@@ -199,12 +187,8 @@
         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;file name of json file with non-default parameter settings &quot;</span>
-            <span class="s2">&quot;(base_dir/qspr/models/[-p]_params.json). NB. If json file with name &quot;</span>
-            <span class="s2">&quot;</span><span class="si">{model_type}</span><span class="s2">_{REG/CLS}_</span><span class="si">{property}</span><span class="s2">_params.json) present in &quot;</span>
-            <span class="s2">&quot;qspr/models folder those settings will also be used, but if the same &quot;</span>
-            <span class="s2">&quot;parameter is present in both files the settings from &quot;</span>
-            <span class="s2">&quot;(base_dir/[-p]_params.json) will be used.&quot;</span>
+            <span class="s2">&quot;file path of json file with non-default parameter settings, &quot;</span>
+            <span class="s2">&quot;e.g. ./parameters.json&quot;</span>
         <span class="p">),</span>
     <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
@@ -236,7 +220,7 @@
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;If included then the model will be trained on all data and saved&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-op&quot;</span><span class="p">,</span>
         <span class="s2">&quot;--optimization&quot;</span><span class="p">,</span>
         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -251,7 +235,7 @@
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="p">(</span>
             <span class="s2">&quot;search_space hyperparameter optimization json file location &quot;</span>
-            <span class="s2">&quot;(base_dir/[name].json). If None, default &quot;</span>
+            <span class="s2">&quot;(./my_search_space.json). If None, default &quot;</span>
             <span class="s2">&quot;qsprpred.models.search_space.json used.&quot;</span>
         <span class="p">),</span>
     <span class="p">)</span>
@@ -282,11 +266,6 @@
         <span class="p">),</span>
     <span class="p">)</span>
 
-    <span class="c1"># other</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-ng&quot;</span><span class="p">,</span> <span class="s2">&quot;--no_git&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;If on, git hash is not retrieved&quot;</span>
-    <span class="p">)</span>
-
     <span class="k">if</span> <span class="n">txt</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -297,42 +276,40 @@
 
 <div class="viewcode-block" id="QSPR_modelling"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.model_CLI.QSPR_modelling">[docs]</a><span class="k">def</span> <span class="nf">QSPR_modelling</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimize, evaluate and train estimators.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">+</span> <span class="s2">&quot;/qspr/models&quot;</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">+</span> <span class="s2">&quot;/qspr/models&quot;</span><span class="p">)</span>
 
     <span class="c1"># read in file with specified parameters for model fitting</span>
     <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">parameters</span><span class="si">}</span><span class="s2">.json&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">parameters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
                 <span class="n">par_dicts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Parameter settings file (</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">.json) not found.&quot;</span> <span class="o">%</span>
-                <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter settings file (</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">parameters</span><span class="si">}</span><span class="s2">) not found.&quot;</span><span class="p">)</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">optimization</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;grid&quot;</span><span class="p">,</span> <span class="s2">&quot;bayes&quot;</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">search_space</span><span class="p">:</span>
             <span class="n">grid_params</span> <span class="o">=</span> <span class="n">QSPRModel</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">search_space</span><span class="si">}</span><span class="s2">.json&quot;</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">search_space</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">optimization</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">model_types</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">grid_params</span> <span class="o">=</span> <span class="n">QSPRModel</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span>
-                <span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">optimization</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">model_types</span>
-            <span class="p">)</span>
+            <span class="c1"># Get default search space</span>
+            <span class="n">model_types</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model_types</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;DNN&quot;</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">model_types</span><span class="p">:</span>
+                <span class="n">dnn_grid_params</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span>
+                    <span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">optimization</span><span class="p">,</span> <span class="s2">&quot;DNN&quot;</span>
+                <span class="p">)</span>
+                <span class="n">model_types</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;DNN&quot;</span><span class="p">)</span>
+            <span class="n">grid_params</span> <span class="o">=</span> <span class="n">QSPRModel</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">optimization</span><span class="p">,</span> <span class="n">model_types</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;DNN&quot;</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">model_types</span><span class="p">:</span>
+                <span class="n">grid_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">grid_params</span><span class="p">,</span> <span class="n">dnn_grid_params</span><span class="p">))</span>
 
-    <span class="k">for</span> <span class="n">data_prefix</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">data_prefixes</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data file: </span><span class="si">{</span><span class="n">data_prefix</span><span class="si">}</span><span class="s2">_df.pkl&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">datasets</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="n">mydataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s2">/qspr/data/</span><span class="si">{</span><span class="n">data_prefix</span><span class="si">}</span><span class="s2">_df.pkl&quot;</span>
-        <span class="p">)</span>
-
-        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">task</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">mydataset</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">]</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">task</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span> <span class="o">==</span> <span class="n">task</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">):</span>
             <span class="n">reg</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">):</span>
@@ -342,7 +319,6 @@
         <span class="n">reg_abbr</span> <span class="o">=</span> <span class="s2">&quot;regression&quot;</span> <span class="k">if</span> <span class="n">reg</span> <span class="k">else</span> <span class="s2">&quot;classification&quot;</span>
 
         <span class="k">for</span> <span class="n">model_type</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">model_types</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">model_type</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model: </span><span class="si">{</span><span class="n">model_type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">reg_abbr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">model_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;RF&quot;</span><span class="p">,</span> <span class="s2">&quot;XGB&quot;</span><span class="p">,</span> <span class="s2">&quot;DNN&quot;</span><span class="p">,</span> <span class="s2">&quot;SVM&quot;</span><span class="p">,</span> <span class="s2">&quot;PLS&quot;</span><span class="p">,</span> <span class="s2">&quot;NB&quot;</span><span class="p">,</span> <span class="s2">&quot;KNN&quot;</span><span class="p">]:</span>
@@ -362,6 +338,7 @@
                 <span class="s2">&quot;PLS&quot;</span><span class="p">:</span> <span class="n">PLSRegression</span><span class="p">,</span>
                 <span class="s2">&quot;NB&quot;</span><span class="p">:</span> <span class="n">GaussianNB</span><span class="p">,</span>
                 <span class="s2">&quot;KNN&quot;</span><span class="p">:</span> <span class="n">KNeighborsRegressor</span> <span class="k">if</span> <span class="n">reg</span> <span class="k">else</span> <span class="n">KNeighborsClassifier</span><span class="p">,</span>
+                <span class="s2">&quot;DNN&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">}</span>
 
             <span class="c1"># setting some default parameters</span>
@@ -380,16 +357,14 @@
             <span class="c1"># class_weight and scale_pos_weight are only used for RF, XGB and SVM</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">reg</span><span class="p">:</span>
                 <span class="n">class_weight</span> <span class="o">=</span> <span class="s2">&quot;balanced&quot;</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">sample_weighing</span> <span class="k">else</span> <span class="kc">None</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">alg_dict</span><span class="p">[</span><span class="n">model_type</span><span class="p">]</span> <span class="o">==</span> <span class="n">RandomForestClassifier</span> <span class="ow">or</span>
-                    <span class="n">alg_dict</span><span class="p">[</span><span class="n">model_type</span><span class="p">]</span> <span class="o">==</span> <span class="n">SVC</span>
-                <span class="p">):</span>
+                <span class="k">if</span> <span class="n">alg_dict</span><span class="p">[</span><span class="n">model_type</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">SVC</span><span class="p">]:</span>
                     <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;class_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_weight</span>
-                <span class="n">counts</span> <span class="o">=</span> <span class="n">mydataset</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+                <span class="n">counts</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
                 <span class="n">scale_pos_weight</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span>
-                    <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">sample_weighing</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span>
-                     <span class="ow">not</span> <span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isMultiClass</span><span class="p">())</span> <span class="k">else</span> <span class="mi">1</span>
+                    <span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">args</span><span class="o">.</span><span class="n">sample_weighing</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span>
+                        <span class="ow">not</span> <span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isMultiClass</span><span class="p">()</span>
+                    <span class="p">)</span> <span class="k">else</span> <span class="mi">1</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">alg_dict</span><span class="p">[</span><span class="n">model_type</span><span class="p">]</span> <span class="o">==</span> <span class="n">XGBClassifier</span><span class="p">:</span>
                     <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;scale_pos_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale_pos_weight</span>
@@ -405,40 +380,44 @@
                     <span class="p">)</span>
 
             <span class="c1"># Create QSPR model object</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_type</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">model_suffix</span> <span class="k">else</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_type</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">model_suffix</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;DNN&quot;</span><span class="p">:</span>
-                <span class="n">QSPRmodel</span> <span class="o">=</span> <span class="n">QSPRDNN</span><span class="p">(</span>
-                    <span class="n">base_dir</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span>
-                    <span class="n">data</span><span class="o">=</span><span class="n">mydataset</span><span class="p">,</span>
+                <span class="n">QSPRmodel</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
+                    <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
                     <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
-                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_type</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data_prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
                     <span class="n">gpus</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">gpus</span><span class="p">,</span>
                     <span class="n">patience</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">patience</span><span class="p">,</span>
                     <span class="n">tol</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">tolerance</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">QSPRmodel</span> <span class="o">=</span> <span class="n">QSPRsklearn</span><span class="p">(</span>
-                    <span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span>
-                    <span class="n">data</span><span class="o">=</span><span class="n">mydataset</span><span class="p">,</span>
+                <span class="n">QSPRmodel</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
+                    <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
                     <span class="n">alg</span><span class="o">=</span><span class="n">alg_dict</span><span class="p">[</span><span class="n">model_type</span><span class="p">],</span>
-                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_type</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data_prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
                     <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="c1"># if desired run parameter optimization</span>
+            <span class="n">score_func</span> <span class="o">=</span> <span class="n">SklearnMetric</span><span class="o">.</span><span class="n">getDefaultMetric</span><span class="p">(</span><span class="n">QSPRmodel</span><span class="o">.</span><span class="n">task</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">optimization</span> <span class="o">==</span> <span class="s2">&quot;grid&quot;</span><span class="p">:</span>
                 <span class="n">search_space_gs</span> <span class="o">=</span> <span class="n">grid_params</span><span class="p">[</span><span class="n">grid_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_type</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">search_space_gs</span><span class="p">)</span>
                 <span class="n">gridsearcher</span> <span class="o">=</span> <span class="n">GridSearchOptimization</span><span class="p">(</span>
-                    <span class="n">scoring</span><span class="o">=</span><span class="n">QSPRmodel</span><span class="o">.</span><span class="n">scoreFunc</span><span class="p">,</span> <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_gs</span>
+                    <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span> <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_gs</span>
                 <span class="p">)</span>
                 <span class="n">best_params</span> <span class="o">=</span> <span class="n">gridsearcher</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">QSPRmodel</span><span class="p">)</span>
                 <span class="n">QSPRmodel</span><span class="o">.</span><span class="n">saveParams</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">optimization</span> <span class="o">==</span> <span class="s1">&#39;bayes&#39;</span><span class="p">:</span>
-                <span class="n">search_space_bs</span> <span class="o">=</span> <span class="n">grid_params</span><span class="p">[</span><span class="n">grid_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span>
-                                              <span class="n">model_type</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">optimization</span> <span class="o">==</span> <span class="s2">&quot;bayes&quot;</span><span class="p">:</span>
+                <span class="n">search_space_bs</span> <span class="o">=</span> <span class="n">grid_params</span><span class="p">[</span><span class="n">grid_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_type</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">search_space_bs</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">reg</span> <span class="ow">and</span> <span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;RF&quot;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">mydataset</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">mydataset</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">min</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">dataset</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">min</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">search_space_bs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                             <span class="p">{</span><span class="s2">&quot;criterion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;squared_error&quot;</span><span class="p">]]}</span>
                         <span class="p">)</span>
@@ -454,7 +433,7 @@
                         <span class="p">{</span><span class="s2">&quot;criterion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;gini&quot;</span><span class="p">,</span> <span class="s2">&quot;entropy&quot;</span><span class="p">]]}</span>
                     <span class="p">)</span>
                 <span class="n">bayesoptimizer</span> <span class="o">=</span> <span class="n">OptunaOptimization</span><span class="p">(</span>
-                    <span class="n">scoring</span><span class="o">=</span><span class="n">QSPRmodel</span><span class="o">.</span><span class="n">scoreFunc</span><span class="p">,</span>
+                    <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
                     <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_bs</span><span class="p">,</span>
                     <span class="n">n_trials</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">n_trials</span><span class="p">,</span>
                     <span class="n">n_jobs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
@@ -464,7 +443,8 @@
             <span class="c1"># initialize models from saved or default parameters</span>
 
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">model_evaluation</span><span class="p">:</span>
-                <span class="n">QSPRmodel</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                <span class="n">CrossValAssessor</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">)(</span><span class="n">QSPRmodel</span><span class="p">)</span>
+                <span class="n">TestSetAssessor</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">)(</span><span class="n">QSPRmodel</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">save_model</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;DNN&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model_evaluation</span><span class="p">):</span>
@@ -473,7 +453,7 @@
                         <span class="s2">&quot;for determining optimal number of epochs to stop training.&quot;</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">QSPRmodel</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span></div>
+                    <span class="n">QSPRmodel</span><span class="o">.</span><span class="n">fitAttached</span><span class="p">()</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -489,30 +469,33 @@
     <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_DETERMINISTIC_OPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
 
     <span class="c1"># Backup files</span>
+    <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span> <span class="k">for</span> <span class="n">data_file</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">data_paths</span><span class="p">]</span>
     <span class="n">file_prefixes</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data_prefix</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">alg</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">model_types</span>
-        <span class="k">for</span> <span class="n">data_prefix</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">data_prefixes</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">alg</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">model_types</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">datasets</span>
     <span class="p">]</span>
-    <span class="n">backup_msg</span> <span class="o">=</span> <span class="n">backup_files</span><span class="p">(</span>
-        <span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;qspr/models&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">file_prefixes</span><span class="p">),</span> <span class="n">cp_suffix</span><span class="o">=</span><span class="s2">&quot;_params&quot;</span>
-    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">model_suffix</span><span class="p">:</span>
+        <span class="n">file_prefixes</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">model_suffix</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">file_prefixes</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s2">/qspr/models&quot;</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s2">/qspr/models&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">skip_backup</span><span class="p">:</span>
+        <span class="n">backup_msg</span> <span class="o">=</span> <span class="n">backup_files</span><span class="p">(</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">file_prefixes</span><span class="p">),</span> <span class="n">cp_suffix</span><span class="o">=</span><span class="s2">&quot;_params&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
 
     <span class="n">logSettings</span> <span class="o">=</span> <span class="n">enable_file_logger</span><span class="p">(</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;qspr/models&quot;</span><span class="p">),</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span>
         <span class="s2">&quot;QSPRmodel.log&quot;</span><span class="p">,</span>
         <span class="n">args</span><span class="o">.</span><span class="n">debug</span><span class="p">,</span>
         <span class="vm">__name__</span><span class="p">,</span>
-        <span class="n">commit_hash</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_git</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="nb">vars</span><span class="p">(</span><span class="n">args</span><span class="p">),</span>
         <span class="n">disable_existing_loggers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">log</span> <span class="o">=</span> <span class="n">logSettings</span><span class="o">.</span><span class="n">log</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">backup_msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">skip_backup</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">backup_msg</span><span class="p">)</span>
 
     <span class="c1"># Add optuna logging</span>
     <span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">enable_propagation</span><span class="p">()</span>  <span class="c1"># Propagate logs to the root logger.</span>
@@ -521,15 +504,16 @@
     <span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
     <span class="c1"># Create json log file with used commandline arguments</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s2">/qspr/models/QSPRmodel.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/QSPRmodel.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Command line arguments written to </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/QSPRmodel.json&quot;</span><span class="p">)</span>
 
     <span class="c1"># Optimize, evaluate and train estimators according to QSPR arguments</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="s2">&quot;QSPR modelling started: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
     <span class="p">)</span>
 
+    <span class="n">args</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">datasets</span>
     <span class="n">QSPR_modelling</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>

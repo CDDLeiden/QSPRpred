@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 4
 
    qsprpred.data
-   qsprpred.deep
    qsprpred.extra
    qsprpred.logs
    qsprpred.metrics

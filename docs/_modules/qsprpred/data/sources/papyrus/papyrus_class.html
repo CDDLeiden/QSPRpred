@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sources.papyrus.papyrus_class &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.data.sources.papyrus.papyrus_class &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -92,6 +92,7 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">papyrus_scripts</span>
@@ -102,7 +103,7 @@
 
 
 <div class="viewcode-block" id="Papyrus"><a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus">[docs]</a><span class="k">class</span> <span class="nc">Papyrus</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Create new instance of Papyrus dataset.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create new instance of Papyrus dataset.</span>
 <span class="sd">    See `papyrus_filter` and `Papyrus.download` and `Papyrus.getData` for more details.</span>
 
 <span class="sd">    Attributes:</span>
@@ -122,7 +123,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_DIR</span><span class="p">,</span>
         <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">,</span>
-        <span class="n">descriptors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="n">descriptors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">stereo</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">disk_margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
         <span class="n">plus_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -131,12 +132,20 @@
 <span class="sd">        `Papyrus.download` and `Papyrus.getData` for more details.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data_dir (str): storage directory for Papyrus database and the extracted data</span>
-<span class="sd">            version (str): Papyrus database version</span>
-<span class="sd">            descriptors (str, list, None): descriptors to download if not already present</span>
-<span class="sd">            stereo (str): include stereochemistry in the database</span>
-<span class="sd">            disk_margin (float): the disk space margin to leave free</span>
-<span class="sd">            plus_only (bool): use only plusplus version, only high quality data</span>
+<span class="sd">            data_dir (str):</span>
+<span class="sd">                storage directory for Papyrus database and the extracted data</span>
+<span class="sd">            version (str):</span>
+<span class="sd">                Papyrus database version</span>
+<span class="sd">            descriptors (str, list, None):</span>
+<span class="sd">                descriptors to download if not already present (set to &#39;all&#39; for</span>
+<span class="sd">                all descriptors, otherwise a list of descriptor names, see</span>
+<span class="sd">                https://github.com/OlivierBeq/Papyrus-scripts)</span>
+<span class="sd">            stereo (str):</span>
+<span class="sd">                include stereochemistry in the database</span>
+<span class="sd">            disk_margin (float):</span>
+<span class="sd">                the disk space margin to leave free</span>
+<span class="sd">            plus_only (bool):</span>
+<span class="sd">                use only plusplus version, only high quality data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataDir</span> <span class="o">=</span> <span class="n">data_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
@@ -168,11 +177,12 @@
         <span class="n">acc_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">quality</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">activity_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
-        <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">1e5</span><span class="p">,</span>
         <span class="n">use_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MoleculeTable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the data from the Papyrus database as a `DataSetTSV` instance.</span>
 
@@ -185,6 +195,7 @@
 <span class="sd">            drop_duplicates (bool): remove duplicates after filtering</span>
 <span class="sd">            chunk_size (int): data is read in chunks of this size (see `papyrus_filter`)</span>
 <span class="sd">            use_existing (bool): use existing if available</span>
+<span class="sd">            kwargs: additional keyword arguments passed to `MoleculeTable.fromTableFile`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            MolculeTable: the filtered data set</span>
@@ -206,13 +217,13 @@
             <span class="n">plusplus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plusplus</span><span class="p">,</span>
             <span class="n">papyrus_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataDir</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">MoleculeTable</span><span class="o">.</span><span class="n">fromTableFile</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">store_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">MoleculeTable</span><span class="o">.</span><span class="n">fromTableFile</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">store_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Papyrus.getProteinData"><a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getProteinData">[docs]</a>    <span class="k">def</span> <span class="nf">getProteinData</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">acc_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the protein data from the Papyrus database.</span>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.utils.descriptorcalculator &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.data.utils.descriptorcalculator &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -116,9 +116,12 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc_sets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;DescriptorSet&quot;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: F821</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the descriptorsets to be calculated with this calculator.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descSets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">desc_sets</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">noParallelization</span> <span class="o">=</span> <span class="nb">any</span><span class="p">((</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">descset</span><span class="p">,</span> <span class="s1">&#39;noParallelization&#39;</span><span class="p">)</span> <span class="ow">and</span>
-                                      <span class="nb">getattr</span><span class="p">(</span><span class="n">descset</span><span class="p">,</span> <span class="s1">&#39;noParallelization&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">)</span>
-                                     <span class="k">for</span> <span class="n">descset</span> <span class="ow">in</span> <span class="n">desc_sets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noParallelization</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="nb">hasattr</span><span class="p">(</span><span class="n">descset</span><span class="p">,</span> <span class="s2">&quot;noParallelization&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="n">descset</span><span class="o">.</span><span class="n">noParallelization</span> <span class="ow">is</span> <span class="kc">True</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">descset</span> <span class="ow">in</span> <span class="n">desc_sets</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="DescriptorsCalculator.loadDescriptorSets"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator.loadDescriptorSets">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">loadDescriptorSets</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;DescriptorSet&quot;</span><span class="p">]:</span>  <span class="c1"># noqa: F821</span>
@@ -258,12 +261,19 @@
         <span class="c1"># remove all descriptorsets that are not in the list of descriptors to keep</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descSets</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descSets</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">to_remove</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="DescriptorsCalculator.get_len"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator.get_len">[docs]</a>    <span class="k">def</span> <span class="nf">get_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DescriptorsCalculator.getLen"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator.getLen">[docs]</a>    <span class="k">def</span> <span class="nf">getLen</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return number of descriptors calculated by all descriptorsets.&quot;&quot;&quot;</span>
         <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">descset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descSets</span><span class="p">:</span>
-            <span class="n">length</span> <span class="o">+=</span> <span class="n">descset</span><span class="o">.</span><span class="n">get_len</span><span class="p">()</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="n">descset</span><span class="o">.</span><span class="n">getLen</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">length</span></div>
+
+<div class="viewcode-block" id="DescriptorsCalculator.getDescriptorNames"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator.getDescriptorNames">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptorNames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return list of descriptor names calculated by all descriptorsets.&quot;&quot;&quot;</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">descset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descSets</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">+=</span> <span class="n">descset</span><span class="o">.</span><span class="n">descriptors</span>
+        <span class="k">return</span> <span class="n">names</span></div>
 
 <div class="viewcode-block" id="DescriptorsCalculator.treatInfs"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.DescriptorsCalculator.treatInfs">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">treatInfs</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -304,13 +314,17 @@
             <span class="n">values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">descset</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">descset</span><span class="o">.</span><span class="n">isFP</span><span class="p">:</span>
                 <span class="n">values</span><span class="o">.</span><span class="n">add_prefix</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">descset</span><span class="o">.</span><span class="n">fingerprintType</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">)</span>
-            <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-            <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatInfs</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatInfs</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Could not convert descriptor values to </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2">. &quot;</span>
+                    <span class="s2">&quot;Keeping original dtype.&quot;</span>
+                <span class="p">)</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">df</span><span class="p">,</span> <span class="n">values</span><span class="o">.</span><span class="n">add_prefix</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">getPrefix</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">descset</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
             <span class="p">)</span>
-        <span class="c1"># replace errors by nan values</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span>
 
 <div class="viewcode-block" id="MoleculeDescriptorsCalculator.getPrefix"><a class="viewcode-back" href="../../../../api/qsprpred.data.utils.html#qsprpred.data.utils.descriptorcalculator.MoleculeDescriptorsCalculator.getPrefix">[docs]</a>    <span class="k">def</span> <span class="nf">getPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -337,7 +351,9 @@
             <span class="k">if</span> <span class="n">descset</span><span class="o">.</span><span class="n">isFP</span><span class="p">:</span>
                 <span class="n">values</span><span class="o">.</span><span class="n">add_prefix</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">descset</span><span class="o">.</span><span class="n">fingerprintType</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">)</span>
             <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-            <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatInfs</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="c1"># if dtype is numeric</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatInfs</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
             <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">add_prefix</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">getPrefix</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">descset</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">)</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 

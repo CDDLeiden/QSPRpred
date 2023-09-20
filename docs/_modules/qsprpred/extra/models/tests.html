@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.models.tests &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.extra.models.tests &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -93,7 +93,6 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
 <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
 
@@ -111,22 +110,20 @@
 <span class="kn">from</span> <span class="nn">..data.utils.descriptor_utils.msa_calculator</span> <span class="kn">import</span> <span class="n">ClustalMSA</span>
 <span class="kn">from</span> <span class="nn">..data.utils.descriptorcalculator</span> <span class="kn">import</span> <span class="n">ProteinDescriptorCalculator</span>
 <span class="kn">from</span> <span class="nn">..data.utils.descriptorsets</span> <span class="kn">import</span> <span class="n">ProDec</span>
-<span class="kn">from</span> <span class="nn">..models.pcm</span> <span class="kn">import</span> <span class="n">QSPRsklearnPCM</span>
+<span class="kn">from</span> <span class="nn">..models.pcm</span> <span class="kn">import</span> <span class="n">SklearnPCMModel</span>
 
 
 <div class="viewcode-block" id="ModelDataSetsMixInExtras"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras">[docs]</a><span class="k">class</span> <span class="nc">ModelDataSetsMixInExtras</span><span class="p">(</span><span class="n">ModelDataSetsMixIn</span><span class="p">,</span> <span class="n">DataSetsMixInExtras</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for testing models in extras.&quot;&quot;&quot;</span>
-
-    <span class="n">qsprModelsPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/qspr/models&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for testing models in extras.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="TestPCM"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM">[docs]</a><span class="k">class</span> <span class="nc">TestPCM</span><span class="p">(</span><span class="n">ModelDataSetsMixInExtras</span><span class="p">,</span> <span class="n">ModelTestMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestPCM.getModel"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getModel">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+<div class="viewcode-block" id="TestPCM.getModel"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize dataset and model.</span>
 
@@ -137,10 +134,10 @@
 <span class="sd">            parameters (dict | None): Parameters to use.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            QSPRsklearnPCM: Initialized model.</span>
+<span class="sd">            SklearnPCMModel: Initialized model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">QSPRsklearnPCM</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/&quot;</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">SklearnPCMModel</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
@@ -197,11 +194,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># initialize dataset</span>
-        <span class="n">prep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_prep</span><span class="p">()</span>
+        <span class="n">prep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
         <span class="n">prep</span><span class="p">[</span><span class="s2">&quot;feature_calculators&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prep</span><span class="p">[</span><span class="s2">&quot;feature_calculators&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
             <span class="n">ProteinDescriptorCalculator</span><span class="p">(</span>
                 <span class="n">desc_sets</span><span class="o">=</span><span class="p">[</span><span class="n">ProDec</span><span class="p">(</span><span class="n">sets</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Sneath&quot;</span><span class="p">])],</span>
-                <span class="n">msa_provider</span><span class="o">=</span><span class="n">ClustalMSA</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsprdatapath</span><span class="p">),</span>
+                <span class="n">msa_provider</span><span class="o">=</span><span class="n">ClustalMSA</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">]</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPCMDataSet</span><span class="p">(</span>
@@ -217,7 +214,7 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRsklearnPCM</span><span class="p">(</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">SklearnPCMModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">props</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">protein_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="s2">&quot;accession&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>

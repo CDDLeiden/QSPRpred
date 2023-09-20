@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.logs package &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.logs package &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -67,7 +67,6 @@
 <li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.deep.html">qsprpred.deep package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.html">qsprpred.extra package</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qsprpred.logs package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.metrics.html">qsprpred.metrics package</a></li>
@@ -122,7 +121,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.logs.config.LevelFilter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.logs.config.</span></span><span class="sig-name descname"><span class="pre">LevelFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#LevelFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.LevelFilter" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/logging.html#logging.Filter" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/logging.html#logging.Filter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></a></p>
 <p>LoggingFilter used to filter one or more specific log levels messages</p>
 <p>Initialize a filter.</p>
 <p>Initialize with the name of the logger which, together with its
@@ -140,8 +139,8 @@ If deemed appropriate, the record may be modified in-place.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.logs.config.LevelFormatter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.logs.config.</span></span><span class="sig-name descname"><span class="pre">LevelFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#LevelFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.LevelFormatter" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/logging.html#logging.Formatter" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Formatter</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.logs.config.</span></span><span class="sig-name descname"><span class="pre">LevelFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#LevelFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.LevelFormatter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/logging.html#logging.Formatter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Formatter</span></code></a></p>
 <p>LoggingFormatter used to specifiy the formatting per level</p>
 <p>Initialize the formatter with specified format strings.</p>
 <p>Initialize the formatter either with the specified format string, or a
@@ -149,8 +148,8 @@ default as described above. Allow for specialized date formatting with
 the optional datefmt argument. If datefmt is omitted, you get an
 ISO8601-like (or RFC 3339-like) format.</p>
 <p>Use a style parameter of ‘%’, ‘{’ or ‘$’ to specify that you want to
-use one of %-formatting, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str.format" title="(in Python v3.9)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.format()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">{}</span></code>) formatting or
-<a class="reference external" href="https://docs.python.org/3.9/library/string.html#string.Template" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">string.Template</span></code></a> formatting in your format string.</p>
+use one of %-formatting, <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str.format" title="(in Python v3.10)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.format()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">{}</span></code>) formatting or
+<a class="reference external" href="https://docs.python.org/3.10/library/string.html#string.Template" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">string.Template</span></code></a> formatting in your format string.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 3.2: </span>Added the <code class="docutils literal notranslate"><span class="pre">style</span></code> parameter.</p>
 </div>
@@ -177,7 +176,7 @@ When ‘seconds’ is not passed in, convert the current time instead.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.logs.config.LevelFormatter.format">
-<span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/logging.html#logging.LogRecord" title="(in Python v3.9)"><span class="pre">LogRecord</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#LevelFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.LevelFormatter.format" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/logging.html#logging.LogRecord" title="(in Python v3.10)"><span class="pre">LogRecord</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#LevelFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.LevelFormatter.format" title="Permalink to this definition"></a></dt>
 <dd><p>Format the specified record as text.</p>
 <p>The record’s attribute dictionary is used as the operand to a
 string formatting operation which yields the returned string.
@@ -208,7 +207,7 @@ traceback.print_exception()</p>
 <dd><p>This method is provided as an extension point for specialized
 formatting of stack information.</p>
 <p>The input data is a string as returned from a call to
-<a class="reference external" href="https://docs.python.org/3.9/library/traceback.html#traceback.print_stack" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">traceback.print_stack()</span></code></a>, but with the last trailing newline
+<a class="reference external" href="https://docs.python.org/3.10/library/traceback.html#traceback.print_stack" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">traceback.print_stack()</span></code></a>, but with the last trailing newline
 removed.</p>
 <p>The base implementation just returns the value passed in.</p>
 </dd></dl>
@@ -243,7 +242,7 @@ set the ‘converter’ attribute in the Formatter class.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.logs.config.LogFileConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.logs.config.</span></span><span class="sig-name descname"><span class="pre">LogFileConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#LogFileConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.LogFileConfig" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">
@@ -253,46 +252,57 @@ set the ‘converter’ attribute in the Formatter class.</p>
 All info is saved in a simple format on the log file path.
 Debug entries are saved to a separate file if debug is True
 Debug and warning and above are save in a verbose format.
-Warning and above are also printed to std.out
-…</p>
+Warning and above are also printed to std.out</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>(</strong><strong>str</strong><strong>)</strong> (<em>log_file_path</em>) – </p></li>
-<li><p><strong>(</strong><strong>bool</strong><strong>)</strong> (<em>no_exist_log</em>) – </p></li>
-<li><p><strong>(</strong><strong>bool</strong><strong>)</strong> – </p></li>
+<li><p><strong>log_file_path</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Folder where all logs for this run are saved</p></li>
+<li><p><strong>debug</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – if true, debug messages are saved</p></li>
+<li><p><strong>no_exist_log</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – if true, existing loggers are disabled</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.logs.config.get_git_info">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.config.</span></span><span class="sig-name descname"><span class="pre">get_git_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#get_git_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.get_git_info" title="Permalink to this definition"></a></dt>
+<dd><p>Get information of the current git commit</p>
+<p>If the package is installed with pip, read the detailed version extracted
+by setuptools_scm. Otherwise, use gitpython to get the information from
+the git repo.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="qsprpred.logs.config.get_runid">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.config.</span></span><span class="sig-name descname"><span class="pre">get_runid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'logs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#get_runid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.get_runid" title="Permalink to this definition"></a></dt>
-<dd><p>Fetch runid that is used in all logfiles to identifiy a specific run
-…</p>
+<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.config.</span></span><span class="sig-name descname"><span class="pre">get_runid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'logs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#get_runid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.get_runid" title="Permalink to this definition"></a></dt>
+<dd><p>Fetch runid that is used in all logfiles to identifiy a specific run.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>(</strong><strong>str</strong><strong>)</strong> (<em>log_folder</em>) – </p></li>
-<li><p><strong>(</strong><strong>bool</strong><strong>)</strong> (<em>old</em>) – </p></li>
-<li><p><strong>(</strong><strong>int</strong><strong>)</strong> (<em>id</em>) – </p></li>
+<li><p><strong>log_folder</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Folder where all logs are saved</p></li>
+<li><p><strong>old</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – if true, fetches the last used runid</p></li>
+<li><p><strong>id</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – If included, returns this runid number</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>runid in the format “0001”</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>runid (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)">str</a>)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qsprpred.logs.config.init_logfile">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.config.</span></span><span class="sig-name descname"><span class="pre">init_logfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">githash</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#init_logfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.init_logfile" title="Permalink to this definition"></a></dt>
-<dd><p>Put some intial information in the logfile
-…</p>
+<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.config.</span></span><span class="sig-name descname"><span class="pre">init_logfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/config.html#init_logfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.config.init_logfile" title="Permalink to this definition"></a></dt>
+<dd><p>Put some intial information in the logfile</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>log</strong> (<em>Logging instance</em>) – </p></li>
-<li><p><strong>(</strong><strong>str</strong><strong>)</strong> (<em>githash</em>) – </p></li>
-<li><p><strong>(</strong><strong>str</strong><strong>)</strong> – </p></li>
+<li><p><strong>log</strong> – Logging instance</p></li>
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – Dictionary with all command line arguments</p></li>
 </ul>
 </dd>
 </dl>
@@ -301,13 +311,10 @@ Warning and above are also printed to std.out
 </section>
 <section id="module-qsprpred.logs.stopwatch">
 <span id="qsprpred-logs-stopwatch-module"></span><h2>qsprpred.logs.stopwatch module<a class="headerlink" href="#module-qsprpred.logs.stopwatch" title="Permalink to this heading"></a></h2>
-<p>stopwatch</p>
-<p>Created by: Martin Sicho
-On: 14.02.23, 12:39</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.logs.stopwatch.StopWatch">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.logs.stopwatch.</span></span><span class="sig-name descname"><span class="pre">StopWatch</span></span><a class="reference internal" href="../_modules/qsprpred/logs/stopwatch.html#StopWatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.stopwatch.StopWatch" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.logs.stopwatch.StopWatch.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/stopwatch.html#StopWatch.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.stopwatch.StopWatch.reset" title="Permalink to this definition"></a></dt>
@@ -323,27 +330,24 @@ On: 14.02.23, 12:39</p>
 </section>
 <section id="module-qsprpred.logs.utils">
 <span id="qsprpred-logs-utils-module"></span><h2>qsprpred.logs.utils module<a class="headerlink" href="#module-qsprpred.logs.utils" title="Permalink to this heading"></a></h2>
-<p>utils</p>
-<p>Created by: Martin Sicho
-On: 17.05.22, 9:55</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qsprpred.logs.utils.backup_files">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">backup_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_prefixes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#backup_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.backup_files" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">backup_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_prefixes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#backup_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.backup_files" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qsprpred.logs.utils.backup_files_in_folder">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">backup_files_in_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_prefixes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_extensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dummy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#backup_files_in_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.backup_files_in_folder" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">backup_files_in_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_prefixes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_extensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dummy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#backup_files_in_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.backup_files_in_folder" title="Permalink to this definition"></a></dt>
 <dd><p>Backs up files in a specified directory to a backup directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>_dir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The directory path where the files to be backed up are located.</p></li>
-<li><p><strong>backup_id</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The ID of the backup.</p></li>
-<li><p><strong>output_prefixes</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The prefix of the output files to be backed up.</p></li>
-<li><p><strong>output_extensions</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – The extension of the output files to be
+<li><p><strong>_dir</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The directory path where the files to be backed up are located.</p></li>
+<li><p><strong>backup_id</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The ID of the backup.</p></li>
+<li><p><strong>output_prefixes</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The prefix of the output files to be backed up.</p></li>
+<li><p><strong>output_extensions</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – The extension of the output files to be
 backed up. Defaults to “dummy”.</p></li>
-<li><p><strong>cp_suffix</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – The suffix of the files to be copied instead
+<li><p><strong>cp_suffix</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – The suffix of the files to be copied instead
 of moved. Defaults to None.</p></li>
 </ul>
 </dd>
@@ -355,30 +359,55 @@ of moved. Defaults to None.</p></li>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="qsprpred.logs.utils.commit_hash">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">commit_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">GIT_PATH</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#commit_hash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.commit_hash" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="qsprpred.logs.utils.enable_file_logger">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">enable_file_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_existing_loggers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#enable_file_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.enable_file_logger" title="Permalink to this definition"></a></dt>
+<dd><p>Enable file logging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_folder</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – path to the folder where the log file should be stored</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of the log file</p></li>
+<li><p><strong>debug</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – whether to enable debug logging. Defaults to False.</p></li>
+<li><p><strong>log_name</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – name of the logger. Defaults to None.</p></li>
+<li><p><strong>init_data</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><em>optional</em>) – initial data to be logged. Defaults to None.</p></li>
+<li><p><strong>disable_existing_loggers</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – whether to disable existing loggers.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="qsprpred.logs.utils.enable_file_logger">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">enable_file_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_hash</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_existing_loggers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#enable_file_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.enable_file_logger" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="qsprpred.logs.utils.export_conda_environment">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">export_conda_environment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#export_conda_environment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.export_conda_environment" title="Permalink to this definition"></a></dt>
+<dd><p>Export the conda environment to a yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – path to the yaml file</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3.10/library/subprocess.html#subprocess.CalledProcessError" title="(in Python v3.10)"><strong>subprocess.CalledProcessError</strong></a> – if the command fails</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3.10/library/exceptions.html#Exception" title="(in Python v3.10)"><strong>Exception</strong></a> – if an unexpected error occurs</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qsprpred.logs.utils.generate_backup_dir">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">generate_backup_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#generate_backup_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.generate_backup_dir" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsprpred.logs.utils.</span></span><span class="sig-name descname"><span class="pre">generate_backup_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs/utils.html#generate_backup_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.utils.generate_backup_dir" title="Permalink to this definition"></a></dt>
 <dd><p>Generates backup directory for files to be overwritten.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the root directory</p></li>
-<li><p><strong>backup_id</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the ID of the backup</p></li>
+<li><p><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the root directory</p></li>
+<li><p><strong>backup_id</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – the ID of the backup</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -401,9 +430,6 @@ to previous runid+1</p>
 </section>
 <section id="module-qsprpred.logs">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.logs" title="Permalink to this heading"></a></h2>
-<p>__init__.py</p>
-<p>Created by: Martin Sicho
-On: 17.05.22, 9:53</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qsprpred.logs.setLogger">
 <span class="sig-prename descclassname"><span class="pre">qsprpred.logs.</span></span><span class="sig-name descname"><span class="pre">setLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/logs.html#setLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.logs.setLogger" title="Permalink to this definition"></a></dt>

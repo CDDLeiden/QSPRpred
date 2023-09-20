@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.utils.descriptorcalculator &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.extra.data.utils.descriptorcalculator &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -112,8 +112,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-            <span class="n">desc_sets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ProteinDescriptorSet</span><span class="p">],</span>
-            <span class="n">msa_provider</span><span class="p">:</span> <span class="n">MSAProvider</span> <span class="o">=</span> <span class="n">ClustalMSA</span><span class="p">()</span>
+        <span class="n">desc_sets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ProteinDescriptorSet</span><span class="p">],</span>
+        <span class="n">msa_provider</span><span class="p">:</span> <span class="n">MSAProvider</span> <span class="o">=</span> <span class="n">ClustalMSA</span><span class="p">(),</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the protein descriptor calculator.</span>
 
@@ -131,7 +131,7 @@
         <span class="n">acc_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">sequences</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates descriptors for the given protein accession keys.</span>
@@ -198,7 +198,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2">.msaprovider&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span> <span class="c1"># file handle</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2">.msaprovider&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>  <span class="c1"># file handle</span>
             <span class="n">msa_provider_cls</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span>
         <span class="n">msa_provider_cls</span> <span class="o">=</span> <span class="n">import_class</span><span class="p">(</span><span class="n">msa_provider_cls</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">msaProvider</span> <span class="o">=</span> <span class="n">msa_provider_cls</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2">.msaprovider&quot;</span><span class="p">)</span>

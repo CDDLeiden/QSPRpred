@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.utils.descriptor_utils.rdkitdescriptors &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.data.utils.descriptor_utils.rdkitdescriptors &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -120,9 +120,17 @@
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">compute_3Drdkit</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">,</span> <span class="s2">&quot;Asphericity&quot;</span><span class="p">,</span> <span class="s2">&quot;Eccentricity&quot;</span><span class="p">,</span> <span class="s2">&quot;InertialShapeFactor&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;NPR1&quot;</span><span class="p">,</span> <span class="s2">&quot;NPR2&quot;</span><span class="p">,</span> <span class="s2">&quot;PMI1&quot;</span><span class="p">,</span> <span class="s2">&quot;PMI2&quot;</span><span class="p">,</span> <span class="s2">&quot;PMI3&quot;</span><span class="p">,</span> <span class="s2">&quot;RadiusOfGyration&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;SpherocityIndex&quot;</span>
+                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">,</span>
+                <span class="s2">&quot;Asphericity&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Eccentricity&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;InertialShapeFactor&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;NPR1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;NPR2&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;PMI1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;PMI2&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;PMI3&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;RadiusOfGyration&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;SpherocityIndex&quot;</span><span class="p">,</span>
             <span class="p">]</span>
 
 <div class="viewcode-block" id="RdkitDescriptors.getScores"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.rdkitdescriptors.RdkitDescriptors.getScores">[docs]</a>    <span class="k">def</span> <span class="nf">getScores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">):</span>

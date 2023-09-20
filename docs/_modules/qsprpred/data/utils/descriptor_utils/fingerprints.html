@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.utils.descriptor_utils.fingerprints &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.data.utils.descriptor_utils.fingerprints &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -135,9 +135,9 @@
 <div class="viewcode-block" id="MorganFP.getKey"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.MorganFP.getKey">[docs]</a>    <span class="k">def</span> <span class="nf">getKey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;MorganFP&quot;</span></div></div>
 
+
 <div class="viewcode-block" id="RDKitMACCSFP"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.RDKitMACCSFP">[docs]</a><span class="k">class</span> <span class="nc">RDKitMACCSFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;RDKits implementation of MACCS keys fingerprint.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="RDKitMACCSFP.getFingerprints"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.RDKitMACCSFP.getFingerprints">[docs]</a>    <span class="k">def</span> <span class="nf">getFingerprints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the MACCS fingerprints for the input molecules.</span>
 
@@ -167,6 +167,7 @@
 
 <div class="viewcode-block" id="RDKitMACCSFP.getKey"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.RDKitMACCSFP.getKey">[docs]</a>    <span class="k">def</span> <span class="nf">getKey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;RDKitMACCSFP&quot;</span></div></div>
+
 
 <div class="viewcode-block" id="MaccsFP"><a class="viewcode-back" href="../../../../../api/qsprpred.data.utils.descriptor_utils.html#qsprpred.data.utils.descriptor_utils.fingerprints.MaccsFP">[docs]</a><span class="k">class</span> <span class="nc">MaccsFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">167</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -292,7 +293,7 @@
                 <span class="n">minPath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">minPath</span><span class="p">,</span>
                 <span class="n">maxPath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxPath</span><span class="p">,</span>
                 <span class="n">fpSize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nBits</span><span class="p">,</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">np_fp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp</span><span class="p">))</span>
             <span class="n">convertFP</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">np_fp</span><span class="p">)</span>
@@ -354,7 +355,7 @@
                 <span class="n">minPath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">minPath</span><span class="p">,</span>
                 <span class="n">maxPath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxPath</span><span class="p">,</span>
                 <span class="n">fpSize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nBits</span><span class="p">,</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">np_fp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp</span><span class="p">))</span>
             <span class="n">convertFP</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">np_fp</span><span class="p">)</span>
@@ -389,6 +390,7 @@
 
     <span class="k">def</span> <span class="nf">getMorganFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MorganFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">getMaccsFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MaccsFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -409,62 +411,52 @@
 
     <span class="k">def</span> <span class="nf">getLayeredFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">LayeredFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    
+
     <span class="k">def</span> <span class="nf">getRDKitMACCSFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">RDKitMACCSFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">getCDKFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKFP</span>
+        <span class="kn">from</span> <span class="nn">....extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKFP</span>
 
         <span class="k">return</span> <span class="n">CDKFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">getCDKExtendedFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
-            <span class="n">CDKExtendedFP</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">....extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKExtendedFP</span>
 
         <span class="k">return</span> <span class="n">CDKExtendedFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">getCDKEStateFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKEStateFP</span>
+        <span class="kn">from</span> <span class="nn">....extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKEStateFP</span>
 
         <span class="k">return</span> <span class="n">CDKEStateFP</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">getCDKGraphOnlyFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
-            <span class="n">CDKGraphOnlyFP</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">....extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKGraphOnlyFP</span>
 
         <span class="k">return</span> <span class="n">CDKGraphOnlyFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">getCDKMACCSFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKMACCSFP</span>
+        <span class="kn">from</span> <span class="nn">....extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKMACCSFP</span>
 
         <span class="k">return</span> <span class="n">CDKMACCSFP</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">getCDKPubchemFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKPubchemFP</span>
+        <span class="kn">from</span> <span class="nn">....extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKPubchemFP</span>
 
         <span class="k">return</span> <span class="n">CDKPubchemFP</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">getCDKSubstructureFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
-            <span class="n">CDKSubstructureFP</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">....extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKSubstructureFP</span>
 
         <span class="k">return</span> <span class="n">CDKSubstructureFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">getCDKKlekotaRothFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
-            <span class="n">CDKKlekotaRothFP</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">....extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKKlekotaRothFP</span>
 
         <span class="k">return</span> <span class="n">CDKKlekotaRothFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">getCDKAtomPairs2DFP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
-            <span class="n">CDKAtomPairs2DFP</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">....extra.data.utils.descriptor_utils.fingerprints</span> <span class="kn">import</span> <span class="n">CDKAtomPairs2DFP</span>
 
         <span class="k">return</span> <span class="n">CDKAtomPairs2DFP</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

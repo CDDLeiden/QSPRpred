@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.utils.folds &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.data.utils.folds &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -89,6 +89,7 @@
              
   <h1>Source code for qsprpred.data.utils.folds</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module that provides a class that creates folds from a given data set.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">..interfaces</span> <span class="kn">import</span> <span class="n">DataSplit</span>
 <span class="kn">from</span> <span class="nn">.feature_standardization</span> <span class="kn">import</span> <span class="n">apply_feature_standardizer</span>
 
 
@@ -137,7 +138,7 @@
             <span class="k">yield</span> <span class="n">X_arr</span><span class="p">[</span><span class="n">train_index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">X_arr</span><span class="p">[</span><span class="n">test_index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">y_arr</span><span class="p">[</span>
                 <span class="n">train_index</span><span class="p">],</span> <span class="n">y_arr</span><span class="p">[</span><span class="n">test_index</span><span class="p">],</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="p">:</span> <span class="s2">&quot;DataSplit&quot;</span><span class="p">,</span> <span class="n">feature_standardizer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  <span class="c1"># noqa: F821</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span><span class="p">,</span> <span class="n">feature_standardizer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new instance of Folds.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">split</span> <span class="o">=</span> <span class="n">split</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="n">feature_standardizer</span>

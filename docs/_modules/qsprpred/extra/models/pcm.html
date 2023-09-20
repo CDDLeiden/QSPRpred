@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.models.pcm &mdash; QSPRpred 2.0.1 documentation</title>
+  <title>qsprpred.extra.models.pcm &mdash; QSPRpred 2.1.0a1.dev131+g15e3f33 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -44,7 +44,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.0.1
+                v2.1.0a1.dev131+g15e3f33
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -99,18 +99,18 @@
 
 <span class="kn">from</span> <span class="nn">...data.data</span> <span class="kn">import</span> <span class="n">MoleculeTable</span>
 <span class="kn">from</span> <span class="nn">...models.interfaces</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
-<span class="kn">from</span> <span class="nn">...models.models</span> <span class="kn">import</span> <span class="n">QSPRsklearn</span>
+<span class="kn">from</span> <span class="nn">...models.sklearn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
 <span class="kn">from</span> <span class="nn">..data.data</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
 <span class="kn">from</span> <span class="nn">..data.utils.descriptorcalculator</span> <span class="kn">import</span> <span class="n">ProteinDescriptorCalculator</span>
 
 
-<div class="viewcode-block" id="ModelPCM"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.ModelPCM">[docs]</a><span class="k">class</span> <span class="nc">ModelPCM</span><span class="p">(</span><span class="n">QSPRModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="PCMModel"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel">[docs]</a><span class="k">class</span> <span class="nc">PCMModel</span><span class="p">(</span><span class="n">QSPRModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for PCM models.</span>
 
 <span class="sd">    Extension of `QSPRModel` for proteochemometric models (PCM). It modifies</span>
 <span class="sd">    the `predictMols` method to handle PCM descriptors and specification of protein ids.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="ModelPCM.createPredictionDatasetFromMols"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.ModelPCM.createPredictionDatasetFromMols">[docs]</a>    <span class="k">def</span> <span class="nf">createPredictionDatasetFromMols</span><span class="p">(</span>
+<div class="viewcode-block" id="PCMModel.createPredictionDatasetFromMols"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.createPredictionDatasetFromMols">[docs]</a>    <span class="k">def</span> <span class="nf">createPredictionDatasetFromMols</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">protein_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>  <span class="c1"># FIXME: this changes the signature from the base class</span>
@@ -169,7 +169,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">failed_mask</span></div>
 
-<div class="viewcode-block" id="ModelPCM.predictMols"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.ModelPCM.predictMols">[docs]</a>    <span class="k">def</span> <span class="nf">predictMols</span><span class="p">(</span>
+<div class="viewcode-block" id="PCMModel.predictMols"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.predictMols">[docs]</a>    <span class="k">def</span> <span class="nf">predictMols</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">protein_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>  <span class="c1"># FIXME: this changes the signature from the base class</span>
@@ -242,10 +242,10 @@
         <span class="k">return</span> <span class="n">predictions</span></div></div>
 
 
-<div class="viewcode-block" id="QSPRsklearnPCM"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.QSPRsklearnPCM">[docs]</a><span class="k">class</span> <span class="nc">QSPRsklearnPCM</span><span class="p">(</span><span class="n">QSPRsklearn</span><span class="p">,</span> <span class="n">ModelPCM</span><span class="p">):</span>
+<div class="viewcode-block" id="SklearnPCMModel"><a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel">[docs]</a><span class="k">class</span> <span class="nc">SklearnPCMModel</span><span class="p">(</span><span class="n">SklearnModel</span><span class="p">,</span> <span class="n">PCMModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper for sklearn models for PCM.</span>
 
-<span class="sd">    Just replaces some methods in `QSPRsklearn` with those in `ModelPCM`.</span>
+<span class="sd">    Just replaces some methods in `SklearnModel` with those in `PCMModel`.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
 </pre></div>
 
