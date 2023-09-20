@@ -8,6 +8,7 @@
 """
 
 from abc import abstractmethod
+from typing import Optional
 
 import mordred
 import numpy as np
@@ -41,7 +42,7 @@ class Mordred(MoleculeDescriptorSet):
         descs: list[str] | None = None,
         version: str | None = None,
         ignore_3D: bool = False,
-        config: str | None = None
+        config: str | None = None,
     ):
         """
         Initialize the descriptor with the same arguments as you would pass
@@ -74,7 +75,9 @@ class Mordred(MoleculeDescriptorSet):
         self.descriptors = [str(d) for d in descs]
 
     def __call__(self, mols: list[str, Chem.Mol]) -> [pd.DataFrame, np.ndarray]:
-        return self._mordred.pandas(self.iterMols(mols), quiet=True, nproc=1).values
+        df = self._mordred.pandas(self.iterMols(mols), quiet=True, nproc=1)
+        df = df.apply(pd.to_numeric, errors="coerce")  # replace errors by nan values
+        return df.values
 
     @property
     def isFP(self):
@@ -351,7 +354,12 @@ class ProteinDescriptorSet(DescriptorSet):
             should follow the same format as the sequences (dict(str : str))
     """
     @abstractmethod
-    def __call__(self, acc_keys: list[str], sequences: dict[str, str] = None, **kwargs):
+    def __call__(
+        self,
+        acc_keys: list[str],
+        sequences: Optional[dict[str, str]] = None,
+        **kwargs
+    ):
         """
         Calculate the protein descriptors for a given target.
 
@@ -454,7 +462,12 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
         protein_features.set_index("ID", inplace=True)
         return protein_features
 
-    def __call__(self, acc_keys: list[str], sequences: dict[str, str] = None, **kwargs):
+    def __call__(
+        self,
+        acc_keys: list[str],
+        sequences: Optional[dict[str, str]] = None,
+        **kwargs
+    ):
         """
         Calculate the protein descriptors for a given target.
 

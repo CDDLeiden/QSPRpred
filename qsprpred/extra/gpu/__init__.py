@@ -1,10 +1,3 @@
-"""
-__init__.py
-
-Created by: Martin Sicho
-On: 12.05.23, 16:38
-"""
-
 import pkg_resources
 import torch
 
@@ -16,4 +9,6 @@ DEFAULT_DEVICE = (
 )
 DEFAULT_GPUS = (0, )
 # set default parameter search space path
-SSPACE = pkg_resources.resource_filename("qsprpred.deep", "models/search_space.json")
+SSPACE = pkg_resources.resource_filename(
+    "qsprpred.extra.gpu", "models/search_space.json"
+)

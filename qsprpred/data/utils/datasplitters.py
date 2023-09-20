@@ -3,15 +3,37 @@
 To add a new data splitter:
 * Add a DataSplit subclass for your new splitter
 """
-from collections import defaultdict
+import platform
+from typing import Iterable
 
 import numpy as np
 import pandas as pd
+from gbmtsplits import GloballyBalancedSplit
 from sklearn.model_selection import ShuffleSplit
 
 from ...logs import logger
-from ..interfaces import DataSetDependant, DataSplit
+from ..data import QSPRDataset
+from ..interfaces import DataSplit
+from .data_clustering import (
+    FPSimilarityMaxMinClusters,
+    MoleculeClusters,
+    RandomClusters,
+    ScaffoldClusters,
+)
 from .scaffolds import Murcko, Scaffold
+
+
+class RandomSplit(DataSplit):
+    """Splits dataset in random train and test subsets.
+
+    Attributes:
+        testFraction (float): fraction of total dataset to testset
+    """
+    def __init__(self, test_fraction=0.1) -> None:
+        self.testFraction = test_fraction
+
+    def split(self, X, y):
+        return ShuffleSplit(1, test_size=self.testFraction).split(X, y)
 
 
 class ManualSplit(DataSplit):
@@ -47,33 +69,39 @@ class ManualSplit(DataSplit):
             )
 
     def split(self, X, y):
+        """
+        Split the given data into one or multiple train/test subsets based on the
+        predefined splitcol.
+
+        Args:
+            X (np.ndarray | pd.DataFrame): the input data matrix
+            y (np.ndarray | pd.DataFrame | pd.Series): the target variable(s)
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
+        """
         train = self.splitCol[self.splitCol == self.trainVal].index.values
         test = self.splitCol[self.splitCol == self.testVal].index.values
         return iter([(train, test)])
 
 
-class RandomSplit(DataSplit):
-    """Splits dataset in random train and test subsets.
-
-    Attributes:
-        testFraction (float): fraction of total dataset to testset
+class TemporalSplit(DataSplit):
     """
-    def __init__(self, test_fraction=0.1) -> None:
-        self.testFraction = test_fraction
-
-    def split(self, X, y):
-        return ShuffleSplit(1, test_size=self.testFraction).split(X, y)
-
-
-class TemporalSplit(DataSplit, DataSetDependant):
-    """Splits dataset train and test subsets based on a threshold in time.
+    Splits dataset train and test subsets based on a threshold in time.
 
     Attributes:
-        dataSet (QSPRDataset): dataset that this splitter will be acting on
+        dataset (QSPRDataset): dataset that this splitter will be acting on
         timeSplit(float): time point after which sample to test set
         timeCol (str): name of the column within the dataframe with timepoints
     """
-    def __init__(self, timesplit, timeprop, dataset=None) -> None:
+    def __init__(
+        self,
+        timesplit: float,
+        timeprop: str,
+        dataset: QSPRDataset | None = None
+    ) -> None:
         """Initialize a TemporalSplit object.
 
         Args:
@@ -86,105 +114,243 @@ class TemporalSplit(DataSplit, DataSetDependant):
         self.timeCol = timeprop
 
     def split(self, X, y):
-        df = self.getDataSet().getDF()
+        """
+        Split single-task dataset based on a time threshold.
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
+        """
+
+        # Get dataset, dataframe and tasks
+        ds = self.getDataSet()
+        df = ds.getDF().copy()
+        task_names = [TargetProperty.name for TargetProperty in ds.targetProperties]
+
+        assert len(task_names) > 0, "No target properties found."
         assert len(X) == len(
             df
         ), "X and the current data in the dataset must have same length"
+
+        if len(task_names) > 1:
+            logger.warning(
+                "The TemporalSplit is not recommended for multitask\
+                or PCM datasets might lead to very unbalanced subsets\
+                for some tasks"
+            )
+
         indices = np.array(list(range(len(df))))
         mask = df[self.timeCol] > self.timeSplit
         mask = mask.values
         test = indices[mask]
-        assert len(test) > 0, "No test samples found"
+
+        # Check if there are any test samples for each task
+        for task in task_names:
+            if len(df[mask][task]) == 0:
+                raise ValueError(f"No test samples found for task {task.name}")
+            elif len(df[~mask][task]) == 0:
+                raise ValueError(f"No train samples found for task {task.name}")
+
         train = indices[~mask]
+
         return iter([(train, test)])
 
 
-class ScaffoldSplit(DataSplit, DataSetDependant):
-    """Splits dataset in train and test subsets based on their Murcko scaffold.
+class GBMTDataSplit(DataSplit):
+    """
+    Splits dataset into balanced train and test subsets
+    based on an initial clustering algorithm.
 
     Attributes:
-        dataSet: QSPRDataset object.
-        scaffold (qsprpred.data.utils.scaffolds.Scaffold()): `Murcko()` and
-            `BemisMurcko()` are currently available, other types can be added through
-            the abstract class `Scaffold`. Defaults to Murcko().
-        testFraction (float): fraction of the test set. Defaults to 0.1.
-        shuffle (bool): whether to shuffle the data or not. Defaults to True.
-        customTestList (list): list of molecule indexes to force in test set. If
-            forced test contains the totality of the molecules in the dataset, the
-            custom_test_list reverts to default None.
+        dataset (QSPRDataset):
+            dataset that this splitter will be acting on
+        clustering (MoleculeClusters):
+            clustering algorithm to use
+        testFraction (float):
+            fraction of total dataset to testset
+        customTestList (list):
+            list of molecule indexes to force in test set
+        split_kwargs (dict):
+            additional arguments to be passed to the GloballyBalancedSplit
     """
     def __init__(
         self,
-        scaffold: Scaffold = Murcko(),
-        test_fraction=0.1,
-        shuffle=True,
-        custom_test_list=None,
-        dataset=None,
-    ) -> None:
+        dataset: QSPRDataset = None,
+        clustering: MoleculeClusters = FPSimilarityMaxMinClusters(),
+        test_fraction: float = 0.1,
+        custom_test_list: list[str] | None = None,
+        **split_kwargs,
+    ):
         super().__init__(dataset)
-        self.scaffold = scaffold
         self.testFraction = test_fraction
-        self.shuffle = shuffle
         self.customTestList = custom_test_list
+        self.clustering = clustering
+        self.split_kwargs = split_kwargs if split_kwargs else {}
 
-    def split(self, X, y):
-        dataset = self.getDataSet()
-        if not dataset:
-            raise AttributeError(
-                "Dataset not set for splitter. Use 'setDataSet(dataset)' to attach it "
-                "to this instance."
+    def split(
+        self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
+    ) -> Iterable[tuple[list[int], list[int]]]:
+        """
+        Split dataset into balanced train and test subsets
+        based on an initial clustering algorithm.
+
+        Args:
+            X (np.ndarray | pd.DataFrame): the input data matrix
+            y (np.ndarray | pd.DataFrame | pd.Series): the target variable(s)
+
+        Returns:
+            an iterator over the generated subsets represented as a tuple of
+            (train_indices, test_indices) where the indices are the row indices of the
+            input data matrix
+        """
+        # if we are on Windows, raise an error
+        if platform.system() == "Windows":
+            logger.warning(
+                "The GBMTDataSplit currently has a problem on Windows:"
+                "https://github.com/coin-or/pulp/issues/671 and might hang up..."
             )
-        dataset.addScaffolds([self.scaffold])
-        # make sure dataframe is shuffled
-        if self.shuffle:
-            dataset.shuffle()
-        # Find the scaffold of each smiles
-        df = dataset.getDF()
+
+        # Get dataset, dataframe and tasks
+        ds = self.getDataSet()
+        df = ds.getDF().copy().reset_index(drop=True)  # need numeric index splits
+        task_names = [TargetProperty.name for TargetProperty in ds.targetProperties]
+
+        assert len(task_names) > 0, "No target properties found."
         assert len(X) == len(
             df
         ), "X and the current data in the dataset must have same length"
-        scaffold_list = df[[f"Scaffold_{self.scaffold}"]]
-        scaffolds = defaultdict(list)
-        invalid_idx = []
-        for idx, scaffold in scaffold_list.itertuples():
-            if scaffold:
-                scaffolds[scaffold].append(idx)
-            else:
-                logger.warning(
-                    f"Invalid scaffold skipped for molecule with index: {idx}"
-                )
-                invalid_idx.append(idx)
-        # Fill test set with groups of smiles with the same scaffold
-        max_in_test = np.ceil(len(df) * self.testFraction)
-        test_idx = []
-        # Start filling test with scaffold groups that contain the smiles in input list
-        if self.customTestList is not None:
-            for _, scaffold_idx in scaffolds.items():
-                if bool(set(scaffold_idx) & set(self.customTestList)):
-                    test_idx.extend(scaffold_idx)
-        # Revert to default scaffold grouping if all molecules are placed in test set
-        if len(test_idx) > max_in_test:
-            logger.warning(
-                "Warning: Test set includes all molecules in custom_test_list but is "
-                "now bigger than specified fraction"
-            )
-        try:
-            assert len(test_idx) + len(invalid_idx) < len(
-                df
-            ), "Test set cannot contain the totality of the data"
-        except AssertionError:
-            logger.warning(
-                "Warning: Test set cannot contain the totality of the data. "
-                "Ignoring custom_test_list input."
-            )
-            test_idx = []
-        # Continue filling until the test fraction is reached
-        for _, scaffold_idx in scaffolds.items():
-            if len(test_idx) < max_in_test:
-                test_idx.extend(scaffold_idx)
-            else:
-                break
-        # Get train and test set indices
-        train_idx = [df.index.get_loc(x) for x in df.index if x not in test_idx]
-        test_idx = [df.index.get_loc(x) for x in test_idx]
-        return iter([(train_idx, test_idx)])
+
+        # Get clusters
+        clusters = self.clustering.get_clusters(df[ds.smilesCol].tolist())
+
+        # Pre-assign smiles of custom_test_list to test set
+        preassigned_smiles = (
+            {
+                df.loc[df.QSPRID == qspridx][ds.smilesCol].values[0]: 1
+                for qspridx in self.customTestList
+            } if self.customTestList else None
+        )
+
+        print(self.split_kwargs)
+        # Split dataset
+        splitter = GloballyBalancedSplit(
+            sizes=[1 - self.testFraction, self.testFraction],
+            clusters=clusters,
+            clustering_method=None,  # As precomputed clusters are provided
+            **self.split_kwargs,
+        )
+        df_split = splitter(
+            df,
+            ds.smilesCol,
+            task_names,
+            preassigned_smiles=preassigned_smiles,
+        )
+
+        # Get indices
+        train_indices = df_split[df_split["Split"] == 0].index.values
+        test_indices = df_split[df_split["Split"] == 1].index.values
+
+        assert len(train_indices) + len(test_indices) == len(
+            df
+        ), "Not all samples were assigned to a split"
+
+        # Reset index back to QSPRID
+        df.set_index(ds.indexCols, inplace=True, drop=False)
+
+        return iter([(train_indices, test_indices)])
+
+
+class GBMTRandomSplit(GBMTDataSplit):
+    """
+    Splits dataset into balanced random train and test subsets.
+
+    Attributes:
+        dataset (QSPRDataset):
+            dataset that this splitter will be acting on
+        testFraction (float):
+            fraction of total dataset to testset
+        customTestList (list):
+            list of molecule indexes to force in test set
+        split_kwargs (dict):
+            additional arguments to be passed to the GloballyBalancedSplit
+    """
+    def __init__(
+        self,
+        dataset: QSPRDataset | None = None,
+        test_fraction: float = 0.1,
+        seed: int = 42,
+        n_initial_clusters: int | None = None,
+        custom_test_list: list[str] | None = None,
+        **split_kwargs,
+    ) -> None:
+        super().__init__(
+            dataset,
+            RandomClusters(seed, n_initial_clusters),
+            test_fraction,
+            custom_test_list,
+            **split_kwargs,
+        )
+
+
+class ScaffoldSplit(GBMTDataSplit):
+    """
+    Splits dataset into balanced train and test subsets based on molecular scaffolds.
+
+    Attributes:
+        dataset (QSPRDataset):
+            dataset that this splitter will be acting on
+        testFraction (float):
+            fraction of total dataset to testset
+        customTestList (list):
+            list of molecule indexes to force in test set
+        split_kwargs (dict):
+            additional arguments to be passed to the GloballyBalancedSplit
+    """
+    def __init__(
+        self,
+        dataset: QSPRDataset | None = None,
+        scaffold: Scaffold = Murcko(),
+        test_fraction: float = 0.1,
+        custom_test_list: list | None = None,
+        **split_kwargs,
+    ) -> None:
+        super().__init__(
+            dataset,
+            ScaffoldClusters(scaffold),
+            test_fraction,
+            custom_test_list,
+            **split_kwargs,
+        )
+
+
+class ClusterSplit(GBMTDataSplit):
+    """
+    Splits dataset into balanced train and test subsets based on clusters of similar
+    molecules.
+
+    Attributes:
+        dataset (QSPRDataset):
+            dataset that this splitter will be acting on
+        testFraction (float):
+            fraction of total dataset to testset
+        customTestList (list):
+            list of molecule indexes to force in test set
+        split_kwargs (dict):
+            additional arguments to be passed to the GloballyBalancedSplit
+    """
+    def __init__(
+        self,
+        dataset: QSPRDataset = None,
+        test_fraction: float = 0.1,
+        custom_test_list: list[str] | None = None,
+        clustering: MoleculeClusters = FPSimilarityMaxMinClusters(),
+        **split_kwargs,
+    ) -> None:
+        super().__init__(
+            dataset,
+            clustering,  # TODO: For MaxMin pass random seed
+            test_fraction,
+            custom_test_list,
+            **split_kwargs,
+        )

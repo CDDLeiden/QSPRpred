@@ -22,6 +22,7 @@ from ..logs import logger
 from ..models.tasks import TargetTasks
 from ..utils.inspect import import_class
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
+from .utils.datafilters import RepeatsFilter
 from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -61,11 +62,11 @@ class PandasDataSet(DataSet):
         def __init__(
             self,
             func: Callable,
-            func_args: Optional[list] = None,
-            func_kwargs: Optional[dict] = None,
+            func_args: list | None = None,
+            func_kwargs: dict | None = None,
             axis: int = 0,
             raw: bool = False,
-            result_type: str = "expand"
+            result_type: str = "expand",
         ):
             """Initialize the instance with pandas parameters to apply to data chunks.
 
@@ -116,7 +117,7 @@ class PandasDataSet(DataSet):
         chunk_size: int = 1000,
         id_prefix: str = "QSPRID",
     ):
-        """ Initialize a `PandasDataSet` object.
+        """Initialize a `PandasDataSet` object.
         Args
             name (str): Name of the data set. You can use this name to load the dataset
                 from disk anytime and create a new instance.
@@ -154,7 +155,7 @@ class PandasDataSet(DataSet):
                     "Existing data set found, but also found a data frame in store. "
                     "Refusing to overwrite data. If you want to overwrite data in "
                     "store, set overwrite=True.",
-                    stacklevel=2
+                    stacklevel=2,
                 )
                 self.reload()
             else:
@@ -233,8 +234,15 @@ class PandasDataSet(DataSet):
 
         Args:
             name (str): Name of the property.
-            data (List): List of values for the property.
+            data (list): List of values for the property.
         """
+        if isinstance(data, pd.Series):
+            if not np.array_equal(data.index.txt, self.df.index.txt):
+                logger.info(
+                    f"Adding property '{name}' to data set might be introducing 'nan' "
+                    "values due to index with pandas series. Make sure the index of "
+                    "the data frame and the series match or convert series to list."
+                )
         self.df[name] = data
 
     def removeProperty(self, name: str):
@@ -257,12 +265,12 @@ class PandasDataSet(DataSet):
     def apply(
         self,
         func: Callable,
-        func_args: Optional[list] = None,
-        func_kwargs: Optional[dict] = None,
+        func_args: list | None = None,
+        func_kwargs: dict | None = None,
         axis: int = 0,
         raw: bool = False,
         result_type: str = "expand",
-        subset: Optional[list] = None,
+        subset: list | None = None,
     ):
         """Apply a function to the data frame.
 
@@ -284,12 +292,20 @@ class PandasDataSet(DataSet):
         """
         n_cpus = self.nJobs
         chunk_size = self.chunkSize
-        if n_cpus and n_cpus > 1 and not (
-            hasattr(func, "noParallelization") and func.noParallelization is True
+        if (
+            n_cpus and n_cpus > 1 and
+            not (hasattr(func, "noParallelization") and func.noParallelization is True)
         ):
             return self.papply(
-                func, func_args, func_kwargs, axis, raw, result_type, subset, n_cpus,
-                chunk_size
+                func,
+                func_args,
+                func_kwargs,
+                axis,
+                raw,
+                result_type,
+                subset,
+                n_cpus,
+                chunk_size,
             )
         else:
             df_sub = self.df[subset if subset else self.df.columns]
@@ -305,12 +321,12 @@ class PandasDataSet(DataSet):
     def papply(
         self,
         func: Callable,
-        func_args: Optional[list] = None,
-        func_kwargs: Optional[dict] = None,
+        func_args: list | None = None,
+        func_kwargs: dict | None = None,
         axis: int = 0,
         raw: bool = False,
         result_type: str = "expand",
-        subset: Optional[list] = None,
+        subset: list | None = None,
         n_cpus: int = 1,
         chunk_size: int = 1000,
     ):
@@ -358,7 +374,9 @@ class PandasDataSet(DataSet):
 
         return pd.concat(results, axis=0)
 
-    def transform(self, targets: list, transformer: Callable, addAs: Optional[list] = None):
+    def transform(
+        self, targets: list, transformer: Callable, addAs: list | None = None
+    ):
         """Transform the data frame (or its part) using a list of transformers.
 
         Each transformer is a function that takes the data frame (or a subset of it as
@@ -391,9 +409,21 @@ class PandasDataSet(DataSet):
         of the `MoleculeTable`."""
         df_filtered = None
         for table_filter in table_filters:
-            df_filtered = table_filter(self.df)
-        if df_filtered is not None:
-            self.df = df_filtered.copy()
+            if len(self.df) == 0:
+                logger.warning("Dataframe is empty")
+            if table_filter.__class__.__name__ == "CategoryFilter":
+                df_filtered = table_filter(self.df)
+            elif table_filter.__class__.__name__ == "DuplicateFilter":
+                descriptors = self.getDescriptors()
+                if len(descriptors.columns) == 0:
+                    logger.warning(
+                        "Removing duplicates based on descriptors does not \
+                                    work if there are no descriptors"
+                    )
+                else:
+                    df_filtered = table_filter(self.df, descriptors)
+            if df_filtered is not None:
+                self.df = df_filtered.copy()
 
     def save(self):
         """Save the data frame to disk and all associated files.
@@ -429,7 +459,7 @@ class PandasDataSet(DataSet):
             name=name,
             store_dir=store_dir,
             *args,  # noqa: B026 # FIXME: this is a bug in flake8...
-            **kwargs
+            **kwargs,
         )
 
     def getDF(self):
@@ -453,9 +483,9 @@ class DescriptorTable(PandasDataSet):
         df: Optional[pd.DataFrame] = None,
         store_dir: str = ".",
         overwrite: bool = False,
-        key_cols: Optional[list] = None,
+        key_cols: list | None = None,
         n_jobs: int = 1,
-        chunk_size: int = 1000
+        chunk_size: int = 1000,
     ):
         """Initialize a `DescriptorTable` object.
         #TODO: Fill in docstring
@@ -470,8 +500,13 @@ class DescriptorTable(PandasDataSet):
             chunk_size (int):
         """
         super().__init__(
-            f"{name_prefix}_{calculator.getPrefix()}", df, store_dir, overwrite,
-            key_cols, n_jobs, chunk_size
+            f"{name_prefix}_{calculator.getPrefix()}",
+            df,
+            store_dir,
+            overwrite,
+            key_cols,
+            n_jobs,
+            chunk_size,
         )
         self.calculator = calculator
 
@@ -623,7 +658,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             name_prefix=self.name,
             store_dir=self.storeDir,
             n_jobs=self.nJobs,
-            chunk_size=self.chunkSize
+            chunk_size=self.chunkSize,
         )
 
     @staticmethod
@@ -643,7 +678,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             name=name,
             store_dir=store_dir,
             *args,  # noqa: B026 # FIXME: this is a bug in flake8...
-            **kwargs
+            **kwargs,
         )
 
     @staticmethod
@@ -713,19 +748,20 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             with multiprocessing.Pool(self.nJobs) as pool:
                 mask = pool.starmap(
                     check_smiles_valid,
-                    zip(self.df[self.smilesCol], [throw] * len(self.df))
+                    zip(self.df[self.smilesCol], [throw] * len(self.df)),
                 )
             return pd.Series(mask, index=self.df.index)
         else:
             return self.df[self.smilesCol].apply(check_smiles_valid, throw=throw)
 
     def dropDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
-        """Drop descriptors from the data frame that were calculated using a specific
-                calculator.
+        """
+        Drop descriptors from the data frame
+        that were calculated with a specific calculator.
 
-                Args:
-                    calculator (DescriptorsCalculator): DescriptorsCalculator object to
-                        use for descriptor calculation.
+        Args:
+            calculator (DescriptorsCalculator): DescriptorsCalculator object to
+                use for descriptor calculation.
         """
         to_remove = []
         for idx, calc in enumerate(self.descriptorCalculators):
@@ -743,7 +779,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
     def addCustomDescriptors(
         self,
         calculator: "CustomDescriptorsCalculator",  # noqa: F821
-        recalculate: bool = False
+        recalculate: bool = False,
+        **kwargs,
     ):
         """
         Add custom descriptors to the data frame using a `CustomDescriptorsCalculator`
@@ -755,6 +792,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             recalculate (bool): Whether to recalculate descriptors even if they are
                 already present in the data frame. If `False`, existing descriptors
                 are kept and no calculation takes place.
+            **kwargs: Additional keyword arguments to pass to the calculator.
         """
         if recalculate:
             self.dropDescriptors(calculator)
@@ -764,7 +802,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 "Use `recalculate=True` to overwrite them."
             )
             return
-        descriptors = calculator(self.df.index)
+        descriptors = calculator(self.df.index, **kwargs)
         descriptors[self.indexCols] = self.df[self.indexCols]
         self.attachDescriptors(calculator, descriptors, self.indexCols)
 
@@ -772,7 +810,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         self,
         calculator: "DescriptorsCalculator",  # noqa: F821
         descriptors: pd.DataFrame,
-        index_cols: list
+        index_cols: list,
     ):
         """Attach descriptors to the data frame.
 
@@ -928,13 +966,20 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         """
         return name in self.df.columns
 
-    def addProperty(self, name, data):
+    def addProperty(self, name: str, data: list):
         """Add a property to the data frame.
 
         Args:
             name (str): Name of the property.
             data (list): list of property values.
         """
+        if isinstance(data, pd.Series):
+            if not np.array_equal(data.index.txt, self.df.index.txt):
+                logger.info(
+                    f"Adding property '{name}' to data set might be introducing 'nan' "
+                    "values due to index with pandas series. Make sure the index of "
+                    "the data frame and the series match or convert series to list."
+                )
         self.df[name] = data
 
     def removeProperty(self, name):
@@ -947,15 +992,14 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
 
     @staticmethod
     def _scaffold_calculator(mol, scaffold: Scaffold):
-        """Just a helper function to calculate the scaffold of a molecule more easily.
-        """
+        """Just a helper method to calculate the scaffold of a molecule more easily."""
         return scaffold(mol[0])
 
     def addScaffolds(
         self,
         scaffolds: list[Scaffold],
         add_rdkit_scaffold: bool = False,
-        recalculate: bool = False
+        recalculate: bool = False,
     ):
         """Add scaffolds to the data frame.
 
@@ -978,13 +1022,13 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 func_args=(scaffold, ),
                 subset=[self.smilesCol],
                 axis=1,
-                raw=True
+                raw=False,
             )
             if add_rdkit_scaffold:
                 PandasTools.AddMoleculeColumnToFrame(
                     self.df,
                     smilesCol=f"Scaffold_{scaffold}",
-                    molCol=f"Scaffold_{scaffold}_RDMol"
+                    molCol=f"Scaffold_{scaffold}_RDMol",
                 )
 
     def getScaffoldNames(self, include_mols: bool = False):
@@ -1429,15 +1473,23 @@ class QSPRDataset(MoleculeTable):
             `ValueError`: Raised if threshold given with non-classification task.
         """
         super().__init__(
-            name, df, smiles_col, add_rdkit, store_dir, overwrite, n_jobs, chunk_size,
-            drop_invalids, index_cols
+            name,
+            df,
+            smiles_col,
+            add_rdkit,
+            store_dir,
+            overwrite,
+            n_jobs,
+            chunk_size,
+            drop_invalids,
+            index_cols,
         )
+        # load metadata if saved already
         self.metaInfo = None
         try:
             self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
         except FileNotFoundError:
             pass
-
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
         # load target properties
@@ -1475,7 +1527,7 @@ class QSPRDataset(MoleculeTable):
             name,
             df=pd.read_table(filename, sep=sep),
             *args,  # noqa: B026 # FIXME: this is a bug in flake8...
-            **kwargs
+            **kwargs,
         )
 
     @staticmethod
@@ -1684,11 +1736,10 @@ class QSPRDataset(MoleculeTable):
         else:
             assert len(th) > 0, "Threshold list must contain at least one value."
             if len(th) > 1:
-                assert (len(th) > 3  # noqa: PLR2004c
-                       ), (
-                           "For multi-class classification, "
-                           "set more than 3 values as threshold."
-                       )
+                assert len(th) > 3, (  # noqa: PLR2004c
+                    "For multi-class classification, "
+                    "set more than 3 values as threshold."
+                )
                 assert max(self.df[target_property.originalName]) <= max(th), (
                     "Make sure final threshold value is not smaller "
                     "than largest value of property"
@@ -1779,7 +1830,8 @@ class QSPRDataset(MoleculeTable):
         self,
         calculator: "CustomDescriptorsCalculator",  # noqa: F821
         recalculate: bool = False,
-        featurize: bool = True
+        featurize: bool = True,
+        **kwargs,
     ):
         """Add custom descriptors to the data set.
 
@@ -1793,8 +1845,9 @@ class QSPRDataset(MoleculeTable):
                 are already present. Defaults to `False`.
             featurize (bool, optional): whether to featurize the data set splits
                 after adding descriptors. Defaults to `True`.
+            kwargs: additional keyword arguments to pass to the calculator
         """
-        super().addCustomDescriptors(calculator, recalculate)
+        super().addCustomDescriptors(calculator, recalculate, **kwargs)
         self.featurize(update_splits=featurize)
 
     def addDescriptors(
@@ -1930,9 +1983,9 @@ class QSPRDataset(MoleculeTable):
             self.X_ind = self.X.drop(self.X.index)
             self.y_ind = self.y.drop(self.y.index)
 
-    def loadDescriptorsToSplits(self,
-                                shuffle: bool = True,
-                                random_state: Optional[int] = None):
+    def loadDescriptorsToSplits(
+        self, shuffle: bool = True, random_state: Optional[int] = None
+    ):
         """Load all available descriptors into the train and test splits.
 
         If no descriptors are available, an exception will be raised.
@@ -2043,7 +2096,7 @@ class QSPRDataset(MoleculeTable):
     def addFeatures(
         self,
         feature_calculators: list["DescriptorsCalculator"] | None = None,  # noqa: F821
-        recalculate: bool = False
+        recalculate: bool = False,
     ):
         """Add features to the data set.
 
@@ -2064,16 +2117,16 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: Optional[list] = None,
+        datafilters: list = [RepeatsFilter(keep=True)],
         split=None,
         fold=None,
-        feature_calculators: Optional[list] = None,
-        feature_filters: Optional[list] = None,
+        feature_calculators: list | None = None,
+        feature_filters: list | None = None,
         feature_standardizer: Optional[SKLearnStandardizer] = None,
         feature_fill_value: float = np.nan,
         recalculate_features: bool = False,
         shuffle: bool = True,
-        random_state: Optional[int] = None
+        random_state: Optional[int] = None,
     ):
         """Prepare the dataset for use in QSPR model.
 
@@ -2207,7 +2260,7 @@ class QSPRDataset(MoleculeTable):
         """
         # do some checks and give split tha data set if required
         self.checkFeatures()
-        if hasattr(split, 'setDataSet'):
+        if hasattr(split, "setDataSet"):
             split.setDataSet(self)
         # choose the fold generator
         if split is None and not self.fold_generator:
@@ -2348,7 +2401,6 @@ class QSPRDataset(MoleculeTable):
             `str`: paths to the saved standardizers
         """
         path = f"{self.storePrefix}_feature_standardizer.json"
-
         if (
             self.feature_standardizer and self.featureNames is not None and
             len(self.featureNames) > 0
@@ -2361,14 +2413,13 @@ class QSPRDataset(MoleculeTable):
             self.feature_standardizer.toFile(path)
             return path
 
-    def saveMetadata(self):
-        """Save metadata to file.
+    def generateMetadata(self):
+        """Generate metadata of the dataset.
 
         Returns:
-            `str`: path to the saved metadata file
+            `dict`: metadata of the dataset
         """
-        path = self.saveFeatureStandardizer()
-
+        stanadardizer_path = self.saveFeatureStandardizer()
         meta_init = {
             "target_props":
                 TargetProperty.toList(
@@ -2381,17 +2432,26 @@ class QSPRDataset(MoleculeTable):
             "init":
                 meta_init,
             "standardizer_path":
-                path.replace(self.storePrefix, "") if path else None,
+                stanadardizer_path.replace(self.storePrefix, "")
+                if stanadardizer_path else None,
             "descriptorcalculator_path":
                 self.descriptorCalculatorsPathPrefix.replace(self.storePrefix, "")
                 if self.descriptorCalculatorsPathPrefix else None,
             "feature_names":
                 list(self.featureNames) if self.featureNames is not None else None,
         }
+        return ret
+
+    def saveMetadata(self):
+        """Save metadata to file.
+
+        Returns:
+            `str`: path to the saved metadata file
+        """
+        ret = self.generateMetadata()
         path = f"{self.storePrefix}_meta.json"
         with open(path, "w") as f:
             json.dump(ret, f)
-
         return path
 
     @property

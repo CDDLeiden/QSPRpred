@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=7.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -52,24 +52,19 @@ dependencies = [
     "tqdm",
     "sklearn-json @ git+https://github.com/OlivierBeq/sklearn-json.git#egg=sklearn-json",
     "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
+    "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits@0.0.4",
 ]
 
 [project.optional-dependencies]
-dev = [
-  "pre-commit", "isort", "yapf", "ruff", "torch >= 1.7.0",
-  "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
-  "padel-pywrapper >= 1.0.2.post1", "Signature-pywrapper", "Mordred", "biopython", "prodec",
-]
-deep = ["torch >= 1.7.0"]
+
 extra = [
   "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
-  "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper"
+  "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper",
 ]
-full = [
-  "torch >= 1.7.0",
-  "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
-  "padel-pywrapper >= 1.0.2.post1", "Signature-pywrapper", "Mordred", "biopython", "prodec",
-]
+pyboost = ["py-boost"]
+deep = ["torch >= 1.7.0", "chemprop >= 1.6.0"]
+full = [ "qsprpred[pyboost]", "qsprpred[deep]", "qsprpred[extra]" ]
+dev = [ "qsprpred[full]", "pre-commit", "isort", "yapf", "ruff" ]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -77,13 +72,13 @@ where = ["."]
 [project.urls]
 homepage = "https://github.com/CDDLeiden/QSPRPred"
 repository = "https://github.com/CDDLeiden/QSPRPred"
-# documentation = "https://readthedocs.org" # Can anybody add the link?
+documentation = "https://cddleiden.github.io/QSPRPred/docs/"
 
 [tool.setuptools]
 include-package-data = true
 
-[tool.setuptools.dynamic]
-version = {attr = "qsprpred.__version__"}
+[tool.setuptools_scm]
+write_to = "qsprpred/_version.py"
 
 [tool.yapf]
 based_on_style = "facebook"

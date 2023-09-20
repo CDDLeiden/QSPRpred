@@ -68,7 +68,7 @@ class MoleculeDescriptorSet(DescriptorSet):
     Descriptorset: a collection of descriptors that can be calculated for a molecule.
     """
     @abstractmethod
-    def __call__(self, mols: list[str | Mol]):
+    def __call__(self, mols: list[str | Mol]) -> np.ndarray | pd.DataFrame:
         """
         Calculate the descriptor for a molecule.
 
@@ -383,7 +383,7 @@ class TanimotoDistances(MoleculeDescriptorSet):
 class PredictorDesc(MoleculeDescriptorSet):
     """MoleculeDescriptorSet that uses a Predictor object to calculate descriptors from
     a molecule."""
-    def __init__(self, model: list[QSPRModel | str]):
+    def __init__(self, model: QSPRModel | str):
         """
         Initialize the descriptorset with a `QSPRModel` object.
 
@@ -392,7 +392,7 @@ class PredictorDesc(MoleculeDescriptorSet):
         """
 
         if isinstance(model, str):
-            from qsprpred.models.interfaces import QSPRModel
+            from ...models.interfaces import QSPRModel
 
             self.model = QSPRModel.fromFile(model)
         else:
@@ -444,6 +444,44 @@ class PredictorDesc(MoleculeDescriptorSet):
         return "PredictorDesc"
 
 
+class SmilesDesc(MoleculeDescriptorSet):
+    """Descriptorset that calculates descriptors from a SMILES sequence."""
+    def __call__(self, mols: list[str | Mol]):
+        """Return smiles as descriptors.
+
+        Args:
+            mols (list): list of smiles or rdkit molecules
+
+        Returns:
+            an array or data frame of descriptor values of shape (n_mols, n_descriptors)
+        """
+        if all(isinstance(mol, str) for mol in mols):
+            return np.array(mols)
+        elif all(isinstance(mol, Mol) for mol in mols):
+            return np.array([Chem.MolToSmiles(mol) for mol in mols])
+        else:
+            raise ValueError("Molecules should be either SMILES or RDKit Mol objects.")
+
+    @property
+    def isFP(self):
+        return False
+
+    @property
+    def settings(self):
+        return {}
+
+    @property
+    def descriptors(self):
+        return ["SMILES"]
+
+    @descriptors.setter
+    def descriptors(self, descriptors):
+        pass
+
+    def __str__(self):
+        return "SmilesDesc"
+
+
 class _DescriptorSetRetriever:
     """Based on recipe 8.21 of the book "Python Cookbook".
 
@@ -469,19 +507,19 @@ class _DescriptorSetRetriever:
 
     def getMordred(self, *args, **kwargs):
         """Wrapper to get Mordred descriptors - depends on optional dependency."""
-        from qsprpred.extra.data.utils.descriptorsets import Mordred
+        from ...extra.data.utils.descriptorsets import Mordred
 
         return Mordred(*args, **kwargs)
 
     def getMold2(self, *args, **kwargs):
         """Wrapper to get Mold2 descriptors - depends on optional dependency."""
-        from qsprpred.extra.data.utils.descriptorsets import Mold2
+        from ...extra.data.utils.descriptorsets import Mold2
 
         return Mold2(*args, **kwargs)
 
     def getPaDEL(self, *args, **kwargs):
         """Wrapper to get PaDEL descriptors - depends on optional dependency."""
-        from qsprpred.extra.data.utils.descriptorsets import PaDEL
+        from ...extra.data.utils.descriptorsets import PaDEL
 
         return PaDEL(*args, **kwargs)
 
@@ -490,7 +528,8 @@ class _DescriptorSetRetriever:
         return RDKitDescs(*args, **kwargs)
 
     def getExtendedValenceSignature(self, *args, **kwargs):
-        from qsprpred.extra.data.utils.descriptorsets import ExtendedValenceSignature
+        from ...extra.data.utils.descriptorsets import ExtendedValenceSignature
+
         return ExtendedValenceSignature(*args, **kwargs)
 
     def getPredictorDesc(self, *args, **kwargs):
@@ -500,7 +539,7 @@ class _DescriptorSetRetriever:
     def getProDec(self, *args, **kwargs):
         """Wrapper to get protein descriptorsfrom prodec - depends on optional
         dependency."""
-        from qsprpred.extra.data.utils.descriptorsets import ProDec
+        from ...extra.data.utils.descriptorsets import ProDec
 
         return ProDec(*args, **kwargs)
 
@@ -508,7 +547,11 @@ class _DescriptorSetRetriever:
         """Wrapper to get bulk tanimoto distances."""
         return TanimotoDistances(*args, **kwargs)
 
-    def get_DataFrame(self, *args, **kwargs):
+    def getSmilesDesc(self, *args, **kwargs):
+        """Wrapper to get SMILES as descriptors."""
+        return SmilesDesc(*args, **kwargs)
+
+    def getDataFrame(self, *args, **kwargs):
         return DataFrameDescriptorSet(*args, **kwargs)
 
 

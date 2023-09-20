@@ -6,7 +6,8 @@ import os
 import shutil
 import sys
 from abc import ABC, abstractmethod
-from typing import Callable, Iterable, List, Optional, Type, Union
+from datetime import datetime
+from typing import Any, Callable, Iterable, List, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,7 @@ from ..data.data import MoleculeTable, QSPRDataset, TargetProperty
 from ..data.utils.feature_standardization import SKLearnStandardizer
 from ..logs import logger
 from ..models import SSPACE
+from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..models.metrics import SklearnMetric
 from ..models.tasks import ModelTasks
 from ..utils.inspect import import_class
@@ -24,8 +26,7 @@ from ..utils.inspect import import_class
 class QSPRModel(ABC):
     """The definition of the common model interface for the package.
 
-    The QSPRModel handles model initialization, fit, cross validation
-    and hyperparameter optimization.
+    The QSPRModel handles model initialization, fitting, predicting and saving.
 
     Attributes:
         name (str): name of the model
@@ -112,6 +113,22 @@ class QSPRModel(ABC):
                     f"Descriptor calculator file '{path}' not found."
                 )
         return calcs
+
+    @staticmethod
+    def readEarlyStopping(path):
+        """Read early stopping settings from file.
+
+        If the file does not exist, None is returned.
+
+        Args:
+            path (str): absolute path to the JSON file
+
+        Returns:
+            EarlyStopping:
+                Early stopping instance or None if the file does not exist
+        """
+        if os.path.exists(path):
+            return EarlyStopping.fromFile(path)
 
     @staticmethod
     def handleInvalidsInPredictions(
@@ -207,7 +224,7 @@ class QSPRModel(ABC):
         meta = cls.readMetadata(path)
         model_class = import_class(meta["model_class"])
         model_name = meta["name"]
-        base_dir = os.path.dirname(path).replace(f"qspr/models/{model_name}", "")
+        base_dir = os.path.dirname(path).replace(f"{model_name}", "")
         return model_class(name=model_name, base_dir=base_dir)
 
     @classmethod
@@ -236,12 +253,11 @@ class QSPRModel(ABC):
     def __init__(
         self,
         base_dir: str,
-        alg: Optional[Type] = None,
-        data: Optional[QSPRDataset] = None,
-        name: Optional[str] = None,
-        parameters: Optional[dict] = None,
+        alg: Type | None = None,
+        data: QSPRDataset | None = None,
+        name: str | None = None,
+        parameters: dict | None = None,
         autoload=True,
-        scoring=None,
     ):
         """Initialize a QSPR model instance.
 
@@ -259,9 +275,6 @@ class QSPRModel(ABC):
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
-            scoring (str or callable):
-                scoring function to use for cross validation and optimization,
-                if None, the default scoring function is used
         """
         self.data = data
         self.name = name or alg.__class__.__name__
@@ -308,12 +321,18 @@ class QSPRModel(ABC):
                 os.path.join(self.baseDir, self.metaInfo["feature_standardizer_path"])
             ) if self.metaInfo["feature_standardizer_path"] else None
         )
+        # Initialize early stopping tracker if model supports early stopping
+        if self.supportsEarlyStopping:
+            self.earlyStopping = (
+                self.readEarlyStopping(
+                    os.path.join(self.baseDir, self.metaInfo["early_stopping_path"])
+                ) if "early_stopping_path" in self.metaInfo else EarlyStopping()
+            )
+
         # initialize a estimator instance with the given parameters
         self.alg = alg
         if autoload:
             self.estimator = self.loadEstimatorFromFile(params=self.parameters)
-
-        self.scoreFunc = self.getScoringFunction(scoring)
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""
@@ -384,13 +403,13 @@ class QSPRModel(ABC):
     @property
     def outDir(self) -> str:
         """Return output directory of the model,
-        the model files are stored in this directory (`{baseDir}/qspr/models/{name}`).
+        the model files are stored in this directory (`{baseDir}/{name}`).
 
         Returns:
             str: output directory of the model
         """
-        os.makedirs(f"{self.baseDir}/qspr/models/{self.name}", exist_ok=True)
-        return f"{self.baseDir}/qspr/models/{self.name}"
+        os.makedirs(f"{self.baseDir}/{self.name}", exist_ok=True)
+        return f"{self.baseDir}/{self.name}"
 
     @property
     def outPrefix(self) -> str:
@@ -402,6 +421,33 @@ class QSPRModel(ABC):
             str: output prefix of the model files
         """
         return f"{self.outDir}/{self.name}"
+
+    @property
+    @abstractmethod
+    def supportsEarlyStopping(self) -> bool:
+        """Return if the model supports early stopping.
+
+        Returns:
+            bool: True if the model supports early stopping
+        """
+
+    @property
+    def optimalEpochs(self) -> int | None:
+        """Return the optimal number of epochs for early stopping.
+
+        Returns:
+            int | None: optimal number of epochs
+        """
+        return self._optimalEpochs
+
+    @optimalEpochs.setter
+    def optimalEpochs(self, value: int | None = None):
+        """Set the optimal number of epochs for early stopping.
+
+        Args:
+            value (int | None, optional): optimal number of epochs
+        """
+        self._optimalEpochs = value
 
     def saveParams(self, params: dict) -> str:
         """Save model parameters to a JSON file.
@@ -461,6 +507,11 @@ class QSPRModel(ABC):
         self.featureStandardizer.toFile(path)
         return path
 
+    def saveEarlyStopping(self) -> str:
+        path = f"{self.outDir}/{self.name}_early_stopping.json"
+        self.earlyStopping.toFile(path)
+        return path
+
     def saveMetadata(self) -> str:
         """Save model metadata to a JSON file.
 
@@ -503,10 +554,14 @@ class QSPRModel(ABC):
         self.metaInfo["estimator_path"] = self.saveEstimator().replace(
             f"{self.baseDir}/", ""
         )
+        if self.supportsEarlyStopping:
+            self.metaInfo["early_stopping_path"] = self.saveEarlyStopping().replace(
+                f"{self.baseDir}/", ""
+            )
         return self.saveMetadata()
 
     def checkForData(self, exception: bool = True) -> bool:
-        """Check if the model has data set.
+        """Check if the model has a data set.
 
         Args:
             exception (bool): if true, an exception is raised if no data is set
@@ -522,6 +577,52 @@ class QSPRModel(ABC):
                 "with a 'QSPRDataset' instance to train on."
             )
         return has_data
+
+    def convertToNumpy(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None,
+    ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
+        """Convert the given data matrix and target matrix to np.ndarray format.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix
+            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix
+
+        Returns:
+                data matrix and/or target matrix in np.ndarray format
+        """
+        if isinstance(X, QSPRDataset):
+            X = X.getFeatures(raw=True, concat=True)
+        if isinstance(X, pd.DataFrame):
+            X = X.values
+        if y is not None:
+            if isinstance(y, QSPRDataset):
+                y = y.getTargetPropertiesValues(concat=True)
+            if isinstance(y, pd.DataFrame):
+                y = y.values
+            return X, y
+        else:
+            return X
+
+    def getParameters(self, new_parameters) -> dict | None:
+        """Get the model parameters combined with the given parameters.
+
+        If both the model and the given parameters contain the same key,
+        the value from the given parameters is used.
+
+        Args:
+            new_parameters (dict): dictionary of new parameters to add
+
+        Returns:
+            dict: dictionary of model parameters
+        """
+        parameters_out = copy.deepcopy(self.parameters)
+        if parameters_out is not None:
+            parameters_out.update(new_parameters)
+        else:
+            parameters_out = new_parameters
+        return parameters_out
 
     def createPredictionDatasetFromMols(
         self,
@@ -568,11 +669,13 @@ class QSPRModel(ABC):
             feature_calculators=self.featureCalculators,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value,
-            shuffle=False
+            shuffle=False,
         )
         return dataset, failed_mask
 
-    def predictDataset(self, dataset: QSPRDataset, use_probas: bool = False):
+    def predictDataset(self,
+                       dataset: QSPRDataset,
+                       use_probas: bool = False) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given dataset.
 
@@ -581,17 +684,17 @@ class QSPRModel(ABC):
             use_probas: use probabilities if this is a classification model
 
         Returns:
-            np.ndarray: an array of predictions
+            np.ndarray | list[np.ndarray]:
+                an array of predictions or a list of arrays of predictions
+                (for classification models with use_probas=True)
         """
         if self.task.isRegression() or not use_probas:
             predictions = self.predict(dataset)
             # always return 2D array
-            if predictions.ndim == 1:
-                predictions = predictions.reshape(-1, 1)
             if self.task.isClassification():
                 predictions = predictions.astype(int)
         else:
-            # NOTE: if a multiclass-multioutput, this will return a list of 2D arrays
+            # return a list of 2D arrays
             predictions = self.predictProba(dataset)
         return predictions
 
@@ -602,7 +705,7 @@ class QSPRModel(ABC):
         smiles_standardizer: Union[str, callable] = "chembl",
         n_jobs: int = 1,
         fill_value: float = np.nan,
-    ) -> np.ndarray:
+    ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given molecules.
 
@@ -616,10 +719,9 @@ class QSPRModel(ABC):
             fill_value: Value to use for missing values in the feature matrix.
 
         Returns:
-            np.ndarray:
-                an array of predictions, can be a 1D array for single target models,
-                2D array for multi target and a list of
-                2D arrays for multi-target and multi-class models
+            np.ndarray | list[np.ndarray]:
+                an array of predictions or a list of arrays of predictions
+                (for classification models with use_probas=True)
         """
         if not self.featureCalculators:
             raise ValueError("No feature calculator set on this instance.")
@@ -641,86 +743,128 @@ class QSPRModel(ABC):
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
-    def getScoringFunction(
-        self,
-        scoring: Union[str, Callable[[Iterable, Iterable], float]],
-    ) -> Callable[[Iterable, Iterable], float] | SklearnMetric:
-        """Get scoring function from sklearn.metrics.
+    def fitAttached(self, **kwargs) -> str:
+        """Train model on the whole attached data set.
+
+        ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
+        should be run first, so that the average number of epochs from the
+        cross-validation with early stopping can be used for fitting the model.
 
         Args:
-            scoring (Union[str, Callable[[Iterable, Iterable], float]]):
-                metric name from `sklearn.metrics` or user-defined scoring function.
-
-        Raises:
-            ValueError: If the scoring function is currently not supported by
-                GridSearch and BayesOptimization.
+            kwargs: additional arguments to pass to fit
 
         Returns:
-            score_func (Callable[[Iterable, Iterable], float] | SklearnMetric):
-                scorer function from sklearn.metrics (`str` as input)
-                wrapped in the `SklearnMetric` class
-                or user-defined function (`Callable` as input,
-                if classification metric has the attribute `needsProbasToScore`,
-                set to `True` if is needs probabilities instead of predictions).
+            str: path to the saved model
         """
-        if all(
-            [scoring not in SklearnMetric.supportedMetrics,
-             isinstance(scoring, str)]
-        ):
-            raise ValueError(
-                "Scoring function %s not supported. Supported scoring functions are: %s"
-                % (scoring, SklearnMetric.supportedMetrics)
-            )
-        elif callable(scoring):
-            return scoring
-        elif scoring is None:
-            if self.task.isRegression():
-                scorer = SklearnMetric.getMetric("explained_variance")
-            elif self.task in [ModelTasks.MULTICLASS, ModelTasks.MULTITASK_SINGLECLASS]:
-                scorer = SklearnMetric.getMetric("roc_auc_ovr_weighted")
-            elif self.task in [ModelTasks.SINGLECLASS]:
-                scorer = SklearnMetric.getMetric("roc_auc")
-            else:
-                raise ValueError(
-                    "No supported scoring function for task %s" % self.task
-                )
-        else:
-            scorer = SklearnMetric.getMetric(scoring)
-        assert scorer.supportsTask(
-            self.task
-        ), "Scoring function %s does not support task %s" % (scorer, self.task)
-        return scorer
+        # do some checks
+        self.checkForData()
+        # get data
+        X_all = self.data.getFeatures(concat=True).values
+        y_all = self.data.getTargetPropertiesValues(concat=True).values
+        # load estimator
+        self.estimator = self.loadEstimator(self.parameters)
+        # fit model
+        logger.info(
+            "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        # Use early stopping false here, since we are fitting on the whole data set
+        # the number of epochs is already determined from the cross-validation
+        self.estimator = self.fit(
+            X_all, y_all, mode=EarlyStoppingMode.OPTIMAL, **kwargs
+        )
+        logger.info(
+            "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        # save model and return path
+        return self.save()
 
     @abstractmethod
-    def fit(self) -> str:
-        """Build estimator model from the whole associated data set.
-
-        Returns:
-            str: absolute path to the saved model file after fitting
-        """
-
-    @abstractmethod
-    def evaluate(
+    def fit(
         self,
-        save: bool = True,
-        parameters: Optional[dict] = None,
-        **kwargs
-    ) -> float | np.ndarray:
-        """Make predictions for crossvalidation and independent test set.
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None,
+        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        **kwargs,
+    ) -> Any | tuple[Any, int] | None:
+        """Fit the model to the given data matrix or `QSPRDataset`.
 
-        If save is True, the predictions are saved to a file in the output directory.
+        Note. convertToNumpy can be called here, to convert the input data to
+            np.ndarray format.
 
-        Arguments:
-            save (bool): don't save predictions when used in bayesian optimization
-            parameters (dict): optional model parameters to use for evaluation
-            **kwargs: additional keyword arguments for the evaluation function
+        Note. if no estimator is given, the estimator instance of the model is used.
+
+        Note. if a model supports early stopping, the fit function should have the
+            `early_stopping` decorator and the mode argument should be used to set the
+            early stopping mode. If the model does not support early stopping, the mode
+            argument is ignored.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
+            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            estimator (Any): estimator instance to use for fitting
+            mode (EarlyStoppingMode): early stopping mode
+            kwargs: additional arguments to pass to the fit method of the estimator
 
         Returns:
-            float | np.ndarray: predictions for evaluation
+            Any: fitted estimator instance
+            int: in case of early stopping, the number of iterations
+                after which the model stopped training
         """
 
     @abstractmethod
-    def loadEstimator(self, params: Optional[dict] = None) -> object:
+    def predict(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> np.ndarray:
+        """Make predictions for the given data matrix or `QSPRDataset`.
+
+        Note. convertToNumpy can be called here, to convert the input data to
+        np.ndarray format.
+
+        Note. if no estimator is given, the estimator instance of the model
+              is used.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
+            estimator (Any): estimator instance to use for fitting
+
+        Returns:
+            np.ndarray:
+                2D array containing the predictions, where each row corresponds
+                to a sample in the data and each column to a target property
+        """
+
+    @abstractmethod
+    def predictProba(
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
+    ) -> list[np.ndarray]:
+        """Make predictions for the given data matrix or `QSPRDataset`,
+        but use probabilities for classification models. Does not work with
+        regression models.
+
+        Note. convertToNumpy can be called here, to convert the input data to
+        np.ndarray format.
+
+        Note. if no estimator is given, the estimator instance of the model
+              is used.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
+            estimator (Any): estimator instance to use for fitting
+
+        Returns:
+            list[np.ndarray]:
+                a list of 2D arrays containing the probabilities for each class,
+                where each array corresponds to a target property, each row
+                to a sample in the data and each column to a class
+        """
+
+    @abstractmethod
+    def loadEstimator(self, params: dict | None = None) -> object:
         """Initialize estimator instance with the given parameters.
 
         If `params` is `None`, the default parameters will be used.
@@ -733,7 +877,7 @@ class QSPRModel(ABC):
         """
 
     @abstractmethod
-    def loadEstimatorFromFile(self, params: Optional[dict] = None) -> object:
+    def loadEstimatorFromFile(self, params: dict | None = None) -> object:
         """Load estimator instance from file and apply the given parameters.
 
         Args:
@@ -751,45 +895,105 @@ class QSPRModel(ABC):
             path (str): path to the saved estimator
         """
 
-    @abstractmethod
-    def predict(self, X: pd.DataFrame | np.ndarray | QSPRDataset):
-        """Make predictions for the given data matrix or `QSPRDataset`.
+
+class ModelAssessor(ABC):
+    """Base class for assessment methods.
+
+    Attributes:
+        useProba (bool): use probabilities for classification models
+    """
+    def __init__(self, use_proba: bool = True, mode: EarlyStoppingMode | None = None):
+        """Initialize the evaluation method class.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
-
-        Returns:
-            np.ndarray:
-                an array of predictions, can be a 1D array for single target models
-                or a 2D/3D array for multi-target/multi-class models
+            use_proba (bool): use probabilities for classification models
+            mode (EarlyStoppingMode): early stopping mode for fitting
         """
+        self.useProba = use_proba
+        self.mode = mode
 
     @abstractmethod
-    def predictProba(self, X: pd.DataFrame | np.ndarray | QSPRDataset) -> np.ndarray:
-        """Make predictions for the given data matrix or `QSPRDataset`,
-        but use probabilities for classification models. Does not work with
-        regression models.
+    def __call__(self, model: QSPRModel,
+                 **kwargs) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
+        """Evaluate the model.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
+            model (QSPRModel): model to evaluate
+            kwargs: additional arguments for fit function of the model
 
         Returns:
-            np.ndarray:
-                an array of predicted class probabilities
+            list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]:
+                list of tuples containing the true values and the predictions, where
+                each tuple corresponds a set of predictions such as different folds.
         """
+
+    def savePredictionsToFile(
+        self,
+        model: QSPRModel,
+        y: np.array,
+        predictions: np.ndarray | list[np.ndarray],
+        index: pd.Series,
+        file_suffix: str,
+        extra_columns: dict[str, np.ndarray] | None = None,
+    ):
+        """Save predictions to file.
+
+        Args:
+            model (QSPRModel): model to evaluate
+            y (np.array): target values
+            predictions (np.ndarray | list[np.ndarray]): predictions
+            index (pd.Series): index of the data set
+            file_suffix (str): suffix to add to the file name
+            extra_columns (dict[str, np.ndarray]): extra columns to add to the output
+        """
+        # Create dataframe with true values
+        df_out = pd.DataFrame(
+            y.values, columns=y.add_suffix("_Label").columns, index=index
+        )
+        # Add predictions to dataframe
+        for idx, prop in enumerate(model.data.targetProperties):
+            if prop.task.isClassification():
+                # convert one-hot encoded predictions to class labels
+                # and add to train and test
+                df_out[f"{prop.name}_Prediction"] = np.argmax(predictions[idx], axis=1)
+                # add probability columns to train and test set
+                df_out = pd.concat(
+                    [
+                        df_out,
+                        pd.DataFrame(predictions[idx], index=index
+                                    ).add_prefix(f"{prop.name}_ProbabilityClass_"),
+                    ],
+                    axis=1,
+                )
+            else:
+                df_out[f"{prop.name}_Prediction"] = predictions[:, idx]
+        # Add extra columns to dataframe if given (such as fold indexes)
+        if extra_columns is not None:
+            for col_name, col_values in extra_columns.items():
+                df_out[col_name] = col_values
+        df_out.to_csv(f"{model.outPrefix}.{file_suffix}.tsv", sep="\t")
 
 
 class HyperParameterOptimization(ABC):
     """Base class for hyperparameter optimization.
 
     Attributes:
-        scoreFunc (Metric): scoring function to use
+        scoreFunc (Metric): scoring function to use, should match the output of the
+                            evaluation method (e.g. if the evaluation methods returns
+                            class probabilities, the scoring function support class
+                            probabilities)
+        runAssessment (ModelAssessor): evaluation method to use
+        scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
         paramGrid (dict): dictionary of parameters to optimize
         bestScore (float): best score found during optimization
         bestParams (dict): best parameters found during optimization
     """
     def __init__(
-        self, scoring: str | Callable[[Iterable, Iterable], float], param_grid: dict
+        self,
+        scoring: str | Callable[[Iterable, Iterable], float],
+        param_grid: dict,
+        model_assessor: ModelAssessor,
+        score_aggregation: Callable[[Iterable], float],
     ):
         """Initialize the hyperparameter optimization class.
 
@@ -797,10 +1001,15 @@ class HyperParameterOptimization(ABC):
             Metric name from `sklearn.metrics` or user-defined scoring function.
         param_grid (dict):
             dictionary of parameters to optimize
+        model_assessor (ModelAssessor):
+            assessment method to use for determining the best parameters
+        score_aggregation (Callable[[Iterable], float]): function to aggregate scores
         """
         self.scoreFunc = (
             SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
         )
+        self.runAssessment = model_assessor
+        self.scoreAggregation = score_aggregation
         self.paramGrid = param_grid
         self.bestScore = -np.inf
         self.bestParams = None

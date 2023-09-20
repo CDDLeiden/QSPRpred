@@ -19,6 +19,7 @@ from sklearn.preprocessing import StandardScaler
 from .data.data import QSPRDataset
 from .data.utils.datafilters import papyrusLowQualityFilter
 from .data.utils.datasplitters import (
+    ClusterSplit,
     ManualSplit,
     RandomSplit,
     ScaffoldSplit,
@@ -30,6 +31,7 @@ from .data.utils.descriptorsets import (
     FingerprintSet,
     PredictorDesc,
     RDKitDescs,
+    SmilesDesc,
 )
 from .data.utils.featurefilters import (
     BorutaFilter,
@@ -37,9 +39,9 @@ from .data.utils.featurefilters import (
     LowVarianceFilter,
 )
 from .data.utils.scaffolds import Murcko
-from .deep.models.models import QSPRDNN
-from .logs.utils import backup_files, commit_hash, enable_file_logger
-from .models.models import QSPRsklearn
+from .extra.gpu.models.dnn import DNNModel
+from .logs.utils import backup_files, enable_file_logger
+from .models.sklearn import SklearnModel
 from .models.tasks import TargetTasks
 
 
@@ -50,22 +52,36 @@ def QSPRArgParser(txt=None):
     )
     # base arguments
     parser.add_argument(
-        "-b",
-        "--base_dir",
-        type=str,
-        default=".",
-        help="Base directory which contains a folder 'data' with input files",
-    )
-    parser.add_argument("-de", "--debug", action="store_true")
-    parser.add_argument(
-        "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
-    )
-    parser.add_argument(
         "-i",
         "--input",
         type=str,
-        default="dataset.tsv",
-        help="tsv file name that contains SMILES and property value column",
+        default="./dataset.tsv",
+        help="path to tsv file that contains SMILES and property value column",
+    )
+    parser.add_argument(
+        "-o",
+        "--output_dir",
+        type=str,
+        default=".",
+        help="Directory to write output files to.",
+    )
+    parser.add_argument(
+        "-ds",
+        "--data_suffix",
+        type=str,
+        default=None,
+        help="Suffix to add to the dataset name.",
+    )
+    parser.add_argument("-de", "--debug", action="store_true")
+    parser.add_argument(
+        "-sb",
+        "--skip_backup",
+        action="store_true",
+        help="Skip backup of files. WARNING: this may overwrite "
+        "previous results, use with caution.",
+    )
+    parser.add_argument(
+        "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
     )
     parser.add_argument("-ncpu", "--ncpu", type=int, default=8, help="Number of CPUs")
     # model target arguments
@@ -124,30 +140,38 @@ def QSPRArgParser(txt=None):
                         should be a column 'Quality' where all 'Low' will be removed",
     )
     parser.add_argument(
-        "-lt",
-        "--log_transform",
+        "-tr",
+        "--transform_data",
         type=json.loads,
         help=(
-            "For each property if its values need to be log-tranformed. This arg only "
-            "has an effect when mode is regression, otherwise will be ignored! This "
-            "needs to be given for each property included in any of the models as "
-            "follows, e.g. -lt \"{'CL':True,'fu':False}\". Note: no spaces and "
-            "surround by single quotes"
+            "Transformation of the output property. This arg only has an effect when"
+            "task is regression, otherwise will be ignored! Specify the transformation "
+            "as a dictionary with the property name as key and the transformation as "
+            "value, e.g. -tr \"{'CL':'log10','fu':'sqrt'}\". Note: no spaces and "
+            "surrounded by single quotes. Choose from 'log10', 'log2', 'log', 'sqrt',"
+            "'cbrt', 'exp', 'square', 'cube', 'reciprocal'"
         ),
+        default={},
     )
     # Data set split arguments
     parser.add_argument(
         "-sp",
         "--split",
         type=str,
-        choices=["random", "time", "scaffold", "manual"],
+        choices=[
+            "random",
+            "cluster",
+            "scaffold",
+            "time",
+            "manual",
+        ],
         default="random",
         help=(
-            "Split type (Randomsplit, ScaffoldSplit, manualsplit and TemporalSplit)."
-            "If manualsplit is chosen, a column 'datasplit' with values 'train' and "
-            "'test' is required. If ScaffoldSplit or TemporalSplit is chosen, you can "
-            "specify the split_fraction with -sf. If TemporalSplit is chosen, you can "
-            "specify the split_time with -st and the split_timecolumn with -stc."
+            "Split type. If 'random', 'cluster' or 'scaffold', you can specify the"
+            "split_fraction with -sf. If 'cluster', you can specify the clustering"
+            "method with -scm. If 'time', you can specify the split_time with -st and "
+            " the split_timecolumn with -stc. If 'manual', a column 'datasplit' with "
+            "values 'train' and 'test' is required."
         ),
     )
     parser.add_argument(
@@ -157,7 +181,7 @@ def QSPRArgParser(txt=None):
         default=0.1,
         help=(
             "Fraction of the dataset used as test set. "
-            "Used for RandomSplit and ScaffoldSplit"
+            "Used for RandomSplit, ClusterSplit and ScaffoldSplit"
         ),
     )
     parser.add_argument(
@@ -165,14 +189,22 @@ def QSPRArgParser(txt=None):
         "--split_time",
         type=float,
         default=2015,
-        help="Temporal split limit. Used for temporal split.",
+        help="Temporal split limit. Used for TemporalSplit.",
     )
     parser.add_argument(
         "-stc",
         "--split_timecolumn",
         type=str,
         default="Year",
-        help="Temporal split time column. Used for temporal split.",
+        help="Temporal split time column. Used for TemporalSplit.",
+    )
+    parser.add_argument(
+        "-scm",
+        "--split_cluster_method",
+        type=str,
+        choices=["MaxMin", "LeaderPicker"],
+        default="MaxMin",
+        help="Cluster method. Used for ClusterSplit.",
     )
     # features to calculate
     parser.add_argument(
@@ -180,9 +212,21 @@ def QSPRArgParser(txt=None):
         "--features",
         type=str,
         choices=[
-            "Morgan", "RDkit", "Mordred", "Mold2", "PaDEL", "DrugEx", "Signature"
-            "MaccsFP", "AvalonFP", "TopologicalFP", "AtomPairFP", "RDKitFP",
-            "PatternFP", "LayeredFP"
+            "Morgan",
+            "RDkit",
+            "Mordred",
+            "Mold2",
+            "PaDEL",
+            "DrugEx",
+            "Signature"
+            "MaccsFP",
+            "AvalonFP",
+            "TopologicalFP",
+            "AtomPairFP",
+            "RDKitFP",
+            "PatternFP",
+            "LayeredFP",
+            "Smiles",
         ],
         nargs="*",
     )
@@ -228,9 +272,6 @@ def QSPRArgParser(txt=None):
         default=np.nan,
         help="Fill value for missing values in the calculated features",
     )
-    parser.add_argument(
-        "-ng", "--no_git", action="store_true", help="If on, git hash is not retrieved"
-    )
     if txt:
         args = parser.parse_args(txt)
     else:
@@ -249,16 +290,14 @@ def QSPRArgParser(txt=None):
 
 def QSPR_dataprep(args):
     """Optimize, evaluate and train estimators."""
-    if not os.path.exists(args.base_dir + "/qspr/data"):
-        os.makedirs(args.base_dir + "/qspr/data")
     for reg in args.regression:
         for props in args.properties:
             props_name = "_".join(props)
             log.info(f"Property: {props_name}")
             try:
-                df = pd.read_csv(f"{args.base_dir}/data/{args.input}", sep="\t")
-            except BaseException:
-                log.error(f"Dataset file ({args.base_dir}/data/{args.input}) not found")
+                df = pd.read_csv(args.input, sep="\t")
+            except FileNotFoundError:
+                log.error(f"Dataset file ({args.input}) not found")
                 sys.exit()
             # prepare dataset for training QSPR model
             target_props = []
@@ -284,15 +323,28 @@ def QSPR_dataprep(args):
                         "Threshold will be ignored."
                     )
                     th = None
-                log_transform = (
-                    np.log if args.log_transform and args.log_transform[prop] else None
-                )
+                transform_dict = {
+                    "log10": np.log10,
+                    "log2": np.log2,
+                    "log": np.log,
+                    "sqrt": np.sqrt,
+                    "cbrt": np.cbrt,
+                    "exp": np.exp,
+                    "square": np.square,
+                    "cube": lambda x: np.power(x, 3),
+                    "reciprocal": np.reciprocal,
+                }
                 target_props.append(
                     {
-                        "name": prop,
-                        "task": task,
-                        "th": th,
-                        "transformer": log_transform
+                        "name":
+                            prop,
+                        "task":
+                            task,
+                        "th":
+                            th,
+                        "transformer":
+                            transform_dict[args.transform_data[prop]]
+                            if prop in args.transform_data else None,
                     }
                 )
             # missing value imputation
@@ -305,13 +357,17 @@ def QSPR_dataprep(args):
                     imputer = SimpleImputer(strategy="most_frequent")
                 else:
                     sys.exit("invalid impute arg given")
+            dataset_name = (
+                f"{props_name}_{task}_{args.data_suffix}"
+                if args.data_suffix else f"{props_name}_{task}"
+            )
             mydataset = QSPRDataset(
-                f"{props_name}_{task}",
+                dataset_name,
                 target_props=target_props,
                 df=df,
                 smiles_col=args.smiles_col,
                 n_jobs=args.ncpu,
-                store_dir=f"{args.base_dir}/qspr/data/",
+                store_dir=args.output_dir,
                 overwrite=True,
                 target_imputer=imputer if args.imputation is not None else None,
             )
@@ -342,8 +398,16 @@ def QSPR_dataprep(args):
                 split = ManualSplit(
                     splitcol=df["datasplit"], trainval="train", testval="test"
                 )
+            elif args.split == "cluster":
+                split = ClusterSplit(
+                    test_fraction=args.split_fraction,
+                    clustering_algorithm=args.split_clustering_method,
+                    dataset=mydataset,
+                )
             else:
-                split = RandomSplit(test_fraction=args.split_fraction)
+                split = RandomSplit(
+                    test_fraction=args.split_fraction, dataset=mydataset
+                )
             # feature calculator
             descriptorsets = []
             # Avoid importing optional dependencies if not needed
@@ -387,16 +451,18 @@ def QSPR_dataprep(args):
                 descriptorsets.append(FingerprintSet(fingerprint_type="PatternFP"))
             if "LayeredFP" in args.features:
                 descriptorsets.append(FingerprintSet(fingerprint_type="LayeredFP"))
+            if "Smiles" in args.features:
+                descriptorsets.append(SmilesDesc())
             if args.predictor_descs:
                 for predictor_path in args.predictor_descs:
                     # load in predictor from files
                     if "DNN" in predictor_path:
                         descriptorsets.append(
-                            PredictorDesc(QSPRDNN.fromFile(predictor_path))
+                            PredictorDesc(DNNModel.fromFile(predictor_path))
                         )
                     else:
                         descriptorsets.append(
-                            PredictorDesc(QSPRsklearn.fromFile(predictor_path))
+                            PredictorDesc(SklearnModel.fromFile(predictor_path))
                         )
             # feature filters
             featurefilters = []
@@ -421,7 +487,8 @@ def QSPR_dataprep(args):
                 datafilters=datafilters,
                 split=split,
                 feature_filters=featurefilters,
-                feature_standardizer=StandardScaler(),
+                feature_standardizer=StandardScaler()
+                if "Smiles" not in args.features else None,
                 feature_fill_value=0.0,
             )
 
@@ -441,34 +508,36 @@ if __name__ == "__main__":
         torch.manual_seed(args.random_state)
     os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
+    # check input file and output directory exist
+    if not os.path.exists(args.input):
+        raise FileNotFoundError(f"Input file {args.input} not found.")
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+
     # Backup files
     tasks = ["REG" if reg is True else "CLS" for reg in args.regression]
     file_prefixes = [
         f"{property}_{task}" for task in tasks for property in args.properties
     ]
-    backup_msg = backup_files(
-        args.base_dir,
-        "qspr/data",
-        tuple(file_prefixes),
-        cp_suffix=["calculators", "standardizer", "meta"],
-    )
-
-    if not os.path.exists(f"{args.base_dir}/qspr/data"):
-        os.makedirs(f"{args.base_dir}/qspr/data")
+    if not args.skip_backup:
+        backup_msg = backup_files(
+            args.output_dir,
+            tuple(file_prefixes),
+            cp_suffix=["calculators", "standardizer", "meta"],
+        )
 
     logSettings = enable_file_logger(
-        os.path.join(args.base_dir, "qspr/data"),
+        args.output_dir,
         "QSPRdata.log",
         args.debug,
         __name__,
-        commit_hash(os.path.dirname(os.path.realpath(__file__)))
-        if not args.no_git else None,
         vars(args),
         disable_existing_loggers=False,
     )
 
     log = logSettings.log
-    log.info(backup_msg)
+    if not args.skip_backup:
+        log.info(backup_msg)
 
     # Add optuna logging
     optuna.logging.enable_propagation()  # Propagate logs to the root logger.
@@ -477,7 +546,7 @@ if __name__ == "__main__":
 
     # Create json log file with used commandline arguments
     print(json.dumps(vars(args), sort_keys=False, indent=2))
-    with open(f"{args.base_dir}/qspr/data/QSPRdata.json", "w") as f:
+    with open(f"{args.output_dir}/QSPRdata.json", "w") as f:
         json.dump(vars(args), f)
 
     # Optimize, evaluate and train estimators according to QSPR arguments

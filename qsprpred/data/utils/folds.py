@@ -1,4 +1,5 @@
 """A module that provides a class that creates folds from a given data set."""
+from ..interfaces import DataSplit
 from .feature_standardization import apply_feature_standardizer
 
 
@@ -47,7 +48,7 @@ class Folds:
             yield X_arr[train_index, :], X_arr[test_index, :], y_arr[
                 train_index], y_arr[test_index], train_index, test_index
 
-    def __init__(self, split: "DataSplit", feature_standardizer=None):  # noqa: F821
+    def __init__(self, split: DataSplit, feature_standardizer=None):
         """Create a new instance of Folds."""
         self.split = split
         self.featureStandardizer = feature_standardizer

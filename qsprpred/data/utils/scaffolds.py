@@ -1,9 +1,3 @@
-"""
-scaffold
-
-Created by: Martin Sicho
-On: 05.10.22, 10:07
-"""
 from abc import ABC, abstractmethod
 
 

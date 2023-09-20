@@ -193,13 +193,16 @@ class BioPythonMSA(MSAProvider, ABC):
                 file name of the JSON file to save the provider to
         """
         current_path = f"{os.path.basename(fname)}.msa"
-        with open(fname, 'w') as f:
-            json.dump({
-                "out_dir": self.outDir,
-                "fname": self.fName,
-                "current": current_path,
-                "class": f"{self.__class__.__module__}.{self.__class__.__name__}"
-            }, f)
+        with open(fname, "w") as f:
+            json.dump(
+                {
+                    "out_dir": self.outDir,
+                    "fname": self.fName,
+                    "current": current_path,
+                    "class": f"{self.__class__.__module__}.{self.__class__.__name__}",
+                },
+                f,
+            )
         self.currentToFile(os.path.join(os.path.dirname(fname), current_path))
 
     def parseSequences(self, sequences: dict[str, str], **kwargs) -> tuple[str, int]:
@@ -263,8 +266,8 @@ class MAFFT(BioPythonMSA):
     - https://mafft.cbrc.jp/alignment/software/
 
     Uses the BioPython wrapper for MAFFT:
-    - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline 
-    """  # noqa: E501
+    - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline
+    """
     def __call__(self,
                  sequences: dict[str:str] | None = None,
                  **kwargs) -> dict[str, str] | None:

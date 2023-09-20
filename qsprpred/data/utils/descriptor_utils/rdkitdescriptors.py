@@ -30,9 +30,17 @@ class RdkitDescriptors(Scorer):
         )
         if compute_3Drdkit:
             self.descriptors = [
-                *self.descriptors, "Asphericity", "Eccentricity", "InertialShapeFactor",
-                "NPR1", "NPR2", "PMI1", "PMI2", "PMI3", "RadiusOfGyration",
-                "SpherocityIndex"
+                *self.descriptors,
+                "Asphericity",
+                "Eccentricity",
+                "InertialShapeFactor",
+                "NPR1",
+                "NPR2",
+                "PMI1",
+                "PMI2",
+                "PMI3",
+                "RadiusOfGyration",
+                "SpherocityIndex",
             ]
 
     def getScores(self, mols):

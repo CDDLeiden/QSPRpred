@@ -12,8 +12,8 @@ from torch import nn, optim
 from torch.nn import functional as f
 from torch.utils.data import DataLoader, TensorDataset
 
-from ...deep import DEFAULT_DEVICE, DEFAULT_GPUS
-from ...logs import logger
+from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS
+from ....logs import logger
 
 
 class Base(nn.Module):
@@ -211,7 +211,7 @@ class Base(nn.Module):
             print("Neural net fitting completed.", file=log_file)
             log_file.close()
         self.load_state_dict(best_weights)
-        return last_save
+        return self, last_save
 
     def evaluate(self, loader) -> float:
         """Evaluate the performance of the DNN model.

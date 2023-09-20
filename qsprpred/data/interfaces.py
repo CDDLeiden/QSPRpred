@@ -71,10 +71,10 @@ class DataSet(StoredTable):
     def apply(
         self,
         func: callable,
-        func_args: list = None,
-        func_kwargs: dict = None,
+        func_args: list | None = None,
+        func_kwargs: dict | None = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Apply a function to the dataset.
 
@@ -133,9 +133,9 @@ class MoleculeDataSet(DataSet):
         """Indicates if the dataset has descriptors."""
 
 
-class DataSetDependant:  # Note: this shouldn't be ABC; no abstract methods defined
+class DataSetDependant:
     """Classes that need a data set to operate have to implement this."""
-    def __init__(self, dataset) -> None:
+    def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
         self.dataSet = dataset
 
     def setDataSet(self, dataset: MoleculeDataSet):
@@ -155,10 +155,20 @@ class DataSetDependant:  # Note: this shouldn't be ABC; no abstract methods defi
             raise ValueError("Data set not set.")
 
 
-class DataSplit(ABC):
-    """Defines a function split a dataframe into train and test set."""
+class DataSplit(ABC, DataSetDependant):
+    """
+    Defines a function split a dataframe into train and test set.
+
+    Attributes:
+        dataset (MoleculeDataSet): The dataset to split.
+    """
+    def __init__(self, dataset: MoleculeDataSet) -> None:
+        super().__init__(dataset)
+
     @abstractmethod
-    def split(self, X : np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series) -> Iterable[tuple[list[int], list[int]]]:
+    def split(
+        self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
+    ) -> Iterable[tuple[list[int], list[int]]]:
         """Split the given data into one or multiple train/test subsets.
 
         These classes handle partitioning of a feature matrix

@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    qsprpred.extra.data
+   qsprpred.extra.gpu
    qsprpred.extra.models
 
 Module contents

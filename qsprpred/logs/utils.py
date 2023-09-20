@@ -1,51 +1,62 @@
-"""
-utils
-
-Created by: Martin Sicho
-On: 17.05.22, 9:55
-"""
 import datetime
 import json
 import logging
 import os
 import re
 import shutil
+import subprocess
+from typing import Optional
 
-import git
-
-from qsprpred.logs import config, setLogger
-from qsprpred.logs.config import LogFileConfig
+from . import config, setLogger
+from .config import LogFileConfig
 
 BACKUP_DIR_FOLDER_PREFIX = "backup"
 
 
-def commit_hash(GIT_PATH):
-    try:
-        repo = git.Repo.init(GIT_PATH)
-        repo_hash = "#" + repo.head.object.hexsha[:8]
-    except ValueError:
-        from qsprpred import __version__
+def export_conda_environment(filepath: str):
+    """Export the conda environment to a yaml file.
 
-        repo_hash = __version__
-    return repo_hash
+    Args:
+        filepath (str): path to the yaml file
+
+    Raises:
+        subprocess.CalledProcessError: if the command fails
+        Exception: if an unexpected error occurs
+    """
+    try:
+        cmd = f"conda env export > {filepath}"
+        subprocess.run(cmd, shell=True, check=True)
+        print(f"Environment exported to {filepath} successfully!")
+    except subprocess.CalledProcessError as e:
+        print(f"Error exporting the environment: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 
 def enable_file_logger(
-    log_folder,
-    filename,
-    debug=False,
-    log_name=None,
-    git_hash=None,
-    init_data=None,
-    disable_existing_loggers=True,
+    log_folder: str,
+    filename: str,
+    debug: bool = False,
+    log_name: Optional[str] = None,
+    init_data: Optional[dict] = None,
+    disable_existing_loggers: bool = False,
 ):
-    # # Get run id
-    # runid = config.get_runid(log_folder=log_folder,
-    #                         old=keep_old_runid,
-    #                         id=picked_runid)
-    # path = os.path.join(log_folder, f'{runid}/{filename}')
+    """Enable file logging.
 
+    Args:
+        log_folder (str): path to the folder where the log file should be stored
+        filename (str): name of the log file
+        debug (bool): whether to enable debug logging. Defaults to False.
+        log_name (str, optional): name of the logger. Defaults to None.
+        init_data (dict, optional): initial data to be logged. Defaults to None.
+        disable_existing_loggers (bool): whether to disable existing loggers.
+    """
+    # create log folder if it does not exist
     path = os.path.join(log_folder, filename)
+    if not os.path.exists(log_folder):
+        os.makedirs(log_folder)
+
+    # configure logging
     config.config_logger(path, debug, disable_existing_loggers=disable_existing_loggers)
 
     # get logger and init configuration
@@ -55,7 +66,7 @@ def enable_file_logger(
     settings = LogFileConfig(path, log, debug)
 
     # Begin log file
-    config.init_logfile(log, git_hash, json.dumps(init_data, sort_keys=False, indent=2))
+    config.init_logfile(log, json.dumps(init_data, sort_keys=False, indent=2))
 
     return settings
 
@@ -111,7 +122,7 @@ def backup_files_in_folder(
     backup_id: int,
     output_prefixes,
     output_extensions="dummy",
-    cp_suffix=None
+    cp_suffix=None,
 ):
     """Backs up files in a specified directory to a backup directory.
 
@@ -130,6 +141,7 @@ def backup_files_in_folder(
     """
     message = ""
     existing_files = os.listdir(_dir)
+    # if only files with cp_suffix are already existing, only return empty message
     if cp_suffix and all(
         any(_file.split(".")[0].endswith(suff) for suff in cp_suffix)
         for _file in existing_files
@@ -137,8 +149,10 @@ def backup_files_in_folder(
         return message
     for _file in existing_files:
         if _file.startswith(output_prefixes) or _file.endswith(output_extensions):
+            # create backup directory
             backup_dir = generate_backup_dir(_dir, backup_id)
             backup_log = open(os.path.join(backup_dir, "backuplog.log"), "w")
+            # copy file if it has a suffix in cp_suffix
             if cp_suffix is not None and any(
                 _file.split(".")[0].endswith(suff) for suff in cp_suffix
             ):
@@ -147,8 +161,9 @@ def backup_files_in_folder(
                 )
                 message += (
                     f"Already existing '{_file}' "
-                    "was copied to {os.path.abspath(backup_dir)}\n"
+                    f"was copied to {os.path.abspath(backup_dir)}\n"
                 )
+            # move file otherwise
             else:
                 os.rename(os.path.join(_dir, _file), os.path.join(backup_dir, _file))
                 backup_log.write(
@@ -157,40 +172,21 @@ def backup_files_in_folder(
                 )
                 message += (
                     f"Already existing '{_file}' "
-                    "was moved to {os.path.abspath(backup_dir)}\n"
+                    f"was moved to {os.path.abspath(backup_dir)}\n"
                 )
     return message
 
 
-def backup_files(base_dir: str, folder: str, output_prefixes: tuple, cp_suffix=None):
-    dir = base_dir + "/" + folder
-    if os.path.exists(dir):
-        backup_id = generate_backup_runID(dir)
-        if folder in "qspr/data":
-            message = backup_files_in_folder(
-                dir,
-                backup_id,
-                output_prefixes,
-                output_extensions=("json", "log"),
-                cp_suffix=cp_suffix,
-            )
-        if folder == "qspr/models":
-            message = backup_files_in_folder(
-                dir,
-                backup_id,
-                output_prefixes,
-                output_extensions=("json", "log"),
-                cp_suffix=cp_suffix,
-            )
-
-        if folder == "qspr/predictions":
-            message = backup_files_in_folder(
-                dir,
-                backup_id,
-                output_prefixes,
-                output_extensions=("json", "log"),
-                cp_suffix=cp_suffix,
-            )
+def backup_files(output_dir: str, output_prefixes: tuple, cp_suffix=None):
+    if os.path.exists(output_dir) and len(os.listdir(output_dir)) > 0:
+        backup_id = generate_backup_runID(output_dir)
+        message = backup_files_in_folder(
+            output_dir,
+            backup_id,
+            output_prefixes,
+            output_extensions=("json", "log"),
+            cp_suffix=cp_suffix,
+        )
         return message
     else:
         return ""

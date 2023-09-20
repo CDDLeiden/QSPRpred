@@ -26,9 +26,12 @@ class DescriptorsCalculator(ABC):
     def __init__(self, desc_sets: list["DescriptorSet"]) -> None:  # noqa: F821
         """Set the descriptorsets to be calculated with this calculator."""
         self.descSets = list(desc_sets)
-        self.noParallelization = any((hasattr(descset, 'noParallelization') and
-                                      getattr(descset, 'noParallelization') is True)
-                                     for descset in desc_sets)
+        self.noParallelization = any(
+            (
+                hasattr(descset, "noParallelization") and
+                descset.noParallelization is True
+            ) for descset in desc_sets
+        )
 
     @classmethod
     def loadDescriptorSets(cls, fname: str) -> list["DescriptorSet"]:  # noqa: F821
@@ -168,12 +171,19 @@ class DescriptorsCalculator(ABC):
         # remove all descriptorsets that are not in the list of descriptors to keep
         self.descSets = [x for i, x in enumerate(self.descSets) if i not in to_remove]
 
-    def get_len(self):
+    def getLen(self) -> int:
         """Return number of descriptors calculated by all descriptorsets."""
         length = 0
         for descset in self.descSets:
-            length += descset.get_len()
+            length += descset.getLen()
         return length
+
+    def getDescriptorNames(self) -> list[str]:
+        """Return list of descriptor names calculated by all descriptorsets."""
+        names = []
+        for descset in self.descSets:
+            names += descset.descriptors
+        return names
 
     @staticmethod
     def treatInfs(df: pd.DataFrame) -> pd.DataFrame:
@@ -214,13 +224,17 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
             values = pd.DataFrame(values, columns=descset.descriptors)
             if descset.isFP:
                 values.add_prefix(f"{descset.fingerprintType}_")
-            values = values.astype(dtype)
-            values = self.treatInfs(values)
+            try:
+                values = values.astype(dtype)
+                values = self.treatInfs(values)
+            except ValueError:
+                logger.warning(
+                    f"Could not convert descriptor values to {dtype}. "
+                    "Keeping original dtype."
+                )
             df = pd.concat(
                 [df, values.add_prefix(f"{self.getPrefix()}_{descset}_")], axis=1
             )
-        # replace errors by nan values
-        df = df.apply(pd.to_numeric, errors="coerce")
         return df
 
     def getPrefix(self) -> str:
@@ -247,7 +261,9 @@ class CustomDescriptorsCalculator(DescriptorsCalculator):
             if descset.isFP:
                 values.add_prefix(f"{descset.fingerprintType}_")
             values = values.astype(dtype)
-            values = self.treatInfs(values)
+            # if dtype is numeric
+            if np.issubdtype(dtype, np.number):
+                values = self.treatInfs(values)
             values = values.add_prefix(f"{self.getPrefix()}_{descset}_")
             df = df.merge(values, left_index=True, right_index=True)
 
