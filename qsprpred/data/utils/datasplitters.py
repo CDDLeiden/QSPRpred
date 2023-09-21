@@ -20,7 +20,7 @@ from .data_clustering import (
 )
 from .scaffolds import Murcko, Scaffold
 
-
+#TODO: reintroduce random seed in randomsplit below?
 class RandomSplit(DataSplit):
     """Splits dataset in random train and test subsets.
 
