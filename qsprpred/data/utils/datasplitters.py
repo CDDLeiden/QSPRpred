@@ -20,18 +20,27 @@ from .data_clustering import (
 )
 from .scaffolds import Murcko, Scaffold
 
-#TODO: reintroduce random seed in randomsplit below?
 class RandomSplit(DataSplit):
     """Splits dataset in random train and test subsets.
 
     Attributes:
         testFraction (float): fraction of total dataset to testset
     """
-    def __init__(self, test_fraction=0.1) -> None:
+    def __init__(self, test_fraction=0.1, seed: int | None = None) -> None:
         self.testFraction = test_fraction
+        self.seed = seed
+
+    def setSeed(self, seed: int | None):
+        """Set the seed for this instance.
+
+        Args:
+            seed (int):
+                Random state to use for shuffling and other random operations.
+        """
+        self.seed = seed
 
     def split(self, X, y):
-        return ShuffleSplit(1, test_size=self.testFraction).split(X, y)
+        return ShuffleSplit(1, test_size=self.testFraction, random_state=self.seed).split(X, y)
 
 class ManualSplit(DataSplit):
     """Splits dataset in train and test subsets based on a column in the dataframe.
