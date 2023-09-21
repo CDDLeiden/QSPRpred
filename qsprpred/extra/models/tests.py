@@ -157,7 +157,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
                 random_state=random_state[1]
             )
             self.fitTest(model)
-            predictor = QSPRsklearnPCM(
+            predictor = SklearnPCMModel(
                 name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
             )
             self.predictorTest(

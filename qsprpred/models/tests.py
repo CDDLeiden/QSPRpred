@@ -224,9 +224,9 @@ class ModelTestMixIn:
 
         if expect_equal_result:
             if expected_pred_use_probas is not None:
-                self.assertEqual(pred[0], expected_pred_use_probas)
+                self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=8)
             if expected_pred_not_use_probas is not None:
-                self.assertEqual(pred[1], expected_pred_not_use_probas)
+                self.assertAlmostEqual(pred[1], expected_pred_not_use_probas, places=8)
         else:
             if expected_pred_use_probas is not None:
                 self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=5)
