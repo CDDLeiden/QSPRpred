@@ -34,7 +34,7 @@ from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stop
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.interfaces import QSPRModel
 from ..models.metrics import SklearnMetric
-from ..models.models import QSPRsklearn
+from ..models.sklearn import SklearnModel
 from ..models.tasks import ModelTasks, TargetTasks
 
 N_CPUS = 2
@@ -309,8 +309,8 @@ class ModelTestMixIn:
 
         return summary
 
-class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the QSPRsklearn class."""
+class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+    """This class holds the tests for the SklearnModel class."""
     def getModel(
         self,
         name: str,
@@ -319,7 +319,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         parameters: dict | None = None,
         random_state: int | None = None
     ):
-        """Create a QSPRsklearn model.
+        """Create a SklearnModel model.
 
         Args:
             name (str): the name of the model
@@ -328,9 +328,9 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters (dict, optional): the parameters to use. Defaults to None.
 
         Returns:
-            QSPRsklearn: the model
+            SklearnModel: the model
         """
-        return QSPRsklearn(
+        return SklearnModel(
             base_dir=self.generatedModelsPath,
             alg=alg,
             data=dataset,
@@ -376,7 +376,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             random_state=random_state[0]
         )
         self.fitTest(model)
-        predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
         if random_state[0] is not None:
@@ -388,14 +388,13 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 random_state=random_state[1]
             )
             self.fitTest(model)
-            predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
+            predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
             self.predictorTest(
                 predictor,
                 expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
                 expected_pred_not_use_probas=pred_not_use_probas)
-
-
+            
     def testPLSRegressionSummaryWithSeed(self):
         """Test model training for regression models."""
         task = TargetTasks.REGRESSION
@@ -432,7 +431,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.assertListEqual(summary["R2"], expected_summary["R2"])
         self.assertListEqual(summary["RMSE"], expected_summary["RMSE"])
         self.assertListEqual(summary["Set"], expected_summary["Set"])
-
 
     @parameterized.expand(
         [
@@ -486,7 +484,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             random_state=model_random_state
         )
         self.fitTest(model)
-        predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
         if random_state is not None:
@@ -498,7 +496,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 random_state=model_random_state
             )
             self.fitTest(model)
-            predictor = QSPRsklearn(name=f"{model_name}_{task}", base_dir=model.baseDir)
+            predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
             self.predictorTest(
                 predictor,
                 expected_pred_use_probas=pred_use_probas,
@@ -544,7 +542,6 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.assertListEqual(summary["TestSet"], expected_summary["TestSet"])
         self.assertListEqual(summary["Value"], expected_summary["Value"])
 
-
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state) for alg, alg_name in (
@@ -582,7 +579,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             random_state=random_state[0]
         )
         self.fitTest(model)
-        predictor = QSPRsklearn(
+        predictor = SklearnModel(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
@@ -594,7 +591,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 random_state=random_state[1]
             )
             self.fitTest(model)
-            predictor = QSPRsklearn(
+            predictor = SklearnModel(
                 name=f"{model_name}_multitask_regression", base_dir=model.baseDir
             )
             self.predictorTest(
@@ -652,7 +649,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             random_state=model_random_state
         )
         self.fitTest(model)
-        predictor = QSPRsklearn(
+        predictor = SklearnModel(
             name=f"{model_name}_multitask_classification", base_dir=model.baseDir
         )
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
@@ -665,7 +662,7 @@ class TestQSPRsklearn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 random_state=model_random_state
             )
             self.fitTest(model)
-            predictor = QSPRsklearn(
+            predictor = SklearnModel(
                 name=f"{model_name}_multitask_classification", base_dir=model.baseDir
             )
             self.predictorTest(predictor,

@@ -4,6 +4,22 @@ qsprpred.models package
 Submodules
 ----------
 
+qsprpred.models.assessment\_methods module
+------------------------------------------
+
+.. automodule:: qsprpred.models.assessment_methods
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.models.early\_stopping module
+--------------------------------------
+
+.. automodule:: qsprpred.models.early_stopping
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 qsprpred.models.hyperparam\_optimization module
 -----------------------------------------------
 
@@ -28,10 +44,10 @@ qsprpred.models.metrics module
    :undoc-members:
    :show-inheritance:
 
-qsprpred.models.models module
------------------------------
+qsprpred.models.sklearn module
+------------------------------
 
-.. automodule:: qsprpred.models.models
+.. automodule:: qsprpred.models.sklearn
    :members:
    :undoc-members:
    :show-inheritance:

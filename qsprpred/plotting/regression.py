@@ -24,7 +24,7 @@ class CorrelationPlot(RegressionPlot):
         self,
         save: bool = True,
         show: bool = False,
-        property_name: str = None,
+        property_name: str | None = None,
         out_dir: str = ".",
         filename_prefix: str = "corrplot",
         n_cols: int = 1,

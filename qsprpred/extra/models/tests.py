@@ -20,7 +20,7 @@ from ..data.tests import DataSetsMixInExtras
 from ..data.utils.descriptor_utils.msa_calculator import ClustalMSA
 from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
 from ..data.utils.descriptorsets import ProDec
-from ..models.pcm import QSPRsklearnPCM
+from ..models.pcm import SklearnPCMModel
 
 
 class ModelDataSetsMixInExtras(ModelDataSetsMixIn, DataSetsMixInExtras):
@@ -28,7 +28,6 @@ class ModelDataSetsMixInExtras(ModelDataSetsMixIn, DataSetsMixInExtras):
 
 
 class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
-
     def getModel(
         self,
         name: str,
@@ -47,9 +46,9 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             random_state (int | None): Random seed to use.
 
         Returns:
-            QSPRsklearnPCM: Initialized model.
+            SklearnPCMModel: Initialized model.
         """
-        return QSPRsklearnPCM(
+        return SklearnPCMModel(
             base_dir=self.generatedModelsPath,
             alg=alg,
             data=dataset,
@@ -144,7 +143,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             random_state=random_state[0]
         )
         self.fitTest(model)
-        predictor = QSPRsklearnPCM(
+        predictor = SklearnPCMModel(
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
         pred_use_probas, pred_not_use_probas \

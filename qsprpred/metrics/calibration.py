@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 def calibration_error(
     y_true: np.array, y_prob: np.array, n_bins: int = 10, norm: str = "L1"
 ) -> float:

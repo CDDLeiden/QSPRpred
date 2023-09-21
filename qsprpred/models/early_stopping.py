@@ -173,7 +173,7 @@ def early_stopping(func: Callable) -> Callable:
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any | None = None,
         mode: EarlyStoppingMode | None = None,
-        **kwargs
+        **kwargs,
     ) -> Any:
         """Wrapper for fit method of models that support early stopping.
 

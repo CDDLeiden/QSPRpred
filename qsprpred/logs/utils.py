@@ -122,7 +122,7 @@ def backup_files_in_folder(
     backup_id: int,
     output_prefixes,
     output_extensions="dummy",
-    cp_suffix=None
+    cp_suffix=None,
 ):
     """Backs up files in a specified directory to a backup directory.
 
@@ -141,6 +141,7 @@ def backup_files_in_folder(
     """
     message = ""
     existing_files = os.listdir(_dir)
+    # if only files with cp_suffix are already existing, only return empty message
     if cp_suffix and all(
         any(_file.split(".")[0].endswith(suff) for suff in cp_suffix)
         for _file in existing_files
@@ -148,8 +149,10 @@ def backup_files_in_folder(
         return message
     for _file in existing_files:
         if _file.startswith(output_prefixes) or _file.endswith(output_extensions):
+            # create backup directory
             backup_dir = generate_backup_dir(_dir, backup_id)
             backup_log = open(os.path.join(backup_dir, "backuplog.log"), "w")
+            # copy file if it has a suffix in cp_suffix
             if cp_suffix is not None and any(
                 _file.split(".")[0].endswith(suff) for suff in cp_suffix
             ):
@@ -158,8 +161,9 @@ def backup_files_in_folder(
                 )
                 message += (
                     f"Already existing '{_file}' "
-                    "was copied to {os.path.abspath(backup_dir)}\n"
+                    f"was copied to {os.path.abspath(backup_dir)}\n"
                 )
+            # move file otherwise
             else:
                 os.rename(os.path.join(_dir, _file), os.path.join(backup_dir, _file))
                 backup_log.write(
@@ -168,40 +172,21 @@ def backup_files_in_folder(
                 )
                 message += (
                     f"Already existing '{_file}' "
-                    "was moved to {os.path.abspath(backup_dir)}\n"
+                    f"was moved to {os.path.abspath(backup_dir)}\n"
                 )
     return message
 
 
-def backup_files(base_dir: str, folder: str, output_prefixes: tuple, cp_suffix=None):
-    dir = base_dir + "/" + folder
-    if os.path.exists(dir):
-        backup_id = generate_backup_runID(dir)
-        if folder in "qspr/data":
-            message = backup_files_in_folder(
-                dir,
-                backup_id,
-                output_prefixes,
-                output_extensions=("json", "log"),
-                cp_suffix=cp_suffix,
-            )
-        if folder == "qspr/models":
-            message = backup_files_in_folder(
-                dir,
-                backup_id,
-                output_prefixes,
-                output_extensions=("json", "log"),
-                cp_suffix=cp_suffix,
-            )
-
-        if folder == "qspr/predictions":
-            message = backup_files_in_folder(
-                dir,
-                backup_id,
-                output_prefixes,
-                output_extensions=("json", "log"),
-                cp_suffix=cp_suffix,
-            )
+def backup_files(output_dir: str, output_prefixes: tuple, cp_suffix=None):
+    if os.path.exists(output_dir) and len(os.listdir(output_dir)) > 0:
+        backup_id = generate_backup_runID(output_dir)
+        message = backup_files_in_folder(
+            output_dir,
+            backup_id,
+            output_prefixes,
+            output_extensions=("json", "log"),
+            cp_suffix=cp_suffix,
+        )
         return message
     else:
         return ""
