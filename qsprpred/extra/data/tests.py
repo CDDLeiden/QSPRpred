@@ -51,7 +51,6 @@ from .utils.datasplitters import LeaveTargetsOut, PCMSplit, TemporalPerTarget
 
 class DataSetsMixInExtras(DataSetsMixIn):
     """MixIn class for testing data sets in extras."""
-
     def setUp(self):
         super().setUp()
         self.dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
@@ -81,7 +80,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
             FingerprintSet(fingerprint_type="CDKKlekotaRothFP", use_counts=False),
             FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", use_counts=True),
             PaDEL(),
-            ExtendedValenceSignature(1)
+            ExtendedValenceSignature(1),
         ]
 
     @staticmethod
@@ -111,8 +110,9 @@ class DataSetsMixInExtras(DataSetsMixIn):
             [ProteinDescriptorCalculator(combo, msa_provider=cls.getMSAProvider())]
             for combo in itertools.combinations(feature_sets_pcm, 2)
         ]
-        descriptor_calculators = \
+        descriptor_calculators = (
             mol_descriptor_calculators + protein_descriptor_calculators
+        )
         # make combinations of molecular and PCM descriptor calculators
         descriptor_calculators += [
             mol + prot for mol, prot in
@@ -138,7 +138,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
         return pd.read_csv(f"{self.dataPathPCM}/pcm_sample_targets.csv")
 
     def getPCMSeqProvider(
-        self
+        self,
     ) -> Callable[[list[str]], tuple[dict[str, str], dict[str, dict]]]:
         """Return a function that provides sequences for given accessions.
 
@@ -158,16 +158,11 @@ class DataSetsMixInExtras(DataSetsMixIn):
             }
 
         return lambda acc_keys: (
-            {
-                acc: mapper[acc]
-                for acc in acc_keys
-            },
-            {
-                acc: kwargs_map[acc]
-                for acc in acc_keys
-            },
+            {acc: mapper[acc]
+             for acc in acc_keys},
+            {acc: kwargs_map[acc]
+             for acc in acc_keys},
         )
-
 
     def getMSAProvider(self):
         return ClustalMSA(out_dir=self.generatedDataPath)
@@ -184,7 +179,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
         target_imputer: Callable[[pd.Series], pd.Series] | None = None,
         preparation_settings: dict | None = None,
         protein_col: str = "accession",
-        random_state: int | None = None
+        random_state: int | None = None,
     ):
         """Create a small dataset for testing purposes.
 
@@ -215,7 +210,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
             target_imputer=target_imputer,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
-            random_state=random_state
+            random_state=random_state,
         )
         if preparation_settings:
             ret.prepareDataset(**preparation_settings)
@@ -276,6 +271,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
         """Test the Mordred descriptor calculator."""
         import mordred
         from mordred import descriptors
+
         desc_calc = MoleculeDescriptorsCalculator([Mordred()])
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(
@@ -524,8 +520,10 @@ class TestDescriptorsExtra(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestC
         ]
     )
     def testDescriptorsExtraAll(
-        self, _, desc_set: MoleculeDescriptorSet,
-        target_props: list[dict | TargetProperty]
+        self,
+        _,
+        desc_set: MoleculeDescriptorSet,
+        target_props: list[dict | TargetProperty],
     ):
         """Test the calculation of extra descriptors with data preparation."""
         np.random.seed(42)
@@ -614,10 +612,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
             dataset, desc_set, self.getDefaultPrep(), target_props
         )
         self.checkDataSetContainsDescriptorSet(
-            dataset,
-            desc_set,
-            self.getDefaultPrep(),
-            target_props
+            dataset, desc_set, self.getDefaultPrep(), target_props
         )
 
 
@@ -628,7 +623,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.dataset.addProteinDescriptors(
             calculator=ProteinDescriptorCalculator(
                 desc_sets=[ProDec(sets=["Zscale Hellberg"])],
-                msa_provider=self.getMSAProvider()
+                msa_provider=self.getMSAProvider(),
             )
         )
         self.dataset.addDescriptors(
@@ -665,7 +660,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         splitter = PCMSplit(RandomSplit(), dataset=dataset)
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
-        
+
         self.assertEqual(dataset.randomState, seed)
         self.assertListEqual(train.index.tolist(), train_order)
         self.assertListEqual(test.index.tolist(), test_order)
@@ -690,7 +685,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         splitter = TemporalPerTarget(
             year_col=year_col,
             split_years={key: year
-                         for key in self.dataset.getProteinKeys()}
+                         for key in self.dataset.getProteinKeys()},
         )
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()

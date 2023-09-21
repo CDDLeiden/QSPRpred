@@ -58,7 +58,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             gpus=GPUS,
             patience=3,
             tol=0.02,
-            random_state=random_state
+            random_state=random_state,
         )
 
     @parameterized.expand(
@@ -76,18 +76,19 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
         ] + [
             (f"{alg_name}_{task}", task, alg_name, alg, th, random_state)
-            for alg, alg_name, task, th in (
-                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
-            )
-            for random_state in (
-                [None],
-                [1, 42],
-                [42, 42]
-            )
+            for alg, alg_name, task, th in
+            ((STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None), )
+            for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testSingleTaskModel(
-        self, _, task: TargetTasks, alg_name: str, alg: Type, th: float, random_state: int | None
+        self,
+        _,
+        task: TargetTasks,
+        alg_name: str,
+        alg: Type,
+        th: float,
+        random_state: int | None,
     ):
         """Test the DNNModel model in one configuration.
 
@@ -116,22 +117,32 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name=f"{alg_name}",
             alg=alg,
             dataset=dataset,
-            random_state=random_state[0]
+            random_state=random_state[0],
         )
         self.fitTest(model)
-        predictor = DNNModel(name=alg_name, base_dir=model.baseDir, random_state=random_state[0])
+        predictor = DNNModel(
+            name=alg_name, base_dir=model.baseDir, random_state=random_state[0]
+        )
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
         if random_state[0] is not None:
             model.cleanFiles()
             model = self.getModel(
-                base_dir=self.generatedModelsPath, name=f"{alg_name}", alg=alg, dataset=dataset, random_state=random_state[1]
+                base_dir=self.generatedModelsPath,
+                name=f"{alg_name}",
+                alg=alg,
+                dataset=dataset,
+                random_state=random_state[1],
             )
             self.fitTest(model)
-            predictor = DNNModel(name=alg_name, base_dir=model.baseDir, random_state=random_state[1])
-            self.predictorTest(predictor,
+            predictor = DNNModel(
+                name=alg_name, base_dir=model.baseDir, random_state=random_state[1]
+            )
+            self.predictorTest(
+                predictor,
                 expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas)
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
 
 
 class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
@@ -194,13 +205,13 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 "task": task,
                 "th": th
             }],
-            preparation_settings=None
+            preparation_settings=None,
         )
         dataset.prepareDataset(
             feature_calculators=[
                 MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
             ],
-            split=RandomSplit(test_fraction=0.1)
+            split=RandomSplit(test_fraction=0.1),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
@@ -222,12 +233,12 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     def testMultiTaskmodel(self, _, task: TargetTasks, alg_name: str):
         """Test the DNNModel model in one configuration.
 
-            Args:
-                task: Task to test.
-                alg_name: Name of the algorithm.
-                alg: Algorithm to use.
-                th: Threshold to use for classification models.
-            """
+        Args:
+            task: Task to test.
+            alg_name: Name of the algorithm.
+            alg: Algorithm to use.
+            th: Threshold to use for classification models.
+        """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
                 {
@@ -259,13 +270,13 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name=f"{alg_name}_{task}",
             target_props=target_props,
             target_imputer=SimpleImputer(strategy="mean"),
-            preparation_settings=None
+            preparation_settings=None,
         )
         dataset.prepareDataset(
             feature_calculators=[
                 MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
             ],
-            split=RandomSplit(test_fraction=0.1)
+            split=RandomSplit(test_fraction=0.1),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
@@ -436,7 +447,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             base_dir=self.generatedModelsPath,
             name=f"{model_name}_multitask_regression",
             dataset=dataset,
-            parameters=parameters
+            parameters=parameters,
         )
         self.fitTest(model)
         predictor = import_module("..pyboost", __name__).PyBoostModel(

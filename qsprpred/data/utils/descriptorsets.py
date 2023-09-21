@@ -529,6 +529,7 @@ class _DescriptorSetRetriever:
 
     def getExtendedValenceSignature(self, *args, **kwargs):
         from ...extra.data.utils.descriptorsets import ExtendedValenceSignature
+
         return ExtendedValenceSignature(*args, **kwargs)
 
     def getPredictorDesc(self, *args, **kwargs):

@@ -1,6 +1,7 @@
 """This module holds the base class for QSPRmodels, model types should be a subclass."""
 
 import copy
+import inspect
 import json
 import os
 import shutil
@@ -11,7 +12,6 @@ from typing import Any, Callable, Iterable, List, Type, Union
 
 import numpy as np
 import pandas as pd
-import inspect
 
 from .. import VERSION
 from ..data.data import MoleculeTable, QSPRDataset, TargetProperty
@@ -253,10 +253,15 @@ class QSPRModel(ABC):
 
     def init_random_state(self, random_state):
         # set random state, either from constructor or from dataset, if applicable
-        new_random_state = random_state or (self.data.randomState if self.data is not None else np.random.randint(0, 2 ** 32 - 1))
+        new_random_state = random_state or (
+            self.data.randomState
+            if self.data is not None else np.random.randint(0, 2**32 - 1)
+        )
         self.random_state = new_random_state
-        
-        constructor_params = [name for name, _ in inspect.signature(self.alg.__init__).parameters.items()]
+
+        constructor_params = [
+            name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
+        ]
         if "random_state" in constructor_params:
             if self.parameters:
                 self.parameters.update({"random_state": new_random_state})
@@ -264,8 +269,10 @@ class QSPRModel(ABC):
                 self.parameters = {"random_state": new_random_state}
         else:
             if random_state:
-                logger.warning(f"Random state supplied, but alg {self.alg} does not support it."
-                                " Ignoring this setting.")
+                logger.warning(
+                    f"Random state supplied, but alg {self.alg} does not support it."
+                    " Ignoring this setting."
+                )
 
     def __init__(
         self,
@@ -275,7 +282,7 @@ class QSPRModel(ABC):
         name: str | None = None,
         parameters: dict | None = None,
         autoload=True,
-        random_state: int | None = None
+        random_state: int | None = None,
     ):
         """Initialize a QSPR model instance.
 

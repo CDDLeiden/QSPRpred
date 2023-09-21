@@ -54,7 +54,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             data=dataset,
             name=name,
             parameters=parameters,
-            random_state=random_state
+            random_state=random_state,
         )
 
     @parameterized.expand(
@@ -67,10 +67,9 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
                 }],
                 alg_name,
                 alg,
-                random_state
-            ) for alg, alg_name in (
-                (XGBRegressor, "XGBR"),
-            ) for random_state in ([None], [1, 42], [42, 42])
+                random_state,
+            ) for alg, alg_name in ((XGBRegressor, "XGBR"), )
+            for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (
                 alg_name,
@@ -80,7 +79,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
                 }],
                 alg_name,
                 alg,
-                [None]
+                [None],
             ) for alg, alg_name in (
                 (PLSRegression, "PLSR"),
                 (SVR, "SVR"),
@@ -97,7 +96,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
                 ],
                 alg_name,
                 alg,
-                random_state
+                random_state,
             ) for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
@@ -105,7 +104,12 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
         ]
     )
     def testRegressionBasicFitPCM(
-        self, _, props: list[TargetProperty | dict], model_name: str, model_class: Type, random_state: list[int | None]
+        self,
+        _,
+        props: list[TargetProperty | dict],
+        model_name: str,
+        model_class: Type,
+        random_state: list[int | None],
     ):
         """Test model training for regression models.
 
@@ -132,7 +136,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             name=f"{model_name}_{props[0]['task']}_pcm",
             target_props=props,
             preparation_settings=prep,
-            random_state=random_state[0]
+            random_state=random_state[0],
         )
         # initialize model for training from class
         model = self.getModel(
@@ -140,21 +144,22 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
-            random_state=random_state[0]
+            random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = SklearnPCMModel(
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
-        pred_use_probas, pred_not_use_probas \
-            = self.predictorTest(predictor, protein_id=dataset.getDF()["accession"].iloc[0])
+        pred_use_probas, pred_not_use_probas = self.predictorTest(
+            predictor, protein_id=dataset.getDF()["accession"].iloc[0]
+        )
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{props[0]['task']}",
                 alg=model_class,
                 dataset=dataset,
                 parameters=parameters,
-                random_state=random_state[1]
+                random_state=random_state[1],
             )
             self.fitTest(model)
             predictor = SklearnPCMModel(
@@ -165,4 +170,5 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
                 protein_id=dataset.getDF()["accession"].iloc[0],
                 expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas)
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )

@@ -14,18 +14,13 @@ from sklearn import metrics
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.metrics import get_scorer as get_sklearn_scorer
+from sklearn.metrics import matthews_corrcoef, precision_score, recall_score
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
-from sklearn.metrics import (
-    accuracy_score,
-    f1_score,
-    matthews_corrcoef,
-    precision_score,
-    recall_score,
-)
 
 from ..data.data import QSPRDataset
 from ..data.tests import DataSetsMixIn
@@ -130,12 +125,13 @@ class ModelTestMixIn:
             )
 
     def predictorTest(
-            self,
-            predictor: QSPRModel,
-            expect_equal_result=True,
-            expected_pred_use_probas=None,
-            expected_pred_not_use_probas=None,
-            **pred_kwargs):
+        self,
+        predictor: QSPRModel,
+        expect_equal_result=True,
+        expected_pred_use_probas=None,
+        expected_pred_not_use_probas=None,
+        **pred_kwargs,
+    ):
         """Test a model as predictor.
 
         Args:
@@ -235,7 +231,6 @@ class ModelTestMixIn:
             if expected_pred_use_probas is not None:
                 self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=8)
 
-
         return pred[0], pred[1]
 
     # NOTE: below code is taken from CorrelationPlot without the plotting code
@@ -262,7 +257,7 @@ class ModelTestMixIn:
             summary["RMSE"].append(rmse)
             summary["Set"].append(cate_names[j])
             summary["ModelName"].append(model.name)
-            
+
         return summary
 
     # NOTE: below code is taken from MetricsPlot without the plotting code
@@ -311,6 +306,7 @@ class ModelTestMixIn:
 
         return summary
 
+
 class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the SklearnModel class."""
     def getModel(
@@ -319,7 +315,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         alg: Type | None = None,
         dataset: QSPRDataset = None,
         parameters: dict | None = None,
-        random_state: int | None = None
+        random_state: int | None = None,
     ):
         """Create a SklearnModel model.
 
@@ -338,17 +334,19 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             data=dataset,
             name=name,
             parameters=parameters,
-            random_state=random_state
+            random_state=random_state,
         )
 
     @parameterized.expand(
         [
-            (alg_name, TargetTasks.REGRESSION, alg_name, alg, random_state) for alg, alg_name in (
+            (alg_name, TargetTasks.REGRESSION, alg_name, alg, random_state)
+            for alg, alg_name in (
                 (RandomForestRegressor, "RFR"),
                 (XGBRegressor, "XGBR"),
             ) for random_state in ([None], [1, 42], [42, 42])
         ] + [
-            (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None]) for alg, alg_name in (
+            (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None])
+            for alg, alg_name in (
                 (PLSRegression, "PLSR"),
                 (SVR, "SVR"),
                 (KNeighborsRegressor, "KNNR"),
@@ -375,7 +373,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
-            random_state=random_state[0]
+            random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
@@ -387,16 +385,19 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 alg=model_class,
                 dataset=dataset,
                 parameters=parameters,
-                random_state=random_state[1]
+                random_state=random_state[1],
             )
             self.fitTest(model)
-            predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+            predictor = SklearnModel(
+                name=f"{model_name}_{task}", base_dir=model.baseDir
+            )
             self.predictorTest(
                 predictor,
                 expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas)
-            
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+
     def testPLSRegressionSummaryWithSeed(self):
         """Test model training for regression models."""
         task = TargetTasks.REGRESSION
@@ -419,7 +420,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.fitTest(model)
         expected_summary = self.createCorrelationSummary(model)
 
-        #Generate summary again, check that the result is identical
+        # Generate summary again, check that the result is identical
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
@@ -436,7 +437,8 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, th, alg_name, alg, random_state) for alg, alg_name in (
+            (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
+            for alg, alg_name in (
                 (SVC, "SVC"),
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
@@ -445,7 +447,8 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 (TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             ) for random_state in ([None], [1, 42], [42, 42])
         ] + [
-            (f"{alg_name}_{task}", task, th, alg_name, alg, [None]) for alg, alg_name in (
+            (f"{alg_name}_{task}", task, th, alg_name, alg, [None])
+            for alg, alg_name in (
                 (KNeighborsClassifier, "KNNC"),
                 (GaussianNB, "NB"),
             ) for task, th in (
@@ -454,7 +457,9 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
         ]
     )
-    def testClassificationBasicFit(self, _, task, th, model_name, model_class, random_state):
+    def testClassificationBasicFit(
+        self, _, task, th, model_name, model_class, random_state
+    ):
         """Test model training for classification models."""
         if model_name not in ["NB", "SVC"]:
             parameters = {"n_jobs": N_CPUS}
@@ -482,7 +487,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
-            random_state=random_state[0]
+            random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
@@ -494,16 +499,18 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 alg=model_class,
                 dataset=dataset,
                 parameters=parameters,
-                random_state=random_state[1]
+                random_state=random_state[1],
             )
             self.fitTest(model)
-            predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+            predictor = SklearnModel(
+                name=f"{model_name}_{task}", base_dir=model.baseDir
+            )
             self.predictorTest(
                 predictor,
                 expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas)
-
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
 
     def testRandomForestClassifierFitWithSeed(self):
         parameters = {
@@ -529,7 +536,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.fitTest(model)
         expected_summary = self.createMetricsSummary(model)
 
-        #Generate summary again, check that the result is identical
+        # Generate summary again, check that the result is identical
         model = self.getModel(
             name=f"RFC_{TargetTasks.SINGLECLASS}",
             alg=RandomForestClassifier,
@@ -546,13 +553,12 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (alg_name, alg_name, alg, random_state) for alg, alg_name in (
-                (RandomForestRegressor, "RFR"),
-            ) for random_state in ([None], [1, 42], [42, 42])
+            (alg_name, alg_name, alg, random_state)
+            for alg, alg_name in ((RandomForestRegressor, "RFR"), )
+            for random_state in ([None], [1, 42], [42, 42])
         ] + [
-            (alg_name, alg_name, alg, [None]) for alg, alg_name in (
-                (KNeighborsRegressor, "KNNR"),
-            )
+            (alg_name, alg_name, alg, [None])
+            for alg, alg_name in ((KNeighborsRegressor, "KNNR"), )
         ]
     )
     def testRegressionMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -578,7 +584,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name=f"{model_name}_multitask_regression",
             alg=model_class,
             dataset=dataset,
-            random_state=random_state[0]
+            random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = SklearnModel(
@@ -590,7 +596,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 name=f"{model_name}_multitask_regression",
                 alg=model_class,
                 dataset=dataset,
-                random_state=random_state[1]
+                random_state=random_state[1],
             )
             self.fitTest(model)
             predictor = SklearnModel(
@@ -600,18 +606,17 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 predictor,
                 expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas)
-
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
 
     @parameterized.expand(
         [
-            (alg_name, alg_name, alg, random_state) for alg, alg_name in (
-                (RandomForestClassifier, "RFC"),
-            ) for random_state in ([None], [1, 42], [42, 42])
+            (alg_name, alg_name, alg, random_state)
+            for alg, alg_name in ((RandomForestClassifier, "RFC"), )
+            for random_state in ([None], [1, 42], [42, 42])
         ] + [
-            (alg_name, alg_name, alg, [None]) for alg, alg_name in (
-                (KNeighborsClassifier, "KNNC"),
-            )
+            (alg_name, alg_name, alg, [None])
+            for alg, alg_name in ((KNeighborsClassifier, "KNNC"), )
         ]
     )
     def testClassificationMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -647,7 +652,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
-            random_state=random_state[0]
+            random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = SklearnModel(
@@ -660,16 +665,19 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 alg=model_class,
                 dataset=dataset,
                 parameters=parameters,
-                random_state=random_state[1]
+                random_state=random_state[1],
             )
             self.fitTest(model)
             predictor = SklearnModel(
                 name=f"{model_name}_multitask_classification", base_dir=model.baseDir
             )
-            self.predictorTest(predictor,
+            self.predictorTest(
+                predictor,
                 expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas)
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+
 
 class TestMetrics(TestCase):
     """Test the SklearnMetrics from the metrics module."""

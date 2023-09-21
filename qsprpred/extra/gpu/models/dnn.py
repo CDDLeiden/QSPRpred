@@ -116,7 +116,15 @@ class DNNModel(QSPRModel):
         self.tol = tol
         self.nClass = None
         self.nDim = None
-        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload, random_state=random_state)
+        super().__init__(
+            base_dir,
+            alg,
+            data,
+            name,
+            parameters,
+            autoload=autoload,
+            random_state=random_state,
+        )
         if self.task.isMultiTask():
             raise NotImplementedError(
                 "Multitask modelling is not implemented for DNNModel models."
@@ -239,7 +247,7 @@ class DNNModel(QSPRModel):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any | None = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        **kwargs
+        **kwargs,
     ):
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -261,7 +269,9 @@ class DNNModel(QSPRModel):
         if self.earlyStopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
-            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1, random_state=self.random_state)
+            X_train, X_val, y_train, y_val = train_test_split(
+                X, y, test_size=0.1, random_state=self.random_state
+            )
             return estimator.fit(X_train, y_train, X_val, y_val, **kwargs)
 
         # set fixed number of epochs if early stopping is not used

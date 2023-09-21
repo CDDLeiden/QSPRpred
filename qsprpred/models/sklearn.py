@@ -80,7 +80,9 @@ class SklearnModel(QSPRModel):
             else:
                 self.alg()
         except:
-            logger.error(f"Cannot initialize alg {self.alg} with parameters {self.parameters}.")
+            logger.error(
+                f"Cannot initialize alg {self.alg} with parameters {self.parameters}."
+            )
             raise
 
         # log some things

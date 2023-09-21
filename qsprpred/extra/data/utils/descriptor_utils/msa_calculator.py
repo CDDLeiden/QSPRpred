@@ -15,6 +15,7 @@ import Bio.SeqIO as Bio_SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline, MafftCommandline
 
 from .....logs import logger
+from typing import Optional
 
 
 class MSAProvider(ABC):
@@ -199,8 +200,9 @@ class BioPythonMSA(MSAProvider, ABC):
                     "out_dir": self.outDir,
                     "fname": self.fName,
                     "current": current_path,
-                    "class": f"{self.__class__.__module__}.{self.__class__.__name__}"
-                }, f
+                    "class": f"{self.__class__.__module__}.{self.__class__.__name__}",
+                },
+                f,
             )
         self.currentToFile(os.path.join(os.path.dirname(fname), current_path))
 
@@ -318,7 +320,7 @@ class ClustalMSA(BioPythonMSA):
     - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.ClustalOmegaCommandline
     """
     def __call__(self,
-                 sequences: dict[str:str] = None,
+                 sequences: Optional[dict[str:str]] = None,
                  **kwargs) -> dict[str, str] | None:
         """
         MSA with Clustal Omega and BioPython.

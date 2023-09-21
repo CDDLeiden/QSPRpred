@@ -2,7 +2,7 @@ import base64
 import marshal
 import os
 import types
-from typing import Callable
+from typing import Callable, Optional
 
 import pandas as pd
 
@@ -45,8 +45,8 @@ class PCMDataSet(QSPRDataset):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
-        target_imputer: Callable = None,
-        index_cols: list[str] = None,
+        target_imputer: Optional[Callable] = None,
+        index_cols: Optional[list[str]] = None,
         id_prefix: str = "QSPRID",
         random_state: int | None = None,
     ):
@@ -196,7 +196,7 @@ class PCMDataSet(QSPRDataset):
             marshal.dumps(
                 self.proteinSeqProvider.__code__ if self.proteinSeqProvider else None
             )
-        ).decode('ascii')
+        ).decode("ascii")
         return meta
 
     @staticmethod
@@ -207,9 +207,7 @@ class PCMDataSet(QSPRDataset):
                 base64.b64decode(meta["init"]["protein_seq_provider"])
             )
             try:
-                seq_provider = types.FunctionType(
-                    seq_provider, globals()
-                )
+                seq_provider = types.FunctionType(seq_provider, globals())
                 meta["init"]["protein_seq_provider"] = seq_provider
             except Exception as e:
                 logger.warning(
@@ -236,8 +234,8 @@ class PCMDataSet(QSPRDataset):
     def fromMolTable(
         mol_table: MoleculeTable,
         protein_col: str,
-        target_props: list[TargetProperty | dict] = None,
-        name: str = None,
+        target_props: Optional[list[TargetProperty | dict]] = None,
+        name: Optional[str] = None,
         **kwargs,
     ) -> "PCMDataSet":
         """Construct a data set to handle PCM data from a `MoleculeTable`.
@@ -280,7 +278,7 @@ class PCMDataSet(QSPRDataset):
     def addFeatures(
         self,
         feature_calculators: list[DescriptorsCalculator] | None = None,
-        recalculate: bool = False
+        recalculate: bool = False,
     ):
         """Add features to the feature matrix.
 

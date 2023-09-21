@@ -4,9 +4,7 @@ import argparse
 import json
 import os
 import os.path
-import random
 import sys
-from importlib.util import find_spec
 
 import numpy as np
 import optuna
@@ -30,9 +28,13 @@ def QSPRArgParser(txt=None):
         default="./predictions.tsv",
         help="Output path to save results",
     )
-    parser.add_argument("-sb", "--skip_backup", action="store_true",
-                help="Skip backup of files. WARNING: this may overwrite "
-                "previous results, use with caution.")
+    parser.add_argument(
+        "-sb",
+        "--skip_backup",
+        action="store_true",
+        help="Skip backup of files. WARNING: this may overwrite "
+        "previous results, use with caution.",
+    )
     parser.add_argument("-de", "--debug", action="store_true")
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
@@ -148,9 +150,10 @@ if __name__ == "__main__":
     # Backup files
     if not args.skip_backup:
         backup_msg = backup_files(
-                os.path.dirname(args.output_path), (os.path.basename(args.output_path)),
-                cp_suffix="_params"
-            )
+            os.path.dirname(args.output_path),
+            (os.path.basename(args.output_path)),
+            cp_suffix="_params",
+        )
 
     if not os.path.exists(os.path.dirname(args.output_path)):
         os.makedirs(os.path.dirname(args.output_path))

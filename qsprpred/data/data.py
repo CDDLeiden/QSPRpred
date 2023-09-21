@@ -58,7 +58,6 @@ class PandasDataSet(DataSet):
         randomState (int): Random state to use for all random operations.
 
     """
-
     class ParallelApplyWrapper:
         """A wrapper class to parallelize pandas apply functions."""
         def __init__(
@@ -144,7 +143,7 @@ class PandasDataSet(DataSet):
                 call the `setRandomState` method after loading.
         """
         self.randomState = None
-        self.setRandomState(random_state or np.random.randint(0, 2 ** 32 - 1))
+        self.setRandomState(random_state or np.random.randint(0, 2**32 - 1))
         self.name = name
         self.indexCols = index_cols
         # parallel settings
@@ -484,11 +483,10 @@ class PandasDataSet(DataSet):
         """
         return self.df
 
-    def shuffle(self, random_state: int = None):
+    def shuffle(self, random_state: Optional[int] = None):
         """Shuffle the internal data frame."""
         self.df = self.df.sample(
-            frac=1,
-            random_state=random_state if random_state else self.randomState
+            frac=1, random_state=random_state if random_state else self.randomState
         )
 
     def setRandomState(self, random_state: int):
@@ -581,7 +579,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         drop_invalids: bool = True,
         index_cols: Optional[list[str]] = None,
         id_prefix: str = "QSPRID",
-        random_state: int | None = None
+        random_state: int | None = None,
     ):
         """Initialize a `MoleculeTable` object.
 
@@ -624,7 +622,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             n_jobs,
             chunk_size,
             id_prefix,
-            random_state
+            random_state,
         )
         if not self.descriptorCalculatorsPathPrefix:
             self.descriptorCalculatorsPathPrefix = (
@@ -1062,7 +1060,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 func_args=(scaffold, ),
                 subset=[self.smilesCol],
                 axis=1,
-                raw=False
+                raw=False,
             )
             if add_rdkit_scaffold:
                 PandasTools.AddMoleculeColumnToFrame(
@@ -1155,8 +1153,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             bool: Whether the data frame contains scaffold groups.
         """
         return (
-            len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")])
-            > 0
+            len([col
+                 for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
         )
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
@@ -1334,10 +1332,8 @@ class TargetProperty:
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{
-                    k: TargetTasks[v] if k == "task" else v
-                    for k, v in d.items()
-                }
+                **{k: TargetTasks[v] if k == "task" else v
+                   for k, v in d.items()}
             )
         else:
             return TargetProperty(**d)
@@ -1357,10 +1353,8 @@ class TargetProperty:
         if task_from_str:
             return [
                 TargetProperty(
-                    **{
-                        k: TargetTasks[v] if k == "task" else v
-                        for k, v in d.items()
-                    }
+                    **{k: TargetTasks[v] if k == "task" else v
+                       for k, v in d.items()}
                 ) for d in _list
             ]
         else:
@@ -1528,7 +1522,7 @@ class QSPRDataset(MoleculeTable):
             drop_invalids,
             index_cols,
             id_prefix,
-            random_state
+            random_state,
         )
         # load metadata if saved already
         self.metaInfo = None
@@ -1868,7 +1862,9 @@ class QSPRDataset(MoleculeTable):
             mol_table.storeDir if "store_dir" not in kwargs else kwargs["store_dir"]
         )
         name = mol_table.name if name is None else name
-        ds = QSPRDataset(name, target_props, mol_table.getDF(), random_state=random_state, **kwargs)
+        ds = QSPRDataset(
+            name, target_props, mol_table.getDF(), random_state=random_state, **kwargs
+        )
         ds.descriptorCalculators = mol_table.descriptorCalculators
         ds.descriptors = mol_table.descriptors
         return ds
@@ -2063,12 +2059,10 @@ class QSPRDataset(MoleculeTable):
         # shuffle the training and test sets
         if shuffle:
             self.X = self.X.sample(
-                frac=1,
-                random_state=random_state or self.randomState
+                frac=1, random_state=random_state or self.randomState
             )
             self.X_ind = self.X_ind.sample(
-                frac=1,
-                random_state=random_state or self.randomState
+                frac=1, random_state=random_state or self.randomState
             )
             self.y = self.y.loc[self.X.index, :]
             self.y_ind = self.y_ind.loc[self.X_ind.index, :]
@@ -2087,8 +2081,7 @@ class QSPRDataset(MoleculeTable):
         """
         if self.featureNames:
             self.loadDescriptorsToSplits(
-                shuffle=shuffle,
-                random_state=random_state or self.randomState
+                shuffle=shuffle, random_state=random_state or self.randomState
             )
             self.X = self.X[self.featureNames]
             self.X_ind = self.X_ind[self.featureNames]
@@ -2234,8 +2227,7 @@ class QSPRDataset(MoleculeTable):
         # featurize splits
         if self.hasDescriptors:
             self.featurizeSplits(
-                shuffle=shuffle,
-                random_state=random_state or self.randomState
+                shuffle=shuffle, random_state=random_state or self.randomState
             )
         else:
             logger.warning(

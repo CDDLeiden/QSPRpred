@@ -30,9 +30,10 @@ class PCMSplit(DataSplit):
         self.splitter = splitter
 
         # Check that splitter is either RandomSplit, ScaffoldSplit or ClusterSplit
-        assert isinstance(self.splitter, (RandomSplit, ScaffoldSplit, ClusterSplit)), \
-            "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
-        
+        assert isinstance(
+            self.splitter, (RandomSplit, ScaffoldSplit, ClusterSplit)
+        ), "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
+
         if isinstance(self.splitter, RandomSplit):
             self.splitter.setSeed(dataset.randomState if dataset is not None else None)
 
@@ -63,9 +64,9 @@ class PCMSplit(DataSplit):
         task = ds.targetProperties[0].task
         th = ds.targetProperties[0].th if task.isClassification() else None
 
-
-        assert len(ds.targetProperties) == 1, \
-            "PCMSplit only works for single-task datasets!"
+        assert (
+            len(ds.targetProperties) == 1
+        ), "PCMSplit only works for single-task datasets!"
         # TODO: Add support for multi-target PCM datasets: creta a multi-task dataset
         # with all target-task combinations as different columns and split that
         # dataset with the given splitter
@@ -141,7 +142,7 @@ class TemporalPerTarget(DataSplit):
         year_col: str,
         split_years: dict[str, int],
         firts_year_per_compound: bool = True,
-        dataset: PCMDataSet | None = None
+        dataset: PCMDataSet | None = None,
     ):
         """Creates a temporal split that is consistent across targets.
 
@@ -197,8 +198,8 @@ class TemporalPerTarget(DataSplit):
             train_indices.extend([indices.index(i) for i in train])
             test_indices.extend([indices.index(i) for i in test])
 
-
-        assert len(set(train_indices)) + len(set(test_indices)) == len(ds), \
-            "Train and test set do not cover the whole dataset!"
+        assert len(set(train_indices)) + len(
+            set(test_indices)
+        ) == len(ds), "Train and test set do not cover the whole dataset!"
 
         return iter([(train_indices, test_indices)])

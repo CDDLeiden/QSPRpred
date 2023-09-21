@@ -10,6 +10,7 @@ from papyrus_scripts.preprocess import (
     keep_type,
 )
 from papyrus_scripts.reader import read_papyrus
+from typing import Optional
 
 
 def papyrus_filter(
@@ -17,13 +18,13 @@ def papyrus_filter(
     quality: str,
     outdir: str,
     activity_types: list[str] | str = "all",
-    prefix: str = None,
+    prefix: Optional[str] = None,
     drop_duplicates: bool = True,
     chunk_size: int = 1e5,
     use_existing: bool = True,
     stereo: bool = False,
     plusplus: bool = False,
-    papyrus_dir: str = None,
+    papyrus_dir: Optional[str] = None,
 ):
     """Filters the downloaded Papyrus dataset for quality and accession key (UniProt)
     and outputs a .tsv file of all compounds fulfilling these requirements.

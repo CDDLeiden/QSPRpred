@@ -4,6 +4,7 @@ To add a new data splitter:
 * Add a DataSplit subclass for your new splitter
 """
 from typing import Iterable
+
 import numpy as np
 import pandas as pd
 from gbmtsplits import GloballyBalancedSplit
@@ -13,12 +14,13 @@ from ...logs import logger
 from ..data import QSPRDataset
 from ..interfaces import DataSplit
 from .data_clustering import (
-    MoleculeClusters,
     FPSimilarityMaxMinClusters,
-    ScaffoldClusters,
+    MoleculeClusters,
     RandomClusters,
+    ScaffoldClusters,
 )
 from .scaffolds import Murcko, Scaffold
+
 
 class RandomSplit(DataSplit):
     """Splits dataset in random train and test subsets.
@@ -30,10 +32,12 @@ class RandomSplit(DataSplit):
         self,
         test_fraction=0.1,
         dataset: QSPRDataset | None = None,
-        seed: int | None = None
+        seed: int | None = None,
     ) -> None:
         self.testFraction = test_fraction
-        self.seed = self.seed = seed or (dataset.randomState if dataset is not None else None)
+        self.seed = self.seed = seed or (
+            dataset.randomState if dataset is not None else None
+        )
 
     def setSeed(self, seed: int | None):
         """Set the seed for this instance.
@@ -45,7 +49,9 @@ class RandomSplit(DataSplit):
         self.seed = seed
 
     def split(self, X, y):
-        return ShuffleSplit(1, test_size=self.testFraction, random_state=self.seed).split(X, y)
+        return ShuffleSplit(1, test_size=self.testFraction,
+                            random_state=self.seed).split(X, y)
+
 
 class ManualSplit(DataSplit):
     """Splits dataset in train and test subsets based on a column in the dataframe.
@@ -97,6 +103,7 @@ class ManualSplit(DataSplit):
         test = self.splitCol[self.splitCol == self.testVal].index.values
         return iter([(train, test)])
 
+
 class TemporalSplit(DataSplit):
     """
     Splits dataset train and test subsets based on a threshold in time.
@@ -139,8 +146,9 @@ class TemporalSplit(DataSplit):
         task_names = [TargetProperty.name for TargetProperty in ds.targetProperties]
 
         assert len(task_names) > 0, "No target properties found."
-        assert len(X) == len(df),\
-            "X and the current data in the dataset must have same length"
+        assert len(X) == len(
+            df
+        ), "X and the current data in the dataset must have same length"
 
         if len(task_names) > 1:
             logger.warning(
@@ -165,6 +173,7 @@ class TemporalSplit(DataSplit):
 
         return iter([(train, test)])
 
+
 class GBMTDataSplit(DataSplit):
     """
     Splits dataset into balanced train and test subsets
@@ -177,11 +186,10 @@ class GBMTDataSplit(DataSplit):
         customTestList (list): list of molecule indexes to force in test set
         split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
     """
-
     def __init__(
         self,
         dataset: QSPRDataset = None,
-        clustering : MoleculeClusters = FPSimilarityMaxMinClusters(),
+        clustering: MoleculeClusters = FPSimilarityMaxMinClusters(),
         test_fraction: float = 0.1,
         custom_test_list: list[str] | None = None,
         **split_kwargs,
@@ -211,12 +219,13 @@ class GBMTDataSplit(DataSplit):
 
         # Get dataset, dataframe and tasks
         ds = self.getDataSet()
-        df = ds.getDF().copy().reset_index(drop=True) # need numeric index splits
+        df = ds.getDF().copy().reset_index(drop=True)  # need numeric index splits
         task_names = [TargetProperty.name for TargetProperty in ds.targetProperties]
 
         assert len(task_names) > 0, "No target properties found."
-        assert len(X) == len(df),\
-            "X and the current data in the dataset must have same length"
+        assert len(X) == len(
+            df
+        ), "X and the current data in the dataset must have same length"
 
         # Get clusters
         clusters = self.clustering.get_clusters(df[ds.smilesCol].tolist())
@@ -234,7 +243,7 @@ class GBMTDataSplit(DataSplit):
         splitter = GloballyBalancedSplit(
             sizes=[1 - self.testFraction, self.testFraction],
             clusters=clusters,
-            clustering_method=None, # As precomputed clusters are provided
+            clustering_method=None,  # As precomputed clusters are provided
             **self.split_kwargs,
         )
         df_split = splitter(
@@ -248,13 +257,15 @@ class GBMTDataSplit(DataSplit):
         train_indices = df_split[df_split["Split"] == 0].index.values
         test_indices = df_split[df_split["Split"] == 1].index.values
 
-        assert len(train_indices) + len(test_indices) == len(df), \
-            "Not all samples were assigned to a split"
+        assert len(train_indices) + len(test_indices) == len(
+            df
+        ), "Not all samples were assigned to a split"
 
         # Reset index back to QSPRID
         df.set_index(ds.indexCols, inplace=True, drop=False)
 
         return iter([(train_indices, test_indices)])
+
 
 class GBMTRandomSplit(GBMTDataSplit):
     """
@@ -284,6 +295,7 @@ class GBMTRandomSplit(GBMTDataSplit):
             **split_kwargs,
         )
 
+
 class ScaffoldSplit(GBMTDataSplit):
     """
     Splits dataset into balanced train and test subsets based on molecular scaffolds.
@@ -310,6 +322,7 @@ class ScaffoldSplit(GBMTDataSplit):
             **split_kwargs,
         )
 
+
 class ClusterSplit(GBMTDataSplit):
     """
     Splits dataset into balanced train and test subsets based on clusters of similar
@@ -327,11 +340,14 @@ class ClusterSplit(GBMTDataSplit):
         test_fraction: float = 0.1,
         custom_test_list: list[str] | None = None,
         seed: int | None = None,
-        clustering : MoleculeClusters | None = None,
+        clustering: MoleculeClusters | None = None,
         **split_kwargs,
     ) -> None:
         seed = seed or (dataset.randomState if dataset is not None else 42)
-        clustering = clustering if clustering is not None else FPSimilarityMaxMinClusters(seed=seed)
+        clustering = (
+            clustering
+            if clustering is not None else FPSimilarityMaxMinClusters(seed=seed)
+        )
         super().__init__(
             dataset,
             clustering,
