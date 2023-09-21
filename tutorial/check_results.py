@@ -11,7 +11,7 @@ def md5(fname):
     return hash_md5.hexdigest()
 
 
-succes = True
+success = True
 for f in os.listdir("expected"):
     for type in ["ind", "cv"]:
         file_name = f"{f}.{type}.tsv"
@@ -33,7 +33,7 @@ for f in os.listdir("expected"):
                 )
                 print(file.read())
 
-if not succes:
+if not success:
     sys.exit(1)
 else:
     print("Comparison succesful!")
