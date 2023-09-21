@@ -26,9 +26,14 @@ class RandomSplit(DataSplit):
     Attributes:
         testFraction (float): fraction of total dataset to testset
     """
-    def __init__(self, test_fraction=0.1, seed: int | None = None) -> None:
+    def __init__(
+        self,
+        test_fraction=0.1,
+        dataset: QSPRDataset | None = None,
+        seed: int | None = None
+    ) -> None:
         self.testFraction = test_fraction
-        self.seed = seed
+        self.seed = self.seed = seed or (dataset.randomState if dataset is not None else None)
 
     def setSeed(self, seed: int | None):
         """Set the seed for this instance.
