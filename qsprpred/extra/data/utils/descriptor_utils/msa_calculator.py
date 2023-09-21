@@ -15,8 +15,6 @@ import Bio.SeqIO as Bio_SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline, MafftCommandline
 
 from .....logs import logger
-from typing import Optional
-
 
 class MSAProvider(ABC):
     """Interface for multiple sequence alignment providers.
@@ -320,7 +318,7 @@ class ClustalMSA(BioPythonMSA):
     - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.ClustalOmegaCommandline
     """
     def __call__(self,
-                 sequences: Optional[dict[str:str]] = None,
+                 sequences: dict[str:str] = None,
                  **kwargs) -> dict[str, str] | None:
         """
         MSA with Clustal Omega and BioPython.
