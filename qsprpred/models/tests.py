@@ -228,10 +228,12 @@ class ModelTestMixIn:
             if expected_pred_not_use_probas is not None:
                 self.assertAlmostEqual(pred[1], expected_pred_not_use_probas, places=8)
         else:
+            # Skip not_use_probas test:
+            # For regression this is identical to use_probas result
+            # For classification there is no guarantee the classification result actually differs,
+            # unlike probas which will usually have different results
             if expected_pred_use_probas is not None:
-                self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=5)
-            if expected_pred_not_use_probas is not None:
-                self.assertNotAlmostEqual(pred[1], expected_pred_not_use_probas, places=5)
+                self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=8)
 
 
         return pred[0], pred[1]
@@ -441,9 +443,9 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             ) for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
-            ) for random_state in (None, 42)
+            ) for random_state in ([None], [1, 42], [42, 42])
         ] + [
-            (f"{alg_name}_{task}", task, th, alg_name, alg, None) for alg, alg_name in (
+            (f"{alg_name}_{task}", task, th, alg_name, alg, [None]) for alg, alg_name in (
                 (KNeighborsClassifier, "KNNC"),
                 (GaussianNB, "NB"),
             ) for task, th in (
@@ -475,30 +477,30 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         # test classifier
         # initialize model for training from class
-        model_random_state = random_state if model_name in ["SVC", "RFC", "XGBC"] else None
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
-            random_state=model_random_state
+            random_state=random_state[0]
         )
         self.fitTest(model)
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
-        if random_state is not None:
+        if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
                 alg=model_class,
                 dataset=dataset,
                 parameters=parameters,
-                random_state=model_random_state
+                random_state=random_state[1]
             )
             self.fitTest(model)
             predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
             self.predictorTest(
                 predictor,
+                expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
                 expected_pred_not_use_probas=pred_not_use_probas)
 
@@ -605,9 +607,9 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         [
             (alg_name, alg_name, alg, random_state) for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
-            ) for random_state in (None, 42)
+            ) for random_state in ([None], [1, 42], [42, 42])
         ] + [
-            (alg_name, alg_name, alg, None) for alg, alg_name in (
+            (alg_name, alg_name, alg, [None]) for alg, alg_name in (
                 (KNeighborsClassifier, "KNNC"),
             )
         ]
@@ -640,32 +642,32 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         # test classifier
         # initialize model for training from class
-        model_random_state = random_state if model_name in ["RFC"] else None
         model = self.getModel(
             name=f"{model_name}_multitask_classification",
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
-            random_state=model_random_state
+            random_state=random_state[0]
         )
         self.fitTest(model)
         predictor = SklearnModel(
             name=f"{model_name}_multitask_classification", base_dir=model.baseDir
         )
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
-        if random_state is not None:
+        if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_multitask_classification",
                 alg=model_class,
                 dataset=dataset,
                 parameters=parameters,
-                random_state=model_random_state
+                random_state=random_state[1]
             )
             self.fitTest(model)
             predictor = SklearnModel(
                 name=f"{model_name}_multitask_classification", base_dir=model.baseDir
             )
             self.predictorTest(predictor,
+                expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
                 expected_pred_not_use_probas=pred_not_use_probas)
 

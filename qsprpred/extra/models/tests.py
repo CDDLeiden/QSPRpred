@@ -101,7 +101,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             ) for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
-            ) for random_state in ([None], [42, 42])
+            ) for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testRegressionBasicFitPCM(
