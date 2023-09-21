@@ -439,7 +439,6 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         [
             (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
             for alg, alg_name in (
-                (SVC, "SVC"),
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
             ) for task, th in (
@@ -449,6 +448,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         ] + [
             (f"{alg_name}_{task}", task, th, alg_name, alg, [None])
             for alg, alg_name in (
+                (SVC, "SVC"),
                 (KNeighborsClassifier, "KNNC"),
                 (GaussianNB, "NB"),
             ) for task, th in (
