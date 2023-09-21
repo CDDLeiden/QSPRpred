@@ -325,7 +325,7 @@ class ClusterSplit(GBMTDataSplit):
         clustering : MoleculeClusters | None = None,
         **split_kwargs,
     ) -> None:
-        seed = seed or (dataset.randomState if dataset is not None else None)
+        seed = seed or (dataset.randomState if dataset is not None else 42)
         clustering = clustering if clustering is not None else FPSimilarityMaxMinClusters(seed=seed)
         super().__init__(
             dataset,
