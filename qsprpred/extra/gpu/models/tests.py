@@ -455,7 +455,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         self.predictorTest(predictor)
 
-    # FIX ME: This test fails because the PyBoost default auc does not handle
+    # FIXME: This test fails because the PyBoost default auc does not handle
     # mutlitask data and the custom NaN AUC metric is not JSON serializable.
 
     # @parameterized.expand(

@@ -3,6 +3,7 @@
 To add a new data splitter:
 * Add a DataSplit subclass for your new splitter
 """
+import platform
 from typing import Iterable
 
 import numpy as np
@@ -51,6 +52,7 @@ class RandomSplit(DataSplit):
     def split(self, X, y):
         return ShuffleSplit(1, test_size=self.testFraction,
                             random_state=self.seed).split(X, y)
+
 
 
 class ManualSplit(DataSplit):
@@ -180,11 +182,16 @@ class GBMTDataSplit(DataSplit):
     based on an initial clustering algorithm.
 
     Attributes:
-        dataset (QSPRDataset): dataset that this splitter will be acting on
-        clustering (MoleculeClusters): clustering algorithm to use
-        testFraction (float): fraction of total dataset to testset
-        customTestList (list): list of molecule indexes to force in test set
-        split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
+        dataset (QSPRDataset):
+            dataset that this splitter will be acting on
+        clustering (MoleculeClusters):
+            clustering algorithm to use
+        testFraction (float):
+            fraction of total dataset to testset
+        customTestList (list):
+            list of molecule indexes to force in test set
+        split_kwargs (dict):
+            additional arguments to be passed to the GloballyBalancedSplit
     """
     def __init__(
         self,
@@ -216,6 +223,12 @@ class GBMTDataSplit(DataSplit):
             (train_indices, test_indices) where the indices are the row indices of the
             input data matrix
         """
+        # if we are on Windows, raise an error
+        if platform.system() == "Windows":
+            logger.warning(
+                "The GBMTDataSplit currently has a problem on Windows:"
+                "https://github.com/coin-or/pulp/issues/671 and might hang up..."
+            )
 
         # Get dataset, dataframe and tasks
         ds = self.getDataSet()
@@ -272,10 +285,14 @@ class GBMTRandomSplit(GBMTDataSplit):
     Splits dataset into balanced random train and test subsets.
 
     Attributes:
-        dataset (QSPRDataset): dataset that this splitter will be acting on
-        testFraction (float): fraction of total dataset to testset
-        customTestList (list): list of molecule indexes to force in test set
-        split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
+        dataset (QSPRDataset):
+            dataset that this splitter will be acting on
+        testFraction (float):
+            fraction of total dataset to testset
+        customTestList (list):
+            list of molecule indexes to force in test set
+        split_kwargs (dict):
+            additional arguments to be passed to the GloballyBalancedSplit
     """
     def __init__(
         self,
@@ -301,10 +318,14 @@ class ScaffoldSplit(GBMTDataSplit):
     Splits dataset into balanced train and test subsets based on molecular scaffolds.
 
     Attributes:
-        dataset (QSPRDataset): dataset that this splitter will be acting on
-        testFraction (float): fraction of total dataset to testset
-        customTestList (list): list of molecule indexes to force in test set
-        split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
+        dataset (QSPRDataset):
+            dataset that this splitter will be acting on
+        testFraction (float):
+            fraction of total dataset to testset
+        customTestList (list):
+            list of molecule indexes to force in test set
+        split_kwargs (dict):
+            additional arguments to be passed to the GloballyBalancedSplit
     """
     def __init__(
         self,
@@ -329,10 +350,14 @@ class ClusterSplit(GBMTDataSplit):
     molecules.
 
     Attributes:
-        dataset (QSPRDataset): dataset that this splitter will be acting on
-        testFraction (float): fraction of total dataset to testset
-        customTestList (list): list of molecule indexes to force in test set
-        split_kwargs (dict): additional arguments to be passed to the GloballyBalancedSplit
+        dataset (QSPRDataset):
+            dataset that this splitter will be acting on
+        testFraction (float):
+            fraction of total dataset to testset
+        customTestList (list):
+            list of molecule indexes to force in test set
+        split_kwargs (dict):
+            additional arguments to be passed to the GloballyBalancedSplit
     """
     def __init__(
         self,

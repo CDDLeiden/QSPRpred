@@ -668,8 +668,9 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         self.checkConsistencyMulticlass(dataset)
 
     def testTargetProperty(self):
-        """Test target property creation and serialization in the context of a
-        dataset."""
+        """Test target property creation and serialization
+        in the context of a dataset.
+        """
         dataset = QSPRDataset(
             "testTargetProperty",
             [
@@ -917,7 +918,9 @@ class TestTargetProperty(TestCase):
             self.assertEqual(target_prop.th, th)
 
     def testTargetProperty(self):
-        """Check the TargetProperty class on target property creation and serialization."""
+        """Check the TargetProperty class on target
+        property creation and serialization.
+        """
         # Check the different task types
         targetprop = TargetProperty("CL", TargetTasks.REGRESSION)
         self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, "CL", None)

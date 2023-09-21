@@ -149,7 +149,8 @@ class SklearnModel(QSPRModel):
         """See `QSPRModel.fit`."""
         estimator = self.estimator if estimator is None else estimator
         X, y = self.convertToNumpy(X, y)
-        # sklearn models expect 1d arrays for single target regression and classification
+        # sklearn models expect 1d arrays
+        # for single target regression and classification
         if not self.task.isMultiTask():
             y = y.ravel()
         return estimator.fit(X, y)

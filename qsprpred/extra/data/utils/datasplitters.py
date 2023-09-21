@@ -165,7 +165,6 @@ class TemporalPerTarget(DataSplit):
         self.firstYearPerCompound = firts_year_per_compound
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
-
         ds = self.getDataSet()
         df = ds.getDF()
         indices = df.index.tolist()

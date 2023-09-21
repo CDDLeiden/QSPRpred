@@ -86,13 +86,15 @@ class PyBoostModel(QSPRModel):
             )
         if self.task == ModelTasks.MULTITASK_MULTICLASS:
             raise NotImplementedError(
-                "Multi-task multi-class is not supported for pyboost that can handle missing data models."
+                "Multi-task multi-class is not supported for "
+                "pyboost that can handle missing data models."
             )
         if self.task == ModelTasks.MULTITASK_SINGLECLASS:
             # FIX ME:  PyBoost default auc loss does not handle multitask data
             # and the custom NaN AUC metric is not JSON serializable.
             raise NotImplementedError(
-                "Multi-class is not supported for pyboost that can handle missing data models."
+                "Multi-class is not supported for pyboost "
+                "that can handle missing data models."
             )
 
     @property
@@ -274,8 +276,8 @@ class PyBoostModel(QSPRModel):
 
 class MSEwithNaNLoss(MSELoss):
     """
-    Masked MSE loss function. Custom loss wrapper for pyboost that can handle missing data,
-    as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
+    Masked MSE loss function. Custom loss wrapper for pyboost that can handle
+    missing data, as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
     def base_score(self, y_true):
         # Replace .mean with nanmean function to calc base score
@@ -299,8 +301,8 @@ class MSEwithNaNLoss(MSELoss):
 
 class BCEWithNaNLoss(BCELoss):
     """
-    Masked BCE loss function. Custom loss wrapper for pyboost that can handle missing data,
-    as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
+    Masked BCE loss function. Custom loss wrapper for pyboost that can handle missing
+    data, as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
     def base_score(self, y_true):
         # Replace .mean with nanmean function to calc base score
@@ -343,7 +345,6 @@ class NaNRMSEScore(Metric):
         return np.average(err, weights=np.count_nonzero(mask, axis=0))
 
     def compare(self, v0, v1):
-
         return v0 > v1
 
 
@@ -368,7 +369,6 @@ class NaNR2Score(Metric):
         return np.average(1 - err / std, weights=np.count_nonzero(mask, axis=0))
 
     def compare(self, v0, v1):
-
         return v0 > v1
 
 
@@ -379,7 +379,6 @@ class NaNAucMetric(Metric):
     as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
     def __call__(self, y_true, y_pred, sample_weight=None):
-
         aucs = []
         mask = ~cp.isnan(y_true)
 
@@ -391,5 +390,4 @@ class NaNAucMetric(Metric):
         return np.mean(aucs)
 
     def compare(self, v0, v1):
-
         return v0 > v1
