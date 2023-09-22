@@ -110,8 +110,7 @@ class OptunaOptimization(HyperParameterOptimization):
         self.nJobs = 1
         self.bestScore = -np.inf
         self.bestParams = None
-        self.monitor.on_optimization_start(
-            {
+        self.config = {
                 "scoring": scoring,
                 "param_grid": param_grid,
                 "model_assessor": model_assessor,
@@ -119,7 +118,6 @@ class OptunaOptimization(HyperParameterOptimization):
                 "n_trials": n_trials,
                 "n_jobs": n_jobs,
             }
-        )
 
     def optimize(self, model: QSPRModel, **kwargs) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
@@ -131,6 +129,10 @@ class OptunaOptimization(HyperParameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
+        self.monitor.on_optimization_start(
+            model, self.config
+        )
+
         self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
         import optuna
 

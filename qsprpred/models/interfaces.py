@@ -907,10 +907,11 @@ class BaseMonitor():
 class HyperParameterOptimizationMonitor(ABC, BaseMonitor):
     """Base class for monitoring the hyperparameter optimization of a model."""
     @abstractmethod
-    def on_optimization_start(self, config: dict):
+    def on_optimization_start(self, model: QSPRModel, config: dict):
         """Called before the hyperparameter optimization has started.
 
         Args:
+            model (QSPRModel): model to optimize
             config (dict): configuration of the hyperparameter optimization
         """
 
