@@ -131,6 +131,13 @@ class DNNModel(QSPRModel):
             )
 
     def init_random_state(self, random_state):
+        """Set random state if applicable.
+        Defaults to random state of dataset if no random state is provided by the constructor.
+
+        Args:
+            random_state (int): Random state to use for shuffling and other random operations.
+        """
+
         self.random_state = random_state
         if random_state is not None:
             torch.manual_seed(random_state)

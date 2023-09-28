@@ -137,6 +137,11 @@ class ModelTestMixIn:
         Args:
             predictor (QSPRModel):
                 The model to test.
+            expect_equal_result (bool):
+                If pred values provided, specifies whether to check for equality or inequality.
+            expected_pred_use_probas (float): Value to check with use_probas true.
+            expected_pred_not_use_probas (int | float):
+                Value to check with use_probas false. Ignored if expect_equal_result is false.
             **pred_kwargs:
                 Extra keyword arguments to pass to the predictor's `predictMols` method.
         """
@@ -324,6 +329,8 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg (Type, optional): the algorithm to use. Defaults to None.
             dataset (QSPRDataset, optional): the dataset to use. Defaults to None.
             parameters (dict, optional): the parameters to use. Defaults to None.
+            random_state(int, optional):
+                Random state to use for shuffling and other random operations. Defaults to None.
 
         Returns:
             SklearnModel: the model

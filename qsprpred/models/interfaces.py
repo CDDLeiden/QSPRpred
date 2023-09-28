@@ -51,6 +51,8 @@ class QSPRModel(ABC):
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
         metaFile (str):
             absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
+        random_state (int):
+            Random state to use for all random operations for reproducibility.
     """
     @staticmethod
     def readStandardizer(path: str) -> "SKLearnStandardizer":
@@ -252,7 +254,12 @@ class QSPRModel(ABC):
         return meta_info
 
     def init_random_state(self, random_state):
-        # set random state, either from constructor or from dataset, if applicable
+        """Set random state if applicable.
+        Defaults to random state of dataset if no random state is provided by the constructor.
+
+        Args:
+            random_state (int): Random state to use for shuffling and other random operations.
+        """
         new_random_state = random_state or (
             self.data.randomState
             if self.data is not None else np.random.randint(0, 2**32 - 1)
@@ -300,6 +307,8 @@ class QSPRModel(ABC):
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
+            random_state (int): 
+                Random state to use for shuffling and other random operations.
         """
         self.data = data
         self.name = name or alg.__class__.__name__

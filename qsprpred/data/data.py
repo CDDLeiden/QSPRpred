@@ -1855,6 +1855,7 @@ class QSPRDataset(MoleculeTable):
             target_props (list): list of target properties to use
             name (str, optional): name of the data set. Defaults to None.
             kwargs: additional keyword arguments to pass to the constructor
+            random_state(int, optional): seed to use for random operations
 
         Returns:
             QSPRDataset: created data set
