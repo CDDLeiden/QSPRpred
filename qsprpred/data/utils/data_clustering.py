@@ -105,7 +105,7 @@ class ScaffoldClusters(MoleculeClusters):
         ]
 
         # Get unique scaffolds and initialize clusters
-        unique_scaffolds = list(set(scaffolds))
+        unique_scaffolds = sorted(list(set(scaffolds)))
         clusters = {i: [] for i in range(len(unique_scaffolds))}
 
         # Cluster molecules based on scaffolds
