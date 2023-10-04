@@ -902,15 +902,109 @@ class BaseMonitor():
     Attributes:
     """
 
+class FitMonitor(ABC, BaseMonitor):
+    """Base class for monitoring the training of a model."""
+    @abstractmethod
+    def on_fit_start(self, model: QSPRModel):
+        """Called before the training has started.
 
+        Args:
+            model (QSPRModel): model to train
+        """
 
-class HyperParameterOptimizationMonitor(ABC, BaseMonitor):
+    @abstractmethod
+    def on_fit_end(self, model: QSPRModel):
+        """Called after the training has finished.
+
+        Args:
+            model (QSPRModel): model to train
+        """
+
+    @abstractmethod
+    def on_epoch_start(self, epoch: int):
+        """Called before each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+        """
+
+    @abstractmethod
+    def on_epoch_end(self, epoch: int, score: float, predictions: np.ndarray):
+        """Called after each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+            score (float): score of the current epoch
+            predictions (np.ndarray): predictions of the current epoch
+        """
+
+    @abstractmethod
+    def on_batch_start(self, batch: int):
+        """Called before each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+        """
+
+    @abstractmethod
+    def on_batch_end(self, batch: int, score: float, predictions: np.ndarray):
+        """Called after each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+            score (float): score of the current batch
+            predictions (np.ndarray): predictions of the current batch
+        """
+
+class AssessorMonitor(FitMonitor):
+    """Base class for monitoring the assessment of a model."""
+    @abstractmethod
+    def on_assessment_start(self, model: QSPRModel):
+        """Called before the assessment has started.
+
+        Args:
+            model (QSPRModel): model to assess
+        """
+
+    @abstractmethod
+    def on_assessment_end(self, predictions: np.ndarray):
+        """Called after the assessment has finished.
+
+        Args:
+            predictions (np.ndarray): predictions of the assessment (for all folds)
+        """
+
+    @abstractmethod
+    def on_fold_start(self, fold: int, X_train: np.array, y_train: np.array, X_test: np.array, y_test: np.array):
+        """Called before each fold of the assessment.
+
+        Args:
+            fold (int): index of the current fold
+            X_train (np.array): training data of the current fold
+            y_train (np.array): training targets of the current fold
+            X_test (np.array): test data of the current fold
+            y_test (np.array): test targets of the current fold
+        """
+
+    @abstractmethod
+    def on_fold_end(self, model_fit: Any|tuple[Any, int], predictions: np.ndarray):
+        """Called after each fold of the assessment.
+
+        Args:
+            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
+                                             tuple containing the fitted estimator and
+                                             the number of epochs it was trained for
+            predictions (np.ndarray): predictions of the current fold
+        """
+
+class HyperParameterOptimizationMonitor(AssessorMonitor):
     """Base class for monitoring the hyperparameter optimization of a model."""
     @abstractmethod
-    def on_optimization_start(self, config: dict):
+    def on_optimization_start(self, model: QSPRModel, config: dict):
         """Called before the hyperparameter optimization has started.
 
         Args:
+            model (QSPRModel): model to optimize
             config (dict): configuration of the hyperparameter optimization
         """
 
@@ -943,20 +1037,20 @@ class HyperParameterOptimizationMonitor(ABC, BaseMonitor):
             predictions (list[np.ndarray]): predictions of the current iteration
         """
 
-
 class ModelAssessor(ABC):
     """Base class for assessment methods.
 
     Attributes:
         useProba (bool): use probabilities for classification models
     """
-    def __init__(self, use_proba: bool = True, mode: EarlyStoppingMode | None = None):
+    def __init__(self, monitor: AssessorMonitor, use_proba: bool = True, mode: EarlyStoppingMode | None = None):
         """Initialize the evaluation method class.
 
         Args:
             use_proba (bool): use probabilities for classification models
             mode (EarlyStoppingMode): early stopping mode for fitting
         """
+        self.monitor = monitor
         self.useProba = use_proba
         self.mode = mode
 

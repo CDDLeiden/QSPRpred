@@ -39,6 +39,7 @@ class CrossValAssessor(ModelAssessor):
         model.checkForData()
         X, _ = model.data.getFeatures()
         y, _ = model.data.getTargetPropertiesValues()
+        self.monitor.on_assessment_start(model)
         # prepare arrays to store molecule ids and predictions
         cvs_ids = np.array([None] * len(X))
         if model.task.isRegression() or not self.useProba:
@@ -56,9 +57,10 @@ class CrossValAssessor(ModelAssessor):
                 "cross validation fold %s started: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
+            self.monitor.on_fold_start(fold=i, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
             # fit model
             crossval_estimator = model.loadEstimator(evalparams)
-            model.fit(X_train, y_train, crossval_estimator, mode=self.mode, **kwargs)
+            model_fit = model.fit(X_train, y_train, crossval_estimator, mode=self.mode, **kwargs)
             # make predictions
             if model.task.isRegression() or not self.useProba:
                 cvs[idx_test] = model.predict(X_test, crossval_estimator)
@@ -73,6 +75,7 @@ class CrossValAssessor(ModelAssessor):
                 "cross validation fold %s ended: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
+            self.monitor.on_fold_end(preds, model_fit)
         # save results
         if save:
             index_name = model.data.getDF().index.name
@@ -89,6 +92,7 @@ class CrossValAssessor(ModelAssessor):
                 predictions = [cvs_task[fold_counter == i] for cvs_task in cvs]
             output.append((y[fold_counter == i], predictions))
 
+        self.monitor.on_assessment_end(output)
         return output
 
 
