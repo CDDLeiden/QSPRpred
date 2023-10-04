@@ -40,17 +40,18 @@ test:python3.10:
    image: python:3.10
 
 # Write documentation on main branch
-pages:
-   stage: deploy
-   image: python:3.10
-   before_script:
-      - python -m pip install -U sphinx
-      - python -m pip install sphinx-rtd-theme
-   script:
-      - mkdir public
-      - sphinx-build -b html ./docs public
-   artifacts:
-      paths:
-      - public
-   only:
-      - main
+# FIXME: this is not working properly at the moment
+#pages:
+#   stage: deploy
+#   image: python:3.10
+#   before_script:
+#      - python -m pip install -U sphinx
+#      - python -m pip install sphinx-rtd-theme
+#   script:
+#      - mkdir public
+#      - sphinx-build -b html ./docs public
+#   artifacts:
+#      paths:
+#      - public
+#   only:
+#      - main
