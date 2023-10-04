@@ -783,6 +783,7 @@ class QSPRModel(ABC):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
+        monitor: "FitMonitor",
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         **kwargs,
@@ -894,7 +895,6 @@ class QSPRModel(ABC):
         Returns:
             path (str): path to the saved estimator
         """
-
 
 class BaseMonitor():
     """Base class for monitoring the training of a model.
@@ -1055,12 +1055,14 @@ class ModelAssessor(ABC):
         self.mode = mode
 
     @abstractmethod
-    def __call__(self, model: QSPRModel,
+    def __call__(self, model: QSPRModel, monitor: AssessorMonitor,
                  **kwargs) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
         """Evaluate the model.
 
         Args:
             model (QSPRModel): model to evaluate
+            monitor (AssessorMonitor): monitor to track the evaluation, overrides
+                                       the monitor set in the constructor
             kwargs: additional arguments for fit function of the model
 
         Returns:
@@ -1068,6 +1070,7 @@ class ModelAssessor(ABC):
                 list of tuples containing the true values and the predictions, where
                 each tuple corresponds a set of predictions such as different folds.
         """
+        monitor = monitor or self.monitor
 
     def savePredictionsToFile(
         self,
@@ -1114,7 +1117,6 @@ class ModelAssessor(ABC):
             for col_name, col_values in extra_columns.items():
                 df_out[col_name] = col_values
         df_out.to_csv(f"{model.outPrefix}.{file_suffix}.tsv", sep="\t")
-
 
 class HyperParameterOptimization(ABC):
     """Base class for hyperparameter optimization.

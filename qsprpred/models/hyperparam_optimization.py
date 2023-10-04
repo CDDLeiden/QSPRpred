@@ -197,7 +197,7 @@ class OptunaOptimization(HyperParameterOptimization):
         self.monitor.on_iteration_start(bayesian_params)
         # assess the model with the current parameters and return the score
         predictions = self.runAssessment(
-            model, save=False, parameters=bayesian_params, **kwargs
+            model, save=False, parameters=bayesian_params, monitor=self.monitor, **kwargs
         )
         scores = []
         # TODO: this should be removed once random seeds are fixed
@@ -263,7 +263,7 @@ class GridSearchOptimization(HyperParameterOptimization):
         for params in ParameterGrid(self.paramGrid):
             logger.info(params)
             predictions = self.runAssessment(
-                model, save=False, parameters=params, **kwargs
+                model, save=False, parameters=params, monitor=self.monitor, **kwargs
             )
             scores = []
             # TODO: this should be removed once random seeds are fixed

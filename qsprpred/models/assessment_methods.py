@@ -6,8 +6,7 @@ import numpy as np
 import pandas as pd
 
 from ..logs import logger
-from .interfaces import ModelAssessor, QSPRModel
-
+from .interfaces import ModelAssessor, QSPRModel, AssessorMonitor
 
 class CrossValAssessor(ModelAssessor):
     """Perform cross validation on a model.
@@ -20,6 +19,7 @@ class CrossValAssessor(ModelAssessor):
         model: QSPRModel,
         save: bool = True,
         parameters: dict | None = None,
+        monitor: AssessorMonitor | None = None,
         **kwargs,
     ) -> float | np.ndarray:
         """Perform cross validation on the model with the given parameters.
@@ -29,11 +29,13 @@ class CrossValAssessor(ModelAssessor):
             save (bool): whether to save predictions to file
             parameters (dict): optional model parameters to use in assessment
             use_proba (bool): use predictProba instead of predict for classification
+            monitor (AssessorMonitor): optional monitor to use, overrides monitor set in constructor
             **kwargs: additional keyword arguments for the fit function
 
         Returns:
             float | np.ndarray: predictions on the validation set
         """
+        super().__call__(model, monitor) # set monitor
         evalparams = model.parameters if parameters is None else parameters
         # check if data is available
         model.checkForData()
@@ -102,6 +104,7 @@ class TestSetAssessor(ModelAssessor):
         model: QSPRModel,
         save: bool = True,
         parameters: dict | None = None,
+        monitor: AssessorMonitor | None = None,
         **kwargs,
     ):
         """Make predictions for independent test set.
@@ -111,11 +114,13 @@ class TestSetAssessor(ModelAssessor):
             save (bool): whether to save predictions to file
             parameters (dict): optional model parameters to use in assessment
             use_proba (bool): use predictProba instead of predict for classification
+            monitor (AssessorMonitor): optional monitor to use, overrides monitor set in constructor
             **kwargs: additional keyword arguments for the fit function
 
         Returns:
             float | np.ndarray: predictions for evaluation
         """
+        super().__call__(model, monitor, **kwargs) # set monitor
         evalparams = model.parameters if parameters is None else parameters
         # check if data is available
         model.checkForData()
