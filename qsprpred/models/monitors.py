@@ -1,9 +1,96 @@
 import numpy as np
 
-from .interfaces import HyperParameterOptimizationMonitor, QSPRModel
+from .interfaces import (
+    AssessorMonitor,
+    FitMonitor,
+    HyperParameterOptimizationMonitor,
+    QSPRModel,
+)
 
 
-class NullMonitor(HyperParameterOptimizationMonitor):
+class NullFitMonitor(FitMonitor):
+    """Null monitor that does nothing."""
+    def on_fit_start(self, model: QSPRModel):
+        """Called before the training has started.
+
+        Args:
+            model (QSPRModel): model to train
+        """
+
+    def on_fit_end(self, model: QSPRModel):
+        """Called after the training has finished.
+
+        Args:
+            model (QSPRModel): model to train
+        """
+
+    def on_epoch_start(self, epoch: int):
+        """Called before each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+        """
+
+    def on_epoch_end(self, epoch: int, score: float, predictions: np.ndarray):
+        """Called after each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+            score (float): score of the current epoch
+            predictions (np.ndarray): predictions of the current epoch
+        """
+
+    def on_batch_start(self, batch: int):
+        """Called before each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+        """
+
+    def on_batch_end(self, batch: int, score: float, predictions: np.ndarray):
+        """Called after each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+            score (float): score of the current batch
+            predictions (np.ndarray): predictions of the current batch
+        """
+
+
+class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
+    """Null monitor that does nothing."""
+    def on_assessment_start(self, model: QSPRModel):
+        """Called before the assessment has started.
+
+        Args:
+            model (QSPRModel): model to assess
+        """
+
+    def on_assessment_end(self, model: QSPRModel):
+        """Called after the assessment has finished.
+
+        Args:
+            model (QSPRModel): model to assess
+        """
+
+    def on_fold_start(self, fold: int):
+        """Called before each fold of the assessment.
+
+        Args:
+            fold (int): index of the current fold
+        """
+
+    def on_fold_end(self, fold: int, score: float, predictions: np.ndarray):
+        """Called after each fold of the assessment.
+
+        Args:
+            fold (int): index of the current fold
+            score (float): score of the current fold
+            predictions (np.ndarray): predictions of the current fold
+        """
+
+
+class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
     """Null monitor that does nothing."""
     def on_optimization_start(self, model: QSPRModel, config: dict):
         """Called before the hyperparameter optimization has started.
@@ -89,7 +176,7 @@ class PrintMonitor(HyperParameterOptimizationMonitor):
         print("Predictions: %s" % predictions)
 
 
-class WandBMonitor(HyperParameterOptimizationMonitor):
+class WandBMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
     def __init__(self, project_name: str):
         try:
             import wandb
@@ -131,6 +218,7 @@ class WandBMonitor(HyperParameterOptimizationMonitor):
             project=self.project_name,
             config=params,
             name=f"iteration_{self.num_iterations}",
+            group=self.model.name,
             tags=[self.model.name],
             dir=f"{self.model.outDir}",
         )
@@ -146,6 +234,8 @@ class WandBMonitor(HyperParameterOptimizationMonitor):
                                 (e.g for cross-validation)
             predictions (list[np.ndarray]): predictions of the current iteration
         """
-        self.wandb.log({"score": score, "scores": scores})
+        scores_dict = {f"score/scores-{i}": score for i, score in enumerate(scores)}
+        scores_dict["aggregated_score"] = score
+        self.wandb.run.summary(f"iteration_{self.num_iterations}", scores_dict)
         self.wandb.finish()
         self.num_iterations += 1
