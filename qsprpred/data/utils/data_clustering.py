@@ -178,7 +178,7 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
     def __init__(
         self,
         n_clusters: int | None = None,
-        seed: int = 42,
+        seed: int | None = None,
         initial_centroids: list[str] | None = None,
         fp_calculator: FingerprintSet = FingerprintSet(
             fingerprint_type="MorganFP", radius=3, nBits=2048
@@ -206,7 +206,7 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
             len(fps),
             self.nClusters,
             firstPicks=self.initialCentroids if self.initialCentroids else [],
-            seed=self.seed,
+            seed=self.seed if self.seed is not None else -1,
         )
 
         return centroid_indices

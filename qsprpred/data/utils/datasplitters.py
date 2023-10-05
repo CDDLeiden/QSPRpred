@@ -27,7 +27,10 @@ class RandomSplit(DataSplit):
     """Splits dataset in random train and test subsets.
 
     Attributes:
-        testFraction (float): fraction of total dataset to testset
+        testFraction (float):
+            fraction of total dataset to testset
+        seed (int):
+            Random state to use for shuffling and other random operations.
     """
     def __init__(
         self,
@@ -36,9 +39,12 @@ class RandomSplit(DataSplit):
         seed: int | None = None,
     ) -> None:
         self.testFraction = test_fraction
-        self.seed = self.seed = seed or (
+        self.seed = seed or (
             dataset.randomState if dataset is not None else None
         )
+        if self.seed is None:
+            logger.warning("No random state supplied, and could not find random state on the dataset.")
+
 
     def setSeed(self, seed: int | None):
         """Set the seed for this instance.
@@ -289,6 +295,8 @@ class GBMTRandomSplit(GBMTDataSplit):
             dataset that this splitter will be acting on
         testFraction (float):
             fraction of total dataset to testset
+        seed (int):
+            Random state to use for shuffling and other random operations.
         customTestList (list):
             list of molecule indexes to force in test set
         split_kwargs (dict):
@@ -304,6 +312,9 @@ class GBMTRandomSplit(GBMTDataSplit):
         **split_kwargs,
     ) -> None:
         seed = seed or (dataset.randomState if dataset is not None else None)
+        if seed is None:
+            logger.warning("No random state supplied, and could not find random state on the dataset.")
+
         super().__init__(
             dataset,
             RandomClusters(seed, n_initial_clusters),
@@ -356,6 +367,8 @@ class ClusterSplit(GBMTDataSplit):
             fraction of total dataset to testset
         customTestList (list):
             list of molecule indexes to force in test set
+        seed (int):
+            Random state to use for shuffling and other random operations.
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
@@ -368,7 +381,10 @@ class ClusterSplit(GBMTDataSplit):
         clustering: MoleculeClusters | None = None,
         **split_kwargs,
     ) -> None:
-        seed = seed or (dataset.randomState if dataset is not None else 42)
+        seed = seed or (dataset.randomState if dataset is not None else None)
+        if seed is None:
+            logger.warning("No random state supplied, and could not find random state on the dataset.")
+
         clustering = (
             clustering
             if clustering is not None else FPSimilarityMaxMinClusters(seed=seed)

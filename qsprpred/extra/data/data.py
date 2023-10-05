@@ -2,7 +2,7 @@ import base64
 import marshal
 import os
 import types
-from typing import Callable, Optional
+from typing import Callable
 
 import pandas as pd
 
@@ -45,8 +45,8 @@ class PCMDataSet(QSPRDataset):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
-        target_imputer: Optional[Callable] = None,
-        index_cols: Optional[list[str]] = None,
+        target_imputer: Callable | None = None,
+        index_cols: list[str] | None = None,
         id_prefix: str = "QSPRID",
         random_state: int | None = None,
     ):
@@ -234,8 +234,8 @@ class PCMDataSet(QSPRDataset):
     def fromMolTable(
         mol_table: MoleculeTable,
         protein_col: str,
-        target_props: Optional[list[TargetProperty | dict]] = None,
-        name: Optional[str] = None,
+        target_props: list[TargetProperty | dict] | None = None,
+        name: str | None = None,
         **kwargs,
     ) -> "PCMDataSet":
         """Construct a data set to handle PCM data from a `MoleculeTable`.

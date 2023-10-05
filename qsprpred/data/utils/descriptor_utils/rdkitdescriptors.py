@@ -3,12 +3,10 @@ from rdkit.Chem import Descriptors
 from rdkit.ML.Descriptors import MoleculeDescriptors
 
 from ..descriptor_utils.interfaces import Scorer
-from typing import Optional
-
 
 class RdkitDescriptors(Scorer):
     def __init__(
-        self, rdkit_descriptors: Optional[list[str]] = None, compute_3Drdkit: bool = False
+        self, rdkit_descriptors: list[str] | None = None, compute_3Drdkit: bool = False
     ):
         """Initialize a RdkitDescriptors class to calculate rdkit descriptors.
 
