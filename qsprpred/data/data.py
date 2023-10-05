@@ -143,7 +143,7 @@ class PandasDataSet(DataSet):
                 call the `setRandomState` method after loading.
         """
         self.randomState = None
-        self.setRandomState(random_state or np.random.randint(0, 2**32 - 1, dtype=np.int64))
+        self.setRandomState(random_state or int(np.random.randint(0, 2**32 - 1, dtype=np.int64)))
         self.name = name
         self.indexCols = index_cols
         # parallel settings
@@ -443,7 +443,7 @@ class PandasDataSet(DataSet):
         self.df.to_pickle(self.storePath)
         # save the random state
         with open(f"{self.storePath}.seed", "w") as f:
-            json.dump(int(self.randomState), f)
+            json.dump(self.randomState, f)
         return self.storePath
 
     def clearFiles(self):

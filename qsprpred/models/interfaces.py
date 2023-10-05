@@ -262,7 +262,7 @@ class QSPRModel(ABC):
         """
         new_random_state = random_state or (
             self.data.randomState
-            if self.data is not None else np.random.randint(0, 2**32 - 1, dtype=np.int64)
+            if self.data is not None else int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
         )
         self.random_state = new_random_state
         if new_random_state is None:
