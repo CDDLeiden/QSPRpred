@@ -409,3 +409,14 @@ class ClusterSplit(GBMTDataSplit):
             custom_test_list,
             **split_kwargs,
         )
+
+    def setSeed(self, seed: int | None):
+        """Set the seed for this instance.
+
+        Args:
+            seed (int):
+                Random state to use for shuffling and other random operations.
+        """
+        self.seed = seed
+        if hasattr(self.clustering, 'seed'):
+            self.clustering.seed = seed
