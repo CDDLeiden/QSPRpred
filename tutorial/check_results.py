@@ -1,3 +1,10 @@
+"""
+This is a simple script to check that the results of the tutorial match the
+expected results. It is not part of the tutorial itself, but is used by the
+CI/CD pipeline to check that the tutorial is up-to-date and that the models
+are consistent with previous ones.
+"""
+
 import hashlib
 import os
 import sys
@@ -36,4 +43,4 @@ for f in os.listdir("expected"):
 if not success:
     sys.exit(1)
 else:
-    print("Comparison succesful!")
+    print("Comparison of tutorial output successful!")
