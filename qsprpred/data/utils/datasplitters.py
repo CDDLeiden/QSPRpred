@@ -38,13 +38,9 @@ class RandomSplit(DataSplit):
         dataset: QSPRDataset | None = None,
         seed: int | None = None,
     ) -> None:
+        super().__init__(dataset=dataset)
         self.testFraction = test_fraction
-        self.seed = seed or (
-            dataset.randomState if dataset is not None else None
-        )
-        if self.seed is None:
-            logger.warning("No random state supplied, and could not find random state on the dataset.")
-
+        self.seed = seed or (dataset.randomState if self.hasDataSet else None)
 
     def setSeed(self, seed: int | None):
         """Set the seed for this instance.
@@ -56,9 +52,16 @@ class RandomSplit(DataSplit):
         self.seed = seed
 
     def split(self, X, y):
-        return ShuffleSplit(1, test_size=self.testFraction,
-                            random_state=self.seed).split(X, y)
-
+        if self.seed is None:
+            self.seed = self.getDataSet().randomState if self.hasDataSet else None
+        if self.seed is None:
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+        return ShuffleSplit(
+            1, test_size=self.testFraction, random_state=self.seed
+        ).split(X, y)
 
 
 class ManualSplit(DataSplit):
