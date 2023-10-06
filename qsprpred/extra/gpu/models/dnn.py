@@ -130,7 +130,7 @@ class DNNModel(QSPRModel):
                 "Multitask modelling is not implemented for DNNModel models."
             )
 
-    def init_random_state(self, random_state):
+    def initRandomState(self, random_state):
         """Set random state if applicable.
         Defaults to random state of dataset if no random state is provided by the constructor.
 
@@ -138,7 +138,7 @@ class DNNModel(QSPRModel):
             random_state (int): Random state to use for shuffling and other random operations.
         """
 
-        self.random_state = random_state
+        self.randomState = random_state
         if random_state is not None:
             torch.manual_seed(random_state)
 
@@ -277,7 +277,7 @@ class DNNModel(QSPRModel):
             # split cross validation fold train set into train
             # and validation set for early stopping
             X_train, X_val, y_train, y_val = train_test_split(
-                X, y, test_size=0.1, random_state=self.random_state
+                X, y, test_size=0.1, random_state=self.randomState
             )
             return estimator.fit(X_train, y_train, X_val, y_val, **kwargs)
 

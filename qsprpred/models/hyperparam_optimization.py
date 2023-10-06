@@ -122,7 +122,7 @@ class OptunaOptimization(HyperParameterOptimization):
         # create optuna study
         study = optuna.create_study(
             direction="maximize",
-            sampler=optuna.samplers.TPESampler(seed=model.random_state),
+            sampler=optuna.samplers.TPESampler(seed=model.randomState),
         )
         logger.info(
             "Bayesian optimization started: %s" %

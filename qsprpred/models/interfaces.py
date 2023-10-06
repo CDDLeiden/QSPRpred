@@ -253,21 +253,26 @@ class QSPRModel(ABC):
             raise FileNotFoundError(f"Metadata file '{path}' does not exist.")
         return meta_info
 
-    def init_random_state(self, random_state):
+    def initRandomState(self, random_state):
         """Set random state if applicable.
-        Defaults to random state of dataset if no random state is provided by the constructor.
+        Defaults to random state of dataset if no random state is provided,
 
         Args:
-            random_state (int): Random state to use for shuffling and other random operations.
+            random_state (int):
+                Random state to use for shuffling and other random operations.
         """
         new_random_state = random_state or (
             self.data.randomState
-            if self.data is not None else int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+            if self.data is not None else int(
+                np.random.randint(0, 2**32 - 1, dtype=np.int64)
+            )
         )
-        self.random_state = new_random_state
+        self.randomState = new_random_state
         if new_random_state is None:
-            logger.warning("No random state supplied, and could not find random state on the dataset.")
-
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
         constructor_params = [
             name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
         ]
@@ -369,8 +374,9 @@ class QSPRModel(ABC):
         self.alg = alg
         if autoload:
             self.estimator = self.loadEstimatorFromFile(params=self.parameters)
-
-        self.init_random_state(random_state)
+        # initialize random state
+        self.randomState = None
+        self.initRandomState(random_state)
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""
