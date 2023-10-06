@@ -1,6 +1,7 @@
 """This module holds the base class for QSPRmodels, model types should be a subclass."""
 
 import copy
+import inspect
 import json
 import os
 import shutil
@@ -50,6 +51,8 @@ class QSPRModel(ABC):
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
         metaFile (str):
             absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
+        random_state (int):
+            Random state to use for all random operations for reproducibility.
     """
     @staticmethod
     def readStandardizer(path: str) -> "SKLearnStandardizer":
@@ -250,6 +253,41 @@ class QSPRModel(ABC):
             raise FileNotFoundError(f"Metadata file '{path}' does not exist.")
         return meta_info
 
+    def initRandomState(self, random_state):
+        """Set random state if applicable.
+        Defaults to random state of dataset if no random state is provided,
+
+        Args:
+            random_state (int):
+                Random state to use for shuffling and other random operations.
+        """
+        new_random_state = random_state or (
+            self.data.randomState
+            if self.data is not None else int(
+                np.random.randint(0, 2**32 - 1, dtype=np.int64)
+            )
+        )
+        self.randomState = new_random_state
+        if new_random_state is None:
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+        constructor_params = [
+            name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
+        ]
+        if "random_state" in constructor_params:
+            if self.parameters:
+                self.parameters.update({"random_state": new_random_state})
+            else:
+                self.parameters = {"random_state": new_random_state}
+        else:
+            if random_state:
+                logger.warning(
+                    f"Random state supplied, but alg {self.alg} does not support it."
+                    " Ignoring this setting."
+                )
+
     def __init__(
         self,
         base_dir: str,
@@ -258,6 +296,7 @@ class QSPRModel(ABC):
         name: str | None = None,
         parameters: dict | None = None,
         autoload=True,
+        random_state: int | None = None,
     ):
         """Initialize a QSPR model instance.
 
@@ -275,6 +314,8 @@ class QSPRModel(ABC):
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
+            random_state (int): 
+                Random state to use for shuffling and other random operations.
         """
         self.data = data
         self.name = name or alg.__class__.__name__
@@ -333,6 +374,9 @@ class QSPRModel(ABC):
         self.alg = alg
         if autoload:
             self.estimator = self.loadEstimatorFromFile(params=self.parameters)
+        # initialize random state
+        self.randomState = None
+        self.initRandomState(random_state)
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""

@@ -40,23 +40,24 @@ class PandasDataSet(DataSet):
     """A Pandas DataFrame wrapper class to enable data processing functions on
     QSPRpred data.
 
-    Arguments
+    Attributes:
         name (str): Name of the data set. You can use this name to load the dataset
             from disk anytime and create a new instance.
         df (pd.DataFrame): Pandas dataframe containing the data. If you provide a
             dataframe for a dataset that already exists on disk, the dataframe from
             disk will override the supplied data frame. Set 'overwrite' to `True` to
             override the data frame on disk.
-        store_dir (int): Directory to store the dataset files. Defaults to the
+        storeDir (str): Directory to store the dataset files. Defaults to the
             current directory. If it already contains files with the same name,
             the existing data will be loaded.
-        overwrite (bool): Overwrite existing dataset.
-        index_cols (List): List of columns to use as index. If None, the index
+        indexCols (List): List of columns to use as index. If None, the index
             will be a custom generated ID.
-        n_jobs (int): Number of jobs to use for parallel processing. If <= 0,
+        nJobs (int): Number of jobs to use for parallel processing. If <= 0,
             all available cores will be used.
-        chunk_size (int): Size of chunks to use per job in parallel processing.
-        id_prefix (str): Prefix to use for custom generated IDs."""
+        chunkSize (int): Size of chunks to use per job in parallel processing.
+        randomState (int): Random state to use for all random operations.
+
+    """
     class ParallelApplyWrapper:
         """A wrapper class to parallelize pandas apply functions."""
         def __init__(
@@ -110,12 +111,13 @@ class PandasDataSet(DataSet):
         self,
         name: str,
         df: Optional[pd.DataFrame] = None,
-        store_dir: int = ".",
+        store_dir: str = ".",
         overwrite: bool = False,
         index_cols: Optional[list[str]] = None,
         n_jobs: int = 1,
         chunk_size: int = 1000,
         id_prefix: str = "QSPRID",
+        random_state: int | None = None,
     ):
         """Initialize a `PandasDataSet` object.
         Args
@@ -125,7 +127,7 @@ class PandasDataSet(DataSet):
                 dataframe for a dataset that already exists on disk, the dataframe from
                 disk will override the supplied data frame. Set 'overwrite' to `True` to
                 override the data frame on disk.
-            store_dir (int): Directory to store the dataset files. Defaults to the
+            store_dir (str): Directory to store the dataset files. Defaults to the
                 current directory. If it already contains files with the same name,
                 the existing data will be loaded.
             overwrite (bool): Overwrite existing dataset.
@@ -135,7 +137,13 @@ class PandasDataSet(DataSet):
                 all available cores will be used.
             chunk_size (int): Size of chunks to use per job in parallel processing.
             id_prefix (str): Prefix to use for custom generated IDs.
+            random_state (int): Random state to use for all random operations
+                for reproducibility. If not specified, the state is generated randomly.
+                The state is saved upon `save` so if you want to change the state later,
+                call the `setRandomState` method after loading.
         """
+        self.randomState = None
+        self.setRandomState(random_state or int(np.random.randint(0, 2**32 - 1, dtype=np.int64)))
         self.name = name
         self.indexCols = index_cols
         # parallel settings
@@ -433,6 +441,9 @@ class PandasDataSet(DataSet):
         """
         # save data frame
         self.df.to_pickle(self.storePath)
+        # save the random state
+        with open(f"{self.storePath}.seed", "w") as f:
+            json.dump(self.randomState, f)
         return self.storePath
 
     def clearFiles(self):
@@ -447,6 +458,8 @@ class PandasDataSet(DataSet):
         """Reload the data table from disk."""
         self.df = pd.read_pickle(self.storePath)
         self.indexCols = self.df.index.name.split("~")
+        with open(f"{self.storePath}.seed", "r") as f:
+            self.setRandomState(int(f.read()))
         assert all(col in self.df.columns for col in self.indexCols)
 
     @staticmethod
@@ -470,9 +483,20 @@ class PandasDataSet(DataSet):
         """
         return self.df
 
-    def shuffle(self, random_state=None):
+    def shuffle(self, random_state: Optional[int] = None):
         """Shuffle the internal data frame."""
-        self.df = self.df.sample(frac=1, random_state=random_state)
+        self.df = self.df.sample(
+            frac=1, random_state=random_state if random_state else self.randomState
+        )
+
+    def setRandomState(self, random_state: int):
+        """Set the random state for this instance.
+
+        Args:
+            random_state (int):
+                Random state to use for shuffling and other random operations.
+        """
+        self.randomState = random_state
 
 
 class DescriptorTable(PandasDataSet):
@@ -554,6 +578,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         index_cols: Optional[list[str]] = None,
+        id_prefix: str = "QSPRID",
+        random_state: int | None = None,
     ):
         """Initialize a `MoleculeTable` object.
 
@@ -580,11 +606,24 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             chunk_size (int): Size of chunks to use per job in parallel processing.
             drop_invalids (bool): Drop invalid molecules from the data frame.
             index_cols (list[str]): list of columns to use as index. If None, the index
-                will be a custom generated ID."""
+                will be a custom generated ID.
+            id_prefix (str): Prefix to use for the custom generated ID.
+            random_state (int): Random state to use for shuffling and other random ops.
+        """
         self.descriptorCalculators = []  # holds all descriptor calculators
         self.descriptors = []  # holds descriptor tables for each calculator
         self.descriptorCalculatorsPathPrefix = None
-        super().__init__(name, df, store_dir, overwrite, index_cols, n_jobs, chunk_size)
+        super().__init__(
+            name,
+            df,
+            store_dir,
+            overwrite,
+            index_cols,
+            n_jobs,
+            chunk_size,
+            id_prefix,
+            random_state,
+        )
         if not self.descriptorCalculatorsPathPrefix:
             self.descriptorCalculatorsPathPrefix = (
                 f"{self.storePrefix}_descriptor_calculator"
@@ -1115,8 +1154,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             bool: Whether the data frame contains scaffold groups.
         """
         return (
-            len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")])
-            > 0
+            len([col
+                 for col in self.df.columns if col.startswith("ScaffoldGroup_")]) > 0
         )
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
@@ -1294,10 +1333,8 @@ class TargetProperty:
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{
-                    k: TargetTasks[v] if k == "task" else v
-                    for k, v in d.items()
-                }
+                **{k: TargetTasks[v] if k == "task" else v
+                   for k, v in d.items()}
             )
         else:
             return TargetProperty(**d)
@@ -1317,10 +1354,8 @@ class TargetProperty:
         if task_from_str:
             return [
                 TargetProperty(
-                    **{
-                        k: TargetTasks[v] if k == "task" else v
-                        for k, v in d.items()
-                    }
+                    **{k: TargetTasks[v] if k == "task" else v
+                       for k, v in d.items()}
                 ) for d in _list
             ]
         else:
@@ -1437,6 +1472,8 @@ class QSPRDataset(MoleculeTable):
         drop_empty: bool = True,
         target_imputer: Optional[Callable] = None,
         index_cols: Optional[list[str]] = None,
+        id_prefix: str = "QSPRID",
+        random_state: int | None = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if
         specified.
@@ -1468,6 +1505,8 @@ class QSPRDataset(MoleculeTable):
             index_cols (list[str], optional): columns to be used as index in the
                 dataframe. Defaults to `None` in which case a custom ID will be
                 generated.
+            id_prefix (str, optional): prefix for the custom ID. Defaults to "QSPRID".
+            random_state (int, optional): random state for splitting the data.
 
         Raises:
             `ValueError`: Raised if threshold given with non-classification task.
@@ -1483,6 +1522,8 @@ class QSPRDataset(MoleculeTable):
             chunk_size,
             drop_invalids,
             index_cols,
+            id_prefix,
+            random_state,
         )
         # load metadata if saved already
         self.metaInfo = None
@@ -1804,6 +1845,7 @@ class QSPRDataset(MoleculeTable):
         mol_table: MoleculeTable,
         target_props: list[TargetProperty | dict],
         name=None,
+        random_state=None,
         **kwargs,
     ) -> "QSPRDataset":
         """Create QSPRDataset from a MoleculeTable.
@@ -1813,6 +1855,7 @@ class QSPRDataset(MoleculeTable):
             target_props (list): list of target properties to use
             name (str, optional): name of the data set. Defaults to None.
             kwargs: additional keyword arguments to pass to the constructor
+            random_state(int, optional): seed to use for random operations
 
         Returns:
             QSPRDataset: created data set
@@ -1821,7 +1864,9 @@ class QSPRDataset(MoleculeTable):
             mol_table.storeDir if "store_dir" not in kwargs else kwargs["store_dir"]
         )
         name = mol_table.name if name is None else name
-        ds = QSPRDataset(name, target_props, mol_table.getDF(), **kwargs)
+        ds = QSPRDataset(
+            name, target_props, mol_table.getDF(), random_state=random_state, **kwargs
+        )
         ds.descriptorCalculators = mol_table.descriptorCalculators
         ds.descriptors = mol_table.descriptors
         return ds
@@ -2015,8 +2060,12 @@ class QSPRDataset(MoleculeTable):
 
         # shuffle the training and test sets
         if shuffle:
-            self.X = self.X.sample(frac=1, random_state=random_state)
-            self.X_ind = self.X_ind.sample(frac=1, random_state=random_state)
+            self.X = self.X.sample(
+                frac=1, random_state=random_state or self.randomState
+            )
+            self.X_ind = self.X_ind.sample(
+                frac=1, random_state=random_state or self.randomState
+            )
             self.y = self.y.loc[self.X.index, :]
             self.y_ind = self.y_ind.loc[self.X_ind.index, :]
 
@@ -2033,7 +2082,9 @@ class QSPRDataset(MoleculeTable):
         random_state (int): random state for shuffling
         """
         if self.featureNames:
-            self.loadDescriptorsToSplits(shuffle=shuffle, random_state=random_state)
+            self.loadDescriptorsToSplits(
+                shuffle=shuffle, random_state=random_state or self.randomState
+            )
             self.X = self.X[self.featureNames]
             self.X_ind = self.X_ind[self.featureNames]
         else:
@@ -2177,7 +2228,9 @@ class QSPRDataset(MoleculeTable):
 
         # featurize splits
         if self.hasDescriptors:
-            self.featurizeSplits(shuffle=shuffle, random_state=random_state)
+            self.featurizeSplits(
+                shuffle=shuffle, random_state=random_state or self.randomState
+            )
         else:
             logger.warning(
                 "Attempting to featurize splits without descriptors. "
@@ -2217,9 +2270,9 @@ class QSPRDataset(MoleculeTable):
             len(self.targetProperties) > 1 or
             self.targetProperties[0].task == TargetTasks.REGRESSION
         ):
-            return KFold(5)
+            return KFold(5, shuffle=True, random_state=self.randomState)
         else:
-            return StratifiedKFold(5)
+            return StratifiedKFold(5, shuffle=True, random_state=self.randomState)
 
     def getDefaultFoldGenerator(self):
         """Return the default fold generator. The fold generator is used to create folds

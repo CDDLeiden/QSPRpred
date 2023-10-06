@@ -73,7 +73,7 @@ Run settings arguments
 ^^^^^^^^^^^^^^^^^^^^^^^
 Apart from the the input file name, there are a few other base options that can be set.
 The base-directory can be specified using `-b`. Including `-d`, will print debug information to the log file. The random
-seed (-ran) can also be set manually (although identical results are not guaranteed while keeping the same random seed).
+seed (-ran) can also be set manually, which should guarantee identical results while keeping the same random seed.
 Furthermore, the number of cpu's (-ncpu) used for model training. Finally, the name of the smilescolumn in your dataset
 can be indicated with `-sm` (default SMILES).
 

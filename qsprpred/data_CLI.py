@@ -4,10 +4,8 @@ import argparse
 import json
 import os
 import os.path
-import random
 import sys
 from datetime import datetime
-from importlib.util import find_spec
 
 import numpy as np
 import optuna
@@ -370,6 +368,8 @@ def QSPR_dataprep(args):
                 store_dir=args.output_dir,
                 overwrite=True,
                 target_imputer=imputer if args.imputation is not None else None,
+                random_state=args.random_state
+                if args.random_state is not None else None,
             )
             # data filters
             datafilters = []
@@ -498,15 +498,6 @@ def QSPR_dataprep(args):
 
 if __name__ == "__main__":
     args = QSPRArgParser()
-
-    # Set random seeds
-    random.seed(args.random_state)
-    np.random.seed(args.random_state)
-    if find_spec("torch") is not None:
-        import torch
-
-        torch.manual_seed(args.random_state)
-    os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
     # check input file and output directory exist
     if not os.path.exists(args.input):

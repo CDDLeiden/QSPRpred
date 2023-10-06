@@ -158,14 +158,10 @@ class DataSetsMixInExtras(DataSetsMixIn):
             }
 
         return lambda acc_keys: (
-            {
-                acc: mapper[acc]
-                for acc in acc_keys
-            },
-            {
-                acc: kwargs_map[acc]
-                for acc in acc_keys
-            },
+            {acc: mapper[acc]
+             for acc in acc_keys},
+            {acc: kwargs_map[acc]
+             for acc in acc_keys},
         )
 
     def getMSAProvider(self):
@@ -183,6 +179,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
         target_imputer: Callable[[pd.Series], pd.Series] | None = None,
         preparation_settings: dict | None = None,
         protein_col: str = "accession",
+        random_state: int | None = None,
     ):
         """Create a small dataset for testing purposes.
 
@@ -197,6 +194,8 @@ class DataSetsMixInExtras(DataSetsMixIn):
                 preparation settings. Defaults to None.
             protein_col (str, optional):
                 name of the column with protein accessions. Defaults to "accession".
+            random_state (int, optional):
+                random seed to use in the dataset. Defaults to `None`
         Returns:
             QSPRDataset: a `QSPRDataset` object
         """
@@ -211,6 +210,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
             target_imputer=target_imputer,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
+            random_state=random_state,
         )
         if preparation_settings:
             ret.prepareDataset(**preparation_settings)
@@ -645,6 +645,25 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.assertTrue(
             set(test_smiles.unique()).isdisjoint(set(train_smiles.unique()))
         )
+
+    def test_PCMSplit_random_shuffle(self):
+        splitter = PCMSplit(RandomSplit(), dataset=self.dataset)
+        self.dataset.split(splitter, featurize=True)
+        seed = self.dataset.randomState
+        train, test = self.dataset.getFeatures()
+        train_order = train.index.tolist()
+        test_order = test.index.tolist()
+        self.dataset.save()
+        # reload and check if orders are the same if we redo the split
+        # and featurization with the same random state
+        dataset = PCMDataSet.fromFile(self.dataset.storePath)
+        splitter = PCMSplit(RandomSplit(), dataset=dataset)
+        self.dataset.split(splitter, featurize=True)
+        train, test = self.dataset.getFeatures()
+
+        self.assertEqual(dataset.randomState, seed)
+        self.assertListEqual(train.index.tolist(), train_order)
+        self.assertListEqual(test.index.tolist(), test_order)
 
     def test_LeaveTargetOut(self):
         target = self.dataset.getProteinKeys()[0:2]

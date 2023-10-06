@@ -33,6 +33,7 @@ class SklearnModel(QSPRModel):
         name: str | None = None,
         parameters: dict | None = None,
         autoload: bool = True,
+        random_state: int | None = None,
     ):
         """Initialize SklearnModel model.
 
@@ -43,8 +44,9 @@ class SklearnModel(QSPRModel):
             name (str): customized model name
             parameters (dict): model parameters
             autoload (bool): load model from file
+            random_state (int): seed for the random state
         """
-        super().__init__(base_dir, alg, data, name, parameters, autoload)
+        super().__init__(base_dir, alg, data, name, parameters, autoload, random_state)
         # check for incompatible tasks
         if self.task == ModelTasks.MULTITASK_MIXED:
             raise ValueError(
@@ -66,9 +68,23 @@ class SklearnModel(QSPRModel):
                 self.parameters.update({"max_iter": 10000})
             else:
                 self.parameters = {"max_iter": 10000}
+
         # set parameters if defined
         if self.parameters not in [None, {}] and hasattr(self, "estimator"):
             self.estimator.set_params(**self.parameters)
+
+        # check if alg can be initialized with parameters
+        try:
+            if self.parameters is not None:
+                self.alg(**self.parameters)
+            else:
+                self.alg()
+        except:
+            logger.error(
+                f"Cannot initialize alg {self.alg} with parameters {self.parameters}."
+            )
+            raise
+
         # log some things
         logger.info("parameters: %s" % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')

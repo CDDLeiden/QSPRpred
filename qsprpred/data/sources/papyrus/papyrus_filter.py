@@ -17,13 +17,13 @@ def papyrus_filter(
     quality: str,
     outdir: str,
     activity_types: list[str] | str = "all",
-    prefix: str = None,
+    prefix: str | None = None,
     drop_duplicates: bool = True,
     chunk_size: int = 1e5,
     use_existing: bool = True,
     stereo: bool = False,
     plusplus: bool = False,
-    papyrus_dir: str = None,
+    papyrus_dir: str | None = None,
 ):
     """Filters the downloaded Papyrus dataset for quality and accession key (UniProt)
     and outputs a .tsv file of all compounds fulfilling these requirements.

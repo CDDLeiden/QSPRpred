@@ -16,7 +16,6 @@ from Bio.Align.Applications import ClustalOmegaCommandline, MafftCommandline
 
 from .....logs import logger
 
-
 class MSAProvider(ABC):
     """Interface for multiple sequence alignment providers.
 

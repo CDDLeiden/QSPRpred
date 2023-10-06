@@ -10,10 +10,13 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 from parameterized import parameterized
+from sklearn import metrics
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.metrics import get_scorer as get_sklearn_scorer
+from sklearn.metrics import matthews_corrcoef, precision_score, recall_score
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
@@ -121,12 +124,24 @@ class ModelTestMixIn:
                 )
             )
 
-    def predictorTest(self, predictor: QSPRModel, **pred_kwargs):
+    def predictorTest(
+        self,
+        predictor: QSPRModel,
+        expect_equal_result=True,
+        expected_pred_use_probas=None,
+        expected_pred_not_use_probas=None,
+        **pred_kwargs,
+    ):
         """Test a model as predictor.
 
         Args:
             predictor (QSPRModel):
                 The model to test.
+            expect_equal_result (bool):
+                If pred values provided, specifies whether to check for equality or inequality.
+            expected_pred_use_probas (float): Value to check with use_probas true.
+            expected_pred_not_use_probas (int | float):
+                Value to check with use_probas false. Ignored if expect_equal_result is false.
             **pred_kwargs:
                 Extra keyword arguments to pass to the predictor's `predictMols` method.
         """
@@ -151,6 +166,7 @@ class ModelTestMixIn:
                 )
 
         # predict the property
+        pred = []
         for use_probas in [True, False]:
             predictions = predictor.predictMols(
                 df.SMILES.to_list(), use_probas=use_probas, **pred_kwargs
@@ -181,6 +197,7 @@ class ModelTestMixIn:
                 self.assertIn(singleoutput, [1, 0])
             else:
                 return AssertionError(f"Unknown task: {predictor.task}")
+            pred.append(singleoutput)
             # test with an invalid smiles
             invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
             predictions = predictor.predictMols(
@@ -206,6 +223,94 @@ class ModelTestMixIn:
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
+        if expect_equal_result:
+            if expected_pred_use_probas is not None:
+                self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=8)
+            if expected_pred_not_use_probas is not None:
+                self.assertAlmostEqual(pred[1], expected_pred_not_use_probas, places=8)
+        else:
+            # Skip not_use_probas test:
+            # For regression this is identical to use_probas result
+            # For classification there is no guarantee the classification result actually differs,
+            # unlike probas which will usually have different results
+            if expected_pred_use_probas is not None:
+                self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=8)
+
+        return pred[0], pred[1]
+
+    # NOTE: below code is taken from CorrelationPlot without the plotting code
+    # Would be nice if the summary code without plot was available regardless
+    def createCorrelationSummary(self, model):
+        cv_path = f"{model.outPrefix}.cv.tsv"
+        ind_path = f"{model.outPrefix}.ind.tsv"
+
+        cate = [cv_path, ind_path]
+        cate_names = ["cv", "ind"]
+        property_name = model.targetProperties[0].name
+        summary = {"ModelName": [], "R2": [], "RMSE": [], "Set": []}
+        for j, _ in enumerate(["Cross Validation", "Independent Test"]):
+            df = pd.read_table(cate[j])
+            coef = metrics.r2_score(
+                df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]
+            )
+            rmse = metrics.mean_squared_error(
+                df[f"{property_name}_Label"],
+                df[f"{property_name}_Prediction"],
+                squared=False,
+            )
+            summary["R2"].append(coef)
+            summary["RMSE"].append(rmse)
+            summary["Set"].append(cate_names[j])
+            summary["ModelName"].append(model.name)
+
+        return summary
+
+    # NOTE: below code is taken from MetricsPlot without the plotting code
+    # Would be nice if the summary code without plot was available regardless
+    def createMetricsSummary(self, model):
+        decision_threshold: float = 0.5
+        metrics = [
+            f1_score,
+            matthews_corrcoef,
+            precision_score,
+            recall_score,
+            accuracy_score,
+        ]
+        summary = {"Metric": [], "Model": [], "TestSet": [], "Value": []}
+        property_name = model.targetProperties[0].name
+
+        cv_path = f"{model.outPrefix}.cv.tsv"
+        ind_path = f"{model.outPrefix}.ind.tsv"
+
+        df = pd.read_table(cv_path)
+
+        # cross-validation
+        for fold in sorted(df.Fold.unique()):
+            y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
+            y_pred_values = [1 if x > decision_threshold else 0 for x in y_pred]
+            y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            for metric in metrics:
+                val = metric(y_true, y_pred_values)
+                summary["Metric"].append(metric.__name__)
+                summary["Model"].append(model.name)
+                summary["TestSet"].append(f"CV{fold + 1}")
+                summary["Value"].append(val)
+
+        # independent test set
+        df = pd.read_table(ind_path)
+        y_pred = df[f"{property_name}_ProbabilityClass_1"]
+        th = 0.5
+        y_pred_values = [1 if x > th else 0 for x in y_pred]
+        y_true = df[f"{property_name}_Label"]
+        for metric in metrics:
+            val = metric(y_true, y_pred_values)
+            summary["Metric"].append(metric.__name__)
+            summary["Model"].append(model.name)
+            summary["TestSet"].append("IND")
+            summary["Value"].append(val)
+
+        return summary
+
 
 class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the SklearnModel class."""
@@ -215,6 +320,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         alg: Type | None = None,
         dataset: QSPRDataset = None,
         parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Create a SklearnModel model.
 
@@ -223,6 +329,8 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg (Type, optional): the algorithm to use. Defaults to None.
             dataset (QSPRDataset, optional): the dataset to use. Defaults to None.
             parameters (dict, optional): the parameters to use. Defaults to None.
+            random_state(int, optional):
+                Random state to use for shuffling and other random operations. Defaults to None.
 
         Returns:
             SklearnModel: the model
@@ -233,20 +341,26 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             data=dataset,
             name=name,
             parameters=parameters,
+            random_state=random_state,
         )
 
     @parameterized.expand(
         [
-            (alg_name, TargetTasks.REGRESSION, alg_name, alg) for alg, alg_name in (
-                (PLSRegression, "PLSR"),
-                (SVR, "SVR"),
+            (alg_name, TargetTasks.REGRESSION, alg_name, alg, random_state)
+            for alg, alg_name in (
                 (RandomForestRegressor, "RFR"),
                 (XGBRegressor, "XGBR"),
+            ) for random_state in ([None], [1, 42], [42, 42])
+        ] + [
+            (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None])
+            for alg, alg_name in (
+                (PLSRegression, "PLSR"),
+                (SVR, "SVR"),
                 (KNeighborsRegressor, "KNNR"),
             )
         ]
     )
-    def testRegressionBasicFit(self, _, task, model_name, model_class):
+    def testRegressionBasicFit(self, _, task, model_name, model_class, random_state):
         """Test model training for regression models."""
         if model_name not in ["SVR", "PLSR"]:
             parameters = {"n_jobs": N_CPUS}
@@ -266,17 +380,82 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
+            random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
-        self.predictorTest(predictor)
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=f"{model_name}_{task}",
+                alg=model_class,
+                dataset=dataset,
+                parameters=parameters,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = SklearnModel(
+                name=f"{model_name}_{task}", base_dir=model.baseDir
+            )
+            self.predictorTest(
+                predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+
+    def testPLSRegressionSummaryWithSeed(self):
+        """Test model training for regression models."""
+        task = TargetTasks.REGRESSION
+        model_name = "PLSR"
+        model_class = PLSRegression
+        parameters = None
+        dataset = self.createLargeTestDataSet(
+            target_props=[{
+                "name": "CL",
+                "task": task
+            }],
+            preparation_settings=self.getDefaultPrep(),
+        )
+        model = self.getModel(
+            name=f"{model_name}_{task}",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters,
+        )
+        self.fitTest(model)
+        expected_summary = self.createCorrelationSummary(model)
+
+        # Generate summary again, check that the result is identical
+        model = self.getModel(
+            name=f"{model_name}_{task}",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters,
+        )
+        self.fitTest(model)
+        summary = self.createCorrelationSummary(model)
+
+        self.assertListEqual(summary["ModelName"], expected_summary["ModelName"])
+        self.assertListEqual(summary["R2"], expected_summary["R2"])
+        self.assertListEqual(summary["RMSE"], expected_summary["RMSE"])
+        self.assertListEqual(summary["Set"], expected_summary["Set"])
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, th, alg_name, alg) for alg, alg_name in (
-                (SVC, "SVC"),
+            (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
+            for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
+            ) for task, th in (
+                (TargetTasks.SINGLECLASS, [6.5]),
+                (TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
+            ) for random_state in ([None], [1, 42], [42, 42])
+        ] + [
+            (f"{alg_name}_{task}", task, th, alg_name, alg, [None])
+            for alg, alg_name in (
+                (SVC, "SVC"),
                 (KNeighborsClassifier, "KNNC"),
                 (GaussianNB, "NB"),
             ) for task, th in (
@@ -285,7 +464,9 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
         ]
     )
-    def testClassificationBasicFit(self, _, task, th, model_name, model_class):
+    def testClassificationBasicFit(
+        self, _, task, th, model_name, model_class, random_state
+    ):
         """Test model training for classification models."""
         if model_name not in ["NB", "SVC"]:
             parameters = {"n_jobs": N_CPUS}
@@ -313,20 +494,81 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
+            random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
-        self.predictorTest(predictor)
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=f"{model_name}_{task}",
+                alg=model_class,
+                dataset=dataset,
+                parameters=parameters,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = SklearnModel(
+                name=f"{model_name}_{task}", base_dir=model.baseDir
+            )
+            self.predictorTest(
+                predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+
+    def testRandomForestClassifierFitWithSeed(self):
+        parameters = {
+            "n_jobs": N_CPUS,
+        }
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.SINGLECLASS,
+                "th": [6.5]
+            }],
+            preparation_settings=self.getDefaultPrep(),
+        )
+        # test classifier
+        # initialize model for training from class
+        model = self.getModel(
+            name=f"RFC_{TargetTasks.SINGLECLASS}",
+            alg=RandomForestClassifier,
+            dataset=dataset,
+            parameters=parameters,
+        )
+        self.fitTest(model)
+        expected_summary = self.createMetricsSummary(model)
+
+        # Generate summary again, check that the result is identical
+        model = self.getModel(
+            name=f"RFC_{TargetTasks.SINGLECLASS}",
+            alg=RandomForestClassifier,
+            dataset=dataset,
+            parameters=parameters,
+        )
+        self.fitTest(model)
+        summary = self.createMetricsSummary(model)
+
+        self.assertListEqual(summary["Metric"], expected_summary["Metric"])
+        self.assertListEqual(summary["Model"], expected_summary["Model"])
+        self.assertListEqual(summary["TestSet"], expected_summary["TestSet"])
+        self.assertListEqual(summary["Value"], expected_summary["Value"])
 
     @parameterized.expand(
         [
-            (alg_name, alg_name, alg) for alg, alg_name in (
-                (RandomForestRegressor, "RFR"),
-                (KNeighborsRegressor, "KNNR"),
-            )
+            (alg_name, alg_name, alg, random_state)
+            for alg, alg_name in ((RandomForestRegressor, "RFR"), )
+            for random_state in ([None], [1, 42], [42, 42])
+        ] + [
+            (alg_name, alg_name, alg, [None])
+            for alg, alg_name in ((KNeighborsRegressor, "KNNR"), )
         ]
     )
-    def testRegressionMultiTaskFit(self, _, model_name, model_class):
+    def testRegressionMultiTaskFit(self, _, model_name, model_class, random_state):
         """Test model training for multitask regression models."""
         # initialize dataset
         dataset = self.createLargeTestDataSet(
@@ -349,22 +591,42 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name=f"{model_name}_multitask_regression",
             alg=model_class,
             dataset=dataset,
+            random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = SklearnModel(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
-        self.predictorTest(predictor)
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        if random_state[0] is not None and model_name in ["RFR"]:
+            model = self.getModel(
+                name=f"{model_name}_multitask_regression",
+                alg=model_class,
+                dataset=dataset,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = SklearnModel(
+                name=f"{model_name}_multitask_regression", base_dir=model.baseDir
+            )
+            self.predictorTest(
+                predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
 
     @parameterized.expand(
         [
-            (alg_name, alg_name, alg) for alg, alg_name in (
-                (RandomForestClassifier, "RFC"),
-                (KNeighborsClassifier, "KNNC"),
-            )
+            (alg_name, alg_name, alg, random_state)
+            for alg, alg_name in ((RandomForestClassifier, "RFC"), )
+            for random_state in ([None], [1, 42], [42, 42])
+        ] + [
+            (alg_name, alg_name, alg, [None])
+            for alg, alg_name in ((KNeighborsClassifier, "KNNC"), )
         ]
     )
-    def testClassificationMultiTaskFit(self, _, model_name, model_class):
+    def testClassificationMultiTaskFit(self, _, model_name, model_class, random_state):
         """Test model training for multitask classification models."""
         if model_name not in ["NB", "SVC"]:
             parameters = {"n_jobs": N_CPUS}
@@ -397,12 +659,31 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg=model_class,
             dataset=dataset,
             parameters=parameters,
+            random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = SklearnModel(
             name=f"{model_name}_multitask_classification", base_dir=model.baseDir
         )
-        self.predictorTest(predictor)
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=f"{model_name}_multitask_classification",
+                alg=model_class,
+                dataset=dataset,
+                parameters=parameters,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = SklearnModel(
+                name=f"{model_name}_multitask_classification", base_dir=model.baseDir
+            )
+            self.predictorTest(
+                predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
 
 
 class TestMetrics(TestCase):

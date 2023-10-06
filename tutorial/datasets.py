@@ -9,7 +9,7 @@ from qsprpred.data.sources.papyrus import Papyrus
 from qsprpred.models.tasks import TargetTasks
 
 
-def A2AR(data_dir="data"):
+def A2AR(data_dir="data", random_state=None):
     """A classification dataset that contains activity data on the adenosine A2A
     receptor loaded from the Papyrus database using the built-in Papyrus wrapper.
 
@@ -36,18 +36,20 @@ def A2AR(data_dir="data"):
 
     print(f"Number of samples loaded: {len(dataset.getDF())}")
     return QSPRDataset.fromMolTable(
-        dataset, [
+        dataset,
+        [
             {
                 "name": "pchembl_value_Median",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [6.5]
+                "th": [6.5],
             }
         ],
-        overwrite=True
+        overwrite=True,
+        random_state=random_state,
     )
 
 
-def Parkinsons(singletask=True):
+def Parkinsons(singletask=True, random_state=None):
     """Parkinson's disease dataset that contains data for multiple targets related to
     the disease.
 
@@ -70,18 +72,36 @@ def Parkinsons(singletask=True):
     # combine uniprot accessions of same protein
     df = df.loc[df["accession"].isin(
         [
-            "P14867", "P31644", "P34903", "P47869", "P48169", "Q16445", "O15399",
-            "O60391", "Q05586", "Q12879", "Q13224", "Q14957", "Q8TCU5", "Q14643",
-            "O00222", "O15303", "P41594", "Q13255", "Q14416", "Q14831", "Q14832",
-            "Q14833"
+            "P14867",
+            "P31644",
+            "P34903",
+            "P47869",
+            "P48169",
+            "Q16445",
+            "O15399",
+            "O60391",
+            "Q05586",
+            "Q12879",
+            "Q13224",
+            "Q14957",
+            "Q8TCU5",
+            "Q14643",
+            "O00222",
+            "O15303",
+            "P41594",
+            "Q13255",
+            "Q14416",
+            "Q14831",
+            "Q14832",
+            "Q14833",
         ]
     )]
     df.loc[df["accession"].
            isin(["P14867", "P31644", "P34903", "P47869", "P48169", "Q16445"]),
-           "accession"] = "GABAAalpha"
+           "accession", ] = "GABAAalpha"
     df.loc[df["accession"].
            isin(["O15399", "O60391", "Q05586", "Q12879", "Q13224", "Q14957", "Q8TCU5"]),
-           "accession"] = "NMDA"
+           "accession", ] = "NMDA"
 
     # drop columns without pchembl value
     df = df.dropna(subset=["pchembl_value_Mean"])
@@ -106,15 +126,22 @@ def Parkinsons(singletask=True):
                 "name": "GABAAalpha",
                 "task": TargetTasks.REGRESSION
             }],
-            store_dir="qspr/data"
+            store_dir="qspr/data",
+            random_state=random_state,
         )
 
     else:
         target_props = []
         # for target in list of mGLU receptors
         for target in [
-            "O00222", "O15303", "P41594", "Q13255", "Q14416", "Q14831", "Q14832",
-            "Q14833"
+            "O00222",
+            "O15303",
+            "P41594",
+            "Q13255",
+            "Q14416",
+            "Q14831",
+            "Q14832",
+            "Q14833",
         ]:
             target_props.append({"name": target, "task": TargetTasks.REGRESSION})
 
@@ -125,11 +152,12 @@ def Parkinsons(singletask=True):
             target_props=target_props,
             store_dir="qspr/data",
             target_imputer=SimpleImputer(strategy="mean"),
-            overwrite=True
+            overwrite=True,
+            random_state=random_state,
         )
 
 
-def AR_PCM(data_dir="data"):
+def AR_PCM(data_dir="data", random_state=None):
     """
     A classification dataset that contains activity data for a PCM approach to model
     activity for a selection of adenosine receptors. The function recreates steps from
@@ -186,9 +214,10 @@ def AR_PCM(data_dir="data"):
             {
                 "name": "pchembl_value_Median",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [6.5]
+                "th": [6.5],
             }
         ],
         protein_col="accession",
         protein_seq_provider=sequence_provider,
+        random_state=random_state,
     )

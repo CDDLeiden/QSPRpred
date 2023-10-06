@@ -37,6 +37,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         alg: Type | None = None,
         dataset: QSPRDataset = None,
         parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Initialize model with data set.
 
@@ -46,6 +47,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg: Algorithm to use.
             dataset: Data set to use.
             parameters: Parameters to use.
+            random_state: Random seed to use for random operations.
         """
         return DNNModel(
             base_dir=base_dir,
@@ -56,11 +58,12 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             gpus=GPUS,
             patience=3,
             tol=0.02,
+            random_state=random_state,
         )
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name, alg, th)
+            (f"{alg_name}_{task}", task, alg_name, alg, th, [None])
             for alg, alg_name, task, th in (
                 (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
                 (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
@@ -71,10 +74,21 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     [0, 1, 10, 1100],
                 ),
             )
+        ] + [
+            (f"{alg_name}_{task}", task, alg_name, alg, th, random_state)
+            for alg, alg_name, task, th in
+            ((STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None), )
+            for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testSingleTaskModel(
-        self, _, task: TargetTasks, alg_name: str, alg: Type, th: float
+        self,
+        _,
+        task: TargetTasks,
+        alg_name: str,
+        alg: Type,
+        th: float,
+        random_state: int | None,
     ):
         """Test the DNNModel model in one configuration.
 
@@ -83,6 +97,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             alg_name: Name of the algorithm.
             alg: Algorithm to use.
             th: Threshold to use for classification models.
+            random_state: Seed to be used for random operations.
         """
         # initialize dataset
         dataset = self.createLargeTestDataSet(
@@ -102,10 +117,32 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name=f"{alg_name}",
             alg=alg,
             dataset=dataset,
+            random_state=random_state[0],
         )
         self.fitTest(model)
-        predictor = DNNModel(name=alg_name, base_dir=model.baseDir)
-        self.predictorTest(predictor)
+        predictor = DNNModel(
+            name=alg_name, base_dir=model.baseDir, random_state=random_state[0]
+        )
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        if random_state[0] is not None:
+            model.cleanFiles()
+            model = self.getModel(
+                base_dir=self.generatedModelsPath,
+                name=f"{alg_name}",
+                alg=alg,
+                dataset=dataset,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = DNNModel(
+                name=alg_name, base_dir=model.baseDir, random_state=random_state[1]
+            )
+            self.predictorTest(
+                predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
 
 
 class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
