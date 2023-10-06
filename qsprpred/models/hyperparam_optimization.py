@@ -129,12 +129,10 @@ class OptunaOptimization(HyperParameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
-        self.monitor.on_optimization_start(
-            model, self.config
-        )
-
-        self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
         import optuna
+
+        self.monitor.on_optimization_start(model, self.config)
+        self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
 
         logger.info(
             "Bayesian optimization can take a while "

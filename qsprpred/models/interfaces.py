@@ -1070,27 +1070,13 @@ class ModelAssessor(ABC):
                 list of tuples containing the true values and the predictions, where
                 each tuple corresponds a set of predictions such as different folds.
         """
-        monitor = monitor or self.monitor
 
-    def savePredictionsToFile(
-        self,
+    def predictionsToDataFrame(self,
         model: QSPRModel,
         y: np.array,
         predictions: np.ndarray | list[np.ndarray],
         index: pd.Series,
-        file_suffix: str,
-        extra_columns: dict[str, np.ndarray] | None = None,
-    ):
-        """Save predictions to file.
-
-        Args:
-            model (QSPRModel): model to evaluate
-            y (np.array): target values
-            predictions (np.ndarray | list[np.ndarray]): predictions
-            index (pd.Series): index of the data set
-            file_suffix (str): suffix to add to the file name
-            extra_columns (dict[str, np.ndarray]): extra columns to add to the output
-        """
+        extra_columns: dict[str, np.ndarray] | None = None) -> pd.DataFrame:
         # Create dataframe with true values
         df_out = pd.DataFrame(
             y.values, columns=y.add_suffix("_Label").columns, index=index
@@ -1116,6 +1102,30 @@ class ModelAssessor(ABC):
         if extra_columns is not None:
             for col_name, col_values in extra_columns.items():
                 df_out[col_name] = col_values
+        return df_out
+
+    def savePredictionsToFile(
+        self,
+        model: QSPRModel,
+        y: np.array,
+        predictions: np.ndarray | list[np.ndarray],
+        index: pd.Series,
+        file_suffix: str,
+        extra_columns: dict[str, np.ndarray] | None = None,
+    ):
+        """Save predictions to file.
+
+        Args:
+            model (QSPRModel): model to evaluate
+            y (np.array): target values
+            predictions (np.ndarray | list[np.ndarray]): predictions
+            index (pd.Series): index of the data set
+            file_suffix (str): suffix to add to the file name
+            extra_columns (dict[str, np.ndarray]): extra columns to add to the output
+        """
+        df_out = self.predictionsToDataFrame(
+            model, y, predictions, index, extra_columns
+        )
         df_out.to_csv(f"{model.outPrefix}.{file_suffix}.tsv", sep="\t")
 
 class HyperParameterOptimization(ABC):
