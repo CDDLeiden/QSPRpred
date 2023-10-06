@@ -15,7 +15,7 @@ from ..data import PCMDataSet
 
 class PCMSplit(DataSplit):
     """
-    Splits a dataset into train and test set such that the subset are balanced with
+    Splits a dataset into train and test set such that the subsets are balanced with
     respect to each of the protein targets.
 
     This is done with https://github.com/sohviluukkonen/gbmt-splits, linear programming
@@ -67,7 +67,7 @@ class PCMSplit(DataSplit):
         assert (
             len(ds.targetProperties) == 1
         ), "PCMSplit only works for single-task datasets!"
-        # TODO: Add support for multi-target PCM datasets: creta a multi-task dataset
+        # TODO: Add support for multi-target (create a multi-task PCM dataset)
         # with all target-task combinations as different columns and split that
         # dataset with the given splitter
 

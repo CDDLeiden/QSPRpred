@@ -162,7 +162,7 @@ class DataSplit(ABC, DataSetDependant):
     Attributes:
         dataset (MoleculeDataSet): The dataset to split.
     """
-    def __init__(self, dataset: MoleculeDataSet) -> None:
+    def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
         super().__init__(dataset)
 
     @abstractmethod

@@ -75,6 +75,7 @@ class ManualSplit(DataSplit):
     Raises:
         ValueError: if there are more values in splitcol than trainval and testval
     """
+
     def __init__(self, splitcol: pd.Series, trainval: str, testval: str) -> None:
         """Initialize the ManualSplit object with the splitcol, trainval and testval
         attributes.
@@ -87,6 +88,7 @@ class ManualSplit(DataSplit):
         Raises:
             ValueError: if there are more values in splitcol than trainval and testval
         """
+        super().__init__()
         self.splitCol = splitcol.reset_index(drop=True)
         self.trainVal = trainval
         self.testVal = testval
@@ -124,11 +126,9 @@ class TemporalSplit(DataSplit):
         timeSplit(float): time point after which sample to test set
         timeCol (str): name of the column within the dataframe with timepoints
     """
+
     def __init__(
-        self,
-        timesplit: float,
-        timeprop: str,
-        dataset: QSPRDataset | None = None
+        self, timesplit: float, timeprop: str, dataset: QSPRDataset | None = None
     ) -> None:
         """Initialize a TemporalSplit object.
 
@@ -150,7 +150,6 @@ class TemporalSplit(DataSplit):
             (train_indices, test_indices) where the indices are the row indices of the
             input data matrix
         """
-
         # Get dataset, dataframe and tasks
         ds = self.getDataSet()
         df = ds.getDF().copy()
@@ -172,7 +171,6 @@ class TemporalSplit(DataSplit):
         mask = df[self.timeCol] > self.timeSplit
         mask = mask.values
         test = indices[mask]
-
         # Check if there are any test samples for each task
         for task in task_names:
             if len(df[mask][task]) == 0:
@@ -202,6 +200,7 @@ class GBMTDataSplit(DataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset = None,
@@ -257,7 +256,9 @@ class GBMTDataSplit(DataSplit):
             {
                 df.loc[df.QSPRID == qspridx][ds.smilesCol].values[0]: 1
                 for qspridx in self.customTestList
-            } if self.customTestList else None
+            }
+            if self.customTestList
+            else None
         )
 
         print(self.split_kwargs)
@@ -316,7 +317,10 @@ class GBMTRandomSplit(GBMTDataSplit):
     ) -> None:
         seed = seed or (dataset.randomState if dataset is not None else None)
         if seed is None:
-            logger.warning("No random state supplied, and could not find random state on the dataset.")
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
 
         super().__init__(
             dataset,
@@ -341,6 +345,7 @@ class ScaffoldSplit(GBMTDataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset | None = None,
@@ -375,6 +380,7 @@ class ClusterSplit(GBMTDataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset = None,
@@ -386,11 +392,15 @@ class ClusterSplit(GBMTDataSplit):
     ) -> None:
         seed = seed or (dataset.randomState if dataset is not None else None)
         if seed is None:
-            logger.warning("No random state supplied, and could not find random state on the dataset.")
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
 
         clustering = (
             clustering
-            if clustering is not None else FPSimilarityMaxMinClusters(seed=seed)
+            if clustering is not None
+            else FPSimilarityMaxMinClusters(seed=seed)
         )
         super().__init__(
             dataset,
