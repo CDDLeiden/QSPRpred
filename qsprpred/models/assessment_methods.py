@@ -145,7 +145,7 @@ class TestSetAssessor(ModelAssessor):
         model: QSPRModel,
         save: bool = True,
         parameters: dict | None = None,
-        monitor: AssessorMonitor = NullAssessorMonitor(),
+        monitor: AssessorMonitor | None = None,
         **kwargs,
     ):
         """Make predictions for independent test set.
@@ -167,6 +167,7 @@ class TestSetAssessor(ModelAssessor):
         model.checkForData()
         X, X_ind = model.data.getFeatures()
         y, y_ind = model.data.getTargetPropertiesValues()
+        monitor.on_assessment_start(model)
         # prepare arrays to store molecule ids and predictions
         inds_ids = X_ind.index.to_numpy()
         if not model.task.isRegression() and self.useProba:
@@ -174,13 +175,16 @@ class TestSetAssessor(ModelAssessor):
                 np.zeros((y_ind.shape[0], prop.nClasses))
                 for prop in model.targetProperties
             ]
+        monitor.on_fold_start(
+                fold=1, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind
+            )
         # fit model
         ind_estimator = model.loadEstimator(evalparams)
         ind_estimator = model.fit(X, y, ind_estimator, mode=self.mode, **kwargs)
         # if independent test set is available, predict on it
         if X_ind.shape[0] > 0:
             if model.task.isRegression() or not self.useProba:
-                inds = model.predict(X_ind, ind_estimator)
+                inds = preds = model.predict(X_ind, ind_estimator)
             else:
                 preds = model.predictProba(X_ind, ind_estimator)
                 for idx in range(model.nTargets):
@@ -190,9 +194,18 @@ class TestSetAssessor(ModelAssessor):
                 "No independent test set available. "
                 "Skipping prediction on independent test set."
             )
+        index_name = model.data.getDF().index.name
+        ind_index = pd.Index(inds_ids, name=index_name)
+        monitor.on_fold_end(
+                ind_estimator,
+                self.predictionsToDataFrame(
+                    model,
+                    y_ind,
+                    preds,
+                    ind_index
+                ),
+            )
         # predict values for independent test set and save results
         if save:
-            index_name = model.data.getDF().index.name
-            ind_index = pd.Index(inds_ids, name=index_name)
             self.savePredictionsToFile(model, y_ind, inds, ind_index, "ind")
         return [(y_ind, inds)]
