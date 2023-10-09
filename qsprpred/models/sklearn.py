@@ -17,6 +17,7 @@ from ..data.data import QSPRDataset
 from ..logs import logger
 from .interfaces import QSPRModel
 from .tasks import ModelTasks
+from .monitors import NullFitMonitor
 
 
 class SklearnModel(QSPRModel):
@@ -127,8 +128,10 @@ class SklearnModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
+        monitor: Any = NullFitMonitor(),
         estimator: Any = None,
         mode: Any = None,
+        **kwargs
     ):
         """See `QSPRModel.fit`."""
         estimator = self.estimator if estimator is None else estimator

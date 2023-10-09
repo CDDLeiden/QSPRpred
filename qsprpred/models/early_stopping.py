@@ -171,6 +171,7 @@ def early_stopping(func: Callable) -> Callable:
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
+        monitor: "FitMonitor",
         estimator: Any | None = None,
         mode: EarlyStoppingMode | None = None,
         **kwargs,
@@ -181,6 +182,7 @@ def early_stopping(func: Callable) -> Callable:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
+            monitor (FitMonitor): monitor to use for fitting
             mode (EarlyStoppingMode): early stopping mode
             kwargs (dict): additional keyword arguments for the estimator's fit method
 
@@ -192,7 +194,7 @@ def early_stopping(func: Callable) -> Callable:
             " early stopping."
         )
         self.earlyStopping.mode = mode if mode is not None else self.earlyStopping.mode
-        estimator, best_epoch = func(self, X, y, estimator, mode, **kwargs)
+        estimator, best_epoch = func(self, X, y, monitor, estimator, mode, **kwargs)
         if self.earlyStopping.mode == EarlyStoppingMode.RECORDING:
             self.earlyStopping.recordEpochs(best_epoch + 1)  # +1 for 0-indexing
         return estimator

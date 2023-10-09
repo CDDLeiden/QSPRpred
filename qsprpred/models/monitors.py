@@ -12,18 +12,19 @@ from .interfaces import (
 
 class NullFitMonitor(FitMonitor):
     """Null monitor that does nothing."""
-    def on_fit_start(self, model: QSPRModel):
+    def on_fit_start(self, estimator: Any):
         """Called before the training has started.
 
         Args:
-            model (QSPRModel): model to train
+            estimator (Any): estimator to train
         """
 
-    def on_fit_end(self, model: QSPRModel):
+    def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
 
         Args:
-            model (QSPRModel): model to train
+            estimator (Any): estimator that was fitted
+            best_epoch (int | None): index of the best epoch
         """
 
     def on_epoch_start(self, epoch: int):
@@ -33,13 +34,13 @@ class NullFitMonitor(FitMonitor):
             epoch (int): index of the current epoch
         """
 
-    def on_epoch_end(self, epoch: int, score: float, predictions: np.ndarray):
+    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None):
         """Called after each epoch of the training.
 
         Args:
             epoch (int): index of the current epoch
-            score (float): score of the current epoch
-            predictions (np.ndarray): predictions of the current epoch
+            train_loss (float): loss of the current epoch
+            val_loss (float | None): validation loss of the current epoch
         """
 
     def on_batch_start(self, batch: int):
@@ -49,15 +50,14 @@ class NullFitMonitor(FitMonitor):
             batch (int): index of the current batch
         """
 
-    def on_batch_end(self, batch: int, score: float, predictions: np.ndarray):
+    def on_batch_end(self, batch: int, loss: float, predictions: np.ndarray):
         """Called after each batch of the training.
 
         Args:
             batch (int): index of the current batch
-            score (float): score of the current batch
+            loss (float): loss of the current batch
             predictions (np.ndarray): predictions of the current batch
         """
-
 
 class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
     """Null monitor that does nothing."""
@@ -108,12 +108,14 @@ class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
 
 class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
     """Null monitor that does nothing."""
-    def on_optimization_start(self, model: QSPRModel, config: dict):
+    def on_optimization_start(
+        self, model: QSPRModel, config: dict, optimization_type: str
+    ):
         """Called before the hyperparameter optimization has started.
 
         Args:
-            model (QSPRModel): model to optimize
             config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of optimization
         """
 
     def on_optimization_end(self, best_score: float, best_parameters: dict):
@@ -192,9 +194,15 @@ class PrintMonitor(HyperParameterOptimizationMonitor):
         print("Predictions: %s" % predictions)
 
 
-class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
-    """Monitor assessment to weights and biases."""
-    def __init__(self, project_name: str):
+class WandBAssesmentMonitor(AssessorMonitor):
+    """Monitor assessment and fit to weights and biases."""
+    def __init__(self, project_name: str, **kwargs):
+        """Monitor assessment to weights and biases.
+
+        Args:
+            project_name (str): name of the project to log to
+            kwargs: additional keyword arguments for wandb.init
+        """
         try:
             import wandb
         except ImportError:
@@ -204,6 +212,7 @@ class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
         wandb.login()
 
         self.project_name = project_name
+        self.kwargs = kwargs
         self.num_iterations = 0
 
     def on_assessment_start(self, model: QSPRModel):
@@ -239,17 +248,19 @@ class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
             y_test (np.array): test targets of the current fold
         """
         config = {"fold": fold, "model": self.model.name}
-        if hasattr(self, "params"):
+        # add hyperparameter optimization parameters if available
+        if hasattr(self, "optimization_type"):
+            config["optimization_type"] = self.optimization_type
             config.update(self.params)
-        if hasattr(self, "num_iterations"):
             config["hyperParamOpt_iteration"] = self.num_iterations
-        if hasattr(self, "wandb_runids"):
             new_runid = self.wandb.util.generate_id()
             self.wandb_runids.append(new_runid)
+        else:
+            config["optimization_type"] = None
 
         group = (
-            f"{self.model.name}_HyperParamOpt_{self.num_iterations}"
-            if hasattr(self, "num_iterations") else f"{self.model.name}"
+            f"{self.model.name}_{self.optimization_type}_{self.num_iterations}"
+            if hasattr(self, "optimization_type") else f"{self.model.name}"
         )
         name = f"{group}_Assessment_{fold}"
 
@@ -260,6 +271,7 @@ class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
             group=group,
             dir=f"{self.model.outDir}",
             id=new_runid if hasattr(self, "wandb_runids") else None,
+            **self.kwargs,
         )
         self.fold = fold
 
@@ -269,9 +281,9 @@ class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
         """Called after each fold of the assessment.
 
         Args:
-            fitted_estimator (Any |tuple[Any, int]): 
+            fitted_estimator (Any |tuple[Any, int]):
                 fitted estimator of the current fold
-            predictions (np.ndarray): 
+            predictions (np.ndarray):
                 predictions of the current fold
         """
         self.wandb.log(
@@ -284,9 +296,65 @@ class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
         )
         self.wandb.finish()
 
+    def on_fit_start(self, estimator: Any):
+        """Called before the training has started.
+
+        Args:
+            estimator (Any): estimator to train
+        """
+
+    def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
+        """Called after the training has finished.
+
+        Args:
+            estimator (Any): estimator that was fitted
+            best_epoch (int | None): index of the best epoch
+        """
+
+    def on_epoch_start(self, epoch: int):
+        """Called before each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+        """
+        self.epochnr = epoch
+
+    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None):
+        """Called after each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+            train_loss (float): loss of the current epoch
+            val_loss (float | None): validation loss of the current epoch
+        """
+        self.wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
+
+    def on_batch_start(self, batch: int):
+        """Called before each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+        """
+
+    def on_batch_end(self, batch: int, loss: float, predictions: np.ndarray):
+        """Called after each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+            loss (float): loss of the current batch
+            predictions (np.ndarray): predictions of the current batch
+        """
+        self.wandb.log({"batch": batch, "loss": loss})
+
 
 class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
-    def __init__(self, project_name: str):
+    def __init__(self, project_name: str, **kwargs):
+        """Monitor hyperparameter optimization to weights and biases.
+
+        Args:
+            project_name (str): name of the project to log to
+            kwargs: additional keyword arguments for wandb.init
+        """
         try:
             import wandb
         except ImportError:
@@ -296,14 +364,19 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
         wandb.login()
 
         self.project_name = project_name
+        self.kwargs = kwargs
         self.num_iterations = 0
 
-    def on_optimization_start(self, model: QSPRModel, config: dict):
+    def on_optimization_start(
+        self, model: QSPRModel, config: dict, optimization_type: str
+    ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of optimization
         """
+        self.optimization_type = optimization_type
         self.model = model
 
     def on_optimization_end(self, best_score: float, best_parameters: dict):
@@ -335,7 +408,9 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
             predictions (list[np.ndarray]): predictions of the current iteration
         """
         for i, runid in enumerate(self.wandb_runids):
-            self.wandb.init(id=runid, resume="must", project=self.project_name)
+            self.wandb.init(
+                id=runid, resume="must", project=self.project_name, **self.kwargs
+            )
             self.wandb.run.summary["Run scores"] = {
                 "fold_score": scores[i],
                 "aggregated_score": score,

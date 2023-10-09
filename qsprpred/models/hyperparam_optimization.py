@@ -132,7 +132,7 @@ class OptunaOptimization(HyperParameterOptimization):
         """
         import optuna
 
-        self.monitor.on_optimization_start(model, self.config)
+        self.monitor.on_optimization_start(model, self.config, self.__class__.__name__)
         self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
 
         logger.info(

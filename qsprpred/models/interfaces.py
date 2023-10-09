@@ -803,6 +803,7 @@ class QSPRModel(ABC):
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            monitor (FitMonitor): monitor for the fitting process
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
             kwargs: additional arguments to pass to the fit method of the estimator
@@ -907,19 +908,20 @@ class BaseMonitor:
 class FitMonitor(ABC, BaseMonitor):
     """Base class for monitoring the training of a model."""
     @abstractmethod
-    def on_fit_start(self, model: QSPRModel):
+    def on_fit_start(self, estimator: Any):
         """Called before the training has started.
 
         Args:
-            model (QSPRModel): model to train
+            estimator (Any): estimator to train
         """
 
     @abstractmethod
-    def on_fit_end(self, model: QSPRModel):
+    def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
 
         Args:
-            model (QSPRModel): model to train
+            estimator (Any): estimator that was fitted
+            best_epoch (int | None): index of the best epoch
         """
 
     @abstractmethod
@@ -931,13 +933,13 @@ class FitMonitor(ABC, BaseMonitor):
         """
 
     @abstractmethod
-    def on_epoch_end(self, epoch: int, score: float, predictions: np.ndarray):
+    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None):
         """Called after each epoch of the training.
 
         Args:
             epoch (int): index of the current epoch
-            score (float): score of the current epoch
-            predictions (np.ndarray): predictions of the current epoch
+            train_loss (float): loss of the current epoch
+            val_loss (float | None): validation loss of the current epoch
         """
 
     @abstractmethod
@@ -949,12 +951,12 @@ class FitMonitor(ABC, BaseMonitor):
         """
 
     @abstractmethod
-    def on_batch_end(self, batch: int, score: float, predictions: np.ndarray):
+    def on_batch_end(self, batch: int, loss: float, predictions: np.ndarray):
         """Called after each batch of the training.
 
         Args:
             batch (int): index of the current batch
-            score (float): score of the current batch
+            loss (float): loss of the current batch
             predictions (np.ndarray): predictions of the current batch
         """
 
@@ -1011,12 +1013,15 @@ class AssessorMonitor(FitMonitor):
 class HyperParameterOptimizationMonitor(AssessorMonitor):
     """Base class for monitoring the hyperparameter optimization of a model."""
     @abstractmethod
-    def on_optimization_start(self, model: QSPRModel, config: dict):
+    def on_optimization_start(
+        self, model: QSPRModel, config: dict, optimization_type: str
+    ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
             config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of hyperparameter optimization
         """
 
     @abstractmethod

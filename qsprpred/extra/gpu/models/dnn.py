@@ -16,8 +16,9 @@ from ....data.data import QSPRDataset
 from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import QSPRModel
+from ....models.interfaces import QSPRModel, FitMonitor
 from ....models.tasks import ModelTasks
+from ....models.monitors import NullFitMonitor
 
 
 class DNNModel(QSPRModel):
@@ -229,6 +230,7 @@ class DNNModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
+        monitor: FitMonitor = NullFitMonitor(),
         estimator: Any | None = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         **kwargs,
@@ -238,6 +240,7 @@ class DNNModel(QSPRModel):
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            monitor (FitMonitor): fit monitor instance
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
             kwargs (dict): additional keyword arguments for the estimator's fit method
@@ -249,16 +252,21 @@ class DNNModel(QSPRModel):
         """
         estimator = self.estimator if estimator is None else estimator
         X, y = self.convertToNumpy(X, y)
+        monitor.on_fit_start(estimator)
 
         if self.earlyStopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
             X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
-            return estimator.fit(X_train, y_train, X_val, y_val, **kwargs)
+            estimator_fit = estimator.fit(X_train, y_train, X_val, y_val, monitor, **kwargs)
+            monitor.on_fit_end(estimator_fit[0], estimator_fit[1])
+            return estimator_fit
 
         # set fixed number of epochs if early stopping is not used
         estimator.n_epochs = self.earlyStopping.getEpochs()
-        return estimator.fit(X, y, **kwargs)
+        estimator_fit = estimator.fit(X, y, **kwargs)
+        monitor.on_fit_end(estimator_fit)
+        return estimator_fit
 
     def predict(
         self,

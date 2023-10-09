@@ -14,6 +14,8 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS
 from ....logs import logger
+from ....models.interfaces import FitMonitor
+from ....models.monitors import NullFitMonitor
 
 
 class Base(nn.Module):
@@ -93,6 +95,7 @@ class Base(nn.Module):
         y_train,
         X_valid=None,
         y_valid=None,
+        monitor: FitMonitor = NullFitMonitor(),
         log=False,
         log_prefix=None
     ) -> int:
@@ -113,6 +116,8 @@ class Base(nn.Module):
             y_valid (np.ndarray or pd.Dataframe):
                 validation target (m X l), m is the No. of samples, l is
                 the No. of classes or tasks
+            monitor (FitMonitor):
+                monitor to use for training
             log (bool):
                 whether to log the training process to {self.log_prefix}.log
             log_prefix (str):
@@ -143,12 +148,14 @@ class Base(nn.Module):
         if log:
             log_file = open(log_prefix + ".log", "a")
         for epoch in range(self.n_epochs):
+            monitor.on_epoch_start(epoch)
             t0 = time.time()
             loss = None
             # decrease learning rate over the epochs
             for param_group in optimizer.param_groups:
                 param_group["lr"] = self.lr * (1 - 1 / self.n_epochs)**(epoch * 10)
             for i, (Xb, yb) in enumerate(train_loader):
+                monitor.on_batch_start(i)
                 # Batch of target tenor and label tensor
                 Xb, yb = Xb.to(self.device), yb.to(self.device)
                 optimizer.zero_grad()
@@ -167,6 +174,7 @@ class Base(nn.Module):
                     loss = self.criterion(y_, yb)
                 loss.backward()
                 optimizer.step()
+                monitor.on_batch_end(i, loss, y_)
             if patience == -1:
                 if log:
                     print(
@@ -174,6 +182,7 @@ class Base(nn.Module):
                         (epoch, self.n_epochs, time.time() - t0, loss.item()),
                         file=log_file,
                     )
+                monitor.on_epoch_end(epoch, loss.item())
             else:
                 # loss value on validation set based on which optimal model is saved.
                 loss_valid = self.evaluate(valid_loader)
@@ -205,6 +214,7 @@ class Base(nn.Module):
                         )
                     if epoch - last_save > patience:  # early stop
                         break
+                monitor.on_epoch_end(epoch, loss.item(), loss_valid)
         if patience == -1:
             best_weights = self.state_dict()
         if log:
