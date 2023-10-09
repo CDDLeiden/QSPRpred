@@ -1054,7 +1054,9 @@ class ModelAssessor(ABC):
     """Base class for assessment methods.
 
     Attributes:
+        monitor (AssessorMonitor): monitor to track the assessment
         useProba (bool): use probabilities for classification models
+        mode (EarlyStoppingMode): early stopping mode for fitting
     """
     def __init__(
         self,
@@ -1065,6 +1067,7 @@ class ModelAssessor(ABC):
         """Initialize the evaluation method class.
 
         Args:
+            monitor (AssessorMonitor): monitor to track the evaluation
             use_proba (bool): use probabilities for classification models
             mode (EarlyStoppingMode): early stopping mode for fitting
         """

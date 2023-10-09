@@ -16,6 +16,8 @@ class CrossValAssessor(ModelAssessor):
 
     Attributes:
         useProba (bool): use predictProba instead of predict for classification
+        monitor (AssessorMonitor): monitor to use for assessment
+        mode (EarlyStoppingMode): mode to use for early stopping
     """
     def __init__(
         self,
@@ -123,6 +125,21 @@ class CrossValAssessor(ModelAssessor):
 
 
 class TestSetAssessor(ModelAssessor):
+    """Assess a model on a test set.
+
+    Attributes:
+        useProba (bool): use predictProba instead of predict for classification
+        monitor (AssessorMonitor): monitor to use for assessment
+        mode (EarlyStoppingMode): mode to use for early stopping
+    """
+    def __init__(
+        self,
+        monitor: AssessorMonitor = NullAssessorMonitor(),
+        use_proba: bool = True,
+        mode: EarlyStoppingMode | None = None,
+    ):
+        super().__init__(monitor, use_proba, mode)
+
     def __call__(
         self,
         model: QSPRModel,
@@ -144,7 +161,7 @@ class TestSetAssessor(ModelAssessor):
         Returns:
             float | np.ndarray: predictions for evaluation
         """
-        super().__call__(model, monitor, **kwargs)  # set monitor
+        monitor = monitor or self.monitor
         evalparams = model.parameters if parameters is None else parameters
         # check if data is available
         model.checkForData()

@@ -69,11 +69,12 @@ class OptunaOptimization(HyperParameterOptimization):
                 search space for bayesian optimization, keys are the parameter names,
                 values are lists with first element the type of the parameter and the
                 following elements the parameter bounds or values.
-            model_assessor (ModelAssessor): assessment method to use for the
-                                            optimization (default: CrossValAssessor)
-            score_aggregation (Callable): function to aggregate the scores of different
-                                          folds if the assessment method returns
-                                          multiple predictions
+            model_assessor (ModelAssessor):
+                assessment method to use for the optimization
+                (default: CrossValAssessor)
+            score_aggregation (Callable):
+                function to aggregate the scores of different folds if the assessment
+                method returns multiple predictions
             n_trials (int):
                 number of trials for bayes optimization
             n_jobs (int):
@@ -225,6 +226,7 @@ class GridSearchOptimization(HyperParameterOptimization):
         scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
         model_assessor: ModelAssessor = CrossValAssessor(),
+        monitor: HyperParameterOptimizationMonitor = NullMonitor(),
         score_aggregation: Callable = np.mean,
     ):
         """Initialize the class.
@@ -233,15 +235,19 @@ class GridSearchOptimization(HyperParameterOptimization):
             scoring (Union[str, Callable[[Iterable, Iterable], Iterable]]):
                 metric name from sklearn.metrics or user-defined scoring function.
             param_grid (dict):
-                dictionary with parameter names as keys and lists
-                of parameter settings to try as values
-            model_assessor (ModelAssessor): assessment method to use for the
-                                                  optimization
-            score_aggregation (Callable): function to aggregate the scores of different
-                                          folds if the assessment method returns
-                                          multiple predictions (default: np.mean)
+                dictionary with parameter names as keys and lists of parameter settings
+                to try as values
+            model_assessor (ModelAssessor):
+                assessment method to use for the optimization
+            monitor (HyperParameterOptimizationMonitor):
+                monitor for the optimization
+            score_aggregation (Callable):
+                function to aggregate the scores of different folds if the assessment
+                method returns multiple predictions (default: np.mean)
         """
-        super().__init__(scoring, param_grid, model_assessor, score_aggregation)
+        super().__init__(
+            scoring, param_grid, model_assessor, score_aggregation, monitor
+        )
 
     def optimize(self, model: QSPRModel, save_params: bool = True, **kwargs) -> dict:
         """Optimize the hyperparameters of the model.
