@@ -1,5 +1,7 @@
-import numpy as np
 from typing import Any
+
+import numpy as np
+
 from .interfaces import (
     AssessorMonitor,
     FitMonitor,
@@ -73,7 +75,14 @@ class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
             model (QSPRModel): model to assess
         """
 
-    def on_fold_start(self, fold: int, X_train: np.array, y_train: np.array, X_test: np.array, y_test: np.array):
+    def on_fold_start(
+        self,
+        fold: int,
+        X_train: np.array,
+        y_train: np.array,
+        X_test: np.array,
+        y_test: np.array,
+    ):
         """Called before each fold of the assessment.
 
         Args:
@@ -84,12 +93,16 @@ class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
             y_test (np.array): test targets of the current fold
         """
 
-    def on_fold_end(self, fitted_estimator: Any |tuple[Any, int], predictions: np.ndarray):
+    def on_fold_end(
+        self, fitted_estimator: Any | tuple[Any, int], predictions: np.ndarray
+    ):
         """Called after each fold of the assessment.
 
         Args:
-            fitted_estimator (Any |tuple[Any, int]): fitted estimator of the current fold
-            predictions (np.ndarray): predictions of the current fold
+            fitted_estimator (Any |tuple[Any, int]):
+                fitted estimator of the current fold
+            predictions (np.ndarray):
+                predictions of the current fold
         """
 
 
@@ -178,6 +191,7 @@ class PrintMonitor(HyperParameterOptimizationMonitor):
         print("Scores: %s" % scores)
         print("Predictions: %s" % predictions)
 
+
 class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
     """Monitor assessment to weights and biases."""
     def __init__(self, project_name: str):
@@ -207,7 +221,14 @@ class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
             model (QSPRModel): model to assess
         """
 
-    def on_fold_start(self, fold: int, X_train: np.array, y_train: np.array, X_test: np.array, y_test: np.array):
+    def on_fold_start(
+        self,
+        fold: int,
+        X_train: np.array,
+        y_train: np.array,
+        X_test: np.array,
+        y_test: np.array,
+    ):
         """Called before each fold of the assessment.
 
         Args:
@@ -226,7 +247,10 @@ class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
             new_runid = self.wandb.util.generate_id()
             self.wandb_runids.append(new_runid)
 
-        group = f"{self.model.name}_HyperParamOpt_{self.num_iterations}" if hasattr(self, "num_iterations") else f"{self.model.name}"
+        group = (
+            f"{self.model.name}_HyperParamOpt_{self.num_iterations}"
+            if hasattr(self, "num_iterations") else f"{self.model.name}"
+        )
         name = f"{group}_Assessment_{fold}"
 
         self.wandb.init(
@@ -239,15 +263,27 @@ class WandBAssesmentMonitor(AssessorMonitor, NullFitMonitor):
         )
         self.fold = fold
 
-    def on_fold_end(self, fitted_estimator: Any |tuple[Any, int], predictions: np.ndarray):
+    def on_fold_end(
+        self, fitted_estimator: Any | tuple[Any, int], predictions: np.ndarray
+    ):
         """Called after each fold of the assessment.
 
         Args:
-            fitted_estimator (Any |tuple[Any, int]): fitted estimator of the current fold
-            predictions (np.ndarray): predictions of the current fold
+            fitted_estimator (Any |tuple[Any, int]): 
+                fitted estimator of the current fold
+            predictions (np.ndarray): 
+                predictions of the current fold
         """
-        self.wandb.log({"Test Results": self.wandb.Table(data=predictions.values, columns=list(predictions.columns))})
+        self.wandb.log(
+            {
+                "Test Results":
+                    self.wandb.Table(
+                        data=predictions.values, columns=list(predictions.columns)
+                    )
+            }
+        )
         self.wandb.finish()
+
 
 class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
     def __init__(self, project_name: str):
@@ -301,8 +337,9 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
         for i, runid in enumerate(self.wandb_runids):
             self.wandb.init(id=runid, resume="must", project=self.project_name)
             self.wandb.run.summary["Run scores"] = {
-                "fold_score": scores[i], "aggregated_score": score
-                }
+                "fold_score": scores[i],
+                "aggregated_score": score,
+            }
             self.wandb.finish()
         self.num_iterations += 1
         self.wandb_runids = []

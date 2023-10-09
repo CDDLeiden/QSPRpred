@@ -896,11 +896,13 @@ class QSPRModel(ABC):
             path (str): path to the saved estimator
         """
 
-class BaseMonitor():
+
+class BaseMonitor:
     """Base class for monitoring the training of a model.
 
     Attributes:
     """
+
 
 class FitMonitor(ABC, BaseMonitor):
     """Base class for monitoring the training of a model."""
@@ -956,6 +958,7 @@ class FitMonitor(ABC, BaseMonitor):
             predictions (np.ndarray): predictions of the current batch
         """
 
+
 class AssessorMonitor(FitMonitor):
     """Base class for monitoring the assessment of a model."""
     @abstractmethod
@@ -975,7 +978,14 @@ class AssessorMonitor(FitMonitor):
         """
 
     @abstractmethod
-    def on_fold_start(self, fold: int, X_train: np.array, y_train: np.array, X_test: np.array, y_test: np.array):
+    def on_fold_start(
+        self,
+        fold: int,
+        X_train: np.array,
+        y_train: np.array,
+        X_test: np.array,
+        y_test: np.array,
+    ):
         """Called before each fold of the assessment.
 
         Args:
@@ -987,7 +997,7 @@ class AssessorMonitor(FitMonitor):
         """
 
     @abstractmethod
-    def on_fold_end(self, model_fit: Any|tuple[Any, int], predictions: np.ndarray):
+    def on_fold_end(self, model_fit: Any | tuple[Any, int], predictions: np.ndarray):
         """Called after each fold of the assessment.
 
         Args:
@@ -996,6 +1006,7 @@ class AssessorMonitor(FitMonitor):
                                              the number of epochs it was trained for
             predictions (np.ndarray): predictions of the current fold
         """
+
 
 class HyperParameterOptimizationMonitor(AssessorMonitor):
     """Base class for monitoring the hyperparameter optimization of a model."""
@@ -1026,8 +1037,9 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
         """
 
     @abstractmethod
-    def on_iteration_end(self, score: float, scores: list[float],
-                         predictions: list[np.ndarray]):
+    def on_iteration_end(
+        self, score: float, scores: list[float], predictions: list[np.ndarray]
+    ):
         """Called after each iteration of the hyperparameter optimization.
 
         Args:
@@ -1037,13 +1049,19 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
             predictions (list[np.ndarray]): predictions of the current iteration
         """
 
+
 class ModelAssessor(ABC):
     """Base class for assessment methods.
 
     Attributes:
         useProba (bool): use probabilities for classification models
     """
-    def __init__(self, monitor: AssessorMonitor, use_proba: bool = True, mode: EarlyStoppingMode | None = None):
+    def __init__(
+        self,
+        monitor: AssessorMonitor,
+        use_proba: bool = True,
+        mode: EarlyStoppingMode | None = None,
+    ):
         """Initialize the evaluation method class.
 
         Args:
@@ -1071,12 +1089,14 @@ class ModelAssessor(ABC):
                 each tuple corresponds a set of predictions such as different folds.
         """
 
-    def predictionsToDataFrame(self,
+    def predictionsToDataFrame(
+        self,
         model: QSPRModel,
         y: np.array,
         predictions: np.ndarray | list[np.ndarray],
         index: pd.Series,
-        extra_columns: dict[str, np.ndarray] | None = None) -> pd.DataFrame:
+        extra_columns: dict[str, np.ndarray] | None = None,
+    ) -> pd.DataFrame:
         # Create dataframe with true values
         df_out = pd.DataFrame(
             y.values, columns=y.add_suffix("_Label").columns, index=index
@@ -1127,6 +1147,7 @@ class ModelAssessor(ABC):
             model, y, predictions, index, extra_columns
         )
         df_out.to_csv(f"{model.outPrefix}.{file_suffix}.tsv", sep="\t")
+
 
 class HyperParameterOptimization(ABC):
     """Base class for hyperparameter optimization.

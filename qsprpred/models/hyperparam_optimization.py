@@ -111,13 +111,13 @@ class OptunaOptimization(HyperParameterOptimization):
         self.bestScore = -np.inf
         self.bestParams = None
         self.config = {
-                "scoring": scoring,
-                "param_grid": param_grid,
-                "model_assessor": model_assessor,
-                "score_aggregation": score_aggregation,
-                "n_trials": n_trials,
-                "n_jobs": n_jobs,
-            }
+            "scoring": scoring,
+            "param_grid": param_grid,
+            "model_assessor": model_assessor,
+            "score_aggregation": score_aggregation,
+            "n_trials": n_trials,
+            "n_jobs": n_jobs,
+        }
 
     def optimize(self, model: QSPRModel, **kwargs) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
@@ -195,7 +195,11 @@ class OptunaOptimization(HyperParameterOptimization):
         self.monitor.on_iteration_start(bayesian_params)
         # assess the model with the current parameters and return the score
         predictions = self.runAssessment(
-            model, save=False, parameters=bayesian_params, monitor=self.monitor, **kwargs
+            model,
+            save=False,
+            parameters=bayesian_params,
+            monitor=self.monitor,
+            **kwargs,
         )
         scores = []
         # TODO: this should be removed once random seeds are fixed
@@ -204,7 +208,6 @@ class OptunaOptimization(HyperParameterOptimization):
                 # check if more than 1 class in y_true
                 if not len(np.unique(pred[0])) > 1:
                     logger.warning("Only 1 class in y_true, skipping fold.")
-                    pass
             scores.append(self.scoreFunc(*pred))
         assert len(scores) > 0, "No scores calculated, all folds skipped."
 
@@ -270,7 +273,6 @@ class GridSearchOptimization(HyperParameterOptimization):
                     # check if more than 1 class in y_true
                     if not len(np.unique(pred[0])) > 1:
                         logger.warning("Only 1 class in y_true, skipping fold.")
-                        pass
                 scores.append(self.scoreFunc(*pred))
             assert len(scores) > 0, "No scores calculated, all folds skipped."
             # scores = [self.scoreFunc(*pred) for pred in predictions]

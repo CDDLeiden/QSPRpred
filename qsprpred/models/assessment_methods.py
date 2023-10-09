@@ -6,9 +6,10 @@ import numpy as np
 import pandas as pd
 
 from ..logs import logger
-from .interfaces import ModelAssessor, QSPRModel, AssessorMonitor
 from .early_stopping import EarlyStoppingMode
+from .interfaces import AssessorMonitor, ModelAssessor, QSPRModel
 from .monitors import NullAssessorMonitor
+
 
 class CrossValAssessor(ModelAssessor):
     """Perform cross validation on a model.
@@ -16,7 +17,12 @@ class CrossValAssessor(ModelAssessor):
     Attributes:
         useProba (bool): use predictProba instead of predict for classification
     """
-    def __init__(self, monitor: AssessorMonitor = NullAssessorMonitor(), use_proba: bool = True, mode: EarlyStoppingMode | None = None):
+    def __init__(
+        self,
+        monitor: AssessorMonitor = NullAssessorMonitor(),
+        use_proba: bool = True,
+        mode: EarlyStoppingMode | None = None,
+    ):
         super().__init__(monitor, use_proba, mode)
 
     def __call__(
@@ -64,10 +70,14 @@ class CrossValAssessor(ModelAssessor):
                 "cross validation fold %s started: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
-            monitor.on_fold_start(fold=i, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
+            monitor.on_fold_start(
+                fold=i, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test
+            )
             # fit model
             crossval_estimator = model.loadEstimator(evalparams)
-            model_fit = model.fit(X_train, y_train, crossval_estimator, mode=self.mode, **kwargs)
+            model_fit = model.fit(
+                X_train, y_train, crossval_estimator, mode=self.mode, **kwargs
+            )
             # make predictions
             if model.task.isRegression() or not self.useProba:
                 cvs[idx_test] = preds = model.predict(X_test, crossval_estimator)
@@ -89,9 +99,9 @@ class CrossValAssessor(ModelAssessor):
                     y.iloc[idx_test],
                     preds,
                     idx_test,
-                    extra_columns={"Fold": fold_counter[idx_test]}
-                    )
-                )
+                    extra_columns={"Fold": fold_counter[idx_test]},
+                ),
+            )
         # save results
         if save:
             index_name = model.data.getDF().index.name
@@ -128,13 +138,13 @@ class TestSetAssessor(ModelAssessor):
             save (bool): whether to save predictions to file
             parameters (dict): optional model parameters to use in assessment
             use_proba (bool): use predictProba instead of predict for classification
-            monitor (AssessorMonitor): optional monitor to use, overrides monitor set in constructor
+            monitor (AssessorMonitor): optional, overrides monitor set in constructor
             **kwargs: additional keyword arguments for the fit function
 
         Returns:
             float | np.ndarray: predictions for evaluation
         """
-        super().__call__(model, monitor, **kwargs) # set monitor
+        super().__call__(model, monitor, **kwargs)  # set monitor
         evalparams = model.parameters if parameters is None else parameters
         # check if data is available
         model.checkForData()
