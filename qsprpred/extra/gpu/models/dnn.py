@@ -207,6 +207,8 @@ class DNNModel(QSPRModel):
         Returns:
             str: path to the saved parameters as json
         """
+        if params is None:
+            return super().saveParams(params)
         return super().saveParams(
             {
                 k: params[k]
