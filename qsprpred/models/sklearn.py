@@ -16,8 +16,8 @@ from sklearn.svm import SVC, SVR
 from ..data.data import QSPRDataset
 from ..logs import logger
 from .interfaces import QSPRModel
-from .tasks import ModelTasks
 from .monitors import NullFitMonitor
+from .tasks import ModelTasks
 
 
 class SklearnModel(QSPRModel):
@@ -147,7 +147,7 @@ class SklearnModel(QSPRModel):
         monitor: Any = NullFitMonitor(),
         estimator: Any = None,
         mode: Any = None,
-        **kwargs
+        **kwargs,
     ):
         """See `QSPRModel.fit`."""
         estimator = self.estimator if estimator is None else estimator

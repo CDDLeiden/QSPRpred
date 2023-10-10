@@ -175,12 +175,12 @@ class TestSetAssessor(ModelAssessor):
                 np.zeros((y_ind.shape[0], prop.nClasses))
                 for prop in model.targetProperties
             ]
-        monitor.on_fold_start(
-                fold=1, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind
-            )
+        monitor.on_fold_start(fold=1, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind)
         # fit model
         ind_estimator = model.loadEstimator(evalparams)
-        ind_estimator = model.fit(X, y, monitor, ind_estimator, mode=self.mode, **kwargs)
+        ind_estimator = model.fit(
+            X, y, monitor, ind_estimator, mode=self.mode, **kwargs
+        )
         # if independent test set is available, predict on it
         if X_ind.shape[0] > 0:
             if model.task.isRegression() or not self.useProba:
@@ -197,14 +197,9 @@ class TestSetAssessor(ModelAssessor):
         index_name = model.data.getDF().index.name
         ind_index = pd.Index(inds_ids, name=index_name)
         monitor.on_fold_end(
-                ind_estimator,
-                self.predictionsToDataFrame(
-                    model,
-                    y_ind,
-                    preds,
-                    ind_index
-                ),
-            )
+            ind_estimator,
+            self.predictionsToDataFrame(model, y_ind, preds, ind_index),
+        )
         # predict values for independent test set and save results
         if save:
             self.savePredictionsToFile(model, y_ind, inds, ind_index, "ind")

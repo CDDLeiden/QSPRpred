@@ -265,10 +265,8 @@ class QSPRModel(ABC):
                 Random state to use for shuffling and other random operations.
         """
         new_random_state = random_state or (
-            self.data.randomState
-            if self.data is not None else int(
-                np.random.randint(0, 2**32 - 1, dtype=np.int64)
-            )
+            self.data.randomState if self.data is not None else
+            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
         )
         self.randomState = new_random_state
         if new_random_state is None:
@@ -317,7 +315,7 @@ class QSPRModel(ABC):
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
-            random_state (int): 
+            random_state (int):
                 Random state to use for shuffling and other random operations.
         """
         self.data = data
@@ -790,7 +788,7 @@ class QSPRModel(ABC):
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
-    def fitAttached(self, monitor = None, **kwargs) -> str:
+    def fitAttached(self, monitor=None, **kwargs) -> str:
         """Train model on the whole attached data set.
 
         ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
@@ -981,7 +979,9 @@ class FitMonitor(ABC, BaseMonitor):
         """
 
     @abstractmethod
-    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None = None):
+    def on_epoch_end(
+        self, epoch: int, train_loss: float, val_loss: float | None = None
+    ):
         """Called after each epoch of the training.
 
         Args:
