@@ -27,13 +27,41 @@ class RandomSplit(DataSplit):
     """Splits dataset in random train and test subsets.
 
     Attributes:
-        testFraction (float): fraction of total dataset to testset
+        testFraction (float):
+            fraction of total dataset to testset
+        seed (int):
+            Random state to use for shuffling and other random operations.
     """
-    def __init__(self, test_fraction=0.1) -> None:
+    def __init__(
+        self,
+        test_fraction=0.1,
+        dataset: QSPRDataset | None = None,
+        seed: int | None = None,
+    ) -> None:
+        super().__init__(dataset=dataset)
         self.testFraction = test_fraction
+        self.seed = seed or (dataset.randomState if self.hasDataSet else None)
+
+    def setSeed(self, seed: int | None):
+        """Set the seed for this instance.
+
+        Args:
+            seed (int):
+                Random state to use for shuffling and other random operations.
+        """
+        self.seed = seed
 
     def split(self, X, y):
-        return ShuffleSplit(1, test_size=self.testFraction).split(X, y)
+        if self.seed is None:
+            self.seed = self.getDataSet().randomState if self.hasDataSet else None
+        if self.seed is None:
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+        return ShuffleSplit(
+            1, test_size=self.testFraction, random_state=self.seed
+        ).split(X, y)
 
 
 class ManualSplit(DataSplit):
@@ -47,6 +75,7 @@ class ManualSplit(DataSplit):
     Raises:
         ValueError: if there are more values in splitcol than trainval and testval
     """
+
     def __init__(self, splitcol: pd.Series, trainval: str, testval: str) -> None:
         """Initialize the ManualSplit object with the splitcol, trainval and testval
         attributes.
@@ -59,6 +88,7 @@ class ManualSplit(DataSplit):
         Raises:
             ValueError: if there are more values in splitcol than trainval and testval
         """
+        super().__init__()
         self.splitCol = splitcol.reset_index(drop=True)
         self.trainVal = trainval
         self.testVal = testval
@@ -96,11 +126,9 @@ class TemporalSplit(DataSplit):
         timeSplit(float): time point after which sample to test set
         timeCol (str): name of the column within the dataframe with timepoints
     """
+
     def __init__(
-        self,
-        timesplit: float,
-        timeprop: str,
-        dataset: QSPRDataset | None = None
+        self, timesplit: float, timeprop: str, dataset: QSPRDataset | None = None
     ) -> None:
         """Initialize a TemporalSplit object.
 
@@ -122,7 +150,6 @@ class TemporalSplit(DataSplit):
             (train_indices, test_indices) where the indices are the row indices of the
             input data matrix
         """
-
         # Get dataset, dataframe and tasks
         ds = self.getDataSet()
         df = ds.getDF().copy()
@@ -144,7 +171,6 @@ class TemporalSplit(DataSplit):
         mask = df[self.timeCol] > self.timeSplit
         mask = mask.values
         test = indices[mask]
-
         # Check if there are any test samples for each task
         for task in task_names:
             if len(df[mask][task]) == 0:
@@ -174,6 +200,7 @@ class GBMTDataSplit(DataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset = None,
@@ -229,7 +256,9 @@ class GBMTDataSplit(DataSplit):
             {
                 df.loc[df.QSPRID == qspridx][ds.smilesCol].values[0]: 1
                 for qspridx in self.customTestList
-            } if self.customTestList else None
+            }
+            if self.customTestList
+            else None
         )
 
         print(self.split_kwargs)
@@ -270,6 +299,8 @@ class GBMTRandomSplit(GBMTDataSplit):
             dataset that this splitter will be acting on
         testFraction (float):
             fraction of total dataset to testset
+        seed (int):
+            Random state to use for shuffling and other random operations.
         customTestList (list):
             list of molecule indexes to force in test set
         split_kwargs (dict):
@@ -279,11 +310,18 @@ class GBMTRandomSplit(GBMTDataSplit):
         self,
         dataset: QSPRDataset | None = None,
         test_fraction: float = 0.1,
-        seed: int = 42,
+        seed: int | None = None,
         n_initial_clusters: int | None = None,
         custom_test_list: list[str] | None = None,
         **split_kwargs,
     ) -> None:
+        seed = seed or (dataset.randomState if dataset is not None else None)
+        if seed is None:
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+
         super().__init__(
             dataset,
             RandomClusters(seed, n_initial_clusters),
@@ -307,6 +345,7 @@ class ScaffoldSplit(GBMTDataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset | None = None,
@@ -336,21 +375,48 @@ class ClusterSplit(GBMTDataSplit):
             fraction of total dataset to testset
         customTestList (list):
             list of molecule indexes to force in test set
+        seed (int):
+            Random state to use for shuffling and other random operations.
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset = None,
         test_fraction: float = 0.1,
         custom_test_list: list[str] | None = None,
-        clustering: MoleculeClusters = FPSimilarityMaxMinClusters(),
+        seed: int | None = None,
+        clustering: MoleculeClusters | None = None,
         **split_kwargs,
     ) -> None:
+        seed = seed or (dataset.randomState if dataset is not None else None)
+        if seed is None:
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+
+        clustering = (
+            clustering
+            if clustering is not None
+            else FPSimilarityMaxMinClusters(seed=seed)
+        )
         super().__init__(
             dataset,
-            clustering,  # TODO: For MaxMin pass random seed
+            clustering,
             test_fraction,
             custom_test_list,
             **split_kwargs,
         )
+
+    def setSeed(self, seed: int | None):
+        """Set the seed for this instance.
+
+        Args:
+            seed (int):
+                Random state to use for shuffling and other random operations.
+        """
+        self.seed = seed
+        if hasattr(self.clustering, 'seed'):
+            self.clustering.seed = seed

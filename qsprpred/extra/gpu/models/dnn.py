@@ -57,6 +57,8 @@ class DNNModel(QSPRModel):
         tol (float):
             minimum absolute improvement of loss necessary to count as
             progress on best validation score
+        random_state (int):
+            seed for the random state
         nClass (int): number of classes
         nDim (int): number of features
         optimalEpochs (int): number of epochs to train the model for optimal performance
@@ -75,6 +77,7 @@ class DNNModel(QSPRModel):
         data: QSPRDataset | None = None,
         name: str | None = None,
         parameters: dict | None = None,
+        random_state: int | None = None,
         autoload: bool = True,
         device: torch.device = DEFAULT_DEVICE,
         gpus: list[int] = DEFAULT_GPUS,
@@ -114,11 +117,31 @@ class DNNModel(QSPRModel):
         self.tol = tol
         self.nClass = None
         self.nDim = None
-        super().__init__(base_dir, alg, data, name, parameters, autoload=autoload)
+        super().__init__(
+            base_dir,
+            alg,
+            data,
+            name,
+            parameters,
+            autoload=autoload,
+            random_state=random_state,
+        )
         if self.task.isMultiTask():
             raise NotImplementedError(
                 "Multitask modelling is not implemented for DNNModel models."
             )
+
+    def initRandomState(self, random_state):
+        """Set random state if applicable.
+        Defaults to random state of dataset if no random state is provided by the constructor.
+
+        Args:
+            random_state (int): Random state to use for shuffling and other random operations.
+        """
+
+        self.randomState = random_state
+        if random_state is not None:
+            torch.manual_seed(random_state)
 
     @property
     def supportsEarlyStopping(self) -> bool:
@@ -259,7 +282,9 @@ class DNNModel(QSPRModel):
         if self.earlyStopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
-            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
+            X_train, X_val, y_train, y_val = train_test_split(
+                X, y, test_size=0.1, random_state=self.randomState
+            )
             estimator_fit = estimator.fit(X_train, y_train, X_val, y_val, monitor, **kwargs)
             monitor.on_fit_end(estimator_fit[0], estimator_fit[1])
             return estimator_fit

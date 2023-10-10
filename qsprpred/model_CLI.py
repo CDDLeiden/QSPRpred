@@ -4,7 +4,6 @@ import argparse
 import json
 import os
 import os.path
-import random
 import sys
 from copy import deepcopy
 from datetime import datetime
@@ -303,6 +302,7 @@ def QSPR_modelling(args):
                     gpus=args.gpus,
                     patience=args.patience,
                     tol=args.tolerance,
+                    random_state=args.random_state,
                 )
             else:
                 QSPRmodel = SklearnModel(
@@ -311,6 +311,7 @@ def QSPR_modelling(args):
                     alg=alg_dict[model_type],
                     name=model_name,
                     parameters=parameters,
+                    random_state=args.random_state,
                 )
 
             # if desired run parameter optimization
@@ -368,15 +369,6 @@ def QSPR_modelling(args):
 
 if __name__ == "__main__":
     args = QSPRArgParser()
-
-    # Set random seeds
-    random.seed(args.random_state)
-    np.random.seed(args.random_state)
-    if find_spec("torch") is not None:
-        import torch
-
-        torch.manual_seed(args.random_state)
-    os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
     # Backup files
     datasets = [QSPRDataset.fromFile(data_file) for data_file in args.data_paths]

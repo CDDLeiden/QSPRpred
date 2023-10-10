@@ -140,7 +140,10 @@ class OptunaOptimization(HyperParameterOptimization):
             "for some hyperparameter combinations"
         )
         # create optuna study
-        study = optuna.create_study(direction="maximize")
+        study = optuna.create_study(
+            direction="maximize",
+            sampler=optuna.samplers.TPESampler(seed=model.randomState),
+        )
         logger.info(
             "Bayesian optimization started: %s" %
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
