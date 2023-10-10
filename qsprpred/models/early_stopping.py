@@ -194,7 +194,11 @@ def early_stopping(func: Callable) -> Callable:
             " early stopping."
         )
         self.earlyStopping.mode = mode if mode is not None else self.earlyStopping.mode
-        estimator, best_epoch = func(self, X, y, monitor, estimator, mode, **kwargs)
+        # alternative to using NullMonitor here as this leads to circular imports
+        if monitor is not None:
+            estimator, best_epoch = func(self, X, y, monitor, estimator, mode, **kwargs)
+        else:
+            estimator, best_epoch = func(self, X, y, estimator=estimator, mode=mode, **kwargs)
         if self.earlyStopping.mode == EarlyStoppingMode.RECORDING:
             self.earlyStopping.recordEpochs(best_epoch + 1)  # +1 for 0-indexing
         return estimator
