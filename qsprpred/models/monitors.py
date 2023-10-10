@@ -34,7 +34,7 @@ class NullFitMonitor(FitMonitor):
             epoch (int): index of the current epoch
         """
 
-    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None):
+    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None = None):
         """Called after each epoch of the training.
 
         Args:
@@ -319,7 +319,7 @@ class WandBAssesmentMonitor(AssessorMonitor):
         """
         self.epochnr = epoch
 
-    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None):
+    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None = None):
         """Called after each epoch of the training.
 
         Args:

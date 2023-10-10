@@ -50,6 +50,9 @@ class QSPRModel(ABC):
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
         metaFile (str):
             absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
+        earlyStopping (EarlyStopping):
+            early stopping tracker for training of QSPRpred models that support
+            early stopping (e.g. neural networks)
     """
     @staticmethod
     def readStandardizer(path: str) -> "SKLearnStandardizer":
@@ -934,7 +937,7 @@ class FitMonitor(ABC, BaseMonitor):
         """
 
     @abstractmethod
-    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None):
+    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None = None):
         """Called after each epoch of the training.
 
         Args:
