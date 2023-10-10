@@ -1012,11 +1012,12 @@ class FitMonitor(ABC, BaseMonitor):
 class AssessorMonitor(FitMonitor):
     """Base class for monitoring the assessment of a model."""
     @abstractmethod
-    def on_assessment_start(self, model: QSPRModel):
+    def on_assessment_start(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
+            assesment_type (str): type of assessment
         """
 
     @abstractmethod

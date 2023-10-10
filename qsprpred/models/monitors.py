@@ -61,11 +61,12 @@ class NullFitMonitor(FitMonitor):
 
 class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
     """Null monitor that does nothing."""
-    def on_assessment_start(self, model: QSPRModel):
+    def on_assessment_start(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
+            assesment_type (str): type of assessment
         """
 
     def on_assessment_end(self, model: QSPRModel):
@@ -211,17 +212,19 @@ class WandBAssesmentMonitor(AssessorMonitor):
 
         wandb.login()
 
-        self.project_name = project_name
+        self.projectName = project_name
         self.kwargs = kwargs
-        self.num_iterations = 0
+        self.numIterations = 0
 
-    def on_assessment_start(self, model: QSPRModel):
+    def on_assessment_start(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
+            assesment_type (str): type of assessment
         """
         self.model = model
+        self.assessmentType = assesment_type
 
     def on_assessment_end(self, model: QSPRModel):
         """Called after the assessment has finished.
@@ -247,25 +250,25 @@ class WandBAssesmentMonitor(AssessorMonitor):
             X_test (np.array): test data of the current fold
             y_test (np.array): test targets of the current fold
         """
-        config = {"fold": fold, "model": self.model.name}
+        config = {"fold": fold, "model": self.model.name, "assessmentType": self.assessmentType}
         # add hyperparameter optimization parameters if available
-        if hasattr(self, "optimization_type"):
-            config["optimization_type"] = self.optimization_type
+        if hasattr(self, "optimizationType"):
+            config["optimizationType"] = self.optimizationType
             config.update(self.params)
-            config["hyperParamOpt_iteration"] = self.num_iterations
+            config["hyperParamOpt_iteration"] = self.numIterations
             new_runid = self.wandb.util.generate_id()
             self.wandb_runids.append(new_runid)
         else:
-            config["optimization_type"] = None
+            config["optimizationType"] = None
 
         group = (
-            f"{self.model.name}_{self.optimization_type}_{self.num_iterations}"
-            if hasattr(self, "optimization_type") else f"{self.model.name}"
+            f"{self.model.name}_{self.optimizationType}_{self.numIterations}"
+            if hasattr(self, "optimizationType") else f"{self.model.name}"
         )
-        name = f"{group}_Assessment_{fold}"
+        name = f"{group}_{self.assessmentType}_{fold}"
 
         self.wandb.init(
-            project=self.project_name,
+            project=self.projectName,
             config=config,
             name=name,
             group=group,
@@ -363,9 +366,9 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
 
         wandb.login()
 
-        self.project_name = project_name
+        self.projectName = project_name
         self.kwargs = kwargs
-        self.num_iterations = 0
+        self.numIterations = 0
 
     def on_optimization_start(
         self, model: QSPRModel, config: dict, optimization_type: str
@@ -376,7 +379,7 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of optimization
         """
-        self.optimization_type = optimization_type
+        self.optimizationType = optimization_type
         self.model = model
 
     def on_optimization_end(self, best_score: float, best_parameters: dict):
@@ -409,12 +412,12 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
         """
         for i, runid in enumerate(self.wandb_runids):
             self.wandb.init(
-                id=runid, resume="must", project=self.project_name, **self.kwargs
+                id=runid, resume="must", project=self.projectName, **self.kwargs
             )
             self.wandb.run.summary["Run scores"] = {
                 "fold_score": scores[i],
                 "aggregated_score": score,
             }
             self.wandb.finish()
-        self.num_iterations += 1
+        self.numIterations += 1
         self.wandb_runids = []

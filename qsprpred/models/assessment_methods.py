@@ -54,7 +54,7 @@ class CrossValAssessor(ModelAssessor):
         model.checkForData()
         X, _ = model.data.getFeatures()
         y, _ = model.data.getTargetPropertiesValues()
-        monitor.on_assessment_start(model)
+        monitor.on_assessment_start(model, self.__class__.__name__)
         # prepare arrays to store molecule ids and predictions
         cvs_ids = np.array([None] * len(X))
         if model.task.isRegression() or not self.useProba:
@@ -167,7 +167,7 @@ class TestSetAssessor(ModelAssessor):
         model.checkForData()
         X, X_ind = model.data.getFeatures()
         y, y_ind = model.data.getTargetPropertiesValues()
-        monitor.on_assessment_start(model)
+        monitor.on_assessment_start(model, self.__class__.__name__)
         # prepare arrays to store molecule ids and predictions
         inds_ids = X_ind.index.to_numpy()
         if not model.task.isRegression() and self.useProba:
