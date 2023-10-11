@@ -31,13 +31,15 @@ extensions = [
 ]
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.10', None)}
-
+intersphinx_mapping = {'python': ('https://docs.python.org/3.9', None)}
+autoclass_content = "both"
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
-    "private-members": False,
-    "show-inheritance": True,
+    "special-members": False,
     "inherited-members": True,
+    "private-members": False,
+    "show-inheritance": True
 }
 
 # napoleon settings
