@@ -184,7 +184,7 @@ class TestSetAssessor(ModelAssessor):
         # if independent test set is available, predict on it
         if X_ind.shape[0] > 0:
             if model.task.isRegression() or not self.useProba:
-                inds = preds = model.predict(X_ind, ind_estimator)
+                inds = model.predict(X_ind, ind_estimator)
             else:
                 preds = model.predictProba(X_ind, ind_estimator)
                 for idx in range(model.nTargets):
@@ -198,7 +198,7 @@ class TestSetAssessor(ModelAssessor):
         ind_index = pd.Index(inds_ids, name=index_name)
         monitor.on_fold_end(
             ind_estimator,
-            self.predictionsToDataFrame(model, y_ind, preds, ind_index),
+            self.predictionsToDataFrame(model, y_ind, inds, ind_index),
         )
         # predict values for independent test set and save results
         if save:

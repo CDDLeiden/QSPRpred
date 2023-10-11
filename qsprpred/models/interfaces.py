@@ -1160,7 +1160,7 @@ class ModelAssessor(ABC):
         )
         # Add predictions to dataframe
         for idx, prop in enumerate(model.data.targetProperties):
-            if prop.task.isClassification():
+            if prop.task.isClassification() and self.useProba:
                 # convert one-hot encoded predictions to class labels
                 # and add to train and test
                 df_out[f"{prop.name}_Prediction"] = np.argmax(predictions[idx], axis=1)
