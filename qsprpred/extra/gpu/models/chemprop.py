@@ -14,8 +14,9 @@ from tqdm import trange
 
 from ....data.data import QSPRDataset
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import QSPRModel
+from ....models.interfaces import QSPRModel, FitMonitor
 from ....models.tasks import ModelTasks
+from ....models.monitors import NullFitMonitor
 
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):
@@ -165,6 +166,7 @@ class ChempropModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
+        monitor: FitMonitor = NullFitMonitor(),
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         keep_logs: bool = False,
@@ -180,6 +182,7 @@ class ChempropModel(QSPRModel):
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            monitor (FitMonitor): monitor to use for fitting
             estimator (Any): estimator instance to use for fitting
             early_stopping (bool): if True, early stopping is used,
                                    only applies to models that support early stopping.
@@ -190,6 +193,7 @@ class ChempropModel(QSPRModel):
                 after which the model stopped training
         """
         estimator = self.estimator if estimator is None else estimator
+        monitor.on_fit_start(estimator)
 
         # convert data to chemprop MoleculeDataset
         data = self.convertToMoleculeDataset(X, y)
@@ -309,6 +313,7 @@ class ChempropModel(QSPRModel):
             self.earlyStopping.getEpochs() if not self.earlyStopping else args.epochs
         )
         for epoch in trange(n_epochs):
+            monitor.on_epoch_start(epoch)
             self.chempropLogger.debug(f"Epoch {epoch}")
             n_iter = chemprop.train.train(
                 model=estimator,
@@ -360,6 +365,7 @@ class ChempropModel(QSPRModel):
                 mean_val_score = chemprop.utils.multitask_mean(
                     val_scores[args.metric], metric=args.metric
                 )
+                monitor.on_epoch_end(epoch, mean_val_score)
                 if (
                     args.minimize_score and mean_val_score < best_score or
                     not args.minimize_score and mean_val_score > best_score
@@ -378,7 +384,9 @@ class ChempropModel(QSPRModel):
             shutil.rmtree(save_dir)
 
         if self.earlyStopping:
+            monitor.on_fit_end(best_estimator, best_epoch)
             return best_estimator, best_epoch
+        monitor.on_fit_end(estimator)
         return estimator, None
 
     def predict(

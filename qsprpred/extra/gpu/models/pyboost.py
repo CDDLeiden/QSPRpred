@@ -23,8 +23,9 @@ from sklearn.model_selection import train_test_split
 
 from ....data.data import QSPRDataset
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import QSPRModel
+from ....models.interfaces import QSPRModel, FitMonitor
 from ....models.tasks import ModelTasks
+from ....models.monitors import NullFitMonitor
 
 
 class PyBoostModel(QSPRModel):
@@ -111,6 +112,7 @@ class PyBoostModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
+        monitor: FitMonitor = NullFitMonitor(),
         estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         **kwargs,
@@ -128,6 +130,7 @@ class PyBoostModel(QSPRModel):
             (GzipKNNAlgorithm): fitted estimator instance
         """
         estimator = self.estimator if estimator is None else estimator
+        monitor.on_fit_start(estimator)
         X, y = self.convertToNumpy(X, y)
 
         if self.task == ModelTasks.MULTICLASS:
@@ -138,12 +141,13 @@ class PyBoostModel(QSPRModel):
             # and validation set for early stopping
             X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
             estimator.fit(X_train, y_train, eval_sets=[{"X": X_val, "y": y_val}])
-
+            monitor.on_fit_end(estimator, estimator.best_round)
             return estimator, estimator.best_round
 
         estimator.params.update({"ntrees": self.earlyStopping.getEpochs()})
         estimator.fit(X, y)
 
+        monitor.on_fit_end(estimator)
         return estimator, self.earlyStopping.getEpochs()
 
     def predict(
