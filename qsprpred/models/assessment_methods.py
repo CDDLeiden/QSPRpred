@@ -41,7 +41,6 @@ class CrossValAssessor(ModelAssessor):
             model (QSPRModel): model to assess
             save (bool): whether to save predictions to file
             parameters (dict): optional model parameters to use in assessment
-            use_proba (bool): use predictProba instead of predict for classification
             monitor (AssessorMonitor): optional, overrides monitor set in constructor
             **kwargs: additional keyword arguments for the fit function
 
