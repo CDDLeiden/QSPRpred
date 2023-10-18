@@ -50,7 +50,7 @@ dependencies = [
     "xgboost",
     "boruta",
     "tqdm",
-    "sklearn-json @ git+https://github.com/OlivierBeq/sklearn-json.git#egg=sklearn-json",
+    "ml2json",
     "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
     "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits@0.0.4",
 ]

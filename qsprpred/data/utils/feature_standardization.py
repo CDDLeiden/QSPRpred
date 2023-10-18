@@ -1,6 +1,6 @@
 """This module is used for standardizing feature sets."""
 import numpy as np
-import sklearn_json as skljson
+import ml2json
 
 from ...logs import logger
 
@@ -44,7 +44,7 @@ class SKLearnStandardizer:
         Args:
             fname: file name to save standardizer to
         """
-        skljson.to_json(self.scaler, fname)
+        ml2json.to_json(self.scaler, fname)
 
     @staticmethod
     def fromFile(fname: str):
@@ -53,7 +53,7 @@ class SKLearnStandardizer:
         Args:
             fname: file name to load standardizer from
         """
-        return SKLearnStandardizer(skljson.from_json(fname))
+        return SKLearnStandardizer(ml2json.from_json(fname))
 
     @staticmethod
     def fromFit(features: np.array, scaler):
