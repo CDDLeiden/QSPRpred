@@ -146,51 +146,6 @@ class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
                                   (e.g for cross-validation)
         """
 
-
-class PrintMonitor(HyperParameterOptimizationMonitor):
-    """Monitor that prints the progress of the hyperparameter optimization."""
-    def on_optimization_start(self, model: QSPRModel, config: dict):
-        """Called before the hyperparameter optimization has started.
-
-        Args:
-            model (QSPRModel): model to optimize
-            config (dict): configuration of the hyperparameter optimization
-        """
-        print(f"Hyperparameter optimization started for {model.name}.")
-
-    def on_optimization_end(self, best_score: float, best_parameters: dict):
-        """Called after the hyperparameter optimization has finished.
-
-        Args:
-            best_score (float): best score found during optimization
-            best_parameters (dict): best parameters found during optimization
-        """
-        print("Hyperparameter optimization finished.")
-        print("Best score: %s" % best_score)
-        print("Best parameters: %s" % best_parameters)
-
-    def on_iteration_start(self, params: dict):
-        """Called before each iteration of the hyperparameter optimization.
-
-        Args:
-            params (dict): parameters used for the current iteration
-        """
-        print("Iteration started.")
-        print("Parameters: %s" % params)
-
-    def on_iteration_end(self, score: float, scores: list[float]):
-        """Called after each iteration of the hyperparameter optimization.
-
-        Args:
-            score (float): (aggregated) score of the current iteration
-            scores (list[float]): scores of the current iteration
-                                  (e.g for cross-validation)
-        """
-        print("Iteration finished.")
-        print("Score: %s" % score)
-        print("Scores: %s" % scores)
-
-
 class WandBAssesmentMonitor(AssessorMonitor):
     """Monitor assessment and fit to weights and biases."""
     def __init__(self, project_name: str, **kwargs):
