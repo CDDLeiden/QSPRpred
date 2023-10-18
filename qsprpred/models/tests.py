@@ -77,10 +77,11 @@ class ModelTestMixIn:
         score_func = SklearnMetric.getDefaultMetric(model.task)
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
-            scoring=score_func,
             param_grid=search_space_bs,
             n_trials=1,
-            model_assessor=CrossValAssessor(mode=EarlyStoppingMode.NOT_RECORDING),
+            model_assessor=CrossValAssessor(
+                scoring=score_func, mode=EarlyStoppingMode.NOT_RECORDING
+            ),
         )
         best_params = bayesoptimizer.optimize(model)
         model.saveParams(best_params)
@@ -90,11 +91,12 @@ class ModelTestMixIn:
         if model.task.isClassification():
             score_func = SklearnMetric.getMetric("accuracy")
         gridsearcher = GridSearchOptimization(
-            scoring=score_func,
             param_grid=search_space_gs,
             score_aggregation=np.median,
             model_assessor=TestSetAssessor(
-                use_proba=False, mode=EarlyStoppingMode.NOT_RECORDING
+                scoring=score_func,
+                use_proba=False,
+                mode=EarlyStoppingMode.NOT_RECORDING,
             ),
         )
         best_params = gridsearcher.optimize(model)
@@ -102,8 +104,9 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        CrossValAssessor(mode=EarlyStoppingMode.RECORDING)(model)
-        TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING)(model)
+        score_func = SklearnMetric.getDefaultMetric(model.task)
+        CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(model)
+        TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func)(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
@@ -230,13 +233,12 @@ class ModelTestMixIn:
                 self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=8)
             if expected_pred_not_use_probas is not None:
                 self.assertAlmostEqual(pred[1], expected_pred_not_use_probas, places=8)
-        else:
+        elif expected_pred_use_probas is not None:
             # Skip not_use_probas test:
             # For regression this is identical to use_probas result
-            # For classification there is no guarantee the classification result actually differs,
-            # unlike probas which will usually have different results
-            if expected_pred_use_probas is not None:
-                self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=8)
+            # For classification there is no guarantee the classification result
+            # actually differs, unlike probas which will usually have different results
+            self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=8)
 
         return pred[0], pred[1]
 
@@ -332,7 +334,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             dataset (QSPRDataset, optional): the dataset to use. Defaults to None.
             parameters (dict, optional): the parameters to use. Defaults to None.
             random_state(int, optional):
-                Random state to use for shuffling and other random operations. Defaults 
+                Random state to use for shuffling and other random operations. Defaults
                 to None.
 
         Returns:

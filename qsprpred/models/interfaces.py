@@ -1021,12 +1021,8 @@ class AssessorMonitor(FitMonitor):
         """
 
     @abstractmethod
-    def on_assessment_end(self, predictions: np.ndarray):
-        """Called after the assessment has finished.
-
-        Args:
-            predictions (np.ndarray): predictions of the assessment (for all folds)
-        """
+    def on_assessment_end(self):
+        """Called after the assessment has finished."""
 
     @abstractmethod
     def on_fold_start(
@@ -1108,12 +1104,17 @@ class ModelAssessor(ABC):
     """Base class for assessment methods.
 
     Attributes:
+        scoreFunc (Metric): scoring function to use, should match the output of the
+                        evaluation method (e.g. if the evaluation methods returns
+                        class probabilities, the scoring function support class
+                        probabilities)
         monitor (AssessorMonitor): monitor to track the assessment
         useProba (bool): use probabilities for classification models
         mode (EarlyStoppingMode): early stopping mode for fitting
     """
     def __init__(
         self,
+        scoring: str | Callable[[Iterable, Iterable], float],
         monitor: AssessorMonitor,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
@@ -1121,6 +1122,7 @@ class ModelAssessor(ABC):
         """Initialize the evaluation method class.
 
         Args:
+            scoring: str | Callable[[Iterable, Iterable], float],
             monitor (AssessorMonitor): monitor to track the evaluation
             use_proba (bool): use probabilities for classification models
             mode (EarlyStoppingMode): early stopping mode for fitting
@@ -1128,22 +1130,31 @@ class ModelAssessor(ABC):
         self.monitor = monitor
         self.useProba = use_proba
         self.mode = mode
+        self.scoreFunc = (
+            SklearnMetric.getMetric(scoring) if isinstance(scoring, str) else scoring
+        )
 
     @abstractmethod
-    def __call__(self, model: QSPRModel, monitor: AssessorMonitor,
-                 **kwargs) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
+    def __call__(
+        self,
+        model: QSPRModel,
+        save: bool,
+        parameters: dict | None,
+        monitor: AssessorMonitor,
+        **kwargs,
+    ) -> list[float]:
         """Evaluate the model.
 
         Args:
             model (QSPRModel): model to evaluate
+            save (bool): save predictions to file
+            parameters (dict): parameters to use for the evaluation
             monitor (AssessorMonitor): monitor to track the evaluation, overrides
                                        the monitor set in the constructor
             kwargs: additional arguments for fit function of the model
 
         Returns:
-            list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]:
-                list of tuples containing the true values and the predictions, where
-                each tuple corresponds a set of predictions such as different folds.
+            list[float]: scores of the model for each fold
         """
 
     def predictionsToDataFrame(
@@ -1154,6 +1165,15 @@ class ModelAssessor(ABC):
         index: pd.Series,
         extra_columns: dict[str, np.ndarray] | None = None,
     ) -> pd.DataFrame:
+        """Create a dataframe with true values and predictions.
+
+        Args:
+            model (QSPRModel): model to evaluate
+            y (np.array): target values
+            predictions (np.ndarray | list[np.ndarray]): predictions
+            index (pd.Series): index of the data set
+            extra_columns (dict[str, np.ndarray]): extra columns to add to the output
+        """
         # Create dataframe with true values
         df_out = pd.DataFrame(
             y.values, columns=y.add_suffix("_Label").columns, index=index
@@ -1181,39 +1201,11 @@ class ModelAssessor(ABC):
                 df_out[col_name] = col_values
         return df_out
 
-    def savePredictionsToFile(
-        self,
-        model: QSPRModel,
-        y: np.array,
-        predictions: np.ndarray | list[np.ndarray],
-        index: pd.Series,
-        file_suffix: str,
-        extra_columns: dict[str, np.ndarray] | None = None,
-    ):
-        """Save predictions to file.
-
-        Args:
-            model (QSPRModel): model to evaluate
-            y (np.array): target values
-            predictions (np.ndarray | list[np.ndarray]): predictions
-            index (pd.Series): index of the data set
-            file_suffix (str): suffix to add to the file name
-            extra_columns (dict[str, np.ndarray]): extra columns to add to the output
-        """
-        df_out = self.predictionsToDataFrame(
-            model, y, predictions, index, extra_columns
-        )
-        df_out.to_csv(f"{model.outPrefix}.{file_suffix}.tsv", sep="\t")
-
 
 class HyperParameterOptimization(ABC):
     """Base class for hyperparameter optimization.
 
     Attributes:
-        scoreFunc (Metric): scoring function to use, should match the output of the
-                            evaluation method (e.g. if the evaluation methods returns
-                            class probabilities, the scoring function support class
-                            probabilities)
         runAssessment (ModelAssessor): evaluation method to use
         scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
         paramGrid (dict): dictionary of parameters to optimize
@@ -1223,7 +1215,6 @@ class HyperParameterOptimization(ABC):
     """
     def __init__(
         self,
-        scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
         model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float],
@@ -1240,9 +1231,6 @@ class HyperParameterOptimization(ABC):
         score_aggregation (Callable[[Iterable], float]): function to aggregate scores
         monitor (HyperParameterOptimizationMonitor): monitor to track the optimization
         """
-        self.scoreFunc = (
-            SklearnMetric.getMetric(scoring) if isinstance(scoring, str) else scoring
-        )
         self.runAssessment = model_assessor
         self.scoreAggregation = score_aggregation
         self.paramGrid = param_grid
