@@ -7,7 +7,7 @@ From v2.1.0.a2 to v2.2.0
 
 ## Changes
 - The jupyter notebooks now pass a random state to ensure consistent results.
-
+- The deceased `sklearn-json` package has been replaced by its continuation `ml2json`.
 ## New Features
 - Most unit tests now have a variant that checks whether using a fixed random seed gives reproducible results.
 - The build pipeline now contains a check that the jupyter notebooks give the same results as ones that were observed before.
