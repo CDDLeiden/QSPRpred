@@ -21,13 +21,13 @@ Quick Start
 QSPRpred can be installed with pip like so (with python >= 3.10):
 
 ```bash
-pip install git+https://github.com/CDDLeiden/QSPRPred.git@main
+pip install git+https://github.com/CDDLeiden/QSPRpred.git@main
 ```
 
 Note that this will install the basic dependencies, but not the optional dependencies. If you want to use the optional dependencies, you can install the package with an option:
 
 ```bash
-pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[<option>]
+pip install git+https://github.com/CDDLeiden/QSPRpred.git@main#egg=qsprpred[<option>]
 ```
 
 The following options are available:
@@ -38,7 +38,7 @@ The following options are available:
 
 ### Multiple Sequence Alignment Provider for Protein Descriptors
 
-If you plan to optionally use QSPRPred to calculate protein descriptors for PCM, make sure to also install Clustal Omega. You can get it via `conda`:
+If you plan to optionally use QSPRpred to calculate protein descriptors for PCM, make sure to also install Clustal Omega. You can get it via `conda`:
 
 ```bash
 
@@ -53,7 +53,7 @@ This is needed to provide multiple sequence alignments for the PCM descriptors.
 At the moment, we do not support protein descriptor calculation for PCM on Windows.
 
 ## Use
-After installation, you will have access to various command line features, but you can also use the Python API directly (see [Documentation](https://cddleiden.github.io/QSPRPred/docs/)). For a quick start, you can also check out the  [Jupyter notebook tutorials](./tutorial), which documents the use of the Python API to build different types of models. [This tutorial](./tutorial/tutorial_training.ipynb) shows how a QSAR model can be trained. [This tutorial](./tutorial/tutorial_usage.ipynb) shows how to use a QSAR model to predict the bioactivity of a set of molecules. The tutorials as well as the [documentation](https://cddleiden.github.io/QSPRPred/docs/use.html) are still work in progress, and we will be happy for any contributions where it is still lacking.
+After installation, you will have access to various command line features, but you can also use the Python API directly (see [Documentation](https://cddleiden.github.io/QSPRpred/docs/)). For a quick start, you can also check out the  [Jupyter notebook tutorials](./tutorial), which documents the use of the Python API to build different types of models. [This tutorial](./tutorial/tutorial_training.ipynb) shows how a QSAR model can be trained. [This tutorial](./tutorial/tutorial_usage.ipynb) shows how to use a QSAR model to predict the bioactivity of a set of molecules. The tutorials as well as the [documentation](https://cddleiden.github.io/QSPRpred/docs/use.html) are still work in progress, and we will be happy for any contributions where it is still lacking.
 
 To use the commandline to train the same QSAR model as in the tutorial use (run from tutorial folder):
 ```bash
