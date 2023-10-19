@@ -26,7 +26,7 @@ class SKLearnStandardizer:
         """Get scaler object."""
         return self.scaler
 
-    def __call__(self, features: np.array | pd.DataFrame) -> np.array:
+    def __call__(self, features: np.array) -> np.array:
         """Standardize features.
 
         Args:
@@ -35,7 +35,9 @@ class SKLearnStandardizer:
         Returns:
             features: array of standardized features
         """
-        features = features.values if isinstance(features, pd.DataFrame) else features
+        # if isinstance(features, np.ndarray):
+        #     features = pd.DataFrame(features)
+        # print(features)
         features = self.scaler.transform(features)
         logger.debug("Data standardized")
         return features
