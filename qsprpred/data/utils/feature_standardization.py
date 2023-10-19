@@ -1,5 +1,6 @@
 """This module is used for standardizing feature sets."""
 import numpy as np
+import pandas as pd
 import ml2json
 
 from ...logs import logger
@@ -25,7 +26,7 @@ class SKLearnStandardizer:
         """Get scaler object."""
         return self.scaler
 
-    def __call__(self, features: np.array) -> np.array:
+    def __call__(self, features: np.array | pd.DataFrame) -> np.array:
         """Standardize features.
 
         Args:
@@ -34,6 +35,7 @@ class SKLearnStandardizer:
         Returns:
             features: array of standardized features
         """
+        features = features.values if isinstance(features, pd.DataFrame) else features
         features = self.scaler.transform(features)
         logger.debug("Data standardized")
         return features
