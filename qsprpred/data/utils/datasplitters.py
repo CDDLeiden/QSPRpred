@@ -13,7 +13,7 @@ from sklearn.model_selection import ShuffleSplit
 
 from ...logs import logger
 from ..data import QSPRDataset
-from ..interfaces import DataSplit
+from ..interfaces import DataSplit, Randomized
 from .data_clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
@@ -23,7 +23,7 @@ from .data_clustering import (
 from .scaffolds import Murcko, Scaffold
 
 
-class RandomSplit(DataSplit):
+class RandomSplit(DataSplit, Randomized):
     """Splits dataset in random train and test subsets.
 
     Attributes:
@@ -32,36 +32,47 @@ class RandomSplit(DataSplit):
         seed (int):
             Random state to use for shuffling and other random operations.
     """
+
     def __init__(
         self,
         test_fraction=0.1,
         dataset: QSPRDataset | None = None,
         seed: int | None = None,
     ) -> None:
-        super().__init__(dataset=dataset)
+        DataSplit.__init__(self, dataset)
+        Randomized.__init__(self, seed)
         self.testFraction = test_fraction
-        self.seed = seed or (dataset.randomState if self.hasDataSet else None)
-
-    def setSeed(self, seed: int | None):
-        """Set the seed for this instance.
-
-        Args:
-            seed (int):
-                Random state to use for shuffling and other random operations.
-        """
-        self.seed = seed
+        self.setSeed(seed or (dataset.randomState if self.hasDataSet else None))
 
     def split(self, X, y):
         if self.seed is None:
-            self.seed = self.getDataSet().randomState if self.hasDataSet else None
+            self.seed = self.setSeed(
+                self.getDataSet().randomState if self.hasDataSet else None
+            )
         if self.seed is None:
             logger.warning(
                 "No random state supplied, "
                 "and could not find random state on the dataset."
+                "Random seed will be set randomly."
             )
         return ShuffleSplit(
             1, test_size=self.testFraction, random_state=self.seed
         ).split(X, y)
+
+
+class BootstrapSplit(DataSplit, Randomized):
+    def __init__(self, split: DataSplit, n_bootstraps=5, seed=None):
+        Randomized.__init__(self, seed)
+        self._split = split
+        self.n_bootstraps = n_bootstraps
+
+    def split(
+        self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
+    ) -> Iterable[tuple[list[int], list[int]]]:
+        if hasattr(self._split, "setSeed") and self.seed is not None:
+            self._split.setSeed(self.seed)
+        for i in range(self.n_bootstraps):
+            yield from self._split.split(X, y)
 
 
 class ManualSplit(DataSplit):
@@ -152,7 +163,7 @@ class TemporalSplit(DataSplit):
         """
         # Get dataset, dataframe and tasks
         ds = self.getDataSet()
-        df = ds.getDF().copy()
+        df = ds.getDF().loc[X.index, :].copy()
         task_names = [TargetProperty.name for TargetProperty in ds.targetProperties]
 
         assert len(task_names) > 0, "No target properties found."
@@ -240,7 +251,9 @@ class GBMTDataSplit(DataSplit):
 
         # Get dataset, dataframe and tasks
         ds = self.getDataSet()
-        df = ds.getDF().copy().reset_index(drop=True)  # need numeric index splits
+        df = ds.getDF().copy()  # need numeric index splits
+        df = df.loc[X.index, :]
+        df.reset_index(drop=True,  inplace=True)
         task_names = [TargetProperty.name for TargetProperty in ds.targetProperties]
 
         assert len(task_names) > 0, "No target properties found."
@@ -306,6 +319,7 @@ class GBMTRandomSplit(GBMTDataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset | None = None,
@@ -418,5 +432,5 @@ class ClusterSplit(GBMTDataSplit):
                 Random state to use for shuffling and other random operations.
         """
         self.seed = seed
-        if hasattr(self.clustering, 'seed'):
+        if hasattr(self.clustering, "seed"):
             self.clustering.seed = seed

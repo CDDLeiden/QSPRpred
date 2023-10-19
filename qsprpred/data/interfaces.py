@@ -133,6 +133,20 @@ class MoleculeDataSet(DataSet):
         """Indicates if the dataset has descriptors."""
 
 
+class Randomized:
+
+    def __init__(self, seed: int | None = None) -> None:
+        self.seed = seed
+
+    def setSeed(self, seed: int | None = None):
+        """Randomize an action."""
+        self.seed = seed
+
+    def getSeed(self):
+        """Get the seed used to randomize the action."""
+        return self.seed
+
+
 class DataSetDependant:
     """Classes that need a data set to operate have to implement this."""
     def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
@@ -187,6 +201,12 @@ class DataSplit(ABC, DataSetDependant):
             input data matrix X (note that these are integer indices, rather than a
             pandas index!)
         """
+
+    def splitDataset(self, dataset: "QSPRDataset"):
+        return self.split(
+            dataset.getFeatures(concat=True),
+            dataset.getTargetPropertiesValues(concat=True)
+        )
 
 
 class DataFilter(ABC):

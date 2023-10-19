@@ -4,7 +4,9 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import KFold
 
+from ..data.interfaces import DataSplit
 from ..logs import logger
 from .early_stopping import EarlyStoppingMode
 from .interfaces import AssessorMonitor, ModelAssessor, QSPRModel
@@ -19,13 +21,16 @@ class CrossValAssessor(ModelAssessor):
         monitor (AssessorMonitor): monitor to use for assessment
         mode (EarlyStoppingMode): mode to use for early stopping
     """
+
     def __init__(
         self,
+        split: DataSplit | None = None,
         monitor: AssessorMonitor = NullAssessorMonitor(),
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
     ):
         super().__init__(monitor, use_proba, mode)
+        self.split = split
 
     def __call__(
         self,
@@ -49,11 +54,15 @@ class CrossValAssessor(ModelAssessor):
             float | np.ndarray: predictions on the validation set
         """
         monitor = monitor or self.monitor
+        model.checkForData()
+        data = model.data
+        split = self.split or KFold(
+            n_splits=5, shuffle=True, random_state=data.randomState
+        )
         evalparams = model.parameters if parameters is None else parameters
         # check if data is available
-        model.checkForData()
-        X, _ = model.data.getFeatures()
-        y, _ = model.data.getTargetPropertiesValues()
+        X, _ = data.getFeatures()
+        y, _ = data.getTargetPropertiesValues()
         monitor.on_assessment_start(model, self.__class__.__name__)
         # prepare arrays to store molecule ids and predictions
         cvs_ids = np.array([None] * len(X))
@@ -64,13 +73,13 @@ class CrossValAssessor(ModelAssessor):
                 np.zeros((y.shape[0], prop.nClasses)) for prop in model.targetProperties
             ]
         # cross validation
-        folds = model.data.createFolds()
         fold_counter = np.zeros(y.shape[0])
-        for i, (X_train, X_test, y_train, y_test, idx_train,
-                idx_test) in enumerate(folds):
+        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(
+            data.iterFolds(split=split)
+        ):
             logger.debug(
-                "cross validation fold %s started: %s" %
-                (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                "cross validation fold %s started: %s"
+                % (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
             monitor.on_fold_start(
                 fold=i, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test
@@ -91,8 +100,8 @@ class CrossValAssessor(ModelAssessor):
             fold_counter[idx_test] = i
             cvs_ids[idx_test] = X.iloc[idx_test].index.to_numpy()
             logger.debug(
-                "cross validation fold %s ended: %s" %
-                (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                "cross validation fold %s ended: %s"
+                % (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
             monitor.on_fold_end(
                 model_fit,
@@ -106,7 +115,7 @@ class CrossValAssessor(ModelAssessor):
             )
         # save results
         if save:
-            index_name = model.data.getDF().index.name
+            index_name = data.getDF().index.name
             cvs_index = pd.Index(cvs_ids, name=index_name)
             self.savePredictionsToFile(
                 model, y, cvs, cvs_index, "cv", extra_columns={"Fold": fold_counter}
@@ -132,6 +141,7 @@ class TestSetAssessor(ModelAssessor):
         monitor (AssessorMonitor): monitor to use for assessment
         mode (EarlyStoppingMode): mode to use for early stopping
     """
+
     def __init__(
         self,
         monitor: AssessorMonitor = NullAssessorMonitor(),

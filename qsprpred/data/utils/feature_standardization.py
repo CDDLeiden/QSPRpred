@@ -1,5 +1,6 @@
 """This module is used for standardizing feature sets."""
 import numpy as np
+import pandas as pd
 import sklearn_json as skljson
 
 from ...logs import logger
@@ -93,6 +94,7 @@ def apply_feature_standardizer(feature_standardizer, X, fit=True):
     else:
         standardizer = SKLearnStandardizer(standardizer)
 
-    X = standardizer(X)
+    X_std = standardizer(X)
+    X = pd.DataFrame(X_std, index=X.index, columns=X.columns)
 
     return X, standardizer
