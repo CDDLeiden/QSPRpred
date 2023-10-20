@@ -8,6 +8,7 @@ from .interfaces import (
     HyperParameterOptimizationMonitor,
     QSPRModel,
 )
+import pandas as pd
 
 
 class NullFitMonitor(FitMonitor):
@@ -146,8 +147,8 @@ class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
                                   (e.g for cross-validation)
         """
 
-class WandBAssesmentMonitor(AssessorMonitor):
-    """Monitor assessment and fit to weights and biases."""
+class WandBMonitor(HyperParameterOptimizationMonitor):
+    """Monitor hyperparameter optimization to weights and biases."""
     def __init__(self, project_name: str, **kwargs):
         """Monitor assessment to weights and biases.
 
@@ -167,24 +168,6 @@ class WandBAssesmentMonitor(AssessorMonitor):
         self.projectName = project_name
         self.kwargs = kwargs
 
-    def on_assessment_start(self, model: QSPRModel, assesment_type: str):
-        """Called before the assessment has started.
-
-        Args:
-            model (QSPRModel): model to assess
-            assesment_type (str): type of assessment
-        """
-        self.model = model
-        self.data = model.data
-        self.assessmentType = assesment_type
-
-    def on_assessment_end(self):
-        """Called after the assessment has finished.
-
-        Args:
-            model (QSPRModel): model to assess
-        """
-
     def on_fold_start(
         self,
         fold: int,
@@ -202,22 +185,23 @@ class WandBAssesmentMonitor(AssessorMonitor):
             X_test (np.array): test data of the current fold
             y_test (np.array): test targets of the current fold
         """
+        super().on_fold_start(fold, X_train, y_train, X_test, y_test)
         config = {
             "fold": fold,
-            "model": self.model.name,
+            "model": self.assessmentModel.name,
             "assessmentType": self.assessmentType,
         }
         # add hyperparameter optimization parameters if available
         if hasattr(self, "optimizationType"):
             config["optimizationType"] = self.optimizationType
-            config.update(self.params)
-            config["hyperParamOpt_iteration"] = self.numIterations
+            config.update(self.parameters[self.iteration])
+            config["hyperParamOpt_iteration"] = self.iteration
         else:
             config["optimizationType"] = None
 
         group = (
-            f"{self.model.name}_{self.optimizationType}_{self.numIterations}"
-            if hasattr(self, "optimizationType") else f"{self.model.name}"
+            f"{self.model.name}_{self.optimizationType}_{self.iteration}"
+            if hasattr(self, "optimizationType") else f"{self.assessmentModel.name}"
         )
         name = f"{group}_{self.assessmentType}_{fold}"
 
@@ -226,23 +210,23 @@ class WandBAssesmentMonitor(AssessorMonitor):
             config=config,
             name=name,
             group=group,
-            dir=f"{self.model.outDir}",
+            dir=f"{self.assessmentModel.outDir}",
             **self.kwargs,
         )
-        self.fold = fold
 
     def on_fold_end(
-        self, fitted_estimator: Any | tuple[Any, int], predictions: np.ndarray
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
 
         Args:
-            fitted_estimator (Any |tuple[Any, int]):
+            model_fit (Any |tuple[Any, int]):
                 fitted estimator of the current fold
-            predictions (np.ndarray):
+            predictions (pd.DataFrame):
                 predictions of the current fold
         """
-        self.wandb.log({"Test Results" : self.wandb.Table(data=predictions)})
+        super().on_fold_end(model_fit, fold_predictions)
+        self.wandb.log({"Test Results" : self.wandb.Table(data=fold_predictions)})
         self.wandb.finish()
 
     def on_fit_start(self, estimator: Any):
@@ -297,58 +281,3 @@ class WandBAssesmentMonitor(AssessorMonitor):
             predictions (np.ndarray): predictions of the current batch
         """
         self.wandb.log({"batch": batch, "loss": loss})
-
-
-class WandBMonitor(WandBAssesmentMonitor, HyperParameterOptimizationMonitor):
-    def __init__(self, project_name: str, **kwargs):
-        """Monitor hyperparameter optimization to weights and biases.
-
-        Args:
-            project_name (str): name of the project to log to
-            kwargs: additional keyword arguments for wandb.init
-        """
-        super().__init__(project_name, **kwargs)
-        self.numIterations = 0
-
-    def on_optimization_start(
-        self, model: QSPRModel, config: dict, optimization_type: str
-    ):
-        """Called before the hyperparameter optimization has started.
-
-        Args:
-            config (dict): configuration of the hyperparameter optimization
-            optimization_type (str): type of optimization
-        """
-        self.optimizationType = optimization_type
-        self.model = model
-        self.data = model.data
-        self.config = config
-
-    def on_optimization_end(self, best_score: float, best_parameters: dict):
-        """Called after the hyperparameter optimization has finished.
-
-        Args:
-            best_score (float): best score found during optimization
-            best_parameters (dict): best parameters found during optimization
-        """
-        self.bestScore = best_score
-        self.bestParameters = best_parameters
-
-    def on_iteration_start(self, params: dict):
-        """Called before each iteration of the hyperparameter optimization.
-
-        Args:
-            params (dict): parameters used for the current iteration
-        """
-        self.params = params
-
-    def on_iteration_end(self, score: float, scores: list[float]):
-        """Called after each iteration of the hyperparameter optimization.
-
-        Args:
-            score (float): (aggregated) score of the current iteration
-            scores (list[float]): scores of the current iteration
-                                (e.g for cross-validation)
-        """
-        self.scores.loc[self.numIterations] = [score, scores]
-        self.numIterations += 1

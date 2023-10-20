@@ -108,7 +108,7 @@ class CrossValAssessor(ModelAssessor):
         if save:
             pd.concat(predictions).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
 
-        monitor.on_assessment_end()
+        monitor.on_assessment_end(pd.concat(predictions))
 
         return scores
 
@@ -180,4 +180,6 @@ class TestSetAssessor(ModelAssessor):
         # predict values for independent test set and save results
         if save:
             predictions_df.to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
+
+        monitor.on_assessment_end(predictions_df)
         return [score]
