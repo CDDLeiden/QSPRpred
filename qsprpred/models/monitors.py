@@ -13,11 +13,11 @@ import pandas as pd
 
 class NullFitMonitor(FitMonitor):
     """Null monitor that does nothing."""
-    def on_fit_start(self, estimator: Any):
+    def on_fit_start(self, model: QSPRModel):
         """Called before the training has started.
 
         Args:
-            estimator (Any): estimator to train
+            model (QSPRModel): estimator to train
         """
 
     def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
@@ -53,13 +53,12 @@ class NullFitMonitor(FitMonitor):
             batch (int): index of the current batch
         """
 
-    def on_batch_end(self, batch: int, loss: float, predictions: np.ndarray):
+    def on_batch_end(self, batch: int, loss: float):
         """Called after each batch of the training.
 
         Args:
             batch (int): index of the current batch
             loss (float): loss of the current batch
-            predictions (np.ndarray): predictions of the current batch
         """
 
 
@@ -229,12 +228,23 @@ class WandBMonitor(HyperParameterOptimizationMonitor):
         self.wandb.log({"Test Results" : self.wandb.Table(data=fold_predictions)})
         self.wandb.finish()
 
-    def on_fit_start(self, estimator: Any):
+    def on_fit_start(self, model: QSPRModel):
         """Called before the training has started.
 
         Args:
-            estimator (Any): estimator to train
+            model (QSPRModel): model to train
         """
+        super().on_fit_start(model)
+        # initialize wandb run if not already initialized
+        if not self.wandb.run:
+            self.wandb.init(
+                project=self.projectName,
+                config={"model": self.fitModel.name},
+                name=f"{self.fitModel.name}_fit",
+                group=self.fitModel.name,
+                dir=f"{self.fitModel.outDir}",
+                **self.kwargs,
+            )
 
     def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
@@ -243,15 +253,11 @@ class WandBMonitor(HyperParameterOptimizationMonitor):
             estimator (Any): estimator that was fitted
             best_epoch (int | None): index of the best epoch
         """
+        super().on_fit_end(estimator, best_epoch)
         self.wandb.log({"best_epoch": best_epoch})
-
-    def on_epoch_start(self, epoch: int):
-        """Called before each epoch of the training.
-
-        Args:
-            epoch (int): index of the current epoch
-        """
-        self.epochnr = epoch
+        # finish wandb run if not already finished
+        if not hasattr(self, "assessmentType"):
+            self.wandb.finish()
 
     def on_epoch_end(
         self, epoch: int, train_loss: float, val_loss: float | None = None
@@ -263,16 +269,10 @@ class WandBMonitor(HyperParameterOptimizationMonitor):
             train_loss (float): loss of the current epoch
             val_loss (float | None): validation loss of the current epoch
         """
+        super().on_epoch_end(epoch, train_loss, val_loss)
         self.wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
 
-    def on_batch_start(self, batch: int):
-        """Called before each batch of the training.
-
-        Args:
-            batch (int): index of the current batch
-        """
-
-    def on_batch_end(self, batch: int, loss: float, predictions: np.ndarray):
+    def on_batch_end(self, batch: int, loss: float):
         """Called after each batch of the training.
 
         Args:
@@ -280,4 +280,5 @@ class WandBMonitor(HyperParameterOptimizationMonitor):
             loss (float): loss of the current batch
             predictions (np.ndarray): predictions of the current batch
         """
+        super().on_batch_end(batch, loss)
         self.wandb.log({"batch": batch, "loss": loss})

@@ -277,7 +277,7 @@ class DNNModel(QSPRModel):
         """
         estimator = self.estimator if estimator is None else estimator
         X, y = self.convertToNumpy(X, y)
-        monitor.on_fit_start(estimator)
+        monitor.on_fit_start(self)
 
         if self.earlyStopping:
             # split cross validation fold train set into train
@@ -291,7 +291,7 @@ class DNNModel(QSPRModel):
 
         # set fixed number of epochs if early stopping is not used
         estimator.n_epochs = self.earlyStopping.getEpochs()
-        estimator_fit = estimator.fit(X, y, **kwargs)
+        estimator_fit = estimator.fit(X, y, monitor=monitor, **kwargs)
         monitor.on_fit_end(estimator_fit)
         return estimator_fit
 

@@ -174,7 +174,7 @@ class Base(nn.Module):
                     loss = self.criterion(y_, yb)
                 loss.backward()
                 optimizer.step()
-                monitor.on_batch_end(i, loss, y_)
+                monitor.on_batch_end(i, float(loss))
             if patience == -1:
                 if log:
                     print(

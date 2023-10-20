@@ -942,20 +942,33 @@ class QSPRModel(ABC):
         """
 
 
-class BaseMonitor:
-    """Base class for monitoring the training of a model."""
+class FitMonitor():
+    """Base class for monitoring the fitting of a model.
 
-class FitMonitor(ABC, BaseMonitor):
-    """Base class for monitoring the training of a model."""
-    @abstractmethod
-    def on_fit_start(self, estimator: Any):
-        """Called before the training has started.
+    Attributes:
+        fitModel (QSPRModel): model to fit
+        fitLog (pd.DataFrame): log of the training process
+        batchLog (pd.DataFrame): log of the training process per batch
+        currentEpoch (int): index of the current epoch
+        currentBatch (int): index of the current batch
+        bestEstimator (Any): best estimator of the training process
+        bestEpoch (int): index of the best epoch
+    """
+    def __init__(self):
+        self.fitModel = None
+        self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
+        self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
+        self.currentEpoch = None
+        self.currentBatch = None
+        self.bestEstimator = None
+        self.bestEpoch = None
 
-        Args:
-            estimator (Any): estimator to train
-        """
+    def on_fit_start(self, model: QSPRModel):
+        """Called before the training has started."""
+        self.fitModel = model
+        self.currentEpoch = 0
+        self.currentBatch = 0
 
-    @abstractmethod
     def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
 
@@ -963,16 +976,17 @@ class FitMonitor(ABC, BaseMonitor):
             estimator (Any): estimator that was fitted
             best_epoch (int | None): index of the best epoch
         """
+        self.bestEstimator = estimator
+        self.bestEpoch = best_epoch
 
-    @abstractmethod
     def on_epoch_start(self, epoch: int):
         """Called before each epoch of the training.
 
         Args:
             epoch (int): index of the current epoch
         """
+        self.currentEpoch = epoch
 
-    @abstractmethod
     def on_epoch_end(
         self, epoch: int, train_loss: float, val_loss: float | None = None
     ):
@@ -983,24 +997,40 @@ class FitMonitor(ABC, BaseMonitor):
             train_loss (float): loss of the current epoch
             val_loss (float | None): validation loss of the current epoch
         """
+        self.fitLog.loc[epoch] = [epoch, train_loss, val_loss]
 
-    @abstractmethod
     def on_batch_start(self, batch: int):
         """Called before each batch of the training.
 
         Args:
             batch (int): index of the current batch
         """
+        self.currentBatch = batch
 
-    @abstractmethod
-    def on_batch_end(self, batch: int, loss: float, predictions: np.ndarray):
+    def on_batch_end(self, batch: int, loss: float):
         """Called after each batch of the training.
 
         Args:
             batch (int): index of the current batch
             loss (float): loss of the current batch
-            predictions (np.ndarray): predictions of the current batch
         """
+        self.batchLog.loc[len(self.batchLog)] = [self.currentEpoch, batch, loss]
+
+    def _clearFit(self):
+        self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
+        self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
+        self.currentEpoch = None
+        self.currentBatch = None
+        self.bestEstimator = None
+        self.bestEpoch = None
+
+    def _getFit(self) -> tuple[pd.DataFrame, pd.DataFrame, Any, int]:
+        return {
+            "fitLog": self.fitLog,
+            "batchLog": self.batchLog,
+            "bestEstimator": self.bestEstimator,
+            "bestEpoch": self.bestEpoch
+        }
 
 
 class AssessorMonitor(FitMonitor):
@@ -1013,6 +1043,8 @@ class AssessorMonitor(FitMonitor):
         foldData (dict): dictionary of input data, keyed by the fold index
         predictions (np.ndarray): predictions of the current fold
         estimators (dict): dictionary of fitted estimators, keyed by the fold index
+        currentFold (int): index of the current fold
+        fits (dict): dictionary of fit data, keyed by the fold index
     """
     def __init__(self) -> None:
         self.assessmentModel = None
@@ -1021,6 +1053,8 @@ class AssessorMonitor(FitMonitor):
         self.predictions = None
         self.estimators = {}
         self.currentFold = None
+        self.fits = {}
+        super().__init__()
 
     def on_assessment_start(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
@@ -1073,6 +1107,8 @@ class AssessorMonitor(FitMonitor):
             predictions (pd.DataFrame): predictions of the current fold
         """
         self.estimators[self.currentFold] = model_fit
+        self.fits[self.currentFold] = self._getFit()
+        self._clearFit()
 
     def _clear_assessment(self):
         """Clear the assessment data."""
@@ -1157,7 +1193,6 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
             score (float): (aggregated) score of the current iteration
             scores (list[float]): scores of the current iteration
                                   (e.g for cross-validation)
-            predictions (list[np.ndarray]): predictions of the current iteration
         """
         self.scores.loc[self.iteration] = [score, scores]
         self.assessments[self.iteration] = self._get_assessment()
