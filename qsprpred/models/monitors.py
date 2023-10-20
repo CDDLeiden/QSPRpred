@@ -155,6 +155,7 @@ class WandBAssesmentMonitor(AssessorMonitor):
             project_name (str): name of the project to log to
             kwargs: additional keyword arguments for wandb.init
         """
+        super().__init__()
         try:
             import wandb
         except ImportError:
@@ -165,7 +166,6 @@ class WandBAssesmentMonitor(AssessorMonitor):
 
         self.projectName = project_name
         self.kwargs = kwargs
-        self.numIterations = 0
 
     def on_assessment_start(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
@@ -175,6 +175,7 @@ class WandBAssesmentMonitor(AssessorMonitor):
             assesment_type (str): type of assessment
         """
         self.model = model
+        self.data = model.data
         self.assessmentType = assesment_type
 
     def on_assessment_end(self):
@@ -211,8 +212,6 @@ class WandBAssesmentMonitor(AssessorMonitor):
             config["optimizationType"] = self.optimizationType
             config.update(self.params)
             config["hyperParamOpt_iteration"] = self.numIterations
-            new_runid = self.wandb.util.generate_id()
-            self.wandb_runids.append(new_runid)
         else:
             config["optimizationType"] = None
 
@@ -228,7 +227,6 @@ class WandBAssesmentMonitor(AssessorMonitor):
             name=name,
             group=group,
             dir=f"{self.model.outDir}",
-            id=new_runid if hasattr(self, "wandb_runids") else None,
             **self.kwargs,
         )
         self.fold = fold
@@ -244,14 +242,7 @@ class WandBAssesmentMonitor(AssessorMonitor):
             predictions (np.ndarray):
                 predictions of the current fold
         """
-        self.wandb.log(
-            {
-                "Test Results":
-                    self.wandb.Table(
-                        data=predictions.values, columns=list(predictions.columns)
-                    )
-            }
-        )
+        self.wandb.log({"Test Results" : self.wandb.Table(data=predictions)})
         self.wandb.finish()
 
     def on_fit_start(self, estimator: Any):
@@ -268,6 +259,7 @@ class WandBAssesmentMonitor(AssessorMonitor):
             estimator (Any): estimator that was fitted
             best_epoch (int | None): index of the best epoch
         """
+        self.wandb.log({"best_epoch": best_epoch})
 
     def on_epoch_start(self, epoch: int):
         """Called before each epoch of the training.
@@ -307,7 +299,7 @@ class WandBAssesmentMonitor(AssessorMonitor):
         self.wandb.log({"batch": batch, "loss": loss})
 
 
-class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
+class WandBMonitor(WandBAssesmentMonitor, HyperParameterOptimizationMonitor):
     def __init__(self, project_name: str, **kwargs):
         """Monitor hyperparameter optimization to weights and biases.
 
@@ -315,16 +307,7 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
             project_name (str): name of the project to log to
             kwargs: additional keyword arguments for wandb.init
         """
-        try:
-            import wandb
-        except ImportError:
-            raise ImportError("WandBMonitor requires wandb to be installed.")
-        self.wandb = wandb
-
-        wandb.login()
-
-        self.projectName = project_name
-        self.kwargs = kwargs
+        super().__init__(project_name, **kwargs)
         self.numIterations = 0
 
     def on_optimization_start(
@@ -338,6 +321,8 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
         """
         self.optimizationType = optimization_type
         self.model = model
+        self.data = model.data
+        self.config = config
 
     def on_optimization_end(self, best_score: float, best_parameters: dict):
         """Called after the hyperparameter optimization has finished.
@@ -346,6 +331,8 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
             best_score (float): best score found during optimization
             best_parameters (dict): best parameters found during optimization
         """
+        self.bestScore = best_score
+        self.bestParameters = best_parameters
 
     def on_iteration_start(self, params: dict):
         """Called before each iteration of the hyperparameter optimization.
@@ -353,7 +340,6 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
         Args:
             params (dict): parameters used for the current iteration
         """
-        self.wandb_runids = []
         self.params = params
 
     def on_iteration_end(self, score: float, scores: list[float]):
@@ -364,14 +350,5 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
             scores (list[float]): scores of the current iteration
                                 (e.g for cross-validation)
         """
-        for i, runid in enumerate(self.wandb_runids):
-            self.wandb.init(
-                id=runid, resume="must", project=self.projectName, **self.kwargs
-            )
-            self.wandb.run.summary["Run scores"] = {
-                "fold_score": scores[i],
-                "aggregated_score": score,
-            }
-            self.wandb.finish()
+        self.scores.loc[self.numIterations] = [score, scores]
         self.numIterations += 1
-        self.wandb_runids = []

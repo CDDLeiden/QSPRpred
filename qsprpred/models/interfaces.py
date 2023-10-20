@@ -23,7 +23,6 @@ from ..models.metrics import SklearnMetric
 from ..models.tasks import ModelTasks
 from ..utils.inspect import import_class
 
-
 class QSPRModel(ABC):
     """The definition of the common model interface for the package.
 
@@ -282,12 +281,11 @@ class QSPRModel(ABC):
                 self.parameters.update({"random_state": new_random_state})
             else:
                 self.parameters = {"random_state": new_random_state}
-        else:
-            if random_state:
-                logger.warning(
-                    f"Random state supplied, but alg {self.alg} does not support it."
-                    " Ignoring this setting."
-                )
+        elif random_state:
+            logger.warning(
+                f"Random state supplied, but alg {self.alg} does not support it."
+                " Ignoring this setting."
+            )
 
     def __init__(
         self,
@@ -945,11 +943,7 @@ class QSPRModel(ABC):
 
 
 class BaseMonitor:
-    """Base class for monitoring the training of a model.
-
-    Attributes:
-    """
-
+    """Base class for monitoring the training of a model."""
 
 class FitMonitor(ABC, BaseMonitor):
     """Base class for monitoring the training of a model."""
@@ -1010,7 +1004,18 @@ class FitMonitor(ABC, BaseMonitor):
 
 
 class AssessorMonitor(FitMonitor):
-    """Base class for monitoring the assessment of a model."""
+    """Base class for monitoring the assessment of a model.
+
+    Attributes:
+        model (QSPRModel): model to assess
+        data (QSPRDataset): data set used to train the model
+        predictions (np.ndarray): predictions of the current fold
+    """
+    def __init__(self) -> None:
+        self.model = None
+        self.data = None
+        self.predictions = None
+
     @abstractmethod
     def on_assessment_start(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
@@ -1044,19 +1049,36 @@ class AssessorMonitor(FitMonitor):
         """
 
     @abstractmethod
-    def on_fold_end(self, model_fit: Any | tuple[Any, int], predictions: np.ndarray):
+    def on_fold_end(self, model_fit: Any | tuple[Any, int], predictions: pd.DataFrame):
         """Called after each fold of the assessment.
 
         Args:
             model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
-            predictions (np.ndarray): predictions of the current fold
+            predictions (pd.DataFrame): predictions of the current fold
         """
 
 
 class HyperParameterOptimizationMonitor(AssessorMonitor):
-    """Base class for monitoring the hyperparameter optimization of a model."""
+    """Base class for monitoring the hyperparameter optimization of a model.
+
+    Attributes:
+        config (dict): configuration of the hyperparameter optimization
+        bestScore (float): best score found during optimization
+        bestParameters (dict): best parameters found during optimization
+        assessments (dict): dictionary of assessments, keyed by the iteration number
+        scores (pd.DataFrame): dataframe containing the scores of each iteration
+        model (QSPRModel): model to optimize
+        data (QSPRDataset): data set used to train the model
+    """
+    def __init__(self):
+        self.config = None
+        self.bestScore = None
+        self.bestParameters = None
+        self.assessments = {}
+        self.scores = pd.DataFrame(columns=["aggregated_score", "fold_scores"])
+
     @abstractmethod
     def on_optimization_start(
         self, model: QSPRModel, config: dict, optimization_type: str
