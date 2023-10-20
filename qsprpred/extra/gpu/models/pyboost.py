@@ -130,7 +130,7 @@ class PyBoostModel(QSPRModel):
             (GzipKNNAlgorithm): fitted estimator instance
         """
         estimator = self.estimator if estimator is None else estimator
-        monitor.on_fit_start(estimator)
+        monitor.on_fit_start(self)
         X, y = self.convertToNumpy(X, y)
 
         if self.task == ModelTasks.MULTICLASS:

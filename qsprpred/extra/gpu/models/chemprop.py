@@ -193,7 +193,7 @@ class ChempropModel(QSPRModel):
                 after which the model stopped training
         """
         estimator = self.estimator if estimator is None else estimator
-        monitor.on_fit_start(estimator)
+        monitor.on_fit_start(self)
 
         # convert data to chemprop MoleculeDataset
         data = self.convertToMoleculeDataset(X, y)
