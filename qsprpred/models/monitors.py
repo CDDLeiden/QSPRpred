@@ -34,7 +34,9 @@ class NullFitMonitor(FitMonitor):
             epoch (int): index of the current epoch
         """
 
-    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None = None):
+    def on_epoch_end(
+        self, epoch: int, train_loss: float, val_loss: float | None = None
+    ):
         """Called after each epoch of the training.
 
         Args:
@@ -59,6 +61,7 @@ class NullFitMonitor(FitMonitor):
             predictions (np.ndarray): predictions of the current batch
         """
 
+
 class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
     """Null monitor that does nothing."""
     def on_assessment_start(self, model: QSPRModel, assesment_type: str):
@@ -69,7 +72,7 @@ class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
             assesment_type (str): type of assessment
         """
 
-    def on_assessment_end(self, model: QSPRModel):
+    def on_assessment_end(self):
         """Called after the assessment has finished.
 
         Args:
@@ -134,16 +137,13 @@ class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
             params (dict): parameters used for the current iteration
         """
 
-    def on_iteration_end(
-        self, score: float, scores: list[float], predictions: list[np.ndarray]
-    ):
+    def on_iteration_end(self, score: float, scores: list[float]):
         """Called after each iteration of the hyperparameter optimization.
 
         Args:
             score (float): (aggregated) score of the current iteration
             scores (list[float]): scores of the current iteration
                                   (e.g for cross-validation)
-            predictions (list[np.ndarray]): predictions of the current iteration
         """
 
 
@@ -178,21 +178,17 @@ class PrintMonitor(HyperParameterOptimizationMonitor):
         print("Iteration started.")
         print("Parameters: %s" % params)
 
-    def on_iteration_end(
-        self, score: float, scores: list[float], predictions: list[np.ndarray]
-    ):
+    def on_iteration_end(self, score: float, scores: list[float]):
         """Called after each iteration of the hyperparameter optimization.
 
         Args:
             score (float): (aggregated) score of the current iteration
             scores (list[float]): scores of the current iteration
                                   (e.g for cross-validation)
-            predictions (list[np.ndarray]): predictions of the current iteration
         """
         print("Iteration finished.")
         print("Score: %s" % score)
         print("Scores: %s" % scores)
-        print("Predictions: %s" % predictions)
 
 
 class WandBAssesmentMonitor(AssessorMonitor):
@@ -226,7 +222,7 @@ class WandBAssesmentMonitor(AssessorMonitor):
         self.model = model
         self.assessmentType = assesment_type
 
-    def on_assessment_end(self, model: QSPRModel):
+    def on_assessment_end(self):
         """Called after the assessment has finished.
 
         Args:
@@ -250,7 +246,11 @@ class WandBAssesmentMonitor(AssessorMonitor):
             X_test (np.array): test data of the current fold
             y_test (np.array): test targets of the current fold
         """
-        config = {"fold": fold, "model": self.model.name, "assessmentType": self.assessmentType}
+        config = {
+            "fold": fold,
+            "model": self.model.name,
+            "assessmentType": self.assessmentType,
+        }
         # add hyperparameter optimization parameters if available
         if hasattr(self, "optimizationType"):
             config["optimizationType"] = self.optimizationType
@@ -322,7 +322,9 @@ class WandBAssesmentMonitor(AssessorMonitor):
         """
         self.epochnr = epoch
 
-    def on_epoch_end(self, epoch: int, train_loss: float, val_loss: float | None = None):
+    def on_epoch_end(
+        self, epoch: int, train_loss: float, val_loss: float | None = None
+    ):
         """Called after each epoch of the training.
 
         Args:
@@ -399,16 +401,13 @@ class WandBMonitor(HyperParameterOptimizationMonitor, WandBAssesmentMonitor):
         self.wandb_runids = []
         self.params = params
 
-    def on_iteration_end(
-        self, score: float, scores: list[float], predictions: list[np.ndarray]
-    ):
+    def on_iteration_end(self, score: float, scores: list[float]):
         """Called after each iteration of the hyperparameter optimization.
 
         Args:
             score (float): (aggregated) score of the current iteration
             scores (list[float]): scores of the current iteration
                                 (e.g for cross-validation)
-            predictions (list[np.ndarray]): predictions of the current iteration
         """
         for i, runid in enumerate(self.wandb_runids):
             self.wandb.init(

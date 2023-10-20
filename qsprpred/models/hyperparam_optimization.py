@@ -8,7 +8,6 @@ import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
 from ..logs import logger
-from ..models.assessment_methods import CrossValAssessor
 from ..models.interfaces import (
     HyperParameterOptimization,
     HyperParameterOptimizationMonitor,
@@ -51,9 +50,8 @@ class OptunaOptimization(HyperParameterOptimization):
     """
     def __init__(
         self,
-        scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
-        model_assessor: ModelAssessor = CrossValAssessor(),
+        model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float] = np.mean,
         monitor: HyperParameterOptimizationMonitor = NullMonitor(),
         n_trials: int = 100,
@@ -63,8 +61,6 @@ class OptunaOptimization(HyperParameterOptimization):
         of QSPRModels using Optuna.
 
         Args:
-            scoring (str | Callable[[Iterable, Iterable], float]]):
-                scoring function for the optimization.
             param_grid (dict):
                 search space for bayesian optimization, keys are the parameter names,
                 values are lists with first element the type of the parameter and the
@@ -81,9 +77,7 @@ class OptunaOptimization(HyperParameterOptimization):
                 number of jobs to run in parallel.
                 At the moment only n_jobs=1 is supported.
         """
-        super().__init__(
-            scoring, param_grid, model_assessor, score_aggregation, monitor
-        )
+        super().__init__(param_grid, model_assessor, score_aggregation, monitor)
         search_space_types = [
             "categorical",
             "discrete_uniform",
@@ -112,7 +106,6 @@ class OptunaOptimization(HyperParameterOptimization):
         self.bestScore = -np.inf
         self.bestParams = None
         self.config = {
-            "scoring": scoring,
             "param_grid": param_grid,
             "model_assessor": model_assessor,
             "score_aggregation": score_aggregation,
@@ -133,7 +126,6 @@ class OptunaOptimization(HyperParameterOptimization):
         import optuna
 
         self.monitor.on_optimization_start(model, self.config, self.__class__.__name__)
-        self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
 
         logger.info(
             "Bayesian optimization can take a while "
@@ -198,27 +190,17 @@ class OptunaOptimization(HyperParameterOptimization):
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
         self.monitor.on_iteration_start(bayesian_params)
         # assess the model with the current parameters and return the score
-        predictions = self.runAssessment(
+        scores = self.runAssessment(
             model,
             save=False,
             parameters=bayesian_params,
             monitor=self.monitor,
             **kwargs,
         )
-        scores = []
-        # TODO: this should be removed once random seeds are fixed
-        for pred in predictions:
-            if model.task.isClassification():
-                # check if more than 1 class in y_true
-                if not len(np.unique(pred[0])) > 1:
-                    logger.warning("Only 1 class in y_true, skipping fold.")
-            scores.append(self.scoreFunc(*pred))
-        assert len(scores) > 0, "No scores calculated, all folds skipped."
-
         score = self.scoreAggregation(scores)
         logger.info(bayesian_params)
         logger.info(f"Score: {score}, std: {np.std(scores)}")
-        self.monitor.on_iteration_end(score, scores, predictions)
+        self.monitor.on_iteration_end(score, scores)
         return score
 
 
@@ -226,17 +208,14 @@ class GridSearchOptimization(HyperParameterOptimization):
     """Class for hyperparameter optimization of QSPRModels using GridSearch."""
     def __init__(
         self,
-        scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
-        model_assessor: ModelAssessor = CrossValAssessor(),
+        model_assessor: ModelAssessor,
         monitor: HyperParameterOptimizationMonitor = NullMonitor(),
         score_aggregation: Callable = np.mean,
     ):
         """Initialize the class.
 
         Args:
-            scoring (Union[str, Callable[[Iterable, Iterable], Iterable]]):
-                metric name from sklearn.metrics or user-defined scoring function.
             param_grid (dict):
                 dictionary with parameter names as keys and lists of parameter settings
                 to try as values
@@ -248,9 +227,7 @@ class GridSearchOptimization(HyperParameterOptimization):
                 function to aggregate the scores of different folds if the assessment
                 method returns multiple predictions (default: np.mean)
         """
-        super().__init__(
-            scoring, param_grid, model_assessor, score_aggregation, monitor
-        )
+        super().__init__(param_grid, model_assessor, score_aggregation, monitor)
 
     def optimize(self, model: QSPRModel, save_params: bool = True, **kwargs) -> dict:
         """Optimize the hyperparameters of the model.
@@ -266,25 +243,14 @@ class GridSearchOptimization(HyperParameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
-        self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
         logger.info(
             "Grid search started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         for params in ParameterGrid(self.paramGrid):
             logger.info(params)
-            predictions = self.runAssessment(
+            scores = self.runAssessment(
                 model, save=False, parameters=params, monitor=self.monitor, **kwargs
             )
-            scores = []
-            # TODO: this should be removed once random seeds are fixed
-            for pred in predictions:
-                if model.task.isClassification():
-                    # check if more than 1 class in y_true
-                    if not len(np.unique(pred[0])) > 1:
-                        logger.warning("Only 1 class in y_true, skipping fold.")
-                scores.append(self.scoreFunc(*pred))
-            assert len(scores) > 0, "No scores calculated, all folds skipped."
-            # scores = [self.scoreFunc(*pred) for pred in predictions]
             score = self.scoreAggregation(scores)
             logger.info(f"Score: {score}, std: {np.std(scores)}")
             if score > self.bestScore:
