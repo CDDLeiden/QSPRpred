@@ -72,11 +72,11 @@ class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
             assesment_type (str): type of assessment
         """
 
-    def on_assessment_end(self):
+    def on_assessment_end(self, predictions: pd.DataFrame):
         """Called after the assessment has finished.
 
         Args:
-            model (QSPRModel): model to assess
+            predictions (pd.DataFrame): predictions of the assessment
         """
 
     def on_fold_start(
