@@ -9,7 +9,18 @@ from .feature_standardization import apply_feature_standardizer
 class FoldGenerator(ABC):
 
     @abstractmethod
-    def iterFolds(self, dataset: "QSPRDataset") -> Generator[tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame | pd.Series, pd.DataFrame | pd.Series, list[int], list[int]], None, None]:
+    def iterFolds(
+            self,
+            dataset: "QSPRDataset",
+            concat=False
+    ) -> Generator[tuple[
+        pd.DataFrame,
+        pd.DataFrame,
+        pd.DataFrame | pd.Series,
+        pd.DataFrame | pd.Series,
+        list[int],
+        list[int]
+    ], None, None]:
         pass
 
     def getFolds(self, dataset: "QSPRDataset"):
@@ -37,7 +48,18 @@ class FoldsFromDataSplit(FoldGenerator):
         self.split = split
         self.featureStandardizer = feature_standardizer
 
-    def _make_folds(self, X: pd.DataFrame, y: pd.DataFrame | pd.Series) -> Generator[tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame | pd.Series, pd.DataFrame | pd.Series, list[int], list[int]], None, None]:
+    def _make_folds(
+        self,
+        X: pd.DataFrame,
+        y: pd.DataFrame | pd.Series
+    ) -> Generator[tuple[
+        pd.DataFrame,
+        pd.DataFrame,
+        pd.DataFrame | pd.Series,
+        pd.DataFrame | pd.Series,
+        list[int],
+        list[int]
+    ], None, None]:
         """A generator that converts folds as returned by the splitter to a tuple of
         (X_train, X_test, y_train, y_test, train_index, test_index).
 
@@ -53,7 +75,18 @@ class FoldsFromDataSplit(FoldGenerator):
             yield X.iloc[train_index, :], X.iloc[test_index, :], y.iloc[
                 train_index], y.iloc[test_index], train_index, test_index
 
-    def iterFolds(self, dataset: "QSPRDataset") -> Generator[tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame | pd.Series, pd.DataFrame | pd.Series, list[int], list[int]], None, None]:
+    def iterFolds(
+            self,
+            dataset: "QSPRDataset",
+            concat=False
+    ) -> Generator[tuple[
+        pd.DataFrame,
+        pd.DataFrame,
+        pd.DataFrame | pd.Series,
+        pd.DataFrame | pd.Series,
+        list[int],
+        list[int]
+    ], None, None]:
         """Create folds from X and y. Can be used either for cross-validation,
         bootstrapping or train-test split.
 
@@ -81,8 +114,12 @@ class FoldsFromDataSplit(FoldGenerator):
         if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
             if self.split.getSeed() is None:
                 self.split.setSeed(dataset.randomState)
-
+        features = dataset.getFeatures(raw=True, concat=concat)
+        targets = dataset.getTargetPropertiesValues(concat=concat)
+        if not concat:
+            features = features[0]
+            targets = targets[0]
         if self.featureStandardizer:
-            return self._standardize_folds(self._make_folds(dataset.getFeatures(raw=True)[0], dataset.getTargetPropertiesValues()[0]))
+            return self._standardize_folds(self._make_folds(features, targets))
         else:
-            return self._make_folds(dataset.getFeatures(raw=True)[0], dataset.getTargetPropertiesValues()[0])
+            return self._make_folds(features, targets)

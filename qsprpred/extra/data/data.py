@@ -297,3 +297,4 @@ class PCMDataSet(QSPRDataset):
                 )
             else:
                 raise ValueError("Unknown feature calculator type: %s" % type(calc))
+        self.featurize(update_splits=True)

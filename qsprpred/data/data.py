@@ -943,7 +943,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         self.attachDescriptors(calculator, descriptors, self.indexCols)
 
     def getDescriptors(self):
-        """Get the subset of the data frame that contains only descriptors.
+        """Get the calculated descriptors as a pandas data frame.
 
         Returns:
             pd.DataFrame: Data frame containing only descriptors.
@@ -1538,7 +1538,7 @@ class QSPRDataset(MoleculeTable):
             overwrite,
             n_jobs,
             chunk_size,
-            drop_invalids,
+            False,
             index_cols,
             id_prefix,
             random_state,
@@ -1562,6 +1562,8 @@ class QSPRDataset(MoleculeTable):
         self.y = None
         self.X_ind = None
         self.y_ind = None
+        if drop_invalids:
+            self.dropInvalids()
         self.restoreTrainingData()
         logger.info(
             f"Dataset '{self.name}' created for target "
@@ -1716,8 +1718,19 @@ class QSPRDataset(MoleculeTable):
         be empty. If descriptors are available, the resulting training matrices will
             be featurized.
         """
-        self.loadDataToSplits()
-        self.featurizeSplits()
+        # split data into training and independent sets if saved previously
+        if "Split_IsTrain" in self.df.columns:
+            self.y = self.df.query("Split_IsTrain")[self.targetPropertyNames]
+            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index), self.targetPropertyNames]
+        else:
+            self.y = self.df[self.targetPropertyNames]
+            self.y_ind = self.df.loc[
+                ~self.df.index.isin(self.y.index),
+                self.targetPropertyNames
+            ]
+        self.X = self.y.drop(self.y.columns, axis=1)
+        self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
+        self.featurizeSplits(shuffle=False)
 
     def makeRegression(self, target_property: TargetProperty | str):
         """Switch to regression task using the given target property.
@@ -1916,6 +1929,15 @@ class QSPRDataset(MoleculeTable):
         super().addCustomDescriptors(calculator, recalculate, **kwargs)
         self.featurize(update_splits=featurize)
 
+    def filter(self, table_filters: list[Callable]):
+        """Filter the data set using the given filters.
+
+        Args:
+            table_filters (list[Callable]): list of filters to apply
+        """
+        super().filter(table_filters)
+        self.featurize()
+
     def addDescriptors(
         self,
         calculator: "MoleculeDescriptorsCalculator",  # noqa: F821
@@ -1943,7 +1965,7 @@ class QSPRDataset(MoleculeTable):
     def featurize(self, update_splits=True):
         self.featureNames = self.getFeatureNames()
         if update_splits:
-            self.featurizeSplits()
+            self.featurizeSplits(shuffle=False)
 
     def saveSplit(self):
         """Save split data to the managed data frame."""
@@ -1987,7 +2009,9 @@ class QSPRDataset(MoleculeTable):
             split.setDataSet(self)
         # split the data into train and test
         folds = FoldsFromDataSplit(split)
-        self.X, self.X_ind, self.y, self.y_ind, _, _ = next(folds.iterFolds(self))
+        self.X, self.X_ind, self.y, self.y_ind, _, _ = next(
+            folds.iterFolds(self, concat=True)
+        )
         # select target properties
         logger.info("Total: train: %s test: %s" % (len(self.y), len(self.y_ind)))
         for prop in self.targetProperties:
@@ -2025,26 +2049,7 @@ class QSPRDataset(MoleculeTable):
                     self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
         # convert splits to features if required
         if featurize:
-            self.featurizeSplits()
-
-    def loadDataToSplits(self):
-        """Load the data frame into the train and test splits.
-
-        Loads only if the information is available. Otherwise, the whole data
-        set will be regarded as the training set and the test set will have zero length.
-        """
-        self.X = self.df
-        self.y = self.df[self.targetPropertyNames]
-
-        # split data into training and independent sets if saved previously
-        if "Split_IsTrain" in self.df.columns:
-            self.X = self.df.query("Split_IsTrain")
-            self.X_ind = self.df.query("~Split_IsTrain")
-            self.y = self.X[self.targetPropertyNames]
-            self.y_ind = self.X_ind[self.targetPropertyNames]
-        else:
-            self.X_ind = self.X.drop(self.X.index)
-            self.y_ind = self.y.drop(self.y.index)
+            self.featurizeSplits(shuffle=False)
 
     def loadDescriptorsToSplits(
         self, shuffle: bool = True, random_state: Optional[int] = None
@@ -2066,22 +2071,26 @@ class QSPRDataset(MoleculeTable):
             )
 
         descriptors = self.getDescriptors()
-        self.X = descriptors.loc[self.X.index, :]
-        self.y = self.df.loc[self.y.index, self.targetPropertyNames]
-
         if self.X_ind is not None and self.y_ind is not None:
+            self.X = descriptors.loc[self.X.index, :]
+            self.y = self.df.loc[self.X.index, self.targetPropertyNames]
             self.X_ind = descriptors.loc[self.X_ind.index, :]
             self.y_ind = self.df.loc[self.y_ind.index, self.targetPropertyNames]
         else:
-            self.X_ind = pd.DataFrame(columns=self.X.columns)
-            self.y_ind = pd.DataFrame(columns=[self.targetPropertyNames])
+            self.X = descriptors
+            self.y = self.df.loc[descriptors.index, self.targetPropertyNames]
+            self.X_ind = descriptors.loc[~self.X.index.isin(self.X.index), :]
+            self.y_ind = self.df.loc[self.X_ind.index, self.targetPropertyNames]
         if shuffle:
             self.shuffle(random_state)
+        #  make sure no extra data is present in the splits
+        self.X = self.X.loc[self.X.index.isin(self.df.index), :]
+        self.X_ind = self.X_ind.loc[self.X_ind.index.isin(self.df.index), :]
+        self.y = self.y.loc[self.X.index, :]
+        self.y_ind = self.y_ind.loc[self.X_ind.index, :]
 
     def shuffle(self, random_state: Optional[int] = None):
-        self.X = self.X.sample(
-            frac=1, random_state=random_state or self.randomState
-        )
+        self.X = self.X.sample(frac=1, random_state=random_state or self.randomState)
         self.X_ind = self.X_ind.sample(
             frac=1, random_state=random_state or self.randomState
         )
@@ -2101,17 +2110,26 @@ class QSPRDataset(MoleculeTable):
         shuffle (bool): whether to shuffle the training and test sets
         random_state (int): random state for shuffling
         """
-        if self.featureNames:
+        if self.hasDescriptors and self.hasFeatures:
             self.loadDescriptorsToSplits(
                 shuffle=shuffle, random_state=random_state or self.randomState
             )
-            self.X = self.X[self.featureNames]
-            self.X_ind = self.X_ind[self.featureNames]
+            self.X = self.X.loc[:,  self.featureNames]
+            self.X_ind = self.X_ind.loc[:, self.featureNames]
         else:
+            if self.X is not None and self.X_ind is not None:
+                self.X = self.X.loc[self.X.index, :]
+                self.X_ind = self.X_ind.loc[self.X_ind.index, :]
+            else:
+                self.X = self.df.loc[self.df.index, :]
+                self.X_ind = self.df.loc[~self.df.index.isin(self.X.index), :]
             self.X = self.X.drop(self.X.columns, axis=1)
             self.X_ind = self.X_ind.drop(self.X_ind.columns, axis=1)
             if shuffle:
                 self.shuffle(random_state or self.randomState)
+        # make sure no extra data is present in the splits
+        self.X = self.X.loc[self.X.index.isin(self.df.index), :]
+        self.X_ind = self.X_ind.loc[self.X_ind.index.isin(self.df.index), :]
 
     def fillMissing(self, fill_value: float, columns: Optional[list[str]] = None):
         """Fill missing values in the data set with a given value.
@@ -2121,9 +2139,12 @@ class QSPRDataset(MoleculeTable):
             columns (list[str], optional): columns to fill missing values in.
                 Defaults to None.
         """
+        filled = False
         for desc in self.descriptors:
             desc.fillMissing(fill_value, columns)
-        logger.warning("Missing values filled with %s" % fill_value)
+            filled = True
+        if not filled:
+            logger.warning("Missing values filled with %s" % fill_value)
 
     def filterFeatures(self, feature_filters: list[Callable]):
         """Filter features in the data set.
@@ -2134,19 +2155,17 @@ class QSPRDataset(MoleculeTable):
         """
         if not self.hasFeatures:
             raise ValueError("No features to filter")
-
         if self.X.shape[1] == 1:
             logger.warning("Only one feature present. Skipping feature filtering.")
             return
         else:
             for featurefilter in feature_filters:
                 self.X = featurefilter(self.X, self.y)
-
+            # update features
             self.featureNames = self.X.columns.to_list()
             if self.X_ind is not None:
                 self.X_ind = self.X_ind[self.featureNames]
             logger.info(f"Selected features: {self.featureNames}")
-
             # update descriptor calculator
             if self.descriptorCalculators is not None:
                 for calc in self.descriptorCalculators:
@@ -2186,6 +2205,12 @@ class QSPRDataset(MoleculeTable):
                     self.addDescriptors(calc, recalculate=recalculate, featurize=False)
                 else:
                     raise ValueError("Unknown feature calculator type: %s" % type(calc))
+            self.featurize()
+
+    def dropInvalids(self):
+        ret = super().dropInvalids()
+        self.featurize()
+        return ret
 
     def prepareDataset(
         self,
@@ -2217,51 +2242,33 @@ class QSPRDataset(MoleculeTable):
                 present in the file
             feature_fill_value (float): value to fill missing values with.
                 Defaults to `numpy.nan`
-            shuffle (bool): whether to shuffle the training and test sets
             random_state (int): random state for shuffling
         """
         # apply sanitization and standardization
         if smiles_standardizer is not None:
             self.standardizeSmiles(smiles_standardizer)
-
         # calculate features
         if feature_calculators is not None:
             self.addFeatures(feature_calculators, recalculate=recalculate_features)
-
         # apply data filters
         if datafilters is not None:
             self.filter(datafilters)
-
         # Replace any NaN values in featureNames by 0
         # FIXME: this is not very good, we should probably add option to do custom
         # data imputation here or drop rows with NaNs
         if feature_fill_value is not None:
             self.fillMissing(feature_fill_value)
-
+        # shuffle the data
+        if shuffle:
+            self.shuffle(random_state or self.randomState)
         # split dataset
         if split is not None:
             self.split(split)
-        else:
-            self.X = self.df
-            self.y = self.df[self.targetPropertyNames]
-
-        # featurize splits
-        if self.hasDescriptors:
-            self.featurizeSplits(
-                shuffle=shuffle, random_state=random_state or self.randomState
-            )
-        else:
-            logger.warning(
-                "Attempting to featurize splits without descriptors. "
-                "Skipping this step..."
-            )
-
         # apply feature filters on training set
         if feature_filters and self.hasDescriptors:
             self.filterFeatures(feature_filters)
         elif not self.hasDescriptors:
             logger.warning("No descriptors present, feature filters will be skipped.")
-
         # set feature standardizers
         if feature_standardizer:
             self.setFeatureStandardizer(feature_standardizer)
@@ -2312,10 +2319,14 @@ class QSPRDataset(MoleculeTable):
         self.checkFeatures()
 
         if concat:
-            df_X = pd.concat(
-                [self.X[self.featureNames], self.X_ind[self.featureNames]], axis=0
-            )
-            df_X_ind = None
+            if len(self.X.columns) != 0:
+                df_X = pd.concat(
+                    [self.X[self.featureNames], self.X_ind[self.featureNames]], axis=0
+                )
+                df_X_ind = None
+            else:
+                df_X = pd.concat([self.X, self.X_ind], axis=0)
+                df_X_ind = None
         else:
             if len(self.X.columns) != 0:
                 df_X = self.X[self.featureNames]
@@ -2511,7 +2522,9 @@ class QSPRDataset(MoleculeTable):
         self.restoreTrainingData()
 
     def iterFolds(
-        self, split: DataSplit
+        self,
+        split: DataSplit,
+        concat: bool = False,
     ) -> Generator[
         tuple[
             pd.DataFrame,
@@ -2529,6 +2542,8 @@ class QSPRDataset(MoleculeTable):
         Args:
             split (DataSplit):
                 split instance orchestrating the split
+            concat (bool):
+                whether to concatenate the training and test feature matrices
 
         Yields:
             tuple:
@@ -2537,4 +2552,4 @@ class QSPRDataset(MoleculeTable):
         """
         self.checkFeatures()
         folds = FoldsFromDataSplit(split, self.feature_standardizer)
-        return folds.iterFolds(self)
+        return folds.iterFolds(self, concat=concat)

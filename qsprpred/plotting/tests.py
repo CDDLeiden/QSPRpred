@@ -8,6 +8,7 @@ import pandas as pd
 from matplotlib.axes import SubplotBase
 from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.metrics import roc_auc_score
 
 from ..data.data import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
@@ -57,13 +58,13 @@ class ROCPlotTest(ModelRetriever, TestCase):
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [50]
+                "th": [2]
             }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        CrossValAssessor(scoring="roc_auc")(model)
+        TestSetAssessor(scoring="roc_auc")(model)
         model.save()
         # make plots
         plt = ROCPlot([model])
@@ -86,13 +87,13 @@ class MetricsPlotTest(ModelRetriever, TestCase):
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [50]
+                "th": [2]
             }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_metrics_plot_single_model")
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        CrossValAssessor(scoring="roc_auc")(model)
+        TestSetAssessor(scoring="roc_auc")(model)
         model.save()
         # generate metrics plot and associated files
         plt = MetricsPlot([model])
@@ -114,8 +115,8 @@ class CorrPlotTest(ModelRetriever, TestCase):
         model = self.getModel(
             dataset, "test_corr_plot_single_model", alg=RandomForestRegressor
         )
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        CrossValAssessor(scoring="r2")(model)
+        TestSetAssessor(scoring="r2")(model)
         model.save()
         # generate metrics plot and associated files
         plt = CorrelationPlot([model])
