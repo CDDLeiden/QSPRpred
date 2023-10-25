@@ -23,6 +23,7 @@ from ..models.metrics import SklearnMetric
 from ..models.tasks import ModelTasks
 from ..utils.inspect import import_class
 
+
 class QSPRModel(ABC):
     """The definition of the common model interface for the package.
 
@@ -942,33 +943,13 @@ class QSPRModel(ABC):
         """
 
 
-class FitMonitor():
-    """Base class for monitoring the fitting of a model.
-
-    Attributes:
-        fitModel (QSPRModel): model to fit
-        fitLog (pd.DataFrame): log of the training process
-        batchLog (pd.DataFrame): log of the training process per batch
-        currentEpoch (int): index of the current epoch
-        currentBatch (int): index of the current batch
-        bestEstimator (Any): best estimator of the training process
-        bestEpoch (int): index of the best epoch
-    """
-    def __init__(self):
-        self.fitModel = None
-        self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
-        self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
-        self.currentEpoch = None
-        self.currentBatch = None
-        self.bestEstimator = None
-        self.bestEpoch = None
-
+class FitMonitor(ABC):
+    """Base class for monitoring the fitting of a model."""
+    @abstractmethod
     def on_fit_start(self, model: QSPRModel):
         """Called before the training has started."""
-        self.fitModel = model
-        self.currentEpoch = 0
-        self.currentBatch = 0
 
+    @abstractmethod
     def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
 
@@ -976,17 +957,16 @@ class FitMonitor():
             estimator (Any): estimator that was fitted
             best_epoch (int | None): index of the best epoch
         """
-        self.bestEstimator = estimator
-        self.bestEpoch = best_epoch
 
+    @abstractmethod
     def on_epoch_start(self, epoch: int):
         """Called before each epoch of the training.
 
         Args:
             epoch (int): index of the current epoch
         """
-        self.currentEpoch = epoch
 
+    @abstractmethod
     def on_epoch_end(
         self, epoch: int, train_loss: float, val_loss: float | None = None
     ):
@@ -997,16 +977,16 @@ class FitMonitor():
             train_loss (float): loss of the current epoch
             val_loss (float | None): validation loss of the current epoch
         """
-        self.fitLog.loc[epoch] = [epoch, train_loss, val_loss]
 
+    @abstractmethod
     def on_batch_start(self, batch: int):
         """Called before each batch of the training.
 
         Args:
             batch (int): index of the current batch
         """
-        self.currentBatch = batch
 
+    @abstractmethod
     def on_batch_end(self, batch: int, loss: float):
         """Called after each batch of the training.
 
@@ -1014,48 +994,11 @@ class FitMonitor():
             batch (int): index of the current batch
             loss (float): loss of the current batch
         """
-        self.batchLog.loc[len(self.batchLog)] = [self.currentEpoch, batch, loss]
-
-    def _clearFit(self):
-        self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
-        self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
-        self.currentEpoch = None
-        self.currentBatch = None
-        self.bestEstimator = None
-        self.bestEpoch = None
-
-    def _getFit(self) -> tuple[pd.DataFrame, pd.DataFrame, Any, int]:
-        return {
-            "fitLog": self.fitLog,
-            "batchLog": self.batchLog,
-            "bestEstimator": self.bestEstimator,
-            "bestEpoch": self.bestEpoch
-        }
 
 
 class AssessorMonitor(FitMonitor):
-    """Base class for monitoring the assessment of a model.
-
-    Attributes:
-        assessmentType (str): type of assessment
-        assessmentModel (QSPRModel): model to assess
-        assessmentDataset (QSPRDataset): data set used to train the model
-        foldData (dict): dictionary of input data, keyed by the fold index
-        predictions (np.ndarray): predictions of the current fold
-        estimators (dict): dictionary of fitted estimators, keyed by the fold index
-        currentFold (int): index of the current fold
-        fits (dict): dictionary of fit data, keyed by the fold index
-    """
-    def __init__(self) -> None:
-        self.assessmentModel = None
-        self.assessmentDataset = None
-        self.foldData = {}
-        self.predictions = None
-        self.estimators = {}
-        self.currentFold = None
-        self.fits = {}
-        super().__init__()
-
+    """Base class for monitoring the assessment of a model."""
+    @abstractmethod
     def on_assessment_start(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
 
@@ -1063,18 +1006,16 @@ class AssessorMonitor(FitMonitor):
             model (QSPRModel): model to assess
             assesment_type (str): type of assessment
         """
-        self.assessmentModel = model
-        self.assessmentDataset = model.data
-        self.assessmentType = assesment_type
 
+    @abstractmethod
     def on_assessment_end(self, predictions: pd.DataFrame):
         """Called after the assessment has finished.
 
         Args:
             predictions (pd.DataFrame): predictions of the assessment
         """
-        self.predictions = predictions
 
+    @abstractmethod
     def on_fold_start(
         self,
         fold: int,
@@ -1092,12 +1033,11 @@ class AssessorMonitor(FitMonitor):
             X_test (np.array): test data of the current fold
             y_test (np.array): test targets of the current fold
         """
-        self.currentFold = fold
-        self.foldData[fold] = {
-            "X_train": X_train, "y_train": y_train, "X_test": X_test, "y_test": y_test
-        }
 
-    def on_fold_end(self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame):
+    @abstractmethod
+    def on_fold_end(
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+    ):
         """Called after each fold of the assessment.
 
         Args:
@@ -1106,51 +1046,11 @@ class AssessorMonitor(FitMonitor):
                                              the number of epochs it was trained for
             predictions (pd.DataFrame): predictions of the current fold
         """
-        self.estimators[self.currentFold] = model_fit
-        self.fits[self.currentFold] = self._getFit()
-        self._clearFit()
-
-    def _clear_assessment(self):
-        """Clear the assessment data."""
-        self.assessmentModel = None
-        self.asssessmentDataset = None
-        self.foldData = {}
-        self.predictions = None
-        self.estimators = {}
-
-    def _get_assessment(self) -> tuple[QSPRModel, QSPRDataset, pd.DataFrame, dict]:
-        """Return the assessment data."""
-        return {
-            "assessmentModel": self.assessmentModel,
-            "assessmentDataset": self.assessmentDataset,
-            "foldData": self.foldData,
-            "predictions": self.predictions,
-            "estimators": self.estimators
-        }
 
 
 class HyperParameterOptimizationMonitor(AssessorMonitor):
-    """Base class for monitoring the hyperparameter optimization of a model.
-
-    Attributes:
-        config (dict): configuration of the hyperparameter optimization
-        bestScore (float): best score found during optimization
-        bestParameters (dict): best parameters found during optimization
-        assessments (dict): dictionary of assessments, keyed by the iteration number
-        scores (pd.DataFrame): dataframe containing the scores of each iteration
-        model (QSPRModel): model to optimize
-        data (QSPRDataset): data set used to train the model
-    """
-    def __init__(self):
-        self.config = None
-        self.bestScore = None
-        self.bestParameters = None
-        self.parameters = {}
-        self.assessments = {}
-        self.scores = pd.DataFrame(columns=["aggregated_score", "fold_scores"])
-        self.iteration = 0
-        super().__init__()
-
+    """Base class for monitoring the hyperparameter optimization of a model."""
+    @abstractmethod
     def on_optimization_start(
         self, model: QSPRModel, config: dict, optimization_type: str
     ):
@@ -1161,11 +1061,8 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
-        self.optimizationType = optimization_type
-        self.model = model
-        self.data = model.data
-        self.config = config
 
+    @abstractmethod
     def on_optimization_end(self, best_score: float, best_parameters: dict):
         """Called after the hyperparameter optimization has finished.
 
@@ -1173,20 +1070,17 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
             best_score (float): best score found during optimization
             best_parameters (dict): best parameters found during optimization
         """
-        self.bestScore = best_score
-        self.bestParameters = best_parameters
 
+    @abstractmethod
     def on_iteration_start(self, params: dict):
         """Called before each iteration of the hyperparameter optimization.
 
         Args:
             params (dict): parameters used for the current iteration
         """
-        self.parameters[self.iteration] = params
 
-    def on_iteration_end(
-        self, score: float, scores: list[float]
-    ):
+    @abstractmethod
+    def on_iteration_end(self, score: float, scores: list[float]):
         """Called after each iteration of the hyperparameter optimization.
 
         Args:
@@ -1194,10 +1088,6 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
             scores (list[float]): scores of the current iteration
                                   (e.g for cross-validation)
         """
-        self.scores.loc[self.iteration] = [score, scores]
-        self.assessments[self.iteration] = self._get_assessment()
-        self._clear_assessment()
-        self.iteration += 1
 
 
 class ModelAssessor(ABC):

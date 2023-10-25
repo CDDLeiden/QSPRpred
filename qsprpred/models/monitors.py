@@ -5,22 +5,74 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Draw
 
-from .interfaces import (
-    AssessorMonitor,
-    FitMonitor,
-    HyperParameterOptimizationMonitor,
-    QSPRModel,
-)
+from ..data.data import QSPRDataset
+from .interfaces import HyperParameterOptimizationMonitor, QSPRModel
 
 
-class NullFitMonitor(FitMonitor):
-    """Null monitor that does nothing."""
+class BaseMonitor(HyperParameterOptimizationMonitor):
+    """Base monitoring the fitting, training and optimization of a model.
+
+    Information about the fitting, training and optimization process is stored
+    internally, but not logged. This class can be used as a base class for other
+    other monitors that do log the information elsewhere.
+
+    Attributes:
+        config (dict): configuration of the hyperparameter optimization
+        bestScore (float): best score found during optimization
+        bestParameters (dict): best parameters found during optimization
+        assessments (dict): dictionary of assessments, keyed by the iteration number
+        scores (pd.DataFrame): dataframe containing the scores of each iteration
+        model (QSPRModel): model to optimize
+        data (QSPRDataset): data set used to train the model
+        assessmentType (str): type of assessment
+        assessmentModel (QSPRModel): model to assess
+        assessmentDataset (QSPRDataset): data set used to train the model
+        foldData (dict): dictionary of input data, keyed by the fold index
+        predictions (np.ndarray): predictions of the current fold
+        estimators (dict): dictionary of fitted estimators, keyed by the fold index
+        currentFold (int): index of the current fold
+        fits (dict): dictionary of fit data, keyed by the fold index
+        fitModel (QSPRModel): model to fit
+        fitLog (pd.DataFrame): log of the training process
+        batchLog (pd.DataFrame): log of the training process per batch
+        currentEpoch (int): index of the current epoch
+        currentBatch (int): index of the current batch
+        bestEstimator (Any): best estimator of the current training process
+        bestEpoch (int): index of the best epoch of the current training process
+    """
+    def __init__(self):
+        # hyperparameter optimization data
+        self.config = None
+        self.bestScore = None
+        self.bestParameters = None
+        self.parameters = {}
+        self.assessments = {}
+        self.scores = pd.DataFrame(columns=["aggregated_score", "fold_scores"])
+        self.iteration = 0
+
+        # assessment data
+        self.assessmentModel = None
+        self.assessmentDataset = None
+        self.foldData = {}
+        self.predictions = None
+        self.estimators = {}
+        self.currentFold = None
+        self.fits = {}
+
+        # fit data
+        self.fitModel = None
+        self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
+        self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
+        self.currentEpoch = None
+        self.currentBatch = None
+        self.bestEstimator = None
+        self.bestEpoch = None
+
     def on_fit_start(self, model: QSPRModel):
-        """Called before the training has started.
-
-        Args:
-            model (QSPRModel): estimator to train
-        """
+        """Called before the training has started."""
+        self.fitModel = model
+        self.currentEpoch = 0
+        self.currentBatch = 0
 
     def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
@@ -29,6 +81,8 @@ class NullFitMonitor(FitMonitor):
             estimator (Any): estimator that was fitted
             best_epoch (int | None): index of the best epoch
         """
+        self.bestEstimator = estimator
+        self.bestEpoch = best_epoch
 
     def on_epoch_start(self, epoch: int):
         """Called before each epoch of the training.
@@ -36,6 +90,7 @@ class NullFitMonitor(FitMonitor):
         Args:
             epoch (int): index of the current epoch
         """
+        self.currentEpoch = epoch
 
     def on_epoch_end(
         self, epoch: int, train_loss: float, val_loss: float | None = None
@@ -47,6 +102,7 @@ class NullFitMonitor(FitMonitor):
             train_loss (float): loss of the current epoch
             val_loss (float | None): validation loss of the current epoch
         """
+        self.fitLog.loc[epoch] = [epoch, train_loss, val_loss]
 
     def on_batch_start(self, batch: int):
         """Called before each batch of the training.
@@ -54,6 +110,7 @@ class NullFitMonitor(FitMonitor):
         Args:
             batch (int): index of the current batch
         """
+        self.currentBatch = batch
 
     def on_batch_end(self, batch: int, loss: float):
         """Called after each batch of the training.
@@ -62,10 +119,24 @@ class NullFitMonitor(FitMonitor):
             batch (int): index of the current batch
             loss (float): loss of the current batch
         """
+        self.batchLog.loc[len(self.batchLog)] = [self.currentEpoch, batch, loss]
 
+    def _clearFit(self):
+        self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
+        self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
+        self.currentEpoch = None
+        self.currentBatch = None
+        self.bestEstimator = None
+        self.bestEpoch = None
 
-class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
-    """Null monitor that does nothing."""
+    def _getFit(self) -> tuple[pd.DataFrame, pd.DataFrame, Any, int]:
+        return {
+            "fitLog": self.fitLog,
+            "batchLog": self.batchLog,
+            "bestEstimator": self.bestEstimator,
+            "bestEpoch": self.bestEpoch,
+        }
+
     def on_assessment_start(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
 
@@ -73,6 +144,9 @@ class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
             model (QSPRModel): model to assess
             assesment_type (str): type of assessment
         """
+        self.assessmentModel = model
+        self.assessmentDataset = model.data
+        self.assessmentType = assesment_type
 
     def on_assessment_end(self, predictions: pd.DataFrame):
         """Called after the assessment has finished.
@@ -80,6 +154,7 @@ class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
         Args:
             predictions (pd.DataFrame): predictions of the assessment
         """
+        self.predictions = predictions
 
     def on_fold_start(
         self,
@@ -98,31 +173,61 @@ class NullAssessorMonitor(AssessorMonitor, NullFitMonitor):
             X_test (np.array): test data of the current fold
             y_test (np.array): test targets of the current fold
         """
+        self.currentFold = fold
+        self.foldData[fold] = {
+            "X_train": X_train,
+            "y_train": y_train,
+            "X_test": X_test,
+            "y_test": y_test,
+        }
 
     def on_fold_end(
-        self, fitted_estimator: Any | tuple[Any, int], predictions: np.ndarray
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
 
         Args:
-            fitted_estimator (Any |tuple[Any, int]):
-                fitted estimator of the current fold
-            predictions (np.ndarray):
-                predictions of the current fold
+            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
+                                             tuple containing the fitted estimator and
+                                             the number of epochs it was trained for
+            predictions (pd.DataFrame): predictions of the current fold
         """
+        self.estimators[self.currentFold] = model_fit
+        self.fits[self.currentFold] = self._getFit()
+        self._clearFit()
 
+    def _clear_assessment(self):
+        """Clear the assessment data."""
+        self.assessmentModel = None
+        self.asssessmentDataset = None
+        self.foldData = {}
+        self.predictions = None
+        self.estimators = {}
 
-class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
-    """Null monitor that does nothing."""
+    def _get_assessment(self) -> tuple[QSPRModel, QSPRDataset, pd.DataFrame, dict]:
+        """Return the assessment data."""
+        return {
+            "assessmentModel": self.assessmentModel,
+            "assessmentDataset": self.assessmentDataset,
+            "foldData": self.foldData,
+            "predictions": self.predictions,
+            "estimators": self.estimators,
+        }
+
     def on_optimization_start(
         self, model: QSPRModel, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
+            model (QSPRModel): model to optimize
             config (dict): configuration of the hyperparameter optimization
-            optimization_type (str): type of optimization
+            optimization_type (str): type of hyperparameter optimization
         """
+        self.optimizationType = optimization_type
+        self.model = model
+        self.data = model.data
+        self.config = config
 
     def on_optimization_end(self, best_score: float, best_parameters: dict):
         """Called after the hyperparameter optimization has finished.
@@ -131,6 +236,8 @@ class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
             best_score (float): best score found during optimization
             best_parameters (dict): best parameters found during optimization
         """
+        self.bestScore = best_score
+        self.bestParameters = best_parameters
 
     def on_iteration_start(self, params: dict):
         """Called before each iteration of the hyperparameter optimization.
@@ -138,6 +245,7 @@ class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
         Args:
             params (dict): parameters used for the current iteration
         """
+        self.parameters[self.iteration] = params
 
     def on_iteration_end(self, score: float, scores: list[float]):
         """Called after each iteration of the hyperparameter optimization.
@@ -147,9 +255,13 @@ class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
             scores (list[float]): scores of the current iteration
                                   (e.g for cross-validation)
         """
+        self.scores.loc[self.iteration] = [score, scores]
+        self.assessments[self.iteration] = self._get_assessment()
+        self._clear_assessment()
+        self.iteration += 1
 
 
-class WandBMonitor(HyperParameterOptimizationMonitor):
+class WandBMonitor(BaseMonitor):
     """Monitor hyperparameter optimization to weights and biases."""
     def __init__(self, project_name: str, **kwargs):
         """Monitor assessment to weights and biases.

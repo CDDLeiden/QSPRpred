@@ -16,7 +16,7 @@ from ....data.data import QSPRDataset
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import QSPRModel, FitMonitor
 from ....models.tasks import ModelTasks
-from ....models.monitors import NullFitMonitor
+from ....models.monitors import BaseMonitor
 
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):
@@ -166,7 +166,7 @@ class ChempropModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        monitor: FitMonitor = NullFitMonitor(),
+        monitor: FitMonitor = BaseMonitor(),
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         keep_logs: bool = False,

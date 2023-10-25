@@ -9,7 +9,7 @@ import pandas as pd
 from ..logs import logger
 from .early_stopping import EarlyStoppingMode
 from .interfaces import AssessorMonitor, ModelAssessor, QSPRModel
-from .monitors import NullAssessorMonitor
+from .monitors import BaseMonitor
 
 
 class CrossValAssessor(ModelAssessor):
@@ -23,7 +23,7 @@ class CrossValAssessor(ModelAssessor):
     def __init__(
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor = NullAssessorMonitor(),
+        monitor: AssessorMonitor = BaseMonitor(),
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
     ):
@@ -124,7 +124,7 @@ class TestSetAssessor(ModelAssessor):
     def __init__(
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor = NullAssessorMonitor(),
+        monitor: AssessorMonitor = BaseMonitor(),
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
     ):

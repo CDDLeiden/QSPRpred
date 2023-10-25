@@ -18,7 +18,7 @@ from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import QSPRModel, FitMonitor
 from ....models.tasks import ModelTasks
-from ....models.monitors import NullFitMonitor
+from ....models.monitors import BaseMonitor
 
 
 class DNNModel(QSPRModel):
@@ -255,7 +255,7 @@ class DNNModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        monitor: FitMonitor = NullFitMonitor(),
+        monitor: FitMonitor = BaseMonitor(),
         estimator: Any | None = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         **kwargs,
