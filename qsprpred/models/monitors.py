@@ -225,6 +225,11 @@ class WandBMonitor(HyperParameterOptimizationMonitor):
                 predictions of the current fold
         """
         super().on_fold_end(model_fit, fold_predictions)
+
+        # add smiles to fold predictions by merging on index
+        dataset_smiles = self.assessmentDataset.getDF()[self.assessmentDataset.smilesCol]
+        fold_predictions = fold_predictions.merge(dataset_smiles, left_index=True, right_index=True)
+
         self.wandb.log({"Test Results" : self.wandb.Table(data=fold_predictions)})
         self.wandb.finish()
 
