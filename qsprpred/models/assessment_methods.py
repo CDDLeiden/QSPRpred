@@ -98,7 +98,7 @@ class CrossValAssessor(ModelAssessor):
                 model,
                 y.iloc[idx_test],
                 fold_predictions,
-                idx_test,
+                pd.Series(y.index).iloc[idx_test],
                 extra_columns={"Fold": fold_counter[idx_test]},
             )
             monitor.on_fold_end(model_fit, fold_predictions_df)
