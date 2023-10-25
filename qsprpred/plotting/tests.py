@@ -58,7 +58,7 @@ class ROCPlotTest(ModelRetriever, TestCase):
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [50]
+                "th": [6.5]
             }],
             preparation_settings=self.getDefaultPrep(),
         )
@@ -88,7 +88,7 @@ class MetricsPlotTest(ModelRetriever, TestCase):
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [50]
+                "th": [6.5]
             }],
             preparation_settings=self.getDefaultPrep(),
         )
@@ -118,6 +118,7 @@ class CorrPlotTest(ModelRetriever, TestCase):
             dataset, "test_corr_plot_single_model", alg=RandomForestRegressor
         )
         score_func = SklearnMetric.getDefaultMetric(model.task)
+        print(score_func)
         CrossValAssessor(scoring = score_func)(model)
         TestSetAssessor(scoring = score_func)(model)
         model.save()
