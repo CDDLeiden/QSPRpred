@@ -21,24 +21,35 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         bestScore (float): best score found during optimization
         bestParameters (dict): best parameters found during optimization
         assessments (dict): dictionary of assessments, keyed by the iteration number
-        scores (pd.DataFrame): dataframe containing the scores of each iteration
+        scores (pd.DataFrame): scores for each hyperparameter search iteration
         model (QSPRModel): model to optimize
-        data (QSPRDataset): data set used to train the model
-        assessmentType (str): type of assessment
-        assessmentModel (QSPRModel): model to assess
-        assessmentDataset (QSPRDataset): data set used to train the model
-        foldData (dict): dictionary of input data, keyed by the fold index
-        predictions (np.ndarray): predictions of the current fold
-        estimators (dict): dictionary of fitted estimators, keyed by the fold index
-        currentFold (int): index of the current fold
-        fits (dict): dictionary of fit data, keyed by the fold index
-        fitModel (QSPRModel): model to fit
-        fitLog (pd.DataFrame): log of the training process
-        batchLog (pd.DataFrame): log of the training process per batch
-        currentEpoch (int): index of the current epoch
-        currentBatch (int): index of the current batch
-        bestEstimator (Any): best estimator of the current training process
-        bestEpoch (int): index of the best epoch of the current training process
+        data (QSPRDataset): dataset used in optimization
+        assessmentType (str): type of current assessment
+        assessmentModel (QSPRModel): model to assess in current assessment
+        assessmentDataset (QSPRDataset): data set used in current assessment
+        foldData (dict): dictionary of input data, keyed by the fold index, of the
+            current assessment
+        predictions (np.ndarray): predictions of the current fold of the
+            current assessment
+        estimators (dict): dictionary of fitted estimators, keyed by the fold index of
+            the current assessment
+        currentFold (int): index of the current fold of the
+            current assessment
+        fits (dict): dictionary of fit data, keyed by the fold index of the current
+            assessment
+        fitModel (QSPRModel): model to fit in current fit of the current assessment
+        fitLog (pd.DataFrame): log of the training process of the current fit of the
+            current assessment
+        batchLog (pd.DataFrame): log of the training process per batch of the current
+            fit of the current assessment
+        currentEpoch (int): index of the current epoch of the current fit of the current
+            assessment
+        currentBatch (int): index of the current batch of the current fit of the current
+            assessment
+        bestEstimator (Any): best estimator of the current fit of the current
+            assessment
+        bestEpoch (int): index of the best epoch of the current fit of the current
+            assessment
     """
     def __init__(self):
         # hyperparameter optimization data
@@ -68,75 +79,52 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         self.bestEstimator = None
         self.bestEpoch = None
 
-    def on_fit_start(self, model: QSPRModel):
-        """Called before the training has started."""
-        self.fitModel = model
-        self.currentEpoch = 0
-        self.currentBatch = 0
-
-    def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
-        """Called after the training has finished.
-
-        Args:
-            estimator (Any): estimator that was fitted
-            best_epoch (int | None): index of the best epoch
-        """
-        self.bestEstimator = estimator
-        self.bestEpoch = best_epoch
-
-    def on_epoch_start(self, epoch: int):
-        """Called before each epoch of the training.
-
-        Args:
-            epoch (int): index of the current epoch
-        """
-        self.currentEpoch = epoch
-
-    def on_epoch_end(
-        self, epoch: int, train_loss: float, val_loss: float | None = None
+    def on_optimization_start(
+        self, model: QSPRModel, config: dict, optimization_type: str
     ):
-        """Called after each epoch of the training.
+        """Called before the hyperparameter optimization has started.
 
         Args:
-            epoch (int): index of the current epoch
-            train_loss (float): loss of the current epoch
-            val_loss (float | None): validation loss of the current epoch
+            model (QSPRModel): model to optimize
+            config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of hyperparameter optimization
         """
-        self.fitLog.loc[epoch] = [epoch, train_loss, val_loss]
+        self.optimizationType = optimization_type
+        self.model = model
+        self.data = model.data
+        self.config = config
 
-    def on_batch_start(self, batch: int):
-        """Called before each batch of the training.
+    def on_optimization_end(self, best_score: float, best_parameters: dict):
+        """Called after the hyperparameter optimization has finished.
 
         Args:
-            batch (int): index of the current batch
+            best_score (float): best score found during optimization
+            best_parameters (dict): best parameters found during optimization
         """
-        self.currentBatch = batch
+        self.bestScore = best_score
+        self.bestParameters = best_parameters
 
-    def on_batch_end(self, batch: int, loss: float):
-        """Called after each batch of the training.
+    def on_iteration_start(self, params: dict):
+        """Called before each iteration of the hyperparameter optimization.
 
         Args:
-            batch (int): index of the current batch
-            loss (float): loss of the current batch
+            params (dict): parameters used for the current iteration
         """
-        self.batchLog.loc[len(self.batchLog)] = [self.currentEpoch, batch, loss]
+        self.parameters[self.iteration] = params
 
-    def _clearFit(self):
-        self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
-        self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
-        self.currentEpoch = None
-        self.currentBatch = None
-        self.bestEstimator = None
-        self.bestEpoch = None
+    def on_iteration_end(self, score: float, scores: list[float]):
+        """Called after each iteration of the hyperparameter optimization.
 
-    def _getFit(self) -> tuple[pd.DataFrame, pd.DataFrame, Any, int]:
-        return {
-            "fitLog": self.fitLog,
-            "batchLog": self.batchLog,
-            "bestEstimator": self.bestEstimator,
-            "bestEpoch": self.bestEpoch,
-        }
-
+        Args:
+            score (float): (aggregated) score of the current iteration
+            scores (list[float]): scores of the current iteration
+                                  (e.g for cross-validation)
+        """
+        self.scores.loc[self.iteration] = [score, scores]
+        self.assessments[self.iteration] = self._get_assessment()
+        self._clear_assessment()
+        self.iteration += 1
+        
     def on_assessment_start(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
 
@@ -214,52 +202,74 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
             "estimators": self.estimators,
         }
 
-    def on_optimization_start(
-        self, model: QSPRModel, config: dict, optimization_type: str
+    def on_fit_start(self, model: QSPRModel):
+        """Called before the training has started."""
+        self.fitModel = model
+        self.currentEpoch = 0
+        self.currentBatch = 0
+
+    def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
+        """Called after the training has finished.
+
+        Args:
+            estimator (Any): estimator that was fitted
+            best_epoch (int | None): index of the best epoch
+        """
+        self.bestEstimator = estimator
+        self.bestEpoch = best_epoch
+
+    def on_epoch_start(self, epoch: int):
+        """Called before each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+        """
+        self.currentEpoch = epoch
+
+    def on_epoch_end(
+        self, epoch: int, train_loss: float, val_loss: float | None = None
     ):
-        """Called before the hyperparameter optimization has started.
+        """Called after each epoch of the training.
 
         Args:
-            model (QSPRModel): model to optimize
-            config (dict): configuration of the hyperparameter optimization
-            optimization_type (str): type of hyperparameter optimization
+            epoch (int): index of the current epoch
+            train_loss (float): loss of the current epoch
+            val_loss (float | None): validation loss of the current epoch
         """
-        self.optimizationType = optimization_type
-        self.model = model
-        self.data = model.data
-        self.config = config
+        self.fitLog.loc[epoch] = [epoch, train_loss, val_loss]
 
-    def on_optimization_end(self, best_score: float, best_parameters: dict):
-        """Called after the hyperparameter optimization has finished.
+    def on_batch_start(self, batch: int):
+        """Called before each batch of the training.
 
         Args:
-            best_score (float): best score found during optimization
-            best_parameters (dict): best parameters found during optimization
+            batch (int): index of the current batch
         """
-        self.bestScore = best_score
-        self.bestParameters = best_parameters
+        self.currentBatch = batch
 
-    def on_iteration_start(self, params: dict):
-        """Called before each iteration of the hyperparameter optimization.
+    def on_batch_end(self, batch: int, loss: float):
+        """Called after each batch of the training.
 
         Args:
-            params (dict): parameters used for the current iteration
+            batch (int): index of the current batch
+            loss (float): loss of the current batch
         """
-        self.parameters[self.iteration] = params
+        self.batchLog.loc[len(self.batchLog)] = [self.currentEpoch, batch, loss]
 
-    def on_iteration_end(self, score: float, scores: list[float]):
-        """Called after each iteration of the hyperparameter optimization.
+    def _clearFit(self):
+        self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
+        self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
+        self.currentEpoch = None
+        self.currentBatch = None
+        self.bestEstimator = None
+        self.bestEpoch = None
 
-        Args:
-            score (float): (aggregated) score of the current iteration
-            scores (list[float]): scores of the current iteration
-                                  (e.g for cross-validation)
-        """
-        self.scores.loc[self.iteration] = [score, scores]
-        self.assessments[self.iteration] = self._get_assessment()
-        self._clear_assessment()
-        self.iteration += 1
-
+    def _getFit(self) -> tuple[pd.DataFrame, pd.DataFrame, Any, int]:
+        return {
+            "fitLog": self.fitLog,
+            "batchLog": self.batchLog,
+            "bestEstimator": self.bestEstimator,
+            "bestEpoch": self.bestEpoch,
+        }
 
 class WandBMonitor(BaseMonitor):
     """Monitor hyperparameter optimization to weights and biases."""
