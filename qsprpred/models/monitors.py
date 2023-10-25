@@ -1,6 +1,9 @@
 from typing import Any
 
 import numpy as np
+import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import Draw
 
 from .interfaces import (
     AssessorMonitor,
@@ -8,7 +11,6 @@ from .interfaces import (
     HyperParameterOptimizationMonitor,
     QSPRModel,
 )
-import pandas as pd
 
 
 class NullFitMonitor(FitMonitor):
@@ -146,6 +148,7 @@ class NullMonitor(HyperParameterOptimizationMonitor, NullAssessorMonitor):
                                   (e.g for cross-validation)
         """
 
+
 class WandBMonitor(HyperParameterOptimizationMonitor):
     """Monitor hyperparameter optimization to weights and biases."""
     def __init__(self, project_name: str, **kwargs):
@@ -227,10 +230,23 @@ class WandBMonitor(HyperParameterOptimizationMonitor):
         super().on_fold_end(model_fit, fold_predictions)
 
         # add smiles to fold predictions by merging on index
-        dataset_smiles = self.assessmentDataset.getDF()[self.assessmentDataset.smilesCol]
-        fold_predictions = fold_predictions.merge(dataset_smiles, left_index=True, right_index=True)
+        dataset_smiles = self.assessmentDataset.getDF()[self.assessmentDataset.smilesCol
+                                                       ]
+        fold_predictions = fold_predictions.merge(
+            dataset_smiles, left_index=True, right_index=True
+        )
 
-        self.wandb.log({"Test Results" : self.wandb.Table(data=fold_predictions)})
+        fold_predictions["molecule"] = None
+        for index, row in fold_predictions.iterrows():
+            mol = Chem.MolFromSmiles(row[self.assessmentDataset.smilesCol])
+            if mol is not None:
+                fold_predictions.at[index, "molecule"] = self.wandb.Image(
+                    Draw.MolToImage(mol, size=(200, 200))
+                )
+
+        wandbTable = self.wandb.Table(data=fold_predictions)
+
+        self.wandb.log({"Test Results": wandbTable})
         self.wandb.finish()
 
     def on_fit_start(self, model: QSPRModel):
