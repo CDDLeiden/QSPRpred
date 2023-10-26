@@ -8,6 +8,8 @@ from rdkit.Chem import Draw
 from ..data.data import QSPRDataset
 from .interfaces import HyperParameterOptimizationMonitor, QSPRModel
 
+from copy import deepcopy
+
 
 class BaseMonitor(HyperParameterOptimizationMonitor):
     """Base monitoring the fitting, training and optimization of a model.
@@ -351,22 +353,24 @@ class WandBMonitor(BaseMonitor):
         """
         super().on_fold_end(model_fit, fold_predictions)
 
+        fold_predictions_copy = deepcopy(fold_predictions)
+
         # add smiles to fold predictions by merging on index
         dataset_smiles = self.assessmentDataset.getDF()[self.assessmentDataset.smilesCol
                                                        ]
-        fold_predictions = fold_predictions.merge(
+        fold_predictions_copy = fold_predictions_copy.merge(
             dataset_smiles, left_index=True, right_index=True
         )
 
-        fold_predictions["molecule"] = None
-        for index, row in fold_predictions.iterrows():
+        fold_predictions_copy["molecule"] = None
+        for index, row in fold_predictions_copy.iterrows():
             mol = Chem.MolFromSmiles(row[self.assessmentDataset.smilesCol])
             if mol is not None:
-                fold_predictions.at[index, "molecule"] = self.wandb.Image(
+                fold_predictions_copy.at[index, "molecule"] = self.wandb.Image(
                     Draw.MolToImage(mol, size=(200, 200))
                 )
 
-        wandbTable = self.wandb.Table(data=fold_predictions)
+        wandbTable = self.wandb.Table(data=fold_predictions_copy)
 
         self.wandb.log({"Test Results": wandbTable})
         self.wandb.finish()
