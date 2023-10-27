@@ -125,7 +125,7 @@ class OptunaOptimization(HyperParameterOptimization):
         """
         import optuna
 
-        self.monitor.on_optimization_start(model, self.config, self.__class__.__name__)
+        self.monitor.onOptimizationStart(model, self.config, self.__class__.__name__)
 
         logger.info(
             "Bayesian optimization can take a while "
@@ -155,7 +155,7 @@ class OptunaOptimization(HyperParameterOptimization):
         self.bestScore = trial.value
         self.bestParams = trial.params
 
-        self.monitor.on_optimization_end(self.bestScore, self.bestParams)
+        self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
         return self.bestParams
 
     def objective(self, trial: optuna.trial.Trial, model: QSPRModel, **kwargs) -> float:
@@ -188,7 +188,7 @@ class OptunaOptimization(HyperParameterOptimization):
                 )
             elif value[0] == "uniform":
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
-        self.monitor.on_iteration_start(bayesian_params)
+        self.monitor.onIterationStart(bayesian_params)
         # assess the model with the current parameters and return the score
         scores = self.runAssessment(
             model,
@@ -200,7 +200,7 @@ class OptunaOptimization(HyperParameterOptimization):
         score = self.scoreAggregation(scores)
         logger.info(bayesian_params)
         logger.info(f"Score: {score}, std: {np.std(scores)}")
-        self.monitor.on_iteration_end(score, scores)
+        self.monitor.onIterationEnd(score, scores)
         return score
 
 

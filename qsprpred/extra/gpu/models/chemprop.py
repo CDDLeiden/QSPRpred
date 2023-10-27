@@ -193,7 +193,7 @@ class ChempropModel(QSPRModel):
                 after which the model stopped training
         """
         estimator = self.estimator if estimator is None else estimator
-        monitor.on_fit_start(self)
+        monitor.onFitStart(self)
 
         # convert data to chemprop MoleculeDataset
         data = self.convertToMoleculeDataset(X, y)
@@ -313,7 +313,7 @@ class ChempropModel(QSPRModel):
             self.earlyStopping.getEpochs() if not self.earlyStopping else args.epochs
         )
         for epoch in trange(n_epochs):
-            monitor.on_epoch_start(epoch)
+            monitor.onEpochStart(epoch)
             self.chempropLogger.debug(f"Epoch {epoch}")
             n_iter = chemprop.train.train(
                 model=estimator,
@@ -365,7 +365,7 @@ class ChempropModel(QSPRModel):
                 mean_val_score = chemprop.utils.multitask_mean(
                     val_scores[args.metric], metric=args.metric
                 )
-                monitor.on_epoch_end(epoch, mean_val_score)
+                monitor.onEpochEnd(epoch, mean_val_score)
                 if (
                     args.minimize_score and mean_val_score < best_score or
                     not args.minimize_score and mean_val_score > best_score
@@ -384,9 +384,9 @@ class ChempropModel(QSPRModel):
             shutil.rmtree(save_dir)
 
         if self.earlyStopping:
-            monitor.on_fit_end(best_estimator, best_epoch)
+            monitor.onFitEnd(best_estimator, best_epoch)
             return best_estimator, best_epoch
-        monitor.on_fit_end(estimator)
+        monitor.onFitEnd(estimator)
         return estimator, None
 
     def predict(

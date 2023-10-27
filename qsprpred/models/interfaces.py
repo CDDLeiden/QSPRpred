@@ -946,11 +946,11 @@ class QSPRModel(ABC):
 class FitMonitor(ABC):
     """Base class for monitoring the fitting of a model."""
     @abstractmethod
-    def on_fit_start(self, model: QSPRModel):
+    def onFitStart(self, model: QSPRModel):
         """Called before the training has started."""
 
     @abstractmethod
-    def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
+    def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
 
         Args:
@@ -959,7 +959,7 @@ class FitMonitor(ABC):
         """
 
     @abstractmethod
-    def on_epoch_start(self, epoch: int):
+    def onEpochStart(self, epoch: int):
         """Called before each epoch of the training.
 
         Args:
@@ -967,7 +967,7 @@ class FitMonitor(ABC):
         """
 
     @abstractmethod
-    def on_epoch_end(
+    def onEpochEnd(
         self, epoch: int, train_loss: float, val_loss: float | None = None
     ):
         """Called after each epoch of the training.
@@ -979,7 +979,7 @@ class FitMonitor(ABC):
         """
 
     @abstractmethod
-    def on_batch_start(self, batch: int):
+    def onBatchStart(self, batch: int):
         """Called before each batch of the training.
 
         Args:
@@ -987,7 +987,7 @@ class FitMonitor(ABC):
         """
 
     @abstractmethod
-    def on_batch_end(self, batch: int, loss: float):
+    def onBatchEnd(self, batch: int, loss: float):
         """Called after each batch of the training.
 
         Args:
@@ -999,7 +999,7 @@ class FitMonitor(ABC):
 class AssessorMonitor(FitMonitor):
     """Base class for monitoring the assessment of a model."""
     @abstractmethod
-    def on_assessment_start(self, model: QSPRModel, assesment_type: str):
+    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
 
         Args:
@@ -1008,7 +1008,7 @@ class AssessorMonitor(FitMonitor):
         """
 
     @abstractmethod
-    def on_assessment_end(self, predictions: pd.DataFrame):
+    def onAssessmentEnd(self, predictions: pd.DataFrame):
         """Called after the assessment has finished.
 
         Args:
@@ -1016,7 +1016,7 @@ class AssessorMonitor(FitMonitor):
         """
 
     @abstractmethod
-    def on_fold_start(
+    def onFoldStart(
         self,
         fold: int,
         X_train: np.array,
@@ -1035,7 +1035,7 @@ class AssessorMonitor(FitMonitor):
         """
 
     @abstractmethod
-    def on_fold_end(
+    def onFoldEnd(
         self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
@@ -1051,7 +1051,7 @@ class AssessorMonitor(FitMonitor):
 class HyperParameterOptimizationMonitor(AssessorMonitor):
     """Base class for monitoring the hyperparameter optimization of a model."""
     @abstractmethod
-    def on_optimization_start(
+    def onOptimizationStart(
         self, model: QSPRModel, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
@@ -1063,7 +1063,7 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
         """
 
     @abstractmethod
-    def on_optimization_end(self, best_score: float, best_parameters: dict):
+    def onOptimizationEnd(self, best_score: float, best_parameters: dict):
         """Called after the hyperparameter optimization has finished.
 
         Args:
@@ -1072,7 +1072,7 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
         """
 
     @abstractmethod
-    def on_iteration_start(self, params: dict):
+    def onIterationStart(self, params: dict):
         """Called before each iteration of the hyperparameter optimization.
 
         Args:
@@ -1080,7 +1080,7 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
         """
 
     @abstractmethod
-    def on_iteration_end(self, score: float, scores: list[float]):
+    def onIterationEnd(self, score: float, scores: list[float]):
         """Called after each iteration of the hyperparameter optimization.
 
         Args:
