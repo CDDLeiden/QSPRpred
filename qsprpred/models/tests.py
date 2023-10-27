@@ -515,7 +515,7 @@ class TestSklearnClassification(SklearnModelMixIn):
                 (XGBClassifier, "XGBC"),
             ) for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
-                (TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
+                (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
             ) for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (f"{alg_name}_{task}", task, th, alg_name, alg, [None])
