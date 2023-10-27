@@ -274,6 +274,129 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
             "bestEpoch": self.bestEpoch,
         }
 
+
+class FileMonitor(BaseMonitor):
+    def __init__(
+        self,
+        save_optimization: bool = True,
+        save_assessments: bool = True,
+        save_fits: bool = True,
+    ):
+        """Monitor hyperparameter optimization, assessment and fitting to files.
+
+        Args:
+            save_optimization (bool): whether to save the hyperparameter optimization
+                scores
+            save_assessments (bool): whether to save assessment predictions
+            save_fits (bool): whether to save the fit log and batch log
+        """
+        super().__init__()
+        self.saveOptimization = save_optimization
+        self.saveAssessments = save_assessments
+        self.saveFits = save_fits
+        self.outDir = None
+
+    def onOptimizationStart(
+        self, model: QSPRModel, config: dict, optimization_type: str
+    ):
+        """Called before the hyperparameter optimization has started.
+
+        Args:
+            model (QSPRModel): model to optimize
+            config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of hyperparameter optimization
+        """
+        super().onOptimizationStart(model, config, optimization_type)
+        self.outDir = self.outDir or model.outDir
+        self.optimizationPath = f"{self.outDir}/{self.optimizationType}"
+
+    def onIterationStart(self, params: dict):
+        """Called before each iteration of the hyperparameter optimization.
+
+        Args:
+            params (dict): parameters used for the current iteration
+        """
+        super().onIterationStart(params)
+        self.optimizationItPath = f"{self.optimizationPath}/iteration_{self.iteration}"
+
+    def onIterationEnd(self, score: float, scores: list[float]):
+        """Called after each iteration of the hyperparameter optimization.
+
+        Args:
+            score (float): (aggregated) score of the current iteration
+            scores (list[float]): scores of the current iteration
+                                  (e.g for cross-validation)
+        """
+        if self.saveAssessments:
+            # save parameters to json
+            with open(f"{self.optimizationItPath}/parameters.json", "w") as f:
+                json.dump(self.parameters[self.iteration], f)
+        super().onIterationEnd(score, scores)
+        if self.saveOptimization:
+            # add parameters to scores with separate columns
+            savescores = pd.concat(
+                [self.scores, pd.DataFrame(self.parameters).T], axis=1
+            )
+            savescores.to_csv(
+                f"{self.optimizationPath}/{self.optimizationType}_scores.tsv", sep="\t"
+            )
+
+    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+        """Called before the assessment has started.
+
+        Args:
+            model (QSPRModel): model to assess
+            assesment_type (str): type of assessment
+        """
+        super().onAssessmentStart(model, assesment_type)
+        self.outDir = self.outDir or model.outDir
+        if self.saveAssessments:
+            if self.iteration is not None:
+                self.assessmentPath = f"{self.optimizationItPath}/{self.assessmentType}"
+            else:
+                self.assessmentPath = f"{self.outDir}/{self.assessmentType}"
+            os.makedirs(self.assessmentPath, exist_ok=True)
+
+    def onAssessmentEnd(self, predictions: pd.DataFrame):
+        """Called after the assessment has finished.
+
+        Args:
+            predictions (pd.DataFrame): predictions of the assessment
+        """
+        super().onAssessmentEnd(predictions)
+        if self.saveAssessments:
+            predictions.to_csv(
+                f"{self.assessmentPath}/{self.assessmentType}_predictions.tsv",
+                sep="\t"
+            )
+
+    def onFitStart(self, model: QSPRModel):
+        """Called before the training has started."""
+        super().onFitStart(model)
+        self.outDir = self.outDir or model.outDir
+        self.fitPath = self.outDir
+        if self.saveFits:
+            if self.iteration is not None:
+                self.fitPath = f"{self.optimizationItPath}"
+            if self.currentFold is not None:
+                self.fitPath = (
+                    f"{self.fitPath}/{self.assessmentType}/fold_{self.currentFold}"
+                )
+            os.makedirs(self.fitPath, exist_ok=True)
+
+    def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
+        """Called after the training has finished.
+
+        Args:
+            estimator (Any): estimator that was fitted
+            best_epoch (int | None): index of the best epoch
+        """
+        super().onFitEnd(estimator, best_epoch)
+        if self.saveFits:
+            self.fitLog.to_csv(f"{self.fitPath}/fit_log.tsv", sep="\t")
+            self.batchLog.to_csv(f"{self.fitPath}/batch_log.tsv", sep="\t")
+
+
 class WandBMonitor(BaseMonitor):
     """Monitor hyperparameter optimization to weights and biases."""
     def __init__(self, project_name: str, **kwargs):
