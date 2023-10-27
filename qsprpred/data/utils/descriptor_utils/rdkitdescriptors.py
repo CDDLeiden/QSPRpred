@@ -26,7 +26,8 @@ class RdkitDescriptors(Scorer):
         #     self.descriptors = list(self.available.values())
         self.descriptors = (
             rdkit_descriptors
-            if rdkit_descriptors is not None else [x[0] for x in Descriptors._descList]
+            if rdkit_descriptors is not None
+            else sorted(list(set([x[0] for x in Descriptors._descList])))
         )
         if compute_3Drdkit:
             self.descriptors = [
