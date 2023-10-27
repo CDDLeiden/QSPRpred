@@ -1442,8 +1442,10 @@ class TestDescriptorSets(DataSetsMixIn, TestCase):
         """Test the rdkit descriptors calculator."""
         desc_calc = MoleculeDescriptorsCalculator([RDKitDescs()])
         self.dataset.addDescriptors(desc_calc)
+        rdkit_desc_count = len(set(Descriptors._descList))
         self.assertEqual(
-            self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList))
+            self.dataset.X.shape,
+            (len(self.dataset), rdkit_desc_count)
         )
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
@@ -1451,7 +1453,7 @@ class TestDescriptorSets(DataSetsMixIn, TestCase):
         desc_calc = MoleculeDescriptorsCalculator([RDKitDescs(compute_3Drdkit=True)])
         self.dataset.addDescriptors(desc_calc, recalculate=True)
         self.assertEqual(
-            self.dataset.X.shape, (len(self.dataset), len(Descriptors._descList) + 10)
+            self.dataset.X.shape, (len(self.dataset), rdkit_desc_count + 10)
         )
 
     def testSmilesDesc(self):
