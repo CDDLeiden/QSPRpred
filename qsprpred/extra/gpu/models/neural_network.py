@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS
 from ....logs import logger
 from ....models.interfaces import FitMonitor
-from ....models.monitors import NullFitMonitor
+from ....models.monitors import BaseMonitor
 
 
 class Base(nn.Module):
@@ -95,7 +95,7 @@ class Base(nn.Module):
         y_train,
         X_valid=None,
         y_valid=None,
-        monitor: FitMonitor = NullFitMonitor(),
+        monitor: FitMonitor = BaseMonitor(),
         log=False,
         log_prefix=None
     ) -> int:
@@ -174,7 +174,7 @@ class Base(nn.Module):
                     loss = self.criterion(y_, yb)
                 loss.backward()
                 optimizer.step()
-                monitor.on_batch_end(i, loss, y_)
+                monitor.on_batch_end(i, float(loss))
             if patience == -1:
                 if log:
                     print(

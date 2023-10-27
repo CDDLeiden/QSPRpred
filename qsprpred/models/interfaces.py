@@ -282,12 +282,11 @@ class QSPRModel(ABC):
                 self.parameters.update({"random_state": new_random_state})
             else:
                 self.parameters = {"random_state": new_random_state}
-        else:
-            if random_state:
-                logger.warning(
-                    f"Random state supplied, but alg {self.alg} does not support it."
-                    " Ignoring this setting."
-                )
+        elif random_state:
+            logger.warning(
+                f"Random state supplied, but alg {self.alg} does not support it."
+                " Ignoring this setting."
+            )
 
     def __init__(
         self,
@@ -944,22 +943,11 @@ class QSPRModel(ABC):
         """
 
 
-class BaseMonitor:
-    """Base class for monitoring the training of a model.
-
-    Attributes:
-    """
-
-
-class FitMonitor(ABC, BaseMonitor):
-    """Base class for monitoring the training of a model."""
+class FitMonitor(ABC):
+    """Base class for monitoring the fitting of a model."""
     @abstractmethod
-    def on_fit_start(self, estimator: Any):
-        """Called before the training has started.
-
-        Args:
-            estimator (Any): estimator to train
-        """
+    def on_fit_start(self, model: QSPRModel):
+        """Called before the training has started."""
 
     @abstractmethod
     def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
@@ -999,13 +987,12 @@ class FitMonitor(ABC, BaseMonitor):
         """
 
     @abstractmethod
-    def on_batch_end(self, batch: int, loss: float, predictions: np.ndarray):
+    def on_batch_end(self, batch: int, loss: float):
         """Called after each batch of the training.
 
         Args:
             batch (int): index of the current batch
             loss (float): loss of the current batch
-            predictions (np.ndarray): predictions of the current batch
         """
 
 
@@ -1021,8 +1008,12 @@ class AssessorMonitor(FitMonitor):
         """
 
     @abstractmethod
-    def on_assessment_end(self):
-        """Called after the assessment has finished."""
+    def on_assessment_end(self, predictions: pd.DataFrame):
+        """Called after the assessment has finished.
+
+        Args:
+            predictions (pd.DataFrame): predictions of the assessment
+        """
 
     @abstractmethod
     def on_fold_start(
@@ -1044,14 +1035,16 @@ class AssessorMonitor(FitMonitor):
         """
 
     @abstractmethod
-    def on_fold_end(self, model_fit: Any | tuple[Any, int], predictions: np.ndarray):
+    def on_fold_end(
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+    ):
         """Called after each fold of the assessment.
 
         Args:
             model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
-            predictions (np.ndarray): predictions of the current fold
+            predictions (pd.DataFrame): predictions of the current fold
         """
 
 
@@ -1087,16 +1080,13 @@ class HyperParameterOptimizationMonitor(AssessorMonitor):
         """
 
     @abstractmethod
-    def on_iteration_end(
-        self, score: float, scores: list[float], predictions: list[np.ndarray]
-    ):
+    def on_iteration_end(self, score: float, scores: list[float]):
         """Called after each iteration of the hyperparameter optimization.
 
         Args:
             score (float): (aggregated) score of the current iteration
             scores (list[float]): scores of the current iteration
                                   (e.g for cross-validation)
-            predictions (list[np.ndarray]): predictions of the current iteration
         """
 
 

@@ -11,7 +11,7 @@ from ..data.interfaces import DataSplit
 from ..logs import logger
 from .early_stopping import EarlyStoppingMode
 from .interfaces import AssessorMonitor, ModelAssessor, QSPRModel
-from .monitors import NullAssessorMonitor
+from .monitors import BaseMonitor
 
 
 class CrossValAssessor(ModelAssessor):
@@ -27,7 +27,7 @@ class CrossValAssessor(ModelAssessor):
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
         split: DataSplit | None = None,
-        monitor: AssessorMonitor = NullAssessorMonitor(),
+        monitor: AssessorMonitor = BaseMonitor(),
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
     ):
@@ -105,7 +105,7 @@ class CrossValAssessor(ModelAssessor):
                 model,
                 y.iloc[idx_test],
                 fold_predictions,
-                idx_test,
+                pd.Series(y.index).iloc[idx_test],
                 extra_columns={"Fold": fold_counter[idx_test]},
             )
             monitor.on_fold_end(model_fit, fold_predictions_df)
@@ -113,7 +113,8 @@ class CrossValAssessor(ModelAssessor):
         # save results
         if save:
             pd.concat(predictions).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
-        monitor.on_assessment_end()
+        monitor.on_assessment_end(pd.concat(predictions))
+
         return scores
 
 
@@ -129,7 +130,7 @@ class TestSetAssessor(ModelAssessor):
     def __init__(
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor = NullAssessorMonitor(),
+        monitor: AssessorMonitor = BaseMonitor(),
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
     ):
@@ -185,4 +186,6 @@ class TestSetAssessor(ModelAssessor):
         # predict values for independent test set and save results
         if save:
             predictions_df.to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
+
+        monitor.on_assessment_end(predictions_df)
         return [score]

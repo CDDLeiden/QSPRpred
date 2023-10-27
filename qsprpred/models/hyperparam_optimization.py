@@ -14,7 +14,7 @@ from ..models.interfaces import (
     ModelAssessor,
     QSPRModel,
 )
-from ..models.monitors import NullMonitor
+from ..models.monitors import BaseMonitor
 
 
 class OptunaOptimization(HyperParameterOptimization):
@@ -53,7 +53,7 @@ class OptunaOptimization(HyperParameterOptimization):
         param_grid: dict,
         model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float] = np.mean,
-        monitor: HyperParameterOptimizationMonitor = NullMonitor(),
+        monitor: HyperParameterOptimizationMonitor = BaseMonitor(),
         n_trials: int = 100,
         n_jobs: int = 1,
     ):
@@ -210,7 +210,7 @@ class GridSearchOptimization(HyperParameterOptimization):
         self,
         param_grid: dict,
         model_assessor: ModelAssessor,
-        monitor: HyperParameterOptimizationMonitor = NullMonitor(),
+        monitor: HyperParameterOptimizationMonitor = BaseMonitor(),
         score_aggregation: Callable = np.mean,
     ):
         """Initialize the class.

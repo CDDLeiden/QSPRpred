@@ -25,7 +25,7 @@ from ....data.data import QSPRDataset
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import QSPRModel, FitMonitor
 from ....models.tasks import ModelTasks
-from ....models.monitors import NullFitMonitor
+from ....models.monitors import BaseMonitor
 
 
 class PyBoostModel(QSPRModel):
@@ -112,7 +112,7 @@ class PyBoostModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        monitor: FitMonitor = NullFitMonitor(),
+        monitor: FitMonitor = BaseMonitor(),
         estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         **kwargs,
@@ -130,7 +130,7 @@ class PyBoostModel(QSPRModel):
             (GzipKNNAlgorithm): fitted estimator instance
         """
         estimator = self.estimator if estimator is None else estimator
-        monitor.on_fit_start(estimator)
+        monitor.on_fit_start(self)
         X, y = self.convertToNumpy(X, y)
 
         if self.task == ModelTasks.MULTICLASS:

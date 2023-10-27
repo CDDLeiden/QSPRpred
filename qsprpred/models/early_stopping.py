@@ -194,7 +194,7 @@ def early_stopping(func: Callable) -> Callable:
             " early stopping."
         )
         self.earlyStopping.mode = mode if mode is not None else self.earlyStopping.mode
-        # alternative to using NullMonitor here as this leads to circular imports
+        # alternative to using BaseMonitor here as this leads to circular imports
         if monitor is not None:
             estimator, best_epoch = func(self, X, y, monitor, estimator, mode, **kwargs)
         else:
