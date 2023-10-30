@@ -1227,6 +1227,11 @@ class HyperParameterOptimization(ABC):
         self.bestScore = -np.inf
         self.bestParams = None
         self.monitor = monitor
+        self.config = {
+            "param_grid": param_grid,
+            "model_assessor": model_assessor,
+            "score_aggregation": score_aggregation
+        }
 
     @abstractmethod
     def optimize(self, model: QSPRModel) -> dict:
