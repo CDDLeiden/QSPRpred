@@ -7,6 +7,7 @@ from .feature_standardization import apply_feature_standardizer
 
 
 class FoldGenerator(ABC):
+    """A generator that creates folds from a given data set."""
 
     @abstractmethod
     def iterFolds(
@@ -21,6 +22,21 @@ class FoldGenerator(ABC):
         list[int],
         list[int]
     ], None, None]:
+        """
+        Returns the generator of folds to iterate over.
+
+        Args:
+            dataset (QSPRDataset):
+                the data set to generate the splits for
+            concat (bool, optional):
+                whether to concatenate the features in the test
+                and training set of the data set (default: False)
+
+        Returns:
+            generator:
+                a generator that yields a tuple of
+                (X_train, X_test, y_train, y_test, train_index, test_index)
+        """
         pass
 
     def getFolds(self, dataset: "QSPRDataset"):
@@ -29,8 +45,18 @@ class FoldGenerator(ABC):
 
 
 class FoldsFromDataSplit(FoldGenerator):
-    """A class that creates folds from a given data set. It can be used for
-    cross-validation."""
+    """This generator takes a scikit-learn or scikit-learn-like splitter
+    and creates folds from it. It is possible to pass a standardizer to
+    make sure features in the splits are properly standardized.
+
+    Attributes:
+        split (DataSplit):
+            the splitter to use to create the folds (this can also just be
+            a raw scikit-learn splitter)
+        featureStandardizer:
+            the standardizer to use to standardize the features (this can also
+            just be a raw scikit-learn standardizer)
+    """
 
     def _standardize_folds(self, folds):
         """A generator that fits and applies feature standardizers to each fold
@@ -44,7 +70,16 @@ class FoldsFromDataSplit(FoldGenerator):
             yield X_train, X_test, y_train, y_test, train_index, test_index
 
     def __init__(self, split: "DataSplit", feature_standardizer=None):
-        """Create a new instance of Folds."""
+        """Initialize the generator with a splitter and a standardizer.
+
+        Args:
+            split (DataSplit):
+                the splitter to use to create the folds (this can also just be
+                a raw scikit-learn splitter)
+            feature_standardizer:
+                the standardizer to use to standardize the features (this can also
+                just be a raw scikit-learn standardizer)
+        """
         self.split = split
         self.featureStandardizer = feature_standardizer
 

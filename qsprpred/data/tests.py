@@ -427,7 +427,9 @@ class DescriptorCheckMixIn:
                 self.assertEqual(fold[0].shape[1], expected_length)
                 self.assertEqual(fold[1].shape[1], expected_length)
         else:
-            self.assertRaises(ValueError, lambda: [x for x in ds.iterFolds(split=KFold(n_splits=5))])
+            self.assertRaises(
+                ValueError, lambda: [x for x in ds.iterFolds(split=KFold(n_splits=5))]
+            )
 
     def checkDescriptors(
         self, dataset: QSPRDataset, target_props: list[dict | TargetProperty]
@@ -968,13 +970,33 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             timesplit=TIME_SPLIT_YEAR,
             timeprop="Year of first disclosure",
         )
-
+        # prepare and validate the split
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
         # test if dates higher than 2000 are in test set
         test_set = dataset.getFeatures()[1]
         years = dataset.getDF().loc[test_set.index, "Year of first disclosure"]
         self.assertTrue(all(years > TIME_SPLIT_YEAR))
+        # test bootstrapping
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet(
+                name="TemporalSplit_bootstrap_mt"
+            )
+        else:
+            dataset = self.createLargeTestDataSet(name="TemporalSplit_bootstrap")
+        split = TemporalSplit(
+            timesplit=[TIME_SPLIT_YEAR - 1, TIME_SPLIT_YEAR, TIME_SPLIT_YEAR + 1],
+            timeprop="Year of first disclosure",
+        )
+        bootstrap_split = BootstrapSplit(
+            split=split,
+            n_bootstraps=10,
+        )
+        for time, fold_info in zip(
+            split.timeSplit, list(dataset.iterFolds(bootstrap_split))
+        ):
+            years = dataset.getDF().loc[fold_info[1].index, "Year of first disclosure"]
+            self.assertTrue(all(years > time))
 
     @parameterized.expand(
         [
@@ -1000,6 +1022,27 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
             self.assertTrue(
                 all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
             )
+        # check folding by scaffold
+        if multitask:
+            dataset = self.createLargeMultitaskDataSet(
+                name="ScaffoldSplit_folding_mt"
+            )
+        else:
+            dataset = self.createLargeTestDataSet(name="ScaffoldSplit_folding")
+        n_folds = 5
+        split = ScaffoldSplit(
+            scaffold=scaffold,
+            custom_test_list=custom_test_list,
+            n_folds=n_folds,
+        )
+        test_index_all = []
+        for k, (X_train, X_test, y_train, y_test, train_index, test_index) \
+                in enumerate(dataset.iterFolds(split)):
+            self.assertTrue(all([x not in test_index_all for x in test_index]))
+            self.assertTrue(len(X_train) > len(X_test))
+            test_index_all.extend(X_test.index.tolist())
+        self.assertEqual(k, n_folds - 1)
+        self.assertEqual(len(test_index_all), len(dataset.getFeatures(concat=True)))
 
     @parameterized.expand(
         [
@@ -1444,10 +1487,7 @@ class TestDescriptorSets(DataSetsMixIn, TestCase):
         desc_calc = MoleculeDescriptorsCalculator([RDKitDescs()])
         self.dataset.addDescriptors(desc_calc)
         rdkit_desc_count = len(set(Descriptors._descList))
-        self.assertEqual(
-            self.dataset.X.shape,
-            (len(self.dataset), rdkit_desc_count)
-        )
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), rdkit_desc_count))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
         # with 3D

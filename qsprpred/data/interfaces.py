@@ -134,12 +134,25 @@ class MoleculeDataSet(DataSet):
 
 
 class Randomized:
+    """A pseudorandom action that can be fixed with a seed.
+
+    Attributes:
+        seed (int | None):
+            The seed to use to randomize the action. If `None`,
+            a random seed is used instead of a fixed one (default: `None`).
+    """
 
     def __init__(self, seed: int | None = None) -> None:
+        """Create a new randomized action.
+
+        Args:
+            seed:
+                the seed to use to randomize the action. If `None`,
+                a random seed is used instead of a fixed one (default: `None`).
+        """
         self.seed = seed
 
     def setSeed(self, seed: int | None = None):
-        """Randomize an action."""
         self.seed = seed
 
     def getSeed(self):
@@ -153,16 +166,19 @@ class DataSetDependant:
         self.dataSet = dataset
 
     def setDataSet(self, dataset: MoleculeDataSet):
-        """
-        Set the data sets.
-        """
         self.dataSet = dataset
 
     @property
-    def hasDataSet(self):
+    def hasDataSet(self) -> bool:
+        """Indicates if this object has a data set attached to it."""
         return self.dataSet is not None
 
     def getDataSet(self):
+        """Get the data set attached to this object.
+
+        Raises:
+            ValueError: If no data set is attached to this object.
+        """
         if self.hasDataSet:
             return self.dataSet
         else:
