@@ -130,7 +130,7 @@ class PyBoostModel(QSPRModel):
             (GzipKNNAlgorithm): fitted estimator instance
         """
         estimator = self.estimator if estimator is None else estimator
-        monitor.on_fit_start(self)
+        monitor.onFitStart(self)
         X, y = self.convertToNumpy(X, y)
 
         if self.task == ModelTasks.MULTICLASS:
@@ -141,13 +141,13 @@ class PyBoostModel(QSPRModel):
             # and validation set for early stopping
             X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
             estimator.fit(X_train, y_train, eval_sets=[{"X": X_val, "y": y_val}])
-            monitor.on_fit_end(estimator, estimator.best_round)
+            monitor.onFitEnd(estimator, estimator.best_round)
             return estimator, estimator.best_round
 
         estimator.params.update({"ntrees": self.earlyStopping.getEpochs()})
         estimator.fit(X, y)
 
-        monitor.on_fit_end(estimator)
+        monitor.onFitEnd(estimator)
         return estimator, self.earlyStopping.getEpochs()
 
     def predict(

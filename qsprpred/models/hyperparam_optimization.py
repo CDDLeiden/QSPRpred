@@ -105,13 +105,10 @@ class OptunaOptimization(HyperParameterOptimization):
         self.nJobs = 1
         self.bestScore = -np.inf
         self.bestParams = None
-        self.config = {
-            "param_grid": param_grid,
-            "model_assessor": model_assessor,
-            "score_aggregation": score_aggregation,
+        self.config.update({
             "n_trials": n_trials,
             "n_jobs": n_jobs,
-        }
+        })
 
     def optimize(self, model: QSPRModel, **kwargs) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
@@ -125,7 +122,7 @@ class OptunaOptimization(HyperParameterOptimization):
         """
         import optuna
 
-        self.monitor.on_optimization_start(model, self.config, self.__class__.__name__)
+        self.monitor.onOptimizationStart(model, self.config, self.__class__.__name__)
 
         logger.info(
             "Bayesian optimization can take a while "
@@ -155,7 +152,7 @@ class OptunaOptimization(HyperParameterOptimization):
         self.bestScore = trial.value
         self.bestParams = trial.params
 
-        self.monitor.on_optimization_end(self.bestScore, self.bestParams)
+        self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
         return self.bestParams
 
     def objective(self, trial: optuna.trial.Trial, model: QSPRModel, **kwargs) -> float:
@@ -188,7 +185,7 @@ class OptunaOptimization(HyperParameterOptimization):
                 )
             elif value[0] == "uniform":
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
-        self.monitor.on_iteration_start(bayesian_params)
+        self.monitor.onIterationStart(bayesian_params)
         # assess the model with the current parameters and return the score
         scores = self.runAssessment(
             model,
@@ -200,7 +197,7 @@ class OptunaOptimization(HyperParameterOptimization):
         score = self.scoreAggregation(scores)
         logger.info(bayesian_params)
         logger.info(f"Score: {score}, std: {np.std(scores)}")
-        self.monitor.on_iteration_end(score, scores)
+        self.monitor.onIterationEnd(score, scores)
         return score
 
 
@@ -243,10 +240,12 @@ class GridSearchOptimization(HyperParameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
+        self.monitor.onOptimizationStart(model, self.config, self.__class__.__name__)
         logger.info(
             "Grid search started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         for params in ParameterGrid(self.paramGrid):
+            self.monitor.onIterationStart(params)
             logger.info(params)
             scores = self.runAssessment(
                 model, save=False, parameters=params, monitor=self.monitor, **kwargs
@@ -256,6 +255,7 @@ class GridSearchOptimization(HyperParameterOptimization):
             if score > self.bestScore:
                 self.bestScore = score
                 self.bestParams = params
+            self.monitor.onIterationEnd(score, scores)
         # log some info and return the best parameters
         logger.info(
             "Grid search ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -267,4 +267,5 @@ class GridSearchOptimization(HyperParameterOptimization):
         # save the best parameters to the model if requested
         if save_params:
             model.saveParams(self.bestParams)
+        self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
         return self.bestParams

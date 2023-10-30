@@ -344,18 +344,20 @@ def QSPR_modelling(args):
                         {"criterion": ["categorical", ["gini", "entropy"]]}
                     )
                 bayesoptimizer = OptunaOptimization(
-                    scoring=score_func,
+                    model_assessor=CrossValAssessor(scoring=score_func),
                     param_grid=search_space_bs,
                     n_trials=args.n_trials,
                     n_jobs=args.n_jobs,
                 )
                 best_params = bayesoptimizer.optimize(QSPRmodel)
 
-            # initialize models from saved or default parameters
-
             if args.model_evaluation:
-                CrossValAssessor(mode=EarlyStoppingMode.RECORDING)(QSPRmodel)
-                TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING)(QSPRmodel)
+                CrossValAssessor(
+                    mode=EarlyStoppingMode.RECORDING, scoring=score_func
+                )(QSPRmodel)
+                TestSetAssessor(
+                    mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func
+                )(QSPRmodel)
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):

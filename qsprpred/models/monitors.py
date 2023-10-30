@@ -1,3 +1,6 @@
+import json
+import os
+from copy import deepcopy
 from typing import Any
 
 import numpy as np
@@ -7,8 +10,6 @@ from rdkit.Chem import Draw
 
 from ..data.data import QSPRDataset
 from .interfaces import HyperParameterOptimizationMonitor, QSPRModel
-
-from copy import deepcopy
 
 
 class BaseMonitor(HyperParameterOptimizationMonitor):
@@ -60,8 +61,9 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         self.bestParameters = None
         self.parameters = {}
         self.assessments = {}
-        self.scores = pd.DataFrame(columns=["aggregated_score", "fold_scores"])
-        self.iteration = 0
+        self.scores = pd.DataFrame(columns=["aggregated_score", "fold_scores"]
+                                  ).rename_axis("Iteration")
+        self.iteration = None
 
         # assessment data
         self.assessmentModel = None
@@ -81,7 +83,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         self.bestEstimator = None
         self.bestEpoch = None
 
-    def on_optimization_start(
+    def onOptimizationStart(
         self, model: QSPRModel, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
@@ -92,11 +94,12 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
             optimization_type (str): type of hyperparameter optimization
         """
         self.optimizationType = optimization_type
+        self.iteration = 0
         self.model = model
         self.data = model.data
         self.config = config
 
-    def on_optimization_end(self, best_score: float, best_parameters: dict):
+    def onOptimizationEnd(self, best_score: float, best_parameters: dict):
         """Called after the hyperparameter optimization has finished.
 
         Args:
@@ -106,7 +109,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         self.bestScore = best_score
         self.bestParameters = best_parameters
 
-    def on_iteration_start(self, params: dict):
+    def onIterationStart(self, params: dict):
         """Called before each iteration of the hyperparameter optimization.
 
         Args:
@@ -114,7 +117,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         """
         self.parameters[self.iteration] = params
 
-    def on_iteration_end(self, score: float, scores: list[float]):
+    def onIterationEnd(self, score: float, scores: list[float]):
         """Called after each iteration of the hyperparameter optimization.
 
         Args:
@@ -126,8 +129,8 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         self.assessments[self.iteration] = self._get_assessment()
         self._clear_assessment()
         self.iteration += 1
-        
-    def on_assessment_start(self, model: QSPRModel, assesment_type: str):
+
+    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
 
         Args:
@@ -138,7 +141,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         self.assessmentDataset = model.data
         self.assessmentType = assesment_type
 
-    def on_assessment_end(self, predictions: pd.DataFrame):
+    def onAssessmentEnd(self, predictions: pd.DataFrame):
         """Called after the assessment has finished.
 
         Args:
@@ -146,7 +149,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         """
         self.predictions = predictions
 
-    def on_fold_start(
+    def onFoldStart(
         self,
         fold: int,
         X_train: np.array,
@@ -171,7 +174,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
             "y_test": y_test,
         }
 
-    def on_fold_end(
+    def onFoldEnd(
         self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
@@ -204,13 +207,13 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
             "estimators": self.estimators,
         }
 
-    def on_fit_start(self, model: QSPRModel):
+    def onFitStart(self, model: QSPRModel):
         """Called before the training has started."""
         self.fitModel = model
         self.currentEpoch = 0
         self.currentBatch = 0
 
-    def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
+    def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
 
         Args:
@@ -220,7 +223,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         self.bestEstimator = estimator
         self.bestEpoch = best_epoch
 
-    def on_epoch_start(self, epoch: int):
+    def onEpochStart(self, epoch: int):
         """Called before each epoch of the training.
 
         Args:
@@ -228,9 +231,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         """
         self.currentEpoch = epoch
 
-    def on_epoch_end(
-        self, epoch: int, train_loss: float, val_loss: float | None = None
-    ):
+    def onEpochEnd(self, epoch: int, train_loss: float, val_loss: float | None = None):
         """Called after each epoch of the training.
 
         Args:
@@ -240,7 +241,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         """
         self.fitLog.loc[epoch] = [epoch, train_loss, val_loss]
 
-    def on_batch_start(self, batch: int):
+    def onBatchStart(self, batch: int):
         """Called before each batch of the training.
 
         Args:
@@ -248,7 +249,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
         """
         self.currentBatch = batch
 
-    def on_batch_end(self, batch: int, loss: float):
+    def onBatchEnd(self, batch: int, loss: float):
         """Called after each batch of the training.
 
         Args:
@@ -273,6 +274,129 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
             "bestEpoch": self.bestEpoch,
         }
 
+
+class FileMonitor(BaseMonitor):
+    def __init__(
+        self,
+        save_optimization: bool = True,
+        save_assessments: bool = True,
+        save_fits: bool = True,
+    ):
+        """Monitor hyperparameter optimization, assessment and fitting to files.
+
+        Args:
+            save_optimization (bool): whether to save the hyperparameter optimization
+                scores
+            save_assessments (bool): whether to save assessment predictions
+            save_fits (bool): whether to save the fit log and batch log
+        """
+        super().__init__()
+        self.saveOptimization = save_optimization
+        self.saveAssessments = save_assessments
+        self.saveFits = save_fits
+        self.outDir = None
+
+    def onOptimizationStart(
+        self, model: QSPRModel, config: dict, optimization_type: str
+    ):
+        """Called before the hyperparameter optimization has started.
+
+        Args:
+            model (QSPRModel): model to optimize
+            config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of hyperparameter optimization
+        """
+        super().onOptimizationStart(model, config, optimization_type)
+        self.outDir = self.outDir or model.outDir
+        self.optimizationPath = f"{self.outDir}/{self.optimizationType}"
+
+    def onIterationStart(self, params: dict):
+        """Called before each iteration of the hyperparameter optimization.
+
+        Args:
+            params (dict): parameters used for the current iteration
+        """
+        super().onIterationStart(params)
+        self.optimizationItPath = f"{self.optimizationPath}/iteration_{self.iteration}"
+
+    def onIterationEnd(self, score: float, scores: list[float]):
+        """Called after each iteration of the hyperparameter optimization.
+
+        Args:
+            score (float): (aggregated) score of the current iteration
+            scores (list[float]): scores of the current iteration
+                                  (e.g for cross-validation)
+        """
+        if self.saveAssessments:
+            # save parameters to json
+            with open(f"{self.optimizationItPath}/parameters.json", "w") as f:
+                json.dump(self.parameters[self.iteration], f)
+        super().onIterationEnd(score, scores)
+        if self.saveOptimization:
+            # add parameters to scores with separate columns
+            savescores = pd.concat(
+                [self.scores, pd.DataFrame(self.parameters).T], axis=1
+            )
+            savescores.to_csv(
+                f"{self.optimizationPath}/{self.optimizationType}_scores.tsv", sep="\t"
+            )
+
+    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+        """Called before the assessment has started.
+
+        Args:
+            model (QSPRModel): model to assess
+            assesment_type (str): type of assessment
+        """
+        super().onAssessmentStart(model, assesment_type)
+        self.outDir = self.outDir or model.outDir
+        if self.saveAssessments:
+            if self.iteration is not None:
+                self.assessmentPath = f"{self.optimizationItPath}/{self.assessmentType}"
+            else:
+                self.assessmentPath = f"{self.outDir}/{self.assessmentType}"
+            os.makedirs(self.assessmentPath, exist_ok=True)
+
+    def onAssessmentEnd(self, predictions: pd.DataFrame):
+        """Called after the assessment has finished.
+
+        Args:
+            predictions (pd.DataFrame): predictions of the assessment
+        """
+        super().onAssessmentEnd(predictions)
+        if self.saveAssessments:
+            predictions.to_csv(
+                f"{self.assessmentPath}/{self.assessmentType}_predictions.tsv",
+                sep="\t"
+            )
+
+    def onFitStart(self, model: QSPRModel):
+        """Called before the training has started."""
+        super().onFitStart(model)
+        self.outDir = self.outDir or model.outDir
+        self.fitPath = self.outDir
+        if self.saveFits:
+            if self.iteration is not None:
+                self.fitPath = f"{self.optimizationItPath}"
+            if self.currentFold is not None:
+                self.fitPath = (
+                    f"{self.fitPath}/{self.assessmentType}/fold_{self.currentFold}"
+                )
+            os.makedirs(self.fitPath, exist_ok=True)
+
+    def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
+        """Called after the training has finished.
+
+        Args:
+            estimator (Any): estimator that was fitted
+            best_epoch (int | None): index of the best epoch
+        """
+        super().onFitEnd(estimator, best_epoch)
+        if self.saveFits:
+            self.fitLog.to_csv(f"{self.fitPath}/fit_log.tsv", sep="\t")
+            self.batchLog.to_csv(f"{self.fitPath}/batch_log.tsv", sep="\t")
+
+
 class WandBMonitor(BaseMonitor):
     """Monitor hyperparameter optimization to weights and biases."""
     def __init__(self, project_name: str, **kwargs):
@@ -294,7 +418,7 @@ class WandBMonitor(BaseMonitor):
         self.projectName = project_name
         self.kwargs = kwargs
 
-    def on_fold_start(
+    def onFoldStart(
         self,
         fold: int,
         X_train: np.array,
@@ -311,7 +435,7 @@ class WandBMonitor(BaseMonitor):
             X_test (np.array): test data of the current fold
             y_test (np.array): test targets of the current fold
         """
-        super().on_fold_start(fold, X_train, y_train, X_test, y_test)
+        super().onFoldStart(fold, X_train, y_train, X_test, y_test)
         config = {
             "fold": fold,
             "model": self.assessmentModel.name,
@@ -340,7 +464,7 @@ class WandBMonitor(BaseMonitor):
             **self.kwargs,
         )
 
-    def on_fold_end(
+    def onFoldEnd(
         self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
@@ -351,7 +475,7 @@ class WandBMonitor(BaseMonitor):
             predictions (pd.DataFrame):
                 predictions of the current fold
         """
-        super().on_fold_end(model_fit, fold_predictions)
+        super().onFoldEnd(model_fit, fold_predictions)
 
         fold_predictions_copy = deepcopy(fold_predictions)
 
@@ -375,13 +499,13 @@ class WandBMonitor(BaseMonitor):
         self.wandb.log({"Test Results": wandbTable})
         self.wandb.finish()
 
-    def on_fit_start(self, model: QSPRModel):
+    def onFitStart(self, model: QSPRModel):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to train
         """
-        super().on_fit_start(model)
+        super().onFitStart(model)
         # initialize wandb run if not already initialized
         if not self.wandb.run:
             self.wandb.init(
@@ -393,22 +517,20 @@ class WandBMonitor(BaseMonitor):
                 **self.kwargs,
             )
 
-    def on_fit_end(self, estimator: Any, best_epoch: int | None = None):
+    def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
 
         Args:
             estimator (Any): estimator that was fitted
             best_epoch (int | None): index of the best epoch
         """
-        super().on_fit_end(estimator, best_epoch)
+        super().onFitEnd(estimator, best_epoch)
         self.wandb.log({"best_epoch": best_epoch})
         # finish wandb run if not already finished
         if not hasattr(self, "assessmentType"):
             self.wandb.finish()
 
-    def on_epoch_end(
-        self, epoch: int, train_loss: float, val_loss: float | None = None
-    ):
+    def onEpochEnd(self, epoch: int, train_loss: float, val_loss: float | None = None):
         """Called after each epoch of the training.
 
         Args:
@@ -416,10 +538,10 @@ class WandBMonitor(BaseMonitor):
             train_loss (float): loss of the current epoch
             val_loss (float | None): validation loss of the current epoch
         """
-        super().on_epoch_end(epoch, train_loss, val_loss)
+        super().onEpochEnd(epoch, train_loss, val_loss)
         self.wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
 
-    def on_batch_end(self, batch: int, loss: float):
+    def onBatchEnd(self, batch: int, loss: float):
         """Called after each batch of the training.
 
         Args:
@@ -427,5 +549,5 @@ class WandBMonitor(BaseMonitor):
             loss (float): loss of the current batch
             predictions (np.ndarray): predictions of the current batch
         """
-        super().on_batch_end(batch, loss)
+        super().onBatchEnd(batch, loss)
         self.wandb.log({"batch": batch, "loss": loss})

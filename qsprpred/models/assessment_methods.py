@@ -64,9 +64,10 @@ class CrossValAssessor(ModelAssessor):
         evalparams = model.parameters if parameters is None else parameters
         self.scoreFunc.checkMetricCompatibility(model.task, self.useProba)
         # check if data is available
-        X, _ = data.getFeatures()
-        y, _ = data.getTargetPropertiesValues()
-        monitor.on_assessment_start(model, self.__class__.__name__)
+        model.checkForData()
+        X, _ = model.data.getFeatures()
+        y, _ = model.data.getTargetPropertiesValues()
+        monitor.onAssessmentStart(model, self.__class__.__name__)
         # cross validation
         fold_counter = np.zeros(y.shape[0])
         predictions = []
@@ -78,7 +79,7 @@ class CrossValAssessor(ModelAssessor):
                 "cross validation fold %s started: %s"
                 % (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
-            monitor.on_fold_start(
+            monitor.onFoldStart(
                 fold=i, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test
             )
             # fit model
@@ -108,13 +109,12 @@ class CrossValAssessor(ModelAssessor):
                 pd.Series(y.index).iloc[idx_test],
                 extra_columns={"Fold": fold_counter[idx_test]},
             )
-            monitor.on_fold_end(model_fit, fold_predictions_df)
+            monitor.onFoldEnd(model_fit, fold_predictions_df)
             predictions.append(fold_predictions_df)
         # save results
         if save:
             pd.concat(predictions).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
-        monitor.on_assessment_end(pd.concat(predictions))
-
+        monitor.onAssessmentEnd(pd.concat(predictions))
         return scores
 
 
@@ -165,8 +165,8 @@ class TestSetAssessor(ModelAssessor):
         model.checkForData()
         X, X_ind = model.data.getFeatures()
         y, y_ind = model.data.getTargetPropertiesValues()
-        monitor.on_assessment_start(model, self.__class__.__name__)
-        monitor.on_fold_start(fold=1, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind)
+        monitor.onAssessmentStart(model, self.__class__.__name__)
+        monitor.onFoldStart(fold=1, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind)
         # fit model
         ind_estimator = model.loadEstimator(evalparams)
         ind_estimator = model.fit(
@@ -182,10 +182,10 @@ class TestSetAssessor(ModelAssessor):
         predictions_df = self.predictionsToDataFrame(
             model, y_ind, predictions, y_ind.index
         )
-        monitor.on_fold_end(ind_estimator, predictions_df)
+        monitor.onFoldEnd(ind_estimator, predictions_df)
         # predict values for independent test set and save results
         if save:
             predictions_df.to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
 
-        monitor.on_assessment_end(predictions_df)
+        monitor.onAssessmentEnd(predictions_df)
         return [score]
