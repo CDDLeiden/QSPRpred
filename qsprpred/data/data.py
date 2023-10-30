@@ -2145,6 +2145,8 @@ class QSPRDataset(MoleculeTable):
             filled = True
         if not filled:
             logger.warning("Missing values filled with %s" % fill_value)
+        else:
+            self.featurize()
 
     def filterFeatures(self, feature_filters: list[Callable]):
         """Filter features in the data set.
