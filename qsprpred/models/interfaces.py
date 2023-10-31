@@ -947,7 +947,11 @@ class FitMonitor(ABC):
     """Base class for monitoring the fitting of a model."""
     @abstractmethod
     def onFitStart(self, model: QSPRModel):
-        """Called before the training has started."""
+        """Called before the training has started.
+
+        Args:
+            model (QSPRModel): model to be fitted
+        """
 
     @abstractmethod
     def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
