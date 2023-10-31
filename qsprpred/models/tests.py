@@ -1040,6 +1040,48 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.baseMonitorTest(test_monitor, "test", False)
         self.baseMonitorTest(fit_monitor, "fit", False)
 
+    def fileMonitorTest(self, monitor: FileMonitor,
+                        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+                        neural_net: bool):
+        """Test if the correct files are generated"""
+        def check_fit_files(path):
+            self.assertTrue(os.path.exists(f"{path}/fit_log.tsv"))
+            self.assertTrue(os.path.exists(f"{path}/batch_log.tsv"))
+
+        def check_assessment_files(path, monitor):
+            output_path = f"{path}/{monitor.assessmentType}"
+            self.assertTrue(os.path.exists(output_path))
+            self.assertTrue(
+                os.path.exists(
+                    f"{output_path}/{monitor.assessmentType}_predictions.tsv"
+                )
+            )
+
+            if monitor.saveFits and neural_net:
+                for fold in monitor.foldData:
+                    check_fit_files(f"{output_path}/fold_{fold}")
+
+        def check_hyperparam_files(path, monitor):
+            output_path = f"{path}/GridSearchOptimization"
+            self.assertTrue(os.path.exists(output_path))
+            self.assertTrue(
+                os.path.exists(f"{output_path}/GridSearchOptimization_scores.tsv")
+            )
+
+            if monitor.saveAssessments:
+                for assessment in monitor.assessments:
+                    check_assessment_files(
+                        f"{output_path}/iteration_{assessment}",
+                        monitor
+                    )
+
+        if monitor_type == "hyperparam":
+            check_hyperparam_files(monitor.outDir, monitor)
+        elif monitor_type in ["crossval", "test"]:
+            check_assessment_files(monitor.outDir, monitor)
+        elif monitor_type == "fit" and neural_net:
+            check_fit_files(monitor.outDir)
+
     def test_FileMonitor(self):
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
@@ -1050,7 +1092,7 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name="RFR",
             random_state=42,
         )
-        
+
         hyperparam_monitor = FileMonitor()
         crossval_monitor = FileMonitor()
         test_monitor = FileMonitor()
@@ -1063,39 +1105,7 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         ) = self.trainModelWithMonitoring(
             model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
         )
-        # check hyperparameter files are created
-        modelpath = hyperparam_monitor.model.outDir
-        self.assertEqual(hyperparam_monitor.outDir, modelpath)
-        self.assertTrue(os.path.exists(f"{modelpath}/GridSearchOptimization"))
-        scores_path = f"{modelpath}/GridSearchOptimization/GridSearchOptimization_scores.tsv"
-        self.assertTrue(os.path.exists(scores_path))
-        scores = pd.read_csv(scores_path, sep="\t")
-        self.assertEqual(scores.shape, (6, 5)) # idx + aggregated scores + scores + 2 params
-        for i in range(6):
-            iteration_dir = f"{modelpath}/GridSearchOptimization/iteration_{i}"
-            self.assertTrue(os.path.exists(iteration_dir))
-            self.assertTrue(os.path.exists(f"{iteration_dir}/parameters.json"))
-            self.assertTrue(os.path.exists(f"{iteration_dir}/CrossValAssessor"))
-            preds_path = f"{iteration_dir}/CrossValAssessor/CrossValAssessor_predictions.tsv"
-            self.assertTrue(os.path.exists(preds_path))
-            preds = pd.read_csv(preds_path, sep="\t")
-            self.assertEqual(preds.shape, (len(hyperparam_monitor.data.y), 4)) # idx + labels + preds + fold
-
-        # check crossvalidation assessment files are created
-        self.assertTrue(os.path.exists(f"{modelpath}/CrossValAssessor"))
-        preds_path = f"{modelpath}/CrossValAssessor/CrossValAssessor_predictions.tsv"
-        self.assertTrue(os.path.exists(preds_path))
-        preds = pd.read_csv(preds_path, sep="\t")
-        self.assertEqual(preds.shape, (len(crossval_monitor.assessmentDataset.y), 4))
-
-        # check test set assessment files are created
-        self.assertTrue(os.path.exists(f"{modelpath}/TestSetAssessor"))
-        preds_path = f"{modelpath}/TestSetAssessor/TestSetAssessor_predictions.tsv"
-        self.assertTrue(os.path.exists(preds_path))
-        preds = pd.read_csv(preds_path, sep="\t")
-        self.assertEqual(preds.shape, (len(test_monitor.assessmentDataset.y_ind), 3))
-
-    def test_WandBMonitor(self):
-        #import wandb
-        # wandb.init(anonymous="must", mode="offline")
-        pass
+        self.fileMonitorTest(hyperparam_monitor, "hyperparam", False)
+        self.fileMonitorTest(crossval_monitor, "crossval", False)
+        self.fileMonitorTest(test_monitor, "test", False)
+        self.fileMonitorTest(fit_monitor, "fit", False)

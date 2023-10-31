@@ -17,7 +17,7 @@ from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.tasks import ModelTasks, TargetTasks
 from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitors
-from ....models.monitors import BaseMonitor
+from ....models.monitors import BaseMonitor, FileMonitor
 
 GPUS = list(range(torch.cuda.device_count()))
 
@@ -551,3 +551,33 @@ class TestNNMonitoring(TestMonitors):
         self.baseMonitorTest(crossval_monitor, "crossval", True)
         self.baseMonitorTest(test_monitor, "test", True)
         self.baseMonitorTest(fit_monitor, "fit", True)
+
+    def test_FileMonitor(self):
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
+        )
+
+        hyperparam_monitor = FileMonitor()
+        crossval_monitor = FileMonitor()
+        test_monitor = FileMonitor()
+        fit_monitor = FileMonitor()
+        (
+            hyperparam_monitor,
+            crossval_monitor,
+            test_monitor,
+            fit_monitor,
+        ) = self.trainModelWithMonitoring(
+            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        )
+        self.fileMonitorTest(hyperparam_monitor, "hyperparam", True)
+        self.fileMonitorTest(crossval_monitor, "crossval", True)
+        self.fileMonitorTest(test_monitor, "test", True)
+        self.fileMonitorTest(fit_monitor, "fit", True)
