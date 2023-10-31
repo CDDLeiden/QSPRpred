@@ -34,7 +34,7 @@ from ..models.interfaces import (
     QSPRModel,
 )
 from ..models.metrics import SklearnMetric
-from ..models.monitors import BaseMonitor, FileMonitor
+from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.sklearn import SklearnModel
 from ..models.tasks import ModelTasks, TargetTasks
 
@@ -1013,6 +1013,7 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             raise ValueError(f"Unknown monitor type {monitor_type}")
 
     def test_BaseMonitor(self):
+        """Test the base monitor"""
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
             alg=RandomForestRegressor,
@@ -1083,6 +1084,7 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             check_fit_files(monitor.outDir)
 
     def test_FileMonitor(self):
+        """Test the file monitor"""
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
             alg=RandomForestRegressor,
@@ -1109,3 +1111,37 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         self.fileMonitorTest(crossval_monitor, "crossval", False)
         self.fileMonitorTest(test_monitor, "test", False)
         self.fileMonitorTest(fit_monitor, "fit", False)
+
+    def test_ListMonitor(self):
+        """Test the list monitor"""
+        model = SklearnModel(
+            base_dir=self.generatedModelsPath,
+            alg=RandomForestRegressor,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="RFR",
+            random_state=42,
+        )
+
+        hyperparam_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
+        crossval_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
+        test_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
+        fit_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
+        (
+            hyperparam_monitor,
+            crossval_monitor,
+            test_monitor,
+            fit_monitor,
+        ) = self.trainModelWithMonitoring(
+            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        )
+        self.baseMonitorTest(hyperparam_monitor.monitors[0], "hyperparam", False)
+        self.baseMonitorTest(crossval_monitor.monitors[0], "crossval", False)
+        self.baseMonitorTest(test_monitor.monitors[0], "test", False)
+        self.baseMonitorTest(fit_monitor.monitors[0], "fit", False)
+
+        self.fileMonitorTest(hyperparam_monitor.monitors[1], "hyperparam", False)
+        self.fileMonitorTest(crossval_monitor.monitors[1], "crossval", False)
+        self.fileMonitorTest(test_monitor.monitors[1], "test", False)
+        self.fileMonitorTest(fit_monitor.monitors[1], "fit", False)
