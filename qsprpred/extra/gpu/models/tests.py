@@ -16,7 +16,8 @@ from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.tasks import ModelTasks, TargetTasks
-from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn
+from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitors
+from ....models.monitors import BaseMonitor
 
 GPUS = list(range(torch.cuda.device_count()))
 
@@ -510,3 +511,43 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     #         name=f"{model_name}_multitask_classification", base_dir=model.baseDir
     #     )
     #     self.predictorTest(predictor)
+
+
+class TestNNMonitoring(TestMonitors):
+    """This class holds the tests for the monitoring classes."""
+    @property
+    def gridFile(self):
+        """Return the path to the grid file with test
+        search spaces for hyperparameter optimization.
+        """
+        return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
+
+    def test_BaseMonitor(self):
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
+        )
+
+        hyperparam_monitor = BaseMonitor()
+        crossval_monitor = BaseMonitor()
+        test_monitor = BaseMonitor()
+        fit_monitor = BaseMonitor()
+        (
+            hyperparam_monitor,
+            crossval_monitor,
+            test_monitor,
+            fit_monitor,
+        ) = self.trainModelWithMonitoring(
+            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        )
+        self.baseMonitorTest(hyperparam_monitor, "hyperparam", True)
+        self.baseMonitorTest(crossval_monitor, "crossval", True)
+        self.baseMonitorTest(test_monitor, "test", True)
+        self.baseMonitorTest(fit_monitor, "fit", True)

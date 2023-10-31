@@ -4,7 +4,7 @@ import logging
 import numbers
 import os
 from os.path import exists
-from typing import Type
+from typing import Type, Literal
 from unittest import TestCase
 
 import numpy as np
@@ -902,8 +902,10 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
 
 
 class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+
     def trainModelWithMonitoring(
         self,
+        model: QSPRModel,
         hyperparam_monitor: HyperParameterOptimizationMonitor,
         crossval_monitor: AssessorMonitor,
         test_monitor: AssessorMonitor,
@@ -914,15 +916,6 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         AssessorMonitor,
         FitMonitor,
     ):
-        model = SklearnModel(
-            base_dir=self.generatedModelsPath,
-            alg=RandomForestRegressor,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
-            name="RFR",
-            random_state=42,
-        )
         score_func = SklearnMetric.getDefaultMetric(model.task)
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
@@ -950,7 +943,86 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         model.fitAttached(monitor=fit_monitor)
         return hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
 
+    def baseMonitorTest(self, monitor: BaseMonitor,
+                        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+                        neural_net: bool):
+        """Test the base monitor."""
+        def check_fit_empty(monitor):
+            self.assertEqual(len(monitor.fitLog), 0)
+            self.assertEqual(len(monitor.batchLog), 0)
+            self.assertIsNone(monitor.currentEpoch)
+            self.assertIsNone(monitor.currentBatch)
+            self.assertIsNone(monitor.bestEstimator)
+            self.assertIsNone(monitor.bestEpoch)
+
+        def check_assessment_empty(monitor):
+            self.assertIsNone(monitor.assessmentModel)
+            self.assertIsNone(monitor.asssessmentDataset)
+            self.assertDictEqual(monitor.foldData, {})
+            self.assertIsNone(monitor.predictions)
+            self.assertDictEqual(monitor.estimators, {})
+
+        def check_hyperparam_monitor(monitor):
+            # calculate number of iterations from config
+            n_iter = np.prod([len(v) for v in monitor.config["param_grid"].values()])
+            self.assertGreater(n_iter, 0)
+            self.assertEqual(len(monitor.assessments), n_iter)
+            self.assertEqual(len(monitor.parameters), n_iter)
+            self.assertEqual(monitor.scores.shape, (n_iter, 2)) # agg score + scores
+            self.assertEqual(
+                max(monitor.scores.aggregated_score),
+                monitor.bestScore,
+            )
+            self.assertDictEqual(
+                monitor.bestParameters,
+                monitor.parameters[
+                    monitor.scores.aggregated_score.argmax()],
+            )
+            check_assessment_empty(monitor)
+            check_fit_empty(monitor)
+
+        def check_assessor_monitor(monitor, n_folds, len_y):
+            self.assertEqual(
+                monitor.predictions.shape,
+                (len_y, 3 if n_folds > 1 else 2), # labels + preds (+ fold)
+            )
+            self.assertEqual(len(monitor.foldData), n_folds)
+            self.assertEqual(len(monitor.fits), n_folds)
+            self.assertEqual(len(monitor.estimators), n_folds)
+            check_fit_empty(monitor)
+
+        def check_fit_monitor(monitor):
+            self.assertGreater(len(monitor.fitLog), 0)
+            self.assertGreater(len(monitor.batchLog), 0)
+            self.assertTrue(isinstance(monitor.bestEstimator, monitor.fitModel.alg))
+            self.assertIsNotNone(monitor.currentEpoch)
+            self.assertIsNotNone(monitor.currentBatch)
+
+        if monitor_type == "hyperparam":
+            check_hyperparam_monitor(monitor)
+        elif monitor_type == "crossval":
+            check_assessor_monitor(monitor, 5, len(monitor.assessmentDataset.y))
+        elif monitor_type == "test":
+            check_assessor_monitor(monitor, 1, len(monitor.assessmentDataset.y_ind))
+        elif monitor_type == "fit":
+            if neural_net:
+                check_fit_monitor(monitor)
+            else:
+                check_fit_empty(monitor)
+        else:
+            raise ValueError(f"Unknown monitor type {monitor_type}")
+
     def test_BaseMonitor(self):
+        model = SklearnModel(
+            base_dir=self.generatedModelsPath,
+            alg=RandomForestRegressor,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="RFR",
+            random_state=42,
+        )
+
         hyperparam_monitor = BaseMonitor()
         crossval_monitor = BaseMonitor()
         test_monitor = BaseMonitor()
@@ -961,70 +1033,24 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             test_monitor,
             fit_monitor,
         ) = self.trainModelWithMonitoring(
-            hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
         )
-        ## check hyperparameter monitor
-        # check hyperparameter arguments are set correctly
-        self.assertDictEqual(
-            hyperparam_monitor.config["param_grid"],
-            {
-                "max_depth": [None, 20, 100],
-                "n_estimators": [10, 100]
-            },
-        )
-        self.assertEqual(len(hyperparam_monitor.assessments), 6)
-        self.assertEqual(len(hyperparam_monitor.parameters), 6)
-        self.assertEqual(hyperparam_monitor.scores.shape, (6, 2))
-        self.assertEqual(
-            max(hyperparam_monitor.scores.aggregated_score),
-            hyperparam_monitor.bestScore,
-        )
-        self.assertDictEqual(
-            hyperparam_monitor.bestParameters,
-            hyperparam_monitor.parameters[
-                hyperparam_monitor.scores.aggregated_score.argmax()],
-        )
-
-        def check_fit_empty(monitor):
-            self.assertEqual(len(monitor.fitLog), 0)
-            self.assertEqual(len(monitor.batchLog), 0)
-            self.assertIsNone(monitor.currentEpoch)
-            self.assertIsNone(monitor.currentBatch)
-            self.assertIsNone(monitor.bestEstimator)
-            self.assertIsNone(monitor.bestEpoch)
-
-        # check assessments and fits are cleared
-        self.assertIsNone(hyperparam_monitor.assessmentModel)
-        self.assertIsNone(hyperparam_monitor.asssessmentDataset)
-        self.assertDictEqual(hyperparam_monitor.foldData, {})
-        self.assertIsNone(hyperparam_monitor.predictions)
-        self.assertDictEqual(hyperparam_monitor.estimators, {})
-        check_fit_empty(hyperparam_monitor)
-
-        ## check crossvalidation assessment monitor
-        self.assertEqual(
-            crossval_monitor.predictions.shape,
-            (len(crossval_monitor.assessmentDataset.y), 3), # labels + preds + fold
-        )
-        self.assertEqual(len(crossval_monitor.foldData), 5)
-        self.assertEqual(len(crossval_monitor.fits), 5)
-        self.assertEqual(len(crossval_monitor.estimators), 5)
-        check_fit_empty(crossval_monitor)
-
-        ## check crossvalidation assessment monitor
-        self.assertEqual(
-            test_monitor.predictions.shape,
-            (len(test_monitor.assessmentDataset.y_ind), 2), # labels + preds
-        )
-        self.assertEqual(len(test_monitor.foldData), 1)
-        self.assertEqual(len(test_monitor.fits), 1)
-        self.assertEqual(len(test_monitor.estimators), 1)
-        check_fit_empty(test_monitor)
-
-        # fit monitor is empty (Fitting is only monitored for deep learning models)
-        check_fit_empty(fit_monitor)
+        self.baseMonitorTest(hyperparam_monitor, "hyperparam", False)
+        self.baseMonitorTest(crossval_monitor, "crossval", False)
+        self.baseMonitorTest(test_monitor, "test", False)
+        self.baseMonitorTest(fit_monitor, "fit", False)
 
     def test_FileMonitor(self):
+        model = SklearnModel(
+            base_dir=self.generatedModelsPath,
+            alg=RandomForestRegressor,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="RFR",
+            random_state=42,
+        )
+        
         hyperparam_monitor = FileMonitor()
         crossval_monitor = FileMonitor()
         test_monitor = FileMonitor()
@@ -1035,7 +1061,7 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             test_monitor,
             fit_monitor,
         ) = self.trainModelWithMonitoring(
-            hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
         )
         # check hyperparameter files are created
         modelpath = hyperparam_monitor.model.outDir

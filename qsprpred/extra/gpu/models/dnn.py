@@ -292,7 +292,7 @@ class DNNModel(QSPRModel):
         # set fixed number of epochs if early stopping is not used
         estimator.n_epochs = self.earlyStopping.getEpochs()
         estimator_fit = estimator.fit(X, y, monitor=monitor, **kwargs)
-        monitor.onFitEnd(estimator_fit)
+        monitor.onFitEnd(estimator_fit[0])
         return estimator_fit
 
     def predict(
