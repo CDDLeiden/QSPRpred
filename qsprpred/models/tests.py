@@ -27,8 +27,14 @@ from ..data.tests import DataSetsMixIn
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
-from ..models.interfaces import QSPRModel
+from ..models.interfaces import (
+    AssessorMonitor,
+    FitMonitor,
+    HyperParameterOptimizationMonitor,
+    QSPRModel,
+)
 from ..models.metrics import SklearnMetric
+from ..models.monitors import BaseMonitor, FileMonitor
 from ..models.sklearn import SklearnModel
 from ..models.tasks import ModelTasks, TargetTasks
 
@@ -881,3 +887,177 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
         test_obj = test_class(support=False)
         with self.assertRaises(AssertionError):
             _ = test_obj.test_func(None, None, None, None, best_epoch=40)
+
+
+class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+    def trainModelWithMonitoring(
+        self,
+        hyperparam_monitor: HyperParameterOptimizationMonitor,
+        crossval_monitor: AssessorMonitor,
+        test_monitor: AssessorMonitor,
+        fit_monitor: FitMonitor,
+    ) -> (
+        HyperParameterOptimizationMonitor,
+        AssessorMonitor,
+        AssessorMonitor,
+        FitMonitor,
+    ):
+        model = SklearnModel(
+            base_dir=self.generatedModelsPath,
+            alg=RandomForestRegressor,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="RFR",
+            random_state=42,
+        )
+        score_func = SklearnMetric.getDefaultMetric(model.task)
+        search_space_gs = self.getParamGrid(model, "grid")
+        gridsearcher = GridSearchOptimization(
+            param_grid=search_space_gs,
+            model_assessor=CrossValAssessor(
+                scoring=score_func,
+                mode=EarlyStoppingMode.NOT_RECORDING,
+            ),
+            monitor=hyperparam_monitor,
+        )
+        best_params = gridsearcher.optimize(model)
+        model.saveParams(best_params)
+        # perform crossvalidation
+        CrossValAssessor(
+            mode=EarlyStoppingMode.RECORDING,
+            scoring=score_func,
+            monitor=crossval_monitor,
+        )(model)
+        TestSetAssessor(
+            mode=EarlyStoppingMode.NOT_RECORDING,
+            scoring=score_func,
+            monitor=test_monitor,
+        )(model)
+        # train the model on all data
+        model.fitAttached(monitor=fit_monitor)
+        return hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+
+    def test_BaseMonitor(self):
+        hyperparam_monitor = BaseMonitor()
+        crossval_monitor = BaseMonitor()
+        test_monitor = BaseMonitor()
+        fit_monitor = BaseMonitor()
+        (
+            hyperparam_monitor,
+            crossval_monitor,
+            test_monitor,
+            fit_monitor,
+        ) = self.trainModelWithMonitoring(
+            hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        )
+        ## check hyperparameter monitor
+        # check hyperparameter arguments are set correctly
+        self.assertDictEqual(
+            hyperparam_monitor.config["param_grid"],
+            {
+                "max_depth": [None, 20, 100],
+                "n_estimators": [10, 100]
+            },
+        )
+        self.assertEqual(len(hyperparam_monitor.assessments), 6)
+        self.assertEqual(len(hyperparam_monitor.parameters), 6)
+        self.assertEqual(hyperparam_monitor.scores.shape, (6, 2))
+        self.assertEqual(
+            max(hyperparam_monitor.scores.aggregated_score),
+            hyperparam_monitor.bestScore,
+        )
+        self.assertDictEqual(
+            hyperparam_monitor.bestParameters,
+            hyperparam_monitor.parameters[
+                hyperparam_monitor.scores.aggregated_score.argmax()],
+        )
+
+        def check_fit_empty(monitor):
+            self.assertEqual(len(monitor.fitLog), 0)
+            self.assertEqual(len(monitor.batchLog), 0)
+            self.assertIsNone(monitor.currentEpoch)
+            self.assertIsNone(monitor.currentBatch)
+            self.assertIsNone(monitor.bestEstimator)
+            self.assertIsNone(monitor.bestEpoch)
+
+        # check assessments and fits are cleared
+        self.assertIsNone(hyperparam_monitor.assessmentModel)
+        self.assertIsNone(hyperparam_monitor.asssessmentDataset)
+        self.assertDictEqual(hyperparam_monitor.foldData, {})
+        self.assertIsNone(hyperparam_monitor.predictions)
+        self.assertDictEqual(hyperparam_monitor.estimators, {})
+        check_fit_empty(hyperparam_monitor)
+
+        ## check crossvalidation assessment monitor
+        self.assertEqual(
+            crossval_monitor.predictions.shape,
+            (len(crossval_monitor.assessmentDataset.y), 3), # labels + preds + fold
+        )
+        self.assertEqual(len(crossval_monitor.foldData), 5)
+        self.assertEqual(len(crossval_monitor.fits), 5)
+        self.assertEqual(len(crossval_monitor.estimators), 5)
+        check_fit_empty(crossval_monitor)
+
+        ## check crossvalidation assessment monitor
+        self.assertEqual(
+            test_monitor.predictions.shape,
+            (len(test_monitor.assessmentDataset.y_ind), 2), # labels + preds
+        )
+        self.assertEqual(len(test_monitor.foldData), 1)
+        self.assertEqual(len(test_monitor.fits), 1)
+        self.assertEqual(len(test_monitor.estimators), 1)
+        check_fit_empty(test_monitor)
+
+        # fit monitor is empty (Fitting is only monitored for deep learning models)
+        check_fit_empty(fit_monitor)
+
+    def test_FileMonitor(self):
+        hyperparam_monitor = FileMonitor()
+        crossval_monitor = FileMonitor()
+        test_monitor = FileMonitor()
+        fit_monitor = FileMonitor()
+        (
+            hyperparam_monitor,
+            crossval_monitor,
+            test_monitor,
+            fit_monitor,
+        ) = self.trainModelWithMonitoring(
+            hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        )
+        # check hyperparameter files are created
+        modelpath = hyperparam_monitor.model.outDir
+        self.assertEqual(hyperparam_monitor.outDir, modelpath)
+        self.assertTrue(os.path.exists(f"{modelpath}/GridSearchOptimization"))
+        scores_path = f"{modelpath}/GridSearchOptimization/GridSearchOptimization_scores.tsv"
+        self.assertTrue(os.path.exists(scores_path))
+        scores = pd.read_csv(scores_path, sep="\t")
+        self.assertEqual(scores.shape, (6, 5)) # idx + aggregated scores + scores + 2 params
+        for i in range(6):
+            iteration_dir = f"{modelpath}/GridSearchOptimization/iteration_{i}"
+            self.assertTrue(os.path.exists(iteration_dir))
+            self.assertTrue(os.path.exists(f"{iteration_dir}/parameters.json"))
+            self.assertTrue(os.path.exists(f"{iteration_dir}/CrossValAssessor"))
+            preds_path = f"{iteration_dir}/CrossValAssessor/CrossValAssessor_predictions.tsv"
+            self.assertTrue(os.path.exists(preds_path))
+            preds = pd.read_csv(preds_path, sep="\t")
+            self.assertEqual(preds.shape, (len(hyperparam_monitor.data.y), 4)) # idx + labels + preds + fold
+
+        # check crossvalidation assessment files are created
+        self.assertTrue(os.path.exists(f"{modelpath}/CrossValAssessor"))
+        preds_path = f"{modelpath}/CrossValAssessor/CrossValAssessor_predictions.tsv"
+        self.assertTrue(os.path.exists(preds_path))
+        preds = pd.read_csv(preds_path, sep="\t")
+        self.assertEqual(preds.shape, (len(crossval_monitor.assessmentDataset.y), 4))
+
+        # check test set assessment files are created
+        self.assertTrue(os.path.exists(f"{modelpath}/TestSetAssessor"))
+        preds_path = f"{modelpath}/TestSetAssessor/TestSetAssessor_predictions.tsv"
+        self.assertTrue(os.path.exists(preds_path))
+        preds = pd.read_csv(preds_path, sep="\t")
+        self.assertEqual(preds.shape, (len(test_monitor.assessmentDataset.y_ind), 3))
+
+    def test_WandBMonitor(self):
+        #import wandb
+        # wandb.init(anonymous="must", mode="offline")
+        pass

@@ -183,7 +183,7 @@ class BaseMonitor(HyperParameterOptimizationMonitor):
             model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
-            predictions (pd.DataFrame): predictions of the current fold
+            fold_predictions (pd.DataFrame): predictions of the current fold
         """
         self.estimators[self.currentFold] = model_fit
         self.fits[self.currentFold] = self._getFit()
