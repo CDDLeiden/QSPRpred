@@ -34,7 +34,7 @@ from ..models.interfaces import (
     QSPRModel,
 )
 from ..models.metrics import SklearnMetric
-from ..models.monitors import BaseMonitor
+from ..models.monitors import BaseMonitor, FileMonitor
 from ..models.sklearn import SklearnModel
 from ..models.tasks import ModelTasks, TargetTasks
 
@@ -935,7 +935,6 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
         best_params = gridsearcher.optimize(model)
         model.saveParams(best_params)
-        model.cleanFiles()
         # perform crossvalidation
         CrossValAssessor(
             mode=EarlyStoppingMode.RECORDING,
@@ -1026,7 +1025,51 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         check_fit_empty(fit_monitor)
 
     def test_FileMonitor(self):
-        pass
+        hyperparam_monitor = FileMonitor()
+        crossval_monitor = FileMonitor()
+        test_monitor = FileMonitor()
+        fit_monitor = FileMonitor()
+        (
+            hyperparam_monitor,
+            crossval_monitor,
+            test_monitor,
+            fit_monitor,
+        ) = self.trainModelWithMonitoring(
+            hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        )
+        # check hyperparameter files are created
+        modelpath = hyperparam_monitor.model.outDir
+        self.assertEqual(hyperparam_monitor.outDir, modelpath)
+        self.assertTrue(os.path.exists(f"{modelpath}/GridSearchOptimization"))
+        scores_path = f"{modelpath}/GridSearchOptimization/GridSearchOptimization_scores.tsv"
+        self.assertTrue(os.path.exists(scores_path))
+        scores = pd.read_csv(scores_path, sep="\t")
+        self.assertEqual(scores.shape, (6, 5)) # idx + aggregated scores + scores + 2 params
+        for i in range(6):
+            iteration_dir = f"{modelpath}/GridSearchOptimization/iteration_{i}"
+            self.assertTrue(os.path.exists(iteration_dir))
+            self.assertTrue(os.path.exists(f"{iteration_dir}/parameters.json"))
+            self.assertTrue(os.path.exists(f"{iteration_dir}/CrossValAssessor"))
+            preds_path = f"{iteration_dir}/CrossValAssessor/CrossValAssessor_predictions.tsv"
+            self.assertTrue(os.path.exists(preds_path))
+            preds = pd.read_csv(preds_path, sep="\t")
+            self.assertEqual(preds.shape, (len(hyperparam_monitor.data.y), 4)) # idx + labels + preds + fold
+
+        # check crossvalidation assessment files are created
+        self.assertTrue(os.path.exists(f"{modelpath}/CrossValAssessor"))
+        preds_path = f"{modelpath}/CrossValAssessor/CrossValAssessor_predictions.tsv"
+        self.assertTrue(os.path.exists(preds_path))
+        preds = pd.read_csv(preds_path, sep="\t")
+        self.assertEqual(preds.shape, (len(crossval_monitor.assessmentDataset.y), 4))
+
+        # check test set assessment files are created
+        self.assertTrue(os.path.exists(f"{modelpath}/TestSetAssessor"))
+        preds_path = f"{modelpath}/TestSetAssessor/TestSetAssessor_predictions.tsv"
+        self.assertTrue(os.path.exists(preds_path))
+        preds = pd.read_csv(preds_path, sep="\t")
+        self.assertEqual(preds.shape, (len(test_monitor.assessmentDataset.y_ind), 3))
 
     def test_WandBMonitor(self):
+        #import wandb
+        # wandb.init(anonymous="must", mode="offline")
         pass
