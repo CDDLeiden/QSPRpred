@@ -16,7 +16,6 @@ from sklearn.svm import SVC, SVR
 from ..data.data import QSPRDataset
 from ..logs import logger
 from .interfaces import QSPRModel
-from .monitors import BaseMonitor
 from .tasks import ModelTasks
 
 
@@ -144,9 +143,9 @@ class SklearnModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        monitor: Any = BaseMonitor(),
         estimator: Any = None,
         mode: Any = None,
+        monitor: None = None,
         **kwargs,
     ):
         """See `QSPRModel.fit`."""

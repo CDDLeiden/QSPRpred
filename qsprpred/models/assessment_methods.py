@@ -19,7 +19,8 @@ class CrossValAssessor(ModelAssessor):
 
     Attributes:
         useProba (bool): use predictProba instead of predict for classification
-        monitor (AssessorMonitor): monitor to use for assessment
+        monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
+            is used
         mode (EarlyStoppingMode): mode to use for early stopping
     """
 
@@ -27,12 +28,14 @@ class CrossValAssessor(ModelAssessor):
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
         split: DataSplit | None = None,
-        monitor: AssessorMonitor = BaseMonitor(),
+        monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
     ):
         super().__init__(scoring, monitor, use_proba, mode)
         self.split = split
+        if monitor is None:
+            self.monitor = BaseMonitor()
 
     def __call__(
         self,
@@ -85,7 +88,7 @@ class CrossValAssessor(ModelAssessor):
             # fit model
             crossval_estimator = model.loadEstimator(evalparams)
             model_fit = model.fit(
-                X_train, y_train, monitor, crossval_estimator, mode=self.mode, **kwargs
+                X_train, y_train, crossval_estimator, self.mode, monitor, **kwargs
             )
             # make predictions
             if model.task.isRegression() or not self.useProba:
@@ -124,18 +127,21 @@ class TestSetAssessor(ModelAssessor):
 
     Attributes:+
         useProba (bool): use predictProba instead of predict for classification
-        monitor (AssessorMonitor): monitor to use for assessment
+        monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
+            is used
         mode (EarlyStoppingMode): mode to use for early stopping
     """
 
     def __init__(
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor = BaseMonitor(),
+        monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
     ):
         super().__init__(scoring, monitor, use_proba, mode)
+        if monitor is None:
+            self.monitor = BaseMonitor()
 
     def __call__(
         self,
@@ -171,7 +177,7 @@ class TestSetAssessor(ModelAssessor):
         # fit model
         ind_estimator = model.loadEstimator(evalparams)
         ind_estimator = model.fit(
-            X, y, monitor, ind_estimator, mode=self.mode, **kwargs
+            X, y, ind_estimator, self.mode, monitor, **kwargs
         )
         # predict values for independent test set
         if model.task.isRegression() or not self.useProba:

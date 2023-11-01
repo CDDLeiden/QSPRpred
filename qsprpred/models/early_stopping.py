@@ -171,9 +171,9 @@ def early_stopping(func: Callable) -> Callable:
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        monitor: "FitMonitor",
         estimator: Any | None = None,
         mode: EarlyStoppingMode | None = None,
+        monitor: "FitMonitor" = None,
         **kwargs,
     ) -> Any:
         """Wrapper for fit method of models that support early stopping.
@@ -182,8 +182,9 @@ def early_stopping(func: Callable) -> Callable:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
-            monitor (FitMonitor): monitor to use for fitting
             mode (EarlyStoppingMode): early stopping mode
+            monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor
+                is used
             kwargs (dict): additional keyword arguments for the estimator's fit method
 
         Returns:
@@ -194,13 +195,7 @@ def early_stopping(func: Callable) -> Callable:
             " early stopping."
         )
         self.earlyStopping.mode = mode if mode is not None else self.earlyStopping.mode
-        # alternative to using BaseMonitor here as this leads to circular imports
-        if monitor is not None:
-            estimator, best_epoch = func(self, X, y, monitor, estimator, mode, **kwargs)
-        else:
-            estimator, best_epoch = func(
-                self, X, y, estimator=estimator, mode=mode, **kwargs
-            )
+        estimator, best_epoch = func(self, X, y, estimator, mode, monitor, **kwargs)
         if self.earlyStopping.mode == EarlyStoppingMode.RECORDING:
             self.earlyStopping.recordEpochs(best_epoch + 1)  # +1 for 0-indexing
         return estimator

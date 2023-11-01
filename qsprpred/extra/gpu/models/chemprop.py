@@ -166,9 +166,9 @@ class ChempropModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        monitor: FitMonitor = BaseMonitor(),
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        monitor: FitMonitor | None = None,
         keep_logs: bool = False,
     ) -> Any | tuple[ChempropMoleculeModel, int | None]:
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -182,16 +182,17 @@ class ChempropModel(QSPRModel):
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
-            monitor (FitMonitor): monitor to use for fitting
             estimator (Any): estimator instance to use for fitting
-            early_stopping (bool): if True, early stopping is used,
-                                   only applies to models that support early stopping.
+            mode (EarlyStoppingMode): mode to use for early stopping
+            monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor
+                is used
 
         Returns:
             Any: fitted estimator instance
             int: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
+        monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
         monitor.onFitStart(self)
 
