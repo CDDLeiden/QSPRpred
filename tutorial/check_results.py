@@ -21,23 +21,33 @@ for f in os.listdir("expected"):
             expected_file_path = f"expected/{relative_file_path}"
             actual_file_path = f"qspr/models/{relative_file_path}"
 
-            expected_values = pd.read_csv(expected_file_path, sep="\t").set_index("QSPRID", drop=True).sort_index()
-            actual_values = pd.read_csv(actual_file_path, sep="\t").set_index("QSPRID", drop=True).sort_index()
-            expected_values = expected_values.round(2)
-            actual_values = actual_values.round(2)
-            assert expected_values.columns.equals(actual_values.columns), f"Column names do not match for file {file_name}."
-            assert expected_values.index.equals(actual_values.index), f"Index values do not match for file {file_name}."
-            assert expected_values.equals(actual_values), f"Values do not match for file {file_name}."
+            expected_values = (
+                pd.read_csv(expected_file_path, sep="\t")
+                .set_index("QSPRID", drop=True)
+                .sort_index()
+            )
+            actual_values = (
+                pd.read_csv(actual_file_path, sep="\t")
+                .set_index("QSPRID", drop=True)
+                .sort_index()
+            )
+            assert expected_values.columns.equals(
+                actual_values.columns
+            ), f"Column names do not match for file {file_name}."
+            assert expected_values.index.equals(
+                actual_values.index
+            ), f"Index values do not match for file {file_name}."
+            assert expected_values.equals(
+                actual_values
+            ), f"Values do not match for file {file_name}."
         except AssertionError as e:
-            # show traceback and log error
-            import traceback
-            traceback.print_exc()
             sys.stderr.write(f"Comparison error in: {f}\n")
             success = False
             continue
         print("Comparison successful!")
 
 if not success:
+    print("Comparison of tutorial outputs failed! One or more files did not match.")
     sys.exit(1)
 else:
     print("Comparison of tutorial outputs successful!")

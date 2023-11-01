@@ -22,6 +22,7 @@ class CrossValAssessor(ModelAssessor):
         monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
             is used
         mode (EarlyStoppingMode): mode to use for early stopping
+        round (int): number of decimal places to round predictions to (default: 3)
     """
 
     def __init__(
@@ -31,11 +32,13 @@ class CrossValAssessor(ModelAssessor):
         monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
+        round: int = 3,
     ):
         super().__init__(scoring, monitor, use_proba, mode)
         self.split = split
         if monitor is None:
             self.monitor = BaseMonitor()
+        self.round = round
 
     def __call__(
         self,
@@ -117,7 +120,10 @@ class CrossValAssessor(ModelAssessor):
         # save results
         if save:
             # reorder predictions to match input order
-            pd.concat(predictions).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
+            pd.concat(predictions).round(self.round).to_csv(
+                f"{model.outPrefix}.cv.tsv",
+                sep="\t"
+            )
         monitor.onAssessmentEnd(pd.concat(predictions))
         return scores
 
@@ -130,6 +136,7 @@ class TestSetAssessor(ModelAssessor):
         monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
             is used
         mode (EarlyStoppingMode): mode to use for early stopping
+        round (int): number of decimal places to round predictions to (default: 3)
     """
 
     def __init__(
@@ -138,10 +145,12 @@ class TestSetAssessor(ModelAssessor):
         monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
+        round: int = 3,
     ):
         super().__init__(scoring, monitor, use_proba, mode)
         if monitor is None:
             self.monitor = BaseMonitor()
+        self.round = round
 
     def __call__(
         self,
@@ -193,6 +202,9 @@ class TestSetAssessor(ModelAssessor):
         # predict values for independent test set and save results
         if save:
             # reorder predictions to match input order
-            predictions_df.to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
+            predictions_df.round(self.round).to_csv(
+                f"{model.outPrefix}.ind.tsv",
+                sep="\t"
+            )
         monitor.onAssessmentEnd(predictions_df)
         return [score]
