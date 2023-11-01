@@ -581,3 +581,6 @@ class TestNNMonitoring(TestMonitors):
         self.fileMonitorTest(crossval_monitor, "crossval", True)
         self.fileMonitorTest(test_monitor, "test", True)
         self.fileMonitorTest(fit_monitor, "fit", True)
+
+    def test_ListMonitor(self):
+        pass
