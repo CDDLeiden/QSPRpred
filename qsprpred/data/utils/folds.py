@@ -149,8 +149,8 @@ class FoldsFromDataSplit(FoldGenerator):
         if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
             if self.split.getSeed() is None:
                 self.split.setSeed(dataset.randomState)
-        features = dataset.getFeatures(raw=True, concat=concat)
-        targets = dataset.getTargetPropertiesValues(concat=concat)
+        features = dataset.getFeatures(raw=True, concat=concat, ordered=True)
+        targets = dataset.getTargetPropertiesValues(concat=concat, ordered=True)
         if not concat:
             features = features[0]
             targets = targets[0]
