@@ -14,6 +14,8 @@
 /**/test_files/generated/
 /**/tutorial/test_files/
 /**/tutorial/cli_tutorial/
+/**/tutorials/tutorial_data/papyrus
+/**/tutorials/tutorial_output
 
 ### Python template
 # Byte-compiled / optimized / DLL files
