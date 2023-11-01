@@ -117,7 +117,7 @@ class CrossValAssessor(ModelAssessor):
         # save results
         if save:
             # reorder predictions to match input order
-            pd.concat(predictions).reindex(y.index).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
+            pd.concat(predictions).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
         monitor.onAssessmentEnd(pd.concat(predictions))
         return scores
 
@@ -193,7 +193,6 @@ class TestSetAssessor(ModelAssessor):
         # predict values for independent test set and save results
         if save:
             # reorder predictions to match input order
-            predictions_df = predictions_df.reindex(y_ind.index)
             predictions_df.to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
         monitor.onAssessmentEnd(predictions_df)
         return [score]
