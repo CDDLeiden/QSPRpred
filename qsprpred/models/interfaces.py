@@ -250,7 +250,7 @@ class QSPRModel(ABC):
             with open(path) as j:
                 meta_info = json.loads(j.read())
                 meta_info["target_properties"] = TargetProperty.fromList(
-                    meta_info["target_properties"], task_from_str=True
+                    meta_info["target_properties"]
                 )
         else:
             raise FileNotFoundError(f"Metadata file '{path}' does not exist.")
