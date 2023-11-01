@@ -1202,7 +1202,7 @@ class TestFoldSplitters(DataSetsMixIn, TestCase):
         fold = BootstrapSplit(split, n_bootstraps=5, seed=42)
         k, indices_third = self.validateFolds(dataset.iterFolds(fold))
         self.assertEqual(k, 5)
-        self.assertEqual(split.getSeed(), 42)
+        self.assertEqual(split.getSeed(), None)
         self.assertNotEqual(indices, indices_third)
 
 

@@ -81,6 +81,7 @@ class BootstrapSplit(DataSplit, Randomized):
         """
         Randomized.__init__(self, seed)
         self._split = split
+        self._original_split_seed = split.seed if hasattr(split, "seed") else None
         self.nBootstraps = n_bootstraps
         self._current = 0
 
@@ -103,6 +104,8 @@ class BootstrapSplit(DataSplit, Randomized):
                 self._split.setSeed(self.seed + self._current)
             yield from self._split.split(X, y)
             self._current += 1
+        if hasattr(self._split, "setSeed"):
+            self._split.setSeed(self._original_split_seed)
         self._current = 0
 
 
