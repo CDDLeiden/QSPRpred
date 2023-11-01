@@ -1721,12 +1721,13 @@ class QSPRDataset(MoleculeTable):
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.y = self.df.query("Split_IsTrain")[self.targetPropertyNames]
-            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index), self.targetPropertyNames]
+            self.y_ind = self.df.loc[
+                ~self.df.index.isin(self.y.index), self.targetPropertyNames
+            ]
         else:
             self.y = self.df[self.targetPropertyNames]
             self.y_ind = self.df.loc[
-                ~self.df.index.isin(self.y.index),
-                self.targetPropertyNames
+                ~self.df.index.isin(self.y.index), self.targetPropertyNames
             ]
         self.X = self.y.drop(self.y.columns, axis=1)
         self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
@@ -2007,6 +2008,9 @@ class QSPRDataset(MoleculeTable):
             and not split.hasDataSet
         ):
             split.setDataSet(self)
+        if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
+            if self.split.getSeed() is None:
+                self.split.setSeed(self.randomState)
         # split the data into train and test
         folds = FoldsFromDataSplit(split)
         self.X, self.X_ind, self.y, self.y_ind, _, _ = next(
@@ -2114,7 +2118,7 @@ class QSPRDataset(MoleculeTable):
             self.loadDescriptorsToSplits(
                 shuffle=shuffle, random_state=random_state or self.randomState
             )
-            self.X = self.X.loc[:,  self.featureNames]
+            self.X = self.X.loc[:, self.featureNames]
             self.X_ind = self.X_ind.loc[:, self.featureNames]
         else:
             if self.X is not None and self.X_ind is not None:
@@ -2244,6 +2248,7 @@ class QSPRDataset(MoleculeTable):
                 present in the file
             feature_fill_value (float): value to fill missing values with.
                 Defaults to `numpy.nan`
+            shuffle (bool): whether to shuffle the created training and test sets
             random_state (int): random state for shuffling
         """
         # apply sanitization and standardization
@@ -2298,7 +2303,11 @@ class QSPRDataset(MoleculeTable):
             return apply_feature_standardizer(self.feature_standardizer, X, fit=True)[0]
 
     def getFeatures(
-        self, inplace: bool = False, concat: bool = False, raw: bool = False
+        self,
+        inplace: bool = False,
+        concat: bool = False,
+        raw: bool = False,
+        ordered: bool = False,
     ):
         """Get the current feature sets (training and test) from the dataset.
 
@@ -2317,6 +2326,10 @@ class QSPRDataset(MoleculeTable):
                 optimized models).
             raw (bool): If `True`, the raw feature matrices will be returned without
                 any standardization applied.
+            ordered (bool):
+                If `True`, the returned feature matrices will be ordered
+                according to the original order of the data set. This is only relevant
+                if `concat` is `True`.
         """
         self.checkFeatures()
 
@@ -2356,23 +2369,27 @@ class QSPRDataset(MoleculeTable):
             self.X = X
             self.X_ind = X_ind
 
+        if ordered and concat:
+            X = X.loc[self.df.index, :]
         return (X, X_ind) if not concat else X
 
-    def getTargetPropertiesValues(self, concat: bool = False):
+    def getTargetPropertiesValues(self, concat: bool = False, ordered: bool = False):
         """Get the response values (training and test) for the set target property.
 
         Args:
             concat (bool): if `True`, return concatenated training and validation set
                 target properties
-
+            ordered (bool): if `True`, return the target properties in the original
+                order of the data set. This is only relevant if `concat` is `True`.
         Returns:
             `tuple` of (train_responses, test_responses) or `pandas.DataFrame` of all
             target property values
         """
         if concat:
-            return pd.concat(
+            ret = pd.concat(
                 [self.y, self.y_ind] if self.y_ind is not None else [self.y]
             )
+            return ret.loc[self.df.index, :] if ordered else ret
         else:
             return self.y, self.y_ind if self.y_ind is not None else self.y
 
