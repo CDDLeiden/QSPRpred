@@ -95,9 +95,7 @@ class Base(nn.Module):
         y_train,
         X_valid=None,
         y_valid=None,
-        monitor: FitMonitor = BaseMonitor(),
-        log=False,
-        log_prefix=None
+        monitor: FitMonitor | None = None
     ) -> int:
         """Training the DNN model.
 
@@ -117,16 +115,13 @@ class Base(nn.Module):
                 validation target (m X l), m is the No. of samples, l is
                 the No. of classes or tasks
             monitor (FitMonitor):
-                monitor to use for training
-            log (bool):
-                whether to log the training process to {self.log_prefix}.log
-            log_prefix (str):
-                prefix for the log file if log is True
+                monitor to use for training, if None, use base monitor
 
         Returns:
             int:
                 the epoch number when the optimal model is saved
         """
+        monitor = BaseMonitor() if monitor is None else monitor
         train_loader = self.getDataLoader(X_train, y_train)
         valid_loader = None
         # if validation data is provided, use early stopping
@@ -144,12 +139,8 @@ class Base(nn.Module):
         best_loss = np.inf
         best_weights = self.state_dict()
         last_save = 0  # record the epoch when optimal model is saved.
-        log_file = None
-        if log:
-            log_file = open(log_prefix + ".log", "a")
         for epoch in range(self.n_epochs):
             monitor.onEpochStart(epoch)
-            t0 = time.time()
             loss = None
             # decrease learning rate over the epochs
             for param_group in optimizer.param_groups:
@@ -176,50 +167,19 @@ class Base(nn.Module):
                 optimizer.step()
                 monitor.onBatchEnd(i, float(loss))
             if patience == -1:
-                if log:
-                    print(
-                        "[Epoch: %d/%d] %.1fs loss_train: %f" %
-                        (epoch, self.n_epochs, time.time() - t0, loss.item()),
-                        file=log_file,
-                    )
                 monitor.onEpochEnd(epoch, loss.item())
             else:
                 # loss value on validation set based on which optimal model is saved.
                 loss_valid = self.evaluate(valid_loader)
-                if log:
-                    print(
-                        "[Epoch: %d/%d] %.1fs loss_train: %f loss_valid: %f" % (
-                            epoch,
-                            self.n_epochs,
-                            time.time() - t0,
-                            loss.item(),
-                            loss_valid,
-                        ),
-                        file=log_file,
-                    )
                 if loss_valid + self.tol < best_loss:
                     best_weights = self.state_dict()
-                    if log:
-                        print(
-                            "[Performance] loss_valid is improved from %f to %f" %
-                            (best_loss, loss_valid),
-                            file=log_file,
-                        )
                     best_loss = loss_valid
                     last_save = epoch
-                else:
-                    if log:
-                        print(
-                            "[Performance] loss_valid is not improved.", file=log_file
-                        )
-                    if epoch - last_save > patience:  # early stop
-                        break
+                elif epoch - last_save > patience:  # early stop
+                    break
                 monitor.onEpochEnd(epoch, loss.item(), loss_valid)
         if patience == -1:
             best_weights = self.state_dict()
-        if log:
-            print("Neural net fitting completed.", file=log_file)
-            log_file.close()
         self.load_state_dict(best_weights)
         return self, last_save
 

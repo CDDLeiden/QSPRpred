@@ -795,7 +795,8 @@ class QSPRModel(ABC):
         cross-validation with early stopping can be used for fitting the model.
 
         Args:
-            monitor (FitMonitor): monitor for the fitting process
+            monitor (FitMonitor): monitor for the fitting process, if None, the base
+                monitor is used
             kwargs: additional arguments to pass to fit
 
         Returns:
@@ -815,7 +816,7 @@ class QSPRModel(ABC):
         # Use early stopping false here, since we are fitting on the whole data set
         # the number of epochs is already determined from the cross-validation
         self.estimator = self.fit(
-            X_all, y_all, monitor=monitor, mode=EarlyStoppingMode.OPTIMAL, **kwargs
+            X_all, y_all, mode=EarlyStoppingMode.OPTIMAL, monitor=monitor, **kwargs
         )
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -828,9 +829,9 @@ class QSPRModel(ABC):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        monitor: "FitMonitor",
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        monitor: "FitMonitor" = None,
         **kwargs,
     ) -> Any | tuple[Any, int] | None:
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -848,9 +849,10 @@ class QSPRModel(ABC):
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
-            monitor (FitMonitor): monitor for the fitting process
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
+            monitor (FitMonitor): monitor for the fitting process,
+                if None, the base monitor is used
             kwargs: additional arguments to pass to the fit method of the estimator
 
         Returns:
@@ -1102,14 +1104,15 @@ class ModelAssessor(ABC):
                         evaluation method (e.g. if the evaluation methods returns
                         class probabilities, the scoring function support class
                         probabilities)
-        monitor (AssessorMonitor): monitor to track the assessment
+        monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
+            is used
         useProba (bool): use probabilities for classification models
         mode (EarlyStoppingMode): early stopping mode for fitting
     """
     def __init__(
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor,
+        monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
     ):
@@ -1212,18 +1215,17 @@ class HyperParameterOptimization(ABC):
         param_grid: dict,
         model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float],
-        monitor: HyperParameterOptimizationMonitor,
+        monitor: HyperParameterOptimizationMonitor | None = None,
     ):
         """Initialize the hyperparameter optimization class.
 
-        scoring (str | Callable[[Iterable, Iterable], float]):
-            Metric name from `sklearn.metrics` or user-defined scoring function.
         param_grid (dict):
             dictionary of parameters to optimize
         model_assessor (ModelAssessor):
             assessment method to use for determining the best parameters
         score_aggregation (Callable[[Iterable], float]): function to aggregate scores
-        monitor (HyperParameterOptimizationMonitor): monitor to track the optimization
+        monitor (HyperParameterOptimizationMonitor): monitor to track the optimization,
+            if None, a BaseMonitor is used
         """
         self.runAssessment = model_assessor
         self.scoreAggregation = score_aggregation

@@ -53,7 +53,7 @@ class OptunaOptimization(HyperParameterOptimization):
         param_grid: dict,
         model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float] = np.mean,
-        monitor: HyperParameterOptimizationMonitor = BaseMonitor(),
+        monitor: HyperParameterOptimizationMonitor | None = None,
         n_trials: int = 100,
         n_jobs: int = 1,
     ):
@@ -71,6 +71,8 @@ class OptunaOptimization(HyperParameterOptimization):
             score_aggregation (Callable):
                 function to aggregate the scores of different folds if the assessment
                 method returns multiple predictions
+            monitor (HyperParameterOptimizationMonitor):
+                monitor for the optimization, if None, a BaseMonitor is used
             n_trials (int):
                 number of trials for bayes optimization
             n_jobs (int):
@@ -78,6 +80,8 @@ class OptunaOptimization(HyperParameterOptimization):
                 At the moment only n_jobs=1 is supported.
         """
         super().__init__(param_grid, model_assessor, score_aggregation, monitor)
+        if monitor is None:
+            self.monitor = BaseMonitor()
         search_space_types = [
             "categorical",
             "discrete_uniform",
@@ -207,8 +211,8 @@ class GridSearchOptimization(HyperParameterOptimization):
         self,
         param_grid: dict,
         model_assessor: ModelAssessor,
-        monitor: HyperParameterOptimizationMonitor = BaseMonitor(),
         score_aggregation: Callable = np.mean,
+        monitor: HyperParameterOptimizationMonitor | None = None,
     ):
         """Initialize the class.
 
@@ -218,13 +222,15 @@ class GridSearchOptimization(HyperParameterOptimization):
                 to try as values
             model_assessor (ModelAssessor):
                 assessment method to use for the optimization
-            monitor (HyperParameterOptimizationMonitor):
-                monitor for the optimization
             score_aggregation (Callable):
                 function to aggregate the scores of different folds if the assessment
                 method returns multiple predictions (default: np.mean)
+            monitor (HyperParameterOptimizationMonitor):
+                monitor for the optimization, if None, a BaseMonitor is used
         """
         super().__init__(param_grid, model_assessor, score_aggregation, monitor)
+        if monitor is None:
+            self.monitor = BaseMonitor()
 
     def optimize(self, model: QSPRModel, save_params: bool = True, **kwargs) -> dict:
         """Optimize the hyperparameters of the model.

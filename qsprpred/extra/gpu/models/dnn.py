@@ -255,9 +255,9 @@ class DNNModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        monitor: FitMonitor = BaseMonitor(),
         estimator: Any | None = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        monitor: FitMonitor | None = None,
         **kwargs,
     ):
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -265,9 +265,9 @@ class DNNModel(QSPRModel):
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
-            monitor (FitMonitor): fit monitor instance
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
+            monitor (FitMonitor): fit monitor instance, if None, a BaseMonitor is used
             kwargs (dict): additional keyword arguments for the estimator's fit method
 
         Returns:
@@ -275,6 +275,7 @@ class DNNModel(QSPRModel):
             int, optional: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
+        monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
         X, y = self.convertToNumpy(X, y)
         monitor.onFitStart(self)
@@ -285,7 +286,9 @@ class DNNModel(QSPRModel):
             X_train, X_val, y_train, y_val = train_test_split(
                 X, y, test_size=0.1, random_state=self.randomState
             )
-            estimator_fit = estimator.fit(X_train, y_train, X_val, y_val, monitor, **kwargs)
+            estimator_fit = estimator.fit(
+                X_train, y_train, X_val, y_val, monitor=monitor, **kwargs
+            )
             monitor.onFitEnd(estimator_fit[0], estimator_fit[1])
             return estimator_fit
 

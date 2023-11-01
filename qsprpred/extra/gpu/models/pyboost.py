@@ -112,9 +112,9 @@ class PyBoostModel(QSPRModel):
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
-        monitor: FitMonitor = BaseMonitor(),
         estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        monitor: FitMonitor | None = None,
         **kwargs,
     ) -> import_module("py_boost").GradientBoosting:
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -123,12 +123,14 @@ class PyBoostModel(QSPRModel):
             X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
-            early_stopping (bool): if True, early stopping is used
+            mode (EarlyStoppingMode): mode to use for early stopping
+            monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor
             kwargs: additional keyword arguments for the fit function
 
         Returns:
-            (GzipKNNAlgorithm): fitted estimator instance
+            (Pyboost): fitted estimator instance
         """
+        monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
         monitor.onFitStart(self)
         X, y = self.convertToNumpy(X, y)
@@ -140,12 +142,13 @@ class PyBoostModel(QSPRModel):
             # split cross validation fold train set into train
             # and validation set for early stopping
             X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
-            estimator.fit(X_train, y_train, eval_sets=[{"X": X_val, "y": y_val}])
+            estimator.fit(X_train, y_train, eval_sets=[{"X": X_val, "y": y_val}],
+                          monitor=monitor)
             monitor.onFitEnd(estimator, estimator.best_round)
             return estimator, estimator.best_round
 
         estimator.params.update({"ntrees": self.earlyStopping.getEpochs()})
-        estimator.fit(X, y)
+        estimator.fit(X, y, monitor=monitor)
 
         monitor.onFitEnd(estimator)
         return estimator, self.earlyStopping.getEpochs()
