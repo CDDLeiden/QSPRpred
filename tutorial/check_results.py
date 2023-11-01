@@ -5,42 +5,37 @@ CI/CD pipeline to check that the tutorial is up-to-date and that the models
 are consistent with previous ones.
 """
 
-import hashlib
+import pandas as pd
 import os
 import sys
-
-
-def md5(fname):
-    hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
 
 
 success = True
 for f in os.listdir("expected"):
     for type in ["ind", "cv"]:
-        file_name = f"{f}.{type}.tsv"
-        print(f"Comparing file contents of {file_name}")
-        relative_file_path = f"{f}/{file_name}"
+        try:
+            file_name = f"{f}.{type}.tsv"
+            print(f"Comparing file contents of {file_name}")
+            relative_file_path = f"{f}/{file_name}"
 
-        expected_file_path = f"expected/{relative_file_path}"
-        actual_file_path = f"qspr/models/{relative_file_path}"
+            expected_file_path = f"expected/{relative_file_path}"
+            actual_file_path = f"qspr/models/{relative_file_path}"
 
-        expected_hash = md5(expected_file_path)
-        actual_hash = md5(actual_file_path)
-
-        if expected_hash != actual_hash:
-            with open(actual_file_path) as file:
-                success = False
-                print(
-                    f"Failure: contents of {relative_file_path} do not match.\
-                      Actual content:"
-                )
-                print(file.read())
+            expected_values = pd.read_csv(expected_file_path, sep="\t").set_index("QSPRID", drop=True).sort_index()
+            actual_values = pd.read_csv(actual_file_path, sep="\t").set_index("QSPRID", drop=True).sort_index()
+            assert expected_values.columns.equals(actual_values.columns), f"Column names do not match for file {file_name}."
+            assert expected_values.index.equals(actual_values.index), f"Index values do not match for file {file_name}."
+            assert expected_values.equals(actual_values), f"Values do not match for file {file_name}."
+        except AssertionError as e:
+            # show traceback and log error
+            import traceback
+            traceback.print_exc()
+            sys.stderr.write(f"Comparison error in: {f}\n")
+            success = False
+            continue
+        print("Comparison successful!")
 
 if not success:
     sys.exit(1)
 else:
-    print("Comparison of tutorial output successful!")
+    print("Comparison of tutorial outputs successful!")
