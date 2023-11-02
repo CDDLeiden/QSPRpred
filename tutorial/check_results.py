@@ -47,17 +47,19 @@ for f in os.listdir("expected"):
                 sys.stderr.write(f"Comparison error in values of: {file_name}\n")
                 # check and print which values are different
                 diff = expected_values.compare(actual_values)
+                overviews = []
                 for idx, row in diff.iterrows():
-                    sys.stderr.write(f"Found differences for item: {idx}\n")
                     overview = dict()
                     for col in diff.columns:
                         name = col[0]
-                        overview[name] = dict()
+                        if name not in overview:
+                            overview[name] = {"idx": idx}
                         if col[1] == "self":
-                            overview[name]["self"] = row[col]
-                        elif col[1] == "other":
-                            overview[name]["other"] = row[col]
-                    sys.stderr.write(json.dumps(overview, indent=4))
+                            overview[name]["true"] = row[col]
+                        else:
+                            overview[name]["expected"] = row[col]
+                    overviews.append(overview)
+                sys.stderr.write(json.dumps(overviews, indent=4))
                 raise e
         except AssertionError as e:
             # print  stack trace
