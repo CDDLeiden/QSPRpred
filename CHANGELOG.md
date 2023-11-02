@@ -9,6 +9,7 @@ From v2.1.0.a2 to v2.2.0
 
 ## Changes
 - The jupyter notebooks now pass a random state to ensure consistent results.
+- The default parameter values for `STFullyConnected` have changed from `n_epochs` = 1000 to `n_epochs` = 100, from `neurons_h1` = 4000 to `neurons_h1` = 256 and `neurons_hx` = 1000 to `neurons_hx` = 128.
 
 ## New Features
 - Most unit tests now have a variant that checks whether using a fixed random seed gives reproducible results.
