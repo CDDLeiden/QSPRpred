@@ -6,6 +6,7 @@ are consistent with previous ones.
 """
 import json
 
+import numpy as np
 import pandas as pd
 import os
 import sys
@@ -58,6 +59,10 @@ for f in os.listdir("expected"):
                             overview[name]["true"] = row[col]
                         else:
                             overview[name]["expected"] = row[col]
+                    overview = {
+                        k: v for k, v in overview.items()
+                        if not (np.isnan(v["true"]) and np.isnan(v["expected"]))
+                    }
                     overviews.append(overview)
                 sys.stderr.write(json.dumps(overviews, indent=4))
                 raise e
