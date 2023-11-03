@@ -1054,7 +1054,7 @@ class AssessorMonitor(FitMonitor):
         """
 
 
-class HyperParameterOptimizationMonitor(AssessorMonitor):
+class HyperparameterOptimizationMonitor(AssessorMonitor):
     """Base class for monitoring the hyperparameter optimization of a model."""
     @abstractmethod
     def onOptimizationStart(
@@ -1199,14 +1199,14 @@ class ModelAssessor(ABC):
         return df_out
 
 
-class HyperParameterOptimization(ABC):
+class HyperparameterOptimization(ABC):
     """Base class for hyperparameter optimization.
 
     Attributes:
         runAssessment (ModelAssessor): evaluation method to use
         scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
         paramGrid (dict): dictionary of parameters to optimize
-        monitor (HyperParameterOptimizationMonitor): monitor to track the optimization
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization
         bestScore (float): best score found during optimization
         bestParams (dict): best parameters found during optimization
     """
@@ -1215,7 +1215,7 @@ class HyperParameterOptimization(ABC):
         param_grid: dict,
         model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float],
-        monitor: HyperParameterOptimizationMonitor | None = None,
+        monitor: HyperparameterOptimizationMonitor | None = None,
     ):
         """Initialize the hyperparameter optimization class.
 
@@ -1224,7 +1224,7 @@ class HyperParameterOptimization(ABC):
         model_assessor (ModelAssessor):
             assessment method to use for determining the best parameters
         score_aggregation (Callable[[Iterable], float]): function to aggregate scores
-        monitor (HyperParameterOptimizationMonitor): monitor to track the optimization,
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization,
             if None, a BaseMonitor is used
         """
         self.runAssessment = model_assessor

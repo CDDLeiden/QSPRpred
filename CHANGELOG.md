@@ -10,11 +10,12 @@ From v2.1.0.a2 to v2.2.0
 ## Changes
 - The jupyter notebooks now pass a random state to ensure consistent results.
 - The default parameter values for `STFullyConnected` have changed from `n_epochs` = 1000 to `n_epochs` = 100, from `neurons_h1` = 4000 to `neurons_h1` = 256 and `neurons_hx` = 1000 to `neurons_hx` = 128.
+- Rename `HyperParameterOptimization` to `HyperparameterOptimization`.
 
 ## New Features
 - Most unit tests now have a variant that checks whether using a fixed random seed gives reproducible results.
 - The build pipeline now contains a check that the jupyter notebooks give the same results as ones that were observed before.
-- Added `FitMonitor`, `AssessorMonitor`, and `HyperParameterOptimizationMonitor` base classes to monitor the progress of fitting, assessing, and  hyperparameter optimization, respectively.
+- Added `FitMonitor`, `AssessorMonitor`, and `HyperparameterOptimizationMonitor` base classes to monitor the progress of fitting, assessing, and  hyperparameter optimization, respectively.
 - Added `BaseMonitor` class to internally keep track of the progress of a fitting, assessing, or hyperparameter optimization process.
 - Added `FileMonitor` class to save the progress of a fitting, assessing, or hyperparameter optimization process to files.
 - Added `WandBMonitor` class to save the progress of a fitting, assessing, or hyperparameter optimization process to [Weights & Biases](https://wandb.ai/).

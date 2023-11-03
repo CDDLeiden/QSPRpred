@@ -30,7 +30,7 @@ from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptim
 from ..models.interfaces import (
     AssessorMonitor,
     FitMonitor,
-    HyperParameterOptimizationMonitor,
+    HyperparameterOptimizationMonitor,
     QSPRModel,
 )
 from ..models.metrics import SklearnMetric
@@ -906,12 +906,12 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     def trainModelWithMonitoring(
         self,
         model: QSPRModel,
-        hyperparam_monitor: HyperParameterOptimizationMonitor,
+        hyperparam_monitor: HyperparameterOptimizationMonitor,
         crossval_monitor: AssessorMonitor,
         test_monitor: AssessorMonitor,
         fit_monitor: FitMonitor,
     ) -> (
-        HyperParameterOptimizationMonitor,
+        HyperparameterOptimizationMonitor,
         AssessorMonitor,
         AssessorMonitor,
         FitMonitor,
