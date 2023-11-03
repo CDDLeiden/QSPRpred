@@ -101,12 +101,13 @@ class OptunaOptimization(HyperparameterOptimization):
             )
 
         self.nTrials = n_trials
-        if n_jobs > 1:
+        self.nJobs = n_jobs
+        if self.nJobs > 1:
             logger.warning(
                 "At the moment n_jobs>1 not available for bayes optimization, "
                 "n_jobs set to 1."
             )
-        self.nJobs = 1
+            self.nJobs = 1
         self.bestScore = -np.inf
         self.bestParams = None
         self.config.update({
