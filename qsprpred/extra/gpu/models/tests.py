@@ -16,7 +16,8 @@ from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.tasks import ModelTasks, TargetTasks
-from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn
+from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitorsMixIn
+from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 
 GPUS = list(range(torch.cuda.device_count()))
 
@@ -510,3 +511,62 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     #         name=f"{model_name}_multitask_classification", base_dir=model.baseDir
     #     )
     #     self.predictorTest(predictor)
+
+
+class TestNNMonitoring(TestMonitorsMixIn, TestCase):
+    """This class holds the tests for the monitoring classes."""
+    @property
+    def gridFile(self):
+        """Return the path to the grid file with test
+        search spaces for hyperparameter optimization.
+        """
+        return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
+
+    def testBaseMonitor(self):
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
+        )
+        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, True)
+
+    def testFileMonitor(self):
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
+        )
+        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, True)
+
+    def testListMonitor(self):
+        """Test the list monitor"""
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
+        )
+        self.runMonitorTest(
+            model,
+            ListMonitor,
+            self.listMonitorTest,
+            True,
+            [BaseMonitor(), FileMonitor()]
+        )

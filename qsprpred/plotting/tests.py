@@ -14,6 +14,7 @@ from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
+from ..models.metrics import SklearnMetric
 from ..plotting.classification import MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot
 
@@ -57,13 +58,14 @@ class ROCPlotTest(ModelRetriever, TestCase):
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [50]
+                "th": [6.5]
             }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        score_func = SklearnMetric.getDefaultMetric(model.task)
+        CrossValAssessor(scoring = score_func)(model)
+        TestSetAssessor(scoring = score_func)(model)
         model.save()
         # make plots
         plt = ROCPlot([model])
@@ -86,13 +88,14 @@ class MetricsPlotTest(ModelRetriever, TestCase):
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [50]
+                "th": [6.5]
             }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_metrics_plot_single_model")
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        score_func = SklearnMetric.getDefaultMetric(model.task)
+        CrossValAssessor(scoring = score_func)(model)
+        TestSetAssessor(scoring = score_func)(model)
         model.save()
         # generate metrics plot and associated files
         plt = MetricsPlot([model])
@@ -114,8 +117,10 @@ class CorrPlotTest(ModelRetriever, TestCase):
         model = self.getModel(
             dataset, "test_corr_plot_single_model", alg=RandomForestRegressor
         )
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        score_func = SklearnMetric.getDefaultMetric(model.task)
+        print(score_func)
+        CrossValAssessor(scoring = score_func)(model)
+        TestSetAssessor(scoring = score_func)(model)
         model.save()
         # generate metrics plot and associated files
         plt = CorrelationPlot([model])

@@ -16,8 +16,9 @@ from ....data.data import QSPRDataset
 from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import QSPRModel
+from ....models.interfaces import QSPRModel, FitMonitor
 from ....models.tasks import ModelTasks
+from ....models.monitors import BaseMonitor
 
 
 class DNNModel(QSPRModel):
@@ -229,6 +230,8 @@ class DNNModel(QSPRModel):
         Returns:
             str: path to the saved parameters as json
         """
+        if params is None:
+            return super().saveParams(params)
         return super().saveParams(
             {
                 k: params[k]
@@ -254,6 +257,7 @@ class DNNModel(QSPRModel):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any | None = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        monitor: FitMonitor | None = None,
         **kwargs,
     ):
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -263,6 +267,7 @@ class DNNModel(QSPRModel):
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
+            monitor (FitMonitor): fit monitor instance, if None, a BaseMonitor is used
             kwargs (dict): additional keyword arguments for the estimator's fit method
 
         Returns:
@@ -270,8 +275,10 @@ class DNNModel(QSPRModel):
             int, optional: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
+        monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
         X, y = self.convertToNumpy(X, y)
+        monitor.onFitStart(self)
 
         if self.earlyStopping:
             # split cross validation fold train set into train
@@ -279,11 +286,17 @@ class DNNModel(QSPRModel):
             X_train, X_val, y_train, y_val = train_test_split(
                 X, y, test_size=0.1, random_state=self.randomState
             )
-            return estimator.fit(X_train, y_train, X_val, y_val, **kwargs)
+            estimator_fit = estimator.fit(
+                X_train, y_train, X_val, y_val, monitor=monitor, **kwargs
+            )
+            monitor.onFitEnd(estimator_fit[0], estimator_fit[1])
+            return estimator_fit
 
         # set fixed number of epochs if early stopping is not used
         estimator.n_epochs = self.earlyStopping.getEpochs()
-        return estimator.fit(X, y, **kwargs)
+        estimator_fit = estimator.fit(X, y, monitor=monitor, **kwargs)
+        monitor.onFitEnd(estimator_fit[0])
+        return estimator_fit
 
     def predict(
         self,
