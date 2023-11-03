@@ -16,8 +16,8 @@ from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.tasks import ModelTasks, TargetTasks
-from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitors
-from ....models.monitors import BaseMonitor, FileMonitor
+from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitorsMixIn
+from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 
 GPUS = list(range(torch.cuda.device_count()))
 
@@ -513,7 +513,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     #     self.predictorTest(predictor)
 
 
-class TestNNMonitoring(TestMonitors):
+class TestNNMonitoring(TestMonitorsMixIn, TestCase):
     """This class holds the tests for the monitoring classes."""
     @property
     def gridFile(self):
@@ -522,7 +522,7 @@ class TestNNMonitoring(TestMonitors):
         """
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
 
-    def test_BaseMonitor(self):
+    def testBaseMonitor(self):
         model = DNNModel(
             base_dir=self.generatedModelsPath,
             data=self.createLargeTestDataSet(
@@ -534,25 +534,9 @@ class TestNNMonitoring(TestMonitors):
             tol=0.02,
             random_state=42,
         )
+        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, True)
 
-        hyperparam_monitor = BaseMonitor()
-        crossval_monitor = BaseMonitor()
-        test_monitor = BaseMonitor()
-        fit_monitor = BaseMonitor()
-        (
-            hyperparam_monitor,
-            crossval_monitor,
-            test_monitor,
-            fit_monitor,
-        ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
-        )
-        self.baseMonitorTest(hyperparam_monitor, "hyperparam", True)
-        self.baseMonitorTest(crossval_monitor, "crossval", True)
-        self.baseMonitorTest(test_monitor, "test", True)
-        self.baseMonitorTest(fit_monitor, "fit", True)
-
-    def test_FileMonitor(self):
+    def testFileMonitor(self):
         model = DNNModel(
             base_dir=self.generatedModelsPath,
             data=self.createLargeTestDataSet(
@@ -564,23 +548,25 @@ class TestNNMonitoring(TestMonitors):
             tol=0.02,
             random_state=42,
         )
+        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, True)
 
-        hyperparam_monitor = FileMonitor()
-        crossval_monitor = FileMonitor()
-        test_monitor = FileMonitor()
-        fit_monitor = FileMonitor()
-        (
-            hyperparam_monitor,
-            crossval_monitor,
-            test_monitor,
-            fit_monitor,
-        ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+    def testListMonitor(self):
+        """Test the list monitor"""
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
         )
-        self.fileMonitorTest(hyperparam_monitor, "hyperparam", True)
-        self.fileMonitorTest(crossval_monitor, "crossval", True)
-        self.fileMonitorTest(test_monitor, "test", True)
-        self.fileMonitorTest(fit_monitor, "fit", True)
-
-    def test_ListMonitor(self):
-        pass
+        self.runMonitorTest(
+            model,
+            ListMonitor,
+            self.listMonitorTest,
+            True,
+            [BaseMonitor(), FileMonitor()]
+        )
