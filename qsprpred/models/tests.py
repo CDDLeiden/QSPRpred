@@ -3,6 +3,7 @@
 import logging
 import numbers
 import os
+from copy import deepcopy
 from os.path import exists
 from typing import Type, Literal
 from unittest import TestCase
@@ -30,7 +31,7 @@ from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptim
 from ..models.interfaces import (
     AssessorMonitor,
     FitMonitor,
-    HyperParameterOptimizationMonitor,
+    HyperparameterOptimizationMonitor,
     QSPRModel,
 )
 from ..models.metrics import SklearnMetric
@@ -889,17 +890,17 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
             _ = test_obj.test_func(None, None, None, best_epoch=40)
 
 
-class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
 
     def trainModelWithMonitoring(
         self,
         model: QSPRModel,
-        hyperparam_monitor: HyperParameterOptimizationMonitor,
+        hyperparam_monitor: HyperparameterOptimizationMonitor,
         crossval_monitor: AssessorMonitor,
         test_monitor: AssessorMonitor,
         fit_monitor: FitMonitor,
     ) -> (
-        HyperParameterOptimizationMonitor,
+        HyperparameterOptimizationMonitor,
         AssessorMonitor,
         AssessorMonitor,
         FitMonitor,
@@ -1000,35 +1001,6 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         else:
             raise ValueError(f"Unknown monitor type {monitor_type}")
 
-    def test_BaseMonitor(self):
-        """Test the base monitor"""
-        model = SklearnModel(
-            base_dir=self.generatedModelsPath,
-            alg=RandomForestRegressor,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
-            name="RFR",
-            random_state=42,
-        )
-
-        hyperparam_monitor = BaseMonitor()
-        crossval_monitor = BaseMonitor()
-        test_monitor = BaseMonitor()
-        fit_monitor = BaseMonitor()
-        (
-            hyperparam_monitor,
-            crossval_monitor,
-            test_monitor,
-            fit_monitor,
-        ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
-        )
-        self.baseMonitorTest(hyperparam_monitor, "hyperparam", False)
-        self.baseMonitorTest(crossval_monitor, "crossval", False)
-        self.baseMonitorTest(test_monitor, "test", False)
-        self.baseMonitorTest(fit_monitor, "fit", False)
-
     def fileMonitorTest(self, monitor: FileMonitor,
                         monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
                         neural_net: bool):
@@ -1071,7 +1043,60 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         elif monitor_type == "fit" and neural_net:
             check_fit_files(monitor.outDir)
 
-    def test_FileMonitor(self):
+    def listMonitorTest(self, monitor: ListMonitor,
+                        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+                        neural_net: bool):
+        self.baseMonitorTest(monitor.monitors[0], monitor_type, neural_net)
+        self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
+
+    def runMonitorTest(
+            self,
+            model,
+            monitor_type,
+            test_method,
+            nerual_net,
+            *args,
+            **kwargs
+    ):
+        hyperparam_monitor = monitor_type(*args, **kwargs)
+        crossval_monitor = deepcopy(hyperparam_monitor)
+        test_monitor = deepcopy(hyperparam_monitor)
+        fit_monitor = deepcopy(hyperparam_monitor)
+        (
+            hyperparam_monitor,
+            crossval_monitor,
+            test_monitor,
+            fit_monitor,
+        ) = self.trainModelWithMonitoring(
+            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        )
+        test_method(hyperparam_monitor, "hyperparam", nerual_net)
+        test_method(crossval_monitor, "crossval", nerual_net)
+        test_method(test_monitor, "test", nerual_net)
+        test_method(fit_monitor, "fit", nerual_net)
+
+
+class TestMonitors(TestMonitorsMixIn, TestCase):
+
+    def testBaseMonitor(self):
+        """Test the base monitor"""
+        model = SklearnModel(
+            base_dir=self.generatedModelsPath,
+            alg=RandomForestRegressor,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="RFR",
+            random_state=42,
+        )
+        self.runMonitorTest(
+            model,
+            BaseMonitor,
+            self.baseMonitorTest,
+            False
+        )
+
+    def testFileMonitor(self):
         """Test the file monitor"""
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
@@ -1082,25 +1107,14 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name="RFR",
             random_state=42,
         )
-
-        hyperparam_monitor = FileMonitor()
-        crossval_monitor = FileMonitor()
-        test_monitor = FileMonitor()
-        fit_monitor = FileMonitor()
-        (
-            hyperparam_monitor,
-            crossval_monitor,
-            test_monitor,
-            fit_monitor,
-        ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        self.runMonitorTest(
+            model,
+            FileMonitor,
+            self.fileMonitorTest,
+            False
         )
-        self.fileMonitorTest(hyperparam_monitor, "hyperparam", False)
-        self.fileMonitorTest(crossval_monitor, "crossval", False)
-        self.fileMonitorTest(test_monitor, "test", False)
-        self.fileMonitorTest(fit_monitor, "fit", False)
 
-    def test_ListMonitor(self):
+    def testListMonitor(self):
         """Test the list monitor"""
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
@@ -1111,25 +1125,11 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name="RFR",
             random_state=42,
         )
-
-        hyperparam_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
-        crossval_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
-        test_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
-        fit_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
-        (
-            hyperparam_monitor,
-            crossval_monitor,
-            test_monitor,
-            fit_monitor,
-        ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        self.runMonitorTest(
+            model,
+            ListMonitor,
+            self.listMonitorTest,
+            False,
+            [BaseMonitor(), FileMonitor()],
         )
-        self.baseMonitorTest(hyperparam_monitor.monitors[0], "hyperparam", False)
-        self.baseMonitorTest(crossval_monitor.monitors[0], "crossval", False)
-        self.baseMonitorTest(test_monitor.monitors[0], "test", False)
-        self.baseMonitorTest(fit_monitor.monitors[0], "fit", False)
 
-        self.fileMonitorTest(hyperparam_monitor.monitors[1], "hyperparam", False)
-        self.fileMonitorTest(crossval_monitor.monitors[1], "crossval", False)
-        self.fileMonitorTest(test_monitor.monitors[1], "test", False)
-        self.fileMonitorTest(fit_monitor.monitors[1], "fit", False)
