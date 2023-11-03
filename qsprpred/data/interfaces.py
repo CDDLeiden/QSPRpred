@@ -133,22 +133,52 @@ class MoleculeDataSet(DataSet):
         """Indicates if the dataset has descriptors."""
 
 
+class Randomized:
+    """A pseudorandom action that can be fixed with a seed.
+
+    Attributes:
+        seed (int | None):
+            The seed to use to randomize the action. If `None`,
+            a random seed is used instead of a fixed one (default: `None`).
+    """
+
+    def __init__(self, seed: int | None = None) -> None:
+        """Create a new randomized action.
+
+        Args:
+            seed:
+                the seed to use to randomize the action. If `None`,
+                a random seed is used instead of a fixed one (default: `None`).
+        """
+        self.seed = seed
+
+    def setSeed(self, seed: int | None = None):
+        self.seed = seed
+
+    def getSeed(self):
+        """Get the seed used to randomize the action."""
+        return self.seed
+
+
 class DataSetDependant:
     """Classes that need a data set to operate have to implement this."""
     def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
         self.dataSet = dataset
 
     def setDataSet(self, dataset: MoleculeDataSet):
-        """
-        Set the data sets.
-        """
         self.dataSet = dataset
 
     @property
-    def hasDataSet(self):
+    def hasDataSet(self) -> bool:
+        """Indicates if this object has a data set attached to it."""
         return self.dataSet is not None
 
     def getDataSet(self):
+        """Get the data set attached to this object.
+
+        Raises:
+            ValueError: If no data set is attached to this object.
+        """
         if self.hasDataSet:
             return self.dataSet
         else:
@@ -187,6 +217,12 @@ class DataSplit(ABC, DataSetDependant):
             input data matrix X (note that these are integer indices, rather than a
             pandas index!)
         """
+
+    def splitDataset(self, dataset: "QSPRDataset"):
+        return self.split(
+            dataset.getFeatures(concat=True),
+            dataset.getTargetPropertiesValues(concat=True)
+        )
 
 
 class DataFilter(ABC):

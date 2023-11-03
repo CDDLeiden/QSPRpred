@@ -3,6 +3,7 @@
 import logging
 import numbers
 import os
+from copy import deepcopy
 from os.path import exists
 from typing import Type, Literal
 from unittest import TestCase
@@ -30,7 +31,7 @@ from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptim
 from ..models.interfaces import (
     AssessorMonitor,
     FitMonitor,
-    HyperParameterOptimizationMonitor,
+    HyperparameterOptimizationMonitor,
     QSPRModel,
 )
 from ..models.metrics import SklearnMetric
@@ -44,6 +45,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 class ModelDataSetsMixIn(DataSetsMixIn):
     """This class sets up the datasets for the model tests."""
+
     def setUp(self):
         """Set up the test environment."""
         super().setUp()
@@ -54,6 +56,7 @@ class ModelDataSetsMixIn(DataSetsMixIn):
 
 class ModelTestMixIn:
     """This class holds the tests for the QSPRmodel class."""
+
     @property
     def gridFile(self):
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
@@ -128,9 +131,7 @@ class ModelTestMixIn:
         )
         if model.metaInfo["feature_standardizer_path"] is not None:
             self.assertTrue(
-                exists(
-                    f"{model.baseDir}/{model.metaInfo['feature_standardizer_path']}"
-                )
+                exists(f"{model.baseDir}/{model.metaInfo['feature_standardizer_path']}")
             )
 
     def predictorTest(
@@ -190,19 +191,20 @@ class ModelTestMixIn:
                 self.assertIsInstance(predictions, np.ndarray)
 
             singleoutput = (
-                predictions[0][0,
-                               0] if isinstance(predictions, list) else predictions[0,
-                                                                                    0]
+                predictions[0][0, 0]
+                if isinstance(predictions, list)
+                else predictions[0, 0]
             )
             if (
-                predictor.targetProperties[0].task == TargetTasks.REGRESSION or
-                use_probas
+                predictor.targetProperties[0].task == TargetTasks.REGRESSION
+                or use_probas
             ):
                 self.assertIsInstance(singleoutput, numbers.Real)
             elif predictor.targetProperties[
-                0].task == TargetTasks.MULTICLASS or isinstance(
-                    predictor.estimator, XGBClassifier
-                ):
+                0
+            ].task == TargetTasks.MULTICLASS or isinstance(
+                predictor.estimator, XGBClassifier
+            ):
                 self.assertIsInstance(singleoutput, numbers.Integral)
             elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:
                 self.assertIn(singleoutput, [1, 0])
@@ -216,19 +218,20 @@ class ModelTestMixIn:
             )
             check_shape(invalid_smiles)
             singleoutput = (
-                predictions[0][0,
-                               0] if isinstance(predictions, list) else predictions[0,
-                                                                                    0]
+                predictions[0][0, 0]
+                if isinstance(predictions, list)
+                else predictions[0, 0]
             )
             self.assertEqual(
-                predictions[0][1,
-                               0] if isinstance(predictions, list) else predictions[1,
-                                                                                    0],
+                predictions[0][1, 0]
+                if isinstance(predictions, list)
+                else predictions[1, 0],
                 None,
             )
             if (
-                predictor.targetProperties[0].task == TargetTasks.SINGLECLASS and
-                not isinstance(predictor.estimator, XGBClassifier) and not use_probas
+                predictor.targetProperties[0].task == TargetTasks.SINGLECLASS
+                and not isinstance(predictor.estimator, XGBClassifier)
+                and not use_probas
             ):
                 self.assertIn(singleoutput, [0, 1])
             else:
@@ -322,8 +325,9 @@ class ModelTestMixIn:
         return summary
 
 
-class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+class SklearnModelMixIn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the SklearnModel class."""
+
     def getModel(
         self,
         name: str,
@@ -355,14 +359,20 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             random_state=random_state,
         )
 
+
+class TestSklearnRegression(SklearnModelMixIn):
+    """Test the SklearnModel class for regression models."""
+
     @parameterized.expand(
         [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, random_state)
             for alg, alg_name in (
                 (RandomForestRegressor, "RFR"),
                 (XGBRegressor, "XGBR"),
-            ) for random_state in ([None], [1, 42], [42, 42])
-        ] + [
+            )
+            for random_state in ([None], [1, 42], [42, 42])
+        ]
+        + [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None])
             for alg, alg_name in (
                 (PLSRegression, "PLSR"),
@@ -379,10 +389,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             parameters = None
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": task
-            }],
+            target_props=[{"name": "CL", "task": task}],
             preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
@@ -423,10 +430,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         model_class = PLSRegression
         parameters = None
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": task
-            }],
+            target_props=[{"name": "CL", "task": task}],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(
@@ -455,6 +459,63 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
+            (alg_name, alg_name, alg, random_state)
+            for alg, alg_name in ((RandomForestRegressor, "RFR"),)
+            for random_state in ([None], [1, 42], [42, 42])
+        ]
+        + [
+            (alg_name, alg_name, alg, [None])
+            for alg, alg_name in ((KNeighborsRegressor, "KNNR"),)
+        ]
+    )
+    def testRegressionMultiTaskFit(self, _, model_name, model_class, random_state):
+        """Test model training for multitask regression models."""
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            target_props=[
+                {"name": "fu", "task": TargetTasks.REGRESSION},
+                {"name": "CL", "task": TargetTasks.REGRESSION},
+            ],
+            target_imputer=SimpleImputer(strategy="mean"),
+            preparation_settings=self.getDefaultPrep(),
+        )
+        # test classifier
+        # initialize model for training from class
+        model = self.getModel(
+            name=f"{model_name}_multitask_regression",
+            alg=model_class,
+            dataset=dataset,
+            random_state=random_state[0],
+        )
+        self.fitTest(model)
+        predictor = SklearnModel(
+            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
+        )
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        if random_state[0] is not None and model_name in ["RFR"]:
+            model = self.getModel(
+                name=f"{model_name}_multitask_regression",
+                alg=model_class,
+                dataset=dataset,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = SklearnModel(
+                name=f"{model_name}_multitask_regression", base_dir=model.baseDir
+            )
+            self.predictorTest(
+                predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+
+
+class TestSklearnClassification(SklearnModelMixIn):
+    """Test the SklearnModel class for classification models."""
+
+    @parameterized.expand(
+        [
             (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
             for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
@@ -469,7 +530,8 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 (SVC, "SVC"),
                 (KNeighborsClassifier, "KNNC"),
                 (GaussianNB, "NB"),
-            ) for task, th in (
+            )
+            for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
             )
@@ -491,11 +553,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                 parameters = {"probability": True}
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -536,11 +594,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         }
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": TargetTasks.SINGLECLASS,
-                "th": [6.5]
-            }],
+            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -572,64 +626,6 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state)
-            for alg, alg_name in ((RandomForestRegressor, "RFR"), )
-            for random_state in ([None], [1, 42], [42, 42])
-        ] + [
-            (alg_name, alg_name, alg, [None])
-            for alg, alg_name in ((KNeighborsRegressor, "KNNR"), )
-        ]
-    )
-    def testRegressionMultiTaskFit(self, _, model_name, model_class, random_state):
-        """Test model training for multitask regression models."""
-        # initialize dataset
-        dataset = self.createLargeTestDataSet(
-            target_props=[
-                {
-                    "name": "fu",
-                    "task": TargetTasks.REGRESSION
-                },
-                {
-                    "name": "CL",
-                    "task": TargetTasks.REGRESSION
-                },
-            ],
-            target_imputer=SimpleImputer(strategy="mean"),
-            preparation_settings=self.getDefaultPrep(),
-        )
-        # test classifier
-        # initialize model for training from class
-        model = self.getModel(
-            name=f"{model_name}_multitask_regression",
-            alg=model_class,
-            dataset=dataset,
-            random_state=random_state[0],
-        )
-        self.fitTest(model)
-        predictor = SklearnModel(
-            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
-        )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
-        if random_state[0] is not None and model_name in ["RFR"]:
-            model = self.getModel(
-                name=f"{model_name}_multitask_regression",
-                alg=model_class,
-                dataset=dataset,
-                random_state=random_state[1],
-            )
-            self.fitTest(model)
-            predictor = SklearnModel(
-                name=f"{model_name}_multitask_regression", base_dir=model.baseDir
-            )
-            self.predictorTest(
-                predictor,
-                expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
-            )
-
-    @parameterized.expand(
-        [
-            (alg_name, alg_name, alg, random_state)
             for alg, alg_name in ((RandomForestClassifier, "RFC"), )
             for random_state in ([None], [1, 42], [42, 42])
         ] + [
@@ -649,16 +645,8 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             target_props=[
-                {
-                    "name": "fu",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [0.3]
-                },
-                {
-                    "name": "CL",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5]
-                },
+                {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
+                {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]},
             ],
             target_imputer=SimpleImputer(strategy="mean"),
             preparation_settings=self.getDefaultPrep(),
@@ -699,6 +687,7 @@ class TestSklearnModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 class TestMetrics(TestCase):
     """Test the SklearnMetrics from the metrics module."""
+
     def checkMetric(self, metric, task, y_true, y_pred, y_pred_proba=None):
         """Check if the metric is correctly implemented."""
         scorer = SklearnMetric.getMetric(metric)
@@ -836,8 +825,7 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
             f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
         )
         self.assertTrue(
-            os.path.
-            exists(f"{os.path.dirname(__file__)}/test_files/earlystopping.json")
+            os.path.exists(f"{os.path.dirname(__file__)}/test_files/earlystopping.json")
         )
 
         # check loading
@@ -852,6 +840,7 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
 
     def test_early_stopping_decorator(self):
         """Test the early stopping decorator."""
+
         class test_class:
             def __init__(self, support=True):
                 self.earlyStopping = EarlyStopping(EarlyStoppingMode.RECORDING)
@@ -901,17 +890,17 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
             _ = test_obj.test_func(None, None, None, best_epoch=40)
 
 
-class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
 
     def trainModelWithMonitoring(
         self,
         model: QSPRModel,
-        hyperparam_monitor: HyperParameterOptimizationMonitor,
+        hyperparam_monitor: HyperparameterOptimizationMonitor,
         crossval_monitor: AssessorMonitor,
         test_monitor: AssessorMonitor,
         fit_monitor: FitMonitor,
     ) -> (
-        HyperParameterOptimizationMonitor,
+        HyperparameterOptimizationMonitor,
         AssessorMonitor,
         AssessorMonitor,
         FitMonitor,
@@ -1012,35 +1001,6 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         else:
             raise ValueError(f"Unknown monitor type {monitor_type}")
 
-    def test_BaseMonitor(self):
-        """Test the base monitor"""
-        model = SklearnModel(
-            base_dir=self.generatedModelsPath,
-            alg=RandomForestRegressor,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
-            name="RFR",
-            random_state=42,
-        )
-
-        hyperparam_monitor = BaseMonitor()
-        crossval_monitor = BaseMonitor()
-        test_monitor = BaseMonitor()
-        fit_monitor = BaseMonitor()
-        (
-            hyperparam_monitor,
-            crossval_monitor,
-            test_monitor,
-            fit_monitor,
-        ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
-        )
-        self.baseMonitorTest(hyperparam_monitor, "hyperparam", False)
-        self.baseMonitorTest(crossval_monitor, "crossval", False)
-        self.baseMonitorTest(test_monitor, "test", False)
-        self.baseMonitorTest(fit_monitor, "fit", False)
-
     def fileMonitorTest(self, monitor: FileMonitor,
                         monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
                         neural_net: bool):
@@ -1083,7 +1043,60 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         elif monitor_type == "fit" and neural_net:
             check_fit_files(monitor.outDir)
 
-    def test_FileMonitor(self):
+    def listMonitorTest(self, monitor: ListMonitor,
+                        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+                        neural_net: bool):
+        self.baseMonitorTest(monitor.monitors[0], monitor_type, neural_net)
+        self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
+
+    def runMonitorTest(
+            self,
+            model,
+            monitor_type,
+            test_method,
+            nerual_net,
+            *args,
+            **kwargs
+    ):
+        hyperparam_monitor = monitor_type(*args, **kwargs)
+        crossval_monitor = deepcopy(hyperparam_monitor)
+        test_monitor = deepcopy(hyperparam_monitor)
+        fit_monitor = deepcopy(hyperparam_monitor)
+        (
+            hyperparam_monitor,
+            crossval_monitor,
+            test_monitor,
+            fit_monitor,
+        ) = self.trainModelWithMonitoring(
+            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        )
+        test_method(hyperparam_monitor, "hyperparam", nerual_net)
+        test_method(crossval_monitor, "crossval", nerual_net)
+        test_method(test_monitor, "test", nerual_net)
+        test_method(fit_monitor, "fit", nerual_net)
+
+
+class TestMonitors(TestMonitorsMixIn, TestCase):
+
+    def testBaseMonitor(self):
+        """Test the base monitor"""
+        model = SklearnModel(
+            base_dir=self.generatedModelsPath,
+            alg=RandomForestRegressor,
+            data=self.createLargeTestDataSet(
+                preparation_settings=self.getDefaultPrep()
+            ),
+            name="RFR",
+            random_state=42,
+        )
+        self.runMonitorTest(
+            model,
+            BaseMonitor,
+            self.baseMonitorTest,
+            False
+        )
+
+    def testFileMonitor(self):
         """Test the file monitor"""
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
@@ -1094,25 +1107,14 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name="RFR",
             random_state=42,
         )
-
-        hyperparam_monitor = FileMonitor()
-        crossval_monitor = FileMonitor()
-        test_monitor = FileMonitor()
-        fit_monitor = FileMonitor()
-        (
-            hyperparam_monitor,
-            crossval_monitor,
-            test_monitor,
-            fit_monitor,
-        ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        self.runMonitorTest(
+            model,
+            FileMonitor,
+            self.fileMonitorTest,
+            False
         )
-        self.fileMonitorTest(hyperparam_monitor, "hyperparam", False)
-        self.fileMonitorTest(crossval_monitor, "crossval", False)
-        self.fileMonitorTest(test_monitor, "test", False)
-        self.fileMonitorTest(fit_monitor, "fit", False)
 
-    def test_ListMonitor(self):
+    def testListMonitor(self):
         """Test the list monitor"""
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
@@ -1123,25 +1125,11 @@ class TestMonitors(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             name="RFR",
             random_state=42,
         )
-
-        hyperparam_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
-        crossval_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
-        test_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
-        fit_monitor = ListMonitor([BaseMonitor(), FileMonitor()])
-        (
-            hyperparam_monitor,
-            crossval_monitor,
-            test_monitor,
-            fit_monitor,
-        ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+        self.runMonitorTest(
+            model,
+            ListMonitor,
+            self.listMonitorTest,
+            False,
+            [BaseMonitor(), FileMonitor()],
         )
-        self.baseMonitorTest(hyperparam_monitor.monitors[0], "hyperparam", False)
-        self.baseMonitorTest(crossval_monitor.monitors[0], "crossval", False)
-        self.baseMonitorTest(test_monitor.monitors[0], "test", False)
-        self.baseMonitorTest(fit_monitor.monitors[0], "fit", False)
 
-        self.fileMonitorTest(hyperparam_monitor.monitors[1], "hyperparam", False)
-        self.fileMonitorTest(crossval_monitor.monitors[1], "crossval", False)
-        self.fileMonitorTest(test_monitor.monitors[1], "test", False)
-        self.fileMonitorTest(fit_monitor.monitors[1], "fit", False)

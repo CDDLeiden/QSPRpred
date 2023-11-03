@@ -9,15 +9,15 @@ from sklearn.model_selection import ParameterGrid
 
 from ..logs import logger
 from ..models.interfaces import (
-    HyperParameterOptimization,
-    HyperParameterOptimizationMonitor,
+    HyperparameterOptimization,
+    HyperparameterOptimizationMonitor,
     ModelAssessor,
     QSPRModel,
 )
 from ..models.monitors import BaseMonitor
 
 
-class OptunaOptimization(HyperParameterOptimization):
+class OptunaOptimization(HyperparameterOptimization):
     """Class for hyperparameter optimization of QSPRModels using Optuna.
 
     Attributes:
@@ -53,7 +53,7 @@ class OptunaOptimization(HyperParameterOptimization):
         param_grid: dict,
         model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float] = np.mean,
-        monitor: HyperParameterOptimizationMonitor | None = None,
+        monitor: HyperparameterOptimizationMonitor | None = None,
         n_trials: int = 100,
         n_jobs: int = 1,
     ):
@@ -71,7 +71,7 @@ class OptunaOptimization(HyperParameterOptimization):
             score_aggregation (Callable):
                 function to aggregate the scores of different folds if the assessment
                 method returns multiple predictions
-            monitor (HyperParameterOptimizationMonitor):
+            monitor (HyperparameterOptimizationMonitor):
                 monitor for the optimization, if None, a BaseMonitor is used
             n_trials (int):
                 number of trials for bayes optimization
@@ -101,12 +101,13 @@ class OptunaOptimization(HyperParameterOptimization):
             )
 
         self.nTrials = n_trials
-        if n_jobs > 1:
+        self.nJobs = n_jobs
+        if self.nJobs > 1:
             logger.warning(
                 "At the moment n_jobs>1 not available for bayes optimization, "
                 "n_jobs set to 1."
             )
-        self.nJobs = 1
+            self.nJobs = 1
         self.bestScore = -np.inf
         self.bestParams = None
         self.config.update({
@@ -205,14 +206,14 @@ class OptunaOptimization(HyperParameterOptimization):
         return score
 
 
-class GridSearchOptimization(HyperParameterOptimization):
+class GridSearchOptimization(HyperparameterOptimization):
     """Class for hyperparameter optimization of QSPRModels using GridSearch."""
     def __init__(
         self,
         param_grid: dict,
         model_assessor: ModelAssessor,
         score_aggregation: Callable = np.mean,
-        monitor: HyperParameterOptimizationMonitor | None = None,
+        monitor: HyperparameterOptimizationMonitor | None = None,
     ):
         """Initialize the class.
 
@@ -225,7 +226,7 @@ class GridSearchOptimization(HyperParameterOptimization):
             score_aggregation (Callable):
                 function to aggregate the scores of different folds if the assessment
                 method returns multiple predictions (default: np.mean)
-            monitor (HyperParameterOptimizationMonitor):
+            monitor (HyperparameterOptimizationMonitor):
                 monitor for the optimization, if None, a BaseMonitor is used
         """
         super().__init__(param_grid, model_assessor, score_aggregation, monitor)

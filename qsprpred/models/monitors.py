@@ -9,9 +9,9 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 
 from ..data.data import QSPRDataset
-from .interfaces import HyperParameterOptimizationMonitor, QSPRModel
+from .interfaces import HyperparameterOptimizationMonitor, QSPRModel
 
-class NullMonitor(HyperParameterOptimizationMonitor):
+class NullMonitor(HyperparameterOptimizationMonitor):
     """Monitor that does nothing."""
 
     def onFitStart(self, model: QSPRModel):
@@ -142,17 +142,17 @@ class NullMonitor(HyperParameterOptimizationMonitor):
                                   (e.g for cross-validation)
         """
 
-class ListMonitor(HyperParameterOptimizationMonitor):
+class ListMonitor(HyperparameterOptimizationMonitor):
     """Monitor that combines multiple monitors.
 
     Attributes:
-        monitors (list[HyperParameterOptimizationMonitor]): list of monitors
+        monitors (list[HyperparameterOptimizationMonitor]): list of monitors
     """
-    def __init__(self, monitors: list[HyperParameterOptimizationMonitor]):
+    def __init__(self, monitors: list[HyperparameterOptimizationMonitor]):
         """Initialize the monitor.
 
         Args:
-            monitors (list[HyperParameterOptimizationMonitor]): list of monitors
+            monitors (list[HyperparameterOptimizationMonitor]): list of monitors
         """
         self.monitors = monitors
 
@@ -312,7 +312,7 @@ class ListMonitor(HyperParameterOptimizationMonitor):
         for monitor in self.monitors:
             monitor.onIterationEnd(score, scores)
 
-class BaseMonitor(HyperParameterOptimizationMonitor):
+class BaseMonitor(HyperparameterOptimizationMonitor):
     """Base monitoring the fitting, training and optimization of a model.
 
     Information about the fitting, training and optimization process is stored
