@@ -1937,6 +1937,7 @@ class QSPRDataset(MoleculeTable):
             table_filters (list[Callable]): list of filters to apply
         """
         super().filter(table_filters)
+        self.restoreTrainingData()
         self.featurize()
 
     def addDescriptors(
