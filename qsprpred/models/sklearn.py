@@ -145,6 +145,8 @@ class SklearnModel(QSPRModel):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
         mode: Any = None,
+        monitor: None = None,
+        **kwargs,
     ):
         """See `QSPRModel.fit`."""
         estimator = self.estimator if estimator is None else estimator

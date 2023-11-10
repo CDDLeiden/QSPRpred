@@ -51,6 +51,9 @@ class QSPRModel(ABC):
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
         metaFile (str):
             absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
+        earlyStopping (EarlyStopping):
+            early stopping tracker for training of QSPRpred models that support
+            early stopping (e.g. neural networks)
         random_state (int):
             Random state to use for all random operations for reproducibility.
     """
@@ -262,10 +265,8 @@ class QSPRModel(ABC):
                 Random state to use for shuffling and other random operations.
         """
         new_random_state = random_state or (
-            self.data.randomState
-            if self.data is not None else int(
-                np.random.randint(0, 2**32 - 1, dtype=np.int64)
-            )
+            self.data.randomState if self.data is not None else
+            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
         )
         self.randomState = new_random_state
         if new_random_state is None:
@@ -281,12 +282,11 @@ class QSPRModel(ABC):
                 self.parameters.update({"random_state": new_random_state})
             else:
                 self.parameters = {"random_state": new_random_state}
-        else:
-            if random_state:
-                logger.warning(
-                    f"Random state supplied, but alg {self.alg} does not support it."
-                    " Ignoring this setting."
-                )
+        elif random_state:
+            logger.warning(
+                f"Random state supplied, but alg {self.alg} does not support it."
+                " Ignoring this setting."
+            )
 
     def __init__(
         self,
@@ -314,7 +314,7 @@ class QSPRModel(ABC):
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
-            random_state (int): 
+            random_state (int):
                 Random state to use for shuffling and other random operations.
         """
         self.data = data
@@ -787,7 +787,7 @@ class QSPRModel(ABC):
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
-    def fitAttached(self, **kwargs) -> str:
+    def fitAttached(self, monitor=None, **kwargs) -> str:
         """Train model on the whole attached data set.
 
         ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
@@ -795,6 +795,8 @@ class QSPRModel(ABC):
         cross-validation with early stopping can be used for fitting the model.
 
         Args:
+            monitor (FitMonitor): monitor for the fitting process, if None, the base
+                monitor is used
             kwargs: additional arguments to pass to fit
 
         Returns:
@@ -814,7 +816,7 @@ class QSPRModel(ABC):
         # Use early stopping false here, since we are fitting on the whole data set
         # the number of epochs is already determined from the cross-validation
         self.estimator = self.fit(
-            X_all, y_all, mode=EarlyStoppingMode.OPTIMAL, **kwargs
+            X_all, y_all, mode=EarlyStoppingMode.OPTIMAL, monitor=monitor, **kwargs
         )
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -829,6 +831,7 @@ class QSPRModel(ABC):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        monitor: "FitMonitor" = None,
         **kwargs,
     ) -> Any | tuple[Any, int] | None:
         """Fit the model to the given data matrix or `QSPRDataset`.
@@ -848,6 +851,8 @@ class QSPRModel(ABC):
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
+            monitor (FitMonitor): monitor for the fitting process,
+                if None, the base monitor is used
             kwargs: additional arguments to pass to the fit method of the estimator
 
         Returns:
@@ -940,54 +945,230 @@ class QSPRModel(ABC):
         """
 
 
+class FitMonitor(ABC):
+    """Base class for monitoring the fitting of a model."""
+    @abstractmethod
+    def onFitStart(self, model: QSPRModel):
+        """Called before the training has started.
+
+        Args:
+            model (QSPRModel): model to be fitted
+        """
+
+    @abstractmethod
+    def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
+        """Called after the training has finished.
+
+        Args:
+            estimator (Any): estimator that was fitted
+            best_epoch (int | None): index of the best epoch
+        """
+
+    @abstractmethod
+    def onEpochStart(self, epoch: int):
+        """Called before each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+        """
+
+    @abstractmethod
+    def onEpochEnd(
+        self, epoch: int, train_loss: float, val_loss: float | None = None
+    ):
+        """Called after each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+            train_loss (float): loss of the current epoch
+            val_loss (float | None): validation loss of the current epoch
+        """
+
+    @abstractmethod
+    def onBatchStart(self, batch: int):
+        """Called before each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+        """
+
+    @abstractmethod
+    def onBatchEnd(self, batch: int, loss: float):
+        """Called after each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+            loss (float): loss of the current batch
+        """
+
+
+class AssessorMonitor(FitMonitor):
+    """Base class for monitoring the assessment of a model."""
+    @abstractmethod
+    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+        """Called before the assessment has started.
+
+        Args:
+            model (QSPRModel): model to assess
+            assesment_type (str): type of assessment
+        """
+
+    @abstractmethod
+    def onAssessmentEnd(self, predictions: pd.DataFrame):
+        """Called after the assessment has finished.
+
+        Args:
+            predictions (pd.DataFrame): predictions of the assessment
+        """
+
+    @abstractmethod
+    def onFoldStart(
+        self,
+        fold: int,
+        X_train: np.array,
+        y_train: np.array,
+        X_test: np.array,
+        y_test: np.array,
+    ):
+        """Called before each fold of the assessment.
+
+        Args:
+            fold (int): index of the current fold
+            X_train (np.array): training data of the current fold
+            y_train (np.array): training targets of the current fold
+            X_test (np.array): test data of the current fold
+            y_test (np.array): test targets of the current fold
+        """
+
+    @abstractmethod
+    def onFoldEnd(
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+    ):
+        """Called after each fold of the assessment.
+
+        Args:
+            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
+                                             tuple containing the fitted estimator and
+                                             the number of epochs it was trained for
+            predictions (pd.DataFrame): predictions of the current fold
+        """
+
+
+class HyperparameterOptimizationMonitor(AssessorMonitor):
+    """Base class for monitoring the hyperparameter optimization of a model."""
+    @abstractmethod
+    def onOptimizationStart(
+        self, model: QSPRModel, config: dict, optimization_type: str
+    ):
+        """Called before the hyperparameter optimization has started.
+
+        Args:
+            model (QSPRModel): model to optimize
+            config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of hyperparameter optimization
+        """
+
+    @abstractmethod
+    def onOptimizationEnd(self, best_score: float, best_parameters: dict):
+        """Called after the hyperparameter optimization has finished.
+
+        Args:
+            best_score (float): best score found during optimization
+            best_parameters (dict): best parameters found during optimization
+        """
+
+    @abstractmethod
+    def onIterationStart(self, params: dict):
+        """Called before each iteration of the hyperparameter optimization.
+
+        Args:
+            params (dict): parameters used for the current iteration
+        """
+
+    @abstractmethod
+    def onIterationEnd(self, score: float, scores: list[float]):
+        """Called after each iteration of the hyperparameter optimization.
+
+        Args:
+            score (float): (aggregated) score of the current iteration
+            scores (list[float]): scores of the current iteration
+                                  (e.g for cross-validation)
+        """
+
+
 class ModelAssessor(ABC):
     """Base class for assessment methods.
 
     Attributes:
+        scoreFunc (Metric): scoring function to use, should match the output of the
+                        evaluation method (e.g. if the evaluation methods returns
+                        class probabilities, the scoring function support class
+                        probabilities)
+        monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
+            is used
         useProba (bool): use probabilities for classification models
+        mode (EarlyStoppingMode): early stopping mode for fitting
     """
-    def __init__(self, use_proba: bool = True, mode: EarlyStoppingMode | None = None):
+    def __init__(
+        self,
+        scoring: str | Callable[[Iterable, Iterable], float],
+        monitor: AssessorMonitor | None = None,
+        use_proba: bool = True,
+        mode: EarlyStoppingMode | None = None,
+    ):
         """Initialize the evaluation method class.
 
         Args:
+            scoring: str | Callable[[Iterable, Iterable], float],
+            monitor (AssessorMonitor): monitor to track the evaluation
             use_proba (bool): use probabilities for classification models
             mode (EarlyStoppingMode): early stopping mode for fitting
         """
+        self.monitor = monitor
         self.useProba = use_proba
         self.mode = mode
+        self.scoreFunc = (
+            SklearnMetric.getMetric(scoring) if isinstance(scoring, str) else scoring
+        )
 
     @abstractmethod
-    def __call__(self, model: QSPRModel,
-                 **kwargs) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
+    def __call__(
+        self,
+        model: QSPRModel,
+        save: bool,
+        parameters: dict | None,
+        monitor: AssessorMonitor,
+        **kwargs,
+    ) -> list[float]:
         """Evaluate the model.
 
         Args:
             model (QSPRModel): model to evaluate
+            save (bool): save predictions to file
+            parameters (dict): parameters to use for the evaluation
+            monitor (AssessorMonitor): monitor to track the evaluation, overrides
+                                       the monitor set in the constructor
             kwargs: additional arguments for fit function of the model
 
         Returns:
-            list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]:
-                list of tuples containing the true values and the predictions, where
-                each tuple corresponds a set of predictions such as different folds.
+            list[float]: scores of the model for each fold
         """
 
-    def savePredictionsToFile(
+    def predictionsToDataFrame(
         self,
         model: QSPRModel,
         y: np.array,
         predictions: np.ndarray | list[np.ndarray],
         index: pd.Series,
-        file_suffix: str,
         extra_columns: dict[str, np.ndarray] | None = None,
-    ):
-        """Save predictions to file.
+    ) -> pd.DataFrame:
+        """Create a dataframe with true values and predictions.
 
         Args:
             model (QSPRModel): model to evaluate
             y (np.array): target values
             predictions (np.ndarray | list[np.ndarray]): predictions
             index (pd.Series): index of the data set
-            file_suffix (str): suffix to add to the file name
             extra_columns (dict[str, np.ndarray]): extra columns to add to the output
         """
         # Create dataframe with true values
@@ -996,7 +1177,7 @@ class ModelAssessor(ABC):
         )
         # Add predictions to dataframe
         for idx, prop in enumerate(model.data.targetProperties):
-            if prop.task.isClassification():
+            if prop.task.isClassification() and self.useProba:
                 # convert one-hot encoded predictions to class labels
                 # and add to train and test
                 df_out[f"{prop.name}_Prediction"] = np.argmax(predictions[idx], axis=1)
@@ -1015,48 +1196,48 @@ class ModelAssessor(ABC):
         if extra_columns is not None:
             for col_name, col_values in extra_columns.items():
                 df_out[col_name] = col_values
-        df_out.to_csv(f"{model.outPrefix}.{file_suffix}.tsv", sep="\t")
+        return df_out
 
 
-class HyperParameterOptimization(ABC):
+class HyperparameterOptimization(ABC):
     """Base class for hyperparameter optimization.
 
     Attributes:
-        scoreFunc (Metric): scoring function to use, should match the output of the
-                            evaluation method (e.g. if the evaluation methods returns
-                            class probabilities, the scoring function support class
-                            probabilities)
         runAssessment (ModelAssessor): evaluation method to use
         scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
         paramGrid (dict): dictionary of parameters to optimize
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization
         bestScore (float): best score found during optimization
         bestParams (dict): best parameters found during optimization
     """
     def __init__(
         self,
-        scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
         model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float],
+        monitor: HyperparameterOptimizationMonitor | None = None,
     ):
         """Initialize the hyperparameter optimization class.
 
-        scoring (str | Callable[[Iterable, Iterable], float]):
-            Metric name from `sklearn.metrics` or user-defined scoring function.
         param_grid (dict):
             dictionary of parameters to optimize
         model_assessor (ModelAssessor):
             assessment method to use for determining the best parameters
         score_aggregation (Callable[[Iterable], float]): function to aggregate scores
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization,
+            if None, a BaseMonitor is used
         """
-        self.scoreFunc = (
-            SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
-        )
         self.runAssessment = model_assessor
         self.scoreAggregation = score_aggregation
         self.paramGrid = param_grid
         self.bestScore = -np.inf
         self.bestParams = None
+        self.monitor = monitor
+        self.config = {
+            "param_grid": param_grid,
+            "model_assessor": model_assessor,
+            "score_aggregation": score_aggregation
+        }
 
     @abstractmethod
     def optimize(self, model: QSPRModel) -> dict:
