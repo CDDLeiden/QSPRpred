@@ -119,7 +119,6 @@ class CrossValAssessor(ModelAssessor):
             predictions.append(fold_predictions_df)
         # save results
         if save:
-            # reorder predictions to match input order
             pd.concat(predictions).round(self.round).to_csv(
                 f"{model.outPrefix}.cv.tsv",
                 sep="\t"
@@ -201,7 +200,6 @@ class TestSetAssessor(ModelAssessor):
         monitor.onFoldEnd(ind_estimator, predictions_df)
         # predict values for independent test set and save results
         if save:
-            # reorder predictions to match input order
             predictions_df.round(self.round).to_csv(
                 f"{model.outPrefix}.ind.tsv",
                 sep="\t"
