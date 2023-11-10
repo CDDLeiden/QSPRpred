@@ -227,7 +227,7 @@ class ChempropModel(QSPRModel):
             for i, task_class_sizes in enumerate(class_sizes):
                 self.chempropLogger.debug(
                     f"{args.task_names[i]} "
-                    f"{', '.join(f'{cls}: {size * 100:.2f}%' for cls, size in enumerate(task_class_sizes))}"  # noqa: E501
+                    f"{', '.join(f'{cls}: {size * 100:.2f}%' for cls, size in enumerate(task_class_sizes))}"
                 )
             train_class_sizes = chemprop.data.utils.get_class_sizes(
                 train_data, proportion=False
