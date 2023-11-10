@@ -2067,7 +2067,8 @@ class QSPRDataset(MoleculeTable):
             raise ValueError(
                 "No descriptors available. Cannot load descriptors to splits."
             )
-
+        #  make sure no extra data is present in the splits
+        self.DropExtraDataFromSplits()
         descriptors = self.getDescriptors()
         if self.X_ind is not None and self.y_ind is not None:
             self.X = descriptors.loc[self.X.index, :]
@@ -2082,10 +2083,7 @@ class QSPRDataset(MoleculeTable):
         if shuffle:
             self.shuffle(random_state)
         #  make sure no extra data is present in the splits
-        self.X = self.X.loc[self.X.index.isin(self.df.index), :]
-        self.X_ind = self.X_ind.loc[self.X_ind.index.isin(self.df.index), :]
-        self.y = self.y.loc[self.X.index, :]
-        self.y_ind = self.y_ind.loc[self.X_ind.index, :]
+        self.DropExtraDataFromSplits()
 
     def shuffle(self, random_state: Optional[int] = None):
         self.X = self.X.sample(frac=1, random_state=random_state or self.randomState)
@@ -2108,6 +2106,8 @@ class QSPRDataset(MoleculeTable):
         shuffle (bool): whether to shuffle the training and test sets
         random_state (int): random state for shuffling
         """
+        # make sure no extra data is present in the splits
+        self.DropExtraDataFromSplits()
         if self.hasDescriptors and self.hasFeatures:
             self.loadDescriptorsToSplits(
                 shuffle=shuffle, random_state=random_state or self.randomState
@@ -2126,8 +2126,19 @@ class QSPRDataset(MoleculeTable):
             if shuffle:
                 self.shuffle(random_state or self.randomState)
         # make sure no extra data is present in the splits
-        self.X = self.X.loc[self.X.index.isin(self.df.index), :]
-        self.X_ind = self.X_ind.loc[self.X_ind.index.isin(self.df.index), :]
+        self.DropExtraDataFromSplits()
+
+    def DropExtraDataFromSplits(self):
+        """Drop any extra data from the splits.
+
+        This method drops any rows from the X, X_ind, y, and y_ind dataframes that are
+        not present in the df dataframe.
+        """
+        self.X = self.X.loc[self.X.index.isin(self.df.index), :] if self.X is not None else None
+        self.X_ind = self.X_ind.loc[self.X_ind.index.isin(self.df.index), :] if self.X_ind is not None else None
+        self.y = self.y.loc[self.X.index, :] if self.y is not None else None
+        self.y_ind = self.y_ind.loc[self.X_ind.index, :] if self.y_ind is not None else None
+
 
     def fillMissing(self, fill_value: float, columns: Optional[list[str]] = None):
         """Fill missing values in the data set with a given value.
