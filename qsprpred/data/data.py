@@ -2091,12 +2091,12 @@ class QSPRDataset(MoleculeTable):
         # make sure no extra data is present in the splits
         mask_train = self.X.index.isin(self.df.index)
         mask_test = self.X_ind.index.isin(self.df.index)
-        if len(mask_train) != len(self.X):
+        if mask_train.sum() != len(self.X):
             logger.warning(
                 "Some items will be removed from the training set because "
                 f"they no longer exist in the data set: {self.X.index[~mask_train]}"
             )
-        if len(mask_test) != len(self.X_ind):
+        if mask_test.sum() != len(self.X_ind):
             logger.warning(
                 "Some items will be removed from the test set because "
                 f"they no longer exist in the data set: {self.X_ind.index[~mask_test]}"
