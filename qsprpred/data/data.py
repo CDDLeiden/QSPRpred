@@ -142,6 +142,14 @@ class PandasDataSet(DataSet):
                 The state is saved upon `save` so if you want to change the state later,
                 call the `setRandomState` method after loading.
         """
+        def enumerate_with_zeros(items):
+            # Find the number of digits in the length of the list
+            num_digits = len(str(len(items)))
+            enumerated_strings = []
+            for i, item in enumerate(items, 1):  # start enumeration from 1
+                padded_str = str(i).zfill(num_digits)
+                enumerated_strings.append(padded_str)
+            return enumerated_strings
         self.randomState = None
         self.setRandomState(random_state or int(np.random.randint(0, 2**32 - 1, dtype=np.int64)))
         self.name = name
@@ -172,7 +180,7 @@ class PandasDataSet(DataSet):
                 if index_cols is not None:
                     self.setIndex(index_cols)
                 else:
-                    df[id_prefix] = [f"{self.name}_{i}" for i in range(len(self.df))]
+                    df[id_prefix] = [f"{self.name}_{i}" for i in enumerate_with_zeros(self.df)]
                     self.setIndex([id_prefix])
         else:
             if not self._isInStore("df"):
