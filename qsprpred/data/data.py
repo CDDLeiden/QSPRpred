@@ -2145,8 +2145,20 @@ class QSPRDataset(MoleculeTable):
             if shuffle:
                 self.shuffle(random_state or self.randomState)
         # make sure no extra data is present in the splits
-        self.X = self.X.loc[self.X.index.isin(self.df.index), :]
-        self.X_ind = self.X_ind.loc[self.X_ind.index.isin(self.df.index), :]
+        mask_train = self.X.index.isin(self.df.index)
+        mask_test = self.X_ind.index.isin(self.df.index)
+        if mask_train.sum() != len(self.X):
+            logger.warning(
+                "Some items will be removed from the training set because "
+                f"they no longer exist in the data set: {self.X.index[~mask_train]}"
+            )
+        if mask_test.sum() != len(self.X_ind):
+            logger.warning(
+                "Some items will be removed from the test set because "
+                f"they no longer exist in the data set: {self.X_ind.index[~mask_test]}"
+            )
+        self.X = self.X.loc[mask_train, :]
+        self.X_ind = self.X_ind.loc[mask_test, :]
 
     def fillMissing(self, fill_value: float, columns: Optional[list[str]] = None):
         """Fill missing values in the data set with a given value.
