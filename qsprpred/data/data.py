@@ -2088,9 +2088,21 @@ class QSPRDataset(MoleculeTable):
             self.y_ind = self.df.loc[self.X_ind.index, self.targetPropertyNames]
         if shuffle:
             self.shuffle(random_state)
-        #  make sure no extra data is present in the splits
-        self.X = self.X.loc[self.X.index.isin(self.df.index), :]
-        self.X_ind = self.X_ind.loc[self.X_ind.index.isin(self.df.index), :]
+        # make sure no extra data is present in the splits
+        mask_train = self.X.index.isin(self.df.index)
+        mask_test = self.X_ind.index.isin(self.df.index)
+        if len(mask_train) != len(self.X):
+            logger.warning(
+                "Some items will be removed from the training set because "
+                f"they no longer exist in the data set: {self.X.index[~mask_train]}"
+            )
+        if len(mask_test) != len(self.X_ind):
+            logger.warning(
+                "Some items will be removed from the test set because "
+                f"they no longer exist in the data set: {self.X_ind.index[~mask_test]}"
+            )
+        self.X = self.X.loc[mask_train, :]
+        self.X_ind = self.X_ind.loc[mask_test, :]
         self.y = self.y.loc[self.X.index, :]
         self.y_ind = self.y_ind.loc[self.X_ind.index, :]
 
