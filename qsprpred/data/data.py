@@ -249,7 +249,7 @@ class PandasDataSet(DataSet):
             data (list): List of values for the property.
         """
         if isinstance(data, pd.Series):
-            if not np.array_equal(data.index.txt, self.df.index.txt):
+            if not self.df.index.equals(data.index):
                 logger.info(
                     f"Adding property '{name}' to data set might be introducing 'nan' "
                     "values due to index with pandas series. Make sure the index of "
@@ -263,6 +263,7 @@ class PandasDataSet(DataSet):
         Args:
             name (str): Name of the property to remove.
         """
+        self.df.drop(columns=[name], inplace=True)
 
     def getSubset(self, prefix: str):
         """Get a subset of the data set by providing a prefix for the column names or a
