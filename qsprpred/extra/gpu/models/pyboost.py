@@ -19,13 +19,14 @@ import numpy as np
 import pandas as pd
 from py_boost.gpu.losses import BCELoss, MSELoss
 from py_boost.gpu.losses.metrics import Metric, auc
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import ShuffleSplit
 
 from ....data.data import QSPRDataset
+from ....data.interfaces import DataSplit
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import QSPRModel, FitMonitor
-from ....models.tasks import ModelTasks
+from ....models.interfaces import FitMonitor, QSPRModel
 from ....models.monitors import BaseMonitor
+from ....models.tasks import ModelTasks
 
 
 class PyBoostModel(QSPRModel):
@@ -114,6 +115,7 @@ class PyBoostModel(QSPRModel):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        split: DataSplit | None = None,
         monitor: FitMonitor | None = None,
         **kwargs,
     ) -> import_module("py_boost").GradientBoosting:
@@ -124,6 +126,8 @@ class PyBoostModel(QSPRModel):
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): mode to use for early stopping
+            split (DataSplit): data split to use for early stopping,
+                if None, a ShuffleSplit with 10% validation set size is used
             monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor
             kwargs: additional keyword arguments for the fit function
 
@@ -132,6 +136,9 @@ class PyBoostModel(QSPRModel):
         """
         monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
+        split = split or ShuffleSplit(
+            n_splits=1, test_size=0.1, random_state=self.data.randomState
+        )
         monitor.onFitStart(self)
         X, y = self.convertToNumpy(X, y)
 
@@ -141,9 +148,16 @@ class PyBoostModel(QSPRModel):
         if self.earlyStopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
-            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
-            estimator.fit(X_train, y_train, eval_sets=[{"X": X_val, "y": y_val}],
-                          monitor=monitor)
+            train_index, val_index = next(split.split(X, y))
+            estimator.fit(
+                X[train_index, :],
+                y[train_index],
+                eval_sets=[{
+                    "X": X[val_index, :],
+                    "y": y[val_index]
+                }],
+                monitor=monitor,
+            )
             monitor.onFitEnd(estimator, estimator.best_round)
             return estimator, estimator.best_round
 
