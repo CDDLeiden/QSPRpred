@@ -643,7 +643,6 @@ class FileMonitor(BaseMonitor):
                 [self.scores, pd.DataFrame(self.parameters).T], axis=1
             )
             savescores.to_csv(
-                f"{self.optimizationPath}/{self.optimizationType}_scores.tsv", sep="\t"
                 f"{self.optimizationPath}/{self.optimizationType}_scores.tsv", sep="\t",
                 index=False
             )
