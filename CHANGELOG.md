@@ -14,6 +14,7 @@ From v2.1.0.a2 to v2.2.0
 - Rename `HyperParameterOptimization` to `HyperparameterOptimization`.
 - `TargetProperty.fromList` and `TargetProperty.fromDict` now accept a both a string and a `TargetTask` as the `task` argument,
 without having to set the `task_from_str` argument, which is now deprecated.
+- Make `EarlyStopping.mode` flexible for `QSPRModel.fitAttached`.
 - `save_params` argument added to `OptunaOptimization` to save the best hyperparameters to the model (default: `True`).
 
 ## New Features
