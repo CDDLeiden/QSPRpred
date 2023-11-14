@@ -263,6 +263,7 @@ class PandasDataSet(DataSet):
         Args:
             name (str): Name of the property to remove.
         """
+        self.df.drop(columns=[name], inplace=True)
 
     def getSubset(self, prefix: str):
         """Get a subset of the data set by providing a prefix for the column names or a
