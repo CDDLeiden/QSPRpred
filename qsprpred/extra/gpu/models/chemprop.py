@@ -8,15 +8,17 @@ import chemprop
 import numpy as np
 import pandas as pd
 import torch
+from sklearn.model_selection import ShuffleSplit
 from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import trange
 
 from ....data.data import QSPRDataset
+from ....data.interfaces import DataSplit
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import QSPRModel, FitMonitor
-from ....models.tasks import ModelTasks
+from ....models.interfaces import FitMonitor, QSPRModel
 from ....models.monitors import BaseMonitor
+from ....models.tasks import ModelTasks
 
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):
@@ -168,6 +170,7 @@ class ChempropModel(QSPRModel):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        split: DataSplit | None = None,
         monitor: FitMonitor | None = None,
         keep_logs: bool = False,
     ) -> Any | tuple[ChempropMoleculeModel, int | None]:
@@ -194,10 +197,24 @@ class ChempropModel(QSPRModel):
         """
         monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
+        split = split or ShuffleSplit(
+            n_splits=1, test_size=0.1, random_state=self.data.randomState
+        )
         monitor.onFitStart(self)
 
-        # convert data to chemprop MoleculeDataset
-        data = self.convertToMoleculeDataset(X, y)
+        # Create validation data when using early stopping
+        X, y = self.convertToNumpy(X, y)
+        if self.earlyStopping:
+            train_index, val_index = next(split.split(X, y))
+            train_data = self.convertToMoleculeDataset(
+                X[train_index, :], y[train_index]
+            )
+            val_data = self.convertToMoleculeDataset(X[val_index, :], y[val_index])
+        else:
+            train_data = self.convertToMoleculeDataset(
+                X, y
+            )  # convert data to chemprop MoleculeDataset
+
         args = estimator.args
 
         # Set pytorch seed for random initial weights
@@ -206,23 +223,9 @@ class ChempropModel(QSPRModel):
         # set task names
         args.task_names = [prop.name for prop in self.data.targetProperties]
 
-        # Create validation data when using early stopping
-        if self.earlyStopping:
-            self.chempropLogger.debug(f"Splitting data with seed {args.seed}")
-            train_data, val_data, _ = chemprop.data.utils.split_data(
-                data=data,
-                split_type=args.split_type,
-                sizes=args.split_sizes if args.split_sizes[2] == 0 else [0.9, 0.1, 0],
-                seed=args.seed,
-                args=args,
-                logger=self.chempropLogger,
-            )
-        else:
-            train_data = data
-
         # Get number of molecules per class in training data
         if args.dataset_type == "classification":
-            class_sizes = chemprop.data.utils.get_class_sizes(data)
+            class_sizes = chemprop.data.utils.get_class_sizes(train_data)
             self.chempropLogger.debug("Class sizes")
             for i, task_class_sizes in enumerate(class_sizes):
                 self.chempropLogger.debug(
@@ -238,12 +241,14 @@ class ChempropModel(QSPRModel):
         args.train_data_size = len(train_data)
 
         # log data size
-        self.chempropLogger.debug(f"Total size = {len(data):,}")
+        total_data_size = len(train_data)
         if self.earlyStopping:
+            total_data_size += len(val_data)
             self.chempropLogger.debug(
                 f"train size = {len(train_data):,}"
                 f" | val size = {len(val_data):,}"
             )
+        self.chempropLogger.debug(f"Total size = {total_data_size:,}")
 
         # Initialize scaler and standard scale training targets (regression only)
         if args.dataset_type == "regression":
@@ -256,7 +261,7 @@ class ChempropModel(QSPRModel):
         loss_func = chemprop.train.loss_functions.get_loss_func(args)
 
         # Automatically determine whether to cache
-        if len(data) <= args.cache_cutoff:
+        if len(train_data) <= args.cache_cutoff:
             chemprop.data.set_cache_graph(True)
             num_workers = 0
         else:
