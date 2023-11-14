@@ -1,6 +1,10 @@
 ## Table of Contents
 
-This is a list of tutorials for QSPRpred. A Quick Start tutorial is designed to get you up and running with QSPRpred as quickly as possible. 
+This is a list of tutorials for QSPRpred. 
+
+Get the data for the tutorials from ... (TODO: add to onedrive/zenode, etc.) or recreate the dataset yourself by running `tutorial_data/create_tutorial_data.py`.
+
+A Quick Start tutorial is designed to get you up and running with QSPRpred as quickly as possible. 
 The rest of the the tutorials is diveded into two categories: basic and advanced. 
 The Basics tutorials cover all basic functionality of QSPRpred that you will need in most projects. The Advanced tutorials cover more advanced topics and are designed for users who are already familiar with the basics of QSPRpred.
 For detailed description of all QSPRpred classes and functions, see the [documentation](https://cddleiden.github.io/QSPRpred/docs/).
@@ -15,7 +19,7 @@ For detailed description of all QSPRpred classes and functions, see the [documen
         - [Descriptors](basics/data/descriptors.ipynb): How to calculate descriptors for molecules.
     - Modelling
         - [Classification](basics/data/classification.ipynb): How to train a classification model.
-        - [Regression](basics/data/regression.ipynb): How to train a regression model.
+        - [Logging](basics/data/logging.ipynb): How to set-up logging.
         - [Model Assessment](basics/data/model_assessment.ipynb): How to assess the performance of a model.
 - <b>Advanced</b>
     - Data
@@ -23,6 +27,7 @@ For detailed description of all QSPRpred classes and functions, see the [documen
         - [Custom data splitting](advanced/data/custom_data_splitting.ipynb): How to use custom data splitting.
     - Modelling
         - [Custom models](advanced/modelling/custom_models.ipynb): How to use custom models.
+        - [Deep learning models](advanced/modelling/deep_learning_models.ipynb): How to use deep learning models.
         - [Hyperparameter optimization](advanced/modelling/hyperparameter_optimization.ipynb): How to optimize model hyperparameters.
         - [Monitoring](advanced/modelling/monitoring.ipynb): How to monitor model training.
         - [Multi-task learning](advanced/modelling/multi_task_modelling.ipynb): How to train a multi-task model.
