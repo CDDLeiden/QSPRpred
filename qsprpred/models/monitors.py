@@ -496,6 +496,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.foldData = {}
         self.predictions = None
         self.estimators = {}
+        self.fits = {}
 
     def _get_assessment(self) -> tuple[QSPRModel, QSPRDataset, pd.DataFrame, dict]:
         """Return the assessment data."""
@@ -505,6 +506,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
             "foldData": self.foldData,
             "predictions": self.predictions,
             "estimators": self.estimators,
+            "fits": self.fits,
         }
 
     def onFitStart(self, model: QSPRModel):
@@ -642,6 +644,8 @@ class FileMonitor(BaseMonitor):
             )
             savescores.to_csv(
                 f"{self.optimizationPath}/{self.optimizationType}_scores.tsv", sep="\t"
+                f"{self.optimizationPath}/{self.optimizationType}_scores.tsv", sep="\t",
+                index=False
             )
 
     def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
