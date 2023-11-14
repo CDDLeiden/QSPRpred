@@ -8,6 +8,7 @@ import shutil
 from collections.abc import Iterable
 from unittest import TestCase
 
+import jsonpickle
 import numpy as np
 import pandas as pd
 from parameterized import parameterized
@@ -55,7 +56,7 @@ from .utils.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarian
 from .utils.scaffolds import BemisMurcko, Murcko
 
 N_CPU = 2
-CHUNK_SIZE = 100
+CHUNK_SIZE = 50
 TIME_SPLIT_YEAR = 2000
 logging.basicConfig(level=logging.DEBUG)
 
@@ -352,9 +353,7 @@ class DataSetsMixIn(PathMixIn):
             target_props=target_props,
             df=df,
             store_dir=self.generatedDataPath,
-            target_imputer=target_imputer,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            target_imputer=target_imputer
         )
         if prep:
             ret.prepareDataset(**prep)
@@ -457,8 +456,10 @@ class DescriptorCheckMixIn:
         # save to file, check if it can be loaded, and if the features are consistent
         dataset.save()
         ds_loaded = dataset.__class__.fromFile(
-            dataset.storePath, n_jobs=N_CPU, chunk_size=CHUNK_SIZE
+            dataset.metaFile
         )
+        ds_loaded.nJobs = N_CPU
+        ds_loaded.chunkSize = CHUNK_SIZE
         for ds_loaded_prop, target_prop in zip(
             ds_loaded.targetProperties, target_props
         ):
@@ -473,7 +474,7 @@ class DescriptorCheckMixIn:
         self.checkFeatures(dataset, expected_length)
 
 
-class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
+class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
     """Simple tests for dataset creation and serialization under different conditions
     and error states."""
 
@@ -573,7 +574,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         # load the data set again and check if everything is consistent after loading
         # creation from file
         stopwatch.reset()
-        dataset_new = QSPRDataset.fromFile(dataset.storePath)
+        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
         stopwatch.stop("Loading from file took: ")
         self.checkConsistency(dataset_new)
         # creation by reinitialization
@@ -677,7 +678,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         self.assertEqual(dataset.targetProperties[0].nClasses, 3)
         self.assertEqual(dataset.targetProperties[0].th, "precomputed")
         # Check that the dataset is correctly loaded from file for classification
-        dataset_new = QSPRDataset.fromFile(dataset.storePath)
+        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
         self.checkBadInit(dataset_new)
         self.checkClassification(dataset_new, ["CL", "fu"], [[0, 15, 30, 60], [0.3]])
         # Check that the make regression method works as expected
@@ -686,7 +687,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         # Check that the dataset is correctly loaded from file for regression
         self.checkRegression(dataset_new, ["CL", "fu"])
         dataset_new.save()
-        dataset_new = QSPRDataset.fromFile(dataset.storePath)
+        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
         self.checkRegression(dataset_new, ["CL", "fu"])
 
     def testIndexing(self):
@@ -775,7 +776,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         dataset.dropInvalids()
         self.assertEqual(dataset.df.shape[0], all_mols - 1)
 
-    def test_random_state_shuffle(self):
+    def testRandomStateShuffle(self):
         dataset = self.createLargeTestDataSet()
         seed = dataset.randomState
         dataset.shuffle()
@@ -784,14 +785,14 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         dataset.shuffle()
         order_next = dataset.getDF().index.tolist()
         # reload and check if seed and order are the same
-        dataset = QSPRDataset.fromFile(dataset.storePath)
+        dataset = QSPRDataset.fromFile(dataset.metaFile)
         self.assertEqual(dataset.randomState, seed)
         self.assertListEqual(dataset.getDF().index.tolist(), order)
         # shuffle again and check if order is the same as before
         dataset.shuffle()
         self.assertListEqual(dataset.getDF().index.tolist(), order_next)
 
-    def test_random_state_featurization(self):
+    def testRandomStateFeaturization(self):
         # create and save the data set
         dataset = self.createLargeTestDataSet()
         dataset.addDescriptors(
@@ -810,7 +811,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         test_order = test.index.tolist()
         # reload and check if orders are the same if we redo the split
         # and featurization with the same random state
-        dataset = QSPRDataset.fromFile(dataset.storePath)
+        dataset = QSPRDataset.fromFile(dataset.metaFile)
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
         dataset.split(split, featurize=False)
         dataset.featurizeSplits(shuffle=True)
@@ -818,7 +819,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         self.assertListEqual(train.index.tolist(), train_order)
         self.assertListEqual(test.index.tolist(), test_order)
 
-    def test_random_state_folds(self):
+    def testRandomStateFolds(self):
         # create and save the data set (fixes the seed)
         dataset = self.createLargeTestDataSet()
         dataset.save()
@@ -837,7 +838,7 @@ class TestDataSetCreationSerialization(DataSetsMixIn, TestCase):
         for _, _, _, _, train_index, test_index in dataset.iterFolds(split):
             order_folds.append(train.iloc[train_index].index.tolist())
         # reload and check if orders are the same if we redo the folds from saved data
-        dataset = QSPRDataset.fromFile(dataset.storePath)
+        dataset = QSPRDataset.fromFile(dataset.metaFile)
         dataset.prepareDataset(
             feature_calculators=[
                 MoleculeDescriptorsCalculator(
@@ -930,6 +931,8 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
     def testManualSplit(self):
         """Test the manual split function, where the split is done manually."""
         dataset = self.createLargeTestDataSet()
+        dataset.nJobs = N_CPU
+        dataset.chunkSize = CHUNK_SIZE
         # Add extra column to the data frame to use for splitting
         dataset.df["split"] = "train"
         dataset.df.loc[dataset.df.sample(frac=0.1).index, "split"] = "test"
@@ -1092,7 +1095,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         test_ids = dataset.X_ind.index.values
         train_ids = dataset.y_ind.index.values
         dataset.save()
-        dataset_new = QSPRDataset.fromFile(dataset.storePath)
+        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
         self.validate_split(dataset_new)
         self.assertTrue(dataset_new.descriptorCalculators)
         self.assertTrue(dataset_new.feature_standardizer)
@@ -1563,7 +1566,7 @@ class TestFeatureStandardizer(DataSetsMixIn, TestCase):
             )
         )
 
-    def test_featurestandarizer(self):
+    def testFeaturesStandardizer(self):
         """Test the feature standardizer fitting, transforming and serialization."""
         scaler = SKLearnStandardizer.fromFit(self.dataset.X, StandardScaler())
         scaled_features = scaler(self.dataset.X)
@@ -1637,7 +1640,7 @@ class DataPrepTestMixIn(DescriptorCheckMixIn):
         # save the dataset
         dataset.save()
         # reload the dataset and check consistency again
-        dataset = dataset.__class__.fromFile(dataset.storePath)
+        dataset = dataset.__class__.fromFile(dataset.metaFile)
         self.assertEqual(dataset.name, name)
         self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
         for idx, prop in enumerate(expected_target_props):

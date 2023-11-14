@@ -4,9 +4,10 @@ import pandas as pd
 import sklearn_json as skljson
 
 from ...logs import logger
+from ...serialization import JSONSerializable
 
 
-class SKLearnStandardizer:
+class SKLearnStandardizer(JSONSerializable):
     """Standardizer for molecular features."""
     def __init__(self, scaler):
         """
@@ -18,13 +19,18 @@ class SKLearnStandardizer:
 
         self.scaler = scaler
 
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        o_dict["scaler"] = skljson.to_dict(self.scaler)
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.scaler = skljson.from_dict(state["scaler"])
+
     def __str__(self):
         """Return string representation."""
         return f"SKLearnStandardizer_{self.scaler.__class__.__name__}"
-
-    def getInstance(self):
-        """Get scaler object."""
-        return self.scaler
 
     def __call__(self, features: np.array) -> np.array:
         """Standardize features.
@@ -39,25 +45,12 @@ class SKLearnStandardizer:
         logger.debug("Data standardized")
         return features
 
-    def toFile(self, fname) -> None:
-        """Save standardizer to json file.
+    def getInstance(self):
+        """Get scaler object."""
+        return self.scaler
 
-        Args:
-            fname: file name to save standardizer to
-        """
-        skljson.to_json(self.scaler, fname)
-
-    @staticmethod
-    def fromFile(fname: str):
-        """Construct standardizer from json file.
-
-        Args:
-            fname: file name to load standardizer from
-        """
-        return SKLearnStandardizer(skljson.from_json(fname))
-
-    @staticmethod
-    def fromFit(features: np.array, scaler):
+    @classmethod
+    def fromFit(cls, features: np.array, scaler):
         """Construct standardizer by fitting on feature set.
 
         Args:

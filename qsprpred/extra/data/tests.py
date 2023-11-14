@@ -339,7 +339,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         train_ids = dataset.y_ind.index.values
         dataset.save()
         # load dataset and test if all checks out after loading
-        dataset_new = PCMDataSet.fromFile(dataset.storePath)
+        dataset_new = PCMDataSet.fromFile(dataset.metaFile)
         self.assertIsInstance(dataset_new, PCMDataSet)
         self.validate_split(dataset_new)
         self.assertEqual(dataset.X_ind.shape[0], round(ndata * 0.2))
@@ -422,7 +422,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         )
         feats_left = self.dataset.X.shape[1]
         self.dataset.save()
-        dataset_new = PCMDataSet.fromFile(self.dataset.storePath)
+        dataset_new = PCMDataSet.fromFile(self.dataset.metaFile)
         self.assertEqual(dataset_new.X.shape[1], feats_left)
 
     @parameterized.expand(
@@ -622,7 +622,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         )
 
     @parameterized.expand([(RandomSplit(),), (ScaffoldSplit(),), (ClusterSplit(),)])
-    def test_PCMSplit(self, splitter):
+    def testPCMSplit(self, splitter):
         splitter = PCMSplit(splitter)
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
@@ -637,7 +637,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
             set(test_smiles.unique()).isdisjoint(set(train_smiles.unique()))
         )
 
-    def test_PCMSplit_random_shuffle(self):
+    def testPCMSplitRandomShuffle(self):
         seed = self.dataset.randomState
         self.dataset.save()
         splitter = PCMSplit(RandomSplit(), dataset=self.dataset)
@@ -646,7 +646,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         train_order = train.index.tolist()
         test_order = test.index.tolist()
         # reload and check if orders are the same if we redo the split
-        dataset = PCMDataSet.fromFile(self.dataset.storePath)
+        dataset = PCMDataSet.fromFile(self.dataset.metaFile)
         splitter = PCMSplit(RandomSplit(), dataset=dataset)
         dataset.split(splitter, featurize=True)
         train, test = dataset.getFeatures()
@@ -654,7 +654,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.assertListEqual(train.index.tolist(), train_order)
         self.assertListEqual(test.index.tolist(), test_order)
 
-    def test_LeaveTargetOut(self):
+    def testLeaveTargetOut(self):
         target = self.dataset.getProteinKeys()[0:2]
         splitter = LeaveTargetsOut(targets=target)
         self.dataset.split(splitter, featurize=True)
@@ -668,7 +668,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
             set(test_targets.unique()).isdisjoint(set(train_targets.unique()))
         )
 
-    def test_PerTargetTemporal(self):
+    def testPerTargetTemporal(self):
         year_col = "Year"
         year = 2015
         splitter = TemporalPerTarget(

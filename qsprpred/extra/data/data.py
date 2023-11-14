@@ -181,34 +181,26 @@ class PCMDataSet(QSPRDataset):
         self.attachDescriptors(calculator, descriptors, [self.proteinCol])
         self.featurize(update_splits=featurize)
 
-    @staticmethod
-    def fromSDF(name, filename, smiles_prop, *args, **kwargs):
-        raise NotImplementedError(
-            f"SDF loading not implemented for {PCMDataSet.__name__}, yet. "
-            f"Use `PCMDataSet.fromMolTable` to convert a `MoleculeTable`"
-            f"read from an SDF instead."
-        )
-
-    def generateMetadata(self):
-        meta = super().generateMetadata()
-        meta["init"]["protein_col"] = self.proteinCol
-        meta["init"]["protein_seq_provider"] = base64.b64encode(
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        o_dict["proteinSeqProvider"] = base64.b64encode(
             marshal.dumps(
                 self.proteinSeqProvider.__code__ if self.proteinSeqProvider else None
             )
         ).decode("ascii")
-        return meta
+        return o_dict
 
-    @staticmethod
-    def loadMetadata(name: str, store_dir: str):
-        meta = QSPRDataset.loadMetadata(name, store_dir)
-        if meta["init"]["protein_seq_provider"] is not None:
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        if self.proteinSeqProvider:
             seq_provider = marshal.loads(
-                base64.b64decode(meta["init"]["protein_seq_provider"])
+                base64.b64decode(self.proteinSeqProvider)
             )
             try:
-                seq_provider = types.FunctionType(seq_provider, globals())
-                meta["init"]["protein_seq_provider"] = seq_provider
+                self.proteinSeqProvider = types.FunctionType(
+                    seq_provider,
+                    globals()
+                )
             except Exception as e:
                 logger.warning(
                     "Failed to load protein sequence provider from metadata. "
@@ -217,17 +209,14 @@ class PCMDataSet(QSPRDataset):
                     f"\nDeserialized Code: {seq_provider}"
                     f"\nSetting protein sequence provider to `None` for now."
                 )
-                meta["init"]["protein_seq_provider"] = None
-
-        return meta
+                self.proteinSeqProvider = None
 
     @staticmethod
-    def fromFile(filename: str, *args, **kwargs) -> "QSPRDataset":
-        store_dir = os.path.dirname(filename)
-        name = os.path.basename(filename).rsplit("_", 1)[0]
-        meta = PCMDataSet.loadMetadata(name, store_dir)
-        return PCMDataSet(
-            *args, name=name, store_dir=store_dir, **meta["init"], **kwargs
+    def fromSDF(name, filename, smiles_prop, *args, **kwargs):
+        raise NotImplementedError(
+            f"SDF loading not implemented for {PCMDataSet.__name__}, yet. "
+            f"Use `PCMDataSet.fromMolTable` to convert a `MoleculeTable`"
+            f"read from an SDF instead."
         )
 
     @staticmethod
@@ -272,7 +261,6 @@ class PCMDataSet(QSPRDataset):
         )
         if not ds.descriptors and mol_table.descriptors:
             ds.descriptors = mol_table.descriptors
-            ds.descriptorCalculators = mol_table.descriptorCalculators
         return ds
 
     def addFeatures(
