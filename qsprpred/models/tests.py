@@ -853,6 +853,7 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
                 y,
                 estimator=None,
                 mode=EarlyStoppingMode.NOT_RECORDING,
+                split=None,
                 monitor=None,
                 **kwargs,
             ):

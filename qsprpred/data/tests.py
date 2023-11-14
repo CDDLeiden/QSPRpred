@@ -771,7 +771,6 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             ),
         )
         invalids = dataset.checkMols(throw=False)
-        print(f"Invalid molecule: {invalids}")
         self.assertEqual(sum(~invalids), 1)
         dataset.dropInvalids()
         self.assertEqual(dataset.df.shape[0], all_mols - 1)
