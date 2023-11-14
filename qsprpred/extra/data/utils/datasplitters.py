@@ -56,42 +56,37 @@ class PCMSplit(DataSplit):
             input data matrix X (note that these are integer indices, rather than a
             pandas index!)
         """
-
         ds = self.getDataSet()
         df = ds.getDF()
         indices = df.index.tolist()
         proteins = df[ds.proteinCol].unique()
         task = ds.targetProperties[0].task
         th = ds.targetProperties[0].th if task.isClassification() else None
-
         assert (
             len(ds.targetProperties) == 1
         ), "PCMSplit only works for single-task datasets!"
         # TODO: Add support for multi-target (create a multi-task PCM dataset)
         # with all target-task combinations as different columns and split that
         # dataset with the given splitter
-
         # Pivot dataframe to get a matrix with protein targets as columns
         df_mt = df.pivot(
             index=ds.smilesCol,
             columns=ds.proteinCol,
             values=ds.targetProperties[0].name,
         ).reset_index()
-
         # Create target properties for multi-task dataset
         mt_targetProperties = [
             TargetProperty(name=target, task=task, th=th) for target in proteins
         ]
-
         # Create multi-task dataset and split it with the given splitter
         ds_mt = QSPRDataset(
             name=f"PCM_{self.splitter.__class__.__name__}_{hash(self)}",
             df=df_mt,
             smiles_col=ds.smilesCol,
             target_props=mt_targetProperties,
+            random_state=ds.randomState,
         )
         ds_mt.split(self.splitter)
-
         # Convert MT indices to indices of original PCM dataset
         test_indices = []
         for i in ds_mt.X_ind.index:
@@ -105,9 +100,7 @@ class PCMSplit(DataSplit):
                             (df[ds.smilesCol] == smiles)].index.astype(str)[0]
                 # Convert to numeric index
                 test_indices.append(indices.index(ds_idx))
-
         train_indices = [i for i in range(len(df)) if i not in test_indices]
-
         return iter([(train_indices, test_indices)])
 
 
