@@ -2068,8 +2068,6 @@ class QSPRDataset(MoleculeTable):
             raise ValueError(
                 "No descriptors available. Cannot load descriptors to splits."
             )
-        #  make sure no extra data is present in the splits
-        self.DropExtraDataFromSplits()
         descriptors = self.getDescriptors()
         if self.X_ind is not None and self.y_ind is not None:
             self.X = descriptors.loc[self.X.index, :]
@@ -2122,8 +2120,6 @@ class QSPRDataset(MoleculeTable):
         shuffle (bool): whether to shuffle the training and test sets
         random_state (int): random state for shuffling
         """
-        # make sure no extra data is present in the splits
-        self.DropExtraDataFromSplits()
         if self.hasDescriptors and self.hasFeatures:
             self.loadDescriptorsToSplits(
                 shuffle=shuffle, random_state=random_state or self.randomState
