@@ -787,7 +787,7 @@ class QSPRModel(ABC):
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
-    def fitAttached(self, monitor=None, **kwargs) -> str:
+    def fitAttached(self, monitor=None, mode=EarlyStoppingMode.OPTIMAL, **kwargs) -> str:
         """Train model on the whole attached data set.
 
         ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
@@ -797,6 +797,10 @@ class QSPRModel(ABC):
         Args:
             monitor (FitMonitor): monitor for the fitting process, if None, the base
                 monitor is used
+            mode (EarlyStoppingMode): early stopping mode for models that support
+                early stopping, by default fit the 'optimal' number of
+                epochs previously stopped at in model assessment on train or test set,
+                to avoid the use of extra data for a validation set.
             kwargs: additional arguments to pass to fit
 
         Returns:
@@ -813,10 +817,8 @@ class QSPRModel(ABC):
         logger.info(
             "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-        # Use early stopping false here, since we are fitting on the whole data set
-        # the number of epochs is already determined from the cross-validation
         self.estimator = self.fit(
-            X_all, y_all, mode=EarlyStoppingMode.OPTIMAL, monitor=monitor, **kwargs
+            X_all, y_all, mode=mode, monitor=monitor, **kwargs
         )
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
