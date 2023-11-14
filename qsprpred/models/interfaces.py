@@ -265,15 +265,15 @@ class QSPRModel(ABC):
                 Random state to use for shuffling and other random operations.
         """
         new_random_state = random_state or (
-            self.data.randomState if self.data is not None else
-            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+            self.data.randomState if self.data is not None else None
         )
-        self.randomState = new_random_state
         if new_random_state is None:
+            self.randomState = int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
             logger.warning(
                 "No random state supplied, "
                 "and could not find random state on the dataset."
             )
+        self.randomState = new_random_state
         constructor_params = [
             name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
         ]
@@ -370,13 +370,13 @@ class QSPRModel(ABC):
                 ) if "early_stopping_path" in self.metaInfo else EarlyStopping()
             )
 
-        # initialize a estimator instance with the given parameters
         self.alg = alg
-        if autoload:
-            self.estimator = self.loadEstimatorFromFile(params=self.parameters)
         # initialize random state
         self.randomState = None
         self.initRandomState(random_state)
+        # initialize a estimator instance with the given parameters
+        if autoload:
+            self.estimator = self.loadEstimatorFromFile(params=self.parameters)
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""
