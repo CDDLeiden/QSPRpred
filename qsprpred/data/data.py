@@ -183,7 +183,7 @@ class PandasDataSet(DataSet):
                 if index_cols is not None:
                     self.setIndex(index_cols)
                 else:
-                    df[id_prefix] = [f"{self.name}_{i}" for i in enumerate_with_zeros(self.df)]
+                    df[id_prefix] = [f"{self.name}_{i}" for i in enumerate_with_zeros(self.df.index)]
                     self.setIndex([id_prefix])
         else:
             if not self._isInStore("df"):
