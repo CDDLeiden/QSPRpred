@@ -97,6 +97,7 @@ def apply_feature_standardizer(feature_standardizer, X, fit=True):
     else:
         standardizer = SKLearnStandardizer(standardizer)
 
-    X = standardizer(X)
+    X_std = standardizer(X)
+    X = pd.DataFrame(X_std, index=X.index, columns=X.columns)
 
     return X, standardizer

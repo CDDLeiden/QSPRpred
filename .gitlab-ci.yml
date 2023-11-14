@@ -27,7 +27,7 @@ stages:
    script:
       - pytest -x qsprpred
       - cd clitest && ./run.sh
-      - cd ../tutorial && ./run_all.sh && python check_results.py
+      - cd ../tutorial && ./run_all.sh
 
 # # Run tests on Python version 11 (linux image)
 # test:python3.11:

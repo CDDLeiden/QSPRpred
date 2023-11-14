@@ -5,7 +5,9 @@ from typing import Callable, Iterable
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import KFold
 
+from ..data.interfaces import DataSplit
 from ..logs import logger
 from .early_stopping import EarlyStoppingMode
 from .interfaces import AssessorMonitor, ModelAssessor, QSPRModel
@@ -20,17 +22,22 @@ class CrossValAssessor(ModelAssessor):
         monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
             is used
         mode (EarlyStoppingMode): mode to use for early stopping
+        round (int): number of decimal places to round predictions to (default: 3)
     """
     def __init__(
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
+        split: DataSplit | None = None,
         monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
+        round: int = 3,
     ):
         super().__init__(scoring, monitor, use_proba, mode)
+        self.split = split
         if monitor is None:
             self.monitor = BaseMonitor()
+        self.round = round
 
     def __call__(
         self,
@@ -54,6 +61,11 @@ class CrossValAssessor(ModelAssessor):
             float | np.ndarray: predictions on the validation set
         """
         monitor = monitor or self.monitor
+        model.checkForData()
+        data = model.data
+        split = self.split or KFold(
+            n_splits=5, shuffle=True, random_state=data.randomState
+        )
         evalparams = model.parameters if parameters is None else parameters
         self.scoreFunc.checkMetricCompatibility(model.task, self.useProba)
         # check if data is available
@@ -61,14 +73,13 @@ class CrossValAssessor(ModelAssessor):
         X, _ = model.data.getFeatures()
         y, _ = model.data.getTargetPropertiesValues()
         monitor.onAssessmentStart(model, self.__class__.__name__)
-
         # cross validation
-        folds = model.data.createFolds()
         fold_counter = np.zeros(y.shape[0])
         predictions = []
         scores = []
-        for i, (X_train, X_test, y_train, y_test, idx_train,
-                idx_test) in enumerate(folds):
+        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(
+            data.iterFolds(split=split)
+        ):
             logger.debug(
                 "cross validation fold %s started: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -79,7 +90,12 @@ class CrossValAssessor(ModelAssessor):
             # fit model
             crossval_estimator = model.loadEstimator(evalparams)
             model_fit = model.fit(
-                X_train, y_train, crossval_estimator, self.mode, monitor, **kwargs
+                X_train,
+                y_train,
+                crossval_estimator,
+                self.mode,
+                monitor=monitor,
+                **kwargs,
             )
             # make predictions
             if model.task.isRegression() or not self.useProba:
@@ -90,7 +106,6 @@ class CrossValAssessor(ModelAssessor):
             # score
             score = self.scoreFunc(y.iloc[idx_test], fold_predictions)
             scores.append(score)
-
             # save molecule ids and fold number
             fold_counter[idx_test] = i
             logger.debug(
@@ -106,25 +121,23 @@ class CrossValAssessor(ModelAssessor):
             )
             monitor.onFoldEnd(model_fit, fold_predictions_df)
             predictions.append(fold_predictions_df)
-
         # save results
         if save:
-            # reorder predictions to match input order
-            pd.concat(predictions).reindex(y.index).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
-
+            pd.concat(predictions).round(self.round
+                                        ).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
         monitor.onAssessmentEnd(pd.concat(predictions))
-
         return scores
 
 
 class TestSetAssessor(ModelAssessor):
     """Assess a model on a test set.
 
-    Attributes:
+    Attributes:+
         useProba (bool): use predictProba instead of predict for classification
         monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
             is used
         mode (EarlyStoppingMode): mode to use for early stopping
+        round (int): number of decimal places to round predictions to (default: 3)
     """
     def __init__(
         self,
@@ -132,10 +145,12 @@ class TestSetAssessor(ModelAssessor):
         monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
+        round: int = 3,
     ):
         super().__init__(scoring, monitor, use_proba, mode)
         if monitor is None:
             self.monitor = BaseMonitor()
+        self.round = round
 
     def __call__(
         self,
@@ -171,7 +186,7 @@ class TestSetAssessor(ModelAssessor):
         # fit model
         ind_estimator = model.loadEstimator(evalparams)
         ind_estimator = model.fit(
-            X, y, ind_estimator, self.mode, monitor, **kwargs
+            X, y, ind_estimator, self.mode, monitor=monitor, **kwargs
         )
         # predict values for independent test set
         if model.task.isRegression() or not self.useProba:
@@ -186,9 +201,7 @@ class TestSetAssessor(ModelAssessor):
         monitor.onFoldEnd(ind_estimator, predictions_df)
         # predict values for independent test set and save results
         if save:
-            # reorder predictions to match input order
-            predictions_df = predictions_df.reindex(y_ind.index)
-            predictions_df.to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
-
+            predictions_df.round(self.round
+                                ).to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
         monitor.onAssessmentEnd(predictions_df)
         return [score]
