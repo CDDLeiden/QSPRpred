@@ -21,6 +21,6 @@ From v2.1.0.a2 to v2.2.0
 - Added `WandBMonitor` class to save the progress of a fitting, assessing, or hyperparameter optimization process to [Weights & Biases](https://wandb.ai/).
 - Added `NullMonitor` class to ignore the progress of a fitting, assessing, or hyperparameter optimization process.
 - Added `ListMonitor` class to combine multiple monitors.
-- Cross-validation, testing and hyperparameter optimization were made more flexible by allowing custom splitting and fold generation strategies. A tutorial showcasing these features was created. 
+- Cross-validation, testing, hyperparameter optimization and early-stopping were made more flexible by allowing custom splitting and fold generation strategies. A tutorial showcasing these features was created. 
 
 ## Removed Features

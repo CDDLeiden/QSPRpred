@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from ..data.data import QSPRDataset
+from ..data.interfaces import DataSplit
 from ..logs import logger
 
 
@@ -173,6 +174,7 @@ def early_stopping(func: Callable) -> Callable:
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any | None = None,
         mode: EarlyStoppingMode | None = None,
+        split: DataSplit | None = None,
         monitor: "FitMonitor" = None,
         **kwargs,
     ) -> Any:
@@ -183,6 +185,8 @@ def early_stopping(func: Callable) -> Callable:
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
+            split (DataSplit): data split to use for early stopping,
+                if None, a ShuffleSplit with 10% validation set size is used
             monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor
                 is used
             kwargs (dict): additional keyword arguments for the estimator's fit method
@@ -195,7 +199,9 @@ def early_stopping(func: Callable) -> Callable:
             " early stopping."
         )
         self.earlyStopping.mode = mode if mode is not None else self.earlyStopping.mode
-        estimator, best_epoch = func(self, X, y, estimator, mode, monitor, **kwargs)
+        estimator, best_epoch = func(
+            self, X, y, estimator, mode, split, monitor, **kwargs
+        )
         if self.earlyStopping.mode == EarlyStoppingMode.RECORDING:
             self.earlyStopping.recordEpochs(best_epoch + 1)  # +1 for 0-indexing
         return estimator

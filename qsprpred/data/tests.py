@@ -1260,6 +1260,14 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         self.assertEqual(len(df_copy), 3)  # three unique SMILES
         self.assertTrue(df_copy.equals(df.iloc[[0, 1, 2]]))  # keep first by year
 
+    def testConsistency(self):
+        dataset = self.createLargeTestDataSet()
+        remove_cation = CategoryFilter(name="moka_ionState7.4", values=["cationic"])
+        self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() > 0)
+        dataset.filter([remove_cation])
+        self.assertEqual(len(dataset.getDF()), len(dataset.getFeatures(concat=True)))
+        self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() == 0)
+
 
 class TestTargetImputation(PathMixIn, TestCase):
     """Small tests to only check if the target imputation works on its own."""
