@@ -10,6 +10,7 @@ import pandas as pd
 import torch
 from sklearn.model_selection import ShuffleSplit
 
+from ....logs import logger
 from ....data.data import QSPRDataset
 from ....data.interfaces import DataSplit
 from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
@@ -127,7 +128,16 @@ class DNNModel(QSPRModel):
         Args:
             random_state (int): Random state to use for shuffling and other random operations.
         """
-
+        new_random_state = random_state or (
+            self.data.randomState if self.data is not None else
+            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+        )
+        self.randomState = new_random_state
+        if new_random_state is None:
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
         self.randomState = random_state
         if random_state is not None:
             torch.manual_seed(random_state)
@@ -150,6 +160,7 @@ class DNNModel(QSPRModel):
         Returns:
             model (object): model instance
         """
+        self.initRandomState(self.randomState)
         if self.task.isRegression():
             self.nClass = 1
         elif self.data is not None:

@@ -13,6 +13,7 @@ from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import trange
 
+from ....logs import logger
 from ....data.data import QSPRDataset
 from ....data.interfaces import DataSplit
 from ....logs import logger
@@ -45,6 +46,27 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         super().__init__(args)
         self.args = args
         self.scaler = scaler
+
+    def initRandomState(self, random_state):
+        """Set random state if applicable.
+        Defaults to random state of dataset if no random state is provided by the constructor.
+
+        Args:
+            random_state (int): Random state to use for shuffling and other random operations.
+        """
+        new_random_state = random_state or (
+            self.data.randomState if self.data is not None else
+            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+        )
+        self.randomState = new_random_state
+        if new_random_state is None:
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+        self.randomState = random_state
+        if random_state is not None:
+            torch.manual_seed(random_state)
 
     @classmethod
     def cast(cls, obj: chemprop.models.MoleculeModel) -> "ChempropMoleculeModel":
@@ -221,9 +243,6 @@ class ChempropModel(QSPRModel):
             )  # convert data to chemprop MoleculeDataset
 
         args = estimator.args
-
-        # Set pytorch seed for random initial weights
-        torch.manual_seed(args.pytorch_seed)
 
         # set task names
         args.task_names = [prop.name for prop in self.data.targetProperties]
@@ -506,6 +525,7 @@ class ChempropModel(QSPRModel):
         Returns:
             object: initialized estimator instance
         """
+        self.initRandomState(self.randomState)
         self.checkArgs(params)
         new_parameters = self.getParameters(params)
         args = ChempropMoleculeModel.getTrainArgs(new_parameters, self.task)

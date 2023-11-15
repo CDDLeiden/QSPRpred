@@ -8,7 +8,6 @@ import shutil
 from collections.abc import Iterable
 from unittest import TestCase
 
-import jsonpickle
 import numpy as np
 import pandas as pd
 from parameterized import parameterized
@@ -285,12 +284,15 @@ class DataSetsMixIn(PathMixIn):
         target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
         target_imputer=None,
         preparation_settings=None,
+        random_state=42,
     ):
         """Create a large dataset for testing purposes.
 
         Args:
             name (str): name of the dataset
             target_props (List of dicts or TargetProperty): list of target properties
+            target_imputer (sklearn.impute): imputer to use for target values
+            random_state (int): random state to use for splitting and shuffling
             preparation_settings (dict): dictionary containing preparation settings
 
         Returns:
@@ -302,6 +304,7 @@ class DataSetsMixIn(PathMixIn):
             target_props=target_props,
             target_imputer=target_imputer,
             prep=preparation_settings,
+            random_state=random_state,
         )
 
     def createSmallTestDataSet(
@@ -310,12 +313,15 @@ class DataSetsMixIn(PathMixIn):
         target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
         target_imputer=None,
         preparation_settings=None,
+        random_state=42,
     ):
         """Create a small dataset for testing purposes.
 
         Args:
             name (str): name of the dataset
             target_props (List of dicts or TargetProperty): list of target properties
+            target_imputer (sklearn.impute): imputer to use for target values
+            random_state (int): random state to use for splitting and shuffling
             preparation_settings (dict): dictionary containing preparation settings
 
         Returns:
@@ -326,6 +332,7 @@ class DataSetsMixIn(PathMixIn):
             name=name,
             target_props=target_props,
             target_imputer=target_imputer,
+            random_state=random_state,
             prep=preparation_settings,
         )
 
@@ -335,6 +342,7 @@ class DataSetsMixIn(PathMixIn):
         name="QSPRDataset_test",
         target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
         target_imputer=None,
+        random_state=None,
         prep=None,
     ):
         """Create a dataset for testing purposes from the given data frame.
@@ -353,7 +361,8 @@ class DataSetsMixIn(PathMixIn):
             target_props=target_props,
             df=df,
             store_dir=self.generatedDataPath,
-            target_imputer=target_imputer
+            target_imputer=target_imputer,
+            random_state=random_state,
         )
         if prep:
             ret.prepareDataset(**prep)
@@ -368,6 +377,7 @@ class DataSetsMixIn(PathMixIn):
         ],
         target_imputer=None,
         preparation_settings=None,
+        random_state=42,
     ):
         """Create a large dataset for testing purposes.
 
@@ -384,6 +394,7 @@ class DataSetsMixIn(PathMixIn):
             name=name,
             target_props=target_props,
             target_imputer=target_imputer,
+            random_state=random_state,
             prep=preparation_settings,
         )
 
@@ -1183,7 +1194,7 @@ class TestFoldSplitters(DataSetsMixIn, TestCase):
         self.assertFalse(set(dataset.X.index) - set(indices))
 
     def testBootstrappedFold(self):
-        dataset = self.createLargeTestDataSet()
+        dataset = self.createLargeTestDataSet(random_state=None)
         dataset.addDescriptors(
             MoleculeDescriptorsCalculator(
                 [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]

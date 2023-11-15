@@ -182,7 +182,7 @@ class TestSetAssessor(ModelAssessor):
         X, X_ind = model.data.getFeatures()
         y, y_ind = model.data.getTargetPropertiesValues()
         monitor.onAssessmentStart(model, self.__class__.__name__)
-        monitor.onFoldStart(fold=1, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind)
+        monitor.onFoldStart(fold=0, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind)
         # fit model
         ind_estimator = model.loadEstimator(evalparams)
         ind_estimator = model.fit(
