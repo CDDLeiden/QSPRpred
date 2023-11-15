@@ -9,7 +9,7 @@ import pickle
 import warnings
 from collections.abc import Callable
 from multiprocessing import Pool
-from typing import Literal, Optional, Generator
+from typing import Generator, Literal, Optional
 
 import numpy as np
 import pandas as pd
@@ -17,9 +17,9 @@ from rdkit.Chem import PandasTools
 from sklearn.preprocessing import LabelEncoder
 from tqdm.auto import tqdm
 
-from .utils.folds import FoldsFromDataSplit
 from ..logs import logger
 from ..models.tasks import TargetTasks
+from ..utils.enumerate import enumerate_with_zeros
 from ..utils.inspect import import_class
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
 from .utils.datafilters import RepeatsFilter
@@ -27,6 +27,7 @@ from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
 )
+from .utils.folds import FoldsFromDataSplit
 from .utils.scaffolds import Scaffold
 from .utils.smiles_standardization import (
     check_smiles_valid,
@@ -57,10 +58,8 @@ class PandasDataSet(DataSet):
         randomState (int): Random state to use for all random operations.
 
     """
-
     class ParallelApplyWrapper:
         """A wrapper class to parallelize pandas apply functions."""
-
         def __init__(
             self,
             func: Callable,
@@ -143,14 +142,6 @@ class PandasDataSet(DataSet):
                 The state is saved upon `save` so if you want to change the state later,
                 call the `setRandomState` method after loading.
         """
-        def enumerate_with_zeros(items):
-            # Find the number of digits in the length of the list
-            num_digits = len(str(len(items)))
-            enumerated_strings = []
-            for i, item in enumerate(items, 1):  # start enumeration from 1
-                padded_str = str(i).zfill(num_digits)
-                enumerated_strings.append(padded_str)
-            return enumerated_strings
         self.randomState = None
         self.setRandomState(
             random_state or int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
@@ -183,7 +174,8 @@ class PandasDataSet(DataSet):
                 if index_cols is not None:
                     self.setIndex(index_cols)
                 else:
-                    df[id_prefix] = [f"{self.name}_{i}" for i in enumerate_with_zeros(self.df.index)]
+                    enum_idxs = enumerate_with_zeros(self.df.index)
+                    df[id_prefix] = f"{id_prefix}_" + pd.Series(enum_idxs)
                     self.setIndex([id_prefix])
         else:
             if not self._isInStore("df"):
@@ -227,9 +219,8 @@ class PandasDataSet(DataSet):
         Returns:
             bool: `True` if the file exists, `False` otherwise.
         """
-        return os.path.exists(self.storePath) and self.storePath.endswith(
-            f"_{name}.pkl"
-        )
+        return os.path.exists(self.storePath
+                             ) and self.storePath.endswith(f"_{name}.pkl")
 
     def getProperty(self, name: str) -> pd.Series:
         """Get a property of the data set.
@@ -313,11 +304,8 @@ class PandasDataSet(DataSet):
         n_cpus = self.nJobs
         chunk_size = self.chunkSize
         if (
-            n_cpus
-            and n_cpus > 1
-            and not (
-                hasattr(func, "noParallelization") and func.noParallelization is True
-            )
+            n_cpus and n_cpus > 1 and
+            not (hasattr(func, "noParallelization") and func.noParallelization is True)
         ):
             return self.papply(
                 func,
@@ -375,14 +363,12 @@ class PandasDataSet(DataSet):
         """
         n_cpus = n_cpus if n_cpus else os.cpu_count()
         df_sub = self.df[subset if subset else self.df.columns]
-        data = [df_sub[i : i + chunk_size] for i in range(0, len(df_sub), chunk_size)]
+        data = [df_sub[i:i + chunk_size] for i in range(0, len(df_sub), chunk_size)]
         # size of batches use in the process - more is faster, but uses more memory
         batch_size = n_cpus
         results = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=n_cpus) as executor:
-            batches = [
-                data[i : i + batch_size] for i in range(0, len(data), batch_size)
-            ]
+            batches = [data[i:i + batch_size] for i in range(0, len(data), batch_size)]
             for batch in tqdm(
                 batches, desc=f"Parallel apply in progress for {self.name}."
             ):
@@ -583,7 +569,6 @@ class DescriptorTable(PandasDataSet):
 
 class MoleculeTable(PandasDataSet, MoleculeDataSet):
     """Class that holds and prepares molecule data for modelling and other analyses."""
-
     def __init__(
         self,
         name: str,
@@ -680,10 +665,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             f"{self.storePrefix}_descriptor_calculator"
         )
         files = [
-            f
-            for f in os.listdir(self.storeDir)
-            if f.endswith(".json")
-            and f.startswith(os.path.basename(self.descriptorCalculatorsPathPrefix))
+            f for f in os.listdir(self.storeDir) if f.endswith(".json") and
+            f.startswith(os.path.basename(self.descriptorCalculatorsPathPrefix))
         ]
         for file in files:
             path = f"{self.storeDir}/{file}"
@@ -991,8 +974,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         if not prefix:
             prefixes = (
                 [f"{self.name}_{x.getPrefix()}" for x in self.descriptorCalculators]
-                if self.descriptorCalculators
-                else []
+                if self.descriptorCalculators else []
             )
         else:
             prefixes = [f"{self.name}_{prefix}"]
@@ -1079,7 +1061,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 continue
             self.df[f"Scaffold_{scaffold}"] = self.apply(
                 self._scaffold_calculator,
-                func_args=(scaffold,),
+                func_args=(scaffold, ),
                 subset=[self.smilesCol],
                 axis=1,
                 raw=False,
@@ -1101,10 +1083,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             list: List of scaffold names.
         """
         return [
-            col
-            for col in self.df.columns
-            if col.startswith("Scaffold_")
-            and (include_mols or not col.endswith("_RDMol"))
+            col for col in self.df.columns if col.startswith("Scaffold_") and
+            (include_mols or not col.endswith("_RDMol"))
         ]
 
     def getScaffolds(self, includeMols: bool = False):
@@ -1117,9 +1097,9 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             pd.DataFrame: Data frame containing only scaffolds.
         """
         if includeMols:
-            return self.df[
-                [col for col in self.df.columns if col.startswith("Scaffold_")]
-            ]
+            return self.df[[
+                col for col in self.df.columns if col.startswith("Scaffold_")
+            ]]
         else:
             return self.df[self.getScaffoldNames()]
 
@@ -1165,13 +1145,9 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         Returns:
             list: list of scaffold groups.
         """
-        return self.df[
-            self.df.columns[
-                self.df.columns.str.startswith(
-                    f"ScaffoldGroup_{scaffold_name}_{mol_per_group}"
-                )
-            ][0]
-        ]
+        return self.df[self.df.columns[self.df.columns.str.startswith(
+            f"ScaffoldGroup_{scaffold_name}_{mol_per_group}"
+        )][0]]
 
     @property
     def hasScaffoldGroups(self):
@@ -1254,13 +1230,11 @@ class TargetProperty:
             classification tasks
         transformer (Callable): function to transform the target property
     """
-
     def __init__(
         self,
         name: str,
-        task: Literal[
-            TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS
-        ],
+        task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
+                      TargetTasks.MULTICLASS],
         original_name: Optional[str] = None,
         th: Optional[list[float] | str] = None,
         n_classes: Optional[int] = None,
@@ -1362,7 +1336,10 @@ class TargetProperty:
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{k: TargetTasks[v] if k == "task" else v for k, v in d.items()}
+                **{
+                    k: TargetTasks[v] if k == "task" else v
+                    for k, v in d.items()
+                }
             )
         else:
             return TargetProperty(**d)
@@ -1382,9 +1359,11 @@ class TargetProperty:
         if task_from_str:
             return [
                 TargetProperty(
-                    **{k: TargetTasks[v] if k == "task" else v for k, v in d.items()}
-                )
-                for d in _list
+                    **{
+                        k: TargetTasks[v] if k == "task" else v
+                        for k, v in d.items()
+                    }
+                ) for d in _list
             ]
         else:
             return [TargetProperty(**d) for d in _list]
@@ -1411,7 +1390,10 @@ class TargetProperty:
             )
             if target_prop.task.isClassification():
                 target_props[-1].update(
-                    {"th": target_prop.th, "n_classes": target_prop.nClasses}
+                    {
+                        "th": target_prop.th,
+                        "n_classes": target_prop.nClasses
+                    }
                 )
             if not drop_transformer:
                 target_props[-1].update({"transformer": target_prop.transformer})
@@ -1482,7 +1464,6 @@ class QSPRDataset(MoleculeTable):
             types.
         featureNames (list of str) : feature names
     """
-
     def __init__(
         self,
         name: str,
@@ -1707,10 +1688,8 @@ class QSPRDataset(MoleculeTable):
                         [f"{prefix}_{descset}_{x}" for x in descset.descriptors]
                     )
         if (
-            self.metaInfo
-            and not features
-            and ("feature_names" in self.metaInfo)
-            and (self.metaInfo["feature_names"] is not None)
+            self.metaInfo and not features and ("feature_names" in self.metaInfo) and
+            (self.metaInfo["feature_names"] is not None)
         ):
             features.extend(
                 [x for x in self.metaInfo["feature_names"] if x not in features]
@@ -1729,14 +1708,12 @@ class QSPRDataset(MoleculeTable):
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.y = self.df.query("Split_IsTrain")[self.targetPropertyNames]
-            self.y_ind = self.df.loc[
-                ~self.df.index.isin(self.y.index), self.targetPropertyNames
-            ]
+            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
+                                     self.targetPropertyNames]
         else:
             self.y = self.df[self.targetPropertyNames]
-            self.y_ind = self.df.loc[
-                ~self.df.index.isin(self.y.index), self.targetPropertyNames
-            ]
+            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
+                                     self.targetPropertyNames]
         self.X = self.y.drop(self.y.columns, axis=1)
         self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
         self.featurizeSplits(shuffle=False)
@@ -1803,15 +1780,13 @@ class QSPRDataset(MoleculeTable):
         if th == "precomputed":
             self.df[new_prop] = self.df[target_property.originalName]
             assert all(
-                value is None
-                or (type(value) in (int, bool))
-                or (isinstance(value, float) and value.is_integer())
+                value is None or (type(value) in (int, bool)) or
+                (isinstance(value, float) and value.is_integer())
                 for value in self.df[new_prop]
             ), "Precomputed classification target must be integers or booleans."
             nClasses = len(self.df[new_prop].dropna().unique())
             target_property.task = (
-                TargetTasks.MULTICLASS
-                if nClasses > 2  # noqa: PLR2004
+                TargetTasks.MULTICLASS if nClasses > 2  # noqa: PLR2004
                 else TargetTasks.SINGLECLASS
             )
             target_property.th = th
@@ -2012,9 +1987,8 @@ class QSPRDataset(MoleculeTable):
 
         """
         if (
-            hasattr(split, "hasDataSet")
-            and hasattr(split, "setDataSet")
-            and not split.hasDataSet
+            hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and
+            not split.hasDataSet
         ):
             split.setDataSet(self)
         if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
@@ -2031,15 +2005,13 @@ class QSPRDataset(MoleculeTable):
             logger.info("Target property: %s" % prop.name)
             if prop.task == TargetTasks.SINGLECLASS:
                 logger.info(
-                    "    In train: active: %s not active: %s"
-                    % (
+                    "    In train: active: %s not active: %s" % (
                         sum(self.y[prop.name]),
                         len(self.y[prop.name]) - sum(self.y[prop.name]),
                     )
                 )
                 logger.info(
-                    "    In test:  active: %s not active: %s\n"
-                    % (
+                    "    In test:  active: %s not active: %s\n" % (
                         sum(self.y_ind[prop.name]),
                         len(self.y_ind[prop.name]) - sum(self.y_ind[prop.name]),
                     )
@@ -2375,13 +2347,12 @@ class QSPRDataset(MoleculeTable):
             else:
                 df_X = pd.concat([self.X, self.X_ind], axis=0)
                 df_X_ind = None
+        elif len(self.X.columns) != 0:
+            df_X = self.X[self.featureNames]
+            df_X_ind = self.X_ind[self.featureNames]
         else:
-            if len(self.X.columns) != 0:
-                df_X = self.X[self.featureNames]
-                df_X_ind = self.X_ind[self.featureNames]
-            else:
-                df_X = self.X
-                df_X_ind = self.X_ind
+            df_X = self.X
+            df_X_ind = self.X_ind
 
         X = df_X.values
         X_ind = df_X_ind.values if df_X_ind is not None else None
@@ -2458,9 +2429,8 @@ class QSPRDataset(MoleculeTable):
             `SKLearnStandardizer`
         """
         if (
-            self.metaInfo is not None
-            and "standardizer_path" in self.metaInfo
-            and self.metaInfo["standardizer_path"]
+            self.metaInfo is not None and "standardizer_path" in self.metaInfo and
+            self.metaInfo["standardizer_path"]
         ):
             return SKLearnStandardizer.fromFile(
                 f"{self.storePrefix}{self.metaInfo['standardizer_path']}"
@@ -2476,9 +2446,8 @@ class QSPRDataset(MoleculeTable):
         """
         path = f"{self.storePrefix}_feature_standardizer.json"
         if (
-            self.feature_standardizer
-            and self.featureNames is not None
-            and len(self.featureNames) > 0
+            self.feature_standardizer and self.featureNames is not None and
+            len(self.featureNames) > 0
         ):
             # make sure feature standardizers are fitted before serialization
             self.fitFeatureStandardizer()
@@ -2496,24 +2465,24 @@ class QSPRDataset(MoleculeTable):
         """
         stanadardizer_path = self.saveFeatureStandardizer()
         meta_init = {
-            "target_props": TargetProperty.toList(
-                copy.deepcopy(self.targetProperties), task_as_str=True
-            ),
-            "smiles_col": self.smilesCol,
+            "target_props":
+                TargetProperty.toList(
+                    copy.deepcopy(self.targetProperties), task_as_str=True
+                ),
+            "smiles_col":
+                self.smilesCol,
         }
         ret = {
-            "init": meta_init,
-            "standardizer_path": stanadardizer_path.replace(self.storePrefix, "")
-            if stanadardizer_path
-            else None,
-            "descriptorcalculator_path": self.descriptorCalculatorsPathPrefix.replace(
-                self.storePrefix, ""
-            )
-            if self.descriptorCalculatorsPathPrefix
-            else None,
-            "feature_names": list(self.featureNames)
-            if self.featureNames is not None
-            else None,
+            "init":
+                meta_init,
+            "standardizer_path":
+                stanadardizer_path.replace(self.storePrefix, "")
+                if stanadardizer_path else None,
+            "descriptorcalculator_path":
+                self.descriptorCalculatorsPathPrefix.replace(self.storePrefix, "")
+                if self.descriptorCalculatorsPathPrefix else None,
+            "feature_names":
+                list(self.featureNames) if self.featureNames is not None else None,
         }
         return ret
 
