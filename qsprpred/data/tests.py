@@ -1177,10 +1177,10 @@ class TestFoldSplitters(DataSetsMixIn, TestCase):
         self.assertFalse(set(dataset.df.index) - set(indices))
 
         def check_min_max(X_train, X_test, *args, **kwargs):
-            self.assertTrue(np.max(X_train) == MAX_VAL)
-            self.assertTrue(np.min(X_train) == MIN_VAL)
-            self.assertTrue(np.max(X_test) == MAX_VAL)
-            self.assertTrue(np.min(X_test) == MIN_VAL)
+            self.assertTrue(np.max(X_train.values) == MAX_VAL)
+            self.assertTrue(np.min(X_train.values) == MIN_VAL)
+            self.assertTrue(np.max(X_test.values) == MAX_VAL)
+            self.assertTrue(np.min(X_test.values) == MIN_VAL)
 
         self.validateFolds(dataset.iterFolds(fold), more=check_min_max)
         k, indices = self.validateFolds(dataset.iterFolds(fold))
