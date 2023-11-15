@@ -273,6 +273,7 @@ class GridSearchOptimization(HyperparameterOptimization):
         )
         # save the best parameters to the model if requested
         if save_params:
-            model.saveParams(self.bestParams)
+            model.setParams(self.bestParams)
+            model.save()
         self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
         return self.bestParams

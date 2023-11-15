@@ -409,6 +409,9 @@ class TanimotoDistances(MoleculeDescriptorSet):
 class PredictorDesc(MoleculeDescriptorSet):
     """MoleculeDescriptorSet that uses a Predictor object to calculate descriptors from
     a molecule."""
+
+    _notJSON = MoleculeDescriptorSet._notJSON + ["model"]
+
     def __init__(self, model: QSPRModel | str):
         """
         Initialize the descriptorset with a `QSPRModel` object.
@@ -419,12 +422,20 @@ class PredictorDesc(MoleculeDescriptorSet):
 
         if isinstance(model, str):
             from ...models.interfaces import QSPRModel
-
             self.model = QSPRModel.fromFile(model)
         else:
             self.model = model
 
         self._descriptors = [self.model.name]
+
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        o_dict["model"] = self.model.metaFile
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.model = QSPRModel.fromFile(self.model)
 
     def __call__(self, mols):
         """

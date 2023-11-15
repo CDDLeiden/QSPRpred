@@ -132,7 +132,7 @@ class DataSetsMixIn(PathMixIn):
             PredictorDesc(
                 SklearnModel.fromFile(
                     f"{os.path.dirname(__file__)}/test_files/test_predictor/"
-                    f"qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json"
+                    f"qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json"
                 )
             ),
             TanimotoDistances(
@@ -1442,7 +1442,7 @@ class TestDescriptorSets(DataSetsMixIn, TestCase):
         # give path to saved model parameters
         meta_path = (
             f"{os.path.dirname(__file__)}/test_files/test_predictor/"
-            "qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json"
+            f"qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json"
         )
         model = SklearnModel.fromFile(meta_path)
         desc_calc = MoleculeDescriptorsCalculator([PredictorDesc(model)])

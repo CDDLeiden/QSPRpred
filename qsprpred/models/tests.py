@@ -93,8 +93,13 @@ class ModelTestMixIn:
             ),
         )
         best_params = bayesoptimizer.optimize(model)
-        model.saveParams(best_params)
-        self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
+        model.setParams(best_params)
+        model.save()
+        model_new = model.__class__.fromFile(model.metaFile)
+        for param in best_params:
+            self.assertEqual(
+                model_new.parameters[param], best_params[param]
+            )
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
         if model.task.isClassification():
@@ -109,8 +114,11 @@ class ModelTestMixIn:
             ),
         )
         best_params = gridsearcher.optimize(model)
-        model.saveParams(best_params)
-        self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
+        model_new = model.__class__.fromFile(model.metaFile)
+        for param in best_params:
+            self.assertEqual(
+                model_new.parameters[param], best_params[param]
+            )
         model.cleanFiles()
         # perform crossvalidation
         score_func = SklearnMetric.getDefaultMetric(model.task)
@@ -119,20 +127,10 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
-        model.fitAttached()
+        path = model.fitAttached()
+        self.assertTrue(exists(path))
         self.assertTrue(exists(model.metaFile))
-        self.assertTrue(exists(f"{model.baseDir}/{model.metaInfo['estimator_path']}"))
-        self.assertTrue(exists(f"{model.baseDir}/{model.metaInfo['parameters_path']}"))
-        self.assertTrue(
-            all(
-                exists(f"{model.baseDir}/{x}")
-                for x in model.metaInfo["feature_calculator_paths"]
-            )
-        )
-        if model.metaInfo["feature_standardizer_path"] is not None:
-            self.assertTrue(
-                exists(f"{model.baseDir}/{model.metaInfo['feature_standardizer_path']}")
-            )
+        self.assertEqual(path, model.metaFile)
 
     def predictorTest(
         self,
@@ -511,6 +509,36 @@ class TestSklearnRegression(SklearnModelMixIn):
             )
 
 
+class TestSklearnSerialization(SklearnModelMixIn):
+
+    def testJSON(self):
+        dataset = self.createLargeTestDataSet(
+            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
+            preparation_settings=self.getDefaultPrep(),
+        )
+        model = self.getModel(
+            name=f"TestSerialization",
+            alg=RandomForestClassifier,
+            dataset=dataset,
+            parameters={"n_jobs": N_CPUS, "n_estimators": 10},
+            random_state=42,
+        )
+        model.save()
+        content = model.toJSON()
+        model2 = SklearnModel.fromJSON(content)
+        model2.baseDir = model.baseDir
+        model3 = SklearnModel.fromFile(model.metaFile)
+        model4 = SklearnModel(
+            name=model.name, base_dir=model.baseDir
+        )
+        self.assertEqual(model.metaFile, model2.metaFile)
+        self.assertEqual(model.metaFile, model3.metaFile)
+        self.assertEqual(model.metaFile, model4.metaFile)
+        self.assertEqual(model.toJSON(), model2.toJSON())
+        self.assertEqual(model.toJSON(), model3.toJSON())
+        self.assertEqual(model.toJSON(), model4.toJSON())
+
+
 class TestSklearnClassification(SklearnModelMixIn):
     """Test the SklearnModel class for classification models."""
 
@@ -568,7 +596,6 @@ class TestSklearnClassification(SklearnModelMixIn):
         self.fitTest(model)
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
-
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
@@ -917,7 +944,8 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
             monitor=hyperparam_monitor,
         )
         best_params = gridsearcher.optimize(model)
-        model.saveParams(best_params)
+        model.setParams(best_params)
+        model.save()
         # perform crossvalidation
         CrossValAssessor(
             mode=EarlyStoppingMode.RECORDING,

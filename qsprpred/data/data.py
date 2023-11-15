@@ -1,11 +1,13 @@
 """This module contains the QSPRDataset that holds and prepares data for modelling."""
-
+import base64
 import concurrent
 import json
+import marshal
 import multiprocessing
 import os
 import pickle
 import shutil
+import types
 import warnings
 from collections.abc import Callable
 from multiprocessing import Pool
@@ -1216,7 +1218,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         return ~invalid_mask
 
 
-class TargetProperty:
+class TargetProperty(JSONSerializable):
     """Target property for QSPRmodelling class.
 
     Attributes:
@@ -1267,6 +1269,39 @@ class TargetProperty:
             if isinstance(th, str) and th == "precomputed":
                 self.nClasses = n_classes
         self.transformer = transformer
+
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        if self.transformer:
+            try:
+                o_dict["transformer"] = base64.b64encode(
+                    marshal.dumps(
+                        self.transformer.__code__ if self.transformer else None
+                    )
+                ).decode("ascii")
+            except Exception as exp:
+                logger.warning(
+                    f"Could not serialize transformer for {self.name}: {exp}"
+                )
+                self.transformer = None
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        if self.transformer:
+            try:
+                self.transformer = marshal.loads(
+                    base64.b64decode(self.transformer)
+                )
+                self.transformer = types.FunctionType(
+                    self.transformer,
+                    globals()
+                )
+            except Exception as exp:
+                logger.warning(
+                    f"Could not deserialize transformer for {self.name}: {exp}"
+                )
+                self.transformer = None
 
     @property
     def th(self):

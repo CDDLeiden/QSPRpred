@@ -15,6 +15,7 @@ from tqdm import trange
 
 from ....data.data import QSPRDataset
 from ....data.interfaces import DataSplit
+from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import FitMonitor, QSPRModel
 from ....models.monitors import BaseMonitor
@@ -112,15 +113,13 @@ class ChempropModel(QSPRModel):
         featureStandardizer (SKLearnStandardizer):
             feature standardizer instance taken from the data set
             or deserialized from file if the model is loaded without data
-        metaInfo (dict):
-            dictionary of metadata about the model,
-            only available after the model is saved
         baseDir (str):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
-        metaFile (str):
-            absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
     """
+
+    _notJSON = QSPRModel._notJSON + ["chempropLogger"]
+
     def __init__(
         self,
         base_dir: str,
@@ -153,6 +152,12 @@ class ChempropModel(QSPRModel):
         super().__init__(base_dir, alg, data, name, parameters, autoload)
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
+        )
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.chempropLogger = chemprop.utils.create_logger(
+            name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
         )
 
     def supportsEarlyStopping(self) -> bool:
@@ -318,6 +323,11 @@ class ChempropModel(QSPRModel):
         n_epochs = (
             self.earlyStopping.getEpochs() if not self.earlyStopping else args.epochs
         )
+        if not n_epochs:
+            raise ValueError(f"Number of epochs must be greater "
+                             f"than 0. Got: {n_epochs}")
+        best_estimator = estimator
+        best_found = False
         for epoch in trange(n_epochs):
             monitor.onEpochStart(epoch)
             self.chempropLogger.debug(f"Epoch {epoch}")
@@ -378,17 +388,20 @@ class ChempropModel(QSPRModel):
                 ):
                     best_score, best_epoch = mean_val_score, epoch
                     best_estimator = deepcopy(estimator)
+                    best_found = True
                 # Evaluate on test set using model with best validation score
                 self.chempropLogger.info(
                     f"Model best validation {args.metric} = {best_score:.6f} on epoch \
                     {best_epoch}"
                 )
-
         writer.close()
+        if not best_found:
+            logger.warning(
+                "Early stopping did not yield a best model, using last model instead."
+            )
         if not keep_logs:
             # remove temp directory with logs
             shutil.rmtree(save_dir)
-
         if self.earlyStopping:
             monitor.onFitEnd(best_estimator, best_epoch)
             return best_estimator, best_epoch
@@ -498,7 +511,7 @@ class ChempropModel(QSPRModel):
         args = ChempropMoleculeModel.getTrainArgs(new_parameters, self.task)
 
         # set task names
-        args.task_names = [prop.name for prop in self.data.targetProperties]
+        args.task_names = [prop.name for prop in self.targetProperties]
 
         return self.alg(args)
 
