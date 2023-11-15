@@ -1192,7 +1192,7 @@ class TestFoldSplitters(DataSetsMixIn, TestCase):
         self.assertFalse(set(dataset.X.index) - set(indices))
 
     def testBootstrappedFold(self):
-        dataset = self.createLargeTestDataSet()
+        dataset = self.createLargeTestDataSet(random_state=None)
         dataset.addDescriptors(
             MoleculeDescriptorsCalculator(
                 [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
