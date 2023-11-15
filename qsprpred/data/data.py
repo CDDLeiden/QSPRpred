@@ -249,7 +249,7 @@ class PandasDataSet(DataSet):
             data (list): List of values for the property.
         """
         if isinstance(data, pd.Series):
-            if not np.array_equal(data.index.txt, self.df.index.txt):
+            if not self.df.index.equals(data.index):
                 logger.info(
                     f"Adding property '{name}' to data set might be introducing 'nan' "
                     "values due to index with pandas series. Make sure the index of "
@@ -263,6 +263,7 @@ class PandasDataSet(DataSet):
         Args:
             name (str): Name of the property to remove.
         """
+        self.df.drop(columns=[name], inplace=True)
 
     def getSubset(self, prefix: str):
         """Get a subset of the data set by providing a prefix for the column names or a
@@ -1345,41 +1346,34 @@ class TargetProperty:
     def fromDict(cls, d: dict):
         """Create a TargetProperty object from a dictionary.
 
+        task can be specified as a string or as a TargetTasks object.
+
         Args:
             d (dict): dictionary containing the target property information
-            task_from_str (bool): whether to convert the task from a string
 
         Returns:
             TargetProperty: TargetProperty object
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{k: TargetTasks[v] if k == "task" else v for k, v in d.items()}
+                **{k: TargetTasks[v.upper()] if k == "task" else v
+                   for k, v in d.items()}
             )
         else:
             return TargetProperty(**d)
 
     @classmethod
-    def fromList(cls, _list: list[dict], task_from_str: bool = False):
+    def fromList(cls, _list: list[dict]):
         """Create a list of TargetProperty objects from a list of dictionaries.
 
         Args:
             _list (list): list of dictionaries containing the target property
                 information
-            task_from_str (bool): whether to convert the task from a string
 
         Returns:
             list[TargetProperty]: list of TargetProperty objects
         """
-        if task_from_str:
-            return [
-                TargetProperty(
-                    **{k: TargetTasks[v] if k == "task" else v for k, v in d.items()}
-                )
-                for d in _list
-            ]
-        else:
-            return [TargetProperty(**d) for d in _list]
+        return [cls.fromDict(d) for d in _list]
 
     @staticmethod
     def toList(_list: list, task_as_str: bool = False, drop_transformer: bool = True):
@@ -1852,7 +1846,7 @@ class QSPRDataset(MoleculeTable):
         with open(os.path.join(store_dir, f"{name}_meta.json")) as f:
             meta = json.load(f)
             meta["init"]["target_props"] = TargetProperty.fromList(
-                meta["init"]["target_props"], task_from_str=True
+                meta["init"]["target_props"]
             )
             return meta
 
@@ -2074,7 +2068,6 @@ class QSPRDataset(MoleculeTable):
             raise ValueError(
                 "No descriptors available. Cannot load descriptors to splits."
             )
-
         descriptors = self.getDescriptors()
         if self.X_ind is not None and self.y_ind is not None:
             self.X = descriptors.loc[self.X.index, :]
