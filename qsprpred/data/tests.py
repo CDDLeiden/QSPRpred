@@ -1012,7 +1012,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
     @parameterized.expand(
         [
             (False, Murcko(), None),
-            (False, BemisMurcko(), ["ScaffoldSplit_001", "ScaffoldSplit_002"]),
+            (False, BemisMurcko(), ["ScaffoldSplit_000", "ScaffoldSplit_001"]),
             (True, Murcko(), None),
         ]
     )
@@ -1058,12 +1058,12 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
     @parameterized.expand(
         [
             (False, FPSimilarityLeaderPickerClusters(), None),
-            (False, FPSimilarityMaxMinClusters(), ["ClusterSplit_001", "ClusterSplit_002"]),
+            (False, FPSimilarityMaxMinClusters(), ["ClusterSplit_000", "ClusterSplit_001"]),
             (True, FPSimilarityMaxMinClusters(), None),
             (
                 True,
                 FPSimilarityLeaderPickerClusters(),
-                ["ClusterSplit_001", "ClusterSplit_002"],
+                ["ClusterSplit_000", "ClusterSplit_001"],
             ),
         ]
     )
