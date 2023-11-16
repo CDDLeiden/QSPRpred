@@ -115,11 +115,14 @@ class OptunaOptimization(HyperparameterOptimization):
             "n_jobs": n_jobs,
         })
 
-    def optimize(self, model: QSPRModel, **kwargs) -> dict:
+    def optimize(self, model: QSPRModel, save_params: bool = True, **kwargs) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
 
         Args:
             model (QSPRModel): the model to optimize
+            save_params (bool):
+                whether to set and save the best parameters to the model
+                after optimization
             **kwargs: additional arguments for the assessment method
 
         Returns:
@@ -158,6 +161,9 @@ class OptunaOptimization(HyperparameterOptimization):
         self.bestParams = trial.params
 
         self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
+        # save the best parameters to the model if requested
+        if save_params:
+            model.saveParams(self.bestParams)
         return self.bestParams
 
     def objective(self, trial: optuna.trial.Trial, model: QSPRModel, **kwargs) -> float:
