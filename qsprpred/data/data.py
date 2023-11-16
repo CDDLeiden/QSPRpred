@@ -174,9 +174,7 @@ class PandasDataSet(DataSet):
                 if index_cols is not None:
                     self.setIndex(index_cols)
                 else:
-                    enum_idxs = enumerate_with_zeros(self.df.index)
-                    df[id_prefix] = f"{id_prefix}_" + pd.Series(enum_idxs)
-                    self.setIndex([id_prefix])
+                    self.generateIndex(prefix=id_prefix)
         else:
             if not self._isInStore("df"):
                 raise ValueError(
@@ -209,6 +207,10 @@ class PandasDataSet(DataSet):
         )
         self.df.index.name = "~".join(cols)
         self.indexCols = cols
+
+    def generateIndex(self, prefix: str = "QSPRID"):
+        self.df[prefix] = enumerate_with_zeros(self.df.index, prefix=prefix)
+        self.setIndex([prefix])
 
     def _isInStore(self, name):
         """Check if a pickled file with the given suffix exists.
