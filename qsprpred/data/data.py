@@ -116,7 +116,7 @@ class PandasDataSet(DataSet):
         index_cols: Optional[list[str]] = None,
         n_jobs: int = 1,
         chunk_size: int = 1000,
-        id_prefix: str = "QSPRID",
+        autoindex_name: str = "QSPRID",
         random_state: int | None = None,
     ):
         """Initialize a `PandasDataSet` object.
@@ -136,7 +136,7 @@ class PandasDataSet(DataSet):
             n_jobs (int): Number of jobs to use for parallel processing. If <= 0,
                 all available cores will be used.
             chunk_size (int): Size of chunks to use per job in parallel processing.
-            id_prefix (str): Prefix to use for custom generated IDs.
+            autoindex_name (str): Column name to use for automatically generated IDs.
             random_state (int): Random state to use for all random operations
                 for reproducibility. If not specified, the state is generated randomly.
                 The state is saved upon `save` so if you want to change the state later,
@@ -174,7 +174,7 @@ class PandasDataSet(DataSet):
                 if index_cols is not None:
                     self.setIndex(index_cols)
                 else:
-                    self.generateIndex(prefix=id_prefix)
+                    self.generateIndex(name=autoindex_name)
         else:
             if not self._isInStore("df"):
                 raise ValueError(
@@ -208,14 +208,16 @@ class PandasDataSet(DataSet):
         self.df.index.name = "~".join(cols)
         self.indexCols = cols
 
-    def generateIndex(self, prefix: str = "QSPRID"):
+    def generateIndex(self, name: str = "QSPRID", prefix: str | None = None):
         """Generate a custom index for the data frame.
 
         Args:
-            prefix (str): prefix to use for the index.
+            name (str): name of the index column.
+            prefix (str): prefix to use for the index column values.
         """
-        self.df[prefix] = enumerate_with_zeros(self.df.index, prefix=prefix)
-        self.setIndex([prefix])
+        prefix = prefix if prefix is not None else self.name
+        self.df[name] = enumerate_with_zeros(self.df.index, prefix=prefix)
+        self.setIndex([name])
 
     def _isInStore(self, name):
         """Check if a pickled file with the given suffix exists.
@@ -589,7 +591,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         index_cols: Optional[list[str]] = None,
-        id_prefix: str = "QSPRID",
+        autoindex_name: str = "QSPRID",
         random_state: int | None = None,
     ):
         """Initialize a `MoleculeTable` object.
@@ -618,7 +620,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             drop_invalids (bool): Drop invalid molecules from the data frame.
             index_cols (list[str]): list of columns to use as index. If None, the index
                 will be a custom generated ID.
-            id_prefix (str): Prefix to use for the custom generated ID.
+            autoindex_name (str): Column name to use for automatically generated IDs.
             random_state (int): Random state to use for shuffling and other random ops.
         """
         self.descriptorCalculators = []  # holds all descriptor calculators
@@ -632,7 +634,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             index_cols,
             n_jobs,
             chunk_size,
-            id_prefix,
+            autoindex_name,
             random_state,
         )
         if not self.descriptorCalculatorsPathPrefix:
@@ -1475,7 +1477,7 @@ class QSPRDataset(MoleculeTable):
         drop_empty: bool = True,
         target_imputer: Optional[Callable] = None,
         index_cols: Optional[list[str]] = None,
-        id_prefix: str = "QSPRID",
+        autoindex_name: str = "QSPRID",
         random_state: int | None = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if
@@ -1508,7 +1510,7 @@ class QSPRDataset(MoleculeTable):
             index_cols (list[str], optional): columns to be used as index in the
                 dataframe. Defaults to `None` in which case a custom ID will be
                 generated.
-            id_prefix (str, optional): prefix for the custom ID. Defaults to "QSPRID".
+            autoindex_name (str): Column name to use for automatically generated IDs.
             random_state (int, optional): random state for splitting the data.
 
         Raises:
@@ -1525,7 +1527,7 @@ class QSPRDataset(MoleculeTable):
             chunk_size,
             False,
             index_cols,
-            id_prefix,
+            autoindex_name,
             random_state,
         )
         # load metadata if saved already
