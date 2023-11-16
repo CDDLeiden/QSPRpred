@@ -209,6 +209,11 @@ class PandasDataSet(DataSet):
         self.indexCols = cols
 
     def generateIndex(self, prefix: str = "QSPRID"):
+        """Generate a custom index for the data frame.
+
+        Args:
+            prefix (str): prefix to use for the index.
+        """
         self.df[prefix] = enumerate_with_zeros(self.df.index, prefix=prefix)
         self.setIndex([prefix])
 
