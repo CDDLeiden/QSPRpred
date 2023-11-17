@@ -6,11 +6,14 @@ From v2.1.0.a2 to v2.2.0
 - Fixed random seeds to give reproducible results. Each dataset is initialized with a single random state (either from the constructor or a random number generator) which is used in all subsequent random operations. Each model is initialized with a single random state as well: it uses the random state from the dataset, unless it's overriden in the constructor. When a dataset is saved to a file so is its random state, which is used by the dataset when the dataset is reloaded.
 - fixed error with serialization of the `DNNModel.params` attribute, when no parameters are set.
 - Fix bug with saving predictions from classification model when `ModelAssessor.useProba` set to `False`.
+- Add missing implementation of `QSPRDataset.removeProperty`
 
 ## Changes
 - The jupyter notebooks now pass a random state to ensure consistent results.
 - The default parameter values for `STFullyConnected` have changed from `n_epochs` = 1000 to `n_epochs` = 100, from `neurons_h1` = 4000 to `neurons_h1` = 256 and `neurons_hx` = 1000 to `neurons_hx` = 128.
 - Rename `HyperParameterOptimization` to `HyperparameterOptimization`.
+- `TargetProperty.fromList` and `TargetProperty.fromDict` now accept a both a string and a `TargetTask` as the `task` argument,
+without having to set the `task_from_str` argument, which is now deprecated.
 - Make `EarlyStopping.mode` flexible for `QSPRModel.fitAttached`.
 - `save_params` argument added to `OptunaOptimization` to save the best hyperparameters to the model (default: `True`).
 
