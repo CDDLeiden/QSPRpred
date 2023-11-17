@@ -69,5 +69,5 @@ Current Development Team
 - [M. Gorosiola González](https://github.com/gorostiolam)
 - [D. Araripe](https://github.com/David-Araripe)
 - C. Jespers
-- A. Bernatavicius
+- [A. Bernatavicius](https://github.com/andriusbern)
 
