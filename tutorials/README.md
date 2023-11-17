@@ -18,17 +18,17 @@ For detailed description of all QSPRpred classes and functions, see the [documen
         - [Data Splitting](basics/data/data_splitting.ipynb): How to split data into training, validation, and test sets.
         - [Descriptors](basics/data/descriptors.ipynb): How to calculate descriptors for molecules.
     - Modelling
-        - [Classification](basics/data/classification.ipynb): How to train a classification model.
-        - [Logging](basics/data/logging.ipynb): How to set-up logging.
-        - [Model Assessment](basics/data/model_assessment.ipynb): How to assess the performance of a model.
+        - [Classification](basics/modelling/classification.ipynb): How to train a classification model.
+        - [Logging](basics/modelling/logging.ipynb): How to set-up logging.
+        - [Model Assessment](basics/modelling/model_assessment.ipynb): How to assess the performance of a model.
 - <b>Advanced</b>
     - Data
         - [Custom descriptors](advanced/data/custom_descriptors.ipynb): How to use custom descriptors.
-        - [Custom data splitting](advanced/data/custom_data_splitting.ipynb): How to use custom data splitting.
+        - [Custom data splitting](advanced/data/custom_splitting.ipynb): How to use custom data splitting.
     - Modelling
         - [Custom models](advanced/modelling/custom_models.ipynb): How to use custom models.
         - [Deep learning models](advanced/modelling/deep_learning_models.ipynb): How to use deep learning models.
         - [Hyperparameter optimization](advanced/modelling/hyperparameter_optimization.ipynb): How to optimize model hyperparameters.
         - [Monitoring](advanced/modelling/monitoring.ipynb): How to monitor model training.
         - [Multi-task learning](advanced/modelling/multi_task_modelling.ipynb): How to train a multi-task model.
-        - [PCM modelling](advanced/modelling/pcm_modelling.ipynb): How to prepare data for and train a proteochemometric model.
+        - [PCM modelling](advanced/modelling/PCM_modelling.ipynb): How to prepare data for and train a proteochemometric model.
