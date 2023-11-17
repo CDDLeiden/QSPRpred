@@ -19,7 +19,7 @@ from ..data.utils.feature_standardization import SKLearnStandardizer
 from ..logs import logger
 from ..models import SSPACE
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
-from ..models.metrics import SklearnMetric
+from ..models.metrics import SklearnMetrics
 from ..models.tasks import ModelTasks
 from ..utils.inspect import import_class
 
@@ -1130,7 +1130,7 @@ class ModelAssessor(ABC):
         self.useProba = use_proba
         self.mode = mode
         self.scoreFunc = (
-            SklearnMetric.getMetric(scoring) if isinstance(scoring, str) else scoring
+            SklearnMetrics(scoring) if isinstance(scoring, str) else scoring
         )
 
     @abstractmethod
