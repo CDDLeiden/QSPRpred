@@ -64,7 +64,7 @@ class ROCPlotTest(ModelRetriever, TestCase):
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
-        score_func = "roc_auc_over" if model.task.isMultiTask() else "roc_auc"
+        score_func = "roc_auc_ovr" if model.task.isMultiTask() else "roc_auc"
         CrossValAssessor(scoring = score_func)(model)
         TestSetAssessor(scoring = score_func)(model)
         model.save()
