@@ -37,7 +37,7 @@ from ..models.interfaces import (
 from ..models.metrics import SklearnMetrics
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.sklearn import SklearnModel
-from ..models.tasks import ModelTasks, TargetTasks
+from ..models.tasks import TargetTasks
 
 N_CPUS = 2
 logging.basicConfig(level=logging.DEBUG)
@@ -83,7 +83,7 @@ class ModelTestMixIn:
             model (QSPRModel): The model to test.
         """
         # perform bayes optimization
-        score_func = SklearnMetrics.getDefaultMetric(model.task)
+        score_func = "r2" if model.task.isRegression() else ("roc_auc_over" if model.task.isMultiTask() else "roc_auc")
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
             param_grid=search_space_bs,
@@ -98,7 +98,7 @@ class ModelTestMixIn:
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
         if model.task.isClassification():
-            score_func = SklearnMetrics.getMetric("accuracy")
+            score_func = SklearnMetrics("accuracy")
         gridsearcher = GridSearchOptimization(
             param_grid=search_space_gs,
             score_aggregation=np.median,
@@ -113,7 +113,7 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        score_func = SklearnMetrics.getDefaultMetric(model.task)
+        score_func = "r2" if model.task.isRegression() else ("roc_auc_over" if model.task.isMultiTask() else "roc_auc")
         CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(model)
         TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func)(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
@@ -788,19 +788,6 @@ class TestMetrics(TestCase):
         )
 
 
-    def test_MultiTaskSingleClassMetrics(self):
-        """Test the multi task single class metrics."""
-        y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
-        y_pred = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
-        y_pred_proba = np.array(
-            [[0.9, 0.6], [0.5, 0.4], [0.3, 0.8], [0.7, 0.1], [1, 0.4]]
-        )
-        for metric in SklearnMetrics.multiTaskSingleClassMetrics:
-            self.checkMetric(
-                metric, ModelTasks.MULTITASK_SINGLECLASS, y_true, y_pred, y_pred_proba
-            )
-
-
 class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
     def test_earlyStoppingMode(self):
         """Test the early stopping mode enum."""
@@ -943,7 +930,7 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
         AssessorMonitor,
         FitMonitor,
     ):
-        score_func = SklearnMetrics.getDefaultMetric(model.task)
+        score_func = "r2" if model.task.isRegression() else ("roc_auc_over" if model.task.isMultiTask() else "roc_auc")
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
             param_grid=search_space_gs,

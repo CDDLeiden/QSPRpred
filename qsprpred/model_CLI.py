@@ -24,7 +24,6 @@ from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.early_stopping import EarlyStoppingMode
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
-from .models.metrics import SklearnMetric
 from .models.sklearn import QSPRModel, SklearnModel
 from .models.tasks import TargetTasks
 
@@ -315,7 +314,7 @@ def QSPR_modelling(args):
                 )
 
             # if desired run parameter optimization
-            score_func = SklearnMetric.getDefaultMetric(QSPRmodel.task)
+            score_func = "r2" if QSPRmodel.task.isRegression() else ("roc_auc_over" if QSPRmodel.task.isMultiTask() else "roc_auc")
             if args.optimization == "grid":
                 search_space_gs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_gs)
