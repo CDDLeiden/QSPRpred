@@ -22,7 +22,7 @@ from tqdm.auto import tqdm
 from .utils.folds import FoldsFromDataSplit
 from ..logs import logger
 from ..models.tasks import TargetTasks
-from ..serialization import JSONSerializable
+from ..serialization import JSONSerializable, function_as_string, function_from_string
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
 from .utils.datafilters import RepeatsFilter
 from .utils.feature_standardization import (
@@ -1274,35 +1274,15 @@ class TargetProperty(JSONSerializable):
     def __getstate__(self):
         o_dict = super().__getstate__()
         if self.transformer:
-            try:
-                o_dict["transformer"] = base64.b64encode(
-                    marshal.dumps(
-                        self.transformer.__code__ if self.transformer else None
-                    )
-                ).decode("ascii")
-            except Exception as exp:
-                logger.warning(
-                    f"Could not serialize transformer for {self.name}: {exp}"
-                )
-                self.transformer = None
+            o_dict["transformer"] = function_as_string(
+                self.transformer
+            )
         return o_dict
 
     def __setstate__(self, state):
         super().__setstate__(state)
         if self.transformer:
-            try:
-                self.transformer = marshal.loads(
-                    base64.b64decode(self.transformer)
-                )
-                self.transformer = types.FunctionType(
-                    self.transformer,
-                    globals()
-                )
-            except Exception as exp:
-                logger.warning(
-                    f"Could not deserialize transformer for {self.name}: {exp}"
-                )
-                self.transformer = None
+            self.transformer = function_from_string(self.transformer)
 
     @property
     def th(self):

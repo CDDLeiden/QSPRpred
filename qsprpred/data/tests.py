@@ -865,6 +865,10 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             self.assertListEqual(train.iloc[train_index].index.tolist(), order_folds[i])
 
 
+def prop_transform(x):
+    return np.log10(x)
+
+
 class TestTargetProperty(TestCase):
     """Test the TargetProperty class."""
 
@@ -877,9 +881,9 @@ class TestTargetProperty(TestCase):
             self.assertTrue(target_prop.task.isClassification())
             self.assertEqual(target_prop.th, th)
 
-    def testTargetProperty(self):
+    def testInit(self):
         """Check the TargetProperty class on target
-        property creation and serialization.
+        property creation.
         """
         # Check the different task types
         targetprop = TargetProperty("CL", TargetTasks.REGRESSION)
@@ -930,6 +934,22 @@ class TestTargetProperty(TestCase):
         self.assertIsInstance(targetprops[0], dict)
         self.assertEqual(targetprops[0]["name"], "CL")
         self.assertEqual(targetprops[0]["task"], TargetTasks.REGRESSION)
+
+    @parameterized.expand(
+        [
+            (TargetTasks.REGRESSION, "CL", None, prop_transform),
+            (TargetTasks.MULTICLASS, "CL", [0, 1, 10, 1200], lambda x: x+1),
+            # (TargetTasks.SINGLECLASS, "CL", [5], np.log), FIXME: np.log does not save
+        ]
+    )
+    def testSerialization(self, task, name, th, transformer):
+        prop = TargetProperty(name, task, transformer=transformer, th=th)
+        json_form = prop.toJSON()
+        prop2 = TargetProperty.fromJSON(json_form)
+        self.assertEqual(prop2.name, prop.name)
+        self.assertEqual(prop2.task, prop.task)
+        rnd_number = np.random.rand(10)
+        self.assertTrue(all(prop2.transformer(rnd_number) == prop.transformer(rnd_number)))
 
 
 class TestDataSplitters(DataSetsMixIn, TestCase):

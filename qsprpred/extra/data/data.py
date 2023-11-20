@@ -13,6 +13,7 @@ from ...data.utils.descriptorcalculator import (
 )
 from ...logs import logger
 from .utils.descriptorcalculator import ProteinDescriptorCalculator
+from ...serialization import function_as_string, function_from_string
 
 
 class PCMDataSet(QSPRDataset):
@@ -183,30 +184,21 @@ class PCMDataSet(QSPRDataset):
 
     def __getstate__(self):
         o_dict = super().__getstate__()
-        o_dict["proteinSeqProvider"] = base64.b64encode(
-            marshal.dumps(
-                self.proteinSeqProvider.__code__ if self.proteinSeqProvider else None
-            )
-        ).decode("ascii")
+        if self.proteinSeqProvider:
+            o_dict["proteinSeqProvider"] = function_as_string(self.proteinSeqProvider)
         return o_dict
 
     def __setstate__(self, state):
         super().__setstate__(state)
         if self.proteinSeqProvider:
-            seq_provider = marshal.loads(
-                base64.b64decode(self.proteinSeqProvider)
-            )
             try:
-                self.proteinSeqProvider = types.FunctionType(
-                    seq_provider,
-                    globals()
-                )
+                self.proteinSeqProvider = function_from_string(self.proteinSeqProvider)
             except Exception as e:
                 logger.warning(
                     "Failed to load protein sequence provider from metadata. "
                     f"The function object could not be recreated from the code. "
                     f"\nError: {e}"
-                    f"\nDeserialized Code: {seq_provider}"
+                    f"\nDeserialized Code: {self.proteinSeqProvider}"
                     f"\nSetting protein sequence provider to `None` for now."
                 )
                 self.proteinSeqProvider = None

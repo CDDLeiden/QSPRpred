@@ -1,6 +1,13 @@
+import base64
 import copy
+import inspect
+import json
+import marshal
 import os
+import types
 from abc import ABC, abstractmethod
+from importlib import import_module
+from typing import Any, Callable
 
 import jsonpickle
 jsonpickle.set_encoder_options('json', indent=4)
@@ -106,7 +113,7 @@ class JSONSerializable(FileSerializable):
         return jsonpickle.encode(self, unpicklable=True)
 
     @classmethod
-    def fromJSON(cls, json: str) -> object:
+    def fromJSON(cls, json: str) -> Any:
         """Reconstruct object from a JSON string.
 
         Args:
@@ -116,3 +123,46 @@ class JSONSerializable(FileSerializable):
             obj (object): reconstructed object
         """
         return jsonpickle.decode(json)
+
+
+def function_as_string(func: Callable) -> str:
+    """Convert a function to a string.
+
+    Args:
+        func (Callable): function to convert
+    """
+    json_form = json.loads(jsonpickle.encode(func, unpicklable=True))
+    if not json_form or "__main__" in json_form:
+        return base64.b64encode(
+            marshal.dumps(
+                func.__code__
+            )
+        ).decode("ascii")
+    elif "py/function" in json_form:
+        return json_form["py/function"]
+    elif "py/object" in json_form:
+        return json_form["py/object"]
+
+
+def function_from_string(func_str: str) -> Callable:
+    """Convert a function from a string. Conversion from encoded bytecode is
+    attempted first. If that fails, the string is assumed to be a fully
+    qualified name of the function.
+
+    Args:
+        func_str (str): string representation of the function
+
+    Returns:
+        func (Callable): function
+    """
+    try:
+        return types.FunctionType(
+            marshal.loads(
+                base64.b64decode(func_str)
+            ),
+            globals()
+        )
+    except:
+        module_name, func_name = func_str.rsplit(".", 1)
+        module = import_module(module_name)
+        return getattr(module, func_name)
