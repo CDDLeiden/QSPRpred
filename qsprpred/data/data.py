@@ -1,13 +1,10 @@
 """This module contains the QSPRDataset that holds and prepares data for modelling."""
-import base64
 import concurrent
 import json
-import marshal
 import multiprocessing
 import os
 import pickle
 import shutil
-import types
 import warnings
 from collections.abc import Callable
 from multiprocessing import Pool
@@ -2029,6 +2026,7 @@ class QSPRDataset(MoleculeTable):
             self.y_ind = self.df.loc[self.y_ind.index, self.targetPropertyNames]
         else:
             self.X = descriptors
+            self.featureNames = self.getDescriptorNames()
             self.y = self.df.loc[descriptors.index, self.targetPropertyNames]
             self.X_ind = descriptors.loc[~self.X.index.isin(self.X.index), :]
             self.y_ind = self.df.loc[self.X_ind.index, self.targetPropertyNames]
@@ -2188,6 +2186,19 @@ class QSPRDataset(MoleculeTable):
         self.featurize()
         return ret
 
+    def reset(self):
+        """Reset the data set. Splits will be removed and all descriptors will be
+        moved to the training data. Feature standardization and molecule
+        standardization and molecule filtering are not affected.
+        """
+        if self.featureNames is not None:
+            self.featureNames = self.getDescriptorNames()
+            self.X = None
+            self.X_ind = None
+            self.y = None
+            self.y_ind = None
+            self.loadDescriptorsToSplits(shuffle=False)
+
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
@@ -2221,6 +2232,8 @@ class QSPRDataset(MoleculeTable):
             shuffle (bool): whether to shuffle the created training and test sets
             random_state (int): random state for shuffling
         """
+        # reset everything
+        self.reset()
         # apply sanitization and standardization
         if smiles_standardizer is not None:
             self.standardizeSmiles(smiles_standardizer)
