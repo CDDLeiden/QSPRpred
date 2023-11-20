@@ -138,6 +138,8 @@ known_first_party = 'qsprpred'
  ]
 
  ignore = [
+   # line length - somes lines are just too long
+   "E501",
    # we decided on having relative rather than absolute imports
    "TID252",
    # module level import not at top of file

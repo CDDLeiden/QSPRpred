@@ -48,7 +48,7 @@ class PCMDataSet(QSPRDataset):
         drop_empty: bool = True,
         target_imputer: Callable | None = None,
         index_cols: list[str] | None = None,
-        id_prefix: str = "QSPRID",
+        autoindex_name: str = "QSPRID",
         random_state: int | None = None,
     ):
         """Construct a data set to handle PCM data.
@@ -90,8 +90,8 @@ class PCMDataSet(QSPRDataset):
             index_cols (List[str], optional):
                 columns to be used as index in the dataframe.
                 Defaults to `None` in which case a custom ID will be generated.
-            id_prefix (str, optional):
-                prefix for the custom ID. Defaults to "QSPRID".
+            autoindex_name (str, optional):
+                Column name to use for automatically generated IDs.
             random_state (int, optional):
                 random state for reproducibility. Defaults to `None`.
 
@@ -113,7 +113,7 @@ class PCMDataSet(QSPRDataset):
             target_props=target_props,
             target_imputer=target_imputer,
             drop_empty=drop_empty,
-            id_prefix=id_prefix,
+            autoindex_name=autoindex_name,
             random_state=random_state,
         )
         self.proteinCol = protein_col

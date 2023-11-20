@@ -58,7 +58,7 @@ def config_logger(log_file_path, debug=None, disable_existing_loggers=True):
     """
     debug_path = os.path.join(os.path.dirname(log_file_path), "debug.log")
     simple_format = "%(message)s"
-    verbose_format = "[%(asctime)s] %(levelname)s [%(filename)s %(name)s %(funcName)s (%(lineno)d)]: %(message)s"  # noqa: E501
+    verbose_format = "[%(asctime)s] %(levelname)s [%(filename)s %(name)s %(funcName)s (%(lineno)d)]: %(message)s"
 
     LOGGING_CONFIG = {
         "version": 1,
