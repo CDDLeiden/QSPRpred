@@ -68,6 +68,7 @@ Current Development Team
 - [S. Luukkonen](https://github.com/sohviluukkonen)
 - [M. Gorosiola González](https://github.com/gorostiolam)
 - [D. Araripe](https://github.com/David-Araripe)
-- C. Jespers
+- [C. Jespers](https://github.com/ChielJespers)
 - [A. Bernatavicius](https://github.com/andriusbern)
+- [R. van den Broek](https://github.com/rlvandenbroek)
 
