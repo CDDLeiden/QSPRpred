@@ -3,6 +3,9 @@
 # Run all jupyter notebooks in the tutorial directory
 set -e
 
+# Create the dataset
+python tutorial_data/create_tutorial_data.py
+
 # Run each notebook in the directory
 find . -name "*.ipynb" | while read notebook
 do  
