@@ -7,11 +7,11 @@ import pandas as pd
 from rdkit.Chem.rdchem import Mol
 
 from ...logs import logger
-from ...utils.inspect import import_class
+from qsprpred.utils.serialization import JSONSerializable
 from .descriptorsets import get_descriptor
 
 
-class DescriptorsCalculator(ABC):
+class DescriptorsCalculator(JSONSerializable, ABC):
     """Calculator for various descriptors of molecules."""
 
     __in__ = __contains__ = lambda self, x: x in self.descSets
@@ -62,38 +62,6 @@ class DescriptorsCalculator(ABC):
 
         return desc_sets
 
-    @classmethod
-    def classFromFile(cls, fname: str):
-        """Initialize descriptorset from a json file.
-
-        Args:
-            fname: file name of json file with descriptor names and settings
-        """
-
-        with open(fname, "r") as infile:
-            descset_dict = json.load(infile)
-            # Assume calculator is a molecule descriptor calculator if not specified
-            # (for backwards compatibility before introduction of protein descriptor calculator) # noqa: 501
-            if "calculator" not in descset_dict:
-                descset_dict["calculator"] = (
-                    "qsprpred.data.utils.descriptorcalculator."
-                    "MoleculeDescriptorsCalculator"
-                )
-
-            return import_class(descset_dict["calculator"])
-
-    @classmethod
-    def fromFile(cls, fname: str):
-        """Initialize descriptorset from a json file.
-
-        Args:
-            fname: file name of json file with descriptor names and settings
-        """
-
-        cl = cls.classFromFile(fname)
-        desc_sets = cl.loadDescriptorSets(fname)
-        return cl(desc_sets)
-
     @abstractmethod
     def __call__(self, *args, **kwargs) -> pd.DataFrame:
         """
@@ -109,35 +77,6 @@ class DescriptorsCalculator(ABC):
                 one of the inputs is expected to be an index, the output data frame
                 should use the same index to map outputs to inputs.
         """
-
-    def toFile(self, fname: str) -> None:
-        """Save descriptorset to json file.
-
-        Args:
-            fname: name of the json file with descriptor names and settings
-        """
-        descset_dict = {}
-        for idx, descset in enumerate(self.descSets):
-            idx = str(idx)
-            if descset.isFP:
-                descset_dict[idx] = {
-                    "name": str(descset),
-                    "settings": descset.settings,
-                    "keepindices": descset.keepindices,
-                }
-            else:
-                descset_dict[idx] = {
-                    "name": str(descset),
-                    "settings": descset.settings,
-                    "descriptors": descset.descriptors,
-                }
-            descset_dict[idx]["class"] = descset.__class__.__name__
-        # save fully qualified class name of calculator
-        descset_dict["calculator"] = (
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
-        with open("%s" % fname, "w") as outfile:
-            json.dump(descset_dict, outfile)
 
     def keepDescriptors(self, descriptors: list[str]) -> None:
         """Drop all descriptors/descriptorsets not in descriptor list.

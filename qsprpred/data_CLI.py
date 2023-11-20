@@ -322,15 +322,15 @@ def QSPR_dataprep(args):
                     )
                     th = None
                 transform_dict = {
-                    "log10": np.log10,
-                    "log2": np.log2,
-                    "log": np.log,
-                    "sqrt": np.sqrt,
-                    "cbrt": np.cbrt,
-                    "exp": np.exp,
-                    "square": np.square,
-                    "cube": lambda x: np.power(x, 3),
-                    "reciprocal": np.reciprocal,
+                    "log10": lambda x: (__import__('numpy').log10(x)),
+                    "log2": lambda x: (__import__('numpy').log2(x)),
+                    "log": lambda x: (__import__('numpy').log(x)),
+                    "sqrt": lambda x: (__import__('numpy').sqrt(x)),
+                    "cbrt": lambda x: (__import__('numpy').cbrt(x)),
+                    "exp": lambda x: (__import__('numpy').exp(x)),
+                    "square": lambda x: __import__('numpy').power(x, 2),
+                    "cube": lambda x: __import__('numpy').power(x, 3),
+                    "reciprocal": lambda x: __import__('numpy').reciprocal(x),
                 }
                 target_props.append(
                     {

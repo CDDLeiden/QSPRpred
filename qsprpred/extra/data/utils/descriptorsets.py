@@ -433,6 +433,17 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
         self.sets = self.factory.available_descriptors if sets is None else sets
         self._descriptors = None
 
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        # Remove factory from state
+        del o_dict["factory"]
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        # Add factory to state
+        self.factory = prodec.ProteinDescriptors()
+
     @staticmethod
     def calculateDescriptor(
         factory: prodec.ProteinDescriptors, msa: dict[str, str], descriptor: str
@@ -499,7 +510,6 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
                 columns=[col for col in df.columns if col not in self._descriptors],
                 inplace=True,
             )
-
         return df
 
     @property
