@@ -8,11 +8,13 @@ such as `ProDec`.
 
 import json
 import os.path
+import shutil
 from abc import ABC, abstractmethod
 
 import Bio
 import Bio.SeqIO as Bio_SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline, MafftCommandline
+from Bio.Application import ApplicationError
 
 from .....logs import logger
 
@@ -100,10 +102,24 @@ class BioPythonMSA(MSAProvider, ABC):
             out_dir (str): directory to save the alignment to
             fname (str): file name of the alignment file
         """
+        if not self.checkTool():
+            raise RuntimeError(
+                f"The tool commnad '{self.cmd}' "
+                f"was not found. Please install it."
+            )
         self.outDir = out_dir
         self.fName = fname
         self.cache = {}
         self._current = None
+
+    @property
+    @abstractmethod
+    def cmd(self) -> str:
+        """The command that runs the alignment algorithm.
+
+        Returns:
+            cmd (str): the command to run the alignment algorithm
+        """
 
     def getFromCache(self, target_ids: list[str]) -> dict[str:str] | None:
         """
@@ -258,6 +274,10 @@ class BioPythonMSA(MSAProvider, ABC):
         self._current = alignment
         return alignment
 
+    def checkTool(self) -> bool:
+        """ Check if the MAFFT tool is installed """
+        return shutil.which(self.cmd) is not None
+
 
 class MAFFT(BioPythonMSA):
     """
@@ -308,6 +328,10 @@ class MAFFT(BioPythonMSA):
             handle.write(stdout)
         return self.parseAlignment(sequences)
 
+    @property
+    def cmd(self) -> str:
+        return "mafft"
+
 
 class ClustalMSA(BioPythonMSA):
     """
@@ -355,3 +379,7 @@ class ClustalMSA(BioPythonMSA):
         )
         clustal_omega_cline()
         return self.parseAlignment(sequences)
+
+    @property
+    def cmd(self) -> str:
+        return "clustalo"
