@@ -7,7 +7,7 @@ import pandas as pd
 from rdkit.Chem.rdchem import Mol
 
 from ...logs import logger
-from ...serialization import JSONSerializable
+from qsprpred.utils.serialization import JSONSerializable
 from .descriptorsets import get_descriptor
 
 

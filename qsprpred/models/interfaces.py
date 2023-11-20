@@ -20,7 +20,7 @@ from ..models import SSPACE
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..models.metrics import SklearnMetric
 from ..models.tasks import ModelTasks
-from ..serialization import JSONSerializable
+from qsprpred.utils.serialization import JSONSerializable
 from ..utils.inspect import import_class
 
 

@@ -15,7 +15,7 @@ from ...models.interfaces import QSPRModel
 from .descriptor_utils.drugexproperties import Property
 from .descriptor_utils.fingerprints import get_fingerprint
 from .descriptor_utils.rdkitdescriptors import RdkitDescriptors
-from ...serialization import JSONSerializable
+from qsprpred.utils.serialization import JSONSerializable
 
 
 class DescriptorSet(JSONSerializable, ABC):

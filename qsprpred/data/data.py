@@ -19,9 +19,8 @@ from tqdm.auto import tqdm
 from .utils.datafilters import RepeatsFilter
 from ..logs import logger
 from ..models.tasks import TargetTasks
-from ..serialization import JSONSerializable, function_as_string, function_from_string
+from qsprpred.utils.serialization import JSONSerializable, function_as_string, function_from_string
 from ..utils.enumerate import enumerate_with_zeros
-from ..utils.inspect import import_class
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
 from .utils.feature_standardization import (
     SKLearnStandardizer,

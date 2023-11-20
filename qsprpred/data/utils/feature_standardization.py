@@ -4,7 +4,7 @@ import pandas as pd
 import sklearn_json as skljson
 
 from ...logs import logger
-from ...serialization import JSONSerializable
+from qsprpred.utils.serialization import JSONSerializable
 
 
 class SKLearnStandardizer(JSONSerializable):

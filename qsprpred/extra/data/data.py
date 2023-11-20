@@ -1,7 +1,3 @@
-import base64
-import marshal
-import os
-import types
 from typing import Callable
 
 import pandas as pd
@@ -13,7 +9,7 @@ from ...data.utils.descriptorcalculator import (
 )
 from ...logs import logger
 from .utils.descriptorcalculator import ProteinDescriptorCalculator
-from ...serialization import function_as_string, function_from_string
+from qsprpred.utils.serialization import function_as_string, function_from_string
 
 
 class PCMDataSet(QSPRDataset):
