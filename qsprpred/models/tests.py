@@ -91,11 +91,7 @@ class ModelTestMixIn:
             model (QSPRModel): The model to test.
         """
         # perform bayes optimization
-        score_func = (
-            "r2"
-            if model.task.isRegression()
-            else ("roc_auc_ovr" if model.task.isMultiTask() else "roc_auc")
-        )
+        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
             param_grid=search_space_bs,
@@ -125,11 +121,7 @@ class ModelTestMixIn:
         self.assertTrue(exists(f"{model.outDir}/{model.name}_params.json"))
         model.cleanFiles()
         # perform crossvalidation
-        score_func = (
-            "r2"
-            if model.task.isRegression()
-            else ("roc_auc_ovr" if model.task.isMultiTask() else "roc_auc")
-        )
+        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(model)
         TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func)(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
@@ -933,11 +925,7 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
         AssessorMonitor,
         FitMonitor,
     ):
-        score_func = (
-            "r2"
-            if model.task.isRegression()
-            else ("roc_auc_ovr" if model.task.isMultiTask() else "roc_auc")
-        )
+        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
             param_grid=search_space_gs,
