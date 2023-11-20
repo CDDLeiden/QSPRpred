@@ -14,10 +14,11 @@ import traceback
 
 
 success = True
+failed_files = []
 for f in os.listdir("expected"):
     for type in ["ind", "cv"]:
+        file_name = f"{f}.{type}.tsv"
         try:
-            file_name = f"{f}.{type}.tsv"
             print(f"Comparing file contents of {file_name}")
             relative_file_path = f"{f}/{file_name}"
 
@@ -70,11 +71,11 @@ for f in os.listdir("expected"):
             # print  stack trace
             traceback.print_exc()
             success = False
+            failed_files.append(file_name)
             continue
-        print("Comparison successful!")
 
 if not success:
-    print("Comparison of tutorial outputs failed! One or more files did not match.")
+    sys.stderr.write("Comparison of tutorial outputs failed! One or more files did not match:\n" + "\n".join(failed_files))
     sys.exit(1)
 else:
     print("Comparison of tutorial outputs successful!")
