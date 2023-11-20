@@ -13,7 +13,6 @@ class Metric(ABC):
     Attributes:
         name (str): Name of the scoring function.
     """
-
     @abstractmethod
     def __call__(
         self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray]
@@ -43,7 +42,6 @@ class SklearnMetrics(Metric):
         name (str): Name of the scoring function.
         scorer: Sklearn scorer object.
     """
-
     def __init__(self, scorer: str | _BaseScorer):
         """Initialize the scoring function.
 
@@ -55,9 +53,7 @@ class SklearnMetrics(Metric):
         self.scorer = scorer  # Sklearn scorer object
         self.name = scorer._score_func.__name__  # Name of the scorer
 
-    def __call__(
-        self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray]
-    ):
+    def __call__(self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray]):
         """Calculate the score.
 
         Args:
@@ -94,4 +90,6 @@ class SklearnMetrics(Metric):
     def _scorerFunc(self, y_true, y_pred):
         """Return the scoring function of a sklearn scorer."""
         # From https://stackoverflow.com/questions/63943410/getting-a-scoring-function-by-name-in-scikit-learn
-        return self.scorer._sign * self.scorer._score_func(y_true, y_pred, **self.scorer._kwargs)
+        return self.scorer._sign * self.scorer._score_func(
+            y_true, y_pred, **self.scorer._kwargs
+        )
