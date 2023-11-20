@@ -128,7 +128,7 @@ class ModelTestMixIn:
         score_func = (
             "r2"
             if model.task.isRegression()
-            else ("roc_auc_over" if model.task.isMultiTask() else "roc_auc")
+            else ("roc_auc_ovr" if model.task.isMultiTask() else "roc_auc")
         )
         CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(model)
         TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func)(model)
