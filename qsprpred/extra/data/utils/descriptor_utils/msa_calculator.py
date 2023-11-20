@@ -6,17 +6,16 @@ is required for the calculation of descriptors that are based on sequence alignm
 such as `ProDec`.
 """
 
-import json
-import os.path
 from abc import ABC, abstractmethod
 
 import Bio
 import Bio.SeqIO as Bio_SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline, MafftCommandline
 
-from .....logs import logger
+from qsprpred.utils.serialization import FileSerializable, JSONSerializable
 
-class MSAProvider(ABC):
+
+class MSAProvider(FileSerializable, ABC):
     """Interface for multiple sequence alignment providers.
 
     This interface defines how calculation and storage of
@@ -58,33 +57,8 @@ class MSAProvider(ABC):
             alignment (dict[str:str] | None): the current alignment
         """
 
-    @classmethod
-    @abstractmethod
-    def fromFile(cls, fname: str) -> "MSAProvider":
-        """
-        Creates an MSA provider object from a JSON file.
 
-        Args:
-            fname (str): file name of the JSON file to load the provider from
-
-        Returns:
-            provider (MSAProvider): the loaded provider
-        """
-
-    @abstractmethod
-    def toFile(self, fname: str) -> str:
-        """
-        Saves the MSA provider to a JSON file.
-
-        Args:
-            fname (str): file name of the JSON file to save the provider to
-
-        Returns:
-            path (str): path to the saved file
-        """
-
-
-class BioPythonMSA(MSAProvider, ABC):
+class BioPythonMSA(MSAProvider, JSONSerializable, ABC):
     """
     Common functionality for MSA providers using BioPython command line wrappers.
 
@@ -134,75 +108,9 @@ class BioPythonMSA(MSAProvider, ABC):
         key = "~".join(target_ids)
         self.cache[key] = alignment
 
-    def currentToFile(self, fname: str):
-        """
-        Saves the current alignment to a JSON file.
-        """
-        if self.current:
-            with open(fname, "w") as f:
-                json.dump(self.current, f)
-        else:
-            logger.warning("No current alignment to save. File not created.")
-
-    def currentFromFile(self, fname: str) -> dict[str:str]:
-        """
-        Loads the alignment from a JSON file.
-
-        Args:
-            fname (str): file name of the JSON file to load the alignment from
-
-        Returns:
-            alignment (dict[str:str]): the loaded alignment
-        """
-        with open(fname, "r") as f:
-            self._current = json.load(f)
-            self.saveToCache(sorted(self.current.keys()), self.current)
-            return self.current
-
     @property
     def current(self):
         return self._current
-
-    @classmethod
-    def fromFile(cls, fname: str) -> dict[str:str]:
-        """Creates an MSA provider object from a JSON file.
-
-
-        Args:
-            fname (str):
-                file name of the JSON file to load the provider from
-
-        Returns:
-            provider (dict[str:str]):
-                Current MSA
-
-        """
-        with open(fname, "r") as f:
-            data = json.load(f)
-        ret = cls(data["out_dir"], data["fname"])
-        current_path = f"{os.path.dirname(fname)}/{data['current']}"
-        ret.currentFromFile(current_path)
-        return ret
-
-    def toFile(self, fname: str):
-        """Saves the MSA provider to a JSON file.
-
-        Args:
-            fname (str):
-                file name of the JSON file to save the provider to
-        """
-        current_path = f"{os.path.basename(fname)}.msa"
-        with open(fname, "w") as f:
-            json.dump(
-                {
-                    "out_dir": self.outDir,
-                    "fname": self.fName,
-                    "current": current_path,
-                    "class": f"{self.__class__.__module__}.{self.__class__.__name__}",
-                },
-                f,
-            )
-        self.currentToFile(os.path.join(os.path.dirname(fname), current_path))
 
     def parseSequences(self, sequences: dict[str, str], **kwargs) -> tuple[str, int]:
         """Create object with sequences and the passed metadata.

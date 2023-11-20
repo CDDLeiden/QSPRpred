@@ -2,12 +2,10 @@
 
 import argparse
 import json
-import os
 import os.path
 import sys
 from copy import deepcopy
 from datetime import datetime
-from importlib.util import find_spec
 
 import numpy as np
 import optuna
@@ -293,7 +291,7 @@ def QSPR_modelling(args):
                 f"{model_type}_{dataset.name}_{args.model_suffix}"
             )
             if model_type == "DNN":
-                QSPRmodel = DNNModel(
+                qspr_model = DNNModel(
                     base_dir=f"{args.output_dir}",
                     data=dataset,
                     parameters=parameters,
@@ -304,7 +302,7 @@ def QSPR_modelling(args):
                     random_state=args.random_state,
                 )
             else:
-                QSPRmodel = SklearnModel(
+                qspr_model = SklearnModel(
                     base_dir=f"{args.output_dir}",
                     data=dataset,
                     alg=alg_dict[model_type],
@@ -314,15 +312,16 @@ def QSPR_modelling(args):
                 )
 
             # if desired run parameter optimization
-            score_func = "r2" if QSPRmodel.task.isRegression() else "roc_auc_ovr"
+            score_func = "r2" if qspr_model.task.isRegression() else "roc_auc_ovr"
+            best_params = None
             if args.optimization == "grid":
                 search_space_gs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_gs)
                 gridsearcher = GridSearchOptimization(
-                    scoring=score_func, param_grid=search_space_gs
+                    model_assessor=CrossValAssessor(scoring=score_func),
+                    param_grid=search_space_gs,
                 )
-                best_params = gridsearcher.optimize(QSPRmodel)
-                QSPRmodel.saveParams(best_params)
+                best_params = gridsearcher.optimize(qspr_model)
             elif args.optimization == "bayes":
                 search_space_bs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_bs)
@@ -348,15 +347,17 @@ def QSPR_modelling(args):
                     n_trials=args.n_trials,
                     n_jobs=args.n_jobs,
                 )
-                best_params = bayesoptimizer.optimize(QSPRmodel)
+                best_params = bayesoptimizer.optimize(qspr_model)
+            if best_params is not None:
+                qspr_model.setParams(best_params)
 
             if args.model_evaluation:
                 CrossValAssessor(
                     mode=EarlyStoppingMode.RECORDING, scoring=score_func
-                )(QSPRmodel)
+                )(qspr_model)
                 TestSetAssessor(
                     mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func
-                )(QSPRmodel)
+                )(qspr_model)
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):
@@ -365,7 +366,7 @@ def QSPR_modelling(args):
                         "for determining optimal number of epochs to stop training."
                     )
                 else:
-                    QSPRmodel.fitAttached()
+                    qspr_model.fitAttached()
 
 
 if __name__ == "__main__":
