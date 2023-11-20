@@ -141,7 +141,6 @@ class Randomized:
             The seed to use to randomize the action. If `None`,
             a random seed is used instead of a fixed one (default: `None`).
     """
-
     def __init__(self, seed: int | None = None) -> None:
         """Create a new randomized action.
 
@@ -221,7 +220,7 @@ class DataSplit(ABC, DataSetDependant):
     def splitDataset(self, dataset: "QSPRDataset"):
         return self.split(
             dataset.getFeatures(concat=True),
-            dataset.getTargetPropertiesValues(concat=True)
+            dataset.getTargetPropertiesValues(concat=True),
         )
 
 

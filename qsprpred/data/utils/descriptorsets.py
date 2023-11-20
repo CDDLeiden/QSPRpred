@@ -11,11 +11,12 @@ import pandas as pd
 from rdkit import Chem, DataStructs
 from rdkit.Chem import Mol
 
-from ...models.interfaces import QSPRModel
+from qsprpred.utils.serialization import JSONSerializable
+
+from ...models.models import QSPRModel
 from .descriptor_utils.drugexproperties import Property
 from .descriptor_utils.fingerprints import get_fingerprint
 from .descriptor_utils.rdkitdescriptors import RdkitDescriptors
-from qsprpred.utils.serialization import JSONSerializable
 
 
 class DescriptorSet(JSONSerializable, ABC):
@@ -150,7 +151,7 @@ class FingerprintSet(MoleculeDescriptorSet):
     defined in descriptorutils.fingerprints.
     """
 
-    _notJSON = MoleculeDescriptorSet._notJSON + ["getFingerprint"]
+    _notJSON = [*MoleculeDescriptorSet._notJSON, "getFingerprint"]
 
     def __init__(self, fingerprint_type, *args, **kwargs):
         """
@@ -167,18 +168,14 @@ class FingerprintSet(MoleculeDescriptorSet):
         self._args = args
         self._kwargs = kwargs
         self.getFingerprint = get_fingerprint(
-            self.fingerprintType,
-            *self._args,
-            **self._kwargs
+            self.fingerprintType, *self._args, **self._kwargs
         )
         self._keepindices = None
 
     def __setstate__(self, state):
         super().__setstate__(state)
         self.getFingerprint = get_fingerprint(
-            self.fingerprintType,
-            *self._args,
-            **self._kwargs
+            self.fingerprintType, *self._args, **self._kwargs
         )
 
     def __call__(self, mols):
@@ -410,7 +407,7 @@ class PredictorDesc(MoleculeDescriptorSet):
     """MoleculeDescriptorSet that uses a Predictor object to calculate descriptors from
     a molecule."""
 
-    _notJSON = MoleculeDescriptorSet._notJSON + ["model"]
+    _notJSON = [*MoleculeDescriptorSet._notJSON, "model"]
 
     def __init__(self, model: QSPRModel | str):
         """
@@ -421,7 +418,8 @@ class PredictorDesc(MoleculeDescriptorSet):
         """
 
         if isinstance(model, str):
-            from ...models.interfaces import QSPRModel
+            from ...models.models import QSPRModel
+
             self.model = QSPRModel.fromFile(model)
         else:
             self.model = model

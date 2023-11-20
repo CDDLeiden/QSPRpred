@@ -17,7 +17,7 @@ from sklearn.utils.validation import check_is_fitted
 
 from ..data.data import QSPRDataset
 from ..logs import logger
-from .interfaces import QSPRModel
+from .models import QSPRModel
 from .tasks import ModelTasks
 
 
@@ -82,9 +82,10 @@ class SklearnModel(QSPRModel):
             )
             raise
         # set parameters if defined
-        if (self.parameters not in [None, {}]) \
-                and hasattr(self, "estimator") \
-                and self.estimator is not None:
+        if (
+            (self.parameters not in [None, {}]) and hasattr(self, "estimator") and
+            self.estimator is not None
+        ):
             try:
                 check_is_fitted(self.estimator)
             except NotFittedError:

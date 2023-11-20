@@ -19,7 +19,7 @@ from sklearn.metrics import (
 )
 
 from ..metrics.calibration import calibration_error
-from ..models.interfaces import QSPRModel
+from ..models.models import QSPRModel
 from ..models.tasks import ModelTasks
 from ..plotting.interfaces import ModelPlot
 

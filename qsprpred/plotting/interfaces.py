@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any
 
-from ..models.interfaces import QSPRModel
+from ..models.models import QSPRModel
 
 
 class ModelPlot(ABC):

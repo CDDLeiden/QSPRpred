@@ -13,13 +13,12 @@ from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import trange
 
-from ....logs import logger
 from ....data.data import QSPRDataset
 from ....data.interfaces import DataSplit
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import FitMonitor, QSPRModel
-from ....models.monitors import BaseMonitor
+from ....models.models import QSPRModel
+from ....models.monitors import BaseMonitor, FitMonitor
 from ....models.tasks import ModelTasks
 
 
@@ -140,7 +139,7 @@ class ChempropModel(QSPRModel):
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
     """
 
-    _notJSON = QSPRModel._notJSON + ["chempropLogger"]
+    _notJSON = [*QSPRModel._notJSON, "chempropLogger"]
 
     def __init__(
         self,
@@ -343,8 +342,10 @@ class ChempropModel(QSPRModel):
             self.earlyStopping.getEpochs() if not self.earlyStopping else args.epochs
         )
         if not n_epochs:
-            raise ValueError(f"Number of epochs must be greater "
-                             f"than 0. Got: {n_epochs}")
+            raise ValueError(
+                f"Number of epochs must be greater "
+                f"than 0. Got: {n_epochs}"
+            )
         best_estimator = estimator
         best_found = False
         for epoch in trange(n_epochs):
