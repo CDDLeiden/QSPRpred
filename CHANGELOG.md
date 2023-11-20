@@ -28,5 +28,6 @@ without having to set the `task_from_str` argument, which is now deprecated.
 - Added `NullMonitor` class to ignore the progress of a fitting, assessing, or hyperparameter optimization process.
 - Added `ListMonitor` class to combine multiple monitors.
 - Cross-validation, testing, hyperparameter optimization and early-stopping were made more flexible by allowing custom splitting and fold generation strategies. A tutorial showcasing these features was created. 
+- Added a `reset` method to `QSPRDataset`, which resets splits and loads all descriptors into the training set matrix again.
 
 ## Removed Features
