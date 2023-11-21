@@ -163,7 +163,8 @@ class OptunaOptimization(HyperparameterOptimization):
         self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
         # save the best parameters to the model if requested
         if save_params:
-            model.saveParams(self.bestParams)
+            model.setParams(self.bestParams)
+            model.save()
         return self.bestParams
 
     def objective(self, trial: optuna.trial.Trial, model: QSPRModel, **kwargs) -> float:
@@ -279,6 +280,7 @@ class GridSearchOptimization(HyperparameterOptimization):
         )
         # save the best parameters to the model if requested
         if save_params:
-            model.saveParams(self.bestParams)
+            model.setParams(self.bestParams)
+            model.save()
         self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
         return self.bestParams

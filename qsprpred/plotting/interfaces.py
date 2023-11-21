@@ -55,13 +55,13 @@ class ModelPlot(ABC):
         ind_path = f"{self.modelOuts[model]}.ind.tsv"
         if model.task not in self.getSupportedTasks():
             raise ValueError("Unsupported model type: %s" % model.task)
-        if "estimator_path" in model.metaInfo["estimator_path"] and not os.path.exists(
-            model.metaInfo["estimator_path"]
+        if not os.path.exists(
+            model.metaFile
         ):
             raise ValueError(
                 "Model output file does not exist: %s. "
                 "Have you evaluated and saved the model, yet?" %
-                model.metaInfo["estimator_path"]
+                model.metaFile
             )
         if not os.path.exists(cv_path):
             raise ValueError(

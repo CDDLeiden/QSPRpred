@@ -45,7 +45,7 @@ python -m qsprpred.data_CLI \
 -st 2000 \
 -fe Morgan \
 -fe RDkit \
--pd ../qsprpred/data/test_files/test_predictor/qspr/models/SVC_MULTICLASS/SVC_MULTICLASS_meta.json \
+-pd ../qsprpred/data/test_files/test_predictor/qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json \
 -lv 0.01 \
 -hc 0.9 \
 -fv 0.0
@@ -56,7 +56,7 @@ python -m qsprpred.data_CLI \
 python -m qsprpred.model_CLI \
 -o ${TEST_BASE}/qspr/models \
 -de \
--dp ${TEST_BASE}/qspr/data/CL_fu_SINGLECLASS_df.pkl \
+-dp ${TEST_BASE}/qspr/data/CL_fu_SINGLECLASS/CL_fu_SINGLECLASS_meta.json \
 -ncpu ${N_CPUS} \
 --model_types RF \
 -s \

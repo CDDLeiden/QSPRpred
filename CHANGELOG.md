@@ -1,6 +1,6 @@
 # Change Log
 
-From v2.1.0.a2 to v2.2.0
+From v2.1.0 to v3.0.0
 
 ## Fixes
 - Fixed random seeds to give reproducible results. Each dataset is initialized with a single random state (either from the constructor or a random number generator) which is used in all subsequent random operations. Each model is initialized with a single random state as well: it uses the random state from the dataset, unless it's overriden in the constructor. When a dataset is saved to a file so is its random state, which is used by the dataset when the dataset is reloaded.
@@ -16,6 +16,7 @@ From v2.1.0.a2 to v2.2.0
 without having to set the `task_from_str` argument, which is now deprecated.
 - Make `EarlyStopping.mode` flexible for `QSPRModel.fitAttached`.
 - `save_params` argument added to `OptunaOptimization` to save the best hyperparameters to the model (default: `True`).
+- We now use `jsonpickle` for object serialization, which is more flexible than the non-standard approach before, but it also means previous models will not be compatible with this version.
 
 ## New Features
 - Most unit tests now have a variant that checks whether using a fixed random seed gives reproducible results.
