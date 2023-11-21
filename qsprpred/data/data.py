@@ -19,7 +19,7 @@ from tqdm.auto import tqdm
 
 from ..logs import logger
 from ..models.tasks import TargetTasks
-from ..utils.enumerate import enumerate_with_zeros
+from ..utils.stringops import generate_padded_index
 from ..utils.serialization import (
     JSONSerializable,
     function_as_string,
@@ -419,7 +419,7 @@ class PandasDataSet(DataSet, JSONSerializable):
             prefix (str): prefix to use for the index column values.
         """
         prefix = prefix if prefix is not None else self.name
-        self.df[name] = enumerate_with_zeros(self.df.index, prefix=prefix)
+        self.df[name] = generate_padded_index(self.df.index, prefix=prefix)
         self.setIndex([name])
 
     def _isInStore(self, name):
