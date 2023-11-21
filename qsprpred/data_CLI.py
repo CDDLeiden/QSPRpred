@@ -14,7 +14,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
 from .data.data import QSPRDataset
-from .data.utils.datafilters import papyrusLowQualityFilter
+from qsprpred.data.processing.datafilters import papyrusLowQualityFilter
 from .data.utils.datasplitters import (
     ClusterSplit,
     ManualSplit,

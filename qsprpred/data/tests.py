@@ -25,7 +25,7 @@ from .utils.data_clustering import (
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
 )
-from .utils.datafilters import CategoryFilter, RepeatsFilter
+from qsprpred.data.processing.datafilters import CategoryFilter, RepeatsFilter
 from .utils.datasplitters import (
     BootstrapSplit,
     ClusterSplit,
