@@ -21,7 +21,7 @@ from sklearn.metrics import (
 from ..metrics.calibration import calibration_error
 from ..models.models import QSPRModel
 from ..models.tasks import ModelTasks
-from ..plotting.interfaces import ModelPlot
+from ..plotting.base_plot import ModelPlot
 
 
 class ClassifierPlot(ModelPlot, ABC):

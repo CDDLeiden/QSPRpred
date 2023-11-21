@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from sklearn import metrics
 
 from ..models.tasks import ModelTasks
-from ..plotting.interfaces import ModelPlot
+from ..plotting.base_plot import ModelPlot
 
 
 class RegressionPlot(ModelPlot, ABC):
