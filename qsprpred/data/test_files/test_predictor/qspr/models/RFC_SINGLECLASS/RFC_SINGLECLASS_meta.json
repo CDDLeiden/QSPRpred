@@ -30,11 +30,11 @@
         "nTargets": 1,
         "featureCalculators": [
             {
-                "py/object": "qsprpred.data.utils.descriptorcalculator.MoleculeDescriptorsCalculator",
+                "py/object": "qsprpred.data.descriptors.descriptorcalculator.MoleculeDescriptorsCalculator",
                 "py/state": {
                     "descSets": [
                         {
-                            "py/object": "qsprpred.data.utils.descriptorsets.FingerprintSet",
+                            "py/object": "qsprpred.data.descriptors.descriptorsets.FingerprintSet",
                             "py/state": {
                                 "_isFP": true,
                                 "fingerprintType": "MorganFP",
