@@ -12,15 +12,15 @@ import pandas as pd
 from gbmtsplits import GloballyBalancedSplit
 from sklearn.model_selection import ShuffleSplit
 
-from ...logs import logger
-from ..data import DataSetDependant, MoleculeDataSet, QSPRDataset, Randomized
-from .data_clustering import (
+from qsprpred.logs import logger
+from qsprpred.data.data import DataSetDependant, MoleculeDataSet, QSPRDataset, Randomized
+from qsprpred.data.utils.data_clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
     RandomClusters,
     ScaffoldClusters,
 )
-from .scaffolds import Murcko, Scaffold
+from qsprpred.data.utils.scaffolds import Murcko, Scaffold
 
 
 class DataSplit(ABC, DataSetDependant):

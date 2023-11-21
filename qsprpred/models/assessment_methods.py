@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from ..data.utils.datasplitters import DataSplit
+from qsprpred.data.validation.datasplitters import DataSplit
 from ..logs import logger
 from ..models.metrics import SklearnMetric
 from .early_stopping import EarlyStoppingMode

@@ -30,7 +30,7 @@ from qsprpred.data.processing.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
 )
-from .utils.folds import FoldsFromDataSplit
+from qsprpred.data.validation.folds import FoldsFromDataSplit
 from .utils.scaffolds import Scaffold
 from .utils.smiles_standardization import (
     check_smiles_valid,

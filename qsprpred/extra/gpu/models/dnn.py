@@ -11,7 +11,7 @@ import torch
 from sklearn.model_selection import ShuffleSplit
 
 from ....data.data import QSPRDataset
-from ....data.utils.datasplitters import DataSplit
+from qsprpred.data.validation.datasplitters import DataSplit
 from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....logs import logger
