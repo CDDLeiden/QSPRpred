@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 
 from .data.data import QSPRDataset
 from qsprpred.data.processing.datafilters import papyrusLowQualityFilter
-from qsprpred.data.validation.datasplitters import (
+from qsprpred.data.sampling.datasplitters import (
     ClusterSplit,
     ManualSplit,
     RandomSplit,

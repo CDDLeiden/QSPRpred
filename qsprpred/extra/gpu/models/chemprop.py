@@ -14,7 +14,7 @@ from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import trange
 
 from ....data.data import QSPRDataset
-from qsprpred.data.validation.datasplitters import DataSplit
+from qsprpred.data.sampling.datasplitters import DataSplit
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.models import QSPRModel

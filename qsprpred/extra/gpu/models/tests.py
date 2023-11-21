@@ -9,7 +9,7 @@ from parameterized import parameterized
 from sklearn.impute import SimpleImputer
 
 from ....data.data import QSPRDataset
-from qsprpred.data.validation.datasplitters import RandomSplit
+from qsprpred.data.sampling.datasplitters import RandomSplit
 from qsprpred.data.descriptors.descriptorcalculator import MoleculeDescriptorsCalculator
 from qsprpred.data.descriptors.descriptorsets import SmilesDesc
 from ....extra.gpu.models.chemprop import ChempropModel

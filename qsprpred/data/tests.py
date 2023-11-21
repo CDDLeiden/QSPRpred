@@ -26,7 +26,7 @@ from .utils.data_clustering import (
     FPSimilarityMaxMinClusters,
 )
 from qsprpred.data.processing.datafilters import CategoryFilter, RepeatsFilter
-from qsprpred.data.validation.datasplitters import (
+from qsprpred.data.sampling.datasplitters import (
     BootstrapSplit,
     ClusterSplit,
     ManualSplit,
@@ -51,7 +51,7 @@ from qsprpred.data.descriptors.descriptorsets import (
 )
 from qsprpred.data.processing.feature_standardization import SKLearnStandardizer
 from qsprpred.data.processing.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
-from qsprpred.data.validation.folds import FoldsFromDataSplit
+from qsprpred.data.sampling.folds import FoldsFromDataSplit
 from .utils.scaffolds import BemisMurcko, Murcko
 
 N_CPU = 2
