@@ -351,48 +351,41 @@ class _FingerprintRetriever:
         return RDKitMACCSFP(*args, **kwargs)
 
     def getCDKFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKFP
-
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKFP
         return CDKFP(*args, **kwargs)
 
     def getCDKExtendedFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKExtendedFP
-
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKExtendedFP
         return CDKExtendedFP(*args, **kwargs)
 
     def getCDKEStateFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKEStateFP
-
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKEStateFP
         return CDKEStateFP()
 
     def getCDKGraphOnlyFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKGraphOnlyFP
-
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKGraphOnlyFP
         return CDKGraphOnlyFP(*args, **kwargs)
 
     def getCDKMACCSFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKMACCSFP
-
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKMACCSFP
         return CDKMACCSFP()
 
     def getCDKPubchemFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKPubchemFP
-
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKPubchemFP
         return CDKPubchemFP()
 
     def getCDKSubstructureFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKSubstructureFP
-
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import \
+            CDKSubstructureFP
         return CDKSubstructureFP(*args, **kwargs)
 
     def getCDKKlekotaRothFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKKlekotaRothFP
-
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import \
+            CDKKlekotaRothFP
         return CDKKlekotaRothFP(*args, **kwargs)
 
     def getCDKAtomPairs2DFP(self, *args, **kwargs):
-        from ....extra.data.utils.descriptor_utils.fingerprints import CDKAtomPairs2DFP
-
+        from qsprpred.extra.data.utils.descriptor_utils.fingerprints import CDKAtomPairs2DFP
         return CDKAtomPairs2DFP(*args, **kwargs)
 
 

@@ -19,7 +19,7 @@ from qsprpred.utils.serialization import JSONSerializable
 from ...logs import logger
 
 from ...models.models import QSPRModel
-from .descriptor_utils.fingerprints import get_fingerprint
+from ...data.descriptors.fingerprints import get_fingerprint
 
 
 class DescriptorSet(JSONSerializable, ABC):

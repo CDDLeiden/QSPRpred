@@ -17,9 +17,6 @@ from PaDEL_pywrapper import PaDEL as PaDEL_calculator
 from PaDEL_pywrapper import descriptor as cdk_fps
 from rdkit import Chem
 
-from .....data.utils.descriptor_utils.fingerprints import Fingerprint
-
-
 class CDKFP(Fingerprint):
     """The CDK fingerprint.
 
