@@ -30,7 +30,7 @@ from qsprpred.data.descriptors.descriptorsets import (
     RDKitDescs,
     SmilesDesc,
 )
-from .data.utils.featurefilters import (
+from qsprpred.data.processing.featurefilters import (
     BorutaFilter,
     HighCorrelationFilter,
     LowVarianceFilter,
