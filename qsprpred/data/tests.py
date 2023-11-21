@@ -1605,7 +1605,7 @@ class TestDescriptorSets(DataSetsMixIn, TestCase):
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
         # with 3D
-        desc_calc = MoleculeDescriptorsCalculator([RDKitDescs(compute_3Drdkit=True)])
+        desc_calc = MoleculeDescriptorsCalculator([RDKitDescs(include_3d=True)])
         self.dataset.addDescriptors(desc_calc, recalculate=True)
         self.assertEqual(
             self.dataset.X.shape, (len(self.dataset), rdkit_desc_count + 10)

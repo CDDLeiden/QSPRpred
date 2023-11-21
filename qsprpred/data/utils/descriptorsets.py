@@ -9,14 +9,17 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
 from rdkit import Chem, DataStructs
-from rdkit.Chem import Mol
+from rdkit.Chem import Mol, Descriptors
+from rdkit.Chem import AllChem, Crippen
+from rdkit.Chem import Descriptors as desc
+from rdkit.Chem import Lipinski
+from rdkit.ML.Descriptors import MoleculeDescriptors
 
 from qsprpred.utils.serialization import JSONSerializable
+from ...logs import logger
 
 from ...models.models import QSPRModel
-from .descriptor_utils.drugexproperties import Property
 from .descriptor_utils.fingerprints import get_fingerprint
-from .descriptor_utils.rdkitdescriptors import RdkitDescriptors
 
 
 class DescriptorSet(JSONSerializable, ABC):
@@ -231,26 +234,58 @@ class FingerprintSet(MoleculeDescriptorSet):
 
 
 class DrugExPhyschem(MoleculeDescriptorSet):
-    """
-    Physciochemical properties originally used in DrugEx for QSAR modelling.
+    """Various properties used for scoring in DrugEx.
 
     Args:
         props: list of properties to calculate
     """
-    def __init__(self, physchem_props=None):
+    def __init__(self, physchem_props: list[str] | None = None):
         """Initialize the descriptorset with Property arguments (a list of properties to
         calculate) to select a subset.
 
         Args:
             physchem_props: list of properties to calculate
         """
+        self._prop_dict = {
+            "MW": desc.MolWt,
+            "logP": Crippen.MolLogP,
+            "HBA": AllChem.CalcNumLipinskiHBA,
+            "HBD": AllChem.CalcNumLipinskiHBD,
+            "Rotable": AllChem.CalcNumRotatableBonds,
+            "Amide": AllChem.CalcNumAmideBonds,
+            "Bridge": AllChem.CalcNumBridgeheadAtoms,
+            "Hetero": AllChem.CalcNumHeteroatoms,
+            "Heavy": Lipinski.HeavyAtomCount,
+            "Spiro": AllChem.CalcNumSpiroAtoms,
+            "FCSP3": AllChem.CalcFractionCSP3,
+            "Ring": Lipinski.RingCount,
+            "Aliphatic": AllChem.CalcNumAliphaticRings,
+            "Aromatic": AllChem.CalcNumAromaticRings,
+            "Saturated": AllChem.CalcNumSaturatedRings,
+            "HeteroR": AllChem.CalcNumHeterocycles,
+            "TPSA": AllChem.CalcTPSA,
+            "Valence": desc.NumValenceElectrons,
+            "MR": Crippen.MolMR,
+        }
+        if physchem_props:
+            self.props = physchem_props
+        else:
+            self.props = self._prop_dict.keys()
         self._isFP = False
-        self.props = list(Property(physchem_props).props)
 
     def __call__(self, mols):
         """Calculate the DrugEx properties for a molecule."""
-        calculator = Property(self.props)
-        return calculator.getScores(self.iterMols(mols, to_list=True))
+        mols = self.iterMols(mols, to_list=True)
+        scores = np.zeros((len(mols), len(self.props)))
+        for i, mol in enumerate(mols):
+            for j, prop in enumerate(self.props):
+                try:
+                    scores[i, j] = self._prop_dict[prop](mol)
+                except Exception as exp:  # noqa: E722
+                    logger.warning(f"Could not calculate {prop} for {mol}.")
+                    logger.exception(exp)
+                    continue
+        return scores
 
     @property
     def isFP(self):
@@ -267,7 +302,7 @@ class DrugExPhyschem(MoleculeDescriptorSet):
     @descriptors.setter
     def descriptors(self, props):
         """Set new props as a list of names."""
-        self.props = list(Property(props).props)
+        self.props = props
 
     def __str__(self):
         return "DrugExPhyschem"
@@ -280,17 +315,45 @@ class RDKitDescs(MoleculeDescriptorSet):
     Args:
         rdkit_descriptors: list of descriptors to calculate, if none, all 2D rdkit
             descriptors will be calculated
-        compute_3Drdkit: if True, 3D descriptors will be calculated
+        include_3d: if True, 3D descriptors will be calculated
     """
-    def __init__(self, rdkit_descriptors=None, compute_3Drdkit=False):
+    def __init__(
+            self,
+            rdkit_descriptors: list[str] | None = None,
+            include_3d: bool = False
+    ):
         self._isFP = False
-        # TODO: RdkitDescriptors probably needs refactoring; see definition
-        self._calculator = RdkitDescriptors(rdkit_descriptors, compute_3Drdkit)
-        self._descriptors = self._calculator.descriptors
-        self.compute3Drdkit = compute_3Drdkit
+        self._descriptors = (
+            rdkit_descriptors
+            if rdkit_descriptors is not None
+            else sorted(list(set([x[0] for x in Descriptors._descList])))
+        )
+        if include_3d:
+            self.descriptors = [
+                *self.descriptors,
+                "Asphericity",
+                "Eccentricity",
+                "InertialShapeFactor",
+                "NPR1",
+                "NPR2",
+                "PMI1",
+                "PMI2",
+                "PMI3",
+                "RadiusOfGyration",
+                "SpherocityIndex",
+            ]
+        self.include3D = include_3d
 
     def __call__(self, mols):
-        return self._calculator.getScores(self.iterMols(mols, to_list=True))
+        mols = self.iterMols(mols, to_list=True)
+        scores = np.zeros((len(mols), len(self.descriptors)))
+        calc = MoleculeDescriptors.MolecularDescriptorCalculator(self.descriptors)
+        for i, mol in enumerate(mols):
+            try:
+                scores[i] = calc.CalcDescriptors(mol)
+            except AttributeError:
+                continue
+        return scores
 
     @property
     def isFP(self):
@@ -300,7 +363,7 @@ class RDKitDescs(MoleculeDescriptorSet):
     def settings(self):
         return {
             "rdkit_descriptors": self.descriptors,
-            "compute_3Drdkit": self.compute3Drdkit,
+            "include_3d": self.include3D,
         }
 
     @property
@@ -309,7 +372,6 @@ class RDKitDescs(MoleculeDescriptorSet):
 
     @descriptors.setter
     def descriptors(self, descriptors):
-        self._calculator.descriptors = descriptors
         self._descriptors = descriptors
 
     def __str__(self):
