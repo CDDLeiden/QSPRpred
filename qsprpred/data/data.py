@@ -26,7 +26,7 @@ from ..utils.serialization import (
     function_from_string,
 )
 from qsprpred.data.processing.datafilters import RepeatsFilter
-from .utils.feature_standardization import (
+from qsprpred.data.processing.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
 )

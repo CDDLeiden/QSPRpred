@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import sklearn_json as skljson
 
-from ...logs import logger
+from qsprpred.logs import logger
 from qsprpred.utils.serialization import JSONSerializable
 
 

@@ -49,7 +49,7 @@ from qsprpred.data.descriptors.descriptorsets import (
     SmilesDesc,
     TanimotoDistances,
 )
-from .utils.feature_standardization import SKLearnStandardizer
+from qsprpred.data.processing.feature_standardization import SKLearnStandardizer
 from .utils.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
 from .utils.folds import FoldsFromDataSplit
 from .utils.scaffolds import BemisMurcko, Murcko

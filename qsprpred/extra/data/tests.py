@@ -27,7 +27,7 @@ from qsprpred.data.descriptors.descriptorsets import (
     MoleculeDescriptorSet,
     RDKitDescs,
 )
-from ...data.utils.feature_standardization import SKLearnStandardizer
+from qsprpred.data.processing.feature_standardization import SKLearnStandardizer
 from ...data.utils.featurefilters import HighCorrelationFilter, LowVarianceFilter
 from ...extra.data.data import PCMDataSet
 from ...extra.data.utils.descriptor_utils.msa_calculator import (
