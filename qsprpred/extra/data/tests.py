@@ -9,7 +9,6 @@ from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
 from ...data.data import TargetProperty
-from ...data.interfaces import DataSplit
 from ...data.tests import (
     CHUNK_SIZE,
     N_CPU,
@@ -17,7 +16,7 @@ from ...data.tests import (
     DataSetsMixIn,
     TestDescriptorInDataMixIn,
 )
-from ...data.utils.datasplitters import ClusterSplit, RandomSplit, ScaffoldSplit
+from ...data.utils.datasplitters import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
 from ...data.utils.descriptorcalculator import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,

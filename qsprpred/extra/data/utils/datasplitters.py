@@ -8,8 +8,7 @@ from typing import Iterable
 import numpy as np
 
 from ....data.data import QSPRDataset, TargetProperty
-from ....data.interfaces import DataSplit
-from ....data.utils.datasplitters import ClusterSplit, RandomSplit, ScaffoldSplit
+from ....data.utils.datasplitters import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
 from ..data import PCMDataSet
 
 

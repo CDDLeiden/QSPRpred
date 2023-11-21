@@ -3,6 +3,8 @@
 To add a new feature filters:
 * Add a FeatureFilter subclass for your new filter
 """
+from abc import ABC, abstractmethod
+
 import numpy as np
 import pandas as pd
 from boruta import BorutaPy
@@ -10,7 +12,22 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler
 
 from ...logs import logger
-from ..interfaces import FeatureFilter
+
+
+class FeatureFilter(ABC):
+    """Filter out uninformative featureNames from a dataframe."""
+    @abstractmethod
+    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None):
+        """Filter out uninformative features from a dataframe.
+
+        Args:
+            df (pd.DataFrame): dataframe to be filtered
+            y_col (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
+
+        Returns:
+            The filtered pd.DataFrame
+        """
 
 
 class LowVarianceFilter(FeatureFilter):

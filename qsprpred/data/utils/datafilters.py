@@ -3,6 +3,7 @@
 To add a new filter:
 * Add a DataFilter subclass for your new filter
 """
+from abc import ABC, abstractmethod
 from functools import partial
 from itertools import chain
 from typing import Optional
@@ -10,8 +11,21 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from ...data.interfaces import DataFilter
 from ...logs import logger
+
+
+class DataFilter(ABC):
+    """Filter out some rows from a dataframe."""
+    @abstractmethod
+    def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Filter out some rows from a dataframe.
+
+        Args:
+            df (pd.DataFrame): dataframe to be filtered
+
+        Returns:
+            The filtered pd.DataFrame
+        """
 
 
 class CategoryFilter(DataFilter):
@@ -140,4 +154,5 @@ class RepeatsFilter(DataFilter):
                 repeat.remove(tokeep)  # Remove the one to keep from the allrepeats list
             df = df.drop(list(chain(*allrepeats)))
 
+        return df
         return df

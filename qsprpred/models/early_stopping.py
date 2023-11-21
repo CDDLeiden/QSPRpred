@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 
 from ..data.data import QSPRDataset
-from ..data.interfaces import DataSplit
 from ..logs import logger
 
 
@@ -174,7 +173,7 @@ def early_stopping(func: Callable) -> Callable:
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any | None = None,
         mode: EarlyStoppingMode | None = None,
-        split: DataSplit | None = None,
+        split: "DataSplit" = None,
         monitor: "FitMonitor" = None,
         **kwargs,
     ) -> Any:

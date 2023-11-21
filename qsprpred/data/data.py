@@ -6,9 +6,10 @@ import os
 import pickle
 import shutil
 import warnings
+from abc import ABC, abstractmethod
 from collections.abc import Callable
 from multiprocessing import Pool
-from typing import Generator, Literal, Optional
+from typing import ClassVar, Generator, Literal, Optional
 
 import numpy as np
 import pandas as pd
@@ -16,12 +17,15 @@ from rdkit.Chem import PandasTools
 from sklearn.preprocessing import LabelEncoder
 from tqdm.auto import tqdm
 
-from .utils.datafilters import RepeatsFilter
 from ..logs import logger
 from ..models.tasks import TargetTasks
-from qsprpred.utils.serialization import JSONSerializable, function_as_string, function_from_string
 from ..utils.enumerate import enumerate_with_zeros
-from .interfaces import DataSet, DataSplit, MoleculeDataSet
+from ..utils.serialization import (
+    JSONSerializable,
+    function_as_string,
+    function_from_string,
+)
+from .utils.datafilters import RepeatsFilter
 from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -33,6 +37,184 @@ from .utils.smiles_standardization import (
     chembl_smi_standardizer,
     old_standardize_sanitize,
 )
+
+
+class StoredTable(ABC):
+    """Abstract base class for tables that are stored in a file."""
+    @abstractmethod
+    def save(self):
+        """Save the table to a file."""
+
+    @abstractmethod
+    def reload(self):
+        """Reload the table from a file."""
+
+    @abstractmethod
+    def clearFiles(self):
+        """Delete the files associated with the table."""
+
+    @staticmethod
+    @abstractmethod
+    def fromFile(filename: str) -> "StoredTable":
+        """Load a `StoredTable` object from a file.
+
+        Args:
+            filename (str): The name of the file to load the object from.
+
+        Returns:
+            The `StoredTable` object itself.
+        """
+
+
+class DataSet(StoredTable):
+    @abstractmethod
+    def __len__(self):
+        pass
+
+    @abstractmethod
+    def getProperties(self):
+        """Get the properties of the dataset."""
+
+    @abstractmethod
+    def addProperty(self, name: str, data: list):
+        """Add a property to the dataset.
+
+        Args:
+            name (str): The name of the property.
+            data (list): The data of the property.
+        """
+
+    @abstractmethod
+    def removeProperty(self, name: str):
+        """Remove a property from the dataset.
+
+        Args:
+            name (str): The name of the property.
+        """
+
+    @abstractmethod
+    def getSubset(self, prefix: str):
+        """Get a subset of the dataset.
+
+        Args:
+            prefix (str): The prefix of the subset.
+        """
+
+    @abstractmethod
+    def apply(
+        self,
+        func: callable,
+        func_args: list | None = None,
+        func_kwargs: dict | None = None,
+        *args,
+        **kwargs,
+    ):
+        """Apply a function to the dataset.
+
+        Args:
+            func (callable): The function to apply.
+            func_args (list, optional): The positional arguments of the function.
+            func_kwargs (dict, optional): The keyword arguments of the function.
+        """
+
+    @abstractmethod
+    def transform(self, targets, transformers):
+        pass
+
+    @abstractmethod
+    def filter(self, table_filters: list[Callable]):
+        """Filter the dataset.
+
+        Args:
+            table_filters (List[Callable]): The filters to apply.
+        """
+
+
+class MoleculeDataSet(DataSet):
+    @abstractmethod
+    def addDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
+        """
+        Add descriptors to the dataset.
+
+        Args:
+            calculator (DescriptorsCalculator): An instance of the
+                `DescriptorsCalculator` class that wraps the descriptors to be
+                calculated.
+        """
+
+    @abstractmethod
+    def getDescriptors(self) -> pd.DataFrame:
+        """
+        Get the table of descriptors that are currently in the dataset.
+
+        Returns:
+            a pd.DataFrame with the descriptors
+        """
+
+    @abstractmethod
+    def getDescriptorNames(self) -> list[str]:
+        """
+        Get the names of the descriptors that are currently in the dataset.
+
+        Returns:
+            a `list` of descriptor names
+        """
+
+    @property
+    @abstractmethod
+    def hasDescriptors(self):
+        """Indicates if the dataset has descriptors."""
+
+
+class Randomized:
+    """A pseudorandom action that can be fixed with a seed.
+
+    Attributes:
+        seed (int | None):
+            The seed to use to randomize the action. If `None`,
+            a random seed is used instead of a fixed one (default: `None`).
+    """
+    def __init__(self, seed: int | None = None) -> None:
+        """Create a new randomized action.
+
+        Args:
+            seed:
+                the seed to use to randomize the action. If `None`,
+                a random seed is used instead of a fixed one (default: `None`).
+        """
+        self.seed = seed
+
+    def setSeed(self, seed: int | None = None):
+        self.seed = seed
+
+    def getSeed(self):
+        """Get the seed used to randomize the action."""
+        return self.seed
+
+
+class DataSetDependant:
+    """Classes that need a data set to operate have to implement this."""
+    def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
+        self.dataSet = dataset
+
+    def setDataSet(self, dataset: MoleculeDataSet):
+        self.dataSet = dataset
+
+    @property
+    def hasDataSet(self) -> bool:
+        """Indicates if this object has a data set attached to it."""
+        return self.dataSet is not None
+
+    def getDataSet(self):
+        """Get the data set attached to this object.
+
+        Raises:
+            ValueError: If no data set is attached to this object.
+        """
+        if self.hasDataSet:
+            return self.dataSet
+        else:
+            raise ValueError("Data set not set.")
 
 
 class PandasDataSet(DataSet, JSONSerializable):
@@ -58,9 +240,7 @@ class PandasDataSet(DataSet, JSONSerializable):
 
     """
 
-    _notJSON = JSONSerializable._notJSON + [
-        "df",
-    ]
+    _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
 
     class ParallelApplyWrapper:
         """A wrapper class to parallelize pandas apply functions."""
@@ -503,7 +683,7 @@ class PandasDataSet(DataSet, JSONSerializable):
 
     @classmethod
     def fromFile(cls, filename: str) -> "PandasDataSet":
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             json_f = f.read()
         o_dict = json.loads(json_f)
         o_dict["py/state"]["storeDir"] = os.path.dirname(filename)
@@ -535,9 +715,8 @@ class PandasDataSet(DataSet, JSONSerializable):
 
 class DescriptorTable(PandasDataSet):
     """Pandas table that holds descriptor data
-     for modelling and other analyses.
+    for modelling and other analyses.
     """
-
     def __init__(
         self,
         calculator,
@@ -621,9 +800,7 @@ class DescriptorTable(PandasDataSet):
 class MoleculeTable(PandasDataSet, MoleculeDataSet):
     """Class that holds and prepares molecule data for modelling and other analyses."""
 
-    _notJSON = PandasDataSet._notJSON + [
-        "descriptors",
-    ]
+    _notJSON: ClassVar = [*PandasDataSet._notJSON, "descriptors"]
 
     def __init__(
         self,
@@ -1266,9 +1443,7 @@ class TargetProperty(JSONSerializable):
     def __getstate__(self):
         o_dict = super().__getstate__()
         if self.transformer:
-            o_dict["transformer"] = function_as_string(
-                self.transformer
-            )
+            o_dict["transformer"] = function_as_string(self.transformer)
         return o_dict
 
     def __setstate__(self, state):
@@ -1346,8 +1521,10 @@ class TargetProperty(JSONSerializable):
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{k: TargetTasks[v.upper()] if k == "task" else v
-                   for k, v in d.items()}
+                **{
+                    k: TargetTasks[v.upper()] if k == "task" else v
+                    for k, v in d.items()
+                }
             )
         else:
             return TargetProperty(**d)
@@ -1462,12 +1639,7 @@ class QSPRDataset(MoleculeTable):
         featureNames (list of str) : feature names
     """
 
-    _notJSON = PandasDataSet._notJSON + [
-        "X",
-        "X_ind",
-        "y",
-        "y_ind",
-    ]
+    _notJSON: ClassVar = [*PandasDataSet._notJSON, "X", "X_ind", "y", "y_ind"]
 
     def __init__(
         self,
@@ -1927,7 +2099,7 @@ class QSPRDataset(MoleculeTable):
             self.saveSplit()
         super().save()
 
-    def split(self, split: DataSplit, featurize: bool = False):
+    def split(self, split: "DataSplit", featurize: bool = False):
         """Split dataset into train and test set.
 
         You can either split tha data frame itself or you can set `featurize` to `True`
@@ -2421,7 +2593,7 @@ class QSPRDataset(MoleculeTable):
 
     def iterFolds(
         self,
-        split: DataSplit,
+        split: "DataSplit",
         concat: bool = False,
     ) -> Generator[
         tuple[
