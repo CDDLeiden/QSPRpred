@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 from rdkit.Chem.rdchem import Mol
 
-from ...logs import logger
+from qsprpred.logs import logger
 from qsprpred.utils.serialization import JSONSerializable
-from .descriptorsets import get_descriptor
+from qsprpred.data.utils.descriptorsets import get_descriptor
 
 
 class DescriptorsCalculator(JSONSerializable, ABC):

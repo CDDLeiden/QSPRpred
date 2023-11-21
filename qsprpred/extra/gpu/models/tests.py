@@ -10,7 +10,7 @@ from sklearn.impute import SimpleImputer
 
 from ....data.data import QSPRDataset
 from ....data.utils.datasplitters import RandomSplit
-from ....data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
+from qsprpred.data.descriptors.descriptorcalculator import MoleculeDescriptorsCalculator
 from ....data.utils.descriptorsets import SmilesDesc
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel

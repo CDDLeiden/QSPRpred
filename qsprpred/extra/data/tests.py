@@ -17,7 +17,7 @@ from ...data.tests import (
     TestDescriptorInDataMixIn,
 )
 from ...data.utils.datasplitters import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
-from ...data.utils.descriptorcalculator import (
+from qsprpred.data.descriptors.descriptorcalculator import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )

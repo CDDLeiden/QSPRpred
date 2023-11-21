@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-from ....data.utils.descriptorcalculator import DescriptorsCalculator
+from qsprpred.data.descriptors.descriptorcalculator import DescriptorsCalculator
 from .descriptor_utils.msa_calculator import ClustalMSA, MSAProvider
 from .descriptorsets import ProteinDescriptorSet
 

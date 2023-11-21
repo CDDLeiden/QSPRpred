@@ -2,7 +2,6 @@
 
 import argparse
 import json
-import os
 import os.path
 import sys
 from datetime import datetime
@@ -23,7 +22,7 @@ from .data.utils.datasplitters import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from .data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
+from qsprpred.data.descriptors.descriptorcalculator import MoleculeDescriptorsCalculator
 from .data.utils.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,

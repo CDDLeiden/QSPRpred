@@ -34,7 +34,7 @@ from .utils.datasplitters import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from .utils.descriptorcalculator import (
+from qsprpred.data.descriptors.descriptorcalculator import (
     CustomDescriptorsCalculator,
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
