@@ -5,7 +5,7 @@ from rdkit import Chem, DataStructs
 from rdkit.SimDivFilters import rdSimDivPickers
 
 from ...logs import logger
-from .descriptorsets import FingerprintSet
+from qsprpred.data.descriptors.descriptorsets import FingerprintSet
 from .scaffolds import Murcko, Scaffold
 
 

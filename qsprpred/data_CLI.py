@@ -23,7 +23,7 @@ from .data.utils.datasplitters import (
     TemporalSplit,
 )
 from qsprpred.data.descriptors.descriptorcalculator import MoleculeDescriptorsCalculator
-from .data.utils.descriptorsets import (
+from qsprpred.data.descriptors.descriptorsets import (
     DrugExPhyschem,
     FingerprintSet,
     PredictorDesc,

@@ -8,7 +8,7 @@ from rdkit.Chem.rdchem import Mol
 
 from qsprpred.logs import logger
 from qsprpred.utils.serialization import JSONSerializable
-from qsprpred.data.utils.descriptorsets import get_descriptor
+from qsprpred.data.descriptors.descriptorsets import get_descriptor
 
 
 class DescriptorsCalculator(JSONSerializable, ABC):

@@ -39,7 +39,7 @@ from qsprpred.data.descriptors.descriptorcalculator import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
-from .utils.descriptorsets import (
+from qsprpred.data.descriptors.descriptorsets import (
     DataFrameDescriptorSet,
     DescriptorSet,
     DrugExPhyschem,

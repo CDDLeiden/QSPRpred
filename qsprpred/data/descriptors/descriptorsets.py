@@ -16,10 +16,10 @@ from rdkit.Chem import Lipinski
 from rdkit.ML.Descriptors import MoleculeDescriptors
 
 from qsprpred.utils.serialization import JSONSerializable
-from ...logs import logger
+from qsprpred.logs import logger
 
-from ...models.models import QSPRModel
-from ...data.descriptors.fingerprints import get_fingerprint
+from qsprpred.models.models import QSPRModel
+from qsprpred.data.descriptors.fingerprints import get_fingerprint
 
 
 class DescriptorSet(JSONSerializable, ABC):

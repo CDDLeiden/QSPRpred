@@ -11,7 +11,7 @@ from sklearn.impute import SimpleImputer
 from ....data.data import QSPRDataset
 from ....data.utils.datasplitters import RandomSplit
 from qsprpred.data.descriptors.descriptorcalculator import MoleculeDescriptorsCalculator
-from ....data.utils.descriptorsets import SmilesDesc
+from qsprpred.data.descriptors.descriptorsets import SmilesDesc
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
