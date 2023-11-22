@@ -17,7 +17,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold, ShuffleSplit, StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-from ..logs.stopwatch import StopWatch
+from qsprpred.utils.stopwatch import StopWatch
 from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from .data import QSPRDataset, TargetProperty
