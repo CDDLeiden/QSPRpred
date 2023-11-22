@@ -14,7 +14,7 @@ from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.logs import logger
 from qsprpred.data.data import DataSetDependant, MoleculeDataSet, QSPRDataset, Randomized
-from qsprpred.data.utils.data_clustering import (
+from qsprpred.data.utils.clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
     RandomClusters,
