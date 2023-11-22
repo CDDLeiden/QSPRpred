@@ -25,9 +25,7 @@ stages:
       - python -m pip install jupyterlab
       - python -m pip freeze # For debugging environment
    script:
-      - pytest qsprpred
-      - cd clitest && ./run.sh
-      - cd ../tutorial && ./run_all.sh
+      - cd testing && ./run.sh
 
 # # Run tests on Python version 11 (linux image)
 # test:python3.11:
@@ -38,20 +36,3 @@ stages:
 test:python3.10:
    extends: .test
    image: python:3.10
-
-# Write documentation on main branch
-# FIXME: this is not working properly at the moment
-#pages:
-#   stage: deploy
-#   image: python:3.10
-#   before_script:
-#      - python -m pip install -U sphinx
-#      - python -m pip install sphinx-rtd-theme
-#   script:
-#      - mkdir public
-#      - sphinx-build -b html ./docs public
-#   artifacts:
-#      paths:
-#      - public
-#   only:
-#      - main

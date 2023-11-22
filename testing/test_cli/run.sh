@@ -6,7 +6,7 @@ export PYTHONPATH=".."
 
 # input data and base directory
 export TEST_BASE="."
-export TEST_DATA='data/test_data_large.tsv'
+export TEST_DATA="${TEST_BASE}/data/test_data_large.tsv"
 
 function cleanup() {
   rm -rf ${TEST_BASE}/data/backup_*;
@@ -45,7 +45,7 @@ python -m qsprpred.data_CLI \
 -st 2000 \
 -fe Morgan \
 -fe RDkit \
--pd ../qsprpred/data/test_files/test_predictor/qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json \
+-pd ../../qsprpred/data/test_files/test_predictor/qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json \
 -lv 0.01 \
 -hc 0.9 \
 -fv 0.0
