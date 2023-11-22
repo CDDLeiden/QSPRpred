@@ -32,7 +32,7 @@ from qsprpred.data.processing.feature_standardization import (
 )
 from qsprpred.data.sampling.folds import FoldsFromDataSplit
 from .chem.scaffolds import Scaffold
-from .chem.smiles_standardization import (
+from .chem.standardization import (
     check_smiles_valid,
     chembl_smi_standardizer,
     old_standardize_sanitize,
