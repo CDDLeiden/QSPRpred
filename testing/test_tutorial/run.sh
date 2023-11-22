@@ -2,7 +2,7 @@
 
 set -e
 
-TUTORIAL_BASE="../../tutorial"
+export TUTORIAL_BASE="../../tutorial"
 
 # Run each notebook (order matters so let's do it manually)
 jupyter nbconvert --to notebook --execute ${TUTORIAL_BASE}/data_preparation.ipynb
