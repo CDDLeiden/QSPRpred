@@ -48,41 +48,42 @@ class Murcko(Scaffold):
 
 class BemisMurcko(Scaffold):
     """
-    Reimplementation of Bemis-Murcko scaffolds based on a function described in the
-    discussion here: https://sourceforge.net/p/rdkit/mailman/message/37269507/
+    Extension of rdkit's BM-like scaffold to make it more true to the paper.
+    In BM's paper, exo bonds on linkers or on rings get cutoff but two
+    electrons remain. 
+    
+    In the rdkit implementation, both atoms in the exo bond get included.
+    This means for BM C1CCC1=N and C1CCC1=O are the same, for rdkit they are
+    different.
 
-    This implementation allows more flexibility in terms of what substructures should be
-    kept, converted, and how.
+    When flattening the BM scaffold using MakeScaffoldGeneric() this leads to
+    distinct scaffolds, as C1CCC1=O is flattened to C1CCC1C and not C1CCC1.
+    
+    In this approach, the two electrons are represented as SMILES "=*". This
+    is to make sure the automatic oxidation state assignment of sulfur does
+    not flatten C1CS1(=*)(=*) into C1CS1 when explicit hydrogen count is
+    provided.
 
-    Credit: Francois Berenger
     Ref.: Bemis, G. W., & Murcko, M. A. (1996). "The properties of known drugs. 1.
     Molecular frameworks." Journal of medicinal chemistry, 39(15), 2887-2893.
 
     """
     def __init__(
-        self, convert_hetero=True, force_single_bonds=True, remove_terminal_atoms=True
+        self, real_bemismurcko=True, use_csk=False
     ):
         """
         Initialize the scaffold generator.
 
         Args:
-            convert_hetero (bool): Convert hetero atoms to carbons.
-            force_single_bonds (bool): Convert all scaffold's bonds to single ones.
-            remove_terminal_atoms (bool): Remove all terminal atoms, keep only
-                ring linkers.
+            real_bemismurcko (bool): Use guidelines from Bemis murcko paper.
+                otherwise, use native rdkit implementation.
+            use_csk (bool): Make scaffold generic (convert all bonds to single
+                and all atoms to carbon). If real_bemismurcko is on, also
+                remove all flattened exo bonds.
         """
-        self.convertHetero = convert_hetero
-        self.forceSingleBonds = force_single_bonds
-        self.removeTerminalAtoms = remove_terminal_atoms
+        self.realBemisMurcko = real_bemismurcko
+        self.useCSK = use_csk
 
-    @staticmethod
-    def findTerminalAtoms(mol):
-        res = []
-
-        for a in mol.GetAtoms():
-            if len(a.GetBonds()) == 1:
-                res.append(a)
-        return res
 
     def __call__(self, mol):
         """
@@ -94,40 +95,23 @@ class BemisMurcko(Scaffold):
         Returns:
             SMILES of the Bemis-Murcko scaffold as `str`
         """
-
         from rdkit import Chem
+        from rdkit.Chem.Scaffolds import MurckoScaffold
+        from rdkit.Chem.AllChem import ReplaceSubstructs
 
         mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
-        only_HA = Chem.rdmolops.RemoveHs(mol)
-        rw_mol = Chem.RWMol(only_HA)
-
-        # switch all HA to Carbon
-        if self.convertHetero:
-            for i in range(rw_mol.GetNumAtoms()):
-                rw_mol.ReplaceAtom(i, Chem.Atom(6))
-
-        # switch all non single bonds to single
-        if self.forceSingleBonds:
-            non_single_bonds = []
-            for b in rw_mol.GetBonds():
-                if b.GetBondType() != Chem.BondType.SINGLE:
-                    non_single_bonds.append(b)
-            for b in non_single_bonds:
-                j = b.GetBeginAtomIdx()
-                k = b.GetEndAtomIdx()
-                rw_mol.RemoveBond(j, k)
-                rw_mol.AddBond(j, k, Chem.BondType.SINGLE)
-
-        # as long as there are terminal atoms, remove them
-        if self.removeTerminalAtoms:
-            terminal_atoms = self.findTerminalAtoms(rw_mol)
-            while terminal_atoms:
-                for a in terminal_atoms:
-                    for b in a.GetBonds():
-                        rw_mol.RemoveBond(b.GetBeginAtomIdx(), b.GetEndAtomIdx())
-                    rw_mol.RemoveAtom(a.GetIdx())
-                terminal_atoms = self.findTerminalAtoms(rw_mol)
-            return Chem.MolToSmiles(rw_mol.GetMol())
+        Chem.RemoveStereochemistry(mol) #important for canonization !
+        scaff=MurckoScaffold.GetScaffoldForMol(mol)
+        
+        if self.realBemisMurcko:
+            scaff=ReplaceSubstructs(scaff,Chem.MolFromSmarts("[$([D1]=[*])]"),Chem.MolFromSmarts("[*]"),replaceAll=True)[0]
+                                            
+        if self.useCSK:
+            scaff=MurckoScaffold.MakeScaffoldGeneric(scaff)
+            if self.realBemisMurcko:
+                scaff=MurckoScaffold.GetScaffoldForMol(scaff)
+        Chem.SanitizeMol(scaff)
+        return Chem.MolToSmiles(scaff)
 
     def __str__(self):
         return "Bemis-Murcko"
