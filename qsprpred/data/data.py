@@ -31,8 +31,8 @@ from qsprpred.data.processing.feature_standardization import (
     apply_feature_standardizer,
 )
 from qsprpred.data.sampling.folds import FoldsFromDataSplit
-from .utils.scaffolds import Scaffold
-from .utils.smiles_standardization import (
+from .chem.scaffolds import Scaffold
+from .chem.smiles_standardization import (
     check_smiles_valid,
     chembl_smi_standardizer,
     old_standardize_sanitize,

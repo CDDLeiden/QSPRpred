@@ -21,7 +21,7 @@ from ..logs.stopwatch import StopWatch
 from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from .data import QSPRDataset, TargetProperty
-from .utils.clustering import (
+from .chem.clustering import (
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
 )
@@ -52,7 +52,7 @@ from qsprpred.data.descriptors.descriptorsets import (
 from qsprpred.data.processing.feature_standardization import SKLearnStandardizer
 from qsprpred.data.processing.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
 from qsprpred.data.sampling.folds import FoldsFromDataSplit
-from .utils.scaffolds import BemisMurcko, Murcko
+from .chem.scaffolds import BemisMurcko, Murcko
 
 N_CPU = 2
 CHUNK_SIZE = 50

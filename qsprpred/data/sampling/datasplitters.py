@@ -14,13 +14,13 @@ from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.logs import logger
 from qsprpred.data.data import DataSetDependant, MoleculeDataSet, QSPRDataset, Randomized
-from qsprpred.data.utils.clustering import (
+from qsprpred.data.chem.clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
     RandomClusters,
     ScaffoldClusters,
 )
-from qsprpred.data.utils.scaffolds import Murcko, Scaffold
+from qsprpred.data.chem.scaffolds import Murcko, Scaffold
 
 
 class DataSplit(ABC, DataSetDependant):

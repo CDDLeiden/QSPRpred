@@ -35,7 +35,7 @@ from qsprpred.data.processing.featurefilters import (
     HighCorrelationFilter,
     LowVarianceFilter,
 )
-from .data.utils.scaffolds import Murcko
+from .data.chem.scaffolds import Murcko
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
 from .models.sklearn import SklearnModel
