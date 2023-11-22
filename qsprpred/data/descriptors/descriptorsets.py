@@ -239,6 +239,9 @@ class DrugExPhyschem(MoleculeDescriptorSet):
     Args:
         props: list of properties to calculate
     """
+
+    _notJSON = [*MoleculeDescriptorSet._notJSON, "_prop_dict"]
+
     def __init__(self, physchem_props: list[str] | None = None):
         """Initialize the descriptorset with Property arguments (a list of properties to
         calculate) to select a subset.
@@ -246,31 +249,11 @@ class DrugExPhyschem(MoleculeDescriptorSet):
         Args:
             physchem_props: list of properties to calculate
         """
-        self._prop_dict = {
-            "MW": desc.MolWt,
-            "logP": Crippen.MolLogP,
-            "HBA": AllChem.CalcNumLipinskiHBA,
-            "HBD": AllChem.CalcNumLipinskiHBD,
-            "Rotable": AllChem.CalcNumRotatableBonds,
-            "Amide": AllChem.CalcNumAmideBonds,
-            "Bridge": AllChem.CalcNumBridgeheadAtoms,
-            "Hetero": AllChem.CalcNumHeteroatoms,
-            "Heavy": Lipinski.HeavyAtomCount,
-            "Spiro": AllChem.CalcNumSpiroAtoms,
-            "FCSP3": AllChem.CalcFractionCSP3,
-            "Ring": Lipinski.RingCount,
-            "Aliphatic": AllChem.CalcNumAliphaticRings,
-            "Aromatic": AllChem.CalcNumAromaticRings,
-            "Saturated": AllChem.CalcNumSaturatedRings,
-            "HeteroR": AllChem.CalcNumHeterocycles,
-            "TPSA": AllChem.CalcTPSA,
-            "Valence": desc.NumValenceElectrons,
-            "MR": Crippen.MolMR,
-        }
+        self._prop_dict = self.getPropDict()
         if physchem_props:
             self.props = physchem_props
         else:
-            self.props = self._prop_dict.keys()
+            self.props = list(self._prop_dict.keys())
         self._isFP = False
 
     def __call__(self, mols):
@@ -286,6 +269,10 @@ class DrugExPhyschem(MoleculeDescriptorSet):
                     logger.exception(exp)
                     continue
         return scores
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self._prop_dict = self.getPropDict()
 
     @property
     def isFP(self):
@@ -306,6 +293,30 @@ class DrugExPhyschem(MoleculeDescriptorSet):
 
     def __str__(self):
         return "DrugExPhyschem"
+
+    @staticmethod
+    def getPropDict():
+        return {
+            "MW": desc.MolWt,
+            "logP": Crippen.MolLogP,
+            "HBA": AllChem.CalcNumLipinskiHBA,
+            "HBD": AllChem.CalcNumLipinskiHBD,
+            "Rotable": AllChem.CalcNumRotatableBonds,
+            "Amide": AllChem.CalcNumAmideBonds,
+            "Bridge": AllChem.CalcNumBridgeheadAtoms,
+            "Hetero": AllChem.CalcNumHeteroatoms,
+            "Heavy": Lipinski.HeavyAtomCount,
+            "Spiro": AllChem.CalcNumSpiroAtoms,
+            "FCSP3": AllChem.CalcFractionCSP3,
+            "Ring": Lipinski.RingCount,
+            "Aliphatic": AllChem.CalcNumAliphaticRings,
+            "Aromatic": AllChem.CalcNumAromaticRings,
+            "Saturated": AllChem.CalcNumSaturatedRings,
+            "HeteroR": AllChem.CalcNumHeterocycles,
+            "TPSA": AllChem.CalcTPSA,
+            "Valence": desc.NumValenceElectrons,
+            "MR": Crippen.MolMR,
+        }
 
 
 class RDKitDescs(MoleculeDescriptorSet):
