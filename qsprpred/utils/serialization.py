@@ -9,6 +9,9 @@ from importlib import import_module
 from typing import Any, Callable
 
 import jsonpickle
+
+from qsprpred.utils.inspect import dynamic_import
+
 jsonpickle.set_encoder_options('json', indent=4)
 
 
@@ -162,6 +165,4 @@ def function_from_string(func_str: str) -> Callable:
             globals()
         )
     except:
-        module_name, func_name = func_str.rsplit(".", 1)
-        module = import_module(module_name)
-        return getattr(module, func_name)
+        return dynamic_import(func_str)

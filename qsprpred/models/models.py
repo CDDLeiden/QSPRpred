@@ -20,7 +20,7 @@ from ..logs import logger
 from ..models import SSPACE
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..models.tasks import ModelTasks
-from ..utils.inspect import import_class
+from ..utils.inspect import dynamic_import
 
 
 class QSPRModel(JSONSerializable, ABC):
@@ -239,7 +239,7 @@ class QSPRModel(JSONSerializable, ABC):
         """Set state."""
         super().__setstate__(state)
         self.data = None
-        self.alg = import_class(self.alg)
+        self.alg = dynamic_import(self.alg)
         self.estimator = self.loadEstimator(self.parameters)
 
     def initFromData(self, data: QSPRDataset | None):
