@@ -16,19 +16,19 @@ from ...data.tests import (
     DataSetsMixIn,
     TestDescriptorInDataMixIn,
 )
-from qsprpred.data.sampling.datasplitters import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
-from qsprpred.data.descriptors.descriptorcalculator import (
+from qsprpred.data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
+from qsprpred.data.descriptors.calculators import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
-from qsprpred.data.descriptors.descriptorsets import (
+from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
     FingerprintSet,
     MoleculeDescriptorSet,
     RDKitDescs,
 )
-from qsprpred.data.processing.feature_standardization import SKLearnStandardizer
-from qsprpred.data.processing.featurefilters import HighCorrelationFilter, LowVarianceFilter
+from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
+from qsprpred.data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...extra.data.data import PCMDataSet
 from ...extra.data.utils.descriptor_utils.msa_calculator import (
     MAFFT,

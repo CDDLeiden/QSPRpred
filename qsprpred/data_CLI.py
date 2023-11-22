@@ -14,23 +14,23 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
 from .data.data import QSPRDataset
-from qsprpred.data.processing.datafilters import papyrusLowQualityFilter
-from qsprpred.data.sampling.datasplitters import (
+from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
+from qsprpred.data.sampling.splits import (
     ClusterSplit,
     ManualSplit,
     RandomSplit,
     ScaffoldSplit,
     TemporalSplit,
 )
-from qsprpred.data.descriptors.descriptorcalculator import MoleculeDescriptorsCalculator
-from qsprpred.data.descriptors.descriptorsets import (
+from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
+from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
     FingerprintSet,
     PredictorDesc,
     RDKitDescs,
     SmilesDesc,
 )
-from qsprpred.data.processing.featurefilters import (
+from qsprpred.data.processing.feature_filters import (
     BorutaFilter,
     HighCorrelationFilter,
     LowVarianceFilter,

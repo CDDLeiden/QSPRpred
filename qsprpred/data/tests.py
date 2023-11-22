@@ -25,8 +25,8 @@ from .chem.clustering import (
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
 )
-from qsprpred.data.processing.datafilters import CategoryFilter, RepeatsFilter
-from qsprpred.data.sampling.datasplitters import (
+from qsprpred.data.processing.data_filters import CategoryFilter, RepeatsFilter
+from qsprpred.data.sampling.splits import (
     BootstrapSplit,
     ClusterSplit,
     ManualSplit,
@@ -34,12 +34,12 @@ from qsprpred.data.sampling.datasplitters import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from qsprpred.data.descriptors.descriptorcalculator import (
+from qsprpred.data.descriptors.calculators import (
     CustomDescriptorsCalculator,
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
-from qsprpred.data.descriptors.descriptorsets import (
+from qsprpred.data.descriptors.sets import (
     DataFrameDescriptorSet,
     DescriptorSet,
     DrugExPhyschem,
@@ -49,8 +49,8 @@ from qsprpred.data.descriptors.descriptorsets import (
     SmilesDesc,
     TanimotoDistances,
 )
-from qsprpred.data.processing.feature_standardization import SKLearnStandardizer
-from qsprpred.data.processing.featurefilters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
+from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
+from qsprpred.data.processing.feature_filters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
 from qsprpred.data.sampling.folds import FoldsFromDataSplit
 from .chem.scaffolds import BemisMurcko, Murcko
 
