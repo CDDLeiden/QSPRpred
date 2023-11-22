@@ -61,6 +61,11 @@ python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o qspr/data -pr GABA
 python -m qsprpred.model_CLI -dp ./qspr/data/GABAAalpha_REGRESSION_df.pkl -o ./qspr/models -m PLS -o bayes -nt 5 -me -s
 ```
 
+Contributions
+=============
+
+Contributions and issue reports are more than welcome. Pull requests can be made directly to the `main` branch and we will transfer them to [contrib](https://github.com/CDDLeiden/QSPRpred/tree/contrib) when scheduled for the next release.
+
 Workflow
 ========
 ![image](figures/QSPRpred_workflow.png)
