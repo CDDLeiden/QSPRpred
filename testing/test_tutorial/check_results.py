@@ -12,6 +12,7 @@ import os
 import sys
 import traceback
 
+TUTORIAL_BASE = os.environ.get("TUTORIAL_BASE")
 
 success = True
 failed_files = []
@@ -23,7 +24,7 @@ for f in os.listdir("expected"):
             relative_file_path = f"{f}/{file_name}"
 
             expected_file_path = f"expected/{relative_file_path}"
-            actual_file_path = f"qspr/models/{relative_file_path}"
+            actual_file_path = f"{TUTORIAL_BASE}/qspr/models/{relative_file_path}"
 
             expected_values = (
                 pd.read_csv(expected_file_path, sep="\t")
@@ -75,7 +76,8 @@ for f in os.listdir("expected"):
             continue
 
 if not success:
-    sys.stderr.write("Comparison of tutorial outputs failed! One or more files did not match:\n" + "\n".join(failed_files))
+    sys.stderr.write("Comparison of tutorial outputs failed! "
+                     "One or more files did not match:\n" + "\n".join(failed_files))
     sys.exit(1)
 else:
     print("Comparison of tutorial outputs successful!")
