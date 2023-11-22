@@ -160,6 +160,10 @@ class EarlyStopping:
         """Return whether early stopping is used."""
         return self.mode.__bool__()
 
+    def clean(self):
+        """Clean early stopping object."""
+        self._trainedEpochs = []
+
 
 def early_stopping(func: Callable) -> Callable:
     """Early stopping decorator for fit method of models that support early stopping.

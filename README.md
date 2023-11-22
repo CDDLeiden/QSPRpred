@@ -53,13 +53,7 @@ This is needed to provide multiple sequence alignments for the PCM descriptors.
 At the moment, we do not support protein descriptor calculation for PCM on Windows.
 
 ## Use
-After installation, you will have access to various command line features, but you can also use the Python API directly (see [Documentation](https://cddleiden.github.io/QSPRPred/docs/)). For a quick start, you can also check out the  [Jupyter notebook tutorials](./tutorial), which documents the use of the Python API to build different types of models. [This tutorial](./tutorial/tutorial_training.ipynb) shows how a QSAR model can be trained. [This tutorial](./tutorial/tutorial_usage.ipynb) shows how to use a QSAR model to predict the bioactivity of a set of molecules. The tutorials as well as the [documentation](https://cddleiden.github.io/QSPRPred/docs/use.html) are still work in progress, and we will be happy for any contributions where it is still lacking.
-
-To use the commandline to train the same QSAR model as in the tutorial use (run from tutorial folder):
-```bash
-python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o qspr/data -pr GABAAalpha -pr NMDA -r true -sp random -sf 0.15 -fe Morgan
-python -m qsprpred.model_CLI -dp ./qspr/data/GABAAalpha_REGRESSION_df.pkl -o ./qspr/models -m PLS -o bayes -nt 5 -me -s
-```
+After installation, you will have access to various command line features and you can use the Python API directly (see [Documentation](https://cddleiden.github.io/QSPRPred/docs/)). For a quick start, you can also check out the [Jupyter notebook tutorials](./tutorials/README.md), which document the use of the Python API to build different types of models. The tutorials as well as the [documentation](https://cddleiden.github.io/QSPRPred/docs/use.html) are still work in progress, and we will be happy for any contributions where it is still lacking.
 
 Workflow
 ========
@@ -74,3 +68,7 @@ Current Development Team
 - [S. Luukkonen](https://github.com/sohviluukkonen)
 - [M. Gorosiola González](https://github.com/gorostiolam)
 - [D. Araripe](https://github.com/David-Araripe)
+- [C. Jespers](https://github.com/ChielJespers)
+- [A. Bernatavicius](https://github.com/andriusbern)
+- [R. van den Broek](https://github.com/rlvandenbroek)
+

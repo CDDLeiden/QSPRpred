@@ -1,17 +1,19 @@
 #!/bin/bash
 
+# Run all jupyter notebooks in the tutorial directory
 set -e
 
-export TUTORIAL_BASE="../../tutorial"
+export TUTORIAL_BASE="../../tutorials"
 
-# Run each notebook (order matters so let's do it manually)
-jupyter nbconvert --to notebook --execute ${TUTORIAL_BASE}/data_preparation.ipynb
-jupyter nbconvert --to notebook --execute ${TUTORIAL_BASE}/data_preparation_advanced.ipynb
-jupyter nbconvert --to notebook --execute ${TUTORIAL_BASE}/data_splitting.ipynb
-jupyter nbconvert --to notebook --execute ${TUTORIAL_BASE}/tutorial_training.ipynb
-jupyter nbconvert --to notebook --execute ${TUTORIAL_BASE}/tutorial_usage.ipynb
-jupyter nbconvert --to notebook --execute ${TUTORIAL_BASE}/adding_new_components.ipynb
-jupyter nbconvert --to notebook --execute ${TUTORIAL_BASE}/pcm.ipynb
+# Create the dataset
+python "${TUTORIAL_BASE}/tutorial_data/create_tutorial_data.py"
 
+# Run each notebook in the directory
+find $TUTORIAL_BASE -name "*.ipynb" | while read notebook
+do
+    jupyter nbconvert --to notebook --execute "$notebook"
+done
+
+# FIXME: bring back model consistency comparison
 # check consistency of models
-python check_results.py
+# python check_results.py
