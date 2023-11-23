@@ -15,8 +15,16 @@ from sklearn import metrics
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import accuracy_score, f1_score
-from sklearn.metrics import get_scorer as get_sklearn_scorer
+from sklearn.metrics import (
+    accuracy_score,
+    explained_variance_score,
+    f1_score,
+    log_loss,
+    top_k_accuracy_score,
+    mean_squared_error,
+    roc_auc_score,
+)
+from sklearn.metrics import make_scorer
 from sklearn.metrics import matthews_corrcoef, precision_score, recall_score
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
@@ -34,10 +42,10 @@ from ..models.interfaces import (
     HyperparameterOptimizationMonitor,
     QSPRModel,
 )
-from ..models.metrics import SklearnMetric
+from ..models.metrics import SklearnMetrics
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.sklearn import SklearnModel
-from ..models.tasks import ModelTasks, TargetTasks
+from ..models.tasks import TargetTasks
 
 N_CPUS = 2
 logging.basicConfig(level=logging.DEBUG)
@@ -83,7 +91,7 @@ class ModelTestMixIn:
             model (QSPRModel): The model to test.
         """
         # perform bayes optimization
-        score_func = SklearnMetric.getDefaultMetric(model.task)
+        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
             param_grid=search_space_bs,
@@ -103,7 +111,7 @@ class ModelTestMixIn:
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
         if model.task.isClassification():
-            score_func = SklearnMetric.getMetric("accuracy")
+            score_func = SklearnMetrics("accuracy")
         gridsearcher = GridSearchOptimization(
             param_grid=search_space_gs,
             score_aggregation=np.median,
@@ -121,7 +129,7 @@ class ModelTestMixIn:
             )
         model.cleanFiles()
         # perform crossvalidation
-        score_func = SklearnMetric.getDefaultMetric(model.task)
+        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(model)
         TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func)(model)
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
@@ -548,11 +556,14 @@ class TestSklearnClassification(SklearnModelMixIn):
             for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
-            ) for task, th in (
+            )
+            for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
-            ) for random_state in ([None], [1, 42], [42, 42])
-        ] + [
+            )
+            for random_state in ([None], [1, 42], [42, 42])
+        ]
+        + [
             (f"{alg_name}_{task}", task, th, alg_name, alg, [None])
             for alg, alg_name in (
                 (SVC, "SVC"),
@@ -653,11 +664,12 @@ class TestSklearnClassification(SklearnModelMixIn):
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state)
-            for alg, alg_name in ((RandomForestClassifier, "RFC"), )
+            for alg, alg_name in ((RandomForestClassifier, "RFC"),)
             for random_state in ([None], [1, 42], [42, 42])
-        ] + [
+        ]
+        + [
             (alg_name, alg_name, alg, [None])
-            for alg, alg_name in ((KNeighborsClassifier, "KNNC"), )
+            for alg, alg_name in ((KNeighborsClassifier, "KNNC"),)
         ]
     )
     def testClassificationMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -715,80 +727,88 @@ class TestSklearnClassification(SklearnModelMixIn):
 class TestMetrics(TestCase):
     """Test the SklearnMetrics from the metrics module."""
 
-    def checkMetric(self, metric, task, y_true, y_pred, y_pred_proba=None):
-        """Check if the metric is correctly implemented."""
-        scorer = SklearnMetric.getMetric(metric)
-        self.assertEqual(scorer.name, metric)
-        self.assertTrue(scorer.supportsTask(task))
-        # lambda function to get the sklearn scoring function from the scorer object
-        sklearn_scorer = get_sklearn_scorer(metric)
+    def test_SklearnMetrics(self):
+        """Test the sklearn metrics wrapper."""
 
-        def sklearn_func(y_true, y_pred):
-            return sklearn_scorer._sign * sklearn_scorer._score_func(
-                y_true, y_pred, **sklearn_scorer._kwargs
-            )
-
-        # perform the test
-        if y_pred_proba is not None and scorer.needsProbasToScore:
-            self.assertEqual(
-                scorer(y_true, y_pred_proba), sklearn_func(y_true, y_pred_proba)
-            )
-        else:
-            self.assertEqual(scorer(y_true, y_pred), sklearn_func(y_true, y_pred))
-
-    def test_RegressionMetrics(self):
-        """Test the regression metrics."""
+        # test regression metrics
         y_true = np.array([1.2, 2.2, 3.2, 4.2, 5.2])
-        y_pred = np.array([1.2, 2.2, 3.2, 4.2, 5.2])
-        for metric in SklearnMetric.regressionMetrics:
-            self.checkMetric(metric, ModelTasks.REGRESSION, y_true, y_pred)
+        y_pred = np.array([[2.2], [2.2], [3.2], [4.2], [5.2]])
 
-    def test_SingleClassMetrics(self):
-        """Test the single class metrics."""
+        ## test explained variance score with scorer from metric
+        metric = explained_variance_score
+        qsprpred_scorer = SklearnMetrics(make_scorer(metric))
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred),  # 2D np array standard in QSPRpred
+            metric(y_true, np.squeeze(y_pred)),  # 1D np array standard in sklearn
+        )
+
+        ## test RMSE score with scorer from str (smaller is better)
+        qsprpred_scorer = SklearnMetrics("neg_mean_squared_error")
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred),
+            -mean_squared_error(y_true, np.squeeze(y_pred)),  # negated
+        )
+
+        ## test multitask regression
+        y_true = np.array([[1.2, 2.2], [3.2, 4.2], [5.2, 1.2], [2.2, 3.2], [4.2, 5.2]])
+        y_pred = np.array([[2.2, 2.2], [3.2, 4.2], [5.2, 1.2], [2.2, 3.2], [4.2, 5.2]])
+        qsprpred_scorer = SklearnMetrics("explained_variance")
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred), explained_variance_score(y_true, y_pred)
+        )
+
+        # test classification metrics
+        ## single class discrete
         y_true = np.array([1, 0, 1, 0, 1])
-        y_pred = np.array([1, 0, 1, 0, 1])
-        y_pred_proba = np.array([0.9, 0.2, 0.8, 0.1, 0.9])
-        for metric in SklearnMetric.singleClassMetrics:
-            self.checkMetric(
-                metric, ModelTasks.SINGLECLASS, y_true, y_pred, y_pred_proba
-            )
-
-    def test_MultiClassMetrics(self):
-        """Test the multi class metrics."""
-        y_true = np.array([0, 1, 2, 1, 1])
-        y_pred = np.array([0, 1, 2, 1, 1])
-        y_pred_proba = np.array(
-            [
-                [0.9, 0.1, 0.0],
-                [0.1, 0.8, 0.1],
-                [0.0, 0.1, 0.9],
-                [0.1, 0.8, 0.1],
-                [0.1, 0.8, 0.1],
-            ]
+        y_pred = np.array([[0], [0], [1], [0], [1]])
+        qsprpred_scorer = SklearnMetrics("accuracy")
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred), accuracy_score(y_true, np.squeeze(y_pred))
         )
-        for metric in SklearnMetric.multiClassMetrics:
-            self.checkMetric(
-                metric, ModelTasks.MULTICLASS, y_true, y_pred, y_pred_proba
+
+        ## single class proba
+        y_true = np.array([1, 0, 1, 0, 1])
+        y_pred = [
+            np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]])
+        ]  # list of 2D np.arrays
+        qsprpred_scorer = SklearnMetrics("neg_log_loss")
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred), -log_loss(y_true, np.squeeze(y_pred[0]))
+        )
+
+        ## multi-class with threshold
+        y_true = np.array([1, 2, 1, 0, 1])
+        y_pred = [
+            np.array(
+                [
+                    [0.9, 0.1, 0.0],
+                    [0.1, 0.8, 0.1],
+                    [0.0, 0.1, 0.9],
+                    [0.1, 0.8, 0.1],
+                    [0.1, 0.8, 0.1],
+                ]
             )
+        ]  # list of 2D np.arrays
+        qsprpred_scorer = SklearnMetrics(
+            make_scorer(top_k_accuracy_score, needs_threshold=True, k=2)
+        )
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred),
+            top_k_accuracy_score(y_true, y_pred[0], k=2),
+        )
 
-    def test_MultiTaskRegressionMetrics(self):
-        """Test the multi task regression metrics."""
-        y_true = np.array([[1.2, 2.2, 3.2, 4.2, 5.2], [1.2, 2.2, 3.2, 4.2, 5.2]])
-        y_pred = np.array([[1.2, 2.2, 3.2, 4.2, 5.2], [1.2, 2.2, 3.2, 4.2, 5.2]])
-        for metric in SklearnMetric.multiTaskRegressionMetrics:
-            self.checkMetric(metric, ModelTasks.MULTITASK_REGRESSION, y_true, y_pred)
-
-    def test_MultiTaskSingleClassMetrics(self):
-        """Test the multi task single class metrics."""
+        ## multi-task single class (same as multi-label in sklearn)
         y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
-        y_pred = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
-        y_pred_proba = np.array(
-            [[0.9, 0.6], [0.5, 0.4], [0.3, 0.8], [0.7, 0.1], [1, 0.4]]
+        y_pred = [
+            np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
+            np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
+        ]  # list of 2D np.arrays
+        qsprpred_scorer = SklearnMetrics("roc_auc_ovr")
+        y_pred_sklearn = np.array([y_pred[0][:, 1], y_pred[1][:, 1]]).T
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred),
+            roc_auc_score(y_true, y_pred_sklearn, multi_class="ovr"),
         )
-        for metric in SklearnMetric.multiTaskSingleClassMetrics:
-            self.checkMetric(
-                metric, ModelTasks.MULTITASK_SINGLECLASS, y_true, y_pred, y_pred_proba
-            )
 
 
 class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
@@ -919,7 +939,6 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
 
 
 class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
-
     def trainModelWithMonitoring(
         self,
         model: QSPRModel,
@@ -933,7 +952,7 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
         AssessorMonitor,
         FitMonitor,
     ):
-        score_func = SklearnMetric.getDefaultMetric(model.task)
+        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
             param_grid=search_space_gs,
@@ -961,10 +980,14 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
         model.fitAttached(monitor=fit_monitor)
         return hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
 
-    def baseMonitorTest(self, monitor: BaseMonitor,
-                        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-                        neural_net: bool):
+    def baseMonitorTest(
+        self,
+        monitor: BaseMonitor,
+        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+        neural_net: bool,
+    ):
         """Test the base monitor."""
+
         def check_fit_empty(monitor):
             self.assertEqual(len(monitor.fitLog), 0)
             self.assertEqual(len(monitor.batchLog), 0)
@@ -986,15 +1009,14 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
             self.assertGreater(n_iter, 0)
             self.assertEqual(len(monitor.assessments), n_iter)
             self.assertEqual(len(monitor.parameters), n_iter)
-            self.assertEqual(monitor.scores.shape, (n_iter, 2)) # agg score + scores
+            self.assertEqual(monitor.scores.shape, (n_iter, 2))  # agg score + scores
             self.assertEqual(
                 max(monitor.scores.aggregated_score),
                 monitor.bestScore,
             )
             self.assertDictEqual(
                 monitor.bestParameters,
-                monitor.parameters[
-                    monitor.scores.aggregated_score.argmax()],
+                monitor.parameters[monitor.scores.aggregated_score.argmax()],
             )
             check_assessment_empty(monitor)
             check_fit_empty(monitor)
@@ -1002,7 +1024,7 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
         def check_assessor_monitor(monitor, n_folds, len_y):
             self.assertEqual(
                 monitor.predictions.shape,
-                (len_y, 3 if n_folds > 1 else 2), # labels + preds (+ fold)
+                (len_y, 3 if n_folds > 1 else 2),  # labels + preds (+ fold)
             )
             self.assertEqual(len(monitor.foldData), n_folds)
             self.assertEqual(len(monitor.fits), n_folds)
@@ -1030,10 +1052,14 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
         else:
             raise ValueError(f"Unknown monitor type {monitor_type}")
 
-    def fileMonitorTest(self, monitor: FileMonitor,
-                        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-                        neural_net: bool):
+    def fileMonitorTest(
+        self,
+        monitor: FileMonitor,
+        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+        neural_net: bool,
+    ):
         """Test if the correct files are generated"""
+
         def check_fit_files(path):
             self.assertTrue(os.path.exists(f"{path}/fit_log.tsv"))
             self.assertTrue(os.path.exists(f"{path}/batch_log.tsv"))
@@ -1061,8 +1087,7 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
             if monitor.saveAssessments:
                 for assessment in monitor.assessments:
                     check_assessment_files(
-                        f"{output_path}/iteration_{assessment}",
-                        monitor
+                        f"{output_path}/iteration_{assessment}", monitor
                     )
 
         if monitor_type == "hyperparam":
@@ -1072,20 +1097,17 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
         elif monitor_type == "fit" and neural_net:
             check_fit_files(monitor.outDir)
 
-    def listMonitorTest(self, monitor: ListMonitor,
-                        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-                        neural_net: bool):
+    def listMonitorTest(
+        self,
+        monitor: ListMonitor,
+        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+        neural_net: bool,
+    ):
         self.baseMonitorTest(monitor.monitors[0], monitor_type, neural_net)
         self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
 
     def runMonitorTest(
-            self,
-            model,
-            monitor_type,
-            test_method,
-            nerual_net,
-            *args,
-            **kwargs
+        self, model, monitor_type, test_method, nerual_net, *args, **kwargs
     ):
         hyperparam_monitor = monitor_type(*args, **kwargs)
         crossval_monitor = deepcopy(hyperparam_monitor)
@@ -1106,7 +1128,6 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
 
 
 class TestMonitors(TestMonitorsMixIn, TestCase):
-
     def testBaseMonitor(self):
         """Test the base monitor"""
         model = SklearnModel(
@@ -1118,12 +1139,7 @@ class TestMonitors(TestMonitorsMixIn, TestCase):
             name="RFR",
             random_state=42,
         )
-        self.runMonitorTest(
-            model,
-            BaseMonitor,
-            self.baseMonitorTest,
-            False
-        )
+        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, False)
 
     def testFileMonitor(self):
         """Test the file monitor"""
@@ -1136,12 +1152,7 @@ class TestMonitors(TestMonitorsMixIn, TestCase):
             name="RFR",
             random_state=42,
         )
-        self.runMonitorTest(
-            model,
-            FileMonitor,
-            self.fileMonitorTest,
-            False
-        )
+        self.runMonitorTest(model, FileMonitor, self.fileMonitorTest, False)
 
     def testListMonitor(self):
         """Test the list monitor"""
@@ -1161,4 +1172,3 @@ class TestMonitors(TestMonitorsMixIn, TestCase):
             False,
             [BaseMonitor(), FileMonitor()],
         )
-

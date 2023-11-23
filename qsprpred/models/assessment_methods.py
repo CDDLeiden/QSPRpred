@@ -67,7 +67,6 @@ class CrossValAssessor(ModelAssessor):
             n_splits=5, shuffle=True, random_state=data.randomState
         )
         evalparams = model.parameters if parameters is None else parameters
-        self.scoreFunc.checkMetricCompatibility(model.task, self.useProba)
         # check if data is available
         model.checkForData()
         X, _ = model.data.getFeatures()
@@ -176,7 +175,6 @@ class TestSetAssessor(ModelAssessor):
         """
         monitor = monitor or self.monitor
         evalparams = model.parameters if parameters is None else parameters
-        self.scoreFunc.checkMetricCompatibility(model.task, self.useProba)
         # check if data is available
         model.checkForData()
         X, X_ind = model.data.getFeatures()

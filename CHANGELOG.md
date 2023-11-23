@@ -17,6 +17,7 @@ without having to set the `task_from_str` argument, which is now deprecated.
 - Make `EarlyStopping.mode` flexible for `QSPRModel.fitAttached`.
 - `save_params` argument added to `OptunaOptimization` to save the best hyperparameters to the model (default: `True`).
 - We now use `jsonpickle` for object serialization, which is more flexible than the non-standard approach before, but it also means previous models will not be compatible with this version.
+- `SklearnMetric` was renamed to `SklearnMetrics`, it now also accepts an scikit-learn scorer name as input.
 
 ## New Features
 - Most unit tests now have a variant that checks whether using a fixed random seed gives reproducible results.
@@ -30,3 +31,4 @@ without having to set the `task_from_str` argument, which is now deprecated.
 - Cross-validation, testing, hyperparameter optimization and early-stopping were made more flexible by allowing custom splitting and fold generation strategies. A tutorial showcasing these features was created. 
 
 ## Removed Features
+- The `Metric` interface has been simplified in order to make it easier to implement custom metrics. The `Metric` interface now only requires the implementation of the `__call__` method, which takes predictions and returns a `float`. The `Metric` interface no longer requires the implementation of `needsDiscreteToScore`, `needsProbaToScore` and `supportsTask`. However, this means the base functionality of `checkMetricCompatibility`, `isClassificationMetric` and `isRegressionMetric` are no longer available.
