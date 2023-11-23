@@ -29,6 +29,7 @@ without having to set the `task_from_str` argument, which is now deprecated.
 - Added `NullMonitor` class to ignore the progress of a fitting, assessing, or hyperparameter optimization process.
 - Added `ListMonitor` class to combine multiple monitors.
 - Cross-validation, testing, hyperparameter optimization and early-stopping were made more flexible by allowing custom splitting and fold generation strategies. A tutorial showcasing these features was created. 
+- Added a `reset` method to `QSPRDataset`, which resets splits and loads all descriptors into the training set matrix again.
 
 ## Removed Features
 - The `Metric` interface has been simplified in order to make it easier to implement custom metrics. The `Metric` interface now only requires the implementation of the `__call__` method, which takes predictions and returns a `float`. The `Metric` interface no longer requires the implementation of `needsDiscreteToScore`, `needsProbaToScore` and `supportsTask`. However, this means the base functionality of `checkMetricCompatibility`, `isClassificationMetric` and `isRegressionMetric` are no longer available.
