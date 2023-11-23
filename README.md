@@ -36,9 +36,9 @@ The following options are available:
 - pyboost : include pyboost model (requires cupy, `pip install cupy-cudaX`, replace X with your [cuda version](https://docs.cupy.dev/en/stable/install.html))
 - full : include all optional dependecies (requires cupy, `pip install cupy-cudaX`, replace X with your [cuda version](https://docs.cupy.dev/en/stable/install.html))
 
-### Multiple Sequence Alignment Provider for Protein Descriptors
+### Note on PCM Modelling
 
-If you plan to optionally use QSPRPred to calculate protein descriptors for PCM, make sure to also install Clustal Omega. You can get it via `conda`:
+If you plan to optionally use QSPRPred to calculate protein descriptors for PCM, make sure to also install Clustal Omega. You can get it via `conda` (**for Linux and MacOS only**):
 
 ```bash
 
@@ -49,8 +49,7 @@ or install MAFFT instead:
 ```bash
 conda install -c biocore mafft
 ```
-This is needed to provide multiple sequence alignments for the PCM descriptors.
-At the moment, we do not support protein descriptor calculation for PCM on Windows.
+This is needed to provide multiple sequence alignments for the PCM descriptors. If Windows is your platform of choice, these tools will need to be installed manually or a custom implementation of the `MSAProvider` class will have to be made.
 
 ## Use
 After installation, you will have access to various command line features and you can use the Python API directly (see [Documentation](https://cddleiden.github.io/QSPRPred/docs/)). For a quick start, you can also check out the [Jupyter notebook tutorials](./tutorials/README.md), which document the use of the Python API to build different types of models. The tutorials as well as the [documentation](https://cddleiden.github.io/QSPRPred/docs/use.html) are still work in progress, and we will be happy for any contributions where it is still lacking.
