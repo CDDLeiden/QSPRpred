@@ -256,8 +256,7 @@ Hyperparameter optimization
 In addition to setting model parameters manually, a hyperparameter search can be performed.
 In QSPRpred, two methods of hyperparameter optimization are implemented: grid search and 
 bayesian optimization. For baysian optimization also give the number of trials.
-The search space needs to be set using a json file, if this is not given then the default
-search space defined in qsprpred/models/search_space.json is used.
+The search space needs to be set using a json file.
 A simple search space file for a RF and KNN model should look as given below.
 Note the indication of the model type as first list item and type of optimization algorithm
 as third list item. The search space file should always include all models to be trained.
@@ -281,7 +280,7 @@ as third list item. The search space file should always include all models to be
 ..  code-block::
 
     # Bayesian optimization
-        python -m qsprpred.model_CLI -dp ./cli_tutorial/data/GABAAalpha_REGRESSION_df.pkl ./cli_tutorial/data/NMDA_REGRESSION_df.pkl -o ./cli_tutorial/models -mt RF -me -s -o bayes -nt 50 -ss mysearchspace -me -s
+        python -m qsprpred.model_CLI -dp ./cli_tutorial/data/GABAAalpha_REGRESSION_df.pkl ./cli_tutorial/data/NMDA_REGRESSION_df.pkl -o ./cli_tutorial/models -mt RF -me -s -o bayes -nt 50 -ss mysearchspace.json -me -s
 
 Multitask modelling
 """""""""""""""""""
