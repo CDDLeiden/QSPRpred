@@ -14,9 +14,7 @@ import numpy as np
 import pandas as pd
 
 from ..data.data import MoleculeTable, QSPRDataset
-from ..data.utils.feature_standardization import SKLearnStandardizer
 from ..logs import logger
-from ..models import SSPACE
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..models.metrics import SklearnMetrics
 from ..models.tasks import ModelTasks
