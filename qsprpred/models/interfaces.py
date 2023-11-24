@@ -14,9 +14,7 @@ import numpy as np
 import pandas as pd
 
 from ..data.data import MoleculeTable, QSPRDataset
-from ..data.utils.feature_standardization import SKLearnStandardizer
 from ..logs import logger
-from ..models import SSPACE
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..models.metrics import SklearnMetrics
 from ..models.tasks import ModelTasks
@@ -87,16 +85,6 @@ class QSPRModel(JSONSerializable, ABC):
         return predictions
 
     @classmethod
-    def getDefaultParamsGrid(cls) -> list:
-        """Get the path to the file with default search grid parameter settings
-        for some predefined estimator types.
-
-        Returns:
-            list: list of default parameter grids
-        """
-        return SSPACE
-
-    @classmethod
     def loadParamsGrid(
         cls, fname: str, optim_type: str, model_types: str
     ) -> np.ndarray:
@@ -116,16 +104,12 @@ class QSPRModel(JSONSerializable, ABC):
                 array with three columns containing modeltype,
                 optimization type (grid or bayes) and model type
         """
-        if fname:
-            try:
-                with open(fname) as json_file:
-                    optim_params = np.array(json.load(json_file), dtype=object)
-            except FileNotFoundError:
-                logger.error("Search space file (%s) not found" % fname)
-                sys.exit()
-        else:
-            with open(cls.getDefaultParamsGrid()) as json_file:
+        try:
+            with open(fname) as json_file:
                 optim_params = np.array(json.load(json_file), dtype=object)
+        except FileNotFoundError:
+            logger.error("Search space file (%s) not found" % fname)
+            sys.exit()
         # select either grid or bayes optimization parameters from param array
         optim_params = optim_params[optim_params[:, 2] == optim_type, :]
         # check all ModelTasks to be used have parameter grid

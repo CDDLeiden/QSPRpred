@@ -33,3 +33,4 @@ without having to set the `task_from_str` argument, which is now deprecated.
 
 ## Removed Features
 - The `Metric` interface has been simplified in order to make it easier to implement custom metrics. The `Metric` interface now only requires the implementation of the `__call__` method, which takes predictions and returns a `float`. The `Metric` interface no longer requires the implementation of `needsDiscreteToScore`, `needsProbaToScore` and `supportsTask`. However, this means the base functionality of `checkMetricCompatibility`, `isClassificationMetric` and `isRegressionMetric` are no longer available.
+- Default hyperparameter search space file, no longer available.
