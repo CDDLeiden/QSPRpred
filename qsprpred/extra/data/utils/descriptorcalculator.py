@@ -1,12 +1,9 @@
 """Module containing various extra descriptor calculators."""
 
-import json
-
 import numpy as np
 import pandas as pd
 
 from ....data.utils.descriptorcalculator import DescriptorsCalculator
-from ....utils.inspect import import_class
 from .descriptor_utils.msa_calculator import ClustalMSA, MSAProvider
 from .descriptorsets import ProteinDescriptorSet
 
@@ -23,7 +20,7 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
     def __init__(
         self,
         desc_sets: list[ProteinDescriptorSet],
-        msa_provider: MSAProvider = ClustalMSA()
+        msa_provider: MSAProvider = ClustalMSA(),
     ) -> None:
         """Initialize the protein descriptor calculator.
 
@@ -41,7 +38,7 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
         acc_keys: list[str],
         sequences: dict[str:str] | None = None,
         dtype: type = np.float32,
-        **kwargs
+        **kwargs,
     ) -> pd.DataFrame:
         """
         Calculates descriptors for the given protein accession keys.
@@ -82,34 +79,3 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
 
     def getPrefix(self) -> str:
         return "Descriptor_PCM"
-
-    def toFile(self, fname: str):
-        """Saves the descriptor calculator to file.
-
-        The `msaProvider` is saved to a separate file with the extension
-        `.msaprovider`. The calculated alignment is saved as `.msaprovider.msa`.
-
-        Args:
-            fname (str): File name to save to.
-        """
-        super().toFile(fname)
-        # save msa if available
-        self.msaProvider.toFile(f"{fname}.msaprovider")
-
-    @classmethod
-    def fromFile(cls, fname: str) -> "ProteinDescriptorCalculator":
-        """Loads the descriptor calculator from file.
-
-        Args:
-            fname: Name of the file to load from.
-
-        Returns:
-            ProteinDescriptorCalculator: The loaded descriptor calculator.
-        """
-
-        ret = super().fromFile(fname)
-        with open(f"{fname}.msaprovider", "r") as fh:  # file handle
-            msa_provider_cls = json.load(fh)["class"]
-        msa_provider_cls = import_class(msa_provider_cls)
-        ret.msaProvider = msa_provider_cls.fromFile(f"{fname}.msaprovider")
-        return ret

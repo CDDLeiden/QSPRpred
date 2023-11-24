@@ -6,7 +6,8 @@ from rdkit.SimDivFilters import rdSimDivPickers
 
 from ...logs import logger
 from .descriptorsets import FingerprintSet
-from .scaffolds import Murcko
+from .scaffolds import Murcko, Scaffold
+
 
 class MoleculeClusters(ABC):
     """
@@ -29,7 +30,7 @@ class MoleculeClusters(ABC):
         """
 
     def _set_nClusters(self, N: int) -> None:
-        self.nClusters = self.nClusters if self.nClusters is not None else N // 100
+        self.nClusters = self.nClusters if self.nClusters is not None else N // 10
         if self.nClusters < 10:
             self.nClusters = 10
             logger.warning(
@@ -75,13 +76,16 @@ class RandomClusters(MoleculeClusters):
         return clusters
 
 
-class MurckoScaffoldClusters(MoleculeClusters):
+class ScaffoldClusters(MoleculeClusters):
     """
-    Cluster molecules based on Murcko scaffolds.
+    Cluster molecules based on scaffolds.
+
+    Attributes:
+        scaffold (Scaffold): scaffold generator
     """
-    def __init__(self):
+    def __init__(self, scaffold: Scaffold = Murcko()):
         super().__init__()
-        self.scaffold = Murcko()
+        self.scaffold = scaffold
 
     def get_clusters(self, smiles_list: list[str]) -> dict:
         """
@@ -101,7 +105,7 @@ class MurckoScaffoldClusters(MoleculeClusters):
         ]
 
         # Get unique scaffolds and initialize clusters
-        unique_scaffolds = list(set(scaffolds))
+        unique_scaffolds = sorted(list(set(scaffolds)))
         clusters = {i: [] for i in range(len(unique_scaffolds))}
 
         # Cluster molecules based on scaffolds
@@ -174,7 +178,7 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
     def __init__(
         self,
         n_clusters: int | None = None,
-        seed: int = 42,
+        seed: int | None = None,
         initial_centroids: list[str] | None = None,
         fp_calculator: FingerprintSet = FingerprintSet(
             fingerprint_type="MorganFP", radius=3, nBits=2048
@@ -202,7 +206,7 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
             len(fps),
             self.nClusters,
             firstPicks=self.initialCentroids if self.initialCentroids else [],
-            seed=self.seed,
+            seed=self.seed if self.seed is not None else -1,
         )
 
         return centroid_indices

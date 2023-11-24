@@ -1,0 +1,11 @@
+[
+["STFullyConnected", {"batch_size" : [32, 256],
+         "neurons_h1" : [50, 200]}, "grid"],
+["STFullyConnected", {"batch_size" : ["int", 32, 256],
+         "lr": ["uniform", 1e-8, 1e-2],
+         "neurons_h1" : ["int", 50, 200],
+         "neurons_hx" : ["int", 50, 200],
+         "extra_layer": ["categorical", [true, false]]}, "bayes"],
+["MoleculeModel", {"hidden_size": [50, 200]}, "grid"],
+["MoleculeModel", {"hidden_size": ["int", 50, 200]}, "bayes"]
+]

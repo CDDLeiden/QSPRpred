@@ -5,6 +5,7 @@ from typing import Callable, Iterable
 import numpy as np
 import pandas as pd
 
+
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
     @abstractmethod
@@ -73,7 +74,7 @@ class DataSet(StoredTable):
         func_args: list | None = None,
         func_kwargs: dict | None = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Apply a function to the dataset.
 
@@ -132,22 +133,52 @@ class MoleculeDataSet(DataSet):
         """Indicates if the dataset has descriptors."""
 
 
+class Randomized:
+    """A pseudorandom action that can be fixed with a seed.
+
+    Attributes:
+        seed (int | None):
+            The seed to use to randomize the action. If `None`,
+            a random seed is used instead of a fixed one (default: `None`).
+    """
+
+    def __init__(self, seed: int | None = None) -> None:
+        """Create a new randomized action.
+
+        Args:
+            seed:
+                the seed to use to randomize the action. If `None`,
+                a random seed is used instead of a fixed one (default: `None`).
+        """
+        self.seed = seed
+
+    def setSeed(self, seed: int | None = None):
+        self.seed = seed
+
+    def getSeed(self):
+        """Get the seed used to randomize the action."""
+        return self.seed
+
+
 class DataSetDependant:
     """Classes that need a data set to operate have to implement this."""
     def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
         self.dataSet = dataset
 
     def setDataSet(self, dataset: MoleculeDataSet):
-        """
-        Set the data sets.
-        """
         self.dataSet = dataset
 
     @property
-    def hasDataSet(self):
+    def hasDataSet(self) -> bool:
+        """Indicates if this object has a data set attached to it."""
         return self.dataSet is not None
 
     def getDataSet(self):
+        """Get the data set attached to this object.
+
+        Raises:
+            ValueError: If no data set is attached to this object.
+        """
         if self.hasDataSet:
             return self.dataSet
         else:
@@ -161,9 +192,10 @@ class DataSplit(ABC, DataSetDependant):
     Attributes:
         dataset (MoleculeDataSet): The dataset to split.
     """
-    def __init__(self, dataset: MoleculeDataSet) -> None:
+    def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
         super().__init__(dataset)
 
+    @abstractmethod
     def split(
         self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
     ) -> Iterable[tuple[list[int], list[int]]]:
@@ -186,22 +218,11 @@ class DataSplit(ABC, DataSetDependant):
             pandas index!)
         """
 
-        self.X = X
-        self.y = y
-
-        self.dataset = self.getDataSet()
-        self.df = self.dataset.getDF()
-        self.tasks = self.dataset.targetProperties
-
-        assert len(self.tasks) > 0, "No target properties found."
-        assert len(X) == len(self.df),\
-            "X and the current data in the dataset must have same length"
-
-        if len(self.tasks) == 1:
-            return self._singletask_split()
-        else:
-            self.df.reset_index(drop=True, inplace=True)  # need numeric index splits
-            return self._multitask_split()
+    def splitDataset(self, dataset: "QSPRDataset"):
+        return self.split(
+            dataset.getFeatures(concat=True),
+            dataset.getTargetPropertiesValues(concat=True)
+        )
 
 
 class DataFilter(ABC):

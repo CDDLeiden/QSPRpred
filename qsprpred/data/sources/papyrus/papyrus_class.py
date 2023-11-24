@@ -13,7 +13,7 @@ from .papyrus_filter import papyrus_filter
 
 
 class Papyrus:
-    """ Create new instance of Papyrus dataset.
+    """Create new instance of Papyrus dataset.
     See `papyrus_filter` and `Papyrus.download` and `Papyrus.getData` for more details.
 
     Attributes:
@@ -92,7 +92,7 @@ class Papyrus:
         drop_duplicates: bool = False,
         chunk_size: int = 1e5,
         use_existing: bool = True,
-        **kwargs
+        **kwargs,
     ) -> MoleculeTable:
         """Get the data from the Papyrus database as a `DataSetTSV` instance.
 

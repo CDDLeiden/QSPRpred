@@ -1,7 +1,3 @@
-import base64
-import marshal
-import os
-import types
 from typing import Callable
 
 import pandas as pd
@@ -13,6 +9,7 @@ from ...data.utils.descriptorcalculator import (
 )
 from ...logs import logger
 from .utils.descriptorcalculator import ProteinDescriptorCalculator
+from qsprpred.utils.serialization import function_as_string, function_from_string
 
 
 class PCMDataSet(QSPRDataset):
@@ -35,9 +32,9 @@ class PCMDataSet(QSPRDataset):
         name: str,
         protein_col: str,
         target_props: list[TargetProperty | dict],
-        df: pd.DataFrame = None,
+        df: pd.DataFrame | None = None,
         smiles_col: str = "SMILES",
-        protein_seq_provider: Callable = None,
+        protein_seq_provider: Callable | None = None,
         add_rdkit: bool = False,
         store_dir: str = ".",
         overwrite: bool = False,
@@ -45,8 +42,10 @@ class PCMDataSet(QSPRDataset):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
-        target_imputer: Callable = None,
-        index_cols: list[str] = None,
+        target_imputer: Callable | None = None,
+        index_cols: list[str] | None = None,
+        autoindex_name: str = "QSPRID",
+        random_state: int | None = None,
     ):
         """Construct a data set to handle PCM data.
 
@@ -87,6 +86,10 @@ class PCMDataSet(QSPRDataset):
             index_cols (List[str], optional):
                 columns to be used as index in the dataframe.
                 Defaults to `None` in which case a custom ID will be generated.
+            autoindex_name (str, optional):
+                Column name to use for automatically generated IDs.
+            random_state (int, optional):
+                random state for reproducibility. Defaults to `None`.
 
         Raises:
             `ValueError`:
@@ -106,6 +109,8 @@ class PCMDataSet(QSPRDataset):
             target_props=target_props,
             target_imputer=target_imputer,
             drop_empty=drop_empty,
+            autoindex_name=autoindex_name,
+            random_state=random_state,
         )
         self.proteinCol = protein_col
         self.proteinSeqProvider = protein_seq_provider
@@ -173,6 +178,27 @@ class PCMDataSet(QSPRDataset):
         self.attachDescriptors(calculator, descriptors, [self.proteinCol])
         self.featurize(update_splits=featurize)
 
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        if self.proteinSeqProvider:
+            o_dict["proteinSeqProvider"] = function_as_string(self.proteinSeqProvider)
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        if self.proteinSeqProvider:
+            try:
+                self.proteinSeqProvider = function_from_string(self.proteinSeqProvider)
+            except Exception as e:
+                logger.warning(
+                    "Failed to load protein sequence provider from metadata. "
+                    f"The function object could not be recreated from the code. "
+                    f"\nError: {e}"
+                    f"\nDeserialized Code: {self.proteinSeqProvider}"
+                    f"\nSetting protein sequence provider to `None` for now."
+                )
+                self.proteinSeqProvider = None
+
     @staticmethod
     def fromSDF(name, filename, smiles_prop, *args, **kwargs):
         raise NotImplementedError(
@@ -181,55 +207,12 @@ class PCMDataSet(QSPRDataset):
             f"read from an SDF instead."
         )
 
-    def generateMetadata(self):
-        meta = super().generateMetadata()
-        meta["init"]["protein_col"] = self.proteinCol
-        meta["init"]["protein_seq_provider"] = base64.b64encode(
-            marshal.dumps(
-                self.proteinSeqProvider.__code__ if self.proteinSeqProvider else None
-            )
-        ).decode('ascii')
-        return meta
-
-    @staticmethod
-    def loadMetadata(name: str, store_dir: str):
-        meta = QSPRDataset.loadMetadata(name, store_dir)
-        if meta["init"]["protein_seq_provider"] is not None:
-            seq_provider = marshal.loads(
-                base64.b64decode(meta["init"]["protein_seq_provider"])
-            )
-            try:
-                seq_provider = types.FunctionType(
-                    seq_provider, globals()
-                )
-                meta["init"]["protein_seq_provider"] = seq_provider
-            except Exception as e:
-                logger.warning(
-                    "Failed to load protein sequence provider from metadata. "
-                    f"The function object could not be recreated from the code. "
-                    f"\nError: {e}"
-                    f"\nDeserialized Code: {seq_provider}"
-                    f"\nSetting protein sequence provider to `None` for now."
-                )
-                meta["init"]["protein_seq_provider"] = None
-
-        return meta
-
-    @staticmethod
-    def fromFile(filename: str, *args, **kwargs) -> "QSPRDataset":
-        store_dir = os.path.dirname(filename)
-        name = os.path.basename(filename).rsplit("_", 1)[0]
-        meta = PCMDataSet.loadMetadata(name, store_dir)
-        return PCMDataSet(
-            *args, name=name, store_dir=store_dir, **meta["init"], **kwargs
-        )
-
     @staticmethod
     def fromMolTable(
         mol_table: MoleculeTable,
         protein_col: str,
-        target_props: list[TargetProperty | dict] = None,
-        name: str = None,
+        target_props: list[TargetProperty | dict] | None = None,
+        name: str | None = None,
         **kwargs,
     ) -> "PCMDataSet":
         """Construct a data set to handle PCM data from a `MoleculeTable`.
@@ -266,13 +249,12 @@ class PCMDataSet(QSPRDataset):
         )
         if not ds.descriptors and mol_table.descriptors:
             ds.descriptors = mol_table.descriptors
-            ds.descriptorCalculators = mol_table.descriptorCalculators
         return ds
 
     def addFeatures(
         self,
         feature_calculators: list[DescriptorsCalculator] | None = None,
-        recalculate: bool = False
+        recalculate: bool = False,
     ):
         """Add features to the feature matrix.
 
@@ -291,3 +273,4 @@ class PCMDataSet(QSPRDataset):
                 )
             else:
                 raise ValueError("Unknown feature calculator type: %s" % type(calc))
+        self.featurize(update_splits=True)

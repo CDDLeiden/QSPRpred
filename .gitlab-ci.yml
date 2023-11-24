@@ -1,5 +1,9 @@
 # This workflow will install Python dependencies, run tests, and write documentation
 
+variables:
+   GIT_STRATEGY: clone # clone entire repo instead of reusing workspace
+   GIT_DEPTH: "0" # avoid shallow clone to give sonar all the info it needs
+
 stages:
    - test
    - deploy
@@ -25,28 +29,29 @@ stages:
       - cd clitest && ./run.sh
       - cd ../tutorial && ./run_all.sh
 
+# # Run tests on Python version 11 (linux image)
+# test:python3.11:
+#    extends: .test
+#    image: python:3.11
+
 # Run tests on Python version 10 (linux image)
 test:python3.10:
    extends: .test
    image: python:3.10
 
-# Run tests on Python version 9 (linux image)
-#test:python3.9:
-#   extends: .test
-#   image: python:3.9
-
 # Write documentation on main branch
-pages:
-   stage: deploy
-   image: python:3.10
-   before_script:
-      - python -m pip install -U sphinx
-      - python -m pip install sphinx-rtd-theme
-   script:
-      - mkdir public
-      - sphinx-build -b html ./docs public
-   artifacts:
-      paths:
-      - public
-   only:
-      - main
+# FIXME: this is not working properly at the moment
+#pages:
+#   stage: deploy
+#   image: python:3.10
+#   before_script:
+#      - python -m pip install -U sphinx
+#      - python -m pip install sphinx-rtd-theme
+#   script:
+#      - mkdir public
+#      - sphinx-build -b html ./docs public
+#   artifacts:
+#      paths:
+#      - public
+#   only:
+#      - main

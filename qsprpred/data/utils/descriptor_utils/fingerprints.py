@@ -203,7 +203,7 @@ class RDKitFP(Fingerprint):
                 minPath=self.minPath,
                 maxPath=self.maxPath,
                 fpSize=self.nBits,
-                **self.kwargs
+                **self.kwargs,
             )
             np_fp = np.zeros(len(fp))
             convertFP(fp, np_fp)
@@ -265,7 +265,7 @@ class LayeredFP(Fingerprint):
                 minPath=self.minPath,
                 maxPath=self.maxPath,
                 fpSize=self.nBits,
-                **self.kwargs
+                **self.kwargs,
             )
             np_fp = np.zeros(len(fp))
             convertFP(fp, np_fp)

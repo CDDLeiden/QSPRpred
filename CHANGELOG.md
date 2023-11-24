@@ -1,35 +1,35 @@
 # Change Log
 
-From v2.0.1 to v2.1.0.dev0
+From v2.1.0 to v3.0.0
 
 ## Fixes
-
-- fixed error with serialization of the `DataFrameDescriptorSet` (#63)
-- Papyrus descriptors are not fetched by default anymore from the `Papyrus`  adapter, which caused fetching of unnecessary data.
+- Fixed random seeds to give reproducible results. Each dataset is initialized with a single random state (either from the constructor or a random number generator) which is used in all subsequent random operations. Each model is initialized with a single random state as well: it uses the random state from the dataset, unless it's overriden in the constructor. When a dataset is saved to a file so is its random state, which is used by the dataset when the dataset is reloaded.
+- fixed error with serialization of the `DNNModel.params` attribute, when no parameters are set.
+- Fix bug with saving predictions from classification model when `ModelAssessor.useProba` set to `False`.
+- Add missing implementation of `QSPRDataset.removeProperty`
 
 ## Changes
-- `QSPRModel.evaluate` moved to a separate class `EvaluationMethod` in `qsprpred.models.interfaces`, with subclasses for cross-validation and making predictions on a test set in `qsprpred.models.evaluation_methods` (`CrossValidation` and `EvaluateTestSetPerformance` respectively).
-- `QSPRModel` attribute `scoreFunc` is removed.
-- 'qspr/models' is no longer added to the output path of `QSPRModel.save`, allowing for complete control over the output path.
-- `SKlearnMetrics.supportsTask` now uses a dictionary like dict[ModelTasks, list[str]] to map tasks to supported metric names. (#53)
-- `PCMSplit` replaces `StratifiedPerTarget` and is compatible with `RandomSplit`, `ScaffoldSplit` and `ClusterSplit`.
-- In the case single-task dataset, the `RandomSplit` now uses `StratifiedShuffleSplit` in case of classification.
-- `DuplicatesFilter` refactored to`RepeatsFilter`, as it also captures scenarios where triplicates/quadruplicates are found in the dataset. These scenarios are now also covered by the respective UnitTest.
-- The versioning scheme of development snapshots has changed from `devX` to `alphaX`/`betaX`, where `X` is an integer that increments with each release.
+- The jupyter notebooks now pass a random state to ensure consistent results.
+- The default parameter values for `STFullyConnected` have changed from `n_epochs` = 1000 to `n_epochs` = 100, from `neurons_h1` = 4000 to `neurons_h1` = 256 and `neurons_hx` = 1000 to `neurons_hx` = 128.
+- Rename `HyperParameterOptimization` to `HyperparameterOptimization`.
+- `TargetProperty.fromList` and `TargetProperty.fromDict` now accept a both a string and a `TargetTask` as the `task` argument,
+without having to set the `task_from_str` argument, which is now deprecated.
+- Make `EarlyStopping.mode` flexible for `QSPRModel.fitAttached`.
+- `save_params` argument added to `OptunaOptimization` to save the best hyperparameters to the model (default: `True`).
+- We now use `jsonpickle` for object serialization, which is more flexible than the non-standard approach before, but it also means previous models will not be compatible with this version.
+- `SklearnMetric` was renamed to `SklearnMetrics`, it now also accepts an scikit-learn scorer name as input.
 
 ## New Features
-- `ClusterSplit` - splits data based clustering of molecular fingerprints.
-- Raise error if search space for optuna optimization is missing search space type annotation or if type not in list.
-- When installing package with pip, the commit hash and date of the installation is saved into `qsprpred._version`
-- `HyperParameterOptimization` classes now accept a `evaluation_method` argument, which is an instance of `EvaluationMethod` (see above). This allows for hyperparameter optimization to be performed on a test set, or on a cross-validation set. (#11)
-- `HyperParameterOptimization` now accepts `score_aggregation` argument, which is a function that takes a list of scores and returns a single score. This allows for the use of different aggregation functions, such as `np.mean` or `np.median` to combine scores from different folds. (#45)
-- A new tutorial `adding_new_components.ipynb` has been added to the `tutorials` folder, which demonstrates how to add new model to QSPRpred.
-- A new function `Metrics.checkMetricCompatibility` has been added, which checks if a metric is compatible with a given task and a given prediction methods (i.e. `predict` or `predictProba`)
-- In `EvaluationMethod` (see above), an attribute `use_proba` has been added, which determines whether the `predict` or `predictProba` method is used to make predictions (#56).
-- Add new descriptorset `SmilesDesc` to use the smiles strings as a descriptor.
-- New module `early_stopping` with classes `EarlyStopping` and `EarlyStoppingMode` has been added. This module allows for more control over early stopping in models that support it.
-- Refactoring of the test suite under `qsprpred.data` and improvement of temporary file handling (!114).
-- `PyBoostModel` - QSPRpred wrapper for py-boost models.
+- Most unit tests now have a variant that checks whether using a fixed random seed gives reproducible results.
+- The build pipeline now contains a check that the jupyter notebooks give the same results as ones that were observed before.
+- Added `FitMonitor`, `AssessorMonitor`, and `HyperparameterOptimizationMonitor` base classes to monitor the progress of fitting, assessing, and  hyperparameter optimization, respectively.
+- Added `BaseMonitor` class to internally keep track of the progress of a fitting, assessing, or hyperparameter optimization process.
+- Added `FileMonitor` class to save the progress of a fitting, assessing, or hyperparameter optimization process to files.
+- Added `WandBMonitor` class to save the progress of a fitting, assessing, or hyperparameter optimization process to [Weights & Biases](https://wandb.ai/).
+- Added `NullMonitor` class to ignore the progress of a fitting, assessing, or hyperparameter optimization process.
+- Added `ListMonitor` class to combine multiple monitors.
+- Cross-validation, testing, hyperparameter optimization and early-stopping were made more flexible by allowing custom splitting and fold generation strategies. A tutorial showcasing these features was created. 
+- Added a `reset` method to `QSPRDataset`, which resets splits and loads all descriptors into the training set matrix again.
 
 ## Removed Features
-- `StratifiedPerTarget` is replaced by `PCMSplit`.
+- The `Metric` interface has been simplified in order to make it easier to implement custom metrics. The `Metric` interface now only requires the implementation of the `__call__` method, which takes predictions and returns a `float`. The `Metric` interface no longer requires the implementation of `needsDiscreteToScore`, `needsProbaToScore` and `supportsTask`. However, this means the base functionality of `checkMetricCompatibility`, `isClassificationMetric` and `isRegressionMetric` are no longer available.

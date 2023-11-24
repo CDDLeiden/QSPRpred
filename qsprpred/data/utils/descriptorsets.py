@@ -15,9 +15,10 @@ from ...models.interfaces import QSPRModel
 from .descriptor_utils.drugexproperties import Property
 from .descriptor_utils.fingerprints import get_fingerprint
 from .descriptor_utils.rdkitdescriptors import RdkitDescriptors
+from qsprpred.utils.serialization import JSONSerializable
 
 
-class DescriptorSet(ABC):
+class DescriptorSet(JSONSerializable, ABC):
     __len__ = lambda self: self.getLen()
 
     @abstractmethod
@@ -32,6 +33,15 @@ class DescriptorSet(ABC):
         Returns:
             DataFrame or np.array of descriptors with shape [n_inputs, n_descriptors]
         """
+
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        o_dict["descriptors"] = self.descriptors
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.descriptors = state["descriptors"]
 
     @property
     @abstractmethod
@@ -139,6 +149,9 @@ class FingerprintSet(MoleculeDescriptorSet):
     """Generic fingerprint descriptorset can be used to calculate any fingerprint type
     defined in descriptorutils.fingerprints.
     """
+
+    _notJSON = MoleculeDescriptorSet._notJSON + ["getFingerprint"]
+
     def __init__(self, fingerprint_type, *args, **kwargs):
         """
         Initialize the descriptor with the same arguments as you would pass to your
@@ -151,9 +164,22 @@ class FingerprintSet(MoleculeDescriptorSet):
         """
         self._isFP = True
         self.fingerprintType = fingerprint_type
-        self.getFingerprint = get_fingerprint(self.fingerprintType, *args, **kwargs)
-
+        self._args = args
+        self._kwargs = kwargs
+        self.getFingerprint = get_fingerprint(
+            self.fingerprintType,
+            *self._args,
+            **self._kwargs
+        )
         self._keepindices = None
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.getFingerprint = get_fingerprint(
+            self.fingerprintType,
+            *self._args,
+            **self._kwargs
+        )
 
     def __call__(self, mols):
         """Calculate the fingerprint for a list of molecules."""
@@ -204,7 +230,7 @@ class FingerprintSet(MoleculeDescriptorSet):
     @descriptors.setter
     def descriptors(self, value):
         """Set the indices of the fingerprint to keep."""
-        self.keepindices(value)
+        self.keepindices = value
 
 
 class DrugExPhyschem(MoleculeDescriptorSet):
@@ -322,7 +348,7 @@ class TanimotoDistances(MoleculeDescriptorSet):
         self.getFingerprint = get_fingerprint(
             self.fingerprintType, *self._args, **self._kwargs
         )
-        self.calculate_fingerprints(list_of_smiles)
+        self.fps = self.calculate_fingerprints(list_of_smiles)
 
     def __call__(self, mols):
         """Calculate the Tanimoto distances to the list of SMILES sequences.
@@ -347,7 +373,7 @@ class TanimotoDistances(MoleculeDescriptorSet):
     def calculate_fingerprints(self, list_of_smiles):
         """Calculate the fingerprints for the list of SMILES sequences."""
         # Convert np.arrays to BitVects
-        self.fps = [
+        return [
             DataStructs.CreateFromBitString("".join(map(str, x))) for x in self.
             getFingerprint([Chem.MolFromSmiles(smiles) for smiles in list_of_smiles])
         ]
@@ -383,6 +409,9 @@ class TanimotoDistances(MoleculeDescriptorSet):
 class PredictorDesc(MoleculeDescriptorSet):
     """MoleculeDescriptorSet that uses a Predictor object to calculate descriptors from
     a molecule."""
+
+    _notJSON = MoleculeDescriptorSet._notJSON + ["model"]
+
     def __init__(self, model: QSPRModel | str):
         """
         Initialize the descriptorset with a `QSPRModel` object.
@@ -393,12 +422,20 @@ class PredictorDesc(MoleculeDescriptorSet):
 
         if isinstance(model, str):
             from ...models.interfaces import QSPRModel
-
             self.model = QSPRModel.fromFile(model)
         else:
             self.model = model
 
         self._descriptors = [self.model.name]
+
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        o_dict["model"] = self.model.metaFile
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.model = QSPRModel.fromFile(self.model)
 
     def __call__(self, mols):
         """
@@ -529,6 +566,7 @@ class _DescriptorSetRetriever:
 
     def getExtendedValenceSignature(self, *args, **kwargs):
         from ...extra.data.utils.descriptorsets import ExtendedValenceSignature
+
         return ExtendedValenceSignature(*args, **kwargs)
 
     def getPredictorDesc(self, *args, **kwargs):

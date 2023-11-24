@@ -1,23 +1,62 @@
 """A module that provides a class that creates folds from a given data set."""
+from abc import ABC, abstractmethod
+from typing import Generator
+
+import pandas as pd
 from .feature_standardization import apply_feature_standardizer
-from ..interfaces import DataSplit
 
 
-class Folds:
-    """A class that creates folds from a given data set. It can be used for
-    cross-validation."""
-    @staticmethod
-    def toArrays(X, y):
-        """Convert data frames X and y to numpy arrays.
+class FoldGenerator(ABC):
+    """A generator that creates folds from a given data set."""
 
-        Arguments:
-            X (pd.DataFrame): feature matrix as a DataFrame
-            y (pd.Series): target values
+    @abstractmethod
+    def iterFolds(
+            self,
+            dataset: "QSPRDataset",
+            concat=False
+    ) -> Generator[tuple[
+        pd.DataFrame,
+        pd.DataFrame,
+        pd.DataFrame | pd.Series,
+        pd.DataFrame | pd.Series,
+        list[int],
+        list[int]
+    ], None, None]:
+        """
+        Returns the generator of folds to iterate over.
+
+        Args:
+            dataset (QSPRDataset):
+                the data set to generate the splits for
+            concat (bool, optional):
+                whether to concatenate the features in the test
+                and training set of the data set (default: False)
 
         Returns:
-            tuple: (X, y) as numpy arrays
+            generator:
+                a generator that yields a tuple of
+                (X_train, X_test, y_train, y_test, train_index, test_index)
         """
-        return X.values, y.values
+        pass
+
+    def getFolds(self, dataset: "QSPRDataset"):
+        """Directly converts the output of `iterFolds` to a `list`."""
+        return list(self.iterFolds(dataset))
+
+
+class FoldsFromDataSplit(FoldGenerator):
+    """This generator takes a scikit-learn or scikit-learn-like splitter
+    and creates folds from it. It is possible to pass a standardizer to
+    make sure features in the splits are properly standardized.
+
+    Attributes:
+        split (DataSplit):
+            the splitter to use to create the folds (this can also just be
+            a raw scikit-learn splitter)
+        featureStandardizer:
+            the standardizer to use to standardize the features (this can also
+            just be a raw scikit-learn standardizer)
+    """
 
     def _standardize_folds(self, folds):
         """A generator that fits and applies feature standardizers to each fold
@@ -30,7 +69,32 @@ class Folds:
             X_test, _ = apply_feature_standardizer(standardizer, X_test, fit=False)
             yield X_train, X_test, y_train, y_test, train_index, test_index
 
-    def _make_folds(self, X, y):
+    def __init__(self, split: "DataSplit", feature_standardizer=None):
+        """Initialize the generator with a splitter and a standardizer.
+
+        Args:
+            split (DataSplit):
+                the splitter to use to create the folds (this can also just be
+                a raw scikit-learn splitter)
+            feature_standardizer:
+                the standardizer to use to standardize the features (this can also
+                just be a raw scikit-learn standardizer)
+        """
+        self.split = split
+        self.featureStandardizer = feature_standardizer
+
+    def _make_folds(
+        self,
+        X: pd.DataFrame,
+        y: pd.DataFrame | pd.Series
+    ) -> Generator[tuple[
+        pd.DataFrame,
+        pd.DataFrame,
+        pd.DataFrame | pd.Series,
+        pd.DataFrame | pd.Series,
+        list[int],
+        list[int]
+    ], None, None]:
         """A generator that converts folds as returned by the splitter to a tuple of
         (X_train, X_test, y_train, y_test, train_index, test_index).
 
@@ -38,22 +102,26 @@ class Folds:
             X (pd.DataFrame): feature matrix as a DataFrame
             y (pd.Series): target values
         Returns:
-            generator: a generator that yields a tuple of
+            generator: a generator that yields tuples of
                 (X_train, X_test, y_train, y_test, train_index, test_index)
         """
-        X_arr, y_arr = self.toArrays(X, y)
-        folds = self.split.split(X_arr, y_arr)
-
+        folds = self.split.split(X, y)
         for train_index, test_index in folds:
-            yield X_arr[train_index, :], X_arr[test_index, :], \
-                y_arr[train_index], y_arr[test_index], train_index, test_index
+            yield X.iloc[train_index, :], X.iloc[test_index, :], y.iloc[
+                train_index], y.iloc[test_index], train_index, test_index
 
-    def __init__(self, split: DataSplit, feature_standardizer=None):  # noqa: F821
-        """Create a new instance of Folds."""
-        self.split = split
-        self.featureStandardizer = feature_standardizer
-
-    def iterFolds(self, X, y):
+    def iterFolds(
+            self,
+            dataset: "QSPRDataset",
+            concat=False
+    ) -> Generator[tuple[
+        pd.DataFrame,
+        pd.DataFrame,
+        pd.DataFrame | pd.Series,
+        pd.DataFrame | pd.Series,
+        list[int],
+        list[int]
+    ], None, None]:
         """Create folds from X and y. Can be used either for cross-validation,
         bootstrapping or train-test split.
 
@@ -68,18 +136,25 @@ class Folds:
         )
 
         Arguments:
-            X (pd.DataFrame): feature matrix as a DataFrame
-            y (pd.Series): target values
+            dataset (QSPRDataset):
+                the data set to generate the splits for
         Returns:
-            generator: a generator that yields a tuple of
+            generator:
+                a generator that yields a tuple of
                 (X_train, X_test, y_train, y_test, train_index, test_index)
 
         """
+        if hasattr(self.split, "setDataSet"):
+            self.split.setDataSet(dataset)
+        if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
+            if self.split.getSeed() is None:
+                self.split.setSeed(dataset.randomState)
+        features = dataset.getFeatures(raw=True, concat=concat, ordered=True)
+        targets = dataset.getTargetPropertiesValues(concat=concat, ordered=True)
+        if not concat:
+            features = features[0]
+            targets = targets[0]
         if self.featureStandardizer:
-            return self._standardize_folds(self._make_folds(X, y))
+            return self._standardize_folds(self._make_folds(features, targets))
         else:
-            return self._make_folds(X, y)
-
-    def getFolds(self, X, y):
-        """Directly converts the output of `iterFolds` to a `list`."""
-        return list(self.iterFolds(X, y))
+            return self._make_folds(features, targets)

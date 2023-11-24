@@ -1,6 +1,7 @@
 """This module holds the base class for QSPRmodels, model types should be a subclass."""
 
 import copy
+import inspect
 import json
 import os
 import shutil
@@ -12,18 +13,18 @@ from typing import Any, Callable, Iterable, List, Type, Union
 import numpy as np
 import pandas as pd
 
-from .. import VERSION
-from ..data.data import MoleculeTable, QSPRDataset, TargetProperty
+from ..data.data import MoleculeTable, QSPRDataset
 from ..data.utils.feature_standardization import SKLearnStandardizer
 from ..logs import logger
 from ..models import SSPACE
-from ..models.metrics import SklearnMetric
-from ..models.tasks import ModelTasks
-from ..utils.inspect import import_class
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
+from ..models.metrics import SklearnMetrics
+from ..models.tasks import ModelTasks
+from qsprpred.utils.serialization import JSONSerializable
+from ..utils.inspect import import_class
 
 
-class QSPRModel(ABC):
+class QSPRModel(JSONSerializable, ABC):
     """The definition of the common model interface for the package.
 
     The QSPRModel handles model initialization, fitting, predicting and saving.
@@ -42,93 +43,17 @@ class QSPRModel(ABC):
         featureStandardizer (SKLearnStandardizer):
             feature standardizer instance taken from the data set
             or deserialized from file if the model is loaded without data
-        metaInfo (dict):
-            dictionary of metadata about the model,
-            only available after the model is saved
         baseDir (str):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
-        metaFile (str):
-            absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
+        earlyStopping (EarlyStopping):
+            early stopping tracker for training of QSPRpred models that support
+            early stopping (e.g. neural networks)
+        randomState (int):
+            Random state to use for all random operations for reproducibility.
     """
-    @staticmethod
-    def readStandardizer(path: str) -> "SKLearnStandardizer":
-        """Read a feature standardizer from a JSON file.
 
-        If the file does not exist, None is returned.
-
-        Args:
-            path (str): absolute path to the JSON file
-
-        Returns:
-            SKLearnStandardizer:
-                feature standardizer instance or None if the file does not exist
-        """
-        if os.path.exists(path):
-            return SKLearnStandardizer.fromFile(path)
-
-    @staticmethod
-    def readParams(path: str) -> dict:
-        """Read model parameters from a JSON file.
-
-        Args:
-            path (str): absolute path to the JSON file
-
-        Returns:
-            dict: dictionary of model parameters
-        """
-        with open(path, "r", encoding="utf-8") as j:
-            logger.info("loading model parameters from file: %s" % path)
-            return json.loads(j.read())
-
-    @staticmethod
-    def readDescriptorCalculators(
-        paths: list[str],
-    ) -> list["DescriptorsCalculator"]:  # noqa: F821
-        """Read a descriptor calculators from a JSON file.
-
-        Args:
-            paths (list[str]): absolute path to the JSON file
-
-        Returns:
-            list[DescriptorsCalculator]: descriptor calculator instance
-            or None if the file does not exist
-        """
-        calcs = []
-        for path in paths:
-            if os.path.exists(path):
-                data = json.load(open(path, "r", encoding="utf-8"))
-                if "calculator" not in data:
-                    calc_cls = (
-                        "qsprpred.data.utils.descriptorcalculator."
-                        "MoleculeDescriptorsCalculator"
-                    )
-                else:
-                    calc_cls = data["calculator"]
-                calc_cls = import_class(calc_cls)
-                calc = calc_cls.fromFile(path)
-                calcs.append(calc)
-            else:
-                raise FileNotFoundError(
-                    f"Descriptor calculator file '{path}' not found."
-                )
-        return calcs
-
-    @staticmethod
-    def readEarlyStopping(path):
-        """Read early stopping settings from file.
-
-        If the file does not exist, None is returned.
-
-        Args:
-            path (str): absolute path to the JSON file
-
-        Returns:
-            EarlyStopping:
-                Early stopping instance or None if the file does not exist
-        """
-        if os.path.exists(path):
-            return EarlyStopping.fromFile(path)
+    _notJSON = ["alg", "data", "estimator"]
 
     @staticmethod
     def handleInvalidsInPredictions(
@@ -214,42 +139,6 @@ class QSPRModel(ABC):
         logger.info("search space loaded from file")
         return optim_params
 
-    @classmethod
-    def fromFile(cls, path: str) -> "QSPRModel":
-        """Load a model from its meta file.
-
-        Args:
-            path (str): full path to the model meta file
-        """
-        meta = cls.readMetadata(path)
-        model_class = import_class(meta["model_class"])
-        model_name = meta["name"]
-        base_dir = os.path.dirname(path).replace(f"{model_name}", "")
-        return model_class(name=model_name, base_dir=base_dir)
-
-    @classmethod
-    def readMetadata(cls, path: str) -> dict:
-        """Read model metadata from a JSON file.
-
-        Args:
-            path (str): absolute path to the JSON file
-
-        Returns:
-            dict: dictionary containing the model metadata
-
-        Raises:
-            FileNotFoundError: if the file does not exist
-        """
-        if os.path.exists(path):
-            with open(path) as j:
-                meta_info = json.loads(j.read())
-                meta_info["target_properties"] = TargetProperty.fromList(
-                    meta_info["target_properties"], task_from_str=True
-                )
-        else:
-            raise FileNotFoundError(f"Metadata file '{path}' does not exist.")
-        return meta_info
-
     def __init__(
         self,
         base_dir: str,
@@ -257,7 +146,8 @@ class QSPRModel(ABC):
         data: QSPRDataset | None = None,
         name: str | None = None,
         parameters: dict | None = None,
-        autoload=True
+        autoload=True,
+        random_state: int | None = None,
     ):
         """Initialize a QSPR model instance.
 
@@ -275,64 +165,64 @@ class QSPRModel(ABC):
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
+            random_state (int):
+                Random state to use for shuffling and other random operations.
         """
-        self.data = data
-        self.name = name or alg.__class__.__name__
-        self.baseDir = base_dir.rstrip("/")
-        # load metadata and update parameters accordingly
-        self.metaFile = f"{self.outPrefix}_meta.json"
-        if autoload:
-            try:
-                self.metaInfo = self.readMetadata(self.metaFile)
-            except FileNotFoundError:
-                if not self.data:
-                    raise FileNotFoundError(
-                        f"Metadata file '{self.metaFile}' not found"
-                    )
-                self.metaInfo = {}
-        else:
-            self.metaInfo = {}
-            if self.data is None:
-                raise ValueError(
-                    "No data set specified. Make sure you "
-                    "initialized this model with a 'QSPRDataset' "
-                    "instance to train on. Or if you want to load "
-                    "a model from file, set 'autoload' to True."
+        self.name = name or (alg.__class__.__name__ if alg else None)
+        if self.name is None:
+            raise ValueError("Model name not specified.")
+        self.baseDir = os.path.abspath(base_dir.rstrip("/"))
+        # initialize settings from data
+        self.data = None
+        self.targetProperties = None
+        self.nTargets = None
+        self.featureCalculators = None
+        self.featureStandardizer = None
+        # initialize estimator
+        self.earlyStopping = EarlyStopping() if self.supportsEarlyStopping else None
+        if autoload and os.path.exists(self.metaFile):
+            new = self.fromFile(self.metaFile)
+            self.__dict__.update(new.__dict__)
+            self.name = name or (alg.__class__.__name__ if alg else None)
+            self.baseDir = os.path.abspath(base_dir.rstrip("/"))
+            if data is not None:
+                self.initFromData(data)
+            if parameters:
+                logger.warning(
+                    f"Explicitly specified parameters ({parameters})"
+                    f"will override model settings read from file: {self.parameters}."
+                    f"Estimator will be reloaded with the new parameters "
+                    f"and will have to be re-fitted if fitted previously."
                 )
-        # get parameters from metadata if available
-        self.parameters = parameters
-        if self.metaInfo and not self.parameters:
-            self.parameters = self.readParams(
-                os.path.join(self.baseDir, self.metaInfo["parameters_path"])
+                self.parameters = parameters
+                self.estimator = self.loadEstimator(self.parameters)
+            if random_state:
+                logger.warning(
+                    f"Explicitly specified random state ({random_state})"
+                    f"will override model settings read from file: {self.randomState}."
+                )
+                self.initRandomState(random_state)
+        else:
+            self.initFromData(data)
+            self.parameters = parameters
+            # initialize an estimator instance with the given parameters
+            self.alg = alg
+            # initialize random state
+            self.randomState = None
+            self.initRandomState(random_state)
+            # load the estimator
+            self.estimator = self.loadEstimator(self.parameters)
+        assert self.estimator is not None, \
+            "Estimator not initialized when it should be."
+        assert self.alg is not None, \
+            "Algorithm class not initialized when it should be."
+        if not autoload and not self.checkForData(exception=False):
+            raise ValueError(
+                "No data set specified. Make sure you "
+                "initialized this model with a 'QSPRDataset' "
+                "instance to train on. Or if you want to load "
+                "a model from file, set 'autoload' to True."
             )
-        # initialize a feature calculator instance
-        self.featureCalculators = (
-            self.data.descriptorCalculators
-            if self.data else self.readDescriptorCalculators(
-                [
-                    os.path.join(self.baseDir, path)
-                    for path in self.metaInfo["feature_calculator_paths"]
-                ]
-            )
-        )
-        # initialize a standardizer instance
-        self.featureStandardizer = (
-            self.data.feature_standardizer if self.data else self.readStandardizer(
-                os.path.join(self.baseDir, self.metaInfo["feature_standardizer_path"])
-            ) if self.metaInfo["feature_standardizer_path"] else None
-        )
-        # Initialize early stopping tracker if model supports early stopping
-        if self.supportsEarlyStopping:
-            self.earlyStopping = (
-                self.readEarlyStopping(
-                    os.path.join(self.baseDir, self.metaInfo["early_stopping_path"])
-                ) if "early_stopping_path" in self.metaInfo else EarlyStopping()
-            )
-
-        # initialize a estimator instance with the given parameters
-        self.alg = alg
-        if autoload:
-            self.estimator = self.loadEstimatorFromFile(params=self.parameters)
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""
@@ -344,19 +234,58 @@ class QSPRModel(ABC):
             name = "None"
         return f"{self.name} ({name})"
 
-    @property
-    def targetProperties(self) -> list[TargetProperty]:
-        """Return the target properties of the model,
-        taken from the data set or deserialized
-        from file if the model is loaded without data.
+    def __setstate__(self, state):
+        """Set state."""
+        super().__setstate__(state)
+        self.data = None
+        self.alg = import_class(self.alg)
+        self.estimator = self.loadEstimator(self.parameters)
 
-        Returns:
-            list[TargetProperty]: target properties of the model
+    def initFromData(self, data: QSPRDataset | None):
+        if data is not None:
+            self.data = data
+            self.targetProperties = self.data.targetProperties
+            self.nTargets = len(self.targetProperties)
+            self.featureCalculators = self.data.descriptorCalculators
+            self.featureStandardizer = self.data.feature_standardizer
+        else:
+            self.data = None
+            self.targetProperties = None
+            self.nTargets = None
+            self.featureCalculators = None
+            self.featureStandardizer = None
+
+    def initRandomState(self, random_state):
+        """Set random state if applicable.
+        Defaults to random state of dataset if no random state is provided,
+
+        Args:
+            random_state (int):
+                Random state to use for shuffling and other random operations.
         """
-        return (
-            self.data.targetProperties
-            if self.data else self.metaInfo["target_properties"]
+        new_random_state = random_state or (
+            self.data.randomState if self.data is not None else None
         )
+        if new_random_state is None:
+            self.randomState = int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+        self.randomState = new_random_state
+        constructor_params = [
+            name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
+        ]
+        if "random_state" in constructor_params:
+            if self.parameters:
+                self.parameters.update({"random_state": new_random_state})
+            else:
+                self.parameters = {"random_state": new_random_state}
+        elif random_state:
+            logger.warning(
+                f"Random state supplied, but alg {self.alg} does not support it."
+                " Ignoring this setting."
+            )
 
     @property
     def task(self) -> ModelTasks:
@@ -388,19 +317,6 @@ class QSPRModel(ABC):
         return self.__class__.__module__ + "." + self.__class__.__name__
 
     @property
-    def nTargets(self) -> int:
-        """Return the number of target properties of the model, taken from the data set
-        or deserialized from file if the model is loaded without data.
-
-        Returns:
-            int: number of target properties of the model
-        """
-        return (
-            len(self.data.targetProperties)
-            if self.data else len(self.metaInfo["target_properties"])
-        )
-
-    @property
     def outDir(self) -> str:
         """Return output directory of the model,
         the model files are stored in this directory (`{baseDir}/{name}`).
@@ -421,6 +337,10 @@ class QSPRModel(ABC):
             str: output prefix of the model files
         """
         return f"{self.outDir}/{self.name}"
+
+    @property
+    def metaFile(self) -> str:
+        return f"{self.outPrefix}_meta.json"
 
     @property
     @abstractmethod
@@ -449,24 +369,7 @@ class QSPRModel(ABC):
         """
         self._optimalEpochs = value
 
-    def saveParams(self, params: dict) -> str:
-        """Save model parameters to a JSON file.
-
-        Args:
-            params (dict): dictionary of model parameters
-
-        Returns:
-            str: absolute path to the JSON file
-        """
-        path = f"{self.outDir}/{self.name}_params.json"
-        self.setParams(params)
-        # save parameters to file
-        with open(path, "w", encoding="utf-8") as j:
-            logger.info("saving model parameters to file: %s" % path)
-            j.write(json.dumps(params, indent=4))
-        return path
-
-    def setParams(self, params):
+    def setParams(self, params: dict):
         """Set model parameters.
 
         Args:
@@ -476,89 +379,6 @@ class QSPRModel(ABC):
             self.parameters.update(params)
         else:
             self.parameters = params
-
-    def saveDescriptorCalculators(self) -> list[str]:
-        """Save the current descriptor calculator to a JSON file.
-
-        The file is stored in the output directory of the model.
-
-        Returns:
-            list[str]:
-                absolute paths to the JSON files containing
-                the saved descriptor calculators
-        """
-        paths = []
-        for calc in self.featureCalculators:
-            path = f"{self.outDir}/{self.name}_descriptor_calculator_{calc}.json"
-            calc.toFile(path)
-            paths.append(path)
-        return paths
-
-    def saveStandardizer(self) -> str:
-        """Save the current feature standardizer to a JSON file.
-
-        The file is stored in the output directory of the model.
-
-        Returns:
-            str:
-                absolute path to the JSON file containing the saved feature standardizer
-        """
-        path = f"{self.outDir}/{self.name}_feature_standardizer.json"
-        self.featureStandardizer.toFile(path)
-        return path
-
-    def saveEarlyStopping(self) -> str:
-        path = f"{self.outDir}/{self.name}_early_stopping.json"
-        self.earlyStopping.toFile(path)
-        return path
-
-    def saveMetadata(self) -> str:
-        """Save model metadata to a JSON file.
-
-        The file is stored in the output directory of the model.
-
-        Returns:
-            str: absolute path to the JSON file containing the model metadata
-        """
-        with open(self.metaFile, "w", encoding="utf-8") as j:
-            logger.info("saving model metadata to file: %s" % self.metaFile)
-            j.write(json.dumps(self.metaInfo, indent=4))
-        return self.metaFile
-
-    def save(self) -> str:
-        """Save the model data, parameters, metadata and all other
-         files to the output directory of the model.
-
-        Returns:
-            str: absolute path to the JSON file containing the model metadata
-        """
-        self.metaInfo["name"] = self.name
-        self.metaInfo["version"] = VERSION
-        self.metaInfo["model_class"] = self.classPath
-        self.metaInfo["target_properties"] = TargetProperty.toList(
-            copy.deepcopy(self.data.targetProperties), task_as_str=True
-        )
-        self.metaInfo["parameters_path"] = self.saveParams(
-            self.parameters
-        ).replace(f"{self.baseDir}/", "")
-        self.metaInfo["feature_calculator_paths"] = (
-            [
-                x.replace(f"{self.baseDir}/", "")
-                for x in self.saveDescriptorCalculators()
-            ] if self.featureCalculators else None
-        )
-        self.metaInfo["feature_standardizer_path"] = (
-            self.saveStandardizer().replace(f"{self.baseDir}/", "")
-            if self.featureStandardizer else None
-        )
-        self.metaInfo["estimator_path"] = self.saveEstimator().replace(
-            f"{self.baseDir}/", ""
-        )
-        if self.supportsEarlyStopping:
-            self.metaInfo["early_stopping_path"] = self.saveEarlyStopping().replace(
-                f"{self.baseDir}/", ""
-            )
-        return self.saveMetadata()
 
     def checkForData(self, exception: bool = True) -> bool:
         """Check if the model has a data set.
@@ -581,7 +401,7 @@ class QSPRModel(ABC):
     def convertToNumpy(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None
+        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to np.ndarray format.
 
@@ -669,7 +489,7 @@ class QSPRModel(ABC):
             feature_calculators=self.featureCalculators,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value,
-            shuffle=False
+            shuffle=False,
         )
         return dataset, failed_mask
 
@@ -694,7 +514,7 @@ class QSPRModel(ABC):
             if self.task.isClassification():
                 predictions = predictions.astype(int)
         else:
-            #return a list of 2D arrays
+            # return a list of 2D arrays
             predictions = self.predictProba(dataset)
         return predictions
 
@@ -743,7 +563,7 @@ class QSPRModel(ABC):
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
-    def fitAttached(self, **kwargs) -> str:
+    def fitAttached(self, monitor=None, mode=EarlyStoppingMode.OPTIMAL, **kwargs) -> str:
         """Train model on the whole attached data set.
 
         ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
@@ -751,6 +571,12 @@ class QSPRModel(ABC):
         cross-validation with early stopping can be used for fitting the model.
 
         Args:
+            monitor (FitMonitor): monitor for the fitting process, if None, the base
+                monitor is used
+            mode (EarlyStoppingMode): early stopping mode for models that support
+                early stopping, by default fit the 'optimal' number of
+                epochs previously stopped at in model assessment on train or test set,
+                to avoid the use of extra data for a validation set.
             kwargs: additional arguments to pass to fit
 
         Returns:
@@ -767,16 +593,40 @@ class QSPRModel(ABC):
         logger.info(
             "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-        # Use early stopping false here, since we are fitting on the whole data set
-        # the number of epochs is already determined from the cross-validation
         self.estimator = self.fit(
-            X_all, y_all, mode=EarlyStoppingMode.OPTIMAL, **kwargs
+            X_all, y_all, mode=mode, monitor=monitor, **kwargs
         )
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         # save model and return path
         return self.save()
+
+    def toJSON(self):
+        o_dict = json.loads(super().toJSON())
+        estimator_path = self.saveEstimator()
+        estimator_path = estimator_path.replace(self.baseDir, ".")
+        o_dict["py/state"]["baseDir"] = "."
+        o_dict["py/state"]["estimator"] = estimator_path
+        o_dict["py/state"]["alg"] = f"{self.alg.__module__}.{self.alg.__name__}"
+        return json.dumps(o_dict, indent=4)
+
+    def save(self):
+        """Save model to file.
+
+        Returns:
+            str: absolute path to the saved model
+        """
+        os.makedirs(self.outDir, exist_ok=True)
+        return self.toFile(self.metaFile)
+
+    @classmethod
+    def fromFile(cls, filename: str):
+        ret = super().fromFile(filename)
+        model_dir = os.path.dirname(filename)
+        ret.baseDir = os.path.dirname(model_dir)
+        ret.estimator = ret.loadEstimatorFromFile(ret.parameters)
+        return ret
 
     @abstractmethod
     def fit(
@@ -785,7 +635,8 @@ class QSPRModel(ABC):
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        **kwargs
+        monitor: "FitMonitor" = None,
+        **kwargs,
     ) -> Any | tuple[Any, int] | None:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -804,6 +655,8 @@ class QSPRModel(ABC):
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
+            monitor (FitMonitor): monitor for the fitting process,
+                if None, the base monitor is used
             kwargs: additional arguments to pass to the fit method of the estimator
 
         Returns:
@@ -892,7 +745,158 @@ class QSPRModel(ABC):
         """Save the underlying estimator to file.
 
         Returns:
-            path (str): path to the saved estimator
+            path (str): absolute path to the saved estimator
+        """
+
+
+class FitMonitor(ABC):
+    """Base class for monitoring the fitting of a model."""
+    @abstractmethod
+    def onFitStart(self, model: QSPRModel):
+        """Called before the training has started.
+
+        Args:
+            model (QSPRModel): model to be fitted
+        """
+
+    @abstractmethod
+    def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
+        """Called after the training has finished.
+
+        Args:
+            estimator (Any): estimator that was fitted
+            best_epoch (int | None): index of the best epoch
+        """
+
+    @abstractmethod
+    def onEpochStart(self, epoch: int):
+        """Called before each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+        """
+
+    @abstractmethod
+    def onEpochEnd(
+        self, epoch: int, train_loss: float, val_loss: float | None = None
+    ):
+        """Called after each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+            train_loss (float): loss of the current epoch
+            val_loss (float | None): validation loss of the current epoch
+        """
+
+    @abstractmethod
+    def onBatchStart(self, batch: int):
+        """Called before each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+        """
+
+    @abstractmethod
+    def onBatchEnd(self, batch: int, loss: float):
+        """Called after each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+            loss (float): loss of the current batch
+        """
+
+
+class AssessorMonitor(FitMonitor):
+    """Base class for monitoring the assessment of a model."""
+    @abstractmethod
+    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+        """Called before the assessment has started.
+
+        Args:
+            model (QSPRModel): model to assess
+            assesment_type (str): type of assessment
+        """
+
+    @abstractmethod
+    def onAssessmentEnd(self, predictions: pd.DataFrame):
+        """Called after the assessment has finished.
+
+        Args:
+            predictions (pd.DataFrame): predictions of the assessment
+        """
+
+    @abstractmethod
+    def onFoldStart(
+        self,
+        fold: int,
+        X_train: np.array,
+        y_train: np.array,
+        X_test: np.array,
+        y_test: np.array,
+    ):
+        """Called before each fold of the assessment.
+
+        Args:
+            fold (int): index of the current fold
+            X_train (np.array): training data of the current fold
+            y_train (np.array): training targets of the current fold
+            X_test (np.array): test data of the current fold
+            y_test (np.array): test targets of the current fold
+        """
+
+    @abstractmethod
+    def onFoldEnd(
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+    ):
+        """Called after each fold of the assessment.
+
+        Args:
+            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
+                                             tuple containing the fitted estimator and
+                                             the number of epochs it was trained for
+            predictions (pd.DataFrame): predictions of the current fold
+        """
+
+
+class HyperparameterOptimizationMonitor(AssessorMonitor):
+    """Base class for monitoring the hyperparameter optimization of a model."""
+    @abstractmethod
+    def onOptimizationStart(
+        self, model: QSPRModel, config: dict, optimization_type: str
+    ):
+        """Called before the hyperparameter optimization has started.
+
+        Args:
+            model (QSPRModel): model to optimize
+            config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of hyperparameter optimization
+        """
+
+    @abstractmethod
+    def onOptimizationEnd(self, best_score: float, best_parameters: dict):
+        """Called after the hyperparameter optimization has finished.
+
+        Args:
+            best_score (float): best score found during optimization
+            best_parameters (dict): best parameters found during optimization
+        """
+
+    @abstractmethod
+    def onIterationStart(self, params: dict):
+        """Called before each iteration of the hyperparameter optimization.
+
+        Args:
+            params (dict): parameters used for the current iteration
+        """
+
+    @abstractmethod
+    def onIterationEnd(self, score: float, scores: list[float]):
+        """Called after each iteration of the hyperparameter optimization.
+
+        Args:
+            score (float): (aggregated) score of the current iteration
+            scores (list[float]): scores of the current iteration
+                                  (e.g for cross-validation)
         """
 
 
@@ -900,50 +904,75 @@ class ModelAssessor(ABC):
     """Base class for assessment methods.
 
     Attributes:
+        scoreFunc (Metric): scoring function to use, should match the output of the
+                        evaluation method (e.g. if the evaluation methods returns
+                        class probabilities, the scoring function support class
+                        probabilities)
+        monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
+            is used
         useProba (bool): use probabilities for classification models
+        mode (EarlyStoppingMode): early stopping mode for fitting
     """
-    def __init__(self, use_proba: bool = True, mode: EarlyStoppingMode | None = None):
+    def __init__(
+        self,
+        scoring: str | Callable[[Iterable, Iterable], float],
+        monitor: AssessorMonitor | None = None,
+        use_proba: bool = True,
+        mode: EarlyStoppingMode | None = None,
+    ):
         """Initialize the evaluation method class.
 
         Args:
+            scoring: str | Callable[[Iterable, Iterable], float],
+            monitor (AssessorMonitor): monitor to track the evaluation
             use_proba (bool): use probabilities for classification models
             mode (EarlyStoppingMode): early stopping mode for fitting
         """
+        self.monitor = monitor
         self.useProba = use_proba
         self.mode = mode
+        self.scoreFunc = (
+            SklearnMetrics(scoring) if isinstance(scoring, str) else scoring
+        )
 
     @abstractmethod
-    def __call__(self, model: QSPRModel,
-                 **kwargs) -> list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]]:
+    def __call__(
+        self,
+        model: QSPRModel,
+        save: bool,
+        parameters: dict | None,
+        monitor: AssessorMonitor,
+        **kwargs,
+    ) -> list[float]:
         """Evaluate the model.
 
         Args:
             model (QSPRModel): model to evaluate
+            save (bool): save predictions to file
+            parameters (dict): parameters to use for the evaluation
+            monitor (AssessorMonitor): monitor to track the evaluation, overrides
+                                       the monitor set in the constructor
             kwargs: additional arguments for fit function of the model
 
         Returns:
-            list[tuple[np.ndarray, np.ndarray | list[np.ndarray]]:
-                list of tuples containing the true values and the predictions, where
-                each tuple corresponds a set of predictions such as different folds.
+            list[float]: scores of the model for each fold
         """
 
-    def savePredictionsToFile(
+    def predictionsToDataFrame(
         self,
         model: QSPRModel,
         y: np.array,
         predictions: np.ndarray | list[np.ndarray],
         index: pd.Series,
-        file_suffix: str,
-        extra_columns: dict[str, np.ndarray] | None = None
-    ):
-        """Save predictions to file.
+        extra_columns: dict[str, np.ndarray] | None = None,
+    ) -> pd.DataFrame:
+        """Create a dataframe with true values and predictions.
 
         Args:
             model (QSPRModel): model to evaluate
             y (np.array): target values
             predictions (np.ndarray | list[np.ndarray]): predictions
             index (pd.Series): index of the data set
-            file_suffix (str): suffix to add to the file name
             extra_columns (dict[str, np.ndarray]): extra columns to add to the output
         """
         # Create dataframe with true values
@@ -952,7 +981,7 @@ class ModelAssessor(ABC):
         )
         # Add predictions to dataframe
         for idx, prop in enumerate(model.data.targetProperties):
-            if prop.task.isClassification():
+            if prop.task.isClassification() and self.useProba:
                 # convert one-hot encoded predictions to class labels
                 # and add to train and test
                 df_out[f"{prop.name}_Prediction"] = np.argmax(predictions[idx], axis=1)
@@ -971,45 +1000,48 @@ class ModelAssessor(ABC):
         if extra_columns is not None:
             for col_name, col_values in extra_columns.items():
                 df_out[col_name] = col_values
-        df_out.to_csv(f"{model.outPrefix}.{file_suffix}.tsv", sep="\t")
+        return df_out
 
 
-class HyperParameterOptimization(ABC):
+class HyperparameterOptimization(ABC):
     """Base class for hyperparameter optimization.
 
     Attributes:
-        scoreFunc (Metric): scoring function to use, should match the output of the
-                            evaluation method (e.g. if the evaluation methods returns
-                            class probabilities, the scoring function support class
-                            probabilities)
         runAssessment (ModelAssessor): evaluation method to use
         scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
         paramGrid (dict): dictionary of parameters to optimize
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization
         bestScore (float): best score found during optimization
         bestParams (dict): best parameters found during optimization
     """
     def __init__(
-        self, scoring: str | Callable[[Iterable, Iterable], float], param_grid: dict,
-        model_assessor: ModelAssessor, score_aggregation: Callable[[Iterable], float]
+        self,
+        param_grid: dict,
+        model_assessor: ModelAssessor,
+        score_aggregation: Callable[[Iterable], float],
+        monitor: HyperparameterOptimizationMonitor | None = None,
     ):
         """Initialize the hyperparameter optimization class.
 
-        scoring (str | Callable[[Iterable, Iterable], float]):
-            Metric name from `sklearn.metrics` or user-defined scoring function.
         param_grid (dict):
             dictionary of parameters to optimize
         model_assessor (ModelAssessor):
             assessment method to use for determining the best parameters
         score_aggregation (Callable[[Iterable], float]): function to aggregate scores
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization,
+            if None, a BaseMonitor is used
         """
-        self.scoreFunc = (
-            SklearnMetric.getMetric(scoring) if type(scoring) == str else scoring
-        )
         self.runAssessment = model_assessor
         self.scoreAggregation = score_aggregation
         self.paramGrid = param_grid
         self.bestScore = -np.inf
         self.bestParams = None
+        self.monitor = monitor
+        self.config = {
+            "param_grid": param_grid,
+            "model_assessor": model_assessor,
+            "score_aggregation": score_aggregation
+        }
 
     @abstractmethod
     def optimize(self, model: QSPRModel) -> dict:

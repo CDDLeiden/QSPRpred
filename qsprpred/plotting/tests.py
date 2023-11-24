@@ -8,24 +8,25 @@ import pandas as pd
 from matplotlib.axes import SubplotBase
 from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.metrics import roc_auc_score
 
 from ..data.data import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
-from ..models.models import QSPRsklearn
+from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
+from ..models.metrics import SklearnMetrics
 from ..plotting.classification import MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot
 
 
 class ModelRetriever(ModelDataSetsMixIn):
-
     def getModel(
         self,
         dataset: QSPRDataset,
         name: str,
         alg: Type = RandomForestClassifier
-    ) -> QSPRsklearn:
+    ) -> SklearnModel:
         """Get a model for testing.
 
         Args:
@@ -37,11 +38,11 @@ class ModelRetriever(ModelDataSetsMixIn):
                 Algorithm to use for model. Defaults to `RandomForestClassifier`.
 
         Returns:
-            QSPRsklearn:
+            SklearnModel:
                 The new model.
 
         """
-        return QSPRsklearn(
+        return SklearnModel(
             name=name,
             data=dataset,
             base_dir=self.generatedModelsPath,
@@ -51,7 +52,6 @@ class ModelRetriever(ModelDataSetsMixIn):
 
 class ROCPlotTest(ModelRetriever, TestCase):
     """Test ROC curve plotting class."""
-
     def testPlotSingle(self):
         """Test plotting ROC curve for single task."""
         dataset = self.createLargeTestDataSet(
@@ -59,13 +59,14 @@ class ROCPlotTest(ModelRetriever, TestCase):
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [50]
+                "th": [6.5]
             }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        score_func = "roc_auc_ovr"
+        CrossValAssessor(scoring = score_func)(model)
+        TestSetAssessor(scoring = score_func)(model)
         model.save()
         # make plots
         plt = ROCPlot([model])
@@ -81,7 +82,6 @@ class ROCPlotTest(ModelRetriever, TestCase):
 
 class MetricsPlotTest(ModelRetriever, TestCase):
     """Test metrics plotting class."""
-
     def testPlotSingle(self):
         """Test plotting metrics for single task."""
         dataset = self.createLargeTestDataSet(
@@ -89,13 +89,14 @@ class MetricsPlotTest(ModelRetriever, TestCase):
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.SINGLECLASS,
-                "th": [50]
+                "th": [6.5]
             }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_metrics_plot_single_model")
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        score_func = "roc_auc"
+        CrossValAssessor(scoring = score_func)(model)
+        TestSetAssessor(scoring = score_func)(model)
         model.save()
         # generate metrics plot and associated files
         plt = MetricsPlot([model])
@@ -109,19 +110,17 @@ class MetricsPlotTest(ModelRetriever, TestCase):
 
 class CorrPlotTest(ModelRetriever, TestCase):
     """Test correlation plotting class."""
-
     def testPlotSingle(self):
         """Test plotting correlation for single task."""
         dataset = self.createLargeTestDataSet(
             "test_corr_plot_single_data", preparation_settings=self.getDefaultPrep()
         )
         model = self.getModel(
-            dataset,
-            "test_corr_plot_single_model",
-            alg=RandomForestRegressor
+            dataset, "test_corr_plot_single_model", alg=RandomForestRegressor
         )
-        CrossValAssessor()(model)
-        TestSetAssessor()(model)
+        score_func = "r2"
+        CrossValAssessor(scoring = score_func)(model)
+        TestSetAssessor(scoring = score_func)(model)
         model.save()
         # generate metrics plot and associated files
         plt = CorrelationPlot([model])

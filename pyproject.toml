@@ -50,29 +50,22 @@ dependencies = [
     "xgboost",
     "boruta",
     "tqdm",
+    "jsonpickle",
     "sklearn-json @ git+https://github.com/OlivierBeq/sklearn-json.git#egg=sklearn-json",
     "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
-    "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits",
+    "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits@0.0.4",
 ]
 
 [project.optional-dependencies]
-dev = [
-  "pre-commit", "isort", "yapf", "ruff", "torch >= 1.7.0",
-  "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
-  "padel-pywrapper >= 1.0.2.post1", "Signature-pywrapper", "Mordred", "biopython", "prodec",
-]
-deep = ["torch >= 1.7.0"]
+
 extra = [
   "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
   "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper",
 ]
-extra_gpu = ["py-boost",]
-full = [
-  "torch >= 1.7.0",
-  "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
-  "padel-pywrapper >= 1.0.2.post1", "Signature-pywrapper", "Mordred", "biopython", "prodec",
-  "py-boost", 
-]
+pyboost = ["py-boost"]
+deep = ["torch >= 1.7.0", "chemprop >= 1.6.0"]
+full = ["qsprpred[pyboost]", "qsprpred[deep]", "qsprpred[extra]"]
+dev = ["qsprpred[full]", "pre-commit", "isort", "yapf", "ruff", "pytest"]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -145,6 +138,8 @@ known_first_party = 'qsprpred'
  ]
 
  ignore = [
+   # line length - somes lines are just too long
+   "E501",
    # we decided on having relative rather than absolute imports
    "TID252",
    # module level import not at top of file

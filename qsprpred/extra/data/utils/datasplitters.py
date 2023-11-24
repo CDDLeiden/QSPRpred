@@ -15,7 +15,7 @@ from ..data import PCMDataSet
 
 class PCMSplit(DataSplit):
     """
-    Splits a dataset into train and test set such that the subset are balanced with
+    Splits a dataset into train and test set such that the subsets are balanced with
     respect to each of the protein targets.
 
     This is done with https://github.com/sohviluukkonen/gbmt-splits, linear programming
@@ -30,8 +30,12 @@ class PCMSplit(DataSplit):
         self.splitter = splitter
 
         # Check that splitter is either RandomSplit, ScaffoldSplit or ClusterSplit
-        assert isinstance(self.splitter, (RandomSplit, ScaffoldSplit, ClusterSplit)), \
-            "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
+        assert isinstance(
+            self.splitter, (RandomSplit, ScaffoldSplit, ClusterSplit)
+        ), "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
+
+        if isinstance(self.splitter, (RandomSplit, ClusterSplit)):
+            self.splitter.setSeed(dataset.randomState if dataset is not None else None)
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
         """
@@ -52,42 +56,37 @@ class PCMSplit(DataSplit):
             input data matrix X (note that these are integer indices, rather than a
             pandas index!)
         """
-
         ds = self.getDataSet()
         df = ds.getDF()
         indices = df.index.tolist()
         proteins = df[ds.proteinCol].unique()
         task = ds.targetProperties[0].task
         th = ds.targetProperties[0].th if task.isClassification() else None
-
-
-        assert len(ds.targetProperties) == 1, \
-            "PCMSplit only works for single-task datasets!"
-        # TODO: Add support for multi-target PCM datasets: creta a multi-task dataset
+        assert (
+            len(ds.targetProperties) == 1
+        ), "PCMSplit only works for single-task datasets!"
+        # TODO: Add support for multi-target (create a multi-task PCM dataset)
         # with all target-task combinations as different columns and split that
         # dataset with the given splitter
-
         # Pivot dataframe to get a matrix with protein targets as columns
         df_mt = df.pivot(
             index=ds.smilesCol,
             columns=ds.proteinCol,
             values=ds.targetProperties[0].name,
         ).reset_index()
-
         # Create target properties for multi-task dataset
         mt_targetProperties = [
             TargetProperty(name=target, task=task, th=th) for target in proteins
         ]
-
         # Create multi-task dataset and split it with the given splitter
         ds_mt = QSPRDataset(
             name=f"PCM_{self.splitter.__class__.__name__}_{hash(self)}",
             df=df_mt,
             smiles_col=ds.smilesCol,
             target_props=mt_targetProperties,
+            random_state=ds.randomState,
         )
         ds_mt.split(self.splitter)
-
         # Convert MT indices to indices of original PCM dataset
         test_indices = []
         for i in ds_mt.X_ind.index:
@@ -101,9 +100,7 @@ class PCMSplit(DataSplit):
                             (df[ds.smilesCol] == smiles)].index.astype(str)[0]
                 # Convert to numeric index
                 test_indices.append(indices.index(ds_idx))
-
         train_indices = [i for i in range(len(df)) if i not in test_indices]
-
         return iter([(train_indices, test_indices)])
 
 
@@ -138,7 +135,7 @@ class TemporalPerTarget(DataSplit):
         year_col: str,
         split_years: dict[str, int],
         firts_year_per_compound: bool = True,
-        dataset: PCMDataSet | None = None
+        dataset: PCMDataSet | None = None,
     ):
         """Creates a temporal split that is consistent across targets.
 
@@ -161,7 +158,6 @@ class TemporalPerTarget(DataSplit):
         self.firstYearPerCompound = firts_year_per_compound
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
-
         ds = self.getDataSet()
         df = ds.getDF()
         indices = df.index.tolist()
@@ -194,8 +190,8 @@ class TemporalPerTarget(DataSplit):
             train_indices.extend([indices.index(i) for i in train])
             test_indices.extend([indices.index(i) for i in test])
 
-
-        assert len(set(train_indices)) + len(set(test_indices)) == len(ds), \
-            "Train and test set do not cover the whole dataset!"
+        assert len(set(train_indices)) + len(
+            set(test_indices)
+        ) == len(ds), "Train and test set do not cover the whole dataset!"
 
         return iter([(train_indices, test_indices)])

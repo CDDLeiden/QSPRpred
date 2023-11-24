@@ -8,6 +8,7 @@
 """
 
 from abc import abstractmethod
+from typing import Optional
 
 import mordred
 import numpy as np
@@ -21,7 +22,6 @@ from rdkit import Chem
 from Signature_pywrapper import Signature as Signature_calculator
 
 from ....data.utils.descriptorsets import DescriptorSet, MoleculeDescriptorSet
-from typing import Optional
 
 
 class Mordred(MoleculeDescriptorSet):
@@ -42,7 +42,7 @@ class Mordred(MoleculeDescriptorSet):
         descs: list[str] | None = None,
         version: str | None = None,
         ignore_3D: bool = False,
-        config: str | None = None
+        config: str | None = None,
     ):
         """
         Initialize the descriptor with the same arguments as you would pass
@@ -433,6 +433,17 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
         self.sets = self.factory.available_descriptors if sets is None else sets
         self._descriptors = None
 
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        # Remove factory from state
+        del o_dict["factory"]
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        # Add factory to state
+        self.factory = prodec.ProteinDescriptors()
+
     @staticmethod
     def calculateDescriptor(
         factory: prodec.ProteinDescriptors, msa: dict[str, str], descriptor: str
@@ -499,7 +510,6 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
                 columns=[col for col in df.columns if col not in self._descriptors],
                 inplace=True,
             )
-
         return df
 
     @property

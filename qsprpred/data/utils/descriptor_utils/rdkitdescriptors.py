@@ -4,10 +4,9 @@ from rdkit.ML.Descriptors import MoleculeDescriptors
 
 from ..descriptor_utils.interfaces import Scorer
 
-
 class RdkitDescriptors(Scorer):
     def __init__(
-        self, rdkit_descriptors: list[str] = None, compute_3Drdkit: bool = False
+        self, rdkit_descriptors: list[str] | None = None, compute_3Drdkit: bool = False
     ):
         """Initialize a RdkitDescriptors class to calculate rdkit descriptors.
 
@@ -26,13 +25,22 @@ class RdkitDescriptors(Scorer):
         #     self.descriptors = list(self.available.values())
         self.descriptors = (
             rdkit_descriptors
-            if rdkit_descriptors is not None else [x[0] for x in Descriptors._descList]
+            if rdkit_descriptors is not None
+            else sorted(list(set([x[0] for x in Descriptors._descList])))
         )
         if compute_3Drdkit:
             self.descriptors = [
-                *self.descriptors, "Asphericity", "Eccentricity", "InertialShapeFactor",
-                "NPR1", "NPR2", "PMI1", "PMI2", "PMI3", "RadiusOfGyration",
-                "SpherocityIndex"
+                *self.descriptors,
+                "Asphericity",
+                "Eccentricity",
+                "InertialShapeFactor",
+                "NPR1",
+                "NPR2",
+                "PMI1",
+                "PMI2",
+                "PMI3",
+                "RadiusOfGyration",
+                "SpherocityIndex",
             ]
 
     def getScores(self, mols):
