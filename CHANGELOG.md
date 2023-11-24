@@ -18,6 +18,7 @@ without having to set the `task_from_str` argument, which is now deprecated.
 - `save_params` argument added to `OptunaOptimization` to save the best hyperparameters to the model (default: `True`).
 - We now use `jsonpickle` for object serialization, which is more flexible than the non-standard approach before, but it also means previous models will not be compatible with this version.
 - `SklearnMetric` was renamed to `SklearnMetrics`, it now also accepts an scikit-learn scorer name as input.
+- `QSPRModel.fitAttached` now accepts a `save_model` (default: `True`) and `save_dataset` (default: `False`) argument to save the model and dataset to a file after fitting.
 
 ## New Features
 - Most unit tests now have a variant that checks whether using a fixed random seed gives reproducible results.
