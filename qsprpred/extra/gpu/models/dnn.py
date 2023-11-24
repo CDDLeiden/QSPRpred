@@ -13,7 +13,7 @@ from sklearn.model_selection import ShuffleSplit
 from ....logs import logger
 from ....data.data import QSPRDataset
 from ....data.interfaces import DataSplit
-from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
+from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import FitMonitor, QSPRModel
@@ -146,10 +146,6 @@ class DNNModel(QSPRModel):
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""
         return True
-
-    @classmethod
-    def getDefaultParamsGrid(cls) -> list[list]:
-        return SSPACE
 
     def loadEstimator(self, params: dict | None = None) -> object:
         """Load model from file or initialize new model.

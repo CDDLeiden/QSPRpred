@@ -141,8 +141,7 @@ def QSPRArgParser(txt=None):
         default=None,
         help=(
             "search_space hyperparameter optimization json file location "
-            "(./my_search_space.json). If None, default "
-            "qsprpred.models.search_space.json used."
+            "(./my_search_space.json)."
         ),
     )
     parser.add_argument(
@@ -201,16 +200,10 @@ def QSPR_modelling(args):
                 args.model_types,
             )
         else:
-            # Get default search space
-            model_types = deepcopy(args.model_types)
-            if "DNN" in args.model_types:
-                dnn_grid_params = DNNModel.loadParamsGrid(
-                    None, args.optimization, "DNN"
-                )
-                model_types.remove("DNN")
-            grid_params = QSPRModel.loadParamsGrid(None, args.optimization, model_types)
-            if "DNN" in args.model_types:
-                grid_params = np.concatenate((grid_params, dnn_grid_params))
+            log.error(
+                "Please specify a search_space file for hyperparameter optimization."
+            )
+            sys.exit()
 
     for dataset in args.datasets:
         log.info(f"Dataset: {dataset.name}")
