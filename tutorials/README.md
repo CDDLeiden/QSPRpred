@@ -2,7 +2,8 @@
 
 This is a list of tutorials for QSPRpred. 
 
-Get the data for the tutorials from ... (TODO: add to onedrive/zenode, etc.) or recreate the dataset yourself by running `tutorial_data/create_tutorial_data.py`.
+The tutorial dataset is available through [OneDrive](https://1drv.ms/u/s!AtzWqu0inkjX3QRxXOkTFNv7IV7u?e=PPj0O2) (just unzip and place the two datasets `A2A_LIGANDS.tsv` and `AR_LIGANDS.tsv` in the `tutorial_data` folder) or recreate the dataset yourself by running `tutorial_data/create_tutorial_data.py`.
+
 
 A Quick Start tutorial is designed to get you up and running with QSPRpred as quickly as possible. 
 The rest of the the tutorials is diveded into two categories: basic and advanced. 
