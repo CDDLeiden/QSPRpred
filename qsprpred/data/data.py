@@ -385,6 +385,10 @@ class PandasDataSet(DataSet, JSONSerializable):
         self.reload()
 
     @property
+    def baseDir(self):
+        return os.path.dirname(self.storeDir)
+
+    @property
     def storePath(self):
         return f"{self.storePrefix}_df.pkl"
 
@@ -858,7 +862,10 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             random_state,
         )
         # the descriptors
-        self.descriptors = []
+        if os.path.exists(self.metaFile):
+            self.__dict__.update(self.fromFile(self.metaFile).__dict__)
+        else:
+            self.descriptors = []
         # settings
         self.smilesCol = smiles_col
         self.includesRdkit = add_rdkit
@@ -2010,7 +2017,7 @@ class QSPRDataset(MoleculeTable):
             QSPRDataset: created data set
         """
         kwargs["store_dir"] = (
-            os.path.dirname(mol_table.storeDir) if "store_dir" not in kwargs else kwargs["store_dir"]
+            mol_table.baseDir if "store_dir" not in kwargs else kwargs["store_dir"]
         )
         name = mol_table.name if name is None else name
         ds = QSPRDataset(
