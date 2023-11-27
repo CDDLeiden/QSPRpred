@@ -8,11 +8,12 @@ import pandas as pd
 import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
+from ..data_source import DataSource
 from ...data import MoleculeTable
 from .papyrus_filter import papyrus_filter
 
 
-class Papyrus:
+class Papyrus(DataSource):
     """Create new instance of Papyrus dataset.
     See `papyrus_filter` and `Papyrus.download` and `Papyrus.getData` for more details.
 
@@ -84,11 +85,11 @@ class Papyrus:
 
     def getData(
         self,
+        name: str,
         acc_keys: list[str],
         quality: str,
         activity_types: list[str] | str = "all",
         output_dir: Optional[str] = None,
-        name: Optional[str] = None,
         drop_duplicates: bool = False,
         chunk_size: int = 1e5,
         use_existing: bool = True,

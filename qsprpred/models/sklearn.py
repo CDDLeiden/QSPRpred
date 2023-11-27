@@ -49,17 +49,6 @@ class SklearnModel(QSPRModel):
             random_state (int): seed for the random state
         """
         super().__init__(base_dir, alg, data, name, parameters, autoload, random_state)
-        # check for incompatible tasks
-        if self.task == ModelTasks.MULTITASK_MIXED:
-            raise ValueError(
-                "MultiTask with a mix of classification and regression tasks "
-                "is not supported for sklearn models."
-            )
-        if self.task == ModelTasks.MULTITASK_MULTICLASS:
-            raise NotImplementedError(
-                "At the moment there are no supported metrics "
-                "for multi-task multi-class/mix multi-and-single class classification."
-            )
         # initialize models with defined parameters
         if type(self.estimator) in [SVC, SVR]:
             logger.warning(
@@ -157,7 +146,17 @@ class SklearnModel(QSPRModel):
         monitor: None = None,
         **kwargs,
     ):
-        """See `QSPRModel.fit`."""
+        # check for incompatible tasks
+        if self.task == ModelTasks.MULTITASK_MIXED:
+            raise ValueError(
+                "MultiTask with a mix of classification and regression tasks "
+                "is not supported for sklearn models."
+            )
+        if self.task == ModelTasks.MULTITASK_MULTICLASS:
+            raise NotImplementedError(
+                "At the moment there are no supported metrics "
+                "for multi-task multi-class/mix multi-and-single class classification."
+            )
         estimator = self.estimator if estimator is None else estimator
         X, y = self.convertToNumpy(X, y)
         # sklearn models expect 1d arrays

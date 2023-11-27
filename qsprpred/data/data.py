@@ -2010,7 +2010,7 @@ class QSPRDataset(MoleculeTable):
             QSPRDataset: created data set
         """
         kwargs["store_dir"] = (
-            mol_table.storeDir if "store_dir" not in kwargs else kwargs["store_dir"]
+            os.path.dirname(mol_table.storeDir) if "store_dir" not in kwargs else kwargs["store_dir"]
         )
         name = mol_table.name if name is None else name
         ds = QSPRDataset(

@@ -239,7 +239,10 @@ class QSPRModel(JSONSerializable, ABC):
         """Set state."""
         super().__setstate__(state)
         self.data = None
-        self.alg = dynamic_import(self.alg)
+        if hasattr(self, 'alg') and self.alg is not None:
+            self.alg = dynamic_import(self.alg)
+        else:
+            self.alg = None
         self.estimator = self.loadEstimator(self.parameters)
 
     def initFromData(self, data: QSPRDataset | None):
@@ -622,7 +625,7 @@ class QSPRModel(JSONSerializable, ABC):
         return self.toFile(self.metaFile)
 
     @classmethod
-    def fromFile(cls, filename: str):
+    def fromFile(cls, filename: str) -> "QSPRModel":
         ret = super().fromFile(filename)
         model_dir = os.path.dirname(filename)
         ret.baseDir = os.path.dirname(model_dir)
