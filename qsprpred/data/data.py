@@ -192,10 +192,19 @@ class Randomized:
         return self.seed
 
 
-class DataSetDependant:
+class DataSetDependant(JSONSerializable):
     """Classes that need a data set to operate have to implement this."""
     def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
         self.dataSet = dataset
+
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        o_dict["dataSet"] = None
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.dataSet = None
 
     def setDataSet(self, dataset: MoleculeDataSet):
         self.dataSet = dataset

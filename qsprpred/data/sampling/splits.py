@@ -23,7 +23,7 @@ from qsprpred.data.chem.clustering import (
 from qsprpred.data.chem.scaffolds import Murcko, Scaffold
 
 
-class DataSplit(ABC, DataSetDependant):
+class DataSplit(DataSetDependant, ABC):
     """
     Defines a function split a dataframe into train and test set.
 
