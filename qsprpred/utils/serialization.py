@@ -10,6 +10,7 @@ from typing import Any, Callable
 
 import jsonpickle
 
+from qsprpred.logs import logger
 from qsprpred.utils.inspect import dynamic_import
 
 jsonpickle.set_encoder_options('json', indent=4)
@@ -65,7 +66,11 @@ class JSONSerializable(FileSerializable):
         for key in self.__dict__:
             if key in self._notJSON:
                 continue
-            o_dict[key] = copy.deepcopy(self.__dict__[key])
+            try:
+                o_dict[key] = copy.deepcopy(self.__dict__[key])
+            except Exception as exp:
+                logger.error(f"Could not deepcopy {key}: {exp}")
+                raise exp
         return o_dict
 
     def __setstate__(self, state: dict):
