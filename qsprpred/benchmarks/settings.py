@@ -54,7 +54,7 @@ class BenchmarkSettings(JSONSerializable):
     random_seed: int
     data_sources: list[DataSource]
     descriptors: list[list[DescriptorSet]]
-    target_props: list[list[TargetProperty]]
+    target_props: list[list[TargetProperty | dict]]
     prep_settings: list[DataPrepSettings]
     models: list[QSPRModel]
     assessors: list[ModelAssessor]

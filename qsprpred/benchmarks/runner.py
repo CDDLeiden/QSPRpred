@@ -1,5 +1,6 @@
 import logging
 import os
+import traceback
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import Lock
 
@@ -26,7 +27,7 @@ class BenchmarkRunner:
         self.data_dir = data_dir
         os.makedirs(self.data_dir, exist_ok=True)
 
-    def run(self):
+    def run(self, raise_errors=False) -> pd.DataFrame:
         # loop over replicas in parallel
         with ProcessPoolExecutor(max_workers=self.n_proc) as executor:
             for result in executor.map(
@@ -34,8 +35,15 @@ class BenchmarkRunner:
                     self.settings.iter_replicas()
             ):
                 if result is not None:
-                    logging.error(f"Something went wrong for {result[0]}: ", result[1])
-                    logging.exception(result[1])
+                    if raise_errors:
+                        raise result[1]
+                    else:
+                        logging.error(
+                            f"Something went wrong for {result[0]}: ",
+                            result[1]
+                        )
+                        logging.exception(result[1])
+        return pd.read_table(self.results_file)
 
     def run_replica(self, replica: Replica):
         try:
