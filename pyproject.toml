@@ -50,7 +50,7 @@ dependencies = [
     "xgboost",
     "boruta",
     "tqdm",
-    "ml2json >= 0.2.1",
+    "ml2json >= 0.2.2",
     "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
     "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits@0.0.4",
 ]
