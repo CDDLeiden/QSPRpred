@@ -11,7 +11,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import ml2json
-from sklearn.svm import SVC, SVR
+from sklearn.exceptions import NotFittedError
+from sklearn.utils.validation import check_is_fitted
 
 from ..data.data import QSPRDataset
 from ..logs import logger
@@ -59,22 +60,8 @@ class SklearnModel(QSPRModel):
                 "for multi-task multi-class/mix multi-and-single class classification."
             )
         # initialize models with defined parameters
-        if type(self.estimator) in [SVC, SVR]:
-            logger.warning(
-                "parameter max_iter set to 10000 to avoid training getting stuck. \
-                            Manually set this parameter if this is not desired."
-            )
-            if self.parameters:
-                self.parameters.update({"max_iter": 10000})
-            else:
-                self.parameters = {"max_iter": 10000}
-
-        # set parameters if defined
-        if self.parameters not in [None, {}] and hasattr(self, "estimator"):
-            self.estimator.set_params(**self.parameters)
-
-        # check if alg can be initialized with parameters
         try:
+            # check if alg can be initialized with parameters
             if self.parameters is not None:
                 self.alg(**self.parameters)
             else:
@@ -84,7 +71,14 @@ class SklearnModel(QSPRModel):
                 f"Cannot initialize alg {self.alg} with parameters {self.parameters}."
             )
             raise
-
+        # set parameters if defined
+        if (self.parameters not in [None, {}]) \
+                and hasattr(self, "estimator") \
+                and self.estimator is not None:
+            try:
+                check_is_fitted(self.estimator)
+            except NotFittedError:
+                self.estimator.set_params(**self.parameters)
         # log some things
         logger.info("parameters: %s" % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
@@ -127,6 +121,10 @@ class SklearnModel(QSPRModel):
             else:
                 return estimator
         elif fallback_load:
+            logger.warning(
+                f"No estimator found at {path}, creating unfitted estimator instead. "
+                f"Set fallback_load to False to prevent this."
+            )
             return self.loadEstimator(params)
         else:
             raise FileNotFoundError(

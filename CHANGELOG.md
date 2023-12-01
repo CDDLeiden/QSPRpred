@@ -1,17 +1,24 @@
 # Change Log
 
-From v2.1.0.a2 to v2.2.0
+From v2.1.0 to v3.0.0
 
 ## Fixes
 - Fixed random seeds to give reproducible results. Each dataset is initialized with a single random state (either from the constructor or a random number generator) which is used in all subsequent random operations. Each model is initialized with a single random state as well: it uses the random state from the dataset, unless it's overriden in the constructor. When a dataset is saved to a file so is its random state, which is used by the dataset when the dataset is reloaded.
 - fixed error with serialization of the `DNNModel.params` attribute, when no parameters are set.
 - Fix bug with saving predictions from classification model when `ModelAssessor.useProba` set to `False`.
+- Add missing implementation of `QSPRDataset.removeProperty`
 
 ## Changes
 - The jupyter notebooks now pass a random state to ensure consistent results.
 - The deceased `sklearn-json` package has been replaced by its continuation `ml2json`.
 - The default parameter values for `STFullyConnected` have changed from `n_epochs` = 1000 to `n_epochs` = 100, from `neurons_h1` = 4000 to `neurons_h1` = 256 and `neurons_hx` = 1000 to `neurons_hx` = 128.
 - Rename `HyperParameterOptimization` to `HyperparameterOptimization`.
+- `TargetProperty.fromList` and `TargetProperty.fromDict` now accept a both a string and a `TargetTask` as the `task` argument,
+without having to set the `task_from_str` argument, which is now deprecated.
+- Make `EarlyStopping.mode` flexible for `QSPRModel.fitAttached`.
+- `save_params` argument added to `OptunaOptimization` to save the best hyperparameters to the model (default: `True`).
+- We now use `jsonpickle` for object serialization, which is more flexible than the non-standard approach before, but it also means previous models will not be compatible with this version.
+- `SklearnMetric` was renamed to `SklearnMetrics`, it now also accepts an scikit-learn scorer name as input.
 
 
 ## New Features
@@ -24,5 +31,8 @@ From v2.1.0.a2 to v2.2.0
 - Added `NullMonitor` class to ignore the progress of a fitting, assessing, or hyperparameter optimization process.
 - Added `ListMonitor` class to combine multiple monitors.
 - Cross-validation, testing, hyperparameter optimization and early-stopping were made more flexible by allowing custom splitting and fold generation strategies. A tutorial showcasing these features was created. 
+- Added a `reset` method to `QSPRDataset`, which resets splits and loads all descriptors into the training set matrix again.
 
 ## Removed Features
+- The `Metric` interface has been simplified in order to make it easier to implement custom metrics. The `Metric` interface now only requires the implementation of the `__call__` method, which takes predictions and returns a `float`. The `Metric` interface no longer requires the implementation of `needsDiscreteToScore`, `needsProbaToScore` and `supportsTask`. However, this means the base functionality of `checkMetricCompatibility`, `isClassificationMetric` and `isRegressionMetric` are no longer available.
+- Default hyperparameter search space file, no longer available.

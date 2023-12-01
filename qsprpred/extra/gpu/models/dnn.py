@@ -1,8 +1,6 @@
 """Here the DNN model originally from DrugEx can be found.
 
 At the moment this contains a class for fully-connected DNNs.
-To add more a model class implementing the `QSPRModel` interface can be added,
-see tutorial adding_new_components.
 """
 import os
 from typing import Any, Type
@@ -12,9 +10,10 @@ import pandas as pd
 import torch
 from sklearn.model_selection import ShuffleSplit
 
+from ....logs import logger
 from ....data.data import QSPRDataset
 from ....data.interfaces import DataSplit
-from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
+from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import FitMonitor, QSPRModel
@@ -34,7 +33,7 @@ class DNNModel(QSPRModel):
         alg (estimator): estimator instance or class
         parameters (dict): dictionary of algorithm specific parameters
         estimator (object):
-            the underlying estimator instance, if `fit` or optimization is perforemed,
+            the underlying estimator instance, if `fit` or optimization is performed,
             this model instance gets updated accordingly
         featureCalculators (MoleculeDescriptorsCalculator):
             feature calculator instance taken from the data set
@@ -42,14 +41,9 @@ class DNNModel(QSPRModel):
         featureStandardizer (SKLearnStandardizer):
             feature standardizer instance taken from the data set
             or deserialized from file if the model is loaded without data
-        metaInfo (dict):
-            dictionary of metadata about the model, only available
-            after the model is saved
         baseDir (str):
             base directory of the model, the model files
             are stored in a subdirectory `{baseDir}/{outDir}/`
-        metaFile (str):
-            absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
         device (cuda device): cuda device
         gpus (int/ list of ints): gpu number(s) to use for model fitting
         patience (int):
@@ -58,18 +52,13 @@ class DNNModel(QSPRModel):
         tol (float):
             minimum absolute improvement of loss necessary to count as
             progress on best validation score
-        random_state (int):
-            seed for the random state
         nClass (int): number of classes
         nDim (int): number of features
-        optimalEpochs (int): number of epochs to train the model for optimal performance
         device (torch.device): cuda device, cpu or gpu
         gpus (list[int]): gpu number(s) to use for model fitting
         patience (int):
             number of epochs to wait before early stop
             if no progress on validation set score
-        optimalEpochs (int):
-            number of epochs to train the model for optimal performance
     """
     def __init__(
         self,
@@ -139,7 +128,16 @@ class DNNModel(QSPRModel):
         Args:
             random_state (int): Random state to use for shuffling and other random operations.
         """
-
+        new_random_state = random_state or (
+            self.data.randomState if self.data is not None else
+            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+        )
+        self.randomState = new_random_state
+        if new_random_state is None:
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
         self.randomState = random_state
         if random_state is not None:
             torch.manual_seed(random_state)
@@ -148,10 +146,6 @@ class DNNModel(QSPRModel):
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""
         return True
-
-    @classmethod
-    def getDefaultParamsGrid(cls) -> list[list]:
-        return SSPACE
 
     def loadEstimator(self, params: dict | None = None) -> object:
         """Load model from file or initialize new model.
@@ -162,14 +156,13 @@ class DNNModel(QSPRModel):
         Returns:
             model (object): model instance
         """
+        self.initRandomState(self.randomState)
         if self.task.isRegression():
             self.nClass = 1
-        else:
-            self.nClass = (
-                self.data.targetProperties[0].nClasses
-                if self.data else self.metaInfo["n_class"]
-            )
-        self.nDim = self.data.X.shape[1] if self.data else self.metaInfo["n_dim"]
+        elif self.data is not None:
+            self.nClass = self.data.targetProperties[0].nClasses
+        if self.data is not None:
+            self.nDim = self.data.X.shape[1]
         # initialize model
         estimator = self.alg(
             n_dim=self.nDim,
@@ -222,34 +215,14 @@ class DNNModel(QSPRModel):
         torch.save(self.estimator.state_dict(), path)
         return path
 
-    def saveParams(self, params: dict) -> str:
-        """Save model parameters to file.
+    def setParams(self, params: dict):
+        """Set parameters of the model.
 
         Args:
-            params (dict): model parameters
-
-        Returns:
-            str: path to the saved parameters as json
+            params (dict): parameters
         """
-        if params is None:
-            return super().saveParams(params)
-        return super().saveParams(
-            {
-                k: params[k]
-                for k in params
-                if not k.startswith("_") and k not in ["training", "device", "gpus"]
-            }
-        )
-
-    def save(self) -> str:
-        """Save the DNNModel model and meta information.
-
-        Returns:
-            str: path to the saved model
-        """
-        self.metaInfo["n_dim"] = self.nDim
-        self.metaInfo["n_class"] = self.nClass
-        return super().save()
+        super().setParams(params)
+        self.estimator = self.loadEstimator(self.parameters)
 
     @early_stopping
     def fit(
@@ -286,7 +259,7 @@ class DNNModel(QSPRModel):
         )
         X, y = self.convertToNumpy(X, y)
         monitor.onFitStart(self)
-
+        # fit with early stopping
         if self.earlyStopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
@@ -301,7 +274,6 @@ class DNNModel(QSPRModel):
             )
             monitor.onFitEnd(estimator_fit[0], estimator_fit[1])
             return estimator_fit
-
         # set fixed number of epochs if early stopping is not used
         estimator.n_epochs = self.earlyStopping.getEpochs()
         estimator_fit = estimator.fit(X, y, monitor=monitor, **kwargs)

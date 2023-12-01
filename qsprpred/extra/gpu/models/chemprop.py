@@ -13,8 +13,10 @@ from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import trange
 
+from ....logs import logger
 from ....data.data import QSPRDataset
 from ....data.interfaces import DataSplit
+from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import FitMonitor, QSPRModel
 from ....models.monitors import BaseMonitor
@@ -44,6 +46,27 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         super().__init__(args)
         self.args = args
         self.scaler = scaler
+
+    def initRandomState(self, random_state):
+        """Set random state if applicable.
+        Defaults to random state of dataset if no random state is provided by the constructor.
+
+        Args:
+            random_state (int): Random state to use for shuffling and other random operations.
+        """
+        new_random_state = random_state or (
+            self.data.randomState if self.data is not None else
+            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+        )
+        self.randomState = new_random_state
+        if new_random_state is None:
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+        self.randomState = random_state
+        if random_state is not None:
+            torch.manual_seed(random_state)
 
     @classmethod
     def cast(cls, obj: chemprop.models.MoleculeModel) -> "ChempropMoleculeModel":
@@ -112,15 +135,13 @@ class ChempropModel(QSPRModel):
         featureStandardizer (SKLearnStandardizer):
             feature standardizer instance taken from the data set
             or deserialized from file if the model is loaded without data
-        metaInfo (dict):
-            dictionary of metadata about the model,
-            only available after the model is saved
         baseDir (str):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
-        metaFile (str):
-            absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
     """
+
+    _notJSON = QSPRModel._notJSON + ["chempropLogger"]
+
     def __init__(
         self,
         base_dir: str,
@@ -153,6 +174,12 @@ class ChempropModel(QSPRModel):
         super().__init__(base_dir, alg, data, name, parameters, autoload)
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
+        )
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.chempropLogger = chemprop.utils.create_logger(
+            name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
         )
 
     def supportsEarlyStopping(self) -> bool:
@@ -217,9 +244,6 @@ class ChempropModel(QSPRModel):
 
         args = estimator.args
 
-        # Set pytorch seed for random initial weights
-        torch.manual_seed(args.pytorch_seed)
-
         # set task names
         args.task_names = [prop.name for prop in self.data.targetProperties]
 
@@ -230,7 +254,7 @@ class ChempropModel(QSPRModel):
             for i, task_class_sizes in enumerate(class_sizes):
                 self.chempropLogger.debug(
                     f"{args.task_names[i]} "
-                    f"{', '.join(f'{cls}: {size * 100:.2f}%' for cls, size in enumerate(task_class_sizes))}"  # noqa: E501
+                    f"{', '.join(f'{cls}: {size * 100:.2f}%' for cls, size in enumerate(task_class_sizes))}"
                 )
             train_class_sizes = chemprop.data.utils.get_class_sizes(
                 train_data, proportion=False
@@ -318,6 +342,11 @@ class ChempropModel(QSPRModel):
         n_epochs = (
             self.earlyStopping.getEpochs() if not self.earlyStopping else args.epochs
         )
+        if not n_epochs:
+            raise ValueError(f"Number of epochs must be greater "
+                             f"than 0. Got: {n_epochs}")
+        best_estimator = estimator
+        best_found = False
         for epoch in trange(n_epochs):
             monitor.onEpochStart(epoch)
             self.chempropLogger.debug(f"Epoch {epoch}")
@@ -378,17 +407,20 @@ class ChempropModel(QSPRModel):
                 ):
                     best_score, best_epoch = mean_val_score, epoch
                     best_estimator = deepcopy(estimator)
+                    best_found = True
                 # Evaluate on test set using model with best validation score
                 self.chempropLogger.info(
                     f"Model best validation {args.metric} = {best_score:.6f} on epoch \
                     {best_epoch}"
                 )
-
         writer.close()
+        if not best_found:
+            logger.warning(
+                "Early stopping did not yield a best model, using last model instead."
+            )
         if not keep_logs:
             # remove temp directory with logs
             shutil.rmtree(save_dir)
-
         if self.earlyStopping:
             monitor.onFitEnd(best_estimator, best_epoch)
             return best_estimator, best_epoch
@@ -493,12 +525,13 @@ class ChempropModel(QSPRModel):
         Returns:
             object: initialized estimator instance
         """
+        self.initRandomState(self.randomState)
         self.checkArgs(params)
         new_parameters = self.getParameters(params)
         args = ChempropMoleculeModel.getTrainArgs(new_parameters, self.task)
 
         # set task names
-        args.task_names = [prop.name for prop in self.data.targetProperties]
+        args.task_names = [prop.name for prop in self.targetProperties]
 
         return self.alg(args)
 

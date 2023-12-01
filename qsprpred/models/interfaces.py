@@ -13,18 +13,16 @@ from typing import Any, Callable, Iterable, List, Type, Union
 import numpy as np
 import pandas as pd
 
-from .. import VERSION
-from ..data.data import MoleculeTable, QSPRDataset, TargetProperty
-from ..data.utils.feature_standardization import SKLearnStandardizer
+from ..data.data import MoleculeTable, QSPRDataset
 from ..logs import logger
-from ..models import SSPACE
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
-from ..models.metrics import SklearnMetric
+from ..models.metrics import SklearnMetrics
 from ..models.tasks import ModelTasks
+from qsprpred.utils.serialization import JSONSerializable
 from ..utils.inspect import import_class
 
 
-class QSPRModel(ABC):
+class QSPRModel(JSONSerializable, ABC):
     """The definition of the common model interface for the package.
 
     The QSPRModel handles model initialization, fitting, predicting and saving.
@@ -43,98 +41,17 @@ class QSPRModel(ABC):
         featureStandardizer (SKLearnStandardizer):
             feature standardizer instance taken from the data set
             or deserialized from file if the model is loaded without data
-        metaInfo (dict):
-            dictionary of metadata about the model,
-            only available after the model is saved
         baseDir (str):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
-        metaFile (str):
-            absolute path to the metadata file of the model (`{outPrefix}_meta.json`)
         earlyStopping (EarlyStopping):
             early stopping tracker for training of QSPRpred models that support
             early stopping (e.g. neural networks)
-        random_state (int):
+        randomState (int):
             Random state to use for all random operations for reproducibility.
     """
-    @staticmethod
-    def readStandardizer(path: str) -> "SKLearnStandardizer":
-        """Read a feature standardizer from a JSON file.
 
-        If the file does not exist, None is returned.
-
-        Args:
-            path (str): absolute path to the JSON file
-
-        Returns:
-            SKLearnStandardizer:
-                feature standardizer instance or None if the file does not exist
-        """
-        if os.path.exists(path):
-            return SKLearnStandardizer.fromFile(path)
-
-    @staticmethod
-    def readParams(path: str) -> dict:
-        """Read model parameters from a JSON file.
-
-        Args:
-            path (str): absolute path to the JSON file
-
-        Returns:
-            dict: dictionary of model parameters
-        """
-        with open(path, "r", encoding="utf-8") as j:
-            logger.info("loading model parameters from file: %s" % path)
-            return json.loads(j.read())
-
-    @staticmethod
-    def readDescriptorCalculators(
-        paths: list[str],
-    ) -> list["DescriptorsCalculator"]:  # noqa: F821
-        """Read a descriptor calculators from a JSON file.
-
-        Args:
-            paths (list[str]): absolute path to the JSON file
-
-        Returns:
-            list[DescriptorsCalculator]: descriptor calculator instance
-            or None if the file does not exist
-        """
-        calcs = []
-        for path in paths:
-            if os.path.exists(path):
-                data = json.load(open(path, "r", encoding="utf-8"))
-                if "calculator" not in data:
-                    calc_cls = (
-                        "qsprpred.data.utils.descriptorcalculator."
-                        "MoleculeDescriptorsCalculator"
-                    )
-                else:
-                    calc_cls = data["calculator"]
-                calc_cls = import_class(calc_cls)
-                calc = calc_cls.fromFile(path)
-                calcs.append(calc)
-            else:
-                raise FileNotFoundError(
-                    f"Descriptor calculator file '{path}' not found."
-                )
-        return calcs
-
-    @staticmethod
-    def readEarlyStopping(path):
-        """Read early stopping settings from file.
-
-        If the file does not exist, None is returned.
-
-        Args:
-            path (str): absolute path to the JSON file
-
-        Returns:
-            EarlyStopping:
-                Early stopping instance or None if the file does not exist
-        """
-        if os.path.exists(path):
-            return EarlyStopping.fromFile(path)
+    _notJSON = ["alg", "data", "estimator"]
 
     @staticmethod
     def handleInvalidsInPredictions(
@@ -168,16 +85,6 @@ class QSPRModel(ABC):
         return predictions
 
     @classmethod
-    def getDefaultParamsGrid(cls) -> list:
-        """Get the path to the file with default search grid parameter settings
-        for some predefined estimator types.
-
-        Returns:
-            list: list of default parameter grids
-        """
-        return SSPACE
-
-    @classmethod
     def loadParamsGrid(
         cls, fname: str, optim_type: str, model_types: str
     ) -> np.ndarray:
@@ -197,16 +104,12 @@ class QSPRModel(ABC):
                 array with three columns containing modeltype,
                 optimization type (grid or bayes) and model type
         """
-        if fname:
-            try:
-                with open(fname) as json_file:
-                    optim_params = np.array(json.load(json_file), dtype=object)
-            except FileNotFoundError:
-                logger.error("Search space file (%s) not found" % fname)
-                sys.exit()
-        else:
-            with open(cls.getDefaultParamsGrid()) as json_file:
+        try:
+            with open(fname) as json_file:
                 optim_params = np.array(json.load(json_file), dtype=object)
+        except FileNotFoundError:
+            logger.error("Search space file (%s) not found" % fname)
+            sys.exit()
         # select either grid or bayes optimization parameters from param array
         optim_params = optim_params[optim_params[:, 2] == optim_type, :]
         # check all ModelTasks to be used have parameter grid
@@ -219,74 +122,6 @@ class QSPRModel(ABC):
             sys.exit()
         logger.info("search space loaded from file")
         return optim_params
-
-    @classmethod
-    def fromFile(cls, path: str) -> "QSPRModel":
-        """Load a model from its meta file.
-
-        Args:
-            path (str): full path to the model meta file
-        """
-        meta = cls.readMetadata(path)
-        model_class = import_class(meta["model_class"])
-        model_name = meta["name"]
-        base_dir = os.path.dirname(path).replace(f"{model_name}", "")
-        return model_class(name=model_name, base_dir=base_dir)
-
-    @classmethod
-    def readMetadata(cls, path: str) -> dict:
-        """Read model metadata from a JSON file.
-
-        Args:
-            path (str): absolute path to the JSON file
-
-        Returns:
-            dict: dictionary containing the model metadata
-
-        Raises:
-            FileNotFoundError: if the file does not exist
-        """
-        if os.path.exists(path):
-            with open(path) as j:
-                meta_info = json.loads(j.read())
-                meta_info["target_properties"] = TargetProperty.fromList(
-                    meta_info["target_properties"], task_from_str=True
-                )
-        else:
-            raise FileNotFoundError(f"Metadata file '{path}' does not exist.")
-        return meta_info
-
-    def initRandomState(self, random_state):
-        """Set random state if applicable.
-        Defaults to random state of dataset if no random state is provided,
-
-        Args:
-            random_state (int):
-                Random state to use for shuffling and other random operations.
-        """
-        new_random_state = random_state or (
-            self.data.randomState if self.data is not None else
-            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
-        )
-        self.randomState = new_random_state
-        if new_random_state is None:
-            logger.warning(
-                "No random state supplied, "
-                "and could not find random state on the dataset."
-            )
-        constructor_params = [
-            name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
-        ]
-        if "random_state" in constructor_params:
-            if self.parameters:
-                self.parameters.update({"random_state": new_random_state})
-            else:
-                self.parameters = {"random_state": new_random_state}
-        elif random_state:
-            logger.warning(
-                f"Random state supplied, but alg {self.alg} does not support it."
-                " Ignoring this setting."
-            )
 
     def __init__(
         self,
@@ -317,66 +152,61 @@ class QSPRModel(ABC):
             random_state (int):
                 Random state to use for shuffling and other random operations.
         """
-        self.data = data
-        self.name = name or alg.__class__.__name__
-        self.baseDir = base_dir.rstrip("/")
-        # load metadata and update parameters accordingly
-        self.metaFile = f"{self.outPrefix}_meta.json"
-        if autoload:
-            try:
-                self.metaInfo = self.readMetadata(self.metaFile)
-            except FileNotFoundError:
-                if not self.data:
-                    raise FileNotFoundError(
-                        f"Metadata file '{self.metaFile}' not found"
-                    )
-                self.metaInfo = {}
-        else:
-            self.metaInfo = {}
-            if self.data is None:
-                raise ValueError(
-                    "No data set specified. Make sure you "
-                    "initialized this model with a 'QSPRDataset' "
-                    "instance to train on. Or if you want to load "
-                    "a model from file, set 'autoload' to True."
+        self.name = name or (alg.__class__.__name__ if alg else None)
+        if self.name is None:
+            raise ValueError("Model name not specified.")
+        self.baseDir = os.path.abspath(base_dir.rstrip("/"))
+        # initialize settings from data
+        self.data = None
+        self.targetProperties = None
+        self.nTargets = None
+        self.featureCalculators = None
+        self.featureStandardizer = None
+        # initialize estimator
+        self.earlyStopping = EarlyStopping() if self.supportsEarlyStopping else None
+        if autoload and os.path.exists(self.metaFile):
+            new = self.fromFile(self.metaFile)
+            self.__dict__.update(new.__dict__)
+            self.name = name or (alg.__class__.__name__ if alg else None)
+            self.baseDir = os.path.abspath(base_dir.rstrip("/"))
+            if data is not None:
+                self.initFromData(data)
+            if parameters:
+                logger.warning(
+                    f"Explicitly specified parameters ({parameters})"
+                    f"will override model settings read from file: {self.parameters}."
+                    f"Estimator will be reloaded with the new parameters "
+                    f"and will have to be re-fitted if fitted previously."
                 )
-        # get parameters from metadata if available
-        self.parameters = parameters
-        if self.metaInfo and not self.parameters:
-            self.parameters = self.readParams(
-                os.path.join(self.baseDir, self.metaInfo["parameters_path"])
+                self.parameters = parameters
+                self.estimator = self.loadEstimator(self.parameters)
+            if random_state:
+                logger.warning(
+                    f"Explicitly specified random state ({random_state})"
+                    f"will override model settings read from file: {self.randomState}."
+                )
+                self.initRandomState(random_state)
+        else:
+            self.initFromData(data)
+            self.parameters = parameters
+            # initialize an estimator instance with the given parameters
+            self.alg = alg
+            # initialize random state
+            self.randomState = None
+            self.initRandomState(random_state)
+            # load the estimator
+            self.estimator = self.loadEstimator(self.parameters)
+        assert self.estimator is not None, \
+            "Estimator not initialized when it should be."
+        assert self.alg is not None, \
+            "Algorithm class not initialized when it should be."
+        if not autoload and not self.checkForData(exception=False):
+            raise ValueError(
+                "No data set specified. Make sure you "
+                "initialized this model with a 'QSPRDataset' "
+                "instance to train on. Or if you want to load "
+                "a model from file, set 'autoload' to True."
             )
-        # initialize a feature calculator instance
-        self.featureCalculators = (
-            self.data.descriptorCalculators
-            if self.data else self.readDescriptorCalculators(
-                [
-                    os.path.join(self.baseDir, path)
-                    for path in self.metaInfo["feature_calculator_paths"]
-                ]
-            )
-        )
-        # initialize a standardizer instance
-        self.featureStandardizer = (
-            self.data.feature_standardizer if self.data else self.readStandardizer(
-                os.path.join(self.baseDir, self.metaInfo["feature_standardizer_path"])
-            ) if self.metaInfo["feature_standardizer_path"] else None
-        )
-        # Initialize early stopping tracker if model supports early stopping
-        if self.supportsEarlyStopping:
-            self.earlyStopping = (
-                self.readEarlyStopping(
-                    os.path.join(self.baseDir, self.metaInfo["early_stopping_path"])
-                ) if "early_stopping_path" in self.metaInfo else EarlyStopping()
-            )
-
-        # initialize a estimator instance with the given parameters
-        self.alg = alg
-        if autoload:
-            self.estimator = self.loadEstimatorFromFile(params=self.parameters)
-        # initialize random state
-        self.randomState = None
-        self.initRandomState(random_state)
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""
@@ -388,19 +218,58 @@ class QSPRModel(ABC):
             name = "None"
         return f"{self.name} ({name})"
 
-    @property
-    def targetProperties(self) -> list[TargetProperty]:
-        """Return the target properties of the model,
-        taken from the data set or deserialized
-        from file if the model is loaded without data.
+    def __setstate__(self, state):
+        """Set state."""
+        super().__setstate__(state)
+        self.data = None
+        self.alg = import_class(self.alg)
+        self.estimator = self.loadEstimator(self.parameters)
 
-        Returns:
-            list[TargetProperty]: target properties of the model
+    def initFromData(self, data: QSPRDataset | None):
+        if data is not None:
+            self.data = data
+            self.targetProperties = self.data.targetProperties
+            self.nTargets = len(self.targetProperties)
+            self.featureCalculators = self.data.descriptorCalculators
+            self.featureStandardizer = self.data.feature_standardizer
+        else:
+            self.data = None
+            self.targetProperties = None
+            self.nTargets = None
+            self.featureCalculators = None
+            self.featureStandardizer = None
+
+    def initRandomState(self, random_state):
+        """Set random state if applicable.
+        Defaults to random state of dataset if no random state is provided,
+
+        Args:
+            random_state (int):
+                Random state to use for shuffling and other random operations.
         """
-        return (
-            self.data.targetProperties
-            if self.data else self.metaInfo["target_properties"]
+        new_random_state = random_state or (
+            self.data.randomState if self.data is not None else None
         )
+        if new_random_state is None:
+            self.randomState = int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+        self.randomState = new_random_state
+        constructor_params = [
+            name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
+        ]
+        if "random_state" in constructor_params:
+            if self.parameters:
+                self.parameters.update({"random_state": new_random_state})
+            else:
+                self.parameters = {"random_state": new_random_state}
+        elif random_state:
+            logger.warning(
+                f"Random state supplied, but alg {self.alg} does not support it."
+                " Ignoring this setting."
+            )
 
     @property
     def task(self) -> ModelTasks:
@@ -432,19 +301,6 @@ class QSPRModel(ABC):
         return self.__class__.__module__ + "." + self.__class__.__name__
 
     @property
-    def nTargets(self) -> int:
-        """Return the number of target properties of the model, taken from the data set
-        or deserialized from file if the model is loaded without data.
-
-        Returns:
-            int: number of target properties of the model
-        """
-        return (
-            len(self.data.targetProperties)
-            if self.data else len(self.metaInfo["target_properties"])
-        )
-
-    @property
     def outDir(self) -> str:
         """Return output directory of the model,
         the model files are stored in this directory (`{baseDir}/{name}`).
@@ -465,6 +321,10 @@ class QSPRModel(ABC):
             str: output prefix of the model files
         """
         return f"{self.outDir}/{self.name}"
+
+    @property
+    def metaFile(self) -> str:
+        return f"{self.outPrefix}_meta.json"
 
     @property
     @abstractmethod
@@ -493,24 +353,7 @@ class QSPRModel(ABC):
         """
         self._optimalEpochs = value
 
-    def saveParams(self, params: dict) -> str:
-        """Save model parameters to a JSON file.
-
-        Args:
-            params (dict): dictionary of model parameters
-
-        Returns:
-            str: absolute path to the JSON file
-        """
-        path = f"{self.outDir}/{self.name}_params.json"
-        self.setParams(params)
-        # save parameters to file
-        with open(path, "w", encoding="utf-8") as j:
-            logger.info("saving model parameters to file: %s" % path)
-            j.write(json.dumps(params, indent=4))
-        return path
-
-    def setParams(self, params):
+    def setParams(self, params: dict):
         """Set model parameters.
 
         Args:
@@ -520,89 +363,6 @@ class QSPRModel(ABC):
             self.parameters.update(params)
         else:
             self.parameters = params
-
-    def saveDescriptorCalculators(self) -> list[str]:
-        """Save the current descriptor calculator to a JSON file.
-
-        The file is stored in the output directory of the model.
-
-        Returns:
-            list[str]:
-                absolute paths to the JSON files containing
-                the saved descriptor calculators
-        """
-        paths = []
-        for calc in self.featureCalculators:
-            path = f"{self.outDir}/{self.name}_descriptor_calculator_{calc}.json"
-            calc.toFile(path)
-            paths.append(path)
-        return paths
-
-    def saveStandardizer(self) -> str:
-        """Save the current feature standardizer to a JSON file.
-
-        The file is stored in the output directory of the model.
-
-        Returns:
-            str:
-                absolute path to the JSON file containing the saved feature standardizer
-        """
-        path = f"{self.outDir}/{self.name}_feature_standardizer.json"
-        self.featureStandardizer.toFile(path)
-        return path
-
-    def saveEarlyStopping(self) -> str:
-        path = f"{self.outDir}/{self.name}_early_stopping.json"
-        self.earlyStopping.toFile(path)
-        return path
-
-    def saveMetadata(self) -> str:
-        """Save model metadata to a JSON file.
-
-        The file is stored in the output directory of the model.
-
-        Returns:
-            str: absolute path to the JSON file containing the model metadata
-        """
-        with open(self.metaFile, "w", encoding="utf-8") as j:
-            logger.info("saving model metadata to file: %s" % self.metaFile)
-            j.write(json.dumps(self.metaInfo, indent=4))
-        return self.metaFile
-
-    def save(self) -> str:
-        """Save the model data, parameters, metadata and all other
-         files to the output directory of the model.
-
-        Returns:
-            str: absolute path to the JSON file containing the model metadata
-        """
-        self.metaInfo["name"] = self.name
-        self.metaInfo["version"] = VERSION
-        self.metaInfo["model_class"] = self.classPath
-        self.metaInfo["target_properties"] = TargetProperty.toList(
-            copy.deepcopy(self.data.targetProperties), task_as_str=True
-        )
-        self.metaInfo["parameters_path"] = self.saveParams(
-            self.parameters
-        ).replace(f"{self.baseDir}/", "")
-        self.metaInfo["feature_calculator_paths"] = (
-            [
-                x.replace(f"{self.baseDir}/", "")
-                for x in self.saveDescriptorCalculators()
-            ] if self.featureCalculators else None
-        )
-        self.metaInfo["feature_standardizer_path"] = (
-            self.saveStandardizer().replace(f"{self.baseDir}/", "")
-            if self.featureStandardizer else None
-        )
-        self.metaInfo["estimator_path"] = self.saveEstimator().replace(
-            f"{self.baseDir}/", ""
-        )
-        if self.supportsEarlyStopping:
-            self.metaInfo["early_stopping_path"] = self.saveEarlyStopping().replace(
-                f"{self.baseDir}/", ""
-            )
-        return self.saveMetadata()
 
     def checkForData(self, exception: bool = True) -> bool:
         """Check if the model has a data set.
@@ -787,7 +547,7 @@ class QSPRModel(ABC):
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
-    def fitAttached(self, monitor=None, **kwargs) -> str:
+    def fitAttached(self, monitor=None, mode=EarlyStoppingMode.OPTIMAL, **kwargs) -> str:
         """Train model on the whole attached data set.
 
         ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
@@ -797,6 +557,10 @@ class QSPRModel(ABC):
         Args:
             monitor (FitMonitor): monitor for the fitting process, if None, the base
                 monitor is used
+            mode (EarlyStoppingMode): early stopping mode for models that support
+                early stopping, by default fit the 'optimal' number of
+                epochs previously stopped at in model assessment on train or test set,
+                to avoid the use of extra data for a validation set.
             kwargs: additional arguments to pass to fit
 
         Returns:
@@ -813,16 +577,40 @@ class QSPRModel(ABC):
         logger.info(
             "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-        # Use early stopping false here, since we are fitting on the whole data set
-        # the number of epochs is already determined from the cross-validation
         self.estimator = self.fit(
-            X_all, y_all, mode=EarlyStoppingMode.OPTIMAL, monitor=monitor, **kwargs
+            X_all, y_all, mode=mode, monitor=monitor, **kwargs
         )
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         # save model and return path
         return self.save()
+
+    def toJSON(self):
+        o_dict = json.loads(super().toJSON())
+        estimator_path = self.saveEstimator()
+        estimator_path = estimator_path.replace(self.baseDir, ".")
+        o_dict["py/state"]["baseDir"] = "."
+        o_dict["py/state"]["estimator"] = estimator_path
+        o_dict["py/state"]["alg"] = f"{self.alg.__module__}.{self.alg.__name__}"
+        return json.dumps(o_dict, indent=4)
+
+    def save(self):
+        """Save model to file.
+
+        Returns:
+            str: absolute path to the saved model
+        """
+        os.makedirs(self.outDir, exist_ok=True)
+        return self.toFile(self.metaFile)
+
+    @classmethod
+    def fromFile(cls, filename: str):
+        ret = super().fromFile(filename)
+        model_dir = os.path.dirname(filename)
+        ret.baseDir = os.path.dirname(model_dir)
+        ret.estimator = ret.loadEstimatorFromFile(ret.parameters)
+        return ret
 
     @abstractmethod
     def fit(
@@ -941,7 +729,7 @@ class QSPRModel(ABC):
         """Save the underlying estimator to file.
 
         Returns:
-            path (str): path to the saved estimator
+            path (str): absolute path to the saved estimator
         """
 
 
@@ -1128,7 +916,7 @@ class ModelAssessor(ABC):
         self.useProba = use_proba
         self.mode = mode
         self.scoreFunc = (
-            SklearnMetric.getMetric(scoring) if isinstance(scoring, str) else scoring
+            SklearnMetrics(scoring) if isinstance(scoring, str) else scoring
         )
 
     @abstractmethod

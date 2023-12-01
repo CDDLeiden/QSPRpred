@@ -51,6 +51,7 @@ dependencies = [
     "boruta",
     "tqdm",
     "ml2json >= 0.2.2",
+    "jsonpickle",
     "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
     "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits@0.0.4",
 ]
@@ -63,8 +64,8 @@ extra = [
 ]
 pyboost = ["py-boost"]
 deep = ["torch >= 1.7.0", "chemprop >= 1.6.0"]
-full = [ "qsprpred[pyboost]", "qsprpred[deep]", "qsprpred[extra]" ]
-dev = [ "qsprpred[full]", "pre-commit", "isort", "yapf", "ruff" ]
+full = ["qsprpred[pyboost]", "qsprpred[deep]", "qsprpred[extra]"]
+dev = ["qsprpred[full]", "pre-commit", "isort", "yapf", "ruff", "pytest"]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -137,6 +138,8 @@ known_first_party = 'qsprpred'
  ]
 
  ignore = [
+   # line length - somes lines are just too long
+   "E501",
    # we decided on having relative rather than absolute imports
    "TID252",
    # module level import not at top of file

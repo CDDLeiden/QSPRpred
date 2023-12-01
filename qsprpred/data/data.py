@@ -1,15 +1,14 @@
 """This module contains the QSPRDataset that holds and prepares data for modelling."""
-
 import concurrent
-import copy
 import json
 import multiprocessing
 import os
 import pickle
+import shutil
 import warnings
 from collections.abc import Callable
 from multiprocessing import Pool
-from typing import Literal, Optional, Generator
+from typing import Generator, Literal, Optional
 
 import numpy as np
 import pandas as pd
@@ -17,16 +16,17 @@ from rdkit.Chem import PandasTools
 from sklearn.preprocessing import LabelEncoder
 from tqdm.auto import tqdm
 
-from .utils.folds import FoldsFromDataSplit
+from .utils.datafilters import RepeatsFilter
 from ..logs import logger
 from ..models.tasks import TargetTasks
-from ..utils.inspect import import_class
+from qsprpred.utils.serialization import JSONSerializable, function_as_string, function_from_string
+from ..utils.enumerate import enumerate_with_zeros
 from .interfaces import DataSet, DataSplit, MoleculeDataSet
-from .utils.datafilters import RepeatsFilter
 from .utils.feature_standardization import (
     SKLearnStandardizer,
     apply_feature_standardizer,
 )
+from .utils.folds import FoldsFromDataSplit
 from .utils.scaffolds import Scaffold
 from .utils.smiles_standardization import (
     check_smiles_valid,
@@ -35,7 +35,7 @@ from .utils.smiles_standardization import (
 )
 
 
-class PandasDataSet(DataSet):
+class PandasDataSet(DataSet, JSONSerializable):
     """A Pandas DataFrame wrapper class to enable data processing functions on
     QSPRpred data.
 
@@ -58,9 +58,12 @@ class PandasDataSet(DataSet):
 
     """
 
+    _notJSON = JSONSerializable._notJSON + [
+        "df",
+    ]
+
     class ParallelApplyWrapper:
         """A wrapper class to parallelize pandas apply functions."""
-
         def __init__(
             self,
             func: Callable,
@@ -117,7 +120,7 @@ class PandasDataSet(DataSet):
         index_cols: Optional[list[str]] = None,
         n_jobs: int = 1,
         chunk_size: int = 1000,
-        id_prefix: str = "QSPRID",
+        autoindex_name: str = "QSPRID",
         random_state: int | None = None,
     ):
         """Initialize a `PandasDataSet` object.
@@ -137,7 +140,7 @@ class PandasDataSet(DataSet):
             n_jobs (int): Number of jobs to use for parallel processing. If <= 0,
                 all available cores will be used.
             chunk_size (int): Size of chunks to use per job in parallel processing.
-            id_prefix (str): Prefix to use for custom generated IDs.
+            autoindex_name (str): Column name to use for automatically generated IDs.
             random_state (int): Random state to use for all random operations
                 for reproducibility. If not specified, the state is generated randomly.
                 The state is saved upon `save` so if you want to change the state later,
@@ -154,10 +157,7 @@ class PandasDataSet(DataSet):
         self.chunkSize = chunk_size
         # paths
         self.storeDir = store_dir.rstrip("/")
-        self.storePrefix = f"{self.storeDir}/{self.name}"
-        if not os.path.exists(self.storeDir):
-            raise FileNotFoundError(f"Directory '{self.storeDir}' does not exist.")
-        self.storePath = f"{self.storePrefix}_df.pkl"
+        self.storeDir = f"{self.storeDir}/{self.name}"
         # data frame initialization
         self.df = None
         if df is not None:
@@ -175,8 +175,7 @@ class PandasDataSet(DataSet):
                 if index_cols is not None:
                     self.setIndex(index_cols)
                 else:
-                    df[id_prefix] = [f"{self.name}_{i}" for i in range(len(self.df))]
-                    self.setIndex([id_prefix])
+                    self.generateIndex(name=autoindex_name)
         else:
             if not self._isInStore("df"):
                 raise ValueError(
@@ -195,6 +194,28 @@ class PandasDataSet(DataSet):
         """
         return len(self.df)
 
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        os.makedirs(self.storeDir, exist_ok=True)
+        self.df.to_pickle(self.storePath)
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.reload()
+
+    @property
+    def storePath(self):
+        return f"{self.storePrefix}_df.pkl"
+
+    @property
+    def storePrefix(self):
+        return f"{self.storeDir}/{self.name}"
+
+    @property
+    def metaFile(self):
+        return f"{self.storePrefix}_meta.json"
+
     def setIndex(self, cols: list[str]):
         """
         Set the index of the data frame.
@@ -210,6 +231,17 @@ class PandasDataSet(DataSet):
         self.df.index.name = "~".join(cols)
         self.indexCols = cols
 
+    def generateIndex(self, name: str = "QSPRID", prefix: str | None = None):
+        """Generate a custom index for the data frame.
+
+        Args:
+            name (str): name of the index column.
+            prefix (str): prefix to use for the index column values.
+        """
+        prefix = prefix if prefix is not None else self.name
+        self.df[name] = enumerate_with_zeros(self.df.index, prefix=prefix)
+        self.setIndex([name])
+
     def _isInStore(self, name):
         """Check if a pickled file with the given suffix exists.
 
@@ -219,9 +251,8 @@ class PandasDataSet(DataSet):
         Returns:
             bool: `True` if the file exists, `False` otherwise.
         """
-        return os.path.exists(self.storePath) and self.storePath.endswith(
-            f"_{name}.pkl"
-        )
+        return os.path.exists(self.storePath
+                             ) and self.storePath.endswith(f"_{name}.pkl")
 
     def getProperty(self, name: str) -> pd.Series:
         """Get a property of the data set.
@@ -249,7 +280,7 @@ class PandasDataSet(DataSet):
             data (list): List of values for the property.
         """
         if isinstance(data, pd.Series):
-            if not np.array_equal(data.index.txt, self.df.index.txt):
+            if not self.df.index.equals(data.index):
                 logger.info(
                     f"Adding property '{name}' to data set might be introducing 'nan' "
                     "values due to index with pandas series. Make sure the index of "
@@ -263,6 +294,7 @@ class PandasDataSet(DataSet):
         Args:
             name (str): Name of the property to remove.
         """
+        self.df.drop(columns=[name], inplace=True)
 
     def getSubset(self, prefix: str):
         """Get a subset of the data set by providing a prefix for the column names or a
@@ -305,11 +337,8 @@ class PandasDataSet(DataSet):
         n_cpus = self.nJobs
         chunk_size = self.chunkSize
         if (
-            n_cpus
-            and n_cpus > 1
-            and not (
-                hasattr(func, "noParallelization") and func.noParallelization is True
-            )
+            n_cpus and n_cpus > 1 and
+            not (hasattr(func, "noParallelization") and func.noParallelization is True)
         ):
             return self.papply(
                 func,
@@ -367,14 +396,12 @@ class PandasDataSet(DataSet):
         """
         n_cpus = n_cpus if n_cpus else os.cpu_count()
         df_sub = self.df[subset if subset else self.df.columns]
-        data = [df_sub[i : i + chunk_size] for i in range(0, len(df_sub), chunk_size)]
+        data = [df_sub[i:i + chunk_size] for i in range(0, len(df_sub), chunk_size)]
         # size of batches use in the process - more is faster, but uses more memory
         batch_size = n_cpus
         results = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=n_cpus) as executor:
-            batches = [
-                data[i : i + batch_size] for i in range(0, len(data), batch_size)
-            ]
+            batches = [data[i:i + batch_size] for i in range(0, len(data), batch_size)]
             for batch in tqdm(
                 batches, desc=f"Parallel apply in progress for {self.name}."
             ):
@@ -442,47 +469,45 @@ class PandasDataSet(DataSet):
             if df_filtered is not None:
                 self.df = df_filtered.copy()
 
+    def toFile(self, filename: str):
+        """Save the metafile and all associated files to a custom location.
+
+        Args:
+            filename (str): absolute path to the saved metafile.
+        """
+        os.makedirs(self.storeDir, exist_ok=True)
+        o_dict = json.loads(self.toJSON())
+        o_dict["py/state"]["storeDir"] = f"./{self.name}"
+        with open(filename, "w") as fh:
+            json.dump(o_dict, fh, indent=4)
+        return os.path.abspath(filename)
+
     def save(self):
         """Save the data frame to disk and all associated files.
 
         Returns:
             str: Path to the saved data frame.
         """
-        # save data frame
-        self.df.to_pickle(self.storePath)
-        # save the random state
-        with open(f"{self.storePath}.seed", "w") as f:
-            json.dump(self.randomState, f)
-        return self.storePath
+        return self.toFile(f"{self.storePrefix}_meta.json")
 
     def clearFiles(self):
         """Remove all files associated with this data set from disk."""
-        for file in [
-            f for f in os.listdir(self.storeDir) if f.endswith((".pkl", ".json"))
-        ]:
-            if file.startswith(self.name):
-                os.remove(f"{self.storeDir}/{file}")
+        if os.path.exists(self.storeDir):
+            shutil.rmtree(self.storeDir)
 
     def reload(self):
         """Reload the data table from disk."""
         self.df = pd.read_pickle(self.storePath)
         self.indexCols = self.df.index.name.split("~")
-        with open(f"{self.storePath}.seed", "r") as f:
-            self.setRandomState(int(f.read()))
         assert all(col in self.df.columns for col in self.indexCols)
 
-    @staticmethod
-    def fromFile(filename, *args, **kwargs) -> "PandasDataSet":
-        """Create a `MoleculeTable` instance from by providing a direct path to the
-        pickled data frame in storage."""
-        store_dir = os.path.dirname(filename)
-        name = os.path.basename(filename).split(".")[0]
-        return PandasDataSet(
-            name=name,
-            store_dir=store_dir,
-            *args,  # noqa: B026 # FIXME: this is a bug in flake8...
-            **kwargs,
-        )
+    @classmethod
+    def fromFile(cls, filename: str) -> "PandasDataSet":
+        with open(filename, 'r') as f:
+            json_f = f.read()
+        o_dict = json.loads(json_f)
+        o_dict["py/state"]["storeDir"] = os.path.dirname(filename)
+        return cls.fromJSON(json.dumps(o_dict))
 
     def getDF(self):
         """Get the data frame this instance manages.
@@ -509,6 +534,10 @@ class PandasDataSet(DataSet):
 
 
 class DescriptorTable(PandasDataSet):
+    """Pandas table that holds descriptor data
+     for modelling and other analyses.
+    """
+
     def __init__(
         self,
         calculator,
@@ -521,16 +550,32 @@ class DescriptorTable(PandasDataSet):
         chunk_size: int = 1000,
     ):
         """Initialize a `DescriptorTable` object.
-        #TODO: Fill in docstring
+
         Args:
-            calculator ():
+            calculator (DescriptorsCalculator):
+                `DescriptorsCalculator` used for descriptor calculation.
             name_prefix (str):
+                Prefix to use for the name of the descriptor table.
             df (pd.DataFrame):
+                data frame containing the descriptors. If you provide a
+                dataframe for a dataset that already exists on disk,
+                the dataframe from disk will override the supplied data
+                frame. Set 'overwrite' to `True` to override
+                the data frame on disk.
             store_dir (str):
+                Directory to store the dataset files. Defaults to the
+                current directory. If it already contains files with the same name,
+                the existing data will be loaded.
             overwrite (bool):
+                Overwrite existing dataset.
             key_cols (list):
+                list of columns to use as index. If None, the index
+                will be a custom generated ID.
             n_jobs (int):
+                Number of jobs to use for parallel processing. If <= 0,
+                all available cores will be used.
             chunk_size (int):
+                Size of chunks to use per job in parallel processing.
         """
         super().__init__(
             f"{name_prefix}_{calculator.getPrefix()}",
@@ -576,6 +621,10 @@ class DescriptorTable(PandasDataSet):
 class MoleculeTable(PandasDataSet, MoleculeDataSet):
     """Class that holds and prepares molecule data for modelling and other analyses."""
 
+    _notJSON = PandasDataSet._notJSON + [
+        "descriptors",
+    ]
+
     def __init__(
         self,
         name: str,
@@ -588,7 +637,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         index_cols: Optional[list[str]] = None,
-        id_prefix: str = "QSPRID",
+        autoindex_name: str = "QSPRID",
         random_state: int | None = None,
     ):
         """Initialize a `MoleculeTable` object.
@@ -617,12 +666,9 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             drop_invalids (bool): Drop invalid molecules from the data frame.
             index_cols (list[str]): list of columns to use as index. If None, the index
                 will be a custom generated ID.
-            id_prefix (str): Prefix to use for the custom generated ID.
+            autoindex_name (str): Column name to use for automatically generated IDs.
             random_state (int): Random state to use for shuffling and other random ops.
         """
-        self.descriptorCalculators = []  # holds all descriptor calculators
-        self.descriptors = []  # holds descriptor tables for each calculator
-        self.descriptorCalculatorsPathPrefix = None
         super().__init__(
             name,
             df,
@@ -631,13 +677,11 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             index_cols,
             n_jobs,
             chunk_size,
-            id_prefix,
+            autoindex_name,
             random_state,
         )
-        if not self.descriptorCalculatorsPathPrefix:
-            self.descriptorCalculatorsPathPrefix = (
-                f"{self.storePrefix}_descriptor_calculator"
-            )
+        # the descriptors
+        self.descriptors = []
         # settings
         self.smilesCol = smiles_col
         self.includesRdkit = add_rdkit
@@ -654,83 +698,30 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         if drop_invalids:
             self.dropInvalids()
 
-    def save(self):
-        """Save the dataset to disk."""
-        super().save()
-        # save descriptor calculator
-        for idx, calc in enumerate(self.descriptorCalculators):
-            calc.toFile(f"{self.descriptorCalculatorsPathPrefix}_{calc}.json")
-            self.descriptors[idx].save()
-        return self.storePath
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        o_dict["descriptors"] = []
+        for desc in self.descriptors:
+            o_dict["descriptors"].append(os.path.basename(desc.storeDir))
+        return o_dict
 
-    def reload(self):
-        """Reload the dataset from disk."""
-        super().reload()
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.descriptors = []
+        for desc in state["descriptors"]:
+            desc = os.path.join(self.storeDir, desc, f"{desc}_meta.json")
+            self.descriptors.append(DescriptorTable.fromFile(desc))
 
-        # load descriptor calculators and tables
-        self.descriptorCalculatorsPathPrefix = (
-            f"{self.storePrefix}_descriptor_calculator"
-        )
-        files = [
-            f
-            for f in os.listdir(self.storeDir)
-            if f.endswith(".json")
-            and f.startswith(os.path.basename(self.descriptorCalculatorsPathPrefix))
-        ]
-        for file in files:
-            path = f"{self.storeDir}/{file}"
-            if os.path.exists(path):
-                with open(path, "r", encoding="utf-8") as fh:  # file handle
-                    data = json.load(fh)
-                if "calculator" not in data:
-                    calc_cls = (
-                        "qsprpred.data.utils.descriptorcalculator."
-                        "MoleculeDescriptorsCalculator"
-                    )
-                else:
-                    calc_cls = data["calculator"]
-                calc_cls = import_class(calc_cls)
-                calc = calc_cls.fromFile(path)
-                self.descriptorCalculators.append(calc)
-                self.descriptors.append(self.loadDescriptorsTable(calc))
+    def toFile(self, filename: str):
+        ret = super().toFile(filename)
+        for desc in self.descriptors:
+            desc.save()
+        return ret
 
-    def loadDescriptorsTable(self, calc) -> DescriptorTable:
-        """Load a descriptor table from disk.
-
-        Args:
-            calc (DescriptorsCalculator): Descriptor
-
-        Returns:
-            DescriptorTable: Descriptor table.
-        """
-
-        return DescriptorTable(
-            calc,
-            name_prefix=self.name,
-            store_dir=self.storeDir,
-            n_jobs=self.nJobs,
-            chunk_size=self.chunkSize,
-        )
-
-    @staticmethod
-    def fromFile(filename, *args, **kwargs) -> "MoleculeTable":
-        """Create a `MoleculeTable` instance from by providing a direct path to the
-        pickled data frame in storage.
-
-        Args:
-            filename (str): Path to the pickled data frame.
-            *args: Additional arguments to pass to the `MoleculeTable` constructor.
-            **kwargs: Additional keyword arguments to pass to the `MoleculeTable`
-                constructor.
-        """
-        store_dir = os.path.dirname(filename)
-        name = os.path.basename(filename).split(".")[0]
-        return MoleculeTable(
-            name=name,
-            store_dir=store_dir,
-            *args,  # noqa: B026 # FIXME: this is a bug in flake8...
-            **kwargs,
-        )
+    @property
+    def descriptorCalculators(self):
+        """Get the descriptor calculators for this table."""
+        return [x.calculator for x in self.descriptors]
 
     @staticmethod
     def fromSMILES(name: str, smiles: list, *args, **kwargs):
@@ -825,7 +816,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         for idx in reversed(to_remove):
             self.descriptors[idx].clearFiles()
             self.descriptors.pop(idx)
-            self.descriptorCalculators.pop(idx)
 
     def addCustomDescriptors(
         self,
@@ -871,9 +861,6 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             descriptors (pd.DataFrame): DataFrame containing the descriptors to attach.
             index_cols (list): List of column names to use as index.
         """
-        if not self.descriptorCalculators:
-            self.descriptorCalculators = []
-        self.descriptorCalculators.append(calculator)
         self.descriptors.append(
             DescriptorTable(
                 calculator,
@@ -983,8 +970,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         if not prefix:
             prefixes = (
                 [f"{self.name}_{x.getPrefix()}" for x in self.descriptorCalculators]
-                if self.descriptorCalculators
-                else []
+                if self.descriptorCalculators else []
             )
         else:
             prefixes = [f"{self.name}_{prefix}"]
@@ -1071,7 +1057,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
                 continue
             self.df[f"Scaffold_{scaffold}"] = self.apply(
                 self._scaffold_calculator,
-                func_args=(scaffold,),
+                func_args=(scaffold, ),
                 subset=[self.smilesCol],
                 axis=1,
                 raw=False,
@@ -1093,10 +1079,8 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             list: List of scaffold names.
         """
         return [
-            col
-            for col in self.df.columns
-            if col.startswith("Scaffold_")
-            and (include_mols or not col.endswith("_RDMol"))
+            col for col in self.df.columns if col.startswith("Scaffold_") and
+            (include_mols or not col.endswith("_RDMol"))
         ]
 
     def getScaffolds(self, includeMols: bool = False):
@@ -1109,9 +1093,9 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
             pd.DataFrame: Data frame containing only scaffolds.
         """
         if includeMols:
-            return self.df[
-                [col for col in self.df.columns if col.startswith("Scaffold_")]
-            ]
+            return self.df[[
+                col for col in self.df.columns if col.startswith("Scaffold_")
+            ]]
         else:
             return self.df[self.getScaffoldNames()]
 
@@ -1157,13 +1141,9 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         Returns:
             list: list of scaffold groups.
         """
-        return self.df[
-            self.df.columns[
-                self.df.columns.str.startswith(
-                    f"ScaffoldGroup_{scaffold_name}_{mol_per_group}"
-                )
-            ][0]
-        ]
+        return self.df[self.df.columns[self.df.columns.str.startswith(
+            f"ScaffoldGroup_{scaffold_name}_{mol_per_group}"
+        )][0]]
 
     @property
     def hasScaffoldGroups(self):
@@ -1233,7 +1213,7 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         return ~invalid_mask
 
 
-class TargetProperty:
+class TargetProperty(JSONSerializable):
     """Target property for QSPRmodelling class.
 
     Attributes:
@@ -1246,13 +1226,11 @@ class TargetProperty:
             classification tasks
         transformer (Callable): function to transform the target property
     """
-
     def __init__(
         self,
         name: str,
-        task: Literal[
-            TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS
-        ],
+        task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
+                      TargetTasks.MULTICLASS],
         original_name: Optional[str] = None,
         th: Optional[list[float] | str] = None,
         n_classes: Optional[int] = None,
@@ -1284,6 +1262,19 @@ class TargetProperty:
             if isinstance(th, str) and th == "precomputed":
                 self.nClasses = n_classes
         self.transformer = transformer
+
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        if self.transformer:
+            o_dict["transformer"] = function_as_string(
+                self.transformer
+            )
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        if self.transformer:
+            self.transformer = function_from_string(self.transformer)
 
     @property
     def th(self):
@@ -1345,41 +1336,34 @@ class TargetProperty:
     def fromDict(cls, d: dict):
         """Create a TargetProperty object from a dictionary.
 
+        task can be specified as a string or as a TargetTasks object.
+
         Args:
             d (dict): dictionary containing the target property information
-            task_from_str (bool): whether to convert the task from a string
 
         Returns:
             TargetProperty: TargetProperty object
         """
         if isinstance(d["task"], str):
             return TargetProperty(
-                **{k: TargetTasks[v] if k == "task" else v for k, v in d.items()}
+                **{k: TargetTasks[v.upper()] if k == "task" else v
+                   for k, v in d.items()}
             )
         else:
             return TargetProperty(**d)
 
     @classmethod
-    def fromList(cls, _list: list[dict], task_from_str: bool = False):
+    def fromList(cls, _list: list[dict]):
         """Create a list of TargetProperty objects from a list of dictionaries.
 
         Args:
             _list (list): list of dictionaries containing the target property
                 information
-            task_from_str (bool): whether to convert the task from a string
 
         Returns:
             list[TargetProperty]: list of TargetProperty objects
         """
-        if task_from_str:
-            return [
-                TargetProperty(
-                    **{k: TargetTasks[v] if k == "task" else v for k, v in d.items()}
-                )
-                for d in _list
-            ]
-        else:
-            return [TargetProperty(**d) for d in _list]
+        return [cls.fromDict(d) for d in _list]
 
     @staticmethod
     def toList(_list: list, task_as_str: bool = False, drop_transformer: bool = True):
@@ -1403,7 +1387,10 @@ class TargetProperty:
             )
             if target_prop.task.isClassification():
                 target_props[-1].update(
-                    {"th": target_prop.th, "n_classes": target_prop.nClasses}
+                    {
+                        "th": target_prop.th,
+                        "n_classes": target_prop.nClasses
+                    }
                 )
             if not drop_transformer:
                 target_props[-1].update({"transformer": target_prop.transformer})
@@ -1475,6 +1462,13 @@ class QSPRDataset(MoleculeTable):
         featureNames (list of str) : feature names
     """
 
+    _notJSON = PandasDataSet._notJSON + [
+        "X",
+        "X_ind",
+        "y",
+        "y_ind",
+    ]
+
     def __init__(
         self,
         name: str,
@@ -1490,7 +1484,7 @@ class QSPRDataset(MoleculeTable):
         drop_empty: bool = True,
         target_imputer: Optional[Callable] = None,
         index_cols: Optional[list[str]] = None,
-        id_prefix: str = "QSPRID",
+        autoindex_name: str = "QSPRID",
         random_state: int | None = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if
@@ -1523,7 +1517,7 @@ class QSPRDataset(MoleculeTable):
             index_cols (list[str], optional): columns to be used as index in the
                 dataframe. Defaults to `None` in which case a custom ID will be
                 generated.
-            id_prefix (str, optional): prefix for the custom ID. Defaults to "QSPRID".
+            autoindex_name (str): Column name to use for automatically generated IDs.
             random_state (int, optional): random state for splitting the data.
 
         Raises:
@@ -1540,23 +1534,14 @@ class QSPRDataset(MoleculeTable):
             chunk_size,
             False,
             index_cols,
-            id_prefix,
+            autoindex_name,
             random_state,
         )
-        # load metadata if saved already
-        self.metaInfo = None
-        try:
-            self.metaInfo = QSPRDataset.loadMetadata(name, store_dir)
-        except FileNotFoundError:
-            pass
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
         # load target properties
         self.setTargetProperties(target_props, drop_empty, target_imputer)
-        # load standardizers for features
-        self.feature_standardizer = self.loadFeatureStandardizer()
-        if not self.feature_standardizer:
-            self.feature_standardizer = None
+        self.feature_standardizer = None
         # populate feature matrix and target property array
         self.X = None
         self.y = None
@@ -1569,6 +1554,10 @@ class QSPRDataset(MoleculeTable):
             f"Dataset '{self.name}' created for target "
             f"targetProperties: '{self.targetProperties}'."
         )
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.restoreTrainingData()
 
     @staticmethod
     def fromTableFile(name: str, filename: str, sep: str = "\t", *args, **kwargs):
@@ -1698,15 +1687,6 @@ class QSPRDataset(MoleculeTable):
                     features.extend(
                         [f"{prefix}_{descset}_{x}" for x in descset.descriptors]
                     )
-        if (
-            self.metaInfo
-            and not features
-            and ("feature_names" in self.metaInfo)
-            and (self.metaInfo["feature_names"] is not None)
-        ):
-            features.extend(
-                [x for x in self.metaInfo["feature_names"] if x not in features]
-            )
         return features
 
     def restoreTrainingData(self):
@@ -1721,14 +1701,12 @@ class QSPRDataset(MoleculeTable):
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.y = self.df.query("Split_IsTrain")[self.targetPropertyNames]
-            self.y_ind = self.df.loc[
-                ~self.df.index.isin(self.y.index), self.targetPropertyNames
-            ]
+            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
+                                     self.targetPropertyNames]
         else:
             self.y = self.df[self.targetPropertyNames]
-            self.y_ind = self.df.loc[
-                ~self.df.index.isin(self.y.index), self.targetPropertyNames
-            ]
+            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
+                                     self.targetPropertyNames]
         self.X = self.y.drop(self.y.columns, axis=1)
         self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
         self.featurizeSplits(shuffle=False)
@@ -1795,15 +1773,13 @@ class QSPRDataset(MoleculeTable):
         if th == "precomputed":
             self.df[new_prop] = self.df[target_property.originalName]
             assert all(
-                value is None
-                or (type(value) in (int, bool))
-                or (isinstance(value, float) and value.is_integer())
+                value is None or (type(value) in (int, bool)) or
+                (isinstance(value, float) and value.is_integer())
                 for value in self.df[new_prop]
             ), "Precomputed classification target must be integers or booleans."
             nClasses = len(self.df[new_prop].dropna().unique())
             target_property.task = (
-                TargetTasks.MULTICLASS
-                if nClasses > 2  # noqa: PLR2004
+                TargetTasks.MULTICLASS if nClasses > 2  # noqa: PLR2004
                 else TargetTasks.SINGLECLASS
             )
             target_property.th = th
@@ -1842,40 +1818,6 @@ class QSPRDataset(MoleculeTable):
         return target_property
 
     @staticmethod
-    def loadMetadata(name: str, store_dir: str):
-        """Load metadata from a JSON file.
-
-        Args:
-            name (str): name of the data set
-            store_dir (str): directory where the data set is stored
-        """
-        with open(os.path.join(store_dir, f"{name}_meta.json")) as f:
-            meta = json.load(f)
-            meta["init"]["target_props"] = TargetProperty.fromList(
-                meta["init"]["target_props"], task_from_str=True
-            )
-            return meta
-
-    @staticmethod
-    def fromFile(filename: str, *args, **kwargs) -> "QSPRDataset":
-        """Load QSPRDataset from the saved file directly.
-
-        Args:
-            filename (str): path to the saved file
-            args: additional arguments to pass to the constructor
-            kwargs: additional keyword arguments to pass to the constructor
-
-        Returns:
-            QSPRDataset: loaded data set
-        """
-        store_dir = os.path.dirname(filename)
-        name = os.path.basename(filename).rsplit("_", 1)[0]
-        meta = QSPRDataset.loadMetadata(name, store_dir)
-        return QSPRDataset(
-            *args, name=name, store_dir=store_dir, **meta["init"], **kwargs
-        )
-
-    @staticmethod
     def fromMolTable(
         mol_table: MoleculeTable,
         target_props: list[TargetProperty | dict],
@@ -1902,7 +1844,6 @@ class QSPRDataset(MoleculeTable):
         ds = QSPRDataset(
             name, target_props, mol_table.getDF(), random_state=random_state, **kwargs
         )
-        ds.descriptorCalculators = mol_table.descriptorCalculators
         ds.descriptors = mol_table.descriptors
         return ds
 
@@ -1986,9 +1927,6 @@ class QSPRDataset(MoleculeTable):
             self.saveSplit()
         super().save()
 
-        # save metadata
-        self.saveMetadata()
-
     def split(self, split: DataSplit, featurize: bool = False):
         """Split dataset into train and test set.
 
@@ -2004,9 +1942,8 @@ class QSPRDataset(MoleculeTable):
 
         """
         if (
-            hasattr(split, "hasDataSet")
-            and hasattr(split, "setDataSet")
-            and not split.hasDataSet
+            hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and
+            not split.hasDataSet
         ):
             split.setDataSet(self)
         if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
@@ -2023,15 +1960,13 @@ class QSPRDataset(MoleculeTable):
             logger.info("Target property: %s" % prop.name)
             if prop.task == TargetTasks.SINGLECLASS:
                 logger.info(
-                    "    In train: active: %s not active: %s"
-                    % (
+                    "    In train: active: %s not active: %s" % (
                         sum(self.y[prop.name]),
                         len(self.y[prop.name]) - sum(self.y[prop.name]),
                     )
                 )
                 logger.info(
-                    "    In test:  active: %s not active: %s\n"
-                    % (
+                    "    In test:  active: %s not active: %s\n" % (
                         sum(self.y_ind[prop.name]),
                         len(self.y_ind[prop.name]) - sum(self.y_ind[prop.name]),
                     )
@@ -2074,7 +2009,6 @@ class QSPRDataset(MoleculeTable):
             raise ValueError(
                 "No descriptors available. Cannot load descriptors to splits."
             )
-
         descriptors = self.getDescriptors()
         if self.X_ind is not None and self.y_ind is not None:
             self.X = descriptors.loc[self.X.index, :]
@@ -2083,6 +2017,7 @@ class QSPRDataset(MoleculeTable):
             self.y_ind = self.df.loc[self.y_ind.index, self.targetPropertyNames]
         else:
             self.X = descriptors
+            self.featureNames = self.getDescriptorNames()
             self.y = self.df.loc[descriptors.index, self.targetPropertyNames]
             self.X_ind = descriptors.loc[~self.X.index.isin(self.X.index), :]
             self.y_ind = self.df.loc[self.X_ind.index, self.targetPropertyNames]
@@ -2198,12 +2133,11 @@ class QSPRDataset(MoleculeTable):
                 self.X_ind = self.X_ind[self.featureNames]
             logger.info(f"Selected features: {self.featureNames}")
             # update descriptor calculator
-            if self.descriptorCalculators is not None:
-                for calc in self.descriptorCalculators:
-                    prefix = calc.getPrefix()
-                    calc.keepDescriptors(
-                        [x for x in self.featureNames if x.startswith(prefix)]
-                    )
+            for calc in self.descriptorCalculators:
+                prefix = calc.getPrefix()
+                calc.keepDescriptors(
+                    [x for x in self.featureNames if x.startswith(prefix)]
+                )
 
     def setFeatureStandardizer(self, feature_standardizer):
         """Set feature standardizer.
@@ -2243,6 +2177,19 @@ class QSPRDataset(MoleculeTable):
         self.featurize()
         return ret
 
+    def reset(self):
+        """Reset the data set. Splits will be removed and all descriptors will be
+        moved to the training data. Feature standardization and molecule
+        standardization and molecule filtering are not affected.
+        """
+        if self.featureNames is not None:
+            self.featureNames = self.getDescriptorNames()
+            self.X = None
+            self.X_ind = None
+            self.y = None
+            self.y_ind = None
+            self.loadDescriptorsToSplits(shuffle=False)
+
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
@@ -2276,6 +2223,8 @@ class QSPRDataset(MoleculeTable):
             shuffle (bool): whether to shuffle the created training and test sets
             random_state (int): random state for shuffling
         """
+        # reset everything
+        self.reset()
         # apply sanitization and standardization
         if smiles_standardizer is not None:
             self.standardizeSmiles(smiles_standardizer)
@@ -2367,13 +2316,12 @@ class QSPRDataset(MoleculeTable):
             else:
                 df_X = pd.concat([self.X, self.X_ind], axis=0)
                 df_X_ind = None
+        elif len(self.X.columns) != 0:
+            df_X = self.X[self.featureNames]
+            df_X_ind = self.X_ind[self.featureNames]
         else:
-            if len(self.X.columns) != 0:
-                df_X = self.X[self.featureNames]
-                df_X_ind = self.X_ind[self.featureNames]
-            else:
-                df_X = self.X
-                df_X_ind = self.X_ind
+            df_X = self.X
+            df_X_ind = self.X_ind
 
         X = df_X.values
         X_ind = df_X_ind.values if df_X_ind is not None else None
@@ -2442,84 +2390,6 @@ class QSPRDataset(MoleculeTable):
     def targetPropertyOriginalNames(self):
         """Get the original names of the target properties."""
         return TargetProperty.getOriginalNames(self.targetProperties)
-
-    def loadFeatureStandardizer(self):
-        """Load feature standardizer from the metadata.
-
-        Returns:
-            `SKLearnStandardizer`
-        """
-        if (
-            self.metaInfo is not None
-            and "standardizer_path" in self.metaInfo
-            and self.metaInfo["standardizer_path"]
-        ):
-            return SKLearnStandardizer.fromFile(
-                f"{self.storePrefix}{self.metaInfo['standardizer_path']}"
-            )
-        else:
-            return None
-
-    def saveFeatureStandardizer(self):
-        """Save feature standardizers to the metadata.
-
-        Returns:
-            `str`: paths to the saved standardizers
-        """
-        path = f"{self.storePrefix}_feature_standardizer.json"
-        if (
-            self.feature_standardizer
-            and self.featureNames is not None
-            and len(self.featureNames) > 0
-        ):
-            # make sure feature standardizers are fitted before serialization
-            self.fitFeatureStandardizer()
-            self.feature_standardizer.toFile(path)
-            return path
-        elif self.feature_standardizer:
-            self.feature_standardizer.toFile(path)
-            return path
-
-    def generateMetadata(self):
-        """Generate metadata of the dataset.
-
-        Returns:
-            `dict`: metadata of the dataset
-        """
-        stanadardizer_path = self.saveFeatureStandardizer()
-        meta_init = {
-            "target_props": TargetProperty.toList(
-                copy.deepcopy(self.targetProperties), task_as_str=True
-            ),
-            "smiles_col": self.smilesCol,
-        }
-        ret = {
-            "init": meta_init,
-            "standardizer_path": stanadardizer_path.replace(self.storePrefix, "")
-            if stanadardizer_path
-            else None,
-            "descriptorcalculator_path": self.descriptorCalculatorsPathPrefix.replace(
-                self.storePrefix, ""
-            )
-            if self.descriptorCalculatorsPathPrefix
-            else None,
-            "feature_names": list(self.featureNames)
-            if self.featureNames is not None
-            else None,
-        }
-        return ret
-
-    def saveMetadata(self):
-        """Save metadata to file.
-
-        Returns:
-            `str`: path to the saved metadata file
-        """
-        ret = self.generateMetadata()
-        path = f"{self.storePrefix}_meta.json"
-        with open(path, "w") as f:
-            json.dump(ret, f)
-        return path
 
     @property
     def isMultiTask(self):

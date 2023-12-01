@@ -128,6 +128,7 @@ def Parkinsons(singletask=True, random_state=None):
             }],
             store_dir="qspr/data",
             random_state=random_state,
+            overwrite=True,
         )
 
     else:
