@@ -139,9 +139,14 @@ class Replica(JSONSerializable):
                 "Assessor": assessor.__class__.__name__,
                 "ScoreFunc": assessor.scoreFunc.name,
                 "Score": scores,
-                "TargetProperties": "~".join([
-                    f"{tp.name}_{tp.task}" for tp in self.target_props
-                ])
+                "TargetProperties": "~".join(
+                    sorted([
+                        tp.name for tp in self.target_props
+                    ])),
+                "TargetTasks": "~".join(
+                    sorted([
+                        tp.task for tp in self.target_props
+                    ])),
             })
             if self.results is None:
                 self.results = scores
