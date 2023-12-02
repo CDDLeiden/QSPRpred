@@ -237,9 +237,6 @@ class PandasDataSet(DataSet, JSONSerializable):
             dataframe for a dataset that already exists on disk, the dataframe from
             disk will override the supplied data frame. Set 'overwrite' to `True` to
             override the data frame on disk.
-        storeDir (str): Directory to store the dataset files. Defaults to the
-            current directory. If it already contains files with the same name,
-            the existing data will be loaded.
         indexCols (List): List of columns to use as index. If None, the index
             will be a custom generated ID.
         nJobs (int): Number of jobs to use for parallel processing. If <= 0,
@@ -345,8 +342,7 @@ class PandasDataSet(DataSet, JSONSerializable):
         self.nJobs = n_jobs if n_jobs > 0 else os.cpu_count()
         self.chunkSize = chunk_size
         # paths
-        self.storeDir = store_dir.rstrip("/")
-        self.storeDir = f"{self.storeDir}/{self.name}"
+        self._storeDir = store_dir.rstrip("/")
         # data frame initialization
         self.df = None
         if df is not None:
@@ -392,6 +388,10 @@ class PandasDataSet(DataSet, JSONSerializable):
     def __setstate__(self, state):
         super().__setstate__(state)
         self.reload()
+
+    @property
+    def storeDir(self):
+        return f"{self._storeDir}/{self.name}"
 
     @property
     def baseDir(self):

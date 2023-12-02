@@ -4,7 +4,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 
 from . import BenchmarkRunner
-from .settings import BenchmarkSettings, DataPrepSettings
+from . import BenchmarkSettings, DataPrepSettings
 from ..data.data import MoleculeTable, TargetProperty, QSPRDataset
 from ..data.sources.data_source import DataSource
 from ..data.tests import DataSetsMixIn
@@ -41,7 +41,7 @@ class TestBenchmarking(DataSetsMixIn, TestCase):
     def setUp(self):
         super().setUp()
         prep = self.getDefaultPrep()
-        descriptors = prep['feature_calculators'].desc_sets
+        descriptors = prep['feature_calculators'][0].descSets
         del prep['feature_calculators']
         self.settings = BenchmarkSettings(
             name=get_random_string(prefix=self.__class__.__name__ + "_"),
@@ -50,16 +50,16 @@ class TestBenchmarking(DataSetsMixIn, TestCase):
             data_sources=[DataSourceTesting(), DataSourceTesting()],
             descriptors=[descriptors],
             target_props=[
-                [{
+                [TargetProperty.fromDict({
                     "name": "CL",
                     "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5]
-                }],
-                [{
-                    "name": "CL",
+                    "th": [10]
+                })],
+                [TargetProperty.fromDict({
+                    "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
-                    "fu": [0.3]
-                }]
+                    "th": [0.3]
+                })],
             ],
             prep_settings=[DataPrepSettings(**prep)],
             models=[
@@ -89,7 +89,7 @@ class TestBenchmarking(DataSetsMixIn, TestCase):
     def test_benchmarking(self):
         results = self.benchmark.run(raise_errors=True)
         self.assertEqual(
-            len(results),
-            self.settings.n_runs * len(self.settings.assessors)
+            self.benchmark.n_runs * len(self.settings.assessors),
+            len(results)
         )
 
