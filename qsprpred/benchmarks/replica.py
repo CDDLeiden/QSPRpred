@@ -53,9 +53,7 @@ class Replica(JSONSerializable):
 
     def __getstate__(self):
         o_dict = super().__getstate__()
-        o_dict["model"] = self.model.metaFile
-        if not os.path.exists(o_dict["model"]):
-            self.model.save()
+        o_dict["model"] = self.model.save()
         o_dict["ds"] = None
         return o_dict
 
