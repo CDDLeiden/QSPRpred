@@ -45,8 +45,7 @@ class BenchmarkSettings(JSONSerializable):
         o_dict = super().__getstate__()
         o_dict["models"] = []
         for model in self.models:
-            if not os.path.exists(model.metaFile):
-                o_dict["models"].append(model.save())
+            o_dict["models"].append(model.save())
         return o_dict
 
     def __setstate__(self, state):
