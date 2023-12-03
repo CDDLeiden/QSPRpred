@@ -54,7 +54,6 @@ class SKLearnStandardizer(JSONSerializable):
 
     @classmethod
     def fromFit(cls, features: np.array, scaler):
->>>>>>> dev
         """Construct standardizer by fitting on feature set.
 
         Args:
