@@ -9,7 +9,6 @@ from .monitors import (
     WandBMonitor
 )
 from .metrics import SklearnMetrics
-from .tasks import ModelTasks, TargetTasks
 from .assessment_methods import CrossValAssessor, TestSetAssessor, ModelAssessor
 from .hyperparam_optimization import (
     OptunaOptimization,

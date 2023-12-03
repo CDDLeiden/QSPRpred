@@ -7,11 +7,11 @@ from sklearn.preprocessing import LabelEncoder
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer, \
     apply_feature_standardizer
-from ...data.properties import TargetProperty
+from qsprpred.tasks import TargetProperty
 from ...data.sampling.folds import FoldsFromDataSplit
 from .mol import MoleculeTable
 from ...logs import logger
-from ...models.tasks import TargetTasks
+from qsprpred.tasks import TargetTasks
 
 
 class QSPRDataset(MoleculeTable):

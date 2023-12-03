@@ -45,7 +45,7 @@ from ..models.monitors import (
 )
 from ..models.metrics import SklearnMetrics
 from ..models.sklearn import SklearnModel
-from ..models.tasks import TargetTasks
+from qsprpred.tasks import TargetTasks
 
 N_CPUS = 2
 logging.basicConfig(level=logging.DEBUG)

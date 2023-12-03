@@ -21,7 +21,7 @@ from ..utils.serialization import JSONSerializable
 
 from ..logs import logger
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
-from ..models.tasks import ModelTasks
+from qsprpred.tasks import ModelTasks
 
 
 class QSPRModel(JSONSerializable, ABC):
