@@ -8,7 +8,7 @@ import pandas as pd
 from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
-from ...data.properties import TargetProperty
+from qsprpred.tasks import TargetProperty, TargetTasks
 from ...data.tests import (
     CHUNK_SIZE,
     N_CPU,
@@ -44,7 +44,6 @@ from ...extra.data.utils.descriptorsets import (
     ProDec,
     ProteinDescriptorSet,
 )
-from ...models.tasks import TargetTasks
 from .utils.datasplitters import LeaveTargetsOut, PCMSplit, TemporalPerTarget
 
 

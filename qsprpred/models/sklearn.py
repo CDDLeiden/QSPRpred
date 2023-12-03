@@ -17,7 +17,7 @@ from sklearn.utils.validation import check_is_fitted
 from ..data.tables.qspr import QSPRDataset
 from ..logs import logger
 from .models import QSPRModel
-from .tasks import ModelTasks
+from qsprpred.tasks import ModelTasks
 
 
 class SklearnModel(QSPRModel):

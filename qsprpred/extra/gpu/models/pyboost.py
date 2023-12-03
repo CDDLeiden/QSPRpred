@@ -26,7 +26,7 @@ from ....data.interfaces import DataSplit
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import FitMonitor, QSPRModel
 from ....models.monitors import BaseMonitor
-from ....models.tasks import ModelTasks
+from qsprpred.tasks import ModelTasks
 
 
 class PyBoostModel(QSPRModel):

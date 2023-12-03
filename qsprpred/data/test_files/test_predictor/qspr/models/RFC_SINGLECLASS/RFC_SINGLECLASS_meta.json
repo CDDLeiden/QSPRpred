@@ -5,13 +5,13 @@
         "baseDir": ".",
         "targetProperties": [
             {
-                "py/object": "qsprpred.data.properties.TargetProperty",
+                "py/object": "qsprpred.tasks.TargetProperty",
                 "name": "CL_class",
                 "originalName": "CL",
                 "task": {
                     "py/reduce": [
                         {
-                            "py/type": "qsprpred.models.tasks.TargetTasks"
+                            "py/type": "qsprpred.tasks.TargetTasks"
                         },
                         {
                             "py/tuple": [

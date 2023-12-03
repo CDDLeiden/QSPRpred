@@ -19,7 +19,7 @@ from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.models import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
-from ....models.tasks import ModelTasks
+from qsprpred.tasks import ModelTasks
 
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):

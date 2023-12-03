@@ -15,7 +15,7 @@ from qsprpred.data.descriptors.sets import SmilesDesc
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
-from ....models.tasks import ModelTasks, TargetTasks
+from qsprpred.tasks import TargetTasks, ModelTasks
 from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitorsMixIn
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 

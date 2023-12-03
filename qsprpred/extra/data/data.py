@@ -4,7 +4,7 @@ import pandas as pd
 
 from ...data.tables.qspr import QSPRDataset
 from ...data.tables.mol import MoleculeTable
-from ...data.properties import TargetProperty
+from qsprpred.tasks import TargetProperty
 from qsprpred.data.descriptors.calculators import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
