@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from ...data.data import TargetProperty
+from ...data.properties import TargetProperty
 from ...models.tasks import TargetTasks
 from ...models.tests import N_CPUS, ModelDataSetsMixIn, ModelTestMixIn
 from ..data.data import PCMDataSet

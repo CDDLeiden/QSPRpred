@@ -8,7 +8,7 @@ import pandas as pd
 from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
-from ...data.data import TargetProperty
+from ...data.properties import TargetProperty
 from ...data.tests import (
     CHUNK_SIZE,
     N_CPU,
