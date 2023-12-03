@@ -2,15 +2,17 @@ import json
 import os
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from typing import Any
+from typing import Any, Callable, Iterable
 
 import numpy as np
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Draw
 
+from .early_stopping import EarlyStoppingMode
 from ..data.tables.qspr_dataset import QSPRDataset
 from .models import QSPRModel
+from ..models.metrics import SklearnMetrics, Metric
 
 
 class FitMonitor(ABC):
@@ -117,6 +119,203 @@ class AssessorMonitor(FitMonitor):
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
             predictions (pd.DataFrame): predictions of the current fold
+        """
+
+
+class HyperparameterOptimizationMonitor(AssessorMonitor):
+    """Base class for monitoring the hyperparameter optimization of a model."""
+    @abstractmethod
+    def onOptimizationStart(
+        self, model: QSPRModel, config: dict, optimization_type: str
+    ):
+        """Called before the hyperparameter optimization has started.
+
+        Args:
+            model (QSPRModel): model to optimize
+            config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of hyperparameter optimization
+        """
+
+    @abstractmethod
+    def onOptimizationEnd(self, best_score: float, best_parameters: dict):
+        """Called after the hyperparameter optimization has finished.
+
+        Args:
+            best_score (float): best score found during optimization
+            best_parameters (dict): best parameters found during optimization
+        """
+
+    @abstractmethod
+    def onIterationStart(self, params: dict):
+        """Called before each iteration of the hyperparameter optimization.
+
+        Args:
+            params (dict): parameters used for the current iteration
+        """
+
+    @abstractmethod
+    def onIterationEnd(self, score: float, scores: list[float]):
+        """Called after each iteration of the hyperparameter optimization.
+
+        Args:
+            score (float): (aggregated) score of the current iteration
+            scores (list[float]): scores of the current iteration
+                                  (e.g for cross-validation)
+        """
+
+
+class ModelAssessor(ABC):
+    """Base class for assessment methods.
+
+    Attributes:
+        scoreFunc (Metric): scoring function to use, should match the output of the
+                        evaluation method (e.g. if the evaluation methods returns
+                        class probabilities, the scoring function support class
+                        probabilities)
+        monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
+            is used
+        useProba (bool): use probabilities for classification models
+        mode (EarlyStoppingMode): early stopping mode for fitting
+    """
+    def __init__(
+        self,
+        scoring: str | Callable[[Iterable, Iterable], float],
+        monitor: AssessorMonitor | None = None,
+        use_proba: bool = True,
+        mode: EarlyStoppingMode | None = None,
+    ):
+        """Initialize the evaluation method class.
+
+        Args:
+            scoring: str | Callable[[Iterable, Iterable], float],
+            monitor (AssessorMonitor): monitor to track the evaluation
+            use_proba (bool): use probabilities for classification models
+            mode (EarlyStoppingMode): early stopping mode for fitting
+        """
+        self.monitor = monitor
+        self.useProba = use_proba
+        self.mode = mode
+        self.scoreFunc = (
+            SklearnMetrics(scoring) if isinstance(scoring, str) else scoring
+        )
+
+    @abstractmethod
+    def __call__(
+        self,
+        model: QSPRModel,
+        save: bool,
+        parameters: dict | None,
+        monitor: AssessorMonitor,
+        **kwargs,
+    ) -> list[float]:
+        """Evaluate the model.
+
+        Args:
+            model (QSPRModel): model to evaluate
+            save (bool): save predictions to file
+            parameters (dict): parameters to use for the evaluation
+            monitor (AssessorMonitor): monitor to track the evaluation, overrides
+                                       the monitor set in the constructor
+            kwargs: additional arguments for fit function of the model
+
+        Returns:
+            list[float]: scores of the model for each fold
+        """
+
+    def predictionsToDataFrame(
+        self,
+        model: QSPRModel,
+        y: np.array,
+        predictions: np.ndarray | list[np.ndarray],
+        index: pd.Series,
+        extra_columns: dict[str, np.ndarray] | None = None,
+    ) -> pd.DataFrame:
+        """Create a dataframe with true values and predictions.
+
+        Args:
+            model (QSPRModel): model to evaluate
+            y (np.array): target values
+            predictions (np.ndarray | list[np.ndarray]): predictions
+            index (pd.Series): index of the data set
+            extra_columns (dict[str, np.ndarray]): extra columns to add to the output
+        """
+        # Create dataframe with true values
+        df_out = pd.DataFrame(
+            y.values, columns=y.add_suffix("_Label").columns, index=index
+        )
+        # Add predictions to dataframe
+        for idx, prop in enumerate(model.data.targetProperties):
+            if prop.task.isClassification() and self.useProba:
+                # convert one-hot encoded predictions to class labels
+                # and add to train and test
+                df_out[f"{prop.name}_Prediction"] = np.argmax(predictions[idx], axis=1)
+                # add probability columns to train and test set
+                df_out = pd.concat(
+                    [
+                        df_out,
+                        pd.DataFrame(predictions[idx], index=index
+                                    ).add_prefix(f"{prop.name}_ProbabilityClass_"),
+                    ],
+                    axis=1,
+                )
+            else:
+                df_out[f"{prop.name}_Prediction"] = predictions[:, idx]
+        # Add extra columns to dataframe if given (such as fold indexes)
+        if extra_columns is not None:
+            for col_name, col_values in extra_columns.items():
+                df_out[col_name] = col_values
+        return df_out
+
+
+class HyperparameterOptimization(ABC):
+    """Base class for hyperparameter optimization.
+
+    Attributes:
+        runAssessment (ModelAssessor): evaluation method to use
+        scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
+        paramGrid (dict): dictionary of parameters to optimize
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization
+        bestScore (float): best score found during optimization
+        bestParams (dict): best parameters found during optimization
+    """
+    def __init__(
+        self,
+        param_grid: dict,
+        model_assessor: ModelAssessor,
+        score_aggregation: Callable[[Iterable], float],
+        monitor: HyperparameterOptimizationMonitor | None = None,
+    ):
+        """Initialize the hyperparameter optimization class.
+
+        param_grid (dict):
+            dictionary of parameters to optimize
+        model_assessor (ModelAssessor):
+            assessment method to use for determining the best parameters
+        score_aggregation (Callable[[Iterable], float]): function to aggregate scores
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization,
+            if None, a BaseMonitor is used
+        """
+        self.runAssessment = model_assessor
+        self.scoreAggregation = score_aggregation
+        self.paramGrid = param_grid
+        self.bestScore = -np.inf
+        self.bestParams = None
+        self.monitor = monitor
+        self.config = {
+            "param_grid": param_grid,
+            "model_assessor": model_assessor,
+            "score_aggregation": score_aggregation,
+        }
+
+    @abstractmethod
+    def optimize(self, model: QSPRModel) -> dict:
+        """Optimize the model hyperparameters.
+
+        Args:
+            model (QSPRModel): model to optimize
+
+        Returns:
+            dict: dictionary of best parameters
         """
 
 
