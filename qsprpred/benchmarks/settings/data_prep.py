@@ -22,6 +22,7 @@ class DataPrepSettings:
         feature_fill_value (float):
             Fill value to use for features.
     """
+
     split: DataSplit = None
     smiles_standardizer: str | Callable = "chembl"
     feature_filters: list = None

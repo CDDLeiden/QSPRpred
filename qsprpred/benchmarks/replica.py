@@ -1,21 +1,21 @@
-import os
-
 import json
 import logging
+import os
 from copy import deepcopy
+from typing import ClassVar
 
 import pandas as pd
 
-from .settings.benchmark import DataPrepSettings
 from ..data import QSPRDataset
-from ..tasks import TargetProperty
 from ..data.descriptors.calculators import MoleculeDescriptorsCalculator
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
 from ..models.assessment_methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
 from ..models.models import QSPRModel
+from ..tasks import TargetProperty
 from ..utils.serialization import JSONSerializable
+from .settings.benchmark import DataPrepSettings
 
 
 class Replica(JSONSerializable):
@@ -50,20 +50,20 @@ class Replica(JSONSerializable):
             `runAssessment` has been called.
     """
 
-    _notJSON = ["model"]
+    _notJSON: ClassVar = ["model"]
 
     def __init__(
-            self,
-            idx: int,
-            name: str,
-            data_source: DataSource,
-            descriptors: list[DescriptorSet],
-            target_props: list[TargetProperty],
-            prep_settings: DataPrepSettings,
-            model: QSPRModel,
-            optimizer: HyperparameterOptimization,
-            assessors: list[ModelAssessor],
-            random_seed: int,
+        self,
+        idx: int,
+        name: str,
+        data_source: DataSource,
+        descriptors: list[DescriptorSet],
+        target_props: list[TargetProperty],
+        prep_settings: DataPrepSettings,
+        model: QSPRModel,
+        optimizer: HyperparameterOptimization,
+        assessors: list[ModelAssessor],
+        random_seed: int,
     ):
         self.idx = idx
         self.name = name
@@ -118,10 +118,7 @@ class Replica(JSONSerializable):
             random_state=self.randomSeed,
         )
 
-    def addDescriptors(
-            self,
-            reload: bool = False
-    ):
+    def addDescriptors(self, reload: bool = False):
         """Adds descriptors to the current data set. Make sure to call
         `initData` first to get it from the source.
 
@@ -161,9 +158,7 @@ class Replica(JSONSerializable):
         """
         if self.ds is None:
             raise ValueError("Data set not initialized. Call initData first.")
-        self.ds.prepareDataset(
-            **deepcopy(self.prepSettings.__dict__),
-        )
+        self.ds.prepareDataset(**deepcopy(self.prepSettings.__dict__), )
 
     def initModel(self):
         """Initializes the model for this replica. This includes
@@ -199,19 +194,20 @@ class Replica(JSONSerializable):
         self.results = None
         for assessor in self.assessors:
             scores = assessor(self.model, save=True)
-            scores = pd.DataFrame({
-                "Assessor": assessor.__class__.__name__,
-                "ScoreFunc": assessor.scoreFunc.name,
-                "Score": scores,
-                "TargetProperties": "~".join(
-                    sorted([
-                        tp.name for tp in self.targetProps
-                    ])),
-                "TargetTasks": "~".join(
-                    sorted([
-                        str(tp.task) for tp in self.targetProps
-                    ])),
-            })
+            scores = pd.DataFrame(
+                {
+                    "Assessor":
+                        assessor.__class__.__name__,
+                    "ScoreFunc":
+                        assessor.scoreFunc.name,
+                    "Score":
+                        scores,
+                    "TargetProperties":
+                        "~".join(sorted([tp.name for tp in self.targetProps])),
+                    "TargetTasks":
+                        "~".join(sorted([str(tp.task) for tp in self.targetProps])),
+                }
+            )
             if self.results is None:
                 self.results = scores
             else:

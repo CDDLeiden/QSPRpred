@@ -1,13 +1,14 @@
 from dataclasses import dataclass
+from typing import ClassVar
 
-from .data_prep import DataPrepSettings
-from ...tasks import TargetProperty
 from ...data.descriptors.sets import DescriptorSet
 from ...data.sources.data_source import DataSource
 from ...models.assessment_methods import ModelAssessor
 from ...models.hyperparam_optimization import HyperparameterOptimization
 from ...models.models import QSPRModel
+from ...tasks import TargetProperty
 from ...utils.serialization import JSONSerializable
+from .data_prep import DataPrepSettings
 
 
 @dataclass
@@ -37,7 +38,7 @@ class BenchmarkSettings(JSONSerializable):
             Hyperparameter optimizers to use.
     """
 
-    _notJSON = ["models"]
+    _notJSON: ClassVar = ["models"]
 
     name: str
     n_replicas: int
