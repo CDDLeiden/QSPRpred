@@ -13,7 +13,9 @@ from gbmtsplits import GloballyBalancedSplit
 from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.logs import logger
-from qsprpred.data.data import DataSetDependant, MoleculeDataSet, QSPRDataset, Randomized
+from qsprpred.data.tables.qspr_dataset import QSPRDataset
+from qsprpred.utils.randomized import Randomized
+from qsprpred.data.tables.base import MoleculeDataSet, DataSetDependant
 from qsprpred.data.chem.clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,

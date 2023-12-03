@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import roc_auc_score
 
-from ..data.data import QSPRDataset
+from ..data.tables.qspr_dataset import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks

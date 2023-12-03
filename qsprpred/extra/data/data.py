@@ -2,7 +2,8 @@ from typing import Callable
 
 import pandas as pd
 
-from ...data.data import MoleculeTable, QSPRDataset
+from ...data.tables.qspr_dataset import QSPRDataset
+from ...data.tables.mol_table import MoleculeTable
 from ...data.properties import TargetProperty
 from qsprpred.data.descriptors.calculators import (
     DescriptorsCalculator,

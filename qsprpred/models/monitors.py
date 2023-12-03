@@ -9,7 +9,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Draw
 
-from ..data.data import QSPRDataset
+from ..data.tables.qspr_dataset import QSPRDataset
 from .models import QSPRModel
 
 

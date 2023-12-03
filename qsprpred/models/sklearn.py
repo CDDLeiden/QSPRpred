@@ -15,7 +15,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.svm import SVC, SVR
 from sklearn.utils.validation import check_is_fitted
 
-from ..data.data import QSPRDataset
+from ..data.tables.qspr_dataset import QSPRDataset
 from ..logs import logger
 from .models import QSPRModel
 from .tasks import ModelTasks

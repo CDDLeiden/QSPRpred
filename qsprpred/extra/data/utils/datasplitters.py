@@ -7,7 +7,7 @@ from typing import Iterable
 
 import numpy as np
 
-from ....data.data import QSPRDataset
+from ....data.tables.qspr_dataset import QSPRDataset
 from ....data.properties import TargetProperty
 from qsprpred.data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
 from ..data import PCMDataSet

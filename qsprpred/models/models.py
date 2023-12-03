@@ -13,9 +13,10 @@ from typing import Any, Callable, List, Type, Union
 import numpy as np
 import pandas as pd
 
-from qsprpred.utils.serialization import JSONSerializable
+from ..utils.serialization import JSONSerializable
 
-from ..data.data import MoleculeTable, QSPRDataset
+from ..data.tables.qspr_dataset import QSPRDataset
+from ..data.tables.mol_table import MoleculeTable
 from ..logs import logger
 from ..models import SSPACE
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
