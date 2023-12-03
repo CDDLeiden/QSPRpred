@@ -16,16 +16,26 @@ class BenchmarkSettings(JSONSerializable):
     """Class that determines settings for a benchmarking run.
 
     Attributes:
-        name (str): name of the benchmark
-        n_replicas (int): number of repetitions per experiment
-        random_seed (int): seed for random operations
-        data_sources (list[DataSource]): data sources to use
-        descriptors (list[list[DescriptorSet]]): descriptors to use
-        target_props (list[list[TargetProperty]]): target properties to use
-        prep_settings (list[qsprpred.benchmarks.settings.data_prep.DataPrepSettings]): data preparation settings to use
-        models (list[QSPRModel]): models to use
-        assessors (list[ModelAssessor]): model assessors to use
-        optimizers (list[HyperparameterOptimization]): hyperparameter optimizers to use
+        name (str):
+            Name of the benchmarking run.
+        n_replicas (int):
+            Number of replicas to run.
+        random_seed (int):
+            Random seed to use.
+        data_sources (list[DataSource]):
+            Data sources to use.
+        descriptors (list[list[DescriptorSet]]):
+            Descriptor sets to use.
+        target_props (list[list[TargetProperty]]):
+            Target properties to use.
+        prep_settings (list[DataPrepSettings]):
+            Data preparation settings to use.
+        models (list[QSPRModel]):
+            Models to use.
+        assessors (list[ModelAssessor]):
+            Model assessors to use.
+        optimizers (list[HyperparameterOptimization]):
+            Hyperparameter optimizers to use.
     """
 
     _notJSON = ["models"]
@@ -50,12 +60,15 @@ class BenchmarkSettings(JSONSerializable):
 
     def __setstate__(self, state):
         super().__setstate__(state)
-        # logging.error(state["models"])
-        # print([os.path.exists(model) for model in state["models"]])
-        # print([json.loads(open(model).read()) for model in state["models"]])
         self.models = [QSPRModel.fromFile(model) for model in state["models"]]
 
     def checkConsistency(self):
+        """Checks if the settings are consistent.
+
+        Raises:
+            AssertionError:
+                If the settings are inconsistent.
+        """
         assert len(self.data_sources) > 0, "No data sources defined."
         assert len(self.descriptors) > 0, "No descriptors defined."
         assert len(self.target_props) > 0, "No target properties defined."
