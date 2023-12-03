@@ -1,4 +1,3 @@
-import pkg_resources
 import torch
 
 # set default number of threads to 1
@@ -8,7 +7,3 @@ DEFAULT_DEVICE = (
     torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 )
 DEFAULT_GPUS = (0, )
-# set default parameter search space path
-SSPACE = pkg_resources.resource_filename(
-    "qsprpred.extra.gpu", "models/search_space.json"
-)
