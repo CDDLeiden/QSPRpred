@@ -20,7 +20,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from qsprpred.utils.stopwatch import StopWatch
 from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
-from .tables.qspr_dataset import QSPRDataset
+from .tables.qspr import QSPRDataset
 from .properties import TargetProperty
 from .chem.clustering import (
     FPSimilarityLeaderPickerClusters,

@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred.data.tables.qspr_dataset import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRDataset
 from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
 from qsprpred.data.sampling.splits import (
     ClusterSplit,

@@ -7,7 +7,7 @@ from typing import Callable
 
 import numpy as np
 
-from ...data.tables.mol_table import MoleculeTable
+from ...data.tables.mol import MoleculeTable
 from ...models.models import QSPRModel
 from ...models.sklearn import SklearnModel
 from ..data.data import PCMDataSet

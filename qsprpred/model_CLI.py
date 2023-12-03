@@ -16,7 +16,7 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from qsprpred.data.tables.qspr_dataset import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRDataset
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor

@@ -31,7 +31,7 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from ..data.tables.qspr_dataset import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from ..data.tests import DataSetsMixIn
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping

@@ -13,7 +13,7 @@ from ...data.chem.standardization import check_smiles_valid, \
     chembl_smi_standardizer, old_standardize_sanitize
 from .base import MoleculeDataSet
 
-from .pandas_table import PandasDataSet
+from .pandas import PandasDataSet
 from ...logs import logger
 
 

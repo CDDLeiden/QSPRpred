@@ -12,7 +12,7 @@ from sklearn.model_selection import ShuffleSplit
 
 from .. import DEFAULT_DEVICE, DEFAULT_GPUS
 from ....data.sampling.splits import DataSplit
-from ....data.tables.qspr_dataset import QSPRDataset
+from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping

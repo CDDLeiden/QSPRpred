@@ -10,7 +10,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 
 from .early_stopping import EarlyStoppingMode
-from ..data.tables.qspr_dataset import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from .models import QSPRModel
 from ..models.metrics import SklearnMetrics, Metric
 

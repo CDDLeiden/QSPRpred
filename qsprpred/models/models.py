@@ -14,8 +14,8 @@ import numpy as np
 import pandas as pd
 
 
-from ..data.tables.qspr_dataset import QSPRDataset
-from ..data.tables.mol_table import MoleculeTable
+from ..data.tables.qspr import QSPRDataset
+from ..data.tables.mol import MoleculeTable
 from ..utils.inspect import dynamic_import
 from ..utils.serialization import JSONSerializable
 

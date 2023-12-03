@@ -6,7 +6,7 @@ from typing import Any, Callable
 import numpy as np
 import pandas as pd
 
-from ..data.tables.qspr_dataset import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from ..logs import logger
 
 

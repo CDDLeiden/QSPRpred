@@ -13,7 +13,7 @@ from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import trange
 
-from ....data.tables.qspr_dataset import QSPRDataset
+from ....data.tables.qspr import QSPRDataset
 from qsprpred.data.sampling.splits import DataSplit
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping

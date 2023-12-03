@@ -8,7 +8,7 @@ import pandas as pd
 import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
-from ...tables.mol_table import MoleculeTable
+from ...tables.mol import MoleculeTable
 from .papyrus_filter import papyrus_filter
 
 
