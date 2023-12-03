@@ -15,6 +15,9 @@ from ..utils.stringops import get_random_string
 
 
 class DataSourceTesting(DataSetsMixIn, DataSource):
+    """Data source for testing purposes. Simply prepares the default
+    data set from`DataSetsMixIn`.
+    """
 
     def __init__(self):
         super().__init__()
@@ -36,7 +39,15 @@ class DataSourceTesting(DataSetsMixIn, DataSource):
         return self.createLargeTestDataSet(name, target_props=target_props)
 
 
-class TestBenchmarking(DataSetsMixIn, TestCase):
+class BenchmarkingTest(DataSetsMixIn, TestCase):
+    """Test benchmarking functionality on the test data set.
+
+    Attributes:
+        settings (BenchmarkSettings):
+            Benchmark settings.
+        benchmark (BenchmarkRunner):
+            Benchmark runner.
+    """
 
     def setUp(self):
         super().setUp()
@@ -86,10 +97,11 @@ class TestBenchmarking(DataSetsMixIn, TestCase):
             results_file=f"{self.generatedPath}/benchmarks/results.tsv"
         )
 
-    def test_benchmarking(self):
+    def test(self):
+        """Run the test benchmark."""
         results = self.benchmark.run(raise_errors=True)
         self.assertEqual(
-            self.benchmark.n_runs * len(self.settings.assessors),
+            self.benchmark.nRuns * len(self.settings.assessors),
             len(results)
         )
 
