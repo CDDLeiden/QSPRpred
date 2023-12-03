@@ -12,10 +12,9 @@ import numpy as np
 import pandas as pd
 import sklearn_json as skljson
 from sklearn.exceptions import NotFittedError
-from sklearn.svm import SVC, SVR
 from sklearn.utils.validation import check_is_fitted
 
-from ..data.data import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from ..logs import logger
 from .models import QSPRModel
 from .tasks import ModelTasks
@@ -50,17 +49,8 @@ class SklearnModel(QSPRModel):
         """
         super().__init__(base_dir, alg, data, name, parameters, autoload, random_state)
         # initialize models with defined parameters
-        if type(self.estimator) in [SVC, SVR]:
-            logger.warning(
-                "parameter max_iter set to 10000 to avoid training getting stuck. \
-                            Manually set this parameter if this is not desired."
-            )
-            if self.parameters:
-                self.parameters.update({"max_iter": 10000})
-            else:
-                self.parameters = {"max_iter": 10000}
-        # check if alg can be initialized with parameters
         try:
+            # check if alg can be initialized with parameters
             if self.parameters is not None:
                 self.alg(**self.parameters)
             else:

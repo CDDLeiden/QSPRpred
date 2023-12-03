@@ -5,7 +5,7 @@
         "baseDir": ".",
         "targetProperties": [
             {
-                "py/object": "qsprpred.data.data.TargetProperty",
+                "py/object": "qsprpred.data.properties.TargetProperty",
                 "name": "CL_class",
                 "originalName": "CL",
                 "task": {

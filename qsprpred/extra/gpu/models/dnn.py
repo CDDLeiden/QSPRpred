@@ -10,9 +10,9 @@ import pandas as pd
 import torch
 from sklearn.model_selection import ShuffleSplit
 
-from ....data.data import QSPRDataset
-from qsprpred.data.sampling.splits import DataSplit
-from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS, SSPACE
+from .. import DEFAULT_DEVICE, DEFAULT_GPUS
+from ....data.sampling.splits import DataSplit
+from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
@@ -146,10 +146,6 @@ class DNNModel(QSPRModel):
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""
         return True
-
-    @classmethod
-    def getDefaultParamsGrid(cls) -> list[list]:
-        return SSPACE
 
     def loadEstimator(self, params: dict | None = None) -> object:
         """Load model from file or initialize new model.

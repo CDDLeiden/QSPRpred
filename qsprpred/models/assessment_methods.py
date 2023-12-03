@@ -10,7 +10,7 @@ from sklearn.model_selection import KFold
 
 from qsprpred.data.sampling.splits import DataSplit
 from ..logs import logger
-from ..models.metrics import SklearnMetric
+from ..models.metrics import SklearnMetrics
 from .early_stopping import EarlyStoppingMode
 from .models import QSPRModel
 from .monitors import AssessorMonitor, BaseMonitor
@@ -48,7 +48,7 @@ class ModelAssessor(ABC):
         self.useProba = use_proba
         self.mode = mode
         self.scoreFunc = (
-            SklearnMetric.getMetric(scoring) if isinstance(scoring, str) else scoring
+            SklearnMetrics(scoring) if isinstance(scoring, str) else scoring
         )
 
     @abstractmethod
@@ -172,7 +172,6 @@ class CrossValAssessor(ModelAssessor):
             n_splits=5, shuffle=True, random_state=data.randomState
         )
         evalparams = model.parameters if parameters is None else parameters
-        self.scoreFunc.checkMetricCompatibility(model.task, self.useProba)
         # check if data is available
         model.checkForData()
         X, _ = model.data.getFeatures()
@@ -281,7 +280,6 @@ class TestSetAssessor(ModelAssessor):
         """
         monitor = monitor or self.monitor
         evalparams = model.parameters if parameters is None else parameters
-        self.scoreFunc.checkMetricCompatibility(model.task, self.useProba)
         # check if data is available
         model.checkForData()
         X, X_ind = model.data.getFeatures()

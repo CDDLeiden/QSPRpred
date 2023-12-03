@@ -1,0 +1,232 @@
+from typing import Literal, Optional, Callable
+
+from qsprpred.models.tasks import TargetTasks
+from qsprpred.utils.serialization import JSONSerializable, function_as_string, \
+    function_from_string
+
+
+class TargetProperty(JSONSerializable):
+    """Target property for QSPRmodelling class.
+
+    Attributes:
+        name (str): name of the target property
+        task (Literal[TargetTasks.REGRESSION,
+              TargetTasks.SINGLECLASS,
+              TargetTasks.MULTICLASS]): task type for the target property
+        th (int): threshold for the target property, only used for classification tasks
+        nClasses (int): number of classes for the target property, only used for
+            classification tasks
+        transformer (Callable): function to transform the target property
+    """
+    def __init__(
+        self,
+        name: str,
+        task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
+                      TargetTasks.MULTICLASS],
+        original_name: Optional[str] = None,
+        th: Optional[list[float] | str] = None,
+        n_classes: Optional[int] = None,
+        transformer: Optional[Callable] = None,
+    ):
+        """Initialize a TargetProperty object.
+
+        Args:
+            name (str): name of the target property
+            task (Literal[TargetTasks.REGRESSION,
+              TargetTasks.SINGLECLASS,
+              TargetTasks.MULTICLASS]): task type for the target property
+            original_name (str): original name of the target property, if not specified,
+                the name is used
+            th (list[float] | str): threshold for the target property, only used
+                for classification tasks
+            n_classes (int): number of classes for the target property (only used if th
+                is precomputed, otherwise it is inferred)
+            transformer (Callable): function to transform the target property
+        """
+        self.name = name
+        self.originalName = original_name if original_name is not None else name
+        self.task = task
+        if task.isClassification():
+            assert (
+                th is not None
+            ), f"Threshold not specified for classification task {name}"
+            self.th = th
+            if isinstance(th, str) and th == "precomputed":
+                self.nClasses = n_classes
+        self.transformer = transformer
+
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        if self.transformer:
+            o_dict["transformer"] = function_as_string(self.transformer)
+        return o_dict
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        if self.transformer:
+            self.transformer = function_from_string(self.transformer)
+
+    @property
+    def th(self):
+        """Set the threshold for the target property.
+
+        Args:
+            th (Union[list[int], str]): threshold for the target property
+        """
+        return self._th
+
+    @th.setter
+    def th(self, th: list[float] | str):
+        """Set the threshold for the target property and the number of classes if th is
+        not precomputed."""
+        assert (
+            self.task.isClassification()
+        ), "Threshold can only be set for classification tasks"
+        self._th = th
+        if isinstance(th, str):
+            assert th == "precomputed", f"Invalid threshold {th}"
+        else:
+            self._nClasses = len(self.th) - 1 if len(self.th) > 1 else 2
+
+    @th.deleter
+    def th(self):
+        """Delete the threshold for the target property and the number of classes."""
+        del self._th
+        del self._nClasses
+
+    @property
+    def nClasses(self):
+        """Get the number of classes for the target property."""
+        return self._nClasses
+
+    @nClasses.setter
+    def nClasses(self, nClasses: int):
+        """Set the number of classes for the target property if th is precomputed.
+
+        Args:
+            nClasses (int): number of classes
+        """
+        assert (
+            self.th == "precomputed"
+        ), "Number of classes can only be set if threshold is precomputed"
+        self._nClasses = nClasses
+
+    def __repr__(self):
+        """Representation of the TargetProperty object."""
+        if self.task.isClassification() and self.th is not None:
+            return f"TargetProperty(name={self.name}, task={self.task}, th={self.th})"
+        else:
+            return f"TargetProperty(name={self.name}, task={self.task})"
+
+    def __str__(self):
+        """Return string identifier of the TargetProperty object."""
+        return self.name
+
+    @classmethod
+    def fromDict(cls, d: dict):
+        """Create a TargetProperty object from a dictionary.
+
+        task can be specified as a string or as a TargetTasks object.
+
+        Args:
+            d (dict): dictionary containing the target property information
+
+        Returns:
+            TargetProperty: TargetProperty object
+        """
+        if isinstance(d["task"], str):
+            return TargetProperty(
+                **{
+                    k: TargetTasks[v.upper()] if k == "task" else v
+                    for k, v in d.items()
+                }
+            )
+        else:
+            return TargetProperty(**d)
+
+    @classmethod
+    def fromList(cls, _list: list[dict]):
+        """Create a list of TargetProperty objects from a list of dictionaries.
+
+        Args:
+            _list (list): list of dictionaries containing the target property
+                information
+
+        Returns:
+            list[TargetProperty]: list of TargetProperty objects
+        """
+        return [cls.fromDict(d) for d in _list]
+
+    @staticmethod
+    def toList(_list: list, task_as_str: bool = False, drop_transformer: bool = True):
+        """Convert a list of TargetProperty objects to a list of dictionaries.
+
+        Args:
+            _list (list): list of TargetProperty objects
+            task_as_str (bool): whether to convert the task to a string
+
+        Returns:
+            list[dict]: list of dictionaries containing the target property information
+        """
+        target_props = []
+        for target_prop in _list:
+            target_props.append(
+                {
+                    "name": target_prop.name,
+                    "task": target_prop.task.name if task_as_str else target_prop.task,
+                    "original_name": target_prop.originalName,
+                }
+            )
+            if target_prop.task.isClassification():
+                target_props[-1].update(
+                    {
+                        "th": target_prop.th,
+                        "n_classes": target_prop.nClasses
+                    }
+                )
+            if not drop_transformer:
+                target_props[-1].update({"transformer": target_prop.transformer})
+        return target_props
+
+    @staticmethod
+    def selectFromList(_list: list, names: list, original_names: bool = False):
+        """Select a subset of TargetProperty objects from a list of TargetProperty
+        objects.
+
+        Args:
+            _list (list): list of TargetProperty objects
+            names (list): list of names of the target properties to be selected
+            original_names (bool): whether to use the original names of the target
+                properties
+
+        Returns:
+            list[TargetProperty]: list of TargetProperty objects
+        """
+        if original_names:
+            return [t for t in _list if t.originalName in names]
+        return [t for t in _list if t.name in names]
+
+    @staticmethod
+    def getNames(_list: list):
+        """Get the names of the target properties from a list of TargetProperty objects.
+
+        Args:
+            _list (list): list of TargetProperty objects
+
+        Returns:
+            list[str]: list of names of the target properties
+        """
+        return [t.name for t in _list]
+
+    @staticmethod
+    def getOriginalNames(_list: list):
+        """Get the original names of the target properties from a list of TargetProperty
+        objects.
+
+        Args:
+            _list (list): list of TargetProperty objects
+
+        Returns:
+            list[str]: list of original names of the target properties
+        """
+        return [t.originalName for t in _list]

@@ -13,14 +13,15 @@ from typing import Any, Callable, List, Type, Union
 import numpy as np
 import pandas as pd
 
-from qsprpred.utils.serialization import JSONSerializable
 
-from ..data.data import MoleculeTable, QSPRDataset
+from ..data.tables.qspr import QSPRDataset
+from ..data.tables.mol import MoleculeTable
+from ..utils.inspect import dynamic_import
+from ..utils.serialization import JSONSerializable
+
 from ..logs import logger
-from ..models import SSPACE
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..models.tasks import ModelTasks
-from ..utils.inspect import dynamic_import
 
 
 class QSPRModel(JSONSerializable, ABC):
@@ -86,16 +87,6 @@ class QSPRModel(JSONSerializable, ABC):
         return predictions
 
     @classmethod
-    def getDefaultParamsGrid(cls) -> list:
-        """Get the path to the file with default search grid parameter settings
-        for some predefined estimator types.
-
-        Returns:
-            list: list of default parameter grids
-        """
-        return SSPACE
-
-    @classmethod
     def loadParamsGrid(
         cls, fname: str, optim_type: str, model_types: str
     ) -> np.ndarray:
@@ -115,16 +106,12 @@ class QSPRModel(JSONSerializable, ABC):
                 array with three columns containing modeltype,
                 optimization type (grid or bayes) and model type
         """
-        if fname:
-            try:
-                with open(fname) as json_file:
-                    optim_params = np.array(json.load(json_file), dtype=object)
-            except FileNotFoundError:
-                logger.error("Search space file (%s) not found" % fname)
-                sys.exit()
-        else:
-            with open(cls.getDefaultParamsGrid()) as json_file:
+        try:
+            with open(fname) as json_file:
                 optim_params = np.array(json.load(json_file), dtype=object)
+        except FileNotFoundError:
+            logger.error("Search space file (%s) not found" % fname)
+            sys.exit()
         # select either grid or bayes optimization parameters from param array
         optim_params = optim_params[optim_params[:, 2] == optim_type, :]
         # check all ModelTasks to be used have parameter grid
@@ -568,7 +555,12 @@ class QSPRModel(JSONSerializable, ABC):
             shutil.rmtree(self.outDir)
 
     def fitAttached(
-        self, monitor=None, mode=EarlyStoppingMode.OPTIMAL, **kwargs
+        self,
+        monitor=None,
+        mode=EarlyStoppingMode.OPTIMAL,
+        save_model=True,
+        save_data=False,
+        **kwargs,
     ) -> str:
         """Train model on the whole attached data set.
 
@@ -583,10 +575,12 @@ class QSPRModel(JSONSerializable, ABC):
                 early stopping, by default fit the 'optimal' number of
                 epochs previously stopped at in model assessment on train or test set,
                 to avoid the use of extra data for a validation set.
+            save_model (bool): save the model to file
+            save_data (bool): save the attached dataset to file
             kwargs: additional arguments to pass to fit
 
         Returns:
-            str: path to the saved model
+            str: path to the saved model, if `save_model` is True
         """
         # do some checks
         self.checkForData()
@@ -603,8 +597,11 @@ class QSPRModel(JSONSerializable, ABC):
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
+        if save_data:
+            self.data.save()
         # save model and return path
-        return self.save()
+        if save_model:
+            return self.save()
 
     def toJSON(self):
         o_dict = json.loads(super().toJSON())

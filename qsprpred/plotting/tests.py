@@ -10,12 +10,12 @@ from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import roc_auc_score
 
-from ..data.data import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
-from ..models.metrics import SklearnMetric
+from ..models.metrics import SklearnMetrics
 from ..plotting.classification import MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot
 
@@ -64,7 +64,7 @@ class ROCPlotTest(ModelRetriever, TestCase):
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
-        score_func = SklearnMetric.getDefaultMetric(model.task)
+        score_func = "roc_auc_ovr"
         CrossValAssessor(scoring = score_func)(model)
         TestSetAssessor(scoring = score_func)(model)
         model.save()
@@ -94,7 +94,7 @@ class MetricsPlotTest(ModelRetriever, TestCase):
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_metrics_plot_single_model")
-        score_func = SklearnMetric.getDefaultMetric(model.task)
+        score_func = "roc_auc"
         CrossValAssessor(scoring = score_func)(model)
         TestSetAssessor(scoring = score_func)(model)
         model.save()
@@ -118,8 +118,7 @@ class CorrPlotTest(ModelRetriever, TestCase):
         model = self.getModel(
             dataset, "test_corr_plot_single_model", alg=RandomForestRegressor
         )
-        score_func = SklearnMetric.getDefaultMetric(model.task)
-        print(score_func)
+        score_func = "r2"
         CrossValAssessor(scoring = score_func)(model)
         TestSetAssessor(scoring = score_func)(model)
         model.save()

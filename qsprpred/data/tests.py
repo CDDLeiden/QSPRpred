@@ -20,7 +20,8 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from qsprpred.utils.stopwatch import StopWatch
 from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
-from .data import QSPRDataset, TargetProperty
+from .tables.qspr import QSPRDataset
+from .properties import TargetProperty
 from .chem.clustering import (
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
@@ -1738,6 +1739,8 @@ class DataPrepTestMixIn(DescriptorCheckMixIn):
             datafilters=[data_filter] if data_filter else None,
         )
         expected_feature_count = len(dataset.featureNames)
+        original_features = dataset.featureNames
+        train, test = dataset.getFeatures()
         self.checkFeatures(dataset, expected_feature_count)
         # save the dataset
         dataset.save()
@@ -1754,6 +1757,19 @@ class DataPrepTestMixIn(DescriptorCheckMixIn):
         else:
             self.assertIsNone(dataset.feature_standardizer)
         self.checkFeatures(dataset, expected_feature_count)
+        # verify prep results are the same after reloading
+        dataset.prepareDataset(
+            feature_calculators=feature_calculators,
+            split=split if split else None,
+            feature_standardizer=feature_standardizer if feature_standardizer else None,
+            feature_filters=[feature_filter] if feature_filter else None,
+            datafilters=[data_filter] if data_filter else None,
+        )
+        self.checkFeatures(dataset, expected_feature_count)
+        self.assertListEqual(sorted(dataset.featureNames), sorted(original_features))
+        train2, test2 = dataset.getFeatures()
+        self.assertTrue(train.index.equals(train2.index))
+        self.assertTrue(test.index.equals(test2.index))
 
 
 class TestDataSetPreparation(DataSetsMixIn, DataPrepTestMixIn, TestCase):

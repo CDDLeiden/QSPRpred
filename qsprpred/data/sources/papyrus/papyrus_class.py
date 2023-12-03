@@ -9,7 +9,7 @@ import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
 from ..data_source import DataSource
-from ...data import MoleculeTable
+from ...tables.mol import MoleculeTable
 from .papyrus_filter import papyrus_filter
 
 

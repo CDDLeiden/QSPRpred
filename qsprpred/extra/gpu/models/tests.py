@@ -8,7 +8,7 @@ import torch
 from parameterized import parameterized
 from sklearn.impute import SimpleImputer
 
-from ....data.data import QSPRDataset
+from ....data.tables.qspr import QSPRDataset
 from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
 from qsprpred.data.descriptors.sets import SmilesDesc
