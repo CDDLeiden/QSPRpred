@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from ...data.data import MoleculeTable, TargetProperty, QSPRDataset
+from qsprpred import TargetProperty
+from qsprpred.data import MoleculeTable, QSPRDataset
 
 
 class DataSource(ABC):

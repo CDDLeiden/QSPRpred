@@ -5,12 +5,12 @@ from sklearn.neural_network import MLPClassifier
 
 from . import BenchmarkRunner
 from . import BenchmarkSettings, DataPrepSettings
-from ..data.data import MoleculeTable, TargetProperty, QSPRDataset
+from .. import TargetProperty, TargetTasks
+from ..data import MoleculeTable, QSPRDataset
 from ..data.sources.data_source import DataSource
 from ..data.tests import DataSetsMixIn
 from ..models.assessment_methods import TestSetAssessor
 from ..models.sklearn import SklearnModel
-from ..models.tasks import TargetTasks
 from ..utils.stringops import get_random_string
 
 

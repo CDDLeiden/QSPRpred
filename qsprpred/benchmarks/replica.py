@@ -7,7 +7,8 @@ from copy import deepcopy
 import pandas as pd
 
 from .settings.benchmark import DataPrepSettings
-from ..data.data import TargetProperty, QSPRDataset
+from ..data import QSPRDataset
+from ..tasks import TargetProperty
 from ..data.descriptors.calculators import MoleculeDescriptorsCalculator
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource

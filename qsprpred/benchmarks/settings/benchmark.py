@@ -1,8 +1,7 @@
-import os
 from dataclasses import dataclass
 
 from .data_prep import DataPrepSettings
-from ...data.data import TargetProperty
+from ...tasks import TargetProperty
 from ...data.descriptors.sets import DescriptorSet
 from ...data.sources.data_source import DataSource
 from ...models.assessment_methods import ModelAssessor
