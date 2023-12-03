@@ -9,8 +9,7 @@ from ...data.processing.feature_standardizers import SKLearnStandardizer, \
     apply_feature_standardizer
 from ...data.properties import TargetProperty
 from ...data.sampling.folds import FoldsFromDataSplit
-from ...data.tables.mol_table import MoleculeTable
-from ...data.tables.pandas_table import PandasDataSet
+from .mol_table import MoleculeTable
 from ...logs import logger
 from ...models.tasks import TargetTasks
 
