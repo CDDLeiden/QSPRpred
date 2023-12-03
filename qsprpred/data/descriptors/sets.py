@@ -5,6 +5,7 @@ To add a new descriptor or fingerprint calculator:
 * Add a function to retrieve your descriptor by name to the descriptor retriever class
 """
 from abc import ABC, abstractmethod
+from typing import Type
 
 import numpy as np
 import pandas as pd
@@ -18,7 +19,6 @@ from rdkit.ML.Descriptors import MoleculeDescriptors
 from qsprpred.utils.serialization import JSONSerializable
 from qsprpred.logs import logger
 
-from qsprpred.models.models import QSPRModel
 from qsprpred.data.descriptors.fingerprints import get_fingerprint
 
 
@@ -482,7 +482,7 @@ class PredictorDesc(MoleculeDescriptorSet):
 
     _notJSON = [*MoleculeDescriptorSet._notJSON, "model"]
 
-    def __init__(self, model: QSPRModel | str):
+    def __init__(self, model: Type["QSPRModel"] | str):
         """
         Initialize the descriptorset with a `QSPRModel` object.
 
@@ -492,7 +492,6 @@ class PredictorDesc(MoleculeDescriptorSet):
 
         if isinstance(model, str):
             from ...models.models import QSPRModel
-
             self.model = QSPRModel.fromFile(model)
         else:
             self.model = model
@@ -506,6 +505,7 @@ class PredictorDesc(MoleculeDescriptorSet):
 
     def __setstate__(self, state):
         super().__setstate__(state)
+        from ...models.models import QSPRModel
         self.model = QSPRModel.fromFile(self.model)
 
     def __call__(self, mols):
