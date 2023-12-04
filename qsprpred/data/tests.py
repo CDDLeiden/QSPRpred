@@ -17,16 +17,16 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold, ShuffleSplit, StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-from qsprpred.utils.stopwatch import StopWatch
+from ..utils.stopwatch import StopWatch
 from ..models.sklearn import SklearnModel
 from .tables.qspr import QSPRDataset
-from qsprpred.tasks import TargetProperty, TargetTasks
+from ..tasks import TargetProperty, TargetTasks
 from .chem.clustering import (
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
 )
-from qsprpred.data.processing.data_filters import CategoryFilter, RepeatsFilter
-from qsprpred.data.sampling.splits import (
+from ..data.processing.data_filters import CategoryFilter, RepeatsFilter
+from ..data.sampling.splits import (
     BootstrapSplit,
     ClusterSplit,
     ManualSplit,
@@ -34,12 +34,12 @@ from qsprpred.data.sampling.splits import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from qsprpred.data.descriptors.calculators import (
+from ..data.descriptors.calculators import (
     CustomDescriptorsCalculator,
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
-from qsprpred.data.descriptors.sets import (
+from ..data.descriptors.sets import (
     DataFrameDescriptorSet,
     DescriptorSet,
     DrugExPhyschem,
@@ -49,9 +49,9 @@ from qsprpred.data.descriptors.sets import (
     SmilesDesc,
     TanimotoDistances,
 )
-from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
-from qsprpred.data.processing.feature_filters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
-from qsprpred.data.sampling.folds import FoldsFromDataSplit
+from ..data.processing.feature_standardizers import SKLearnStandardizer
+from ..data.processing.feature_filters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
+from ..data.sampling.folds import FoldsFromDataSplit
 from .chem.scaffolds import BemisMurcko, Murcko
 
 N_CPU = 2

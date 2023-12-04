@@ -10,14 +10,14 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-import sklearn_json as skljson
+import ml2json
 from sklearn.exceptions import NotFittedError
 from sklearn.utils.validation import check_is_fitted
 
 from ..data.tables.qspr import QSPRDataset
 from ..logs import logger
 from .models import QSPRModel
-from qsprpred.tasks import ModelTasks
+from ..tasks import ModelTasks
 
 
 class SklearnModel(QSPRModel):
@@ -107,7 +107,7 @@ class SklearnModel(QSPRModel):
         """
         path = f"{self.outPrefix}.json"
         if os.path.isfile(path):
-            estimator = skljson.from_json(path)
+            estimator = ml2json.from_json(path)
             self.alg = estimator.__class__
             new_parameters = self.getParameters(params)
             if new_parameters is not None:
@@ -128,7 +128,7 @@ class SklearnModel(QSPRModel):
     def saveEstimator(self) -> str:
         """See `QSPRModel.saveEstimator`."""
         estimator_path = f"{self.outPrefix}.json"
-        skljson.to_json(self.estimator, estimator_path)
+        ml2json.to_json(self.estimator, estimator_path)
         return estimator_path
 
     def fit(

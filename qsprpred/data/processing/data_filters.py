@@ -11,7 +11,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from qsprpred.logs import logger
+from ...logs import logger
 
 
 class DataFilter(ABC):

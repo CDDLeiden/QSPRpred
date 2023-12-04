@@ -16,10 +16,10 @@ from rdkit.Chem import Descriptors as desc
 from rdkit.Chem import Lipinski
 from rdkit.ML.Descriptors import MoleculeDescriptors
 
-from qsprpred.utils.serialization import JSONSerializable
-from qsprpred.logs import logger
+from ...utils.serialization import JSONSerializable
+from ...logs import logger
 
-from qsprpred.data.descriptors.fingerprints import get_fingerprint
+from ...data.descriptors.fingerprints import get_fingerprint
 
 
 class DescriptorSet(JSONSerializable, ABC):
@@ -615,19 +615,19 @@ class _DescriptorSetRetriever:
 
     def getMordred(self, *args, **kwargs):
         """Wrapper to get Mordred descriptors - depends on optional dependency."""
-        from ...extra.data.utils.descriptorsets import Mordred
+        from qsprpred.extra.data.descriptors.sets import Mordred
 
         return Mordred(*args, **kwargs)
 
     def getMold2(self, *args, **kwargs):
         """Wrapper to get Mold2 descriptors - depends on optional dependency."""
-        from ...extra.data.utils.descriptorsets import Mold2
+        from qsprpred.extra.data.descriptors.sets import Mold2
 
         return Mold2(*args, **kwargs)
 
     def getPaDEL(self, *args, **kwargs):
         """Wrapper to get PaDEL descriptors - depends on optional dependency."""
-        from ...extra.data.utils.descriptorsets import PaDEL
+        from qsprpred.extra.data.descriptors.sets import PaDEL
 
         return PaDEL(*args, **kwargs)
 
@@ -636,7 +636,7 @@ class _DescriptorSetRetriever:
         return RDKitDescs(*args, **kwargs)
 
     def getExtendedValenceSignature(self, *args, **kwargs):
-        from ...extra.data.utils.descriptorsets import ExtendedValenceSignature
+        from qsprpred.extra.data.descriptors.sets import ExtendedValenceSignature
 
         return ExtendedValenceSignature(*args, **kwargs)
 
@@ -647,7 +647,7 @@ class _DescriptorSetRetriever:
     def getProDec(self, *args, **kwargs):
         """Wrapper to get protein descriptorsfrom prodec - depends on optional
         dependency."""
-        from ...extra.data.utils.descriptorsets import ProDec
+        from qsprpred.extra.data.descriptors.sets import ProDec
 
         return ProDec(*args, **kwargs)
 

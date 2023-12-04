@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 
 from qsprpred.data.descriptors.calculators import DescriptorsCalculator
-from .descriptor_utils.msa_calculator import ClustalMSA, MSAProvider
-from .descriptorsets import ProteinDescriptorSet
+from qsprpred.extra.data.utils.msa_calculator import ClustalMSA, MSAProvider
+from qsprpred.extra.data.descriptors.sets import ProteinDescriptorSet
 
 
 class ProteinDescriptorCalculator(DescriptorsCalculator):

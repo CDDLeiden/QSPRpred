@@ -8,7 +8,7 @@ import pandas as pd
 from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred.tasks import TargetProperty, TargetTasks
+from ...tasks import TargetProperty, TargetTasks
 from ...data.tests import (
     CHUNK_SIZE,
     N_CPU,
@@ -16,27 +16,27 @@ from ...data.tests import (
     DataSetsMixIn,
     TestDescriptorInDataMixIn,
 )
-from qsprpred.data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
-from qsprpred.data.descriptors.calculators import (
+from ...data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
+from ...data.descriptors.calculators import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
-from qsprpred.data.descriptors.sets import (
+from ...data.descriptors.sets import (
     DrugExPhyschem,
     FingerprintSet,
     MoleculeDescriptorSet,
     RDKitDescs,
 )
-from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
-from qsprpred.data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
+from ...data.processing.feature_standardizers import SKLearnStandardizer
+from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...extra.data.data import PCMDataSet
-from ...extra.data.utils.descriptor_utils.msa_calculator import (
+from qsprpred.extra.data.utils.msa_calculator import (
     MAFFT,
     BioPythonMSA,
     ClustalMSA,
 )
-from ...extra.data.utils.descriptorcalculator import ProteinDescriptorCalculator
-from ...extra.data.utils.descriptorsets import (
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from qsprpred.extra.data.descriptors.sets import (
     ExtendedValenceSignature,
     Mold2,
     Mordred,
@@ -44,7 +44,7 @@ from ...extra.data.utils.descriptorsets import (
     ProDec,
     ProteinDescriptorSet,
 )
-from .utils.datasplitters import LeaveTargetsOut, PCMSplit, TemporalPerTarget
+from qsprpred.extra.data.sampling.splits import LeaveTargetsOut, PCMSplit, TemporalPerTarget
 
 
 class DataSetsMixInExtras(DataSetsMixIn):

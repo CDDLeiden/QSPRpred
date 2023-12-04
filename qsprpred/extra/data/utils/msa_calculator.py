@@ -12,7 +12,6 @@ from abc import ABC, abstractmethod
 import Bio
 import Bio.SeqIO as Bio_SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline, MafftCommandline
-from Bio.Application import ApplicationError
 
 from qsprpred.utils.serialization import FileSerializable, JSONSerializable
 
