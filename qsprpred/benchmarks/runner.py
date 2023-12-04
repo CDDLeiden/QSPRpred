@@ -1,5 +1,4 @@
 import itertools
-import logging
 import os
 import random
 import traceback
@@ -11,6 +10,7 @@ import pandas as pd
 
 from .replica import Replica
 from .settings.benchmark import BenchmarkSettings
+from ..logs import logger
 
 lock = Lock()
 
@@ -130,9 +130,9 @@ class BenchmarkRunner:
             pd.DataFrame:
                 Results from the benchmarking experiments.
         """
-        logging.info(f"Saving settings to: {self.dataDir}/settings.json")
+        logger.info(f"Saving settings to: {self.dataDir}/settings.json")
         self.settings.toFile(f"{self.dataDir}/settings.json")
-        logging.info(f"Performing {self.nRuns} replica runs...")
+        logger.info(f"Performing {self.nRuns} replica runs...")
         with ProcessPoolExecutor(max_workers=self.nProc) as executor:
             for result in executor.map(
                 self.runReplica, self.iterReplicas(), itertools.repeat(self.resultsFile)
@@ -141,10 +141,10 @@ class BenchmarkRunner:
                     if raise_errors:
                         raise result.exception
                     else:
-                        logging.error(
+                        logger.error(
                             f"Error in replica {result.replicaID}: {result.exception}"
                         )
-        logging.info("Finished all replica runs.")
+        logger.info("Finished all replica runs.")
         return pd.read_table(self.resultsFile)
 
     def getSeedList(self, seed: int | None = None) -> list[int]:
@@ -239,7 +239,7 @@ class BenchmarkRunner:
                     df_results is not None
                     and df_results.ReplicaID.isin([replica.id]).any()
                 ):
-                    logging.warning(f"Skipping {replica.id}")
+                    logger.warning(f"Skipping {replica.id}")
                     return
                 replica.initData()
                 replica.addDescriptors()

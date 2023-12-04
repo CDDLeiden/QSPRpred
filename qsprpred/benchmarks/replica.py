@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from copy import deepcopy
 
@@ -10,9 +9,11 @@ from ..data import QSPRDataset
 from ..data.descriptors.calculators import MoleculeDescriptorsCalculator
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
+from ..logs import logger
 from ..models.assessment_methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
 from ..models.models import QSPRModel
+from ..models.monitors import NullMonitor
 from ..tasks import TargetProperty
 from ..utils.serialization import JSONSerializable
 
@@ -136,12 +137,13 @@ class Replica(JSONSerializable):
         self.ds.name = f"{self.ds.name}_{desc_id}"
         # attempt to load the data set with descriptors
         if os.path.exists(self.ds.metaFile) and not reload:
+            logger.info(f"Reloading existing {self.ds.name} from cache...")
             self.ds = QSPRDataset.fromFile(self.ds.metaFile)
             self.ds.setTargetProperties(deepcopy(self.targetProps))
         else:
-            logging.info(f"Data set {self.ds.name} not found. It will be created.")
+            logger.info(f"Data set {self.ds.name} not yet found. It will be created.")
             # calculate descriptors if necessary
-            logging.info(f"Calculating descriptors for {self.ds.name}.")
+            logger.info(f"Calculating descriptors for {self.ds.name}.")
             desc_calculator = MoleculeDescriptorsCalculator(
                 desc_sets=deepcopy(self.descriptors)
             )
@@ -235,7 +237,7 @@ class Replica(JSONSerializable):
         out_file = f"{self.model.outPrefix}_replica.json"
         for assessor in self.assessors:
             # FIXME: some problems in monitor serialization now prevent this
-            assessor.monitor = None
+            assessor.monitor = NullMonitor()
         self.model.data = None  # FIXME: model now does not support data serialization
         results["ReplicaFile"] = self.toFile(out_file)
         return results
