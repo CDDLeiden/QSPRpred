@@ -4,14 +4,16 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-from ...data.processing.data_filters import RepeatsFilter
-from ...data.processing.feature_standardizers import SKLearnStandardizer, \
-    apply_feature_standardizer
-from qsprpred.tasks import TargetProperty
-from ...data.sampling.folds import FoldsFromDataSplit
 from .mol import MoleculeTable
+from ...data.processing.data_filters import RepeatsFilter
+from ...data.processing.feature_standardizers import (
+    SKLearnStandardizer,
+    apply_feature_standardizer,
+)
+from ...data.sampling.folds import FoldsFromDataSplit
 from ...logs import logger
-from qsprpred.tasks import TargetTasks
+from ...tasks import TargetProperty
+from ...tasks import TargetTasks
 
 
 class QSPRDataset(MoleculeTable):
@@ -270,12 +272,14 @@ class QSPRDataset(MoleculeTable):
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.y = self.df.query("Split_IsTrain")[self.targetPropertyNames]
-            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
-                                     self.targetPropertyNames]
+            self.y_ind = self.df.loc[
+                ~self.df.index.isin(self.y.index), self.targetPropertyNames
+            ]
         else:
             self.y = self.df[self.targetPropertyNames]
-            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
-                                     self.targetPropertyNames]
+            self.y_ind = self.df.loc[
+                ~self.df.index.isin(self.y.index), self.targetPropertyNames
+            ]
         self.X = self.y.drop(self.y.columns, axis=1)
         self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
         self.featurizeSplits(shuffle=False)
@@ -342,13 +346,15 @@ class QSPRDataset(MoleculeTable):
         if th == "precomputed":
             self.df[new_prop] = self.df[target_property.originalName]
             assert all(
-                value is None or (type(value) in (int, bool)) or
-                (isinstance(value, float) and value.is_integer())
+                value is None
+                or (type(value) in (int, bool))
+                or (isinstance(value, float) and value.is_integer())
                 for value in self.df[new_prop]
             ), "Precomputed classification target must be integers or booleans."
             nClasses = len(self.df[new_prop].dropna().unique())
             target_property.task = (
-                TargetTasks.MULTICLASS if nClasses > 2  # noqa: PLR2004
+                TargetTasks.MULTICLASS
+                if nClasses > 2  # noqa: PLR2004
                 else TargetTasks.SINGLECLASS
             )
             target_property.th = th
@@ -511,8 +517,9 @@ class QSPRDataset(MoleculeTable):
 
         """
         if (
-            hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and
-            not split.hasDataSet
+            hasattr(split, "hasDataSet")
+            and hasattr(split, "setDataSet")
+            and not split.hasDataSet
         ):
             split.setDataSet(self)
         if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
@@ -529,13 +536,15 @@ class QSPRDataset(MoleculeTable):
             logger.info("Target property: %s" % prop.name)
             if prop.task == TargetTasks.SINGLECLASS:
                 logger.info(
-                    "    In train: active: %s not active: %s" % (
+                    "    In train: active: %s not active: %s"
+                    % (
                         sum(self.y[prop.name]),
                         len(self.y[prop.name]) - sum(self.y[prop.name]),
                     )
                 )
                 logger.info(
-                    "    In test:  active: %s not active: %s\n" % (
+                    "    In test:  active: %s not active: %s\n"
+                    % (
                         sum(self.y_ind[prop.name]),
                         len(self.y_ind[prop.name]) - sum(self.y_ind[prop.name]),
                     )

@@ -42,6 +42,7 @@ class PandasDataSet(DataSet, JSONSerializable):
 
     class ParallelApplyWrapper:
         """A wrapper class to parallelize pandas apply functions."""
+
         def __init__(
             self,
             func: Callable,
@@ -134,8 +135,7 @@ class PandasDataSet(DataSet, JSONSerializable):
         self.nJobs = n_jobs if n_jobs > 0 else os.cpu_count()
         self.chunkSize = chunk_size
         # paths
-        self.storeDir = store_dir.rstrip("/")
-        self.storeDir = f"{self.storeDir}/{self.name}"
+        self._storeDir = store_dir.rstrip("/")
         # data frame initialization
         self.df = None
         if df is not None:
@@ -181,6 +181,10 @@ class PandasDataSet(DataSet, JSONSerializable):
     def __setstate__(self, state):
         super().__setstate__(state)
         self.reload()
+
+    @property
+    def storeDir(self):
+        return f"{self._storeDir}/{self.name}"
 
     @property
     def storePath(self):
@@ -229,8 +233,9 @@ class PandasDataSet(DataSet, JSONSerializable):
         Returns:
             bool: `True` if the file exists, `False` otherwise.
         """
-        return os.path.exists(self.storePath
-                             ) and self.storePath.endswith(f"_{name}.pkl")
+        return os.path.exists(self.storePath) and self.storePath.endswith(
+            f"_{name}.pkl"
+        )
 
     def getProperty(self, name: str) -> pd.Series:
         """Get a property of the data set.
@@ -315,8 +320,11 @@ class PandasDataSet(DataSet, JSONSerializable):
         n_cpus = self.nJobs
         chunk_size = self.chunkSize
         if (
-            n_cpus and n_cpus > 1 and
-            not (hasattr(func, "noParallelization") and func.noParallelization is True)
+            n_cpus
+            and n_cpus > 1
+            and not (
+                hasattr(func, "noParallelization") and func.noParallelization is True
+            )
         ):
             return self.papply(
                 func,
@@ -374,12 +382,14 @@ class PandasDataSet(DataSet, JSONSerializable):
         """
         n_cpus = n_cpus if n_cpus else os.cpu_count()
         df_sub = self.df[subset if subset else self.df.columns]
-        data = [df_sub[i:i + chunk_size] for i in range(0, len(df_sub), chunk_size)]
+        data = [df_sub[i : i + chunk_size] for i in range(0, len(df_sub), chunk_size)]
         # size of batches use in the process - more is faster, but uses more memory
         batch_size = n_cpus
         results = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=n_cpus) as executor:
-            batches = [data[i:i + batch_size] for i in range(0, len(data), batch_size)]
+            batches = [
+                data[i : i + batch_size] for i in range(0, len(data), batch_size)
+            ]
             for batch in tqdm(
                 batches, desc=f"Parallel apply in progress for {self.name}."
             ):
