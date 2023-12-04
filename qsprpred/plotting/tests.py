@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from ..data.tables.qspr import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.sklearn import SklearnModel
-from qsprpred.tasks import TargetTasks
+from ..tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
 from ..plotting.classification import MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot

@@ -7,7 +7,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn import metrics
 
-from qsprpred.tasks import ModelTasks
+from ..tasks import ModelTasks
 from ..plotting.base_plot import ModelPlot
 
 

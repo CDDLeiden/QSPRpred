@@ -4,14 +4,14 @@ import pandas as pd
 
 from ...data.tables.qspr import QSPRDataset
 from ...data.tables.mol import MoleculeTable
-from qsprpred.tasks import TargetProperty
-from qsprpred.data.descriptors.calculators import (
+from ...tasks import TargetProperty
+from ...data.descriptors.calculators import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
 from ...logs import logger
 from .utils.descriptorcalculator import ProteinDescriptorCalculator
-from qsprpred.utils.serialization import function_as_string, function_from_string
+from ...utils.serialization import function_as_string, function_from_string
 
 
 class PCMDataSet(QSPRDataset):

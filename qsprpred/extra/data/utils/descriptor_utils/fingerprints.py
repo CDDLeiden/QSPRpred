@@ -17,7 +17,7 @@ from PaDEL_pywrapper import PaDEL as PaDEL_calculator
 from PaDEL_pywrapper import descriptor as cdk_fps
 from rdkit import Chem
 
-from qsprpred.data.descriptors.fingerprints import Fingerprint
+from .....data.descriptors.fingerprints import Fingerprint
 
 
 class CDKFP(Fingerprint):

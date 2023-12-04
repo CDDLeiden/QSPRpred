@@ -5,12 +5,11 @@ import marshal
 import os
 import types
 from abc import ABC, abstractmethod
-from importlib import import_module
 from typing import Any, Callable
 
 import jsonpickle
 
-from qsprpred.utils.inspect import dynamic_import
+from ..utils.inspect import dynamic_import
 
 jsonpickle.set_encoder_options('json', indent=4)
 

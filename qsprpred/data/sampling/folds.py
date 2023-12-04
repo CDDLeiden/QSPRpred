@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Generator
 
 import pandas as pd
-from qsprpred.data.processing.feature_standardizers import apply_feature_standardizer
+from ...data.processing.feature_standardizers import apply_feature_standardizer
 
 
 class FoldGenerator(ABC):

@@ -11,7 +11,7 @@ from boruta import BorutaPy
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler
 
-from qsprpred.logs import logger
+from ...logs import logger
 
 
 class FeatureFilter(ABC):
