@@ -183,8 +183,12 @@ class PandasDataSet(DataSet, JSONSerializable):
         self.reload()
 
     @property
+    def baseDir(self):
+        return self._storeDir
+
+    @property
     def storeDir(self):
-        return f"{self._storeDir}/{self.name}"
+        return f"{self.baseDir}/{self.name}"
 
     @property
     def storePath(self):
