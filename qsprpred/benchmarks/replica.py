@@ -2,10 +2,10 @@ import json
 import logging
 import os
 from copy import deepcopy
-from typing import ClassVar
 
 import pandas as pd
 
+from .settings.benchmark import DataPrepSettings
 from ..data import QSPRDataset
 from ..data.descriptors.calculators import MoleculeDescriptorsCalculator
 from ..data.descriptors.sets import DescriptorSet
@@ -15,7 +15,6 @@ from ..models.hyperparam_optimization import HyperparameterOptimization
 from ..models.models import QSPRModel
 from ..tasks import TargetProperty
 from ..utils.serialization import JSONSerializable
-from .settings.benchmark import DataPrepSettings
 
 
 class Replica(JSONSerializable):
@@ -50,8 +49,6 @@ class Replica(JSONSerializable):
             `runAssessment` has been called.
     """
 
-    _notJSON: ClassVar = ["model"]
-
     def __init__(
         self,
         idx: int,
@@ -84,12 +81,14 @@ class Replica(JSONSerializable):
         o_dict = super().__getstate__()
         o_dict["model"] = self.model.save()
         o_dict["ds"] = None
+        o_dict["results"] = None
         return o_dict
 
     def __setstate__(self, state):
         super().__setstate__(state)
         self.model = QSPRModel.fromFile(state["model"])
         self.ds = None
+        self.results = None
 
     def __str__(self):
         return self.id
@@ -158,7 +157,9 @@ class Replica(JSONSerializable):
         """
         if self.ds is None:
             raise ValueError("Data set not initialized. Call initData first.")
-        self.ds.prepareDataset(**deepcopy(self.prepSettings.__dict__), )
+        self.ds.prepareDataset(
+            **deepcopy(self.prepSettings.__dict__),
+        )
 
     def initModel(self):
         """Initializes the model for this replica. This includes
@@ -196,16 +197,15 @@ class Replica(JSONSerializable):
             scores = assessor(self.model, save=True)
             scores = pd.DataFrame(
                 {
-                    "Assessor":
-                        assessor.__class__.__name__,
-                    "ScoreFunc":
-                        assessor.scoreFunc.name,
-                    "Score":
-                        scores,
-                    "TargetProperties":
-                        "~".join(sorted([tp.name for tp in self.targetProps])),
-                    "TargetTasks":
-                        "~".join(sorted([str(tp.task) for tp in self.targetProps])),
+                    "Assessor": assessor.__class__.__name__,
+                    "ScoreFunc": assessor.scoreFunc.name,
+                    "Score": scores,
+                    "TargetProperties": "~".join(
+                        sorted([tp.name for tp in self.targetProps])
+                    ),
+                    "TargetTasks": "~".join(
+                        sorted([str(tp.task) for tp in self.targetProps])
+                    ),
                 }
             )
             if self.results is None:
