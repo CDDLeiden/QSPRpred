@@ -43,6 +43,7 @@ class BenchmarkRunner:
             Path to the directory to store data.
 
     """
+
     class ReplicaException(Exception):
         """Custom exception for errors in a replica.
 
@@ -52,6 +53,7 @@ class BenchmarkRunner:
             exception (Exception):
                 Exception that was raised.
         """
+
         def __init__(self, replica_id: str, exception: Exception):
             """Initialize the exception.
 
@@ -69,7 +71,7 @@ class BenchmarkRunner:
         settings: BenchmarkSettings,
         n_proc: int | None = None,
         data_dir: str = "./data",
-        results_file: str = "./data/results.tsv",
+        results_file: str | None = None,
     ):
         """Initialize the runner.
 
@@ -82,12 +84,12 @@ class BenchmarkRunner:
                 Path to the directory to store data. Defaults to "./data".
                 If the directory does not exist, it will be created.
             results_file (str, optional):
-                Path to the results file. Defaults to "./data/results.tsv".
+                Path to the results file. Defaults to "{data_dir}/data/results.tsv".
         """
         self.settings = settings
         self.nProc = n_proc or os.cpu_count()
-        self.resultsFile = results_file
         self.dataDir = data_dir
+        self.resultsFile = results_file if results_file else f"{data_dir}/results.tsv"
         os.makedirs(self.dataDir, exist_ok=True)
 
     @property
@@ -103,9 +105,12 @@ class BenchmarkRunner:
         benchmark_settings = self.settings
         benchmark_settings.checkConsistency()
         ret = (
-            benchmark_settings.n_replicas * len(benchmark_settings.data_sources) *
-            len(benchmark_settings.descriptors) * len(benchmark_settings.target_props) *
-            len(benchmark_settings.prep_settings) * len(benchmark_settings.models)
+            benchmark_settings.n_replicas
+            * len(benchmark_settings.data_sources)
+            * len(benchmark_settings.descriptors)
+            * len(benchmark_settings.target_props)
+            * len(benchmark_settings.prep_settings)
+            * len(benchmark_settings.models)
         )
         if len(benchmark_settings.optimizers) > 0:
             ret *= len(benchmark_settings.optimizers)
@@ -130,8 +135,7 @@ class BenchmarkRunner:
         logging.info(f"Performing {self.nRuns} replica runs...")
         with ProcessPoolExecutor(max_workers=self.nProc) as executor:
             for result in executor.map(
-                self.runReplica, self.iterReplicas(),
-                itertools.repeat(self.resultsFile)
+                self.runReplica, self.iterReplicas(), itertools.repeat(self.resultsFile)
             ):
                 if isinstance(result, self.ReplicaException):
                     if raise_errors:
@@ -189,7 +193,8 @@ class BenchmarkRunner:
         indices = [x + 1 for x in range(benchmark_settings.n_replicas)]
         optimizers = (
             benchmark_settings.optimizers
-            if len(benchmark_settings.optimizers) > 0 else [None]
+            if len(benchmark_settings.optimizers) > 0
+            else [None]
         )
         product = itertools.product(
             indices,
@@ -231,8 +236,8 @@ class BenchmarkRunner:
                 if os.path.exists(results_file):
                     df_results = pd.read_table(results_file)
                 if (
-                    df_results is not None and
-                    df_results.ReplicaID.isin([replica.id]).any()
+                    df_results is not None
+                    and df_results.ReplicaID.isin([replica.id]).any()
                 ):
                     logging.warning(f"Skipping {replica.id}")
                     return
