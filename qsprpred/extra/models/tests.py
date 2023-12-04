@@ -17,8 +17,8 @@ from ...models.tests import N_CPUS, ModelDataSetsMixIn, ModelTestMixIn
 from ..data.data import PCMDataSet
 from ..data.tests import DataSetsMixInExtras
 from qsprpred.extra.data.utils.msa_calculator import ClustalMSA
-from qsprpred.extra.data.descriptors.descriptorcalculator import ProteinDescriptorCalculator
-from qsprpred.extra.data.descriptors.descriptorsets import ProDec
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from qsprpred.extra.data.descriptors.sets import ProDec
 from ..models.pcm import SklearnPCMModel
 
 

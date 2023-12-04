@@ -412,7 +412,7 @@ def QSPR_dataprep(args):
             # Avoid importing optional dependencies if not needed
             f_arr = np.array(args.features)
             if np.isin(["Mordred", "Mold2", "PaDEL", "Signature"], f_arr).any():
-                from qsprpred.extra.data.descriptors.descriptorsets import (
+                from qsprpred.extra.data.descriptors.sets import (
                     ExtendedValenceSignature,
                     Mold2,
                     Mordred,

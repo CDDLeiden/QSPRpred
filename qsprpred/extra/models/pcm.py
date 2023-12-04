@@ -11,7 +11,7 @@ from ...data.tables.mol import MoleculeTable
 from ...models.models import QSPRModel
 from ...models.sklearn import SklearnModel
 from ..data.data import PCMDataSet
-from qsprpred.extra.data.descriptors.descriptorcalculator import ProteinDescriptorCalculator
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 
 
 class PCMModel(QSPRModel, ABC):

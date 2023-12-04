@@ -35,8 +35,8 @@ from qsprpred.extra.data.utils.msa_calculator import (
     BioPythonMSA,
     ClustalMSA,
 )
-from qsprpred.extra.data.descriptors.descriptorcalculator import ProteinDescriptorCalculator
-from qsprpred.extra.data.descriptors.descriptorsets import (
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from qsprpred.extra.data.descriptors.sets import (
     ExtendedValenceSignature,
     Mold2,
     Mordred,
@@ -44,7 +44,7 @@ from qsprpred.extra.data.descriptors.descriptorsets import (
     ProDec,
     ProteinDescriptorSet,
 )
-from qsprpred.extra.data.sampling.datasplitters import LeaveTargetsOut, PCMSplit, TemporalPerTarget
+from qsprpred.extra.data.sampling.splits import LeaveTargetsOut, PCMSplit, TemporalPerTarget
 
 
 class DataSetsMixInExtras(DataSetsMixIn):
