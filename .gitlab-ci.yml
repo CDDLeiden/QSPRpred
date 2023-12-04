@@ -25,7 +25,7 @@ stages:
       - python -m pip install jupyterlab
       - python -m pip freeze # For debugging environment
    script:
-      - pytest qsprpred
+      - pytest -x qsprpred
       - cd clitest && ./run.sh
       - cd ../tutorials && ./run_all.sh
 

@@ -10,6 +10,7 @@ From v2.1.0 to v3.0.0
 
 ## Changes
 - The jupyter notebooks now pass a random state to ensure consistent results.
+- The deceased `sklearn-json` package has been replaced by its continuation `ml2json`.
 - The default parameter values for `STFullyConnected` have changed from `n_epochs` = 1000 to `n_epochs` = 100, from `neurons_h1` = 4000 to `neurons_h1` = 256 and `neurons_hx` = 1000 to `neurons_hx` = 128.
 - Rename `HyperParameterOptimization` to `HyperparameterOptimization`.
 - `TargetProperty.fromList` and `TargetProperty.fromDict` now accept a both a string and a `TargetTask` as the `task` argument,
@@ -20,6 +21,7 @@ without having to set the `task_from_str` argument, which is now deprecated.
 - `SklearnMetric` was renamed to `SklearnMetrics`, it now also accepts an scikit-learn scorer name as input.
 - `QSPRModel.fitAttached` now accepts a `save_model` (default: `True`) and `save_dataset` (default: `False`) argument to save the model and dataset to a file after fitting.
 - Tutorials were completely rewritten and expanded. They can now be found in the `tutorials` folder in stead of the `tutorial` folder.
+
 
 ## New Features
 - Most unit tests now have a variant that checks whether using a fixed random seed gives reproducible results.
