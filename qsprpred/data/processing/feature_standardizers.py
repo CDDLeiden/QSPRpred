@@ -1,7 +1,7 @@
 """This module is used for standardizing feature sets."""
 import numpy as np
 import pandas as pd
-import sklearn_json as skljson
+import ml2json
 
 from ...logs import logger
 from ...utils.serialization import JSONSerializable
@@ -21,12 +21,12 @@ class SKLearnStandardizer(JSONSerializable):
 
     def __getstate__(self):
         o_dict = super().__getstate__()
-        o_dict["scaler"] = skljson.to_dict(self.scaler)
+        o_dict["scaler"] = ml2json.to_dict(self.scaler)
         return o_dict
 
     def __setstate__(self, state):
         super().__setstate__(state)
-        self.scaler = skljson.from_dict(state["scaler"])
+        self.scaler = ml2json.from_dict(state["scaler"])
 
     def __str__(self):
         """Return string representation."""
@@ -41,6 +41,9 @@ class SKLearnStandardizer(JSONSerializable):
         Returns:
             features: array of standardized features
         """
+        # if isinstance(features, np.ndarray):
+        #     features = pd.DataFrame(features)
+        # print(features)
         features = self.scaler.transform(features)
         logger.debug("Data standardized")
         return features

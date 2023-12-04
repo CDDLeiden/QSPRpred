@@ -41,7 +41,7 @@ From v2.1.0 to v3.0.0
   and `save_dataset` (default: `False`) argument to save the model and dataset to a file
   after fitting.
 - Tutorials were completely rewritten and expanded. They can now be found in
-  the `tutorials` folder in stead of the `tutorial` folder.
+  the `tutorials` folder instead of the `tutorial` folder.
 
 ## New Features
 
