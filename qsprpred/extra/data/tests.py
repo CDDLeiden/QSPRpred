@@ -30,13 +30,13 @@ from ...data.descriptors.sets import (
 from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...extra.data.data import PCMDataSet
-from ...extra.data.utils.descriptor_utils.msa_calculator import (
+from qsprpred.extra.data.utils.msa_calculator import (
     MAFFT,
     BioPythonMSA,
     ClustalMSA,
 )
-from ...extra.data.utils.descriptorcalculator import ProteinDescriptorCalculator
-from ...extra.data.utils.descriptorsets import (
+from qsprpred.extra.data.descriptors.descriptorcalculator import ProteinDescriptorCalculator
+from qsprpred.extra.data.descriptors.descriptorsets import (
     ExtendedValenceSignature,
     Mold2,
     Mordred,
@@ -44,7 +44,7 @@ from ...extra.data.utils.descriptorsets import (
     ProDec,
     ProteinDescriptorSet,
 )
-from .utils.datasplitters import LeaveTargetsOut, PCMSplit, TemporalPerTarget
+from qsprpred.extra.data.sampling.datasplitters import LeaveTargetsOut, PCMSplit, TemporalPerTarget
 
 
 class DataSetsMixInExtras(DataSetsMixIn):

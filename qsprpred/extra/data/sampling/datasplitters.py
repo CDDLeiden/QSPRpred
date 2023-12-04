@@ -7,10 +7,10 @@ from typing import Iterable
 
 import numpy as np
 
-from ....data.tables.qspr import QSPRDataset
-from ....tasks import TargetProperty
-from ....data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
-from ..data import PCMDataSet
+from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.tasks import TargetProperty
+from qsprpred.data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
+from qsprpred.extra.data.data import PCMDataSet
 
 
 class PCMSplit(DataSplit):

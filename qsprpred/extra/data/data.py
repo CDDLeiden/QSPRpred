@@ -10,7 +10,7 @@ from ...data.descriptors.calculators import (
     MoleculeDescriptorsCalculator,
 )
 from ...logs import logger
-from .utils.descriptorcalculator import ProteinDescriptorCalculator
+from qsprpred.extra.data.descriptors.descriptorcalculator import ProteinDescriptorCalculator
 from ...utils.serialization import function_as_string, function_from_string
 
 

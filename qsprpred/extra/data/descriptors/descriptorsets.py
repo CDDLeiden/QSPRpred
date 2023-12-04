@@ -21,7 +21,7 @@ from PaDEL_pywrapper import descriptors as PaDEL_descriptors
 from rdkit import Chem
 from Signature_pywrapper import Signature as Signature_calculator
 
-from ....data.descriptors.sets import DescriptorSet, MoleculeDescriptorSet
+from qsprpred.data.descriptors.sets import DescriptorSet, MoleculeDescriptorSet
 
 
 class Mordred(MoleculeDescriptorSet):
