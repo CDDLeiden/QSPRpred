@@ -22,7 +22,7 @@ class CrossValAssessor(ModelAssessor):
         monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
             is used
         mode (EarlyStoppingMode): mode to use for early stopping
-        round (int): number of decimal places to round predictions to (default: 3)
+        round (int): number of decimal places to round predictions to (default: 4)
     """
     def __init__(
         self,
@@ -31,7 +31,7 @@ class CrossValAssessor(ModelAssessor):
         monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
-        round: int = 3,
+        round: int = 5,
     ):
         super().__init__(scoring, monitor, use_proba, mode)
         self.split = split
@@ -144,7 +144,7 @@ class TestSetAssessor(ModelAssessor):
         monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
-        round: int = 3,
+        round: int = 5,
     ):
         super().__init__(scoring, monitor, use_proba, mode)
         if monitor is None:

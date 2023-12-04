@@ -16,19 +16,200 @@ from sklearn.metrics import (
     matthews_corrcoef,
     precision_score,
     recall_score,
+    roc_auc_score
 )
 
 from ..metrics.calibration import calibration_error
 from ..models.interfaces import QSPRModel
 from ..models.tasks import ModelTasks
 from ..plotting.interfaces import ModelPlot
+import re
+from copy import deepcopy
+import seaborn as sns
 
 
 class ClassifierPlot(ModelPlot, ABC):
     """Base class for plots of classification models."""
     def getSupportedTasks(self) -> List[ModelTasks]:
         """Return a list of tasks supported by this plotter."""
-        return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
+        return [ModelTasks.SINGLECLASS, ModelTasks.MULTICLASS, ModelTasks.MULTITASK_SINGLECLASS, ModelTasks.MULTITASK_MULTICLASS]
+
+    def prepareAssessment(self, assessment_df: pd.DataFrame) -> pd.DataFrame:
+        """Prepare assessment dataframe for plotting
+
+        Args:
+            assessment_df (pd.DataFrame):
+                the assessment dataframe containing the experimental and predicted
+                values for each property. The dataframe should have the following
+                columns:
+                QSPRID, Fold (opt.), <property_name>_<suffixes>_<Label/Prediction/ProbabilityClass_X>
+
+        Returns:
+            pd.DataFrame:
+                The dataframe containing the assessment results,
+                columns: QSPRID, Fold, Property, Label, Prediction, Class, Set
+        """
+        # change all property columns into one column
+        id_vars = ["QSPRID", "Fold"] if "Fold" in assessment_df.columns else ["QSPRID"]
+        df = assessment_df.melt(id_vars=id_vars)
+        # split the variable (<property_name>_<suffixes>_<Label/Prediction/ProbabilityClass_X>) column
+        # into the property name and the type (Label or Prediction or ProbabilityClass_X)
+        pattern = re.compile(
+            r"^(?P<Property>.*?)_(?P<type>Label|Prediction|ProbabilityClass_\d+)$"
+            )
+        df[["Property", "type"]] = df["variable"].apply(lambda x: pd.Series(pattern.match(x).groupdict()))
+        df.drop("variable", axis=1, inplace=True)
+        # pivot the dataframe so that Label and Prediction are separate columns
+        df = df.pivot_table(
+            index=[*id_vars, "Property"], columns="type", values="value"
+        )
+        df.reset_index(inplace=True)
+        df.columns.name = None
+        df["Label"] = df["Label"].astype(int)
+        df["Prediction"] = df["Prediction"].astype(int)
+        # Add Fold column if it doesn't exist (for independent test set)
+        if "Fold" not in df.columns:
+            df["Fold"] = "Independent Test"
+            df["Set"] = "Independent Test"
+        else:
+            df["Set"] = "Cross Validation"
+        return df
+
+    def prepareClassificationResults(
+        self
+    ) -> pd.DataFrame:
+        """Prepare classification results dataframe for plotting.
+
+        Returns:
+            pd.DataFrame:
+                the dataframe containing the classficiation results,
+                columns: Model, QSPRID, Fold, Property, Label, Prediction, Set
+        """
+        model_results = {}
+        for m, model in enumerate(self.models):
+            # Read in and prepare the cross-validation and independent test set results
+            df_cv = self.prepareAssessment(pd.read_table(self.cvPaths[model]))
+            df_ind = self.prepareAssessment(pd.read_table(self.indPaths[model]))
+            # concatenate the cross-validation and independent test set results
+            df = pd.concat([df_cv, df_ind])
+            print(model.name)
+            model_results[model.name] = df
+        # concatenate the results from all models and add the model name as a column
+        df = (
+            pd.concat(
+                model_results.values(), keys=model_results.keys(), names=["Model"]
+            ).reset_index(level=1, drop=True).reset_index()
+        )
+
+        self.results = df
+        return df
+
+    def getSummary(self):
+        """Get summary statistics for classification results."""
+        if not hasattr(self, "results"):
+            self.prepareClassificationResults()
+
+        df = deepcopy(self.results)
+
+        # make per class summary
+        # get the number of classes
+        n_classes = df["Label"].nunique()
+        summary_list = {}
+        for class_n in range(n_classes):
+            summary_list[class_n] = (
+                df.groupby(["Model", "Fold", "Property"]).apply(
+                    lambda x: pd.Series(
+                        {
+                            "Precision": precision_score(x.Label, x.Prediction, average=None)[class_n],
+                            "Recall": recall_score(x.Label, x.Prediction, average=None)[class_n],
+                            "F1": f1_score(x.Label, x.Prediction, average=None)[class_n],
+                            "roc_auc_ovr": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average=None)[class_n],
+                        }
+                    )
+                )
+            ).reset_index()
+            summary_list[class_n]["Class"] = class_n
+
+        summary_list["Macro"] = (
+            df.groupby(["Model", "Fold", "Property"]).apply(
+                lambda x: pd.Series(
+                    {
+                        "Precision": precision_score(x.Label, x.Prediction, average="macro"),
+                        "Recall": recall_score(x.Label, x.Prediction, average="macro"),
+                        "F1": f1_score(x.Label, x.Prediction, average="macro"),
+                        "roc_auc_ovr": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average="macro"),
+                        "roc_auc_ovo": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovo", average="macro"),
+                    }
+                )
+            )
+        ).reset_index()
+        summary_list["Macro"]["Class"] = "Macro"
+
+        summary_list["Micro"] = (
+            df.groupby(["Model", "Fold", "Property"]).apply(
+                lambda x: pd.Series(
+                    {
+                        "Precision": precision_score(x.Label, x.Prediction, average="micro"),
+                        "Recall": recall_score(x.Label, x.Prediction, average="micro"),
+                        "F1": f1_score(x.Label, x.Prediction, average="micro"),
+                        "roc_auc_ovr": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average="micro"),
+                    }
+                )
+            )
+        ).reset_index()
+        summary_list["Micro"]["Class"] = "Micro"
+
+        summary_list["Weighted"] = (
+            df.groupby(["Model", "Fold", "Property"]).apply(
+                lambda x: pd.Series(
+                    {
+                        "Precision": precision_score(x.Label, x.Prediction, average="weighted"),
+                        "Recall": recall_score(x.Label, x.Prediction, average="weighted"),
+                        "F1": f1_score(x.Label, x.Prediction, average="weighted"),
+                        "roc_auc_ovr": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average="weighted"),
+                        "roc_auc_ovo": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovo", average="weighted"),
+                    }
+                )
+            )
+        ).reset_index()
+        summary_list["Weighted"]["Class"] = "Weighted"
+
+        summary_list["All"] = (
+            df.groupby(["Model", "Fold", "Property"]).apply(
+                lambda x: pd.Series(
+                    {
+                        "Calibration Error": calibration_error(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]]),
+                        "Accuracy": accuracy_score(x.Label, x.Prediction),
+                        "MCC": matthews_corrcoef(x.Label, x.Prediction),
+                    }
+                )
+            )
+        ).reset_index()
+        summary_list["All"]["Class"] = "All"
+
+        df_summary = pd.concat(summary_list.values(), ignore_index=True)
+
+        # df_summary = (
+        #     df.groupby(["Model", "Fold", "Property"]).apply(
+        #         lambda x: pd.Series(
+        #             {
+        #                 "Accuracy": accuracy_score(x.Label, x.Prediction),
+        #                 "Precision": precision_score(x.Label, x.Prediction),
+        #                 "Recall": recall_score(x.Label, x.Prediction),
+        #                 "F1": f1_score(x.Label, x.Prediction),
+        #                 "MCC": matthews_corrcoef(x.Label, x.Prediction),
+        #                 "Calibration Error": calibration_error(x.Label, x.ProbabilityClass_1),
+        #                 "roc_auc": roc_auc_score(x.Label, x.ProbabilityClass_1)
+        #             }
+        #         )
+        #     )
+        # ).reset_index()
+        df_summary["Set"] = df_summary["Fold"].apply(
+            lambda x: "Independent Test"
+            if x == "Independent Test" else "Cross Validation"
+        )
+        self.summary = df_summary
+        return df_summary
 
 
 class ROCPlot(ClassifierPlot):
@@ -541,93 +722,114 @@ class MetricsPlot(ClassifierPlot):
             df (pd.DataFrame):
                 A dataframe containing the summary data generated.
         """
-        summary = {"Metric": [], "Model": [], "TestSet": [], "Value": []}
-        if property_name is None:
-            property_name = self.models[0].targetProperties[0].name
-        # create the summary data
-        for model in self.models:
-            df = pd.read_table(self.cvPaths[model])
-            # cross-validation
-            for fold in df.Fold.unique():
-                y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-                y_pred_values = [1 if x > self.decision else 0 for x in y_pred]
-                y_true = df[f"{property_name}_Label"][df.Fold == fold]
-                for metric in self.metrics:
-                    val = metric(y_true, y_pred_values)
-                    summary["Metric"].append(metric.__name__)
-                    summary["Model"].append(self.modelNames[model])
-                    summary["TestSet"].append(f"CV{fold + 1}")
-                    summary["Value"].append(val)
-            # independent test set
-            df = pd.read_table(self.indPaths[model])
-            y_pred = df[f"{property_name}_ProbabilityClass_1"]
-            th = 0.5
-            y_pred_values = [1 if x > th else 0 for x in y_pred]
-            y_true = df[f"{property_name}_Label"]
-            for metric in self.metrics:
-                val = metric(y_true, y_pred_values)
-                summary["Metric"].append(metric.__name__)
-                summary["Model"].append(self.modelNames[model])
-                summary["TestSet"].append("IND")
-                summary["Value"].append(val)
-        # create the summary dataframe and save it to a file if required
-        df_summary = pd.DataFrame(summary)
-        if save:
-            df_summary.to_csv(
-                os.path.join(out_dir, f"{filename_prefix}_summary.tsv"),
-                sep="\t",
-                index=False,
-                header=True,
-            )
-        # create the plots for each metric
-        figures = []
-        for metric in df_summary.Metric.unique():
-            # get the data for the metric
-            df_metric = df_summary[df_summary.Metric == metric]
-            cv_avg = (
-                df_metric[df_metric.TestSet != "IND"][[
-                    "Model", "Value"
-                ]].groupby("Model").aggregate(np.mean)
-            )
-            cv_std = (
-                df_metric[df_metric.TestSet != "IND"][[
-                    "Model", "Value"
-                ]].groupby("Model").aggregate(np.std)
-            )
-            ind_vals = (
-                df_metric[df_metric.TestSet == "IND"][[
-                    "Model", "Value"
-                ]].groupby("Model").aggregate(np.sum)
-            )
-            # plot the data
-            models = cv_avg.index
-            x = np.arange(len(models))  # the label locations
-            width = 0.35  # the width of the bars
-            fig, ax = plt.subplots(figsize=(7, 10))
-            ax.bar(
-                x - width / 2,
-                cv_avg.Value,
-                width,
-                label="CV",
-                yerr=cv_std.Value,
-                ecolor="black",
-                capsize=5,
-            )
-            ax.bar(x + width / 2, ind_vals.Value, width, label="Test")
-            # Add some text for labels, title and custom x-axis tick labels, etc.
-            ax.set_ylabel(metric)
-            ax.set_title(f"{metric} by Model and Test Set")
-            ax.set_xticks(x, models)
-            ax.legend()
-            fig.tight_layout()
-            plt.xticks(rotation=75)
-            plt.ylim([0, 1.3])
-            plt.subplots_adjust(bottom=0.4)
-            plt.axhline(y=1.0, color="grey", linestyle="-", alpha=0.3)
-            if save:
-                plt.savefig(os.path.join(out_dir, f"{filename_prefix}_{metric}.png"))
-            if show:
-                plt.show()
-                plt.clf()
-            figures.append((fig, ax))
-        return figures, df_summary
+        # prepare the dataframe for plotting
+        df = self.prepareClassificationResults()
+
+        if not hasattr(self, "summary"):
+            self.getSummary()
+
+        # plot the results
+        sns.catplot(
+            self.summary,
+            x="Class",
+            y="Precision",
+            hue="Set",
+            col="Property",
+            row="Model",
+            kind="bar",
+            margin_titles=True,
+            sharex=False,
+            sharey=False,
+        )
+        #g.map(sns.barplot, "Class", "Precision", hue="Set")
+        plt.show()
+        # summary = {"Metric": [], "Model": [], "TestSet": [], "Value": []}
+        # if property_name is None:
+        #     property_name = self.models[0].targetProperties[0].name
+        # # create the summary data
+        # for model in self.models:
+        #     df = pd.read_table(self.cvPaths[model])
+        #     # cross-validation
+        #     for fold in df.Fold.unique():
+        #         y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
+        #         y_pred_values = [1 if x > self.decision else 0 for x in y_pred]
+        #         y_true = df[f"{property_name}_Label"][df.Fold == fold]
+        #         for metric in self.metrics:
+        #             val = metric(y_true, y_pred_values)
+        #             summary["Metric"].append(metric.__name__)
+        #             summary["Model"].append(self.modelNames[model])
+        #             summary["TestSet"].append(f"CV{fold + 1}")
+        #             summary["Value"].append(val)
+        #     # independent test set
+        #     df = pd.read_table(self.indPaths[model])
+        #     y_pred = df[f"{property_name}_ProbabilityClass_1"]
+        #     th = 0.5
+        #     y_pred_values = [1 if x > th else 0 for x in y_pred]
+        #     y_true = df[f"{property_name}_Label"]
+        #     for metric in self.metrics:
+        #         val = metric(y_true, y_pred_values)
+        #         summary["Metric"].append(metric.__name__)
+        #         summary["Model"].append(self.modelNames[model])
+        #         summary["TestSet"].append("IND")
+        #         summary["Value"].append(val)
+        # # create the summary dataframe and save it to a file if required
+        # df_summary = pd.DataFrame(summary)
+        # if save:
+        #     df_summary.to_csv(
+        #         os.path.join(out_dir, f"{filename_prefix}_summary.tsv"),
+        #         sep="\t",
+        #         index=False,
+        #         header=True,
+        #     )
+        # # create the plots for each metric
+        # figures = []
+        # for metric in df_summary.Metric.unique():
+        #     # get the data for the metric
+        #     df_metric = df_summary[df_summary.Metric == metric]
+        #     cv_avg = (
+        #         df_metric[df_metric.TestSet != "IND"][[
+        #             "Model", "Value"
+        #         ]].groupby("Model").aggregate(np.mean)
+        #     )
+        #     cv_std = (
+        #         df_metric[df_metric.TestSet != "IND"][[
+        #             "Model", "Value"
+        #         ]].groupby("Model").aggregate(np.std)
+        #     )
+        #     ind_vals = (
+        #         df_metric[df_metric.TestSet == "IND"][[
+        #             "Model", "Value"
+        #         ]].groupby("Model").aggregate(np.sum)
+        #     )
+        #     # plot the data
+        #     models = cv_avg.index
+        #     x = np.arange(len(models))  # the label locations
+        #     width = 0.35  # the width of the bars
+        #     fig, ax = plt.subplots(figsize=(7, 10))
+        #     ax.bar(
+        #         x - width / 2,
+        #         cv_avg.Value,
+        #         width,
+        #         label="CV",
+        #         yerr=cv_std.Value,
+        #         ecolor="black",
+        #         capsize=5,
+        #     )
+        #     ax.bar(x + width / 2, ind_vals.Value, width, label="Test")
+        #     # Add some text for labels, title and custom x-axis tick labels, etc.
+        #     ax.set_ylabel(metric)
+        #     ax.set_title(f"{metric} by Model and Test Set")
+        #     ax.set_xticks(x, models)
+        #     ax.legend()
+        #     fig.tight_layout()
+        #     plt.xticks(rotation=75)
+        #     plt.ylim([0, 1.3])
+        #     plt.subplots_adjust(bottom=0.4)
+        #     plt.axhline(y=1.0, color="grey", linestyle="-", alpha=0.3)
+        #     if save:
+        #         plt.savefig(os.path.join(out_dir, f"{filename_prefix}_{metric}.png"))
+        #     if show:
+        #         plt.show()
+        #         plt.clf()
+        #     figures.append((fig, ax))
+        # return figures, df_summary
