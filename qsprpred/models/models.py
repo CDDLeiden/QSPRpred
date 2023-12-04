@@ -265,6 +265,7 @@ class QSPRModel(JSONSerializable, ABC):
             )
         self.randomState = new_random_state
         constructor_params = [
+            # FIXME, this does not always work (i.e for XGBoost)
             name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
         ]
         if "random_state" in constructor_params:
