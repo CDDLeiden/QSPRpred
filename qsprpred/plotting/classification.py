@@ -106,12 +106,17 @@ class ClassifierPlot(ModelPlot, ABC):
 
     def calculateMultiClassMetrics(self, df, average_type, n_classes):
         """Calculate metrics for a given dataframe."""
+        # check if ProbabilityClass_X columns exist
+        proba = all([f"ProbabilityClass_{i}" in df.columns for i in range(n_classes)])
+
         if average_type == "All":
-            return pd.Series({
-                "Calibration Error": calibration_error(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]]),
-                "Accuracy": accuracy_score(df.Label, df.Prediction),
-                "MCC": matthews_corrcoef(df.Label, df.Prediction),
-            })
+            metrics = {
+                "accuracy_score": accuracy_score(df.Label, df.Prediction),
+                "matthews_corrcoef": matthews_corrcoef(df.Label, df.Prediction),
+            }
+            if proba:
+                metrics["calibration_error"] = calibration_error(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]])
+            return pd.Series(metrics)
 
         # check if average type is int (i.e. class number, so we can calculate metrics for a single class)
         if isinstance(average_type, int):
@@ -119,11 +124,12 @@ class ClassifierPlot(ModelPlot, ABC):
             average_type = None
 
         metrics = {
-            "Precision": precision_score(df.Label, df.Prediction, average=average_type),
-            "Recall": recall_score(df.Label, df.Prediction, average=average_type),
-            "F1": f1_score(df.Label, df.Prediction, average=average_type),
-            "roc_auc_ovr": roc_auc_score(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average=average_type),
+            "precision_score": precision_score(df.Label, df.Prediction, average=average_type),
+            "recall_score": recall_score(df.Label, df.Prediction, average=average_type),
+            "f1_score": f1_score(df.Label, df.Prediction, average=average_type),
         }
+        if proba:
+            metrics["roc_auc_ovo"] = roc_auc_score(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average=average_type)
 
         # FIXME: metrics are only returned for class "class_num", but calculated for all classes
         # as returning a list of metrics for each class gives a dataframe with lists as values
@@ -132,25 +138,30 @@ class ClassifierPlot(ModelPlot, ABC):
             metrics = {k: v[class_num] for k, v in metrics.items()}
 
         # Conditionally include roc_auc_ovo for non-micro averages
-        if average_type != "micro" and average_type is not None:
+        if average_type != "micro" and average_type is not None and proba:
             metrics["roc_auc_ovo"] = roc_auc_score(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovo", average=average_type)
 
         return pd.Series(metrics)
 
     def calculateSingleClassMetrics(self, df):
-        return (
-            pd.Series(
-                    {
-                        "Accuracy": accuracy_score(df.Label, df.Prediction),
-                        "Precision": precision_score(df.Label, df.Prediction),
-                        "Recall": recall_score(df.Label, df.Prediction),
-                        "F1": f1_score(df.Label, df.Prediction),
-                        "MCC": matthews_corrcoef(df.Label, df.Prediction),
-                        "Calibration Error": calibration_error(df.Label, df.ProbabilityClass_1),
-                        "roc_auc": roc_auc_score(df.Label, df.ProbabilityClass_1)
-                    }
-                )
-            )
+        """Calculate metrics for a given dataframe."""
+
+        # check if ProbabilityClass_1 column exists
+        proba = "ProbabilityClass_1" in df.columns
+
+        metrics = {
+            "accuracy_score": accuracy_score(df.Label, df.Prediction),
+            "precision_score": precision_score(df.Label, df.Prediction),
+            "recall_score": recall_score(df.Label, df.Prediction),
+            "f1_score": f1_score(df.Label, df.Prediction),
+            "matthews_corrcoef": matthews_corrcoef(df.Label, df.Prediction),
+        }
+
+        if proba:
+            metrics["calibration_error"] = calibration_error(df.Label, df.ProbabilityClass_1)
+            metrics["roc_auc_score"] = roc_auc_score(df.Label, df.ProbabilityClass_1)
+
+        return pd.Series(metrics)
 
     def getSummary(self):
         """Get summary statistics for classification results."""
@@ -652,13 +663,15 @@ class MetricsPlot(ClassifierPlot):
 
     Attributes:
         models (list): A list of QSPRModel objects to plot the data from.
-        metrics (list): A list of metrics to plot.
+        metrics (list): A list of metrics to plot, choose from:
+            f1_score, matthews_corrcoef, precision_score, recall_score,
+            accuracy_score, roc_auc, roc_auc_ovr, roc_auc_ovo and calibration_error
         decision (float): The decision threshold to use for the metrics.
     """
     def __init__(
         self,
         models: List[QSPRModel],
-        metrics: List[callable] = (
+        metrics: List[str] = (
             f1_score,
             matthews_corrcoef,
             precision_score,
