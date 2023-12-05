@@ -104,6 +104,54 @@ class ClassifierPlot(ModelPlot, ABC):
         self.results = df
         return df
 
+    def calculateMultiClassMetrics(self, df, average_type, n_classes):
+        """Calculate metrics for a given dataframe."""
+        if average_type == "All":
+            return pd.Series({
+                "Calibration Error": calibration_error(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]]),
+                "Accuracy": accuracy_score(df.Label, df.Prediction),
+                "MCC": matthews_corrcoef(df.Label, df.Prediction),
+            })
+
+        # check if average type is int (i.e. class number, so we can calculate metrics for a single class)
+        if isinstance(average_type, int):
+            class_num = average_type
+            average_type = None
+
+        metrics = {
+            "Precision": precision_score(df.Label, df.Prediction, average=average_type),
+            "Recall": recall_score(df.Label, df.Prediction, average=average_type),
+            "F1": f1_score(df.Label, df.Prediction, average=average_type),
+            "roc_auc_ovr": roc_auc_score(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average=average_type),
+        }
+
+        # FIXME: metrics are only returned for class "class_num", but calculated for all classes
+        # as returning a list of metrics for each class gives a dataframe with lists as values
+        # which is difficult to explode. Need to find a better way to do this.
+        if average_type is None:
+            metrics = {k: v[class_num] for k, v in metrics.items()}
+
+        # Conditionally include roc_auc_ovo for non-micro averages
+        if average_type != "micro" and average_type is not None:
+            metrics["roc_auc_ovo"] = roc_auc_score(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovo", average=average_type)
+
+        return pd.Series(metrics)
+
+    def calculateSingleClassMetrics(self, df):
+        return (
+            pd.Series(
+                    {
+                        "Accuracy": accuracy_score(df.Label, df.Prediction),
+                        "Precision": precision_score(df.Label, df.Prediction),
+                        "Recall": recall_score(df.Label, df.Prediction),
+                        "F1": f1_score(df.Label, df.Prediction),
+                        "MCC": matthews_corrcoef(df.Label, df.Prediction),
+                        "Calibration Error": calibration_error(df.Label, df.ProbabilityClass_1),
+                        "roc_auc": roc_auc_score(df.Label, df.ProbabilityClass_1)
+                    }
+                )
+            )
+
     def getSummary(self):
         """Get summary statistics for classification results."""
         if not hasattr(self, "results"):
@@ -111,99 +159,37 @@ class ClassifierPlot(ModelPlot, ABC):
 
         df = deepcopy(self.results)
 
-        # make per class summary
-        # get the number of classes
-        n_classes = df["Label"].nunique()
         summary_list = {}
-        for class_n in range(n_classes):
-            summary_list[class_n] = (
-                df.groupby(["Model", "Fold", "Property"]).apply(
-                    lambda x: pd.Series(
-                        {
-                            "Precision": precision_score(x.Label, x.Prediction, average=None)[class_n],
-                            "Recall": recall_score(x.Label, x.Prediction, average=None)[class_n],
-                            "F1": f1_score(x.Label, x.Prediction, average=None)[class_n],
-                            "roc_auc_ovr": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average=None)[class_n],
-                        }
-                    )
-                )
-            ).reset_index()
-            summary_list[class_n]["Class"] = class_n
 
-        summary_list["Macro"] = (
-            df.groupby(["Model", "Fold", "Property"]).apply(
-                lambda x: pd.Series(
-                    {
-                        "Precision": precision_score(x.Label, x.Prediction, average="macro"),
-                        "Recall": recall_score(x.Label, x.Prediction, average="macro"),
-                        "F1": f1_score(x.Label, x.Prediction, average="macro"),
-                        "roc_auc_ovr": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average="macro"),
-                        "roc_auc_ovo": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovo", average="macro"),
-                    }
-                )
-            )
-        ).reset_index()
-        summary_list["Macro"]["Class"] = "Macro"
+        # make summary for each model and property
+        for model_name in df.Model.unique():
+            for property_name in df.Property.unique():
+                df_subset = df[(df.Model == model_name) & (df.Property == property_name)]
 
-        summary_list["Micro"] = (
-            df.groupby(["Model", "Fold", "Property"]).apply(
-                lambda x: pd.Series(
-                    {
-                        "Precision": precision_score(x.Label, x.Prediction, average="micro"),
-                        "Recall": recall_score(x.Label, x.Prediction, average="micro"),
-                        "F1": f1_score(x.Label, x.Prediction, average="micro"),
-                        "roc_auc_ovr": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average="micro"),
-                    }
-                )
-            )
-        ).reset_index()
-        summary_list["Micro"]["Class"] = "Micro"
+                # get the number of classes
+                n_classes = df_subset["Label"].nunique()
 
-        summary_list["Weighted"] = (
-            df.groupby(["Model", "Fold", "Property"]).apply(
-                lambda x: pd.Series(
-                    {
-                        "Precision": precision_score(x.Label, x.Prediction, average="weighted"),
-                        "Recall": recall_score(x.Label, x.Prediction, average="weighted"),
-                        "F1": f1_score(x.Label, x.Prediction, average="weighted"),
-                        "roc_auc_ovr": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average="weighted"),
-                        "roc_auc_ovo": roc_auc_score(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovo", average="weighted"),
-                    }
-                )
-            )
-        ).reset_index()
-        summary_list["Weighted"]["Class"] = "Weighted"
+                # calculate metrics for binary and multi-class properties
+                if n_classes == 2:
+                    summary_list[f"{model_name}_{property_name}_Binary"] = (df_subset.groupby(["Model", "Fold", "Property"]).apply(
+                        lambda x: self.calculateSingleClassMetrics(x)
+                    )).reset_index()
+                    summary_list[f"{model_name}_{property_name}_Binary"]["Class"] = "Binary"
+                else:
+                    # calculate metrics for each class, average type and non-average type metrics
+                    class_list = [*["macro", "micro", "weighted", "All"], *list(range(n_classes))]
 
-        summary_list["All"] = (
-            df.groupby(["Model", "Fold", "Property"]).apply(
-                lambda x: pd.Series(
-                    {
-                        "Calibration Error": calibration_error(x.Label, x[[f"ProbabilityClass_{i}" for i in range(n_classes)]]),
-                        "Accuracy": accuracy_score(x.Label, x.Prediction),
-                        "MCC": matthews_corrcoef(x.Label, x.Prediction),
-                    }
-                )
-            )
-        ).reset_index()
-        summary_list["All"]["Class"] = "All"
+                    for class_type in class_list:
+                        summary_list[f"{model_name}_{property_name}_{class_type}"] = (
+                            df_subset.groupby(["Model", "Fold", "Property"]).apply(
+                                lambda x: self.calculateMultiClassMetrics(x, class_type, n_classes)
+                            )
+                        ).reset_index()
+                        summary_list[f"{model_name}_{property_name}_{class_type}"]["Class"] = class_type
 
         df_summary = pd.concat(summary_list.values(), ignore_index=True)
 
-        # df_summary = (
-        #     df.groupby(["Model", "Fold", "Property"]).apply(
-        #         lambda x: pd.Series(
-        #             {
-        #                 "Accuracy": accuracy_score(x.Label, x.Prediction),
-        #                 "Precision": precision_score(x.Label, x.Prediction),
-        #                 "Recall": recall_score(x.Label, x.Prediction),
-        #                 "F1": f1_score(x.Label, x.Prediction),
-        #                 "MCC": matthews_corrcoef(x.Label, x.Prediction),
-        #                 "Calibration Error": calibration_error(x.Label, x.ProbabilityClass_1),
-        #                 "roc_auc": roc_auc_score(x.Label, x.ProbabilityClass_1)
-        #             }
-        #         )
-        #     )
-        # ).reset_index()
+
         df_summary["Set"] = df_summary["Fold"].apply(
             lambda x: "Independent Test"
             if x == "Independent Test" else "Cross Validation"
