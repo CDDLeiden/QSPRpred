@@ -5,20 +5,18 @@ from typing import Type
 from unittest import TestCase
 
 import pandas as pd
-from matplotlib.axes import SubplotBase
+import seaborn as sns
 from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import roc_auc_score
 
 from ..data.data import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.sklearn import SklearnModel
 from ..models.tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
-from ..models.metrics import SklearnMetrics
-from ..plotting.classification import MetricsPlot, ROCPlot
+from ..plotting.classification import MetricsPlot, ROCPlot, ConfusionMatrixPlot
 from ..plotting.regression import CorrelationPlot
-
+from parameterized import parameterized
 
 class ModelRetriever(ModelDataSetsMixIn):
     def getModel(
@@ -82,34 +80,40 @@ class ROCPlotTest(ModelRetriever, TestCase):
 
 class MetricsPlotTest(ModelRetriever, TestCase):
     """Test metrics plotting class."""
-    def testPlotSingle(self):
-        """Test plotting metrics for single task."""
+
+    @parameterized.expand([(task, task, th)
+            for task, th in (
+                ("binary", [6.5]),
+                ("multi_class", [0, 2, 10, 1100]),
+            )])
+    def testPlotSingle(self, _, task, th):
+        """Test plotting metrics for single task single class and multi-class."""
         dataset = self.createLargeTestDataSet(
-            "test_metrics_plot_single_data",
+            f"test_metrics_plot_single_{task}_data",
             target_props=[{
                 "name": "CL",
-                "task": TargetTasks.SINGLECLASS,
-                "th": [6.5]
+                "task": TargetTasks.SINGLECLASS if task == "binary" else TargetTasks.MULTICLASS,
+                "th": th
             }],
             preparation_settings=self.getDefaultPrep(),
         )
-        model = self.getModel(dataset, "test_metrics_plot_single_model")
-        score_func = "roc_auc"
+        model = self.getModel(dataset, f"test_metrics_plot_single_{task}_model")
+        score_func = "roc_auc_ovr"
         CrossValAssessor(scoring = score_func)(model)
         TestSetAssessor(scoring = score_func)(model)
         model.save()
         # generate metrics plot and associated files
         plt = MetricsPlot([model])
-        figures, summary = plt.make("CL_class", out_dir=model.outDir)
-        for fig, ax in figures:
-            self.assertIsInstance(fig, Figure)
+        figures, summary = plt.make("CL_class")
+        for g in figures:
+            self.assertIsInstance(g, sns.FacetGrid)
         self.assertIsInstance(summary, pd.DataFrame)
-        self.assertTrue(os.path.exists(f"{model.outDir}/metrics_summary.tsv"))
-        self.assertTrue(os.path.exists(f"{model.outDir}/metrics_f1_score.png"))
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_precision.png"))
 
 
 class CorrPlotTest(ModelRetriever, TestCase):
     """Test correlation plotting class."""
+
     def testPlotSingle(self):
         """Test plotting correlation for single task."""
         dataset = self.createLargeTestDataSet(
@@ -124,8 +128,46 @@ class CorrPlotTest(ModelRetriever, TestCase):
         model.save()
         # generate metrics plot and associated files
         plt = CorrelationPlot([model])
-        axes, summary = plt.make("CL", out_dir=model.outDir)
+        g, summary = plt.make("CL")
         self.assertIsInstance(summary, pd.DataFrame)
+        # assert g is sns.FacetGrid
+        self.assertIsInstance(g, sns.FacetGrid)
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_correlation.png"))
+
+class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
+    """Test confusion matrix plotting class."""
+
+    @parameterized.expand([(task, task, th)
+    for task, th in (
+        ("binary", [6.5]),
+        ("multi_class", [0, 2, 10, 1100]),
+    )])
+    def testPlotSingle(self, _, task, th):
+        """Test plotting confusion matrix for single task."""
+        dataset = self.createLargeTestDataSet(
+            f"test_cm_plot_single_{task}_data",
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.SINGLECLASS if task == "binary" else TargetTasks.MULTICLASS,
+                "th": th
+            }],
+            preparation_settings=self.getDefaultPrep(),
+        )
+        model = self.getModel(dataset, f"test_cm_plot_single_{task}_model")
+        score_func = "roc_auc_ovr"
+        CrossValAssessor(scoring = score_func)(model)
+        TestSetAssessor(scoring = score_func)(model)
+        model.save()
+        # make plots
+        plt = ConfusionMatrixPlot([model])
+        axes, cm_dict = plt.make("CL_class")
+        # assert all figures are sns.FacetGrid
         for ax in axes:
-            self.assertIsInstance(ax, SubplotBase)
-        self.assertTrue(os.path.exists(f"{model.outDir}/corrplot.png"))
+            self.assertIsInstance(ax, Figure)
+        self.assertIsInstance(cm_dict, dict)
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_CL_class_0.0_confusion_matrix.png"))
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_CL_class_1.0_confusion_matrix.png"))
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_CL_class_2.0_confusion_matrix.png"))
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_CL_class_3.0_confusion_matrix.png"))
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_CL_class_4.0_confusion_matrix.png"))
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_CL_class_Independent Test_confusion_matrix.png"))
