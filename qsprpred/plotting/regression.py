@@ -148,21 +148,23 @@ class CorrelationPlot(RegressionPlot):
             row="Model",
             hue="Set",
             margin_titles=True,
+            height=4,
             sharex=False,
             sharey=False,
         )
-        g.map(sns.scatterplot, "Label", "Prediction", alpha=0.7)
+        g.map(sns.scatterplot, "Label", "Prediction", s=7, edgecolor="none")
         # set x and y range to be the same for each plot
         for ax in g.axes_dict.values():
             x_min, x_max = ax.get_xlim()
             y_min, y_max = ax.get_ylim()
             ax_min = min(x_min, y_min)
             ax_max = max(x_max, y_max)
-            ax.set_xlim(ax_min, ax_max)
-            ax.set_ylim(ax_min, ax_max)
+            pad = (ax_max - ax_min) * 0.1
+            ax.set_xlim(ax_min - pad, ax_max + pad)
+            ax.set_ylim(ax_min - pad, ax_max + pad)
             ax.set_aspect("equal", "box")
         for ax in g.axes_dict.values():
-            ax.axline((0, 0), slope=1, c=".2", ls="--", zorder=0)
+            ax.axline((0, 0), slope=1, c=".2", ls="--")
 
         g.add_legend()
 
