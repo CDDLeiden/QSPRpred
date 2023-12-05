@@ -11,7 +11,7 @@ import optuna
 import pandas as pd
 
 from .logs.utils import backup_files, enable_file_logger
-from .models.interfaces import QSPRModel
+from .models.models import QSPRModel
 
 
 def QSPRArgParser(txt=None):

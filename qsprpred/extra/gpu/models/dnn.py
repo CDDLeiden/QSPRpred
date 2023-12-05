@@ -10,15 +10,15 @@ import pandas as pd
 import torch
 from sklearn.model_selection import ShuffleSplit
 
-from ....logs import logger
-from ....data.data import QSPRDataset
-from ....data.interfaces import DataSplit
-from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS
+from .. import DEFAULT_DEVICE, DEFAULT_GPUS
+from ....data.sampling.splits import DataSplit
+from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.neural_network import STFullyConnected
+from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import FitMonitor, QSPRModel
-from ....models.monitors import BaseMonitor
-from ....models.tasks import ModelTasks
+from ....models.models import QSPRModel
+from ....models.monitors import BaseMonitor, FitMonitor
+from qsprpred.tasks import ModelTasks
 
 
 class DNNModel(QSPRModel):

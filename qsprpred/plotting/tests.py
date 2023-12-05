@@ -9,10 +9,10 @@ import seaborn as sns
 from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
-from ..data.data import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.sklearn import SklearnModel
-from ..models.tasks import TargetTasks
+from ..tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
 from ..plotting.classification import MetricsPlot, ROCPlot, ConfusionMatrixPlot
 from ..plotting.regression import CorrelationPlot

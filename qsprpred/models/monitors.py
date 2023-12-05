@@ -1,5 +1,6 @@
 import json
 import os
+from abc import ABC, abstractmethod
 from copy import deepcopy
 from typing import Any
 
@@ -8,12 +9,161 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Draw
 
-from ..data.data import QSPRDataset
-from .interfaces import HyperparameterOptimizationMonitor, QSPRModel
+from ..data.tables.qspr import QSPRDataset
+from .models import QSPRModel
+
+
+class FitMonitor(ABC):
+    """Base class for monitoring the fitting of a model."""
+    @abstractmethod
+    def onFitStart(self, model: QSPRModel):
+        """Called before the training has started.
+
+        Args:
+            model (QSPRModel): model to be fitted
+        """
+
+    @abstractmethod
+    def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
+        """Called after the training has finished.
+
+        Args:
+            estimator (Any): estimator that was fitted
+            best_epoch (int | None): index of the best epoch
+        """
+
+    @abstractmethod
+    def onEpochStart(self, epoch: int):
+        """Called before each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+        """
+
+    @abstractmethod
+    def onEpochEnd(self, epoch: int, train_loss: float, val_loss: float | None = None):
+        """Called after each epoch of the training.
+
+        Args:
+            epoch (int): index of the current epoch
+            train_loss (float): loss of the current epoch
+            val_loss (float | None): validation loss of the current epoch
+        """
+
+    @abstractmethod
+    def onBatchStart(self, batch: int):
+        """Called before each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+        """
+
+    @abstractmethod
+    def onBatchEnd(self, batch: int, loss: float):
+        """Called after each batch of the training.
+
+        Args:
+            batch (int): index of the current batch
+            loss (float): loss of the current batch
+        """
+
+
+class AssessorMonitor(FitMonitor):
+    """Base class for monitoring the assessment of a model."""
+    @abstractmethod
+    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+        """Called before the assessment has started.
+
+        Args:
+            model (QSPRModel): model to assess
+            assesment_type (str): type of assessment
+        """
+
+    @abstractmethod
+    def onAssessmentEnd(self, predictions: pd.DataFrame):
+        """Called after the assessment has finished.
+
+        Args:
+            predictions (pd.DataFrame): predictions of the assessment
+        """
+
+    @abstractmethod
+    def onFoldStart(
+        self,
+        fold: int,
+        X_train: np.array,
+        y_train: np.array,
+        X_test: np.array,
+        y_test: np.array,
+    ):
+        """Called before each fold of the assessment.
+
+        Args:
+            fold (int): index of the current fold
+            X_train (np.array): training data of the current fold
+            y_train (np.array): training targets of the current fold
+            X_test (np.array): test data of the current fold
+            y_test (np.array): test targets of the current fold
+        """
+
+    @abstractmethod
+    def onFoldEnd(
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+    ):
+        """Called after each fold of the assessment.
+
+        Args:
+            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
+                                             tuple containing the fitted estimator and
+                                             the number of epochs it was trained for
+            predictions (pd.DataFrame): predictions of the current fold
+        """
+
+
+class HyperparameterOptimizationMonitor(AssessorMonitor):
+    """Base class for monitoring the hyperparameter optimization of a model."""
+    @abstractmethod
+    def onOptimizationStart(
+        self, model: QSPRModel, config: dict, optimization_type: str
+    ):
+        """Called before the hyperparameter optimization has started.
+
+        Args:
+            model (QSPRModel): model to optimize
+            config (dict): configuration of the hyperparameter optimization
+            optimization_type (str): type of hyperparameter optimization
+        """
+
+    @abstractmethod
+    def onOptimizationEnd(self, best_score: float, best_parameters: dict):
+        """Called after the hyperparameter optimization has finished.
+
+        Args:
+            best_score (float): best score found during optimization
+            best_parameters (dict): best parameters found during optimization
+        """
+
+    @abstractmethod
+    def onIterationStart(self, params: dict):
+        """Called before each iteration of the hyperparameter optimization.
+
+        Args:
+            params (dict): parameters used for the current iteration
+        """
+
+    @abstractmethod
+    def onIterationEnd(self, score: float, scores: list[float]):
+        """Called after each iteration of the hyperparameter optimization.
+
+        Args:
+            score (float): (aggregated) score of the current iteration
+            scores (list[float]): scores of the current iteration
+                                  (e.g for cross-validation)
+        """
+
 
 class NullMonitor(HyperparameterOptimizationMonitor):
     """Monitor that does nothing."""
-
     def onFitStart(self, model: QSPRModel):
         """Called before the training has started.
 
@@ -36,9 +186,7 @@ class NullMonitor(HyperparameterOptimizationMonitor):
             epoch (int): index of the current epoch
         """
 
-    def onEpochEnd(
-        self, epoch: int, train_loss: float, val_loss: float | None = None
-    ):
+    def onEpochEnd(self, epoch: int, train_loss: float, val_loss: float | None = None):
         """Called after each epoch of the training.
 
         Args:
@@ -142,6 +290,7 @@ class NullMonitor(HyperparameterOptimizationMonitor):
                                   (e.g for cross-validation)
         """
 
+
 class ListMonitor(HyperparameterOptimizationMonitor):
     """Monitor that combines multiple monitors.
 
@@ -184,9 +333,7 @@ class ListMonitor(HyperparameterOptimizationMonitor):
         for monitor in self.monitors:
             monitor.onEpochStart(epoch)
 
-    def onEpochEnd(
-        self, epoch: int, train_loss: float, val_loss: float | None = None
-    ):
+    def onEpochEnd(self, epoch: int, train_loss: float, val_loss: float | None = None):
         """Called after each epoch of the training.
 
         Args:
@@ -311,6 +458,7 @@ class ListMonitor(HyperparameterOptimizationMonitor):
         """
         for monitor in self.monitors:
             monitor.onIterationEnd(score, scores)
+
 
 class BaseMonitor(HyperparameterOptimizationMonitor):
     """Base monitoring the fitting, training and optimization of a model.
@@ -580,6 +728,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
             "bestEpoch": self.bestEpoch,
         }
 
+
 class FileMonitor(BaseMonitor):
     def __init__(
         self,
@@ -643,8 +792,9 @@ class FileMonitor(BaseMonitor):
                 [self.scores, pd.DataFrame(self.parameters).T], axis=1
             )
             savescores.to_csv(
-                f"{self.optimizationPath}/{self.optimizationType}_scores.tsv", sep="\t",
-                index=False
+                f"{self.optimizationPath}/{self.optimizationType}_scores.tsv",
+                sep="\t",
+                index=False,
             )
 
     def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
@@ -705,6 +855,7 @@ class FileMonitor(BaseMonitor):
         if self.saveFits:
             self.fitLog.to_csv(f"{self.fitPath}/fit_log.tsv", sep="\t")
             self.batchLog.to_csv(f"{self.fitPath}/batch_log.tsv", sep="\t")
+
 
 class WandBMonitor(BaseMonitor):
     """Monitor hyperparameter optimization to weights and biases."""

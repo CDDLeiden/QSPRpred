@@ -4,7 +4,6 @@ import argparse
 import json
 import os.path
 import sys
-from copy import deepcopy
 from datetime import datetime
 
 import numpy as np
@@ -16,14 +15,14 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from .data.data import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRDataset
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.early_stopping import EarlyStoppingMode
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from .models.sklearn import QSPRModel, SklearnModel
-from .models.tasks import TargetTasks
+from qsprpred.tasks import TargetTasks
 
 
 def QSPRArgParser(txt=None):

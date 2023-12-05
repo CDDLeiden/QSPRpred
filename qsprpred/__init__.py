@@ -1,3 +1,5 @@
+from .tasks import ModelTasks, TargetTasks, TargetProperty
+
 import os
 
 from rdkit import rdBase

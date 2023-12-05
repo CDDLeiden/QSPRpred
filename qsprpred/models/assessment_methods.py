@@ -1,5 +1,6 @@
 """This module holds assessment methods for QSPRModels"""
 
+from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Callable, Iterable
 
@@ -7,11 +8,115 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from ..data.interfaces import DataSplit
+from ..data.sampling.splits import DataSplit
 from ..logs import logger
+from ..models.metrics import SklearnMetrics
 from .early_stopping import EarlyStoppingMode
-from .interfaces import AssessorMonitor, ModelAssessor, QSPRModel
-from .monitors import BaseMonitor
+from .models import QSPRModel
+from .monitors import AssessorMonitor, BaseMonitor
+
+
+class ModelAssessor(ABC):
+    """Base class for assessment methods.
+
+    Attributes:
+        scoreFunc (Metric): scoring function to use, should match the output of the
+                        evaluation method (e.g. if the evaluation methods returns
+                        class probabilities, the scoring function support class
+                        probabilities)
+        monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
+            is used
+        useProba (bool): use probabilities for classification models
+        mode (EarlyStoppingMode): early stopping mode for fitting
+    """
+    def __init__(
+        self,
+        scoring: str | Callable[[Iterable, Iterable], float],
+        monitor: AssessorMonitor | None = None,
+        use_proba: bool = True,
+        mode: EarlyStoppingMode | None = None,
+    ):
+        """Initialize the evaluation method class.
+
+        Args:
+            scoring: str | Callable[[Iterable, Iterable], float],
+            monitor (AssessorMonitor): monitor to track the evaluation
+            use_proba (bool): use probabilities for classification models
+            mode (EarlyStoppingMode): early stopping mode for fitting
+        """
+        self.monitor = monitor
+        self.useProba = use_proba
+        self.mode = mode
+        self.scoreFunc = (
+            SklearnMetrics(scoring) if isinstance(scoring, str) else scoring
+        )
+
+    @abstractmethod
+    def __call__(
+        self,
+        model: QSPRModel,
+        save: bool,
+        parameters: dict | None,
+        monitor: AssessorMonitor,
+        **kwargs,
+    ) -> list[float]:
+        """Evaluate the model.
+
+        Args:
+            model (QSPRModel): model to evaluate
+            save (bool): save predictions to file
+            parameters (dict): parameters to use for the evaluation
+            monitor (AssessorMonitor): monitor to track the evaluation, overrides
+                                       the monitor set in the constructor
+            kwargs: additional arguments for fit function of the model
+
+        Returns:
+            list[float]: scores of the model for each fold
+        """
+
+    def predictionsToDataFrame(
+        self,
+        model: QSPRModel,
+        y: np.array,
+        predictions: np.ndarray | list[np.ndarray],
+        index: pd.Series,
+        extra_columns: dict[str, np.ndarray] | None = None,
+    ) -> pd.DataFrame:
+        """Create a dataframe with true values and predictions.
+
+        Args:
+            model (QSPRModel): model to evaluate
+            y (np.array): target values
+            predictions (np.ndarray | list[np.ndarray]): predictions
+            index (pd.Series): index of the data set
+            extra_columns (dict[str, np.ndarray]): extra columns to add to the output
+        """
+        # Create dataframe with true values
+        df_out = pd.DataFrame(
+            y.values, columns=y.add_suffix("_Label").columns, index=index
+        )
+        # Add predictions to dataframe
+        for idx, prop in enumerate(model.data.targetProperties):
+            if prop.task.isClassification() and self.useProba:
+                # convert one-hot encoded predictions to class labels
+                # and add to train and test
+                df_out[f"{prop.name}_Prediction"] = np.argmax(predictions[idx], axis=1)
+                # add probability columns to train and test set
+                df_out = pd.concat(
+                    [
+                        df_out,
+                        pd.DataFrame(predictions[idx], index=index
+                                    ).add_prefix(f"{prop.name}_ProbabilityClass_"),
+                    ],
+                    axis=1,
+                )
+            else:
+                df_out[f"{prop.name}_Prediction"] = predictions[:, idx]
+        # Add extra columns to dataframe if given (such as fold indexes)
+        if extra_columns is not None:
+            for col_name, col_values in extra_columns.items():
+                df_out[col_name] = col_values
+        return df_out
 
 
 class CrossValAssessor(ModelAssessor):
