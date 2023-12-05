@@ -127,7 +127,7 @@ class CorrelationPlot(RegressionPlot):
                 whether to show the plot
             out_path (str | None):
                 path to save the plot to, e.g. "results/plot.png", if `None`, the plot
-                will not be saved to each model's output directory.
+                will be saved to each model's output directory.
 
         Returns:
             g (sns.FacetGrid):

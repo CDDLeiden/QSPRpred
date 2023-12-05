@@ -1,7 +1,7 @@
 """Plotting functions for classification models."""
 import os.path
 from abc import ABC
-from typing import Any, List
+from typing import Any, List, Literal
 
 import numpy as np
 import pandas as pd
@@ -111,7 +111,7 @@ class ClassifierPlot(ModelPlot, ABC):
 
         if average_type == "All":
             metrics = {
-                "accuracy_score": accuracy_score(df.Label, df.Prediction),
+                "accuracy": accuracy_score(df.Label, df.Prediction),
                 "matthews_corrcoef": matthews_corrcoef(df.Label, df.Prediction),
             }
             if proba:
@@ -124,12 +124,12 @@ class ClassifierPlot(ModelPlot, ABC):
             average_type = None
 
         metrics = {
-            "precision_score": precision_score(df.Label, df.Prediction, average=average_type),
-            "recall_score": recall_score(df.Label, df.Prediction, average=average_type),
-            "f1_score": f1_score(df.Label, df.Prediction, average=average_type),
+            "precision": precision_score(df.Label, df.Prediction, average=average_type),
+            "recall": recall_score(df.Label, df.Prediction, average=average_type),
+            "f1": f1_score(df.Label, df.Prediction, average=average_type),
         }
         if proba:
-            metrics["roc_auc_ovo"] = roc_auc_score(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average=average_type)
+            metrics["roc_auc_ovr"] = roc_auc_score(df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]], multi_class="ovr", average=average_type)
 
         # FIXME: metrics are only returned for class "class_num", but calculated for all classes
         # as returning a list of metrics for each class gives a dataframe with lists as values
@@ -150,16 +150,16 @@ class ClassifierPlot(ModelPlot, ABC):
         proba = "ProbabilityClass_1" in df.columns
 
         metrics = {
-            "accuracy_score": accuracy_score(df.Label, df.Prediction),
-            "precision_score": precision_score(df.Label, df.Prediction),
-            "recall_score": recall_score(df.Label, df.Prediction),
-            "f1_score": f1_score(df.Label, df.Prediction),
+            "accuracy": accuracy_score(df.Label, df.Prediction),
+            "precision": precision_score(df.Label, df.Prediction),
+            "recall": recall_score(df.Label, df.Prediction),
+            "f1": f1_score(df.Label, df.Prediction),
             "matthews_corrcoef": matthews_corrcoef(df.Label, df.Prediction),
         }
 
         if proba:
             metrics["calibration_error"] = calibration_error(df.Label, df.ProbabilityClass_1)
-            metrics["roc_auc_score"] = roc_auc_score(df.Label, df.ProbabilityClass_1)
+            metrics["roc_auc"] = roc_auc_score(df.Label, df.ProbabilityClass_1)
 
         return pd.Series(metrics)
 
@@ -656,50 +656,50 @@ class CalibrationPlot(ClassifierPlot):
 class MetricsPlot(ClassifierPlot):
     """Plot of metrics for a given model.
 
-    Includes the following metrics by default: f1_score, matthews_corrcoef,
-    precision_score, recall_score, accuracy_score, calibration_error. However, any
-    callable metric can be passed to the constructor.
-
-
     Attributes:
         models (list): A list of QSPRModel objects to plot the data from.
         metrics (list): A list of metrics to plot, choose from:
-            f1_score, matthews_corrcoef, precision_score, recall_score,
-            accuracy_score, roc_auc, roc_auc_ovr, roc_auc_ovo and calibration_error
-        decision (float): The decision threshold to use for the metrics.
+            f1, matthews_corrcoef, precision, recall, accuracy, roc_auc, roc_auc_ovr,
+            roc_auc_ovo and calibration_error
     """
     def __init__(
         self,
         models: List[QSPRModel],
-        metrics: List[str] = (
-            f1_score,
-            matthews_corrcoef,
-            precision_score,
-            recall_score,
-            accuracy_score,
-            calibration_error,
-        ),
-        decision_threshold: float = 0.5,
+        metrics: List[Literal["f1",
+            "matthews_corrcoef",
+            "precision",
+            "recall",
+            "accuracy",
+            "calibration_error",
+            "roc_auc",
+            "roc_auc_ovr",
+            "roc_auc_ovo"]] = [
+            "f1",
+            "matthews_corrcoef",
+            "precision",
+            "recall",
+            "accuracy",
+            "calibration_error",
+            "roc_auc",
+            "roc_auc_ovr",
+            "roc_auc_ovo",
+            ]
     ):
         """Initialise the metrics plot.
 
         Args:
             models (list): A list of QSPRModel objects to plot the data from.
             metrics (list): A list of metrics to plot.
-            decision_threshold (float): The decision threshold to use for the metrics.
         """
         super().__init__(models)
         self.metrics = metrics
-        self.decision = decision_threshold
 
     def make(
         self,
         save: bool = True,
         show: bool = False,
-        property_name: str | None = None,
-        filename_prefix: str = "metrics",
-        out_dir: str = ".",
-    ) -> [list[tuple[Any, Any]], pd.DataFrame]:
+        out_path: str | None = None,
+    ) -> tuple[List[sns.FacetGrid], pd.DataFrame]:
         """Make the plot for a given validation type.
 
         Args:
@@ -710,125 +710,55 @@ class MetricsPlot(ClassifierPlot):
                 Whether to save the plot to a file.
             show (bool):
                 Whether to display the plot.
-            filename_prefix (str):
-                The prefix to use for the filename.
-            out_dir (str):
-                The directory to save the plot to.
+            out_path (str | None):
+                Path to save the plots to, e.g. "results/plot.png", the plot will be
+                saved to this path with the metric name appended before the extension,
+                e.g. "results/plot_roc_auc.png". If `None`, the plots will be saved to
+                each model's output directory.
 
         Returns:
-            axes (list[plt.Axes]):
-                A list of tuple of figures and matplotlib axes objects with the plots.
-            df (pd.DataFrame):
+            figures (list[sns.FacetGrid]):
+                the seaborn FacetGrid objects used to make the plot
+            pd.DataFrame:
                 A dataframe containing the summary data generated.
         """
-        # prepare the dataframe for plotting
-        df = self.prepareClassificationResults()
-
+        # Get summary with calculated metrics
         if not hasattr(self, "summary"):
             self.getSummary()
 
-        # plot the results
-        sns.catplot(
-            self.summary,
-            x="Class",
-            y="Precision",
-            hue="Set",
-            col="Property",
-            row="Model",
-            kind="bar",
-            margin_titles=True,
-            sharex=False,
-            sharey=False,
-        )
-        #g.map(sns.barplot, "Class", "Precision", hue="Set")
-        plt.show()
-        # summary = {"Metric": [], "Model": [], "TestSet": [], "Value": []}
-        # if property_name is None:
-        #     property_name = self.models[0].targetProperties[0].name
-        # # create the summary data
-        # for model in self.models:
-        #     df = pd.read_table(self.cvPaths[model])
-        #     # cross-validation
-        #     for fold in df.Fold.unique():
-        #         y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-        #         y_pred_values = [1 if x > self.decision else 0 for x in y_pred]
-        #         y_true = df[f"{property_name}_Label"][df.Fold == fold]
-        #         for metric in self.metrics:
-        #             val = metric(y_true, y_pred_values)
-        #             summary["Metric"].append(metric.__name__)
-        #             summary["Model"].append(self.modelNames[model])
-        #             summary["TestSet"].append(f"CV{fold + 1}")
-        #             summary["Value"].append(val)
-        #     # independent test set
-        #     df = pd.read_table(self.indPaths[model])
-        #     y_pred = df[f"{property_name}_ProbabilityClass_1"]
-        #     th = 0.5
-        #     y_pred_values = [1 if x > th else 0 for x in y_pred]
-        #     y_true = df[f"{property_name}_Label"]
-        #     for metric in self.metrics:
-        #         val = metric(y_true, y_pred_values)
-        #         summary["Metric"].append(metric.__name__)
-        #         summary["Model"].append(self.modelNames[model])
-        #         summary["TestSet"].append("IND")
-        #         summary["Value"].append(val)
-        # # create the summary dataframe and save it to a file if required
-        # df_summary = pd.DataFrame(summary)
-        # if save:
-        #     df_summary.to_csv(
-        #         os.path.join(out_dir, f"{filename_prefix}_summary.tsv"),
-        #         sep="\t",
-        #         index=False,
-        #         header=True,
-        #     )
-        # # create the plots for each metric
-        # figures = []
-        # for metric in df_summary.Metric.unique():
-        #     # get the data for the metric
-        #     df_metric = df_summary[df_summary.Metric == metric]
-        #     cv_avg = (
-        #         df_metric[df_metric.TestSet != "IND"][[
-        #             "Model", "Value"
-        #         ]].groupby("Model").aggregate(np.mean)
-        #     )
-        #     cv_std = (
-        #         df_metric[df_metric.TestSet != "IND"][[
-        #             "Model", "Value"
-        #         ]].groupby("Model").aggregate(np.std)
-        #     )
-        #     ind_vals = (
-        #         df_metric[df_metric.TestSet == "IND"][[
-        #             "Model", "Value"
-        #         ]].groupby("Model").aggregate(np.sum)
-        #     )
-        #     # plot the data
-        #     models = cv_avg.index
-        #     x = np.arange(len(models))  # the label locations
-        #     width = 0.35  # the width of the bars
-        #     fig, ax = plt.subplots(figsize=(7, 10))
-        #     ax.bar(
-        #         x - width / 2,
-        #         cv_avg.Value,
-        #         width,
-        #         label="CV",
-        #         yerr=cv_std.Value,
-        #         ecolor="black",
-        #         capsize=5,
-        #     )
-        #     ax.bar(x + width / 2, ind_vals.Value, width, label="Test")
-        #     # Add some text for labels, title and custom x-axis tick labels, etc.
-        #     ax.set_ylabel(metric)
-        #     ax.set_title(f"{metric} by Model and Test Set")
-        #     ax.set_xticks(x, models)
-        #     ax.legend()
-        #     fig.tight_layout()
-        #     plt.xticks(rotation=75)
-        #     plt.ylim([0, 1.3])
-        #     plt.subplots_adjust(bottom=0.4)
-        #     plt.axhline(y=1.0, color="grey", linestyle="-", alpha=0.3)
-        #     if save:
-        #         plt.savefig(os.path.join(out_dir, f"{filename_prefix}_{metric}.png"))
-        #     if show:
-        #         plt.show()
-        #         plt.clf()
-        #     figures.append((fig, ax))
-        # return figures, df_summary
+        figures = []
+        for metric in self.metrics:
+            # check if metric in summary dataframe
+            if metric not in self.summary.columns:
+                print(f"Metric {metric} not in summary dataframe, skipping")
+                continue
+
+            # plot the results
+            g = sns.catplot(
+                self.summary,
+                x="Class",
+                y=metric,
+                hue="Set",
+                col="Property",
+                row="Model",
+                kind="bar",
+                margin_titles=True,
+                sharex=False,
+                sharey=False,
+            )
+            # set y range max to 1 for each plot, but don't set min to 0 as some metrics can be negative
+            for ax in g.axes_dict.values():
+                y_min, y_max = ax.get_ylim()
+                ax.set_ylim(y_min, 1)
+            figures.append(g)
+            if save:
+                # add metric to out_path if it exists before the extension
+                if out_path is not None:
+                    plt.savefig(os.path.splitext(out_path)[0] + f"_{metric}.png", dpi=300)
+                else:
+                    for model in self.models:
+                        plt.savefig(f"{model.outPrefix}_{metric}.png", dpi=300)
+            if show:
+                plt.show()
+                plt.clf()
+        return figures, self.summary
