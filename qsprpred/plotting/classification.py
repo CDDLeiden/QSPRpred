@@ -1,7 +1,7 @@
 """Plotting functions for classification models."""
 import os.path
 from abc import ABC
-from typing import Any, List, Literal
+from typing import List, Literal
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,8 @@ from sklearn.metrics import (
     matthews_corrcoef,
     precision_score,
     recall_score,
-    roc_auc_score
+    roc_auc_score,
+    confusion_matrix
 )
 
 from ..metrics.calibration import calibration_error
@@ -213,6 +214,10 @@ class ROCPlot(ClassifierPlot):
     """Plot of ROC-curve (receiver operating characteristic curve)
     for a given classification model.
     """
+    def getSupportedTasks(self) -> List[ModelTasks]:
+        """Return a list of tasks supported by this plotter."""
+        return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
+
     def makeCV(self, model: QSPRModel, property_name: str) -> plt.Axes:
         """Make the plot for a given model using cross-validation data.
 
@@ -375,6 +380,10 @@ class ROCPlot(ClassifierPlot):
 
 class PRCPlot(ClassifierPlot):
     """Plot of Precision-Recall curve for a given model."""
+    def getSupportedTasks(self) -> List[ModelTasks]:
+        """Return a list of tasks supported by this plotter."""
+        return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
+
     def makeCV(self, model: QSPRModel, property_name: str) -> plt.Axes:
         """Make the plot for a given model using cross-validation data.
 
@@ -512,6 +521,10 @@ class PRCPlot(ClassifierPlot):
 
 class CalibrationPlot(ClassifierPlot):
     """Plot of calibration curve for a given model."""
+    def getSupportedTasks(self) -> List[ModelTasks]:
+        """Return a list of tasks supported by this plotter."""
+        return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
+
     def makeCV(
         self, model: QSPRModel, property_name: str, n_bins: int = 10
     ) -> plt.Axes:
@@ -762,3 +775,80 @@ class MetricsPlot(ClassifierPlot):
                 plt.show()
                 plt.clf()
         return figures, self.summary
+
+class ConfusionMatrixPlot(ClassifierPlot):
+    """Plot of confusion matrix for a given model as a heatmap."""
+
+    def getConfusionMatrixDict(self, df: pd.DataFrame) -> dict:
+        """Create dictionary of confusion matrices for each model, property and fold
+
+        Args:
+            df (pd.DataFrame):
+                the dataframe containing the classficiation results,
+                columns: Model, QSPRID, Fold, Property, Label, Prediction, Set
+
+        Returns:
+            dict:
+                dictionary of confusion matrices for each model, property and fold
+        """
+        conf_dict = {}
+        for model in df.Model.unique():
+            for property in df.Property.unique():
+                for fold in df.Fold.unique():
+                    df_subset = df[(df.Model == model) & (df.Property == property) & (df.Fold == fold)]
+                    conf_dict[(model, property, fold)] = confusion_matrix(df_subset.Label, df_subset.Prediction)
+        return conf_dict
+
+    def make(
+        self,
+        save: bool = True,
+        show: bool = False,
+        out_path: str | None = None,
+    ) -> tuple[dict, plt.Axes]:
+        """Make confusion matrix heatmap for each model, property and fold
+
+        Args:
+            save (bool):
+                whether to save the plot
+            show (bool):
+                whether to show the plot
+            out_path (str | None):
+                path to save the plot to, e.g. "results/plot.png", the plots will be
+                saved to this path with the plot identifier appended before the extension,
+                If `None`, the plots will be saved to each model's output directory.
+
+        Returns:
+            dict:
+                dictionary of confusion matrices for each model, property and fold
+            list[plt.axes.Axes]:
+                a list of matplotlib axes objects containing the plots.
+        """
+        df = self.prepareClassificationResults()
+
+        # Get dictionary of confusion matrices
+        conf_dict = self.getConfusionMatrixDict(df)
+
+        # Create heatmap for each model, property and fold
+        axes = []
+        for model in df.Model.unique():
+            for property in df.Property.unique():
+                for fold in df.Fold.unique():
+                    fig, ax = plt.subplots()
+                    sns.heatmap(conf_dict[(model, property, fold)], annot=True, fmt="g", cmap="Blues")
+                    ax.set_title(f"Confusion Matrix ({model}_{property}_fold_{fold})")
+                    ax.set_xlabel("Predicted label")
+                    ax.set_ylabel("True label")
+                    axes.append(fig)
+                    if save:
+                        if out_path is not None:
+                            # add identifier to out_path before the extension
+                            plt.savefig(os.path.splitext(out_path)[0] + f"_{model}_{property}_{fold}_confusion_matrix.png", dpi=300)
+                        else:
+                            # reverse self.modelNames dictionary to get model out
+                            modelNames = {v: k for k, v in self.modelNames.items()}
+                            plt.savefig(f"{self.modelOuts[modelNames[model]]}_{property}_{fold}_confusion_matrix.png", dpi=300)
+                    if show:
+                        plt.show()
+                        plt.clf()
+                    plt.close()
+        return axes, conf_dict
