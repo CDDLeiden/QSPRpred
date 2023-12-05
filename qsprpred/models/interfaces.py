@@ -13,12 +13,13 @@ from typing import Any, Callable, Iterable, List, Type, Union
 import numpy as np
 import pandas as pd
 
+from qsprpred.utils.serialization import JSONSerializable
+
 from ..data.data import MoleculeTable, QSPRDataset
 from ..logs import logger
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..models.metrics import SklearnMetrics
 from ..models.tasks import ModelTasks
-from qsprpred.utils.serialization import JSONSerializable
 from ..utils.inspect import import_class
 
 
@@ -196,10 +197,12 @@ class QSPRModel(JSONSerializable, ABC):
             self.initRandomState(random_state)
             # load the estimator
             self.estimator = self.loadEstimator(self.parameters)
-        assert self.estimator is not None, \
-            "Estimator not initialized when it should be."
-        assert self.alg is not None, \
-            "Algorithm class not initialized when it should be."
+        assert (
+            self.estimator is not None
+        ), "Estimator not initialized when it should be."
+        assert (
+            self.alg is not None
+        ), "Algorithm class not initialized when it should be."
         if not autoload and not self.checkForData(exception=False):
             raise ValueError(
                 "No data set specified. Make sure you "
@@ -547,7 +550,14 @@ class QSPRModel(JSONSerializable, ABC):
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
-    def fitAttached(self, monitor=None, mode=EarlyStoppingMode.OPTIMAL, **kwargs) -> str:
+    def fitAttached(
+        self,
+        monitor=None,
+        mode=EarlyStoppingMode.OPTIMAL,
+        save_model=True,
+        save_data=False,
+        **kwargs,
+    ) -> str:
         """Train model on the whole attached data set.
 
         ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
@@ -561,10 +571,12 @@ class QSPRModel(JSONSerializable, ABC):
                 early stopping, by default fit the 'optimal' number of
                 epochs previously stopped at in model assessment on train or test set,
                 to avoid the use of extra data for a validation set.
+            save_model (bool): save the model to file
+            save_data (bool): save the attached dataset to file
             kwargs: additional arguments to pass to fit
 
         Returns:
-            str: path to the saved model
+            str: path to the saved model, if `save_model` is True
         """
         # do some checks
         self.checkForData()
@@ -577,14 +589,16 @@ class QSPRModel(JSONSerializable, ABC):
         logger.info(
             "Model fit started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-        self.estimator = self.fit(
-            X_all, y_all, mode=mode, monitor=monitor, **kwargs
-        )
+        self.estimator = self.fit(X_all, y_all, mode=mode, monitor=monitor, **kwargs)
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
+        if save_data:
+            self.data.save()
+
         # save model and return path
-        return self.save()
+        if save_model:
+            return self.save()
 
     def toJSON(self):
         o_dict = json.loads(super().toJSON())
@@ -761,9 +775,7 @@ class FitMonitor(ABC):
         """
 
     @abstractmethod
-    def onEpochEnd(
-        self, epoch: int, train_loss: float, val_loss: float | None = None
-    ):
+    def onEpochEnd(self, epoch: int, train_loss: float, val_loss: float | None = None):
         """Called after each epoch of the training.
 
         Args:
@@ -1024,7 +1036,7 @@ class HyperparameterOptimization(ABC):
         self.config = {
             "param_grid": param_grid,
             "model_assessor": model_assessor,
-            "score_aggregation": score_aggregation
+            "score_aggregation": score_aggregation,
         }
 
     @abstractmethod
