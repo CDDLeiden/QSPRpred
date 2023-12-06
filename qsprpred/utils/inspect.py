@@ -1,9 +1,12 @@
 import importlib
 
 
-def import_class(class_path):
-    """Import a class from a string path."""
-    class_name = class_path.split(".")[-1]
-    module_name = class_path.replace(f".{class_name}", "")
+def dynamic_import(object_path: str):
+    """Import an object from an import path dynamically.
+
+    Args:
+        object_path (str): fully classified path to the object to be imported
+    """
+    module_name, func_name = object_path.rsplit(".", 1)
     module = importlib.import_module(module_name)
-    return getattr(module, class_name)
+    return getattr(module, func_name)

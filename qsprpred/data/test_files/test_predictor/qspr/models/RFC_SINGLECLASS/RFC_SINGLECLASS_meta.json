@@ -5,13 +5,13 @@
         "baseDir": ".",
         "targetProperties": [
             {
-                "py/object": "qsprpred.data.data.TargetProperty",
+                "py/object": "qsprpred.tasks.TargetProperty",
                 "name": "CL_class",
                 "originalName": "CL",
                 "task": {
                     "py/reduce": [
                         {
-                            "py/type": "qsprpred.models.tasks.TargetTasks"
+                            "py/type": "qsprpred.tasks.TargetTasks"
                         },
                         {
                             "py/tuple": [
@@ -30,11 +30,11 @@
         "nTargets": 1,
         "featureCalculators": [
             {
-                "py/object": "qsprpred.data.utils.descriptorcalculator.MoleculeDescriptorsCalculator",
+                "py/object": "qsprpred.data.descriptors.calculators.MoleculeDescriptorsCalculator",
                 "py/state": {
                     "descSets": [
                         {
-                            "py/object": "qsprpred.data.utils.descriptorsets.FingerprintSet",
+                            "py/object": "qsprpred.data.descriptors.sets.FingerprintSet",
                             "py/state": {
                                 "_isFP": true,
                                 "fingerprintType": "MorganFP",
@@ -547,7 +547,7 @@
             }
         ],
         "featureStandardizer": {
-            "py/object": "qsprpred.data.utils.feature_standardization.SKLearnStandardizer",
+            "py/object": "qsprpred.data.processing.feature_standardizers.SKLearnStandardizer",
             "py/state": {
                 "scaler": {
                     "meta": "standard-scaler",

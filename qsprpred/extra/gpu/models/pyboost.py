@@ -21,12 +21,12 @@ from py_boost.gpu.losses import BCELoss, MSELoss
 from py_boost.gpu.losses.metrics import Metric, auc
 from sklearn.model_selection import ShuffleSplit
 
-from ....data.data import QSPRDataset
+from ....data.tables.qspr import QSPRDataset
 from ....data.interfaces import DataSplit
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.interfaces import FitMonitor, QSPRModel
 from ....models.monitors import BaseMonitor
-from ....models.tasks import ModelTasks
+from qsprpred.tasks import ModelTasks
 
 
 class PyBoostModel(QSPRModel):

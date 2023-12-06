@@ -2,7 +2,6 @@
 
 import argparse
 import json
-import os
 import os.path
 import sys
 from datetime import datetime
@@ -14,33 +13,33 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-from .data.data import QSPRDataset
-from .data.utils.datafilters import papyrusLowQualityFilter
-from .data.utils.datasplitters import (
+from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
+from qsprpred.data.sampling.splits import (
     ClusterSplit,
     ManualSplit,
     RandomSplit,
     ScaffoldSplit,
     TemporalSplit,
 )
-from .data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
-from .data.utils.descriptorsets import (
+from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
+from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
     FingerprintSet,
     PredictorDesc,
     RDKitDescs,
     SmilesDesc,
 )
-from .data.utils.featurefilters import (
+from qsprpred.data.processing.feature_filters import (
     BorutaFilter,
     HighCorrelationFilter,
     LowVarianceFilter,
 )
-from .data.utils.scaffolds import Murcko
+from .data.chem.scaffolds import Murcko
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
 from .models.sklearn import SklearnModel
-from .models.tasks import TargetTasks
+from qsprpred.tasks import TargetTasks
 
 
 def QSPRArgParser(txt=None):
@@ -413,7 +412,7 @@ def QSPR_dataprep(args):
             # Avoid importing optional dependencies if not needed
             f_arr = np.array(args.features)
             if np.isin(["Mordred", "Mold2", "PaDEL", "Signature"], f_arr).any():
-                from .extra.data.utils.descriptorsets import (
+                from qsprpred.extra.data.descriptors.sets import (
                     ExtendedValenceSignature,
                     Mold2,
                     Mordred,

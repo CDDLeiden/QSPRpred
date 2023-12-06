@@ -18,10 +18,10 @@ from sklearn.metrics import (
     recall_score,
 )
 
-from ..metrics.calibration import calibration_error
-from ..models.interfaces import QSPRModel
-from ..models.tasks import ModelTasks
-from ..plotting.interfaces import ModelPlot
+from ..models.metrics import calibration_error
+from ..models.models import QSPRModel
+from ..tasks import ModelTasks
+from ..plotting.base_plot import ModelPlot
 
 
 class ClassifierPlot(ModelPlot, ABC):

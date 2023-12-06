@@ -8,14 +8,12 @@ import pandas as pd
 from matplotlib.axes import SubplotBase
 from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import roc_auc_score
 
-from ..data.data import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.sklearn import SklearnModel
-from ..models.tasks import TargetTasks
+from ..tasks import TargetTasks
 from ..models.tests import ModelDataSetsMixIn
-from ..models.metrics import SklearnMetrics
 from ..plotting.classification import MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot
 

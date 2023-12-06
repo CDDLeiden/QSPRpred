@@ -1,5 +1,6 @@
 """Module for hyperparameter optimization of QSPRModels."""
 
+from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Callable, Iterable
 
@@ -8,13 +9,61 @@ import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
 from ..logs import logger
-from ..models.interfaces import (
-    HyperparameterOptimization,
-    HyperparameterOptimizationMonitor,
-    ModelAssessor,
-    QSPRModel,
-)
-from ..models.monitors import BaseMonitor
+from ..models.assessment_methods import ModelAssessor
+from ..models.models import QSPRModel
+from ..models.monitors import BaseMonitor, HyperparameterOptimizationMonitor
+
+
+class HyperparameterOptimization(ABC):
+    """Base class for hyperparameter optimization.
+
+    Attributes:
+        runAssessment (ModelAssessor): evaluation method to use
+        scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
+        paramGrid (dict): dictionary of parameters to optimize
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization
+        bestScore (float): best score found during optimization
+        bestParams (dict): best parameters found during optimization
+    """
+    def __init__(
+        self,
+        param_grid: dict,
+        model_assessor: ModelAssessor,
+        score_aggregation: Callable[[Iterable], float],
+        monitor: HyperparameterOptimizationMonitor | None = None,
+    ):
+        """Initialize the hyperparameter optimization class.
+
+        param_grid (dict):
+            dictionary of parameters to optimize
+        model_assessor (ModelAssessor):
+            assessment method to use for determining the best parameters
+        score_aggregation (Callable[[Iterable], float]): function to aggregate scores
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization,
+            if None, a BaseMonitor is used
+        """
+        self.runAssessment = model_assessor
+        self.scoreAggregation = score_aggregation
+        self.paramGrid = param_grid
+        self.bestScore = -np.inf
+        self.bestParams = None
+        self.monitor = monitor
+        self.config = {
+            "param_grid": param_grid,
+            "model_assessor": model_assessor,
+            "score_aggregation": score_aggregation,
+        }
+
+    @abstractmethod
+    def optimize(self, model: QSPRModel) -> dict:
+        """Optimize the model hyperparameters.
+
+        Args:
+            model (QSPRModel): model to optimize
+
+        Returns:
+            dict: dictionary of best parameters
+        """
 
 
 class OptunaOptimization(HyperparameterOptimization):

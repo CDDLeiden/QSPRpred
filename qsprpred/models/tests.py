@@ -5,7 +5,7 @@ import numbers
 import os
 from copy import deepcopy
 from os.path import exists
-from typing import Type, Literal
+from typing import Literal, Type
 from unittest import TestCase
 
 import numpy as np
@@ -31,21 +31,21 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from ..data.data import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from ..data.tests import DataSetsMixIn
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
-from ..models.interfaces import (
+from ..models.models import QSPRModel
+from ..models.monitors import (
     AssessorMonitor,
     FitMonitor,
     HyperparameterOptimizationMonitor,
-    QSPRModel,
+    BaseMonitor, FileMonitor, ListMonitor,
 )
 from ..models.metrics import SklearnMetrics
-from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.sklearn import SklearnModel
-from ..models.tasks import TargetTasks
+from ..tasks import TargetTasks
 
 N_CPUS = 2
 logging.basicConfig(level=logging.DEBUG)
@@ -53,7 +53,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 class ModelDataSetsMixIn(DataSetsMixIn):
     """This class sets up the datasets for the model tests."""
-
     def setUp(self):
         """Set up the test environment."""
         super().setUp()
@@ -64,7 +63,6 @@ class ModelDataSetsMixIn(DataSetsMixIn):
 
 class ModelTestMixIn:
     """This class holds the tests for the QSPRmodel class."""
-
     @property
     def gridFile(self):
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
@@ -105,9 +103,7 @@ class ModelTestMixIn:
         model.save()
         model_new = model.__class__.fromFile(model.metaFile)
         for param in best_params:
-            self.assertEqual(
-                model_new.parameters[param], best_params[param]
-            )
+            self.assertEqual(model_new.parameters[param], best_params[param])
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
         if model.task.isClassification():
@@ -124,9 +120,7 @@ class ModelTestMixIn:
         best_params = gridsearcher.optimize(model)
         model_new = model.__class__.fromFile(model.metaFile)
         for param in best_params:
-            self.assertEqual(
-                model_new.parameters[param], best_params[param]
-            )
+            self.assertEqual(model_new.parameters[param], best_params[param])
         model.cleanFiles()
         # perform crossvalidation
         score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
@@ -197,20 +191,19 @@ class ModelTestMixIn:
                 self.assertIsInstance(predictions, np.ndarray)
 
             singleoutput = (
-                predictions[0][0, 0]
-                if isinstance(predictions, list)
-                else predictions[0, 0]
+                predictions[0][0,
+                               0] if isinstance(predictions, list) else predictions[0,
+                                                                                    0]
             )
             if (
-                predictor.targetProperties[0].task == TargetTasks.REGRESSION
-                or use_probas
+                predictor.targetProperties[0].task == TargetTasks.REGRESSION or
+                use_probas
             ):
                 self.assertIsInstance(singleoutput, numbers.Real)
             elif predictor.targetProperties[
-                0
-            ].task == TargetTasks.MULTICLASS or isinstance(
-                predictor.estimator, XGBClassifier
-            ):
+                0].task == TargetTasks.MULTICLASS or isinstance(
+                    predictor.estimator, XGBClassifier
+                ):
                 self.assertIsInstance(singleoutput, numbers.Integral)
             elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:
                 self.assertIn(singleoutput, [1, 0])
@@ -224,20 +217,19 @@ class ModelTestMixIn:
             )
             check_shape(invalid_smiles)
             singleoutput = (
-                predictions[0][0, 0]
-                if isinstance(predictions, list)
-                else predictions[0, 0]
+                predictions[0][0,
+                               0] if isinstance(predictions, list) else predictions[0,
+                                                                                    0]
             )
             self.assertEqual(
-                predictions[0][1, 0]
-                if isinstance(predictions, list)
-                else predictions[1, 0],
+                predictions[0][1,
+                               0] if isinstance(predictions, list) else predictions[1,
+                                                                                    0],
                 None,
             )
             if (
-                predictor.targetProperties[0].task == TargetTasks.SINGLECLASS
-                and not isinstance(predictor.estimator, XGBClassifier)
-                and not use_probas
+                predictor.targetProperties[0].task == TargetTasks.SINGLECLASS and
+                not isinstance(predictor.estimator, XGBClassifier) and not use_probas
             ):
                 self.assertIn(singleoutput, [0, 1])
             else:
@@ -333,7 +325,6 @@ class ModelTestMixIn:
 
 class SklearnModelMixIn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the SklearnModel class."""
-
     def getModel(
         self,
         name: str,
@@ -368,17 +359,14 @@ class SklearnModelMixIn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 class TestSklearnRegression(SklearnModelMixIn):
     """Test the SklearnModel class for regression models."""
-
     @parameterized.expand(
         [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, random_state)
             for alg, alg_name in (
                 (RandomForestRegressor, "RFR"),
                 (XGBRegressor, "XGBR"),
-            )
-            for random_state in ([None], [1, 42], [42, 42])
-        ]
-        + [
+            ) for random_state in ([None], [1, 42], [42, 42])
+        ] + [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None])
             for alg, alg_name in (
                 (PLSRegression, "PLSR"),
@@ -395,7 +383,10 @@ class TestSklearnRegression(SklearnModelMixIn):
             parameters = None
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": task}],
+            target_props=[{
+                "name": "CL",
+                "task": task
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
@@ -436,7 +427,10 @@ class TestSklearnRegression(SklearnModelMixIn):
         model_class = PLSRegression
         parameters = None
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": task}],
+            target_props=[{
+                "name": "CL",
+                "task": task
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(
@@ -466,12 +460,11 @@ class TestSklearnRegression(SklearnModelMixIn):
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state)
-            for alg, alg_name in ((RandomForestRegressor, "RFR"),)
+            for alg, alg_name in ((RandomForestRegressor, "RFR"), )
             for random_state in ([None], [1, 42], [42, 42])
-        ]
-        + [
+        ] + [
             (alg_name, alg_name, alg, [None])
-            for alg, alg_name in ((KNeighborsRegressor, "KNNR"),)
+            for alg, alg_name in ((KNeighborsRegressor, "KNNR"), )
         ]
     )
     def testRegressionMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -479,8 +472,14 @@ class TestSklearnRegression(SklearnModelMixIn):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             target_props=[
-                {"name": "fu", "task": TargetTasks.REGRESSION},
-                {"name": "CL", "task": TargetTasks.REGRESSION},
+                {
+                    "name": "fu",
+                    "task": TargetTasks.REGRESSION
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION
+                },
             ],
             target_imputer=SimpleImputer(strategy="mean"),
             preparation_settings=self.getDefaultPrep(),
@@ -518,17 +517,23 @@ class TestSklearnRegression(SklearnModelMixIn):
 
 
 class TestSklearnSerialization(SklearnModelMixIn):
-
     def testJSON(self):
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.SINGLECLASS,
+                "th": [6.5]
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(
-            name=f"TestSerialization",
+            name="TestSerialization",
             alg=RandomForestClassifier,
             dataset=dataset,
-            parameters={"n_jobs": N_CPUS, "n_estimators": 10},
+            parameters={
+                "n_jobs": N_CPUS,
+                "n_estimators": 10
+            },
             random_state=42,
         )
         model.save()
@@ -536,9 +541,7 @@ class TestSklearnSerialization(SklearnModelMixIn):
         model2 = SklearnModel.fromJSON(content)
         model2.baseDir = model.baseDir
         model3 = SklearnModel.fromFile(model.metaFile)
-        model4 = SklearnModel(
-            name=model.name, base_dir=model.baseDir
-        )
+        model4 = SklearnModel(name=model.name, base_dir=model.baseDir)
         self.assertEqual(model.metaFile, model2.metaFile)
         self.assertEqual(model.metaFile, model3.metaFile)
         self.assertEqual(model.metaFile, model4.metaFile)
@@ -549,7 +552,6 @@ class TestSklearnSerialization(SklearnModelMixIn):
 
 class TestSklearnClassification(SklearnModelMixIn):
     """Test the SklearnModel class for classification models."""
-
     @parameterized.expand(
         [
             (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
@@ -569,8 +571,7 @@ class TestSklearnClassification(SklearnModelMixIn):
                 (SVC, "SVC"),
                 (KNeighborsClassifier, "KNNC"),
                 (GaussianNB, "NB"),
-            )
-            for task, th in (
+            ) for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
             )
@@ -592,7 +593,11 @@ class TestSklearnClassification(SklearnModelMixIn):
                 parameters = {"probability": True}
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -632,7 +637,11 @@ class TestSklearnClassification(SklearnModelMixIn):
         }
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.SINGLECLASS,
+                "th": [6.5]
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -684,8 +693,16 @@ class TestSklearnClassification(SklearnModelMixIn):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             target_props=[
-                {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
-                {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]},
+                {
+                    "name": "fu",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [0.3]
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [6.5]
+                },
             ],
             target_imputer=SimpleImputer(strategy="mean"),
             preparation_settings=self.getDefaultPrep(),
@@ -872,7 +889,8 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
             f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
         )
         self.assertTrue(
-            os.path.exists(f"{os.path.dirname(__file__)}/test_files/earlystopping.json")
+            os.path.
+            exists(f"{os.path.dirname(__file__)}/test_files/earlystopping.json")
         )
 
         # check loading
@@ -887,7 +905,6 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
 
     def test_early_stopping_decorator(self):
         """Test the early stopping decorator."""
-
         class test_class:
             def __init__(self, support=True):
                 self.earlyStopping = EarlyStopping(EarlyStoppingMode.RECORDING)
@@ -1068,9 +1085,8 @@ class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
             output_path = f"{path}/{monitor.assessmentType}"
             self.assertTrue(os.path.exists(output_path))
             self.assertTrue(
-                os.path.exists(
-                    f"{output_path}/{monitor.assessmentType}_predictions.tsv"
-                )
+                os.path.
+                exists(f"{output_path}/{monitor.assessmentType}_predictions.tsv")
             )
 
             if monitor.saveFits and neural_net:
