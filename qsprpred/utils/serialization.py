@@ -68,7 +68,7 @@ class JSONSerializable(FileSerializable):
             try:
                 o_dict[key] = copy.deepcopy(self.__dict__[key])
             except Exception as exp:
-                logger.error(f"Could not deepcopy {key}: {exp}")
+                logger.error(f"Could not deepcopy '{key}' because of: {exp}")
                 raise exp
         return o_dict
 
