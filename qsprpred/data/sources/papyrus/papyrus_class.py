@@ -8,11 +8,12 @@ import pandas as pd
 import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
-from ...tables.mol import MoleculeTable
 from .papyrus_filter import papyrus_filter
+from ..data_source import DataSource
+from ...tables.mol import MoleculeTable
 
 
-class Papyrus:
+class Papyrus(DataSource):
     """Create new instance of Papyrus dataset.
     See `papyrus_filter` and `Papyrus.download` and `Papyrus.getData` for more details.
 
@@ -84,11 +85,11 @@ class Papyrus:
 
     def getData(
         self,
-        acc_keys: list[str],
-        quality: str,
+        name: str | None = None,
+        acc_keys: list[str] | None = None,
+        quality: str = "high",
         activity_types: list[str] | str = "all",
         output_dir: Optional[str] = None,
-        name: Optional[str] = None,
         drop_duplicates: bool = False,
         chunk_size: int = 1e5,
         use_existing: bool = True,
@@ -110,6 +111,8 @@ class Papyrus:
         Returns:
             MolculeTable: the filtered data set
         """
+        assert acc_keys is not None, "Please provide a list of accession keys."
+        name = name or "papyrus"
         self.download()
         output_dir = output_dir or self.dataDir
         if not os.path.exists(output_dir):
@@ -119,7 +122,7 @@ class Papyrus:
             quality=quality,
             outdir=output_dir,
             activity_types=activity_types,
-            prefix=name or os.path.basename(output_dir),
+            prefix=name,
             drop_duplicates=drop_duplicates,
             chunk_size=chunk_size,
             use_existing=use_existing,

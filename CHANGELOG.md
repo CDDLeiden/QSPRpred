@@ -45,6 +45,9 @@ From v2.1.0 to v3.0.0
 
 ## New Features
 
+- The `qsprpred.benchmarks` module was added, which contains functions to easily
+  benchmark
+  models on datasets.
 - Most unit tests now have a variant that checks whether using a fixed random seed gives
   reproducible results.
 - The build pipeline now contains a check that the jupyter notebooks give the same
