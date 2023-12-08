@@ -1045,7 +1045,7 @@
                     "name": "roc_auc_score"
                 },
                 "split": null,
-                "round": 3
+                "round": 5
             },
             {
                 "py/object": "qsprpred.models.assessment_methods.CrossValAssessor",
@@ -1067,7 +1067,7 @@
                     "name": "matthews_corrcoef"
                 },
                 "split": null,
-                "round": 3
+                "round": 5
             },
             {
                 "py/object": "qsprpred.models.assessment_methods.TestSetAssessor",
@@ -1088,7 +1088,7 @@
                     },
                     "name": "roc_auc_score"
                 },
-                "round": 3
+                "round": 5
             },
             {
                 "py/object": "qsprpred.models.assessment_methods.TestSetAssessor",
@@ -1109,12 +1109,12 @@
                     },
                     "name": "matthews_corrcoef"
                 },
-                "round": 3
+                "round": 5
             }
         ],
         "randomSeed": 2746317213,
         "ds": null,
         "results": null,
-        "model": "/home/sichom/projects/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksCLS_2746317213/ConsistencyChecksCLS_2746317213_meta.json"
+        "model": "/zfsdata/data/helle/01_MainProjects/03_QSPRPred/Scripts/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksCLS_2746317213/ConsistencyChecksCLS_2746317213_meta.json"
     }
 }
