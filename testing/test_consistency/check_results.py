@@ -58,9 +58,9 @@ for f in os.listdir("expected"):
                         if name not in overview:
                             overview[name] = {"idx": idx}
                         if col[1] == "self":
-                            overview[name]["true"] = row[col]
-                        else:
                             overview[name]["expected"] = row[col]
+                        else:
+                            overview[name]["true"] = row[col]
                     overview = {
                         k: v
                         for k, v in overview.items()
