@@ -127,7 +127,7 @@ class CrossValAssessor(ModelAssessor):
         monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
             is used
         mode (EarlyStoppingMode): mode to use for early stopping
-        round (int): number of decimal places to round predictions to (default: 4)
+        round (int): number of decimal places to round predictions to (default: 5)
     """
     def __init__(
         self,
