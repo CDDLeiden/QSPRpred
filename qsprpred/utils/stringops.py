@@ -1,5 +1,17 @@
 """Enumerating a list of items with leading zeros."""
 from typing import Sized
+import random
+import string
+
+
+def get_random_string(prefix: str = "",  length: int = 10):
+    """Generate a random string of fixed length.
+
+    Args:
+        prefix (str, optional): Prefix to add to the random string.
+        length (int, optional): Length of the random string.
+    """
+    return prefix + ''.join(random.choice(string.ascii_letters) for i in range(length))
 
 
 def generate_padded_index(items: Sized, prefix: str | None = "") -> list[str]:

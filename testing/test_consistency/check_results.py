@@ -5,14 +5,14 @@ CI/CD pipeline to check that the tutorial is up-to-date and that the models
 are consistent with previous ones.
 """
 import json
-
-import numpy as np
-import pandas as pd
 import os
 import sys
 import traceback
 
-TUTORIAL_BASE = os.environ.get("TUTORIAL_BASE")
+import numpy as np
+import pandas as pd
+
+models_base = "./data/models"
 
 success = True
 failed_files = []
@@ -24,7 +24,7 @@ for f in os.listdir("expected"):
             relative_file_path = f"{f}/{file_name}"
 
             expected_file_path = f"expected/{relative_file_path}"
-            actual_file_path = f"{TUTORIAL_BASE}/qspr/models/{relative_file_path}"
+            actual_file_path = f"{models_base}/{relative_file_path}"
 
             expected_values = (
                 pd.read_csv(expected_file_path, sep="\t")
@@ -62,7 +62,8 @@ for f in os.listdir("expected"):
                         else:
                             overview[name]["expected"] = row[col]
                     overview = {
-                        k: v for k, v in overview.items()
+                        k: v
+                        for k, v in overview.items()
                         if not (np.isnan(v["true"]) and np.isnan(v["expected"]))
                     }
                     overviews.append(overview)
@@ -76,8 +77,10 @@ for f in os.listdir("expected"):
             continue
 
 if not success:
-    sys.stderr.write("Comparison of tutorial outputs failed! "
-                     "One or more files did not match:\n" + "\n".join(failed_files))
+    sys.stderr.write(
+        "Comparison of benchmark outputs failed! "
+        "One or more files did not match:\n" + "\n".join(failed_files)
+    )
     sys.exit(1)
 else:
-    print("Comparison of tutorial outputs successful!")
+    print("Comparison of benchmark outputs successful!")

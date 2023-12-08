@@ -10,7 +10,6 @@ function format_qspr {
     ruff --config "${QSPR}/pyproject.toml" "$1"
 }
 
-
 # check if argument is given
 if [ $# -eq 0 ]; then
     echo "No arguments supplied"

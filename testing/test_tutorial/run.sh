@@ -13,7 +13,3 @@ find $TUTORIAL_BASE -name "*.ipynb" | while read notebook
 do
     jupyter nbconvert --to notebook --execute "$notebook"
 done
-
-# FIXME: bring back model consistency comparison
-# check consistency of models
-# python check_results.py

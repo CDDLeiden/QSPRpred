@@ -13,15 +13,13 @@ from typing import Any, Callable, List, Type, Union
 import numpy as np
 import pandas as pd
 
-
-from ..data.tables.qspr import QSPRDataset
 from ..data.tables.mol import MoleculeTable
-from ..utils.inspect import dynamic_import
-from ..utils.serialization import JSONSerializable
-
+from ..data.tables.qspr import QSPRDataset
 from ..logs import logger
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..tasks import ModelTasks
+from ..utils.inspect import dynamic_import
+from ..utils.serialization import JSONSerializable
 
 
 class QSPRModel(JSONSerializable, ABC):
@@ -118,8 +116,8 @@ class QSPRModel(JSONSerializable, ABC):
         model_types = [model_types] if isinstance(model_types, str) else model_types
         if not set(model_types).issubset(list(optim_params[:, 0])):
             logger.error(
-                "model types %s missing from models in search space dict (%s)" %
-                (model_types, optim_params[:, 0])
+                "model types %s missing from models in search space dict (%s)"
+                % (model_types, optim_params[:, 0])
             )
             sys.exit()
         logger.info("search space loaded from file")
@@ -226,7 +224,10 @@ class QSPRModel(JSONSerializable, ABC):
         """Set state."""
         super().__setstate__(state)
         self.data = None
-        self.alg = dynamic_import(self.alg)
+        if hasattr(self, "alg") and self.alg is not None:
+            self.alg = dynamic_import(self.alg)
+        else:
+            self.alg = None
         self.estimator = self.loadEstimator(self.parameters)
 
     def initFromData(self, data: QSPRDataset | None):
@@ -262,8 +263,25 @@ class QSPRModel(JSONSerializable, ABC):
             )
         self.randomState = new_random_state
         constructor_params = [
-            name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
+            # FIXME, this does not always work (i.e for XGBoost)
+            name
+            for name, _ in inspect.signature(self.alg.__init__).parameters.items()
         ]
+        if "random_state" not in constructor_params:
+            try:
+                if self.parameters:
+                    params = {
+                        k: v for k, v in self.parameters.items() if k != "random_state"
+                    }
+                    self.alg(
+                        **params,
+                        random_state=self.randomState,
+                    )
+                else:
+                    self.alg(random_state=new_random_state)
+                constructor_params.append("random_state")
+            except TypeError:
+                pass
         if "random_state" in constructor_params:
             if self.parameters:
                 self.parameters.update({"random_state": new_random_state})
@@ -481,9 +499,9 @@ class QSPRModel(JSONSerializable, ABC):
         )
         return dataset, failed_mask
 
-    def predictDataset(self,
-                       dataset: QSPRDataset,
-                       use_probas: bool = False) -> np.ndarray | list[np.ndarray]:
+    def predictDataset(
+        self, dataset: QSPRDataset, use_probas: bool = False
+    ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given dataset.
 
@@ -619,7 +637,7 @@ class QSPRModel(JSONSerializable, ABC):
         return self.toFile(self.metaFile)
 
     @classmethod
-    def fromFile(cls, filename: str):
+    def fromFile(cls, filename: str) -> "QSPRModel":
         ret = super().fromFile(filename)
         model_dir = os.path.dirname(filename)
         ret.baseDir = os.path.dirname(model_dir)
@@ -665,9 +683,7 @@ class QSPRModel(JSONSerializable, ABC):
 
     @abstractmethod
     def predict(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
@@ -689,9 +705,7 @@ class QSPRModel(JSONSerializable, ABC):
 
     @abstractmethod
     def predictProba(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> list[np.ndarray]:
         """Make predictions for the given data matrix or `QSPRDataset`,
         but use probabilities for classification models. Does not work with

@@ -48,17 +48,6 @@ class SklearnModel(QSPRModel):
             random_state (int): seed for the random state
         """
         super().__init__(base_dir, alg, data, name, parameters, autoload, random_state)
-        # check for incompatible tasks
-        if self.task == ModelTasks.MULTITASK_MIXED:
-            raise ValueError(
-                "MultiTask with a mix of classification and regression tasks "
-                "is not supported for sklearn models."
-            )
-        if self.task == ModelTasks.MULTITASK_MULTICLASS:
-            raise NotImplementedError(
-                "At the moment there are no supported metrics "
-                "for multi-task multi-class/mix multi-and-single class classification."
-            )
         # initialize models with defined parameters
         try:
             # check if alg can be initialized with parameters
@@ -84,6 +73,10 @@ class SklearnModel(QSPRModel):
         logger.info("parameters: %s" % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
 
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        o_dict["alg"] = f"{self.alg.__module__}.{self.alg.__name__}"
+        return o_dict
     @property
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""
@@ -147,7 +140,17 @@ class SklearnModel(QSPRModel):
         monitor: None = None,
         **kwargs,
     ):
-        """See `QSPRModel.fit`."""
+        # check for incompatible tasks
+        if self.task == ModelTasks.MULTITASK_MIXED:
+            raise ValueError(
+                "MultiTask with a mix of classification and regression tasks "
+                "is not supported for sklearn models."
+            )
+        if self.task == ModelTasks.MULTITASK_MULTICLASS:
+            raise NotImplementedError(
+                "At the moment there are no supported metrics "
+                "for multi-task multi-class/mix multi-and-single class classification."
+            )
         estimator = self.estimator if estimator is None else estimator
         X, y = self.convertToNumpy(X, y)
         # sklearn models expect 1d arrays
