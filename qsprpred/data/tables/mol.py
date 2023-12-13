@@ -2,12 +2,14 @@ import multiprocessing
 import os
 import pickle
 from multiprocessing import Pool
-from typing import Optional, ClassVar
+from typing import Optional, ClassVar, Generator, Literal
 
 import numpy as np
 import pandas as pd
 from rdkit.Chem import PandasTools
 
+from .interfaces.searchable import Searchable, Summarizable
+from ..chem.matching import match_mol_to_smarts
 from ...data.chem.scaffolds import Scaffold
 from ...data.chem.standardization import check_smiles_valid, \
     chembl_smi_standardizer, old_standardize_sanitize
@@ -101,10 +103,10 @@ class DescriptorTable(PandasDataSet):
         self.df[columns] = self.df[columns].fillna(fill_value)
 
 
-class MoleculeTable(PandasDataSet, MoleculeDataSet):
+class MoleculeTable(PandasDataSet, Searchable, Summarizable):
     """Class that holds and prepares molecule data for modelling and other analyses."""
 
-    _notJSON: ClassVar = [*PandasDataSet._notJSON, "descriptors"]
+    _notJSON: ClassVar = PandasDataSet._notJSON + ["descriptors"]
 
     def __init__(
         self,
@@ -178,6 +180,146 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
         # drop invalid columns
         if drop_invalids:
             self.dropInvalids()
+
+    def searchWithIndex(
+            self,
+            index: pd.Index,
+            name: str | None = None
+    ) -> "MoleculeTable":
+        """
+        Create a new table from a list of indices.
+
+        Args:
+            index(pd.Index):
+                Indices in this table to create the new table from.
+            name(str):
+                Name of the new table. Defaults to the name of the old table,
+                plus the `_searched` suffix.
+
+        Returns:
+            MoleculeTable:
+                A new table with the molecules from the
+                old table with the given indices.
+        """
+        name = f"{self.name}_searched" if name is None else name
+        ret = MoleculeTable(
+            name=name,
+            df=self.df.loc[index, :],
+            smiles_col=self.smilesCol,
+            add_rdkit=False,
+            store_dir=self.storeDir,
+            overwrite=True,
+            n_jobs=self.nJobs,
+            chunk_size=self.chunkSize,
+            drop_invalids=False,
+            index_cols=self.indexCols
+        )
+        for table, calc in zip(self.descriptors, self.descriptorCalculators):
+            ret.descriptors.append(
+                DescriptorTable(
+                    calc,
+                    name_prefix=name,
+                    df=table.getDF().loc[index, :],
+                    store_dir=table.storeDir,
+                    overwrite=True,
+                    key_cols=table.indexCols,
+                    n_jobs=table.nJobs,
+                    chunk_size=table.chunkSize
+                )
+            )
+        return ret
+
+    def searchOnProperty(
+            self,
+            prop_name: str,
+            values: list[str],
+            name: str | None = None,
+            exact=False
+    ) -> "MoleculeTable":
+        mask = [False] * len(self.df)
+        for value in values:
+            mask = mask | (self.df[prop_name].str.contains(value)) \
+                if not exact else mask | (self.df[prop_name] == value)
+        matches = self.df.index[mask]
+        return self.searchWithIndex(matches, name)
+
+    def searchWithSMARTS(
+            self,
+            patterns: list[str],
+            operator: Literal["or", "and"] = "or",
+            use_chirality: bool = False,
+            name: str | None = None
+    ) -> "MoleculeTable":
+        """
+        Search the molecules in the table with a SMARTS pattern.
+
+        Args:
+            patterns:
+                List of SMARTS patterns to search with.
+            operator (object):
+                Whether to use an "or" or "and" operator on patterns. Defaults to "or".
+            use_chirality:
+                Whether to use chirality in the search.
+            name:
+                Name of the new table. Defaults to the name of the old table,
+                plus the `smarts_searched` suffix.
+
+        Returns:
+            (MolTable): A dataframe with the molecules that match the pattern.
+        """
+        matches = self.df.index[self.df[self.smilesCol].apply(
+            lambda x: match_mol_to_smarts(
+                x, patterns, operator=operator, use_chirality=use_chirality
+            )
+        )]
+        return self.searchWithIndex(
+            matches,
+            name=f"{self.name}_smarts_searched" if name is None else name
+        )
+
+    def getSummary(self):
+        """
+        Make a summary with some statistics about the molecules in this table.
+        The summary contains the number of molecules per target and the number of
+        unique molecules per target.
+
+        Returns:
+            (pd.DataFrame): A dataframe with the summary statistics.
+
+        """
+        summary = {
+            "mols_per_target": self.df.groupby("accession")
+            .count()["InChIKey"].to_dict(),
+            "mols_per_target_unique": self.df.groupby("accession")
+            .aggregate(lambda x: len(set(x)))["InChIKey"].to_dict()
+        }
+        return pd.DataFrame(summary)
+
+    def sample(
+            self,
+            n: int,
+            name: str | None = None,
+            random_state: int = None
+    ) -> "MoleculeTable":
+        """
+        Sample n molecules from the table.
+
+        Args:
+            n (int):
+                Number of molecules to sample.
+            name (str):
+                Name of the new table. Defaults to the name of the old
+                table, plus the `_sampled` suffix.
+            random_state (int):
+                Random state to use for shuffling and other random ops.
+
+        Returns:
+            (MoleculeTable): A dataframe with the sampled molecules.
+        """
+        random_state = random_state or self.randomState
+        name = f"{self.name}_sampled" if name is None else name
+        index = self.df.sample(n=n, random_state=random_state).index
+        return self.searchWithIndex(index, name=name)
 
     def __getstate__(self):
         o_dict = super().__getstate__()
@@ -465,6 +607,15 @@ class MoleculeTable(PandasDataSet, MoleculeDataSet):
     def hasDescriptors(self):
         """Check whether the data frame contains descriptors."""
         return len(self.getDescriptorNames()) > 0
+
+    @property
+    def smiles(self) -> Generator[str, None, None]:
+        """Get the SMILES strings of the molecules in the data frame.
+
+        Returns:
+            Generator[str, None, None]: Generator of SMILES strings.
+        """
+        return iter(self.df[self.smilesCol].values)
 
     def getProperties(self):
         """Get names of all properties/variables saved in the data frame (all columns).

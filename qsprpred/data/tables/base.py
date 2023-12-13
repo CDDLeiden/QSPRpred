@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, Generator
 
 import pandas as pd
 
@@ -129,6 +129,16 @@ class MoleculeDataSet(DataSet):
     @abstractmethod
     def hasDescriptors(self):
         """Indicates if the dataset has descriptors."""
+
+    @property
+    @abstractmethod
+    def smiles(self) -> Generator[str, None, None]:
+        """Get the SMILES strings of the molecules in the dataset.
+
+        Returns:
+            list[str]: The SMILES strings of the molecules in the dataset.
+        """
+
 
 
 class DataSetDependant:
