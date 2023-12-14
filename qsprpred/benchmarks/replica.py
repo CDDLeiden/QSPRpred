@@ -148,6 +148,7 @@ class Replica(JSONSerializable):
                 desc_sets=deepcopy(self.descriptors)
             )
             self.ds.addDescriptors(desc_calculator, recalculate=True)
+            self.ds.setTargetProperties(deepcopy(self.targetProps))
             self.ds.save()
 
     def prepData(self):
