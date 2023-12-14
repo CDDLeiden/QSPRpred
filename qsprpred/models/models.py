@@ -51,7 +51,7 @@ class QSPRModel(JSONSerializable, ABC):
             Random state to use for all random operations for reproducibility.
     """
 
-    _notJSON = ["alg", "data", "estimator"]
+    _notJSON = ["data", "estimator"]
 
     @staticmethod
     def handleInvalidsInPredictions(
@@ -224,10 +224,8 @@ class QSPRModel(JSONSerializable, ABC):
         """Set state."""
         super().__setstate__(state)
         self.data = None
-        if hasattr(self, "alg") and self.alg is not None:
+        if type(self.alg) is str:
             self.alg = dynamic_import(self.alg)
-        else:
-            self.alg = None
         self.estimator = self.loadEstimator(self.parameters)
 
     def initFromData(self, data: QSPRDataset | None):
