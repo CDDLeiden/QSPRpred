@@ -42,5 +42,5 @@ class RandomModel(QSPRModel):
             y_list = [pd.DataFrame(np.random.choice(self.ratios.shape[0], len(X), p=self.ratios[col]), columns=[col]) for col in list(self.ratios)]
             return pd.concat(y_list, axis=1)
         if (self.task.isRegression()):
-            y_list = [pd.DataFrame(np.random.normal(loc=self.mean[col], scale=self.std[col], size=len(X)), columns=[col]) for col in list(self.ratios)]
+            y_list = [pd.DataFrame(np.random.normal(loc=self.mean[col], scale=self.std[col], size=len(X)), columns=[col]) for col in len(self.mean)]
             return pd.concat(y_list, axis=1)
