@@ -91,6 +91,7 @@ class BenchmarkRunner:
         self.dataDir = data_dir
         self.resultsFile = results_file if results_file else f"{data_dir}/results.tsv"
         os.makedirs(self.dataDir, exist_ok=True)
+        self.settings.toFile(f"{self.dataDir}/settings.json")
 
     @property
     def nRuns(self) -> int:
