@@ -44,3 +44,8 @@ class RandomModel(QSPRModel):
         if (self.task.isRegression()):
             y_list = [pd.DataFrame(np.random.normal(loc=self.mean[col], scale=self.std[col], size=len(X)), columns=[col]) for col in len(self.mean)]
             return pd.concat(y_list, axis=1)
+
+    @property
+    def supportsEarlyStopping(self) -> bool:
+        """Whether the model supports early stopping or not."""
+        return False
