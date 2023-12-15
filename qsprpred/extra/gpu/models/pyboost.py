@@ -155,7 +155,6 @@ class PyBoostModel(QSPRModel):
                     "X": X[val_index, :],
                     "y": y[val_index]
                 }],
-                monitor=monitor,
             )
             monitor.onFitEnd(estimator, estimator.best_round)
             return estimator, estimator.best_round
