@@ -261,30 +261,37 @@ class QSPRModel(JSONSerializable, ABC):
             )
         self.randomState = new_random_state
         constructor_params = [
-            # FIXME, this does not always work (i.e for XGBoost)
             name
             for name, _ in inspect.signature(self.alg.__init__).parameters.items()
         ]
-        if "random_state" not in constructor_params:
-            try:
-                if self.parameters:
-                    params = {
-                        k: v for k, v in self.parameters.items() if k != "random_state"
-                    }
-                    self.alg(
-                        **params,
-                        random_state=self.randomState,
-                    )
-                else:
-                    self.alg(random_state=new_random_state)
-                constructor_params.append("random_state")
-            except TypeError:
-                pass
-        if "random_state" in constructor_params:
-            if self.parameters:
-                self.parameters.update({"random_state": new_random_state})
+        common_params = ["seed", "random_seed", "random_state"]
+        random_param = None
+        for seed_param in common_params:
+            if seed_param not in constructor_params:
+                try:
+                    if self.parameters:
+                        params = {
+                            k: v for k, v in self.parameters.items() if k != seed_param
+                        }
+                        params[seed_param] = self.randomState
+                        self.alg(
+                            **params,
+                        )
+                    else:
+                        self.alg(**{seed_param: new_random_state})
+                    random_param = seed_param
+                    break
+                except TypeError:
+                    pass
             else:
-                self.parameters = {"random_state": new_random_state}
+                random_param = seed_param
+                break
+        if random_param is not None:
+            if self.parameters:
+                self.parameters.update({random_param: new_random_state})
+            else:
+                self.parameters = {random_param: new_random_state}
+            self.estimator = self.loadEstimator(self.parameters)
         elif random_state:
             logger.warning(
                 f"Random state supplied, but alg {self.alg} does not support it."
