@@ -198,23 +198,37 @@ class Replica(JSONSerializable):
         self.results = None
         for assessor in self.assessors:
             scores = assessor(self.model, save=True)
-            scores = pd.DataFrame(
-                {
-                    "Assessor": assessor.__class__.__name__,
-                    "ScoreFunc": assessor.scoreFunc.name,
-                    "Score": scores,
-                    "TargetProperties": "~".join(
-                        sorted([tp.name for tp in self.targetProps])
-                    ),
-                    "TargetTasks": "~".join(
-                        sorted([str(tp.task) for tp in self.targetProps])
-                    ),
-                }
-            )
-            if self.results is None:
-                self.results = scores
+            if len(self.targetProps) == len(scores):
+                scores_df = pd.DataFrame()
+                for score, tp in zip(scores, self.targetProps):
+                    score_df = pd.DataFrame(
+                        {
+                            "Assessor": [assessor.__class__.__name__],
+                            "ScoreFunc": [assessor.scoreFunc.name],
+                            "Score": [score],
+                            "TargetProperty": [tp.name],
+                            "TargetTask": [tp.task.name],
+                        }
+                    )
+                    scores_df = pd.concat([scores_df, score_df])
             else:
-                self.results = pd.concat([self.results, scores])
+                scores_df = pd.DataFrame(
+                    {
+                        "Assessor": [assessor.__class__.__name__],
+                        "ScoreFunc": [assessor.scoreFunc.name],
+                        "Score": scores,
+                        "TargetProperty": ["~".join(
+                            sorted([tp.name for tp in self.targetProps])
+                        )],
+                        "TargetTask": ["~".join(
+                            sorted([str(tp.task) for tp in self.targetProps])
+                        )],
+                    }
+                )
+            if self.results is None:
+                self.results = scores_df
+            else:
+                self.results = pd.concat([self.results, scores_df])
 
     def createReport(self):
         """Creates a report from the results of this replica.
