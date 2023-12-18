@@ -50,6 +50,8 @@ class Replica(JSONSerializable):
             `runAssessment` has been called.
     """
 
+    _notJSON = JSONSerializable._notJSON + ["ds", "results", "model"]
+
     def __init__(
         self,
         idx: int,
