@@ -96,8 +96,11 @@ class RandomSplit(DataSplit, Randomized):
                 "and could not find random state on the dataset."
                 "Random seed will be set randomly."
             )
-        return ShuffleSplit(1, test_size=self.testFraction,
-                            random_state=self.seed).split(X, y)
+        return ShuffleSplit(
+            1,
+            test_size=self.testFraction,
+            random_state=self.seed
+        ).split(X, y)
 
 
 class BootstrapSplit(DataSplit, Randomized):
@@ -365,7 +368,7 @@ class GBMTDataSplit(DataSplit):
                 for qspridx in self.customTestList
             } if self.customTestList else None
         )
-        print(self.split_kwargs)
+        logger.debug(f"Split arguments: {self.split_kwargs}")
         # Split dataset
         if self.nFolds == 1:
             sizes = [1 - self.testFraction, self.testFraction]

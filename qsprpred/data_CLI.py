@@ -483,7 +483,7 @@ def QSPR_dataprep(args):
             # prepare dataset for modelling
             mydataset.prepareDataset(
                 feature_calculators=[MoleculeDescriptorsCalculator(descriptorsets)],
-                datafilters=datafilters,
+                data_filters=datafilters,
                 split=split,
                 feature_filters=featurefilters,
                 feature_standardizer=StandardScaler()

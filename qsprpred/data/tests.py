@@ -1735,7 +1735,7 @@ class DataPrepTestMixIn(DescriptorCheckMixIn):
             split=split if split else None,
             feature_standardizer=feature_standardizer if feature_standardizer else None,
             feature_filters=[feature_filter] if feature_filter else None,
-            datafilters=[data_filter] if data_filter else None,
+            data_filters=[data_filter] if data_filter else None,
         )
         expected_feature_count = len(dataset.featureNames)
         original_features = dataset.featureNames
@@ -1762,7 +1762,7 @@ class DataPrepTestMixIn(DescriptorCheckMixIn):
             split=split if split else None,
             feature_standardizer=feature_standardizer if feature_standardizer else None,
             feature_filters=[feature_filter] if feature_filter else None,
-            datafilters=[data_filter] if data_filter else None,
+            data_filters=[data_filter] if data_filter else None,
         )
         self.checkFeatures(dataset, expected_feature_count)
         self.assertListEqual(sorted(dataset.featureNames), sorted(original_features))

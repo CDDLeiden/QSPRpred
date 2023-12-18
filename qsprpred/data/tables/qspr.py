@@ -506,9 +506,9 @@ be removed.
             and not split.hasDataSet
         ):
             split.setDataSet(self)
-        if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
-            if self.split.getSeed() is None:
-                self.split.setSeed(self.randomState)
+        if hasattr(split, "setSeed") and hasattr(split, "getSeed"):
+            if split.getSeed() is None:
+                split.setSeed(self.randomState)
         # split the data into train and test
         folds = FoldsFromDataSplit(split)
         self.X, self.X_ind, self.y, self.y_ind, _, _ = next(
@@ -516,6 +516,10 @@ be removed.
         )
         # select target properties
         logger.info("Total: train: %s test: %s" % (len(self.y), len(self.y_ind)))
+        logger.debug(f"First index train: {self.y.index[0]}")
+        logger.debug(f"First index test: {self.y_ind.index[0]}")
+        logger.debug(f"Last index train: {self.y.index[-1]}")
+        logger.debug(f"Last index test: {self.y_ind.index[-1]}")
         for prop in self.targetProperties:
             logger.info("Target property: %s" % prop.name)
             if prop.task == TargetTasks.SINGLECLASS:
@@ -755,7 +759,7 @@ be removed.
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: list = [RepeatsFilter(keep=True)],
+        data_filters: list | None = (RepeatsFilter(keep=True),),
         split=None,
         feature_calculators: list | None = None,
         feature_filters: list | None = None,
@@ -771,7 +775,7 @@ be removed.
             smiles_standardizer (str | Callable): either `chembl`, `old`, or a
                 partial function that reads and standardizes smiles. If `None`, no
                 standardization will be performed. Defaults to `chembl`.
-            datafilters (list of datafilter obj): filters number of rows from dataset
+            data_filters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             feature_calculators (list[DescriptorsCalculator]): calculate features using
                 different information from the data set
@@ -794,8 +798,8 @@ be removed.
         if feature_calculators is not None:
             self.addFeatures(feature_calculators, recalculate=recalculate_features)
         # apply data filters
-        if datafilters is not None:
-            self.filter(datafilters)
+        if data_filters is not None:
+            self.filter(data_filters)
         # Replace any NaN values in featureNames by 0
         # FIXME: this is not very good, we should probably add option to do custom
         # data imputation here or drop rows with NaNs
