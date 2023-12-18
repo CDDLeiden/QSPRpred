@@ -12,7 +12,8 @@ from .replica import Replica
 from .settings.benchmark import BenchmarkSettings
 from ..logs import logger
 
-lock = Lock()
+lock_data = Lock()
+lock_report = Lock()
 
 
 class BenchmarkRunner:
@@ -145,6 +146,8 @@ class BenchmarkRunner:
                         logger.error(
                             f"Error in replica {result.replicaID}: {result.exception}"
                         )
+                else:
+                    logger.debug(f"Return success from replica: {result}")
         logger.debug("Finished all replica runs.")
         return pd.read_table(self.resultsFile)
 
@@ -209,14 +212,24 @@ class BenchmarkRunner:
         )
         seeds = self.getSeedList(benchmark_settings.random_seed)
         for idx, settings in enumerate(product):
-            yield Replica(
+            yield self.makeReplica(
                 *settings,
                 random_seed=seeds[idx],
                 assessors=benchmark_settings.assessors,
             )
 
+    def makeReplica(self, *args, **kwargs) -> Replica:
+        """Returns a `Replica` object for the given settings. This is useful
+        for debugging.
+
+        Returns:
+            Replica:
+                Replica object.
+        """
+        return Replica(*args, **kwargs)
+
     @classmethod
-    def runReplica(cls, replica: Replica, results_file: str):
+    def runReplica(cls, replica: Replica, results_file: str) -> str | ReplicaException:
         """Runs a single replica. This is executed in parallel by the `run` method.
         It is a classmethod so that it can be pickled and executed in parallel
         more easily.
@@ -228,11 +241,12 @@ class BenchmarkRunner:
                 Path to the results file.
 
         Returns:
-            pd.DataFrame | ReplicaException:
-                Results from the replica or a `ReplicaException` if an error occurred.
+            str | ReplicaException:
+                ID of the replica that was run or a `ReplicaException` if an error
+                was encountered.
         """
         try:
-            with lock:
+            with lock_data:
                 df_results = None
                 if os.path.exists(results_file):
                     df_results = pd.read_table(results_file)
@@ -242,13 +256,26 @@ class BenchmarkRunner:
                 ):
                     logger.warning(f"Skipping {replica.id}")
                     return
+                logger.debug("Initializing data set...")
                 replica.initData()
+                logger.debug("Done.")
+                logger.debug("Adding descriptors...")
                 replica.addDescriptors()
+                logger.debug("Done.")
+            logger.debug("Preparing data...")
             replica.prepData()
+            logger.debug("Done.")
+            logger.debug("Initializing model...")
             replica.initModel()
+            logger.debug("Done.")
+            logger.debug("Running assessments...")
             replica.runAssessment()
-            with lock:
-                df_report = replica.createReport()
+            logger.debug("Done.")
+            logger.debug("Creating report...")
+            df_report = replica.createReport()
+            logger.debug("Done.")
+            with lock_report:
+                logger.debug(f"Adding report to: {results_file}")
                 df_report.to_csv(
                     results_file,
                     sep="\t",
@@ -256,7 +283,9 @@ class BenchmarkRunner:
                     mode="a",
                     header=not os.path.exists(results_file),
                 )
-                return df_report
+                logger.debug("Done.")
+            logger.debug(f"Finished replica: {replica.id}")
+            return replica.id
         except Exception as e:
             traceback.print_exception(type(e), e, e.__traceback__)
             return cls.ReplicaException(replica.id, e)
