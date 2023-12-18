@@ -56,6 +56,7 @@ class QSPRDataset(MoleculeTable):
         index_cols: Optional[list[str]] = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
+        store_format: str = "pkl",
     ):
         """Construct QSPRdata, also apply transformations of output property if
         specified.
@@ -87,6 +88,7 @@ be removed.
                 generated.
             autoindex_name (str): Column name to use for automatically generated IDs.
             random_state (int, optional): random state for splitting the data.
+            store_format (str, optional): format to use for storing the data ('pkl' or 'csv').
 
         Raises:
             `ValueError`: Raised if threshold given with non-classification task.
@@ -104,6 +106,7 @@ be removed.
             index_cols,
             autoindex_name,
             random_state,
+            store_format,
         )
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()

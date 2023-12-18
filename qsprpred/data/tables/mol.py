@@ -122,6 +122,7 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
         index_cols: Optional[list[str]] = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
+        store_format: str = "pkl",
     ):
         """Initialize a `MoleculeTable` object.
 
@@ -151,6 +152,7 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
                 will be a custom generated ID.
             autoindex_name (str): Column name to use for automatically generated IDs.
             random_state (int): Random state to use for shuffling and other random ops.
+            store_format (str): Format to use for storing the data ('pkl' or 'csv').
         """
         super().__init__(
             name,
@@ -162,6 +164,7 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
             chunk_size,
             autoindex_name,
             random_state,
+            store_format,
         )
         # the descriptors
         self.descriptors = []
@@ -212,7 +215,9 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
             n_jobs=self.nJobs,
             chunk_size=self.chunkSize,
             drop_invalids=False,
-            index_cols=self.indexCols
+            index_cols=self.indexCols,
+            random_state=self.randomState,
+            store_format=self.storeFormat,
         )
         for table, calc in zip(self.descriptors, self.descriptorCalculators):
             ret.descriptors.append(
