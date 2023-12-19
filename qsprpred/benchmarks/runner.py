@@ -242,6 +242,8 @@ class BenchmarkRunner:
                 Log level. Defaults to logging.DEBUG.
         """
         replica_logger = logging.getLogger(replica.id)
+        if len(replica_logger.handlers) > 0:
+            return replica_logger
         replica_logger.setLevel(level)
         sh = logging.StreamHandler()
         formatter = logging.Formatter(
@@ -313,6 +315,7 @@ class BenchmarkRunner:
             replica (Replica):
                 Replica to initialize.
         """
+        logger = cls.getLoggerForReplica(replica, cls.logLevel)
         logger.debug("Initializing data set...")
         replica.initData()
         logger.debug("Done.")
@@ -338,13 +341,17 @@ class BenchmarkRunner:
                 was encountered.
         """
         logger = cls.getLoggerForReplica(replica, cls.logLevel)
+        logger.debug(f"Starting replica: {replica.id}")
         try:
             with lock_data:
+                logger.debug(f"Checking {replica.id} in results file: {results_file}")
                 if cls.checkReplicaInResultsFile(replica, results_file):
                     logger.warning(f"Skipping {replica.id}. Already in results file.")
                     return replica.id
+                logger.debug("Initializing data...")
                 cls.initData(replica)
-            logger.debug("Preparing data...")
+                logger.debug("Done.")
+            logger.debug("Preparing data set...")
             replica.prepData()
             logger.debug("Done.")
             logger.debug("Initializing model...")
@@ -363,5 +370,6 @@ class BenchmarkRunner:
             logger.debug(f"Finished replica: {replica.id}")
             return replica.id
         except Exception as e:
+            logger.error(f"Error in replica: {e}")
             traceback.print_exception(type(e), e, e.__traceback__)
             return cls.ReplicaException(replica.id, e)
