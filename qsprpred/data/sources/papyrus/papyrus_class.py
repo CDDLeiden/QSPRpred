@@ -8,6 +8,7 @@ import pandas as pd
 import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
+from qsprpred.logs import logger
 from .papyrus_filter import papyrus_filter
 from ..data_source import DataSource
 from ...tables.mol import MoleculeTable
@@ -73,15 +74,24 @@ class Papyrus(DataSource):
         reload the data completely.
         """
         os.makedirs(self.dataDir, exist_ok=True)
-        download_papyrus(
-            outdir=self.dataDir,
-            version=self.version,
-            descriptors=self.descriptors,
-            stereo=self.stereo,
-            nostereo=self.nostereo,
-            disk_margin=self.diskMargin,
-            only_pp=self.plusplus,
-        )
+        if not os.path.exists(os.path.join(self.dataDir, "papyrus")):
+            logger.info("Downloading Papyrus database...")
+            download_papyrus(
+                outdir=self.dataDir,
+                version=self.version,
+                descriptors=self.descriptors,
+                stereo=self.stereo,
+                nostereo=self.nostereo,
+                disk_margin=self.diskMargin,
+                only_pp=self.plusplus,
+            )
+        else:
+            logger.info(
+                f"Papyrus database already"
+                f" downloaded. Using existing data. "
+                f"Delete the following folder to reload the data: "
+                f"{os.path.join(self.dataDir, 'papyrus')}"
+            )
 
     def getData(
         self,
@@ -111,12 +121,15 @@ class Papyrus(DataSource):
         Returns:
             MolculeTable: the filtered data set
         """
+        logger.debug(f"Getting data from Papyrus data source...")
         assert acc_keys is not None, "Please provide a list of accession keys."
         name = name or "papyrus"
         self.download()
+        logger.debug("Papyrus data set finished downloading.")
         output_dir = output_dir or self.dataDir
         if not os.path.exists(output_dir):
             raise ValueError(f"Output directory '{output_dir}' does not exist.")
+        logger.debug(f"Filtering Papyrus for accession keys: {acc_keys}")
         data, path = papyrus_filter(
             acc_key=acc_keys,
             quality=quality,
@@ -130,7 +143,11 @@ class Papyrus(DataSource):
             plusplus=self.plusplus,
             papyrus_dir=self.dataDir,
         )
-        return MoleculeTable.fromTableFile(name, path, store_dir=output_dir, **kwargs)
+        logger.debug(f"Finished filtering Papyrus data set.")
+        logger.debug(f"Creating MoleculeTable from '{path}'.")
+        ret = MoleculeTable.fromTableFile(name, path, store_dir=output_dir, **kwargs)
+        logger.debug(f"Finished creating MoleculeTable from '{path}'.")
+        return ret
 
     def getProteinData(
         self,
