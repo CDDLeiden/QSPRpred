@@ -2,15 +2,15 @@ from typing import Callable
 
 import pandas as pd
 
-from ...data.tables.qspr import QSPRDataset
-from ...data.tables.mol import MoleculeTable
-from ...tasks import TargetProperty
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 from ...data.descriptors.calculators import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
+from ...data.tables.mol import MoleculeTable
+from ...data.tables.qspr import QSPRDataset
 from ...logs import logger
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from ...tasks import TargetProperty
 from ...utils.serialization import function_as_string, function_from_string
 
 
@@ -29,6 +29,7 @@ class PCMDataSet(QSPRDataset):
             function that takes a list of protein identifiers and returns a `dict`
             mapping those identifiers to their sequences. Defaults to `None`.
     """
+
     def __init__(
         self,
         name: str,
@@ -44,7 +45,6 @@ class PCMDataSet(QSPRDataset):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
-        target_imputer: Callable | None = None,
         index_cols: list[str] | None = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
@@ -83,8 +83,6 @@ class PCMDataSet(QSPRDataset):
                 If `True`, invalid SMILES will be dropped. Defaults to `True`.
             drop_empty (bool, optional):
                 If `True`, rows with empty SMILES will be dropped. Defaults to `True`.
-            target_imputer (Callable, optional):
-                imputer for missing target property values. Defaults to `None`.
             index_cols (List[str], optional):
                 columns to be used as index in the dataframe.
                 Defaults to `None` in which case a custom ID will be generated.
@@ -109,7 +107,6 @@ class PCMDataSet(QSPRDataset):
             drop_invalids=drop_invalids,
             index_cols=index_cols,
             target_props=target_props,
-            target_imputer=target_imputer,
             drop_empty=drop_empty,
             autoindex_name=autoindex_name,
             random_state=random_state,
@@ -138,10 +135,7 @@ class PCMDataSet(QSPRDataset):
         return self.proteinSeqProvider(self.getProteinKeys())
 
     def addProteinDescriptors(
-        self,
-        calculator: ProteinDescriptorCalculator,
-        recalculate=False,
-        featurize=True
+        self, calculator: ProteinDescriptorCalculator, recalculate=False, featurize=True
     ):
         """
         Add protein descriptors to the data frame.
@@ -172,7 +166,8 @@ class PCMDataSet(QSPRDataset):
         # calculate the descriptors
         sequences, info = (
             self.proteinSeqProvider(self.df[self.proteinCol].unique().tolist())
-            if self.proteinSeqProvider else (None, {})
+            if self.proteinSeqProvider
+            else (None, {})
         )
         descriptors = calculator(self.df[self.proteinCol].unique(), sequences, **info)
         descriptors[self.proteinCol] = descriptors.index.values
@@ -243,11 +238,7 @@ class PCMDataSet(QSPRDataset):
         )
         name = mol_table.name if name is None else name
         ds = PCMDataSet(
-            name,
-            protein_col,
-            target_props=target_props,
-            df=mol_table.getDF(),
-            **kwargs
+            name, protein_col, target_props=target_props, df=mol_table.getDF(), **kwargs
         )
         if not ds.descriptors and mol_table.descriptors:
             ds.descriptors = mol_table.descriptors

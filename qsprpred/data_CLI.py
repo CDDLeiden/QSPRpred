@@ -363,7 +363,6 @@ def QSPR_dataprep(args):
                 n_jobs=args.ncpu,
                 store_dir=args.output_dir,
                 overwrite=True,
-                target_imputer=imputer if args.imputation is not None else None,
                 random_state=args.random_state
                 if args.random_state is not None
                 else None,

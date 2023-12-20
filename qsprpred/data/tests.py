@@ -286,7 +286,6 @@ class DataSetsMixIn(PathMixIn):
         self,
         name="QSPRDataset_test_large",
         target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-        target_imputer=None,
         preparation_settings=None,
         random_state=42,
     ):
@@ -295,7 +294,6 @@ class DataSetsMixIn(PathMixIn):
         Args:
             name (str): name of the dataset
             target_props (List of dicts or TargetProperty): list of target properties
-            target_imputer (sklearn.impute): imputer to use for target values
             random_state (int): random state to use for splitting and shuffling
             preparation_settings (dict): dictionary containing preparation settings
 
@@ -306,7 +304,6 @@ class DataSetsMixIn(PathMixIn):
             self.getBigDF(),
             name=name,
             target_props=target_props,
-            target_imputer=target_imputer,
             prep=preparation_settings,
             random_state=random_state,
         )
@@ -315,7 +312,6 @@ class DataSetsMixIn(PathMixIn):
         self,
         name="QSPRDataset_test_small",
         target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-        target_imputer=None,
         preparation_settings=None,
         random_state=42,
     ):
@@ -324,7 +320,6 @@ class DataSetsMixIn(PathMixIn):
         Args:
             name (str): name of the dataset
             target_props (List of dicts or TargetProperty): list of target properties
-            target_imputer (sklearn.impute): imputer to use for target values
             random_state (int): random state to use for splitting and shuffling
             preparation_settings (dict): dictionary containing preparation settings
 
@@ -335,7 +330,6 @@ class DataSetsMixIn(PathMixIn):
             self.getSmallDF(),
             name=name,
             target_props=target_props,
-            target_imputer=target_imputer,
             random_state=random_state,
             prep=preparation_settings,
         )
@@ -345,7 +339,6 @@ class DataSetsMixIn(PathMixIn):
         df,
         name="QSPRDataset_test",
         target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-        target_imputer=None,
         random_state=None,
         prep=None,
     ):
@@ -355,6 +348,7 @@ class DataSetsMixIn(PathMixIn):
             df (pd.DataFrame): data frame containing the dataset
             name (str): name of the dataset
             target_props (List of dicts or TargetProperty): list of target properties
+            random_state (int): random state to use for splitting and shuffling
             prep (dict): dictionary containing preparation settings
 
         Returns:
@@ -365,7 +359,6 @@ class DataSetsMixIn(PathMixIn):
             target_props=target_props,
             df=df,
             store_dir=self.generatedDataPath,
-            target_imputer=target_imputer,
             random_state=random_state,
         )
         if prep:
@@ -379,7 +372,6 @@ class DataSetsMixIn(PathMixIn):
             {"name": "HBD", "task": TargetTasks.MULTICLASS, "th": [-1, 1, 2, 100]},
             {"name": "CL", "task": TargetTasks.REGRESSION},
         ],
-        target_imputer=None,
         preparation_settings=None,
         random_state=42,
     ):
@@ -389,6 +381,7 @@ class DataSetsMixIn(PathMixIn):
             name (str): name of the dataset
             target_props (List of dicts or TargetProperty): list of target properties
             preparation_settings (dict): dictionary containing preparation settings
+            random_state (int): random state to use for splitting and shuffling
 
         Returns:
             QSPRDataset: a `QSPRDataset` object
@@ -397,7 +390,6 @@ class DataSetsMixIn(PathMixIn):
             self.getBigDF(),
             name=name,
             target_props=target_props,
-            target_imputer=target_imputer,
             random_state=random_state,
             prep=preparation_settings,
         )
@@ -1412,20 +1404,28 @@ class TestTargetImputation(PathMixIn, TestCase):
         self.dataset = QSPRDataset(
             "TestImputation",
             target_props=[
-                {"name": "y", "task": TargetTasks.REGRESSION},
-                {"name": "z", "task": TargetTasks.REGRESSION},
+                {
+                    "name": "y",
+                    "task": TargetTasks.REGRESSION,
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
+                {
+                    "name": "z",
+                    "task": TargetTasks.REGRESSION,
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
             ],
             df=self.df,
             store_dir=self.generatedPath,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
-            target_imputer=SimpleImputer(strategy="mean"),
         )
-        self.assertEqual(self.dataset.targetProperties[0].originalName, "y")
-        self.assertEqual(self.dataset.targetProperties[1].originalName, "z")
-        self.assertEqual(self.dataset.targetProperties[0].name, "y_imputed")
-        self.assertEqual(self.dataset.targetProperties[1].name, "z_imputed")
-        self.assertEqual(self.dataset.df["z_imputed"].isna().sum(), 0)
+        self.assertEqual(self.dataset.targetProperties[0].name, "y")
+        self.assertEqual(self.dataset.targetProperties[1].name, "z")
+        self.assertTrue("y_before_impute" in self.dataset.df.columns)
+        self.assertTrue("z_before_impute" in self.dataset.df.columns)
+        self.assertEqual(self.dataset.df["y"].isna().sum(), 0)
+        self.assertEqual(self.dataset.df["z"].isna().sum(), 0)
 
 
 class TestFeatureFilters(PathMixIn, TestCase):

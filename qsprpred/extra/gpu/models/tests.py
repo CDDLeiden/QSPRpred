@@ -8,22 +8,23 @@ import torch
 from parameterized import parameterized
 from sklearn.impute import SimpleImputer
 
-from ....data.tables.qspr import QSPRDataset
-from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
 from qsprpred.data.descriptors.sets import SmilesDesc
+from qsprpred.data.sampling.splits import RandomSplit
+from qsprpred.tasks import TargetTasks, ModelTasks
+from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
-from qsprpred.tasks import TargetTasks, ModelTasks
-from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitorsMixIn
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
+from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitorsMixIn
 
 GPUS = list(range(torch.cuda.device_count()))
 
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
+
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -75,10 +76,12 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     [0, 1, 10, 1100],
                 ),
             )
-        ] + [
+        ]
+        + [
             (f"{alg_name}_{task}", task, alg_name, alg, th, random_state)
-            for alg, alg_name, task, th in
-            ((STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None), )
+            for alg, alg_name, task, th in (
+                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
+            )
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -103,11 +106,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=self.getDefaultPrep(),
         )
 
@@ -148,6 +147,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
+
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -182,7 +182,8 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name, th) for alg_name, task, th in (
+            (f"{alg_name}_{task}", task, alg_name, th)
+            for alg_name, task, th in (
                 ("MoleculeModel", TargetTasks.REGRESSION, None),
                 ("MoleculeModel", TargetTasks.SINGLECLASS, [6.5]),
                 ("MoleculeModel", TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
@@ -201,11 +202,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=None,
         )
         dataset.prepareDataset(
@@ -225,7 +222,8 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name) for alg_name, task in (
+            (f"{alg_name}_{task}", task, alg_name)
+            for alg_name, task in (
                 ("MoleculeModel", ModelTasks.MULTITASK_REGRESSION),
                 ("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS),
             )
@@ -242,35 +240,28 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
-                {
-                    "name": "fu",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [0.3]
-                },
-                {
-                    "name": "CL",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5]
-                },
+                {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
+                {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]},
             ]
         else:
             target_props = [
                 {
                     "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
-                    "th": [0.3]
+                    "th": [0.3],
+                    "imputer": SimpleImputer(strategy="mean"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5]
+                    "th": [6.5],
+                    "imputer": SimpleImputer(strategy="mean"),
                 },
             ]
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
             target_props=target_props,
-            target_imputer=SimpleImputer(strategy="mean"),
             preparation_settings=None,
         )
         dataset.prepareDataset(
@@ -292,6 +283,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 @pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
 class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the PyBoostModel class."""
+
     @staticmethod
     def getModel(
         base_dir: str,
@@ -322,7 +314,8 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            ("PyBoost", TargetTasks.REGRESSION, "PyBoost", params) for params in [
+            ("PyBoost", TargetTasks.REGRESSION, "PyBoost", params)
+            for params in [
                 {
                     "loss": "mse",
                     "metric": "r2_score",
@@ -347,10 +340,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": task
-            }],
+            target_props=[{"name": "CL", "task": task}],
             preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
@@ -370,13 +360,8 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         [
             (f"{'PyBoost'}_{task}", task, th, "PyBoost", params)
             for params, task, th in (
-                ({
-                    "loss": "bce",
-                    "metric": "auc"
-                }, TargetTasks.SINGLECLASS, [6.5]),
-                ({
-                    "loss": "crossentropy"
-                }, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
+                ({"loss": "bce", "metric": "auc"}, TargetTasks.SINGLECLASS, [6.5]),
+                ({"loss": "crossentropy"}, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             )
         ]
     )
@@ -385,11 +370,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -408,11 +389,9 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            ("PyBoost", "PyBoost", params) for params in [
-                {
-                    "loss": "mse",
-                    "metric": "r2_score"
-                },
+            ("PyBoost", "PyBoost", params)
+            for params in [
+                {"loss": "mse", "metric": "r2_score"},
                 # {
                 #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
                 #     "metric": "r2_score"
@@ -432,14 +411,15 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             target_props=[
                 {
                     "name": "fu",
-                    "task": TargetTasks.REGRESSION
+                    "task": TargetTasks.REGRESSION,
+                    "imputer": SimpleImputer(strategy="mean"),
                 },
                 {
                     "name": "CL",
-                    "task": TargetTasks.REGRESSION
+                    "task": TargetTasks.REGRESSION,
+                    "imputer": SimpleImputer(strategy="mean"),
                 },
             ],
-            target_imputer=SimpleImputer(strategy="mean"),
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -495,7 +475,6 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     #                 "th": [6.5]
     #             },
     #         ],
-    #         target_imputer=SimpleImputer(strategy="mean"),
     #         preparation_settings=self.getDefaultPrep(),
     #     )
     #     # test classifier
@@ -515,6 +494,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 class TestNNMonitoring(TestMonitorsMixIn, TestCase):
     """This class holds the tests for the monitoring classes."""
+
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -568,5 +548,5 @@ class TestNNMonitoring(TestMonitorsMixIn, TestCase):
             ListMonitor,
             self.listMonitorTest,
             True,
-            [BaseMonitor(), FileMonitor()]
+            [BaseMonitor(), FileMonitor()],
         )

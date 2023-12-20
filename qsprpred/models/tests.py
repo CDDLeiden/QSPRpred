@@ -498,10 +498,17 @@ class TestSklearnRegressionMultiTask(SklearnModelMixIn):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             target_props=[
-                {"name": "fu", "task": TargetTasks.REGRESSION},
-                {"name": "CL", "task": TargetTasks.REGRESSION},
+                {
+                    "name": "fu",
+                    "task": TargetTasks.REGRESSION,
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION,
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
             ],
-            target_imputer=SimpleImputer(strategy="mean"),
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -700,10 +707,19 @@ class TestSklearnClassification(SklearnModelMixIn):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             target_props=[
-                {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
-                {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]},
+                {
+                    "name": "fu",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [0.3],
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [6.5],
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
             ],
-            target_imputer=SimpleImputer(strategy="mean"),
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
