@@ -8,15 +8,25 @@ import pandas as pd
 from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
-from ...tasks import TargetProperty, TargetTasks
-from ...data.tests import (
-    CHUNK_SIZE,
-    N_CPU,
-    DataPrepTestMixIn,
-    DataSetsMixIn,
-    TestDescriptorInDataMixIn,
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from qsprpred.extra.data.descriptors.sets import (
+    ExtendedValenceSignature,
+    Mold2,
+    Mordred,
+    PaDEL,
+    ProDec,
+    ProteinDescriptorSet,
 )
-from ...data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
+from qsprpred.extra.data.sampling.splits import (
+    LeaveTargetsOut,
+    PCMSplit,
+    TemporalPerTarget,
+)
+from qsprpred.extra.data.utils.msa_calculator import (
+    MAFFT,
+    BioPythonMSA,
+    ClustalMSA,
+)
 from ...data.descriptors.calculators import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
@@ -27,24 +37,18 @@ from ...data.descriptors.sets import (
     MoleculeDescriptorSet,
     RDKitDescs,
 )
-from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
+from ...data.processing.feature_standardizers import SKLearnStandardizer
+from ...data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
+from ...data.tests import (
+    CHUNK_SIZE,
+    N_CPU,
+    DataPrepTestMixIn,
+    DataSetsMixIn,
+    TestDescriptorInDataMixIn,
+)
 from ...extra.data.data import PCMDataSet
-from qsprpred.extra.data.utils.msa_calculator import (
-    MAFFT,
-    BioPythonMSA,
-    ClustalMSA,
-)
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
-from qsprpred.extra.data.descriptors.sets import (
-    ExtendedValenceSignature,
-    Mold2,
-    Mordred,
-    PaDEL,
-    ProDec,
-    ProteinDescriptorSet,
-)
-from qsprpred.extra.data.sampling.splits import LeaveTargetsOut, PCMSplit, TemporalPerTarget
+from ...tasks import TargetProperty, TargetTasks
 
 
 class DataSetsMixInExtras(DataSetsMixIn):
@@ -173,7 +177,6 @@ class DataSetsMixInExtras(DataSetsMixIn):
         | list[dict] = [
             {"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}
         ],
-        target_imputer: Callable[[pd.Series], pd.Series] | None = None,
         preparation_settings: dict | None = None,
         protein_col: str = "accession",
         random_state: int | None = None,
@@ -185,8 +188,6 @@ class DataSetsMixInExtras(DataSetsMixIn):
                 name of the dataset. Defaults to "QSPRDataset_test".
             target_props (list[TargetProperty] | list[dict], optional):
                 target properties.
-            target_imputer (Callable[pd.Series, pd.Series] | None, optional):
-                target imputer. Defaults to `None`.
             preparation_settings (dict | None, optional):
                 preparation settings. Defaults to None.
             protein_col (str, optional):
@@ -204,7 +205,6 @@ class DataSetsMixInExtras(DataSetsMixIn):
             target_props=target_props,
             df=df,
             store_dir=self.generatedDataPath,
-            target_imputer=target_imputer,
             n_jobs=N_CPU,
             chunk_size=CHUNK_SIZE,
             random_state=random_state,
