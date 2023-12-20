@@ -12,10 +12,7 @@ import pandas as pd
 from gbmtsplits import GloballyBalancedSplit
 from sklearn.model_selection import ShuffleSplit
 
-from ...logs import logger
-from ...data.tables.qspr import QSPRDataset
-from ...utils.randomized import Randomized
-from ...data.tables.base import MoleculeDataSet, DataSetDependant
+from qsprpred.utils.interfaces.randomized import Randomized
 from ...data.chem.clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
@@ -23,6 +20,9 @@ from ...data.chem.clustering import (
     ScaffoldClusters,
 )
 from ...data.chem.scaffolds import Murcko, Scaffold
+from ...data.tables.base import MoleculeDataTable, DataSetDependant
+from ...data.tables.qspr import QSPRDataset
+from ...logs import logger
 
 
 class DataSplit(DataSetDependant, ABC):
@@ -30,9 +30,10 @@ class DataSplit(DataSetDependant, ABC):
     Defines a function split a dataframe into train and test set.
 
     Attributes:
-        dataset (MoleculeDataSet): The dataset to split.
+        dataset (MoleculeDataTable): The dataset to split.
     """
-    def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
+
+    def __init__(self, dataset: MoleculeDataTable | None = None) -> None:
         super().__init__(dataset)
 
     @abstractmethod
@@ -74,6 +75,7 @@ class RandomSplit(DataSplit, Randomized):
         seed (int):
             Random state to use for shuffling and other random operations.
     """
+
     def __init__(
         self,
         test_fraction=0.1,
@@ -96,8 +98,9 @@ class RandomSplit(DataSplit, Randomized):
                 "and could not find random state on the dataset."
                 "Random seed will be set randomly."
             )
-        return ShuffleSplit(1, test_size=self.testFraction,
-                            random_state=self.seed).split(X, y)
+        return ShuffleSplit(
+            1, test_size=self.testFraction, random_state=self.seed
+        ).split(X, y)
 
 
 class BootstrapSplit(DataSplit, Randomized):
@@ -110,6 +113,7 @@ class BootstrapSplit(DataSplit, Randomized):
         seed (int):
             Random state to use for shuffling and other random operations.
     """
+
     def __init__(self, split: DataSplit, n_bootstraps=5, seed=None):
         """Initialize a BootstrapSplit object.
 
@@ -159,6 +163,7 @@ class ManualSplit(DataSplit):
     Raises:
         ValueError: if there are more values in splitcol than trainval and testval
     """
+
     def __init__(self, splitcol: pd.Series, trainval: str, testval: str) -> None:
         """Initialize the ManualSplit object with the splitcol, trainval and testval
         attributes.
@@ -209,6 +214,7 @@ class TemporalSplit(DataSplit):
         timeSplit(float): time point after which sample to test set
         timeCol (str): name of the column within the dataframe with timepoints
     """
+
     def __init__(
         self,
         timesplit: float | list[float],
@@ -240,7 +246,9 @@ class TemporalSplit(DataSplit):
             input data matrix
         """
         timesplits = (
-            self.timeSplit if isinstance(self.timeSplit, list) else [
+            self.timeSplit
+            if isinstance(self.timeSplit, list)
+            else [
                 self.timeSplit,
             ]
         )
@@ -300,6 +308,7 @@ class GBMTDataSplit(DataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset = None,
@@ -319,7 +328,7 @@ class GBMTDataSplit(DataSplit):
             self.testFraction = None
             self.customTestList = None
 
-    def setDataSet(self, dataset: MoleculeDataSet):
+    def setDataSet(self, dataset: MoleculeDataTable):
         super().setDataSet(dataset)
         if self.nFolds > 1:
             self.testFraction = (len(dataset) / self.nFolds) / len(dataset)
@@ -363,7 +372,9 @@ class GBMTDataSplit(DataSplit):
             {
                 df.loc[df.QSPRID == qspridx][ds.smilesCol].values[0]: 1
                 for qspridx in self.customTestList
-            } if self.customTestList else None
+            }
+            if self.customTestList
+            else None
         )
         print(self.split_kwargs)
         # Split dataset
@@ -384,9 +395,13 @@ class GBMTDataSplit(DataSplit):
             preassigned_smiles=preassigned_smiles,
         )
         # Get indices
-        for split in (df_split["Split"].unique() if self.nFolds > 1 else [
-            1,
-        ]):
+        for split in (
+            df_split["Split"].unique()
+            if self.nFolds > 1
+            else [
+                1,
+            ]
+        ):
             split = int(split)
             test_indices = df_split[df_split["Split"] == split].index.values
             train_indices = df_split[df_split["Split"] != split].index.values
@@ -414,6 +429,7 @@ class GBMTRandomSplit(GBMTDataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset | None = None,
@@ -455,6 +471,7 @@ class ScaffoldSplit(GBMTDataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset | None = None,
@@ -491,6 +508,7 @@ class ClusterSplit(GBMTDataSplit):
         split_kwargs (dict):
             additional arguments to be passed to the GloballyBalancedSplit
     """
+
     def __init__(
         self,
         dataset: QSPRDataset = None,
@@ -510,7 +528,8 @@ class ClusterSplit(GBMTDataSplit):
 
         clustering = (
             clustering
-            if clustering is not None else FPSimilarityMaxMinClusters(seed=seed)
+            if clustering is not None
+            else FPSimilarityMaxMinClusters(seed=seed)
         )
         super().__init__(
             dataset,

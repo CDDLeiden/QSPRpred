@@ -3,7 +3,7 @@ from typing import Callable
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 
-from .base import MoleculeDataSet
+from qsprpred.data.tables.base import MoleculeDataTable
 
 standard_grid = Draw.MolsToGridImage
 
@@ -18,8 +18,9 @@ def interactive_grid(mols, *args, molsPerRow=5, **kwargs):
     return mols2grid.display(mols, *args, n_cols=molsPerRow, **kwargs)
 
 
-def smiles_to_grid(smiles, *args, mols_per_row=5,
-        impl: Callable = standard_grid, **kwargs):
+def smiles_to_grid(
+    smiles, *args, mols_per_row=5, impl: Callable = standard_grid, **kwargs
+):
     mols = []
     for smile in smiles:
         try:
@@ -28,7 +29,7 @@ def smiles_to_grid(smiles, *args, mols_per_row=5,
                 AllChem.Compute2DCoords(m)
                 mols.append(m)
             else:
-                raise Exception(f'Molecule empty for SMILES: {smile}')
+                raise Exception(f"Molecule empty for SMILES: {smile}")
         except Exception as exp:
             pass
 
@@ -36,10 +37,12 @@ def smiles_to_grid(smiles, *args, mols_per_row=5,
 
 
 def table_to_grid(
-        table: MoleculeDataSet,
-        mols_per_row: int = 5,
-        impl: Callable = standard_grid,
-        *args,
-        **kwargs
+    table: MoleculeDataTable,
+    mols_per_row: int = 5,
+    impl: Callable = standard_grid,
+    *args,
+    **kwargs,
 ):
-    return smiles_to_grid(table.smiles, *args, molsPerRow=mols_per_row, impl=impl, **kwargs)
+    return smiles_to_grid(
+        table.smiles, *args, molsPerRow=mols_per_row, impl=impl, **kwargs
+    )
