@@ -194,9 +194,9 @@ class DataSetsMixIn(PathMixIn):
         feature_filters = [None, HighCorrelationFilter(0.9)]
         data_filters = [
             None,
-            # RepeatsFilter(),
-            # FIXME: this needs to be made more general and not specific to one dataset
+            RepeatsFilter(),
             # CategoryFilter(
+            # FIXME: this needs to be made more general and not specific to one dataset
             #     name="moka_ionState7.4",
             #     values=["cationic"]
             # ),
