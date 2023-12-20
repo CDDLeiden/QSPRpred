@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 from rdkit.Chem import PandasTools
 
-from .interfaces.searchable import Searchable, Summarizable
-from .pandas import PandasDataSet
+from qsprpred.data.tables.searchable import SearchableMolTable
+from .pandas import PandasDataTable
 from ..chem.matching import match_mol_to_smarts
 from ...data.chem.scaffolds import Scaffold
 from ...data.chem.standardization import (
@@ -18,9 +18,10 @@ from ...data.chem.standardization import (
     old_standardize_sanitize,
 )
 from ...logs import logger
+from ...utils.interfaces.summarizable import Summarizable
 
 
-class DescriptorTable(PandasDataSet):
+class DescriptorTable(PandasDataTable):
     """Pandas table that holds descriptor data
     for modelling and other analyses.
     """
@@ -105,10 +106,10 @@ class DescriptorTable(PandasDataSet):
         self.df[columns] = self.df[columns].fillna(fill_value)
 
 
-class MoleculeTable(PandasDataSet, Searchable, Summarizable):
+class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
     """Class that holds and prepares molecule data for modelling and other analyses."""
 
-    _notJSON: ClassVar = PandasDataSet._notJSON + ["descriptors"]
+    _notJSON: ClassVar = PandasDataTable._notJSON + ["descriptors"]
 
     def __init__(
         self,

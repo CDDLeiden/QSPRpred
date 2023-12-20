@@ -1,22 +1,15 @@
 from abc import abstractmethod
 from typing import Literal
 
-import pandas as pd
-
-from qsprpred.data.tables.base import MoleculeDataSet
+from qsprpred.data.tables.base import MoleculeDataTable
 
 
-class Searchable(MoleculeDataSet):
-
+class SearchableMolTable(MoleculeDataTable):
     @abstractmethod
     def searchOnProperty(
-            self,
-            prop_name: str,
-            values: list[str],
-            name: str | None = None,
-            exact=False
-    ) -> MoleculeDataSet:
-        """ Search the molecules within this `MoleculeDataSet` on a property value.
+        self, prop_name: str, values: list[str], name: str | None = None, exact=False
+    ) -> MoleculeDataTable:
+        """Search the molecules within this `MoleculeDataSet` on a property value.
 
         Args:
             prop_name:
@@ -29,18 +22,18 @@ class Searchable(MoleculeDataSet):
                 Whether to search for exact matches or not.
 
         Returns:
-            (MoleculeDataSet):
+            (MoleculeDataTable):
                 A data set with the molecules that match the search.
         """
 
     @abstractmethod
     def searchWithSMARTS(
-            self,
-            patterns: list[str],
-            operator: Literal["or", "and"] = "or",
-            use_chirality: bool = False,
-            name: str | None = None
-    ) -> MoleculeDataSet:
+        self,
+        patterns: list[str],
+        operator: Literal["or", "and"] = "or",
+        use_chirality: bool = False,
+        name: str | None = None,
+    ) -> MoleculeDataTable:
         """
         Search the molecules within this `MoleculeDataSet` with SMARTS patterns.
 
@@ -55,18 +48,5 @@ class Searchable(MoleculeDataSet):
                 Name of the new table.
 
         Returns:
-            (MoleculeDataSet): A dataframe with the molecules that match the pattern.
+            (MoleculeDataTable): A dataframe with the molecules that match the pattern.
         """
-
-
-class Summarizable:
-
-    @abstractmethod
-    def getSummary(self) -> pd.DataFrame:
-        """Make a summary with some statistics about this object or action.
-
-        Returns:
-            (pd.DataFrame):
-                A dataframe with the summary statistics.
-        """
-
