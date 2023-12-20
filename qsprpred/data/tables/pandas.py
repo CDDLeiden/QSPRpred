@@ -9,13 +9,13 @@ import numpy as np
 import pandas as pd
 from tqdm.asyncio import tqdm
 
-from .base import DataSet
+from .base import DataTable
 from ...logs import logger
 from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
 
-class PandasDataSet(DataSet, JSONSerializable):
+class PandasDataTable(DataTable, JSONSerializable):
     """A Pandas DataFrame wrapper class to enable data processing functions on
     QSPRpred data.
 
@@ -102,7 +102,7 @@ class PandasDataSet(DataSet, JSONSerializable):
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
     ):
-        """Initialize a `PandasDataSet` object.
+        """Initialize a `PandasDataTable` object.
         Args
             name (str): Name of the data set. You can use this name to load the dataset
                 from disk anytime and create a new instance.
@@ -494,7 +494,7 @@ class PandasDataSet(DataSet, JSONSerializable):
         assert all(col in self.df.columns for col in self.indexCols)
 
     @classmethod
-    def fromFile(cls, filename: str) -> "PandasDataSet":
+    def fromFile(cls, filename: str) -> "PandasDataTable":
         with open(filename, "r") as f:
             json_f = f.read()
         o_dict = json.loads(json_f)

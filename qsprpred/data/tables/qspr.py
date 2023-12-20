@@ -376,12 +376,17 @@ be removed.
         logger.info("Target property converted to classification.")
         return target_property
 
+    def searchWithIndex(
+        self, index: pd.Index, name: str | None = None
+    ) -> "MoleculeTable":
+        ret = super().searchWithIndex(index, name)
+        return QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
+
     @staticmethod
     def fromMolTable(
         mol_table: MoleculeTable,
         target_props: list[TargetProperty | dict],
         name=None,
-        random_state=None,
         **kwargs,
     ) -> "QSPRDataset":
         """Create QSPRDataset from a MoleculeTable.
@@ -391,17 +396,36 @@ be removed.
             target_props (list): list of target properties to use
             name (str, optional): name of the data set. Defaults to None.
             kwargs: additional keyword arguments to pass to the constructor
-            random_state(int, optional): seed to use for random operations
 
         Returns:
             QSPRDataset: created data set
         """
+        name = mol_table.name if name is None else name
         kwargs["store_dir"] = (
             mol_table.baseDir if "store_dir" not in kwargs else kwargs["store_dir"]
         )
-        name = mol_table.name if name is None else name
+        kwargs["random_state"] = (
+            mol_table.randomState
+            if "random_state" not in kwargs
+            else kwargs["random_state"]
+        )
+        kwargs["n_jobs"] = (
+            mol_table.nJobs if "n_jobs" not in kwargs else kwargs["n_jobs"]
+        )
+        kwargs["chunk_size"] = (
+            mol_table.chunkSize if "chunk_size" not in kwargs else kwargs["chunk_size"]
+        )
+        kwargs["smiles_col"] = (
+            mol_table.smilesCol if "smiles_col" not in kwargs else kwargs["smiles_col"]
+        )
+        kwargs["index_cols"] = (
+            mol_table.indexCols if "index_cols" not in kwargs else kwargs["index_cols"]
+        )
         ds = QSPRDataset(
-            name, target_props, mol_table.getDF(), random_state=random_state, **kwargs
+            name,
+            target_props,
+            mol_table.getDF(),
+            **kwargs,
         )
         ds.descriptors = mol_table.descriptors
         return ds
