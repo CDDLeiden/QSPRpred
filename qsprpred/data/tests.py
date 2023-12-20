@@ -54,7 +54,7 @@ from ..data.sampling.splits import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from ..models.sklearn import SklearnModel
+from ..models.scikit_learn import SklearnModel
 from ..tasks import TargetProperty, TargetTasks
 from ..utils.stopwatch import StopWatch
 

@@ -11,7 +11,7 @@ from ..data.descriptors.sets import RDKitDescs
 from ..data.sources.data_source import DataSource
 from ..data.tests import DataSetsMixIn
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
-from ..models.sklearn import SklearnModel
+from ..models.scikit_learn import SklearnModel
 from ..utils.stringops import get_random_string
 
 

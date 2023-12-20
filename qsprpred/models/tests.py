@@ -47,8 +47,7 @@ from ..models.monitors import (
     FileMonitor,
     ListMonitor,
 )
-from ..models.metrics import SklearnMetrics
-from ..models.sklearn import SklearnModel
+from ..models.scikit_learn import SklearnModel
 from ..tasks import TargetTasks
 
 N_CPUS = 2
