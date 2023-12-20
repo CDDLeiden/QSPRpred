@@ -2,7 +2,7 @@ import multiprocessing
 import os
 import pickle
 from multiprocessing import Pool
-from typing import Optional, ClassVar, Generator, Literal
+from typing import Optional, ClassVar, Generator, Literal, Callable
 
 import numpy as np
 import pandas as pd
@@ -469,6 +469,37 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         descriptors = calculator(self.df.index, **kwargs)
         descriptors[self.indexCols] = self.df[self.indexCols]
         self.attachDescriptors(calculator, descriptors, self.indexCols)
+
+    def imputeProperties(self, names: list[str], imputer: Callable):
+        """Impute missing property values.
+
+        Args:
+            names (list):
+                List of property names to impute.
+            imputer (Callable):
+                imputer object implementing the `fit_trensform`
+                 method from scikit-learn API.
+        """
+        assert hasattr(imputer, "fit_transform"), (
+            "Imputer object must implement the `fit_transform` "
+            "method from scikit-learn API."
+        )
+        assert all(
+            name in self.df.columns for name in names
+        ), "Not all target properties in dataframe columns."
+        names_old = [f"{name}_before_impute" for name in names]
+        self.df[names_old] = self.df[names]
+        self.df[names] = imputer.fit_transform(self.df[names])
+        logger.debug(f"Imputed missing values for properties: {names}")
+        logger.debug(f"Old values saved in: {names_old}")
+
+    def dropEmptySmiles(self):
+        """Drop rows with empty SMILES from the data set."""
+        self.df.dropna(subset=[self.smilesCol], inplace=True)
+
+    def dropEmptyProperties(self, names: list[str]):
+        """Drop rows with empty target property value from the data set."""
+        self.df.dropna(subset=names, how="all", inplace=True)
 
     def attachDescriptors(
         self,
