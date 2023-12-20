@@ -392,6 +392,12 @@ class QSPRDataset(MoleculeTable):
         logger.info("Target property converted to classification.")
         return target_property
 
+    def searchWithIndex(
+        self, index: pd.Index, name: str | None = None
+    ) -> "MoleculeTable":
+        ret = super().searchWithIndex(index, name)
+        return QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
+
     @staticmethod
     def fromMolTable(
         mol_table: MoleculeTable,
@@ -415,9 +421,21 @@ class QSPRDataset(MoleculeTable):
         kwargs["store_dir"] = (
             mol_table.baseDir if "store_dir" not in kwargs else kwargs["store_dir"]
         )
+        kwargs["random_state"] = (
+            mol_table.randomState
+            if "random_state" not in kwargs
+            else kwargs["random_state"]
+        )
         name = mol_table.name if name is None else name
         ds = QSPRDataset(
-            name, target_props, mol_table.getDF(), random_state=random_state, **kwargs
+            name,
+            target_props,
+            mol_table.getDF(),
+            smiles_col=mol_table.smilesCol,
+            n_jobs=mol_table.nJobs,
+            chunk_size=mol_table.chunkSize,
+            index_cols=mol_table.indexCols,
+            **kwargs,
         )
         ds.descriptors = mol_table.descriptors
         return ds

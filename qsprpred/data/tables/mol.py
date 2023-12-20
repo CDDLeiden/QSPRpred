@@ -9,13 +9,14 @@ import pandas as pd
 from rdkit.Chem import PandasTools
 
 from .interfaces.searchable import Searchable, Summarizable
+from .pandas import PandasDataSet
 from ..chem.matching import match_mol_to_smarts
 from ...data.chem.scaffolds import Scaffold
-from ...data.chem.standardization import check_smiles_valid, \
-    chembl_smi_standardizer, old_standardize_sanitize
-from .base import MoleculeDataSet
-
-from .pandas import PandasDataSet
+from ...data.chem.standardization import (
+    check_smiles_valid,
+    chembl_smi_standardizer,
+    old_standardize_sanitize,
+)
 from ...logs import logger
 
 
@@ -23,6 +24,7 @@ class DescriptorTable(PandasDataSet):
     """Pandas table that holds descriptor data
     for modelling and other analyses.
     """
+
     def __init__(
         self,
         calculator,
@@ -182,9 +184,7 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
             self.dropInvalids()
 
     def searchWithIndex(
-            self,
-            index: pd.Index,
-            name: str | None = None
+        self, index: pd.Index, name: str | None = None
     ) -> "MoleculeTable":
         """
         Create a new table from a list of indices.
@@ -212,7 +212,7 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
             n_jobs=self.nJobs,
             chunk_size=self.chunkSize,
             drop_invalids=False,
-            index_cols=self.indexCols
+            index_cols=self.indexCols,
         )
         for table, calc in zip(self.descriptors, self.descriptorCalculators):
             ret.descriptors.append(
@@ -224,31 +224,30 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
                     overwrite=True,
                     key_cols=table.indexCols,
                     n_jobs=table.nJobs,
-                    chunk_size=table.chunkSize
+                    chunk_size=table.chunkSize,
                 )
             )
         return ret
 
     def searchOnProperty(
-            self,
-            prop_name: str,
-            values: list[str],
-            name: str | None = None,
-            exact=False
+        self, prop_name: str, values: list[str], name: str | None = None, exact=False
     ) -> "MoleculeTable":
         mask = [False] * len(self.df)
         for value in values:
-            mask = mask | (self.df[prop_name].str.contains(value)) \
-                if not exact else mask | (self.df[prop_name] == value)
+            mask = (
+                mask | (self.df[prop_name].str.contains(value))
+                if not exact
+                else mask | (self.df[prop_name] == value)
+            )
         matches = self.df.index[mask]
         return self.searchWithIndex(matches, name)
 
     def searchWithSMARTS(
-            self,
-            patterns: list[str],
-            operator: Literal["or", "and"] = "or",
-            use_chirality: bool = False,
-            name: str | None = None
+        self,
+        patterns: list[str],
+        operator: Literal["or", "and"] = "or",
+        use_chirality: bool = False,
+        name: str | None = None,
     ) -> "MoleculeTable":
         """
         Search the molecules in the table with a SMARTS pattern.
@@ -267,14 +266,15 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
         Returns:
             (MolTable): A dataframe with the molecules that match the pattern.
         """
-        matches = self.df.index[self.df[self.smilesCol].apply(
-            lambda x: match_mol_to_smarts(
-                x, patterns, operator=operator, use_chirality=use_chirality
+        matches = self.df.index[
+            self.df[self.smilesCol].apply(
+                lambda x: match_mol_to_smarts(
+                    x, patterns, operator=operator, use_chirality=use_chirality
+                )
             )
-        )]
+        ]
         return self.searchWithIndex(
-            matches,
-            name=f"{self.name}_smarts_searched" if name is None else name
+            matches, name=f"{self.name}_smarts_searched" if name is None else name
         )
 
     def getSummary(self):
@@ -289,17 +289,16 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
         """
         summary = {
             "mols_per_target": self.df.groupby("accession")
-            .count()["InChIKey"].to_dict(),
+            .count()["InChIKey"]
+            .to_dict(),
             "mols_per_target_unique": self.df.groupby("accession")
-            .aggregate(lambda x: len(set(x)))["InChIKey"].to_dict()
+            .aggregate(lambda x: len(set(x)))["InChIKey"]
+            .to_dict(),
         }
         return pd.DataFrame(summary)
 
     def sample(
-            self,
-            n: int,
-            name: str | None = None,
-            random_state: int = None
+        self, n: int, name: str | None = None, random_state: int = None
     ) -> "MoleculeTable":
         """
         Sample n molecules from the table.
@@ -593,7 +592,8 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
         if not prefix:
             prefixes = (
                 [f"{self.name}_{x.getPrefix()}" for x in self.descriptorCalculators]
-                if self.descriptorCalculators else []
+                if self.descriptorCalculators
+                else []
             )
         else:
             prefixes = [f"{self.name}_{prefix}"]
@@ -623,7 +623,7 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
         Returns:
             list: list of property names.
         """
-        return self.df.columns
+        return self.df.columns.tolist()
 
     def hasProperty(self, name):
         """Check whether a property is present in the data frame.
@@ -689,7 +689,7 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
                 continue
             self.df[f"Scaffold_{scaffold}"] = self.apply(
                 self._scaffold_calculator,
-                func_args=(scaffold, ),
+                func_args=(scaffold,),
                 subset=[self.smilesCol],
                 axis=1,
                 raw=False,
@@ -711,8 +711,10 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
             list: List of scaffold names.
         """
         return [
-            col for col in self.df.columns if col.startswith("Scaffold_") and
-            (include_mols or not col.endswith("_RDMol"))
+            col
+            for col in self.df.columns
+            if col.startswith("Scaffold_")
+            and (include_mols or not col.endswith("_RDMol"))
         ]
 
     def getScaffolds(self, includeMols: bool = False):
@@ -725,9 +727,9 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
             pd.DataFrame: Data frame containing only scaffolds.
         """
         if includeMols:
-            return self.df[[
-                col for col in self.df.columns if col.startswith("Scaffold_")
-            ]]
+            return self.df[
+                [col for col in self.df.columns if col.startswith("Scaffold_")]
+            ]
         else:
             return self.df[self.getScaffoldNames()]
 
@@ -773,9 +775,13 @@ class MoleculeTable(PandasDataSet, Searchable, Summarizable):
         Returns:
             list: list of scaffold groups.
         """
-        return self.df[self.df.columns[self.df.columns.str.startswith(
-            f"ScaffoldGroup_{scaffold_name}_{mol_per_group}"
-        )][0]]
+        return self.df[
+            self.df.columns[
+                self.df.columns.str.startswith(
+                    f"ScaffoldGroup_{scaffold_name}_{mol_per_group}"
+                )
+            ][0]
+        ]
 
     @property
     def hasScaffoldGroups(self):

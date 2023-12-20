@@ -870,23 +870,71 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
 class TestSearchFeatures(DataSetsMixIn, TestCase):
     def validateSearch(self, dataset: QSPRDataset, result: QSPRDataset, name: str):
         """Validate the results of a search."""
+        self.assertTrue(len(result) < len(dataset))
         self.assertTrue(isinstance(result, type(dataset)))
         self.assertEqual(result.name, name)
         self.assertListEqual(dataset.getProperties(), result.getProperties())
         self.assertListEqual(dataset.getFeatureNames(), result.getFeatureNames())
         self.assertListEqual(dataset.targetPropertyNames, result.targetPropertyNames)
+        self.assertEqual(len(dataset.descriptors), len(result.descriptors))
+        self.assertEqual(
+            len(dataset.descriptorCalculators), len(result.descriptorCalculators)
+        )
+        self.assertEqual(len(dataset.targetProperties), len(result.targetProperties))
+        self.assertEqual(dataset.nTasks, result.nTasks)
 
     def testSMARTS(self):
         dataset = self.createLargeTestDataSet(
             preparation_settings=self.getDefaultPrep()
         )
         search_name = "search_name"
-        results = dataset.searchWithSMARTS(
-            ["c1ccccc1", "S"],
+        results_and = dataset.searchWithSMARTS(
+            ["c1ccccc1", "S(=O)(=O)"],
             operator="and",
             name=search_name,
         )
+        self.assertTrue(all("S" in x for x in results_and.smiles))
+        self.validateSearch(dataset, results_and, search_name)
+        results_or = dataset.searchWithSMARTS(
+            ["c1ccccc1", "S"],
+            operator="or",
+            name=search_name,
+        )
+        self.validateSearch(dataset, results_or, search_name)
+        self.assertFalse(all("S" in x for x in results_or.smiles))
+        self.assertTrue(any("S" in x for x in results_or.smiles))
+        self.assertTrue(len(results_and) < len(results_or))
+
+    def testPropSearch(self):
+        dataset = self.createLargeTestDataSet(
+            preparation_settings=self.getDefaultPrep()
+        )
+        search_name = "search_name"
+        results = dataset.searchOnProperty(
+            "moka_ionState7.4",
+            ["cationic"],
+            name=search_name,
+            exact=True,
+        )
         self.validateSearch(dataset, results, search_name)
+        self.assertTrue(
+            all(x == "cationic" for x in results.getProperty("moka_ionState7.4"))
+        )
+        results = dataset.searchOnProperty(
+            "Reference",
+            ["Cook"],
+            name=search_name,
+            exact=False,
+        )
+        self.validateSearch(dataset, results, search_name)
+        self.assertTrue(all("Cook" in x for x in results.getProperty("Reference")))
+        results = dataset.searchOnProperty(
+            "Reference",
+            ["Cook"],
+            name=search_name,
+            exact=True,
+        )
+        self.assertTrue(len(results) == 0)
 
 
 def prop_transform(x):
