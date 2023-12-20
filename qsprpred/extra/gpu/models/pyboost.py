@@ -22,10 +22,10 @@ from py_boost.gpu.losses.metrics import Metric, auc
 from sklearn.model_selection import ShuffleSplit
 
 from ....data.tables.qspr import QSPRDataset
-from ....data.interfaces import DataSplit
+from ....data.sampling.splits import DataSplit
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import FitMonitor, QSPRModel
-from ....models.monitors import BaseMonitor
+from ....models.models import QSPRModel
+from ....models.monitors import BaseMonitor, FitMonitor
 from qsprpred.tasks import ModelTasks
 
 
@@ -156,13 +156,12 @@ class PyBoostModel(QSPRModel):
                     "X": X[val_index, :],
                     "y": y[val_index]
                 }],
-                monitor=monitor,
             )
             monitor.onFitEnd(estimator, estimator.best_round)
             return estimator, estimator.best_round
 
         estimator.params.update({"ntrees": self.earlyStopping.getEpochs()})
-        estimator.fit(X, y, monitor=monitor)
+        estimator.fit(X, y)
 
         monitor.onFitEnd(estimator)
         return estimator, self.earlyStopping.getEpochs()
