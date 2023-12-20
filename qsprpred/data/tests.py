@@ -1341,7 +1341,7 @@ class TestDataFilters(DataSetsMixIn, TestCase):
                     ["CC", 1, 2, 2, 6],  # 3rd descriptor is length of SMILES
                 ]
             ),
-            columns=["SMILES", *descriptor_names, "Year"],
+            columns=["SMILES", *descriptor_names, "Year"]
         )
         # only warnings
         df_copy = copy.deepcopy(df)
@@ -1357,7 +1357,7 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         self.assertTrue(df_copy.equals(df.iloc[[2]]))
         # keep first, by year
         df_copy = copy.deepcopy(df)
-        dup_filter3 = RepeatsFilter(keep="first", year_name="Year")
+        dup_filter3 = RepeatsFilter(keep="first", timecol="Year")
         df_copy = dup_filter3(df_copy, df_copy[descriptor_names])
         self.assertEqual(len(df_copy), 3)  # three unique SMILES
         self.assertTrue(df_copy.equals(df.iloc[[0, 1, 2]]))  # keep first by year

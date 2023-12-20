@@ -77,20 +77,20 @@ papyrusLowQualityFilter = partial(CategoryFilter, name="Quality", values=["Low"]
 
 
 class RepeatsFilter(DataFilter):
-    """To filter out duplicate molecules based on descriptor values
+    """To filter out duplicate molecules based on descriptor values.
 
     Attributes:
         keep (str): For duplicate entries determines how properties are treated,
             if False remove both (/all) duplicate entries, if True keep them,
-            if first, keep row of first entry (based on year), if last keep row of
-            last entry based on year.
+            if first, keep row of first entry (based on time), if last keep row of
+            last entry based on time.
             options: 'first', 'last', True, False
-        year_name (str, optional): name of column containing year of publication
+        timecol (str, optional): name of column containing time of publication
             used if keep is 'first' or 'last'
     """
-    def __init__(self, keep: str = "first", year_name: Optional[str] = "Year"):
+    def __init__(self, keep: str|bool = False, timecol: str|None = None):
         self.keep = keep
-        self.year_name = year_name
+        self.timecol = timecol
 
     def __call__(self, df: pd.DataFrame, descriptors: pd.DataFrame) -> pd.DataFrame:
         """Filter rows from dataframe.
@@ -131,21 +131,20 @@ class RepeatsFilter(DataFilter):
 
         if self.keep is True:
             if len(allrepeats) > 0:
+                # print QSPRID of duplicate compounds
                 logger.warning(
                     "Dataframe contains duplicate compounds and/or compounds with "
                     "identical descriptors.\nThe following rows contain duplicates: "
-                    f"{allrepeats}"
+                    f"{[df.loc[repeats].index.values for repeats in allrepeats]}"
                 )
         elif self.keep is False:
             df = df.drop(list(chain(*allrepeats)))
         elif self.keep in ["first", "last"]:
-            logger.warning(
-                "For dataframe with multiple target properties it is "
-                "recommended to give target_props to prevent loss of "
-                "values for properties only occuring for some datapoints"
+            assert self.timecol is not None, (
+                "timecol must be specified if keep is 'first' or 'last'"
             )
             for repeat in allrepeats:
-                years = df.loc[repeat, self.year_name]
+                years = df.loc[repeat, self.timecol]
                 years = pd.to_numeric(years, errors="coerce")
                 if self.keep == "first":
                     tokeep = years.idxmin()  # Use the first occurance
@@ -154,5 +153,4 @@ class RepeatsFilter(DataFilter):
                 repeat.remove(tokeep)  # Remove the one to keep from the allrepeats list
             df = df.drop(list(chain(*allrepeats)))
 
-        return df
         return df
