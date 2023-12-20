@@ -16,6 +16,7 @@ from ...logs import logger
 
 class DataFilter(ABC):
     """Filter out some rows from a dataframe."""
+
     @abstractmethod
     def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
         """Filter out some rows from a dataframe.
@@ -36,6 +37,7 @@ class CategoryFilter(DataFilter):
         values (list[str]): filter values.
         keep (bool): whether to keep or discard values.
     """
+
     def __init__(self, name: str, values: list[str], keep=False) -> None:
         """Initialize the CategoryFilter with the name, values and keep attributes.
 
@@ -88,6 +90,7 @@ class RepeatsFilter(DataFilter):
         year_name (str, optional): name of column containing year of publication
             used if keep is 'first' or 'last'
     """
+
     def __init__(self, keep: str = "first", year_name: Optional[str] = "Year"):
         self.keep = keep
         self.year_name = year_name
@@ -99,6 +102,7 @@ class RepeatsFilter(DataFilter):
             df (pandas dataframe): dataframe to filter
             descriptors (pandas dataframe): dataframe containing descriptors
         """
+
         def group_duplicate_index(df) -> list[list[int]]:
             """Group indices of duplicate rows
 
@@ -154,5 +158,4 @@ class RepeatsFilter(DataFilter):
                 repeat.remove(tokeep)  # Remove the one to keep from the allrepeats list
             df = df.drop(list(chain(*allrepeats)))
 
-        return df
         return df
