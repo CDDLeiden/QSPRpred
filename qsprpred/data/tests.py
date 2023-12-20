@@ -1338,7 +1338,7 @@ class TestDataFilters(DataSetsMixIn, TestCase):
                     ["CCC", 1, 2, 3, 3],
                     ["C", 1, 2, 1, 4],
                     ["C", 1, 2, 1, 5],
-                    ["CC", 1, 2, 2, 6],  # 3rd descriptor is length of SMILES
+                    ["CC", 1, 2, 2, 6],  # 3rd "descriptor" is length of SMILES
                 ]
             ),
             columns=["SMILES", *descriptor_names, "Year"]
@@ -1361,6 +1361,15 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         df_copy = dup_filter3(df_copy, df_copy[descriptor_names])
         self.assertEqual(len(df_copy), 3)  # three unique SMILES
         self.assertTrue(df_copy.equals(df.iloc[[0, 1, 2]]))  # keep first by year
+
+        # check with additional columns
+        df_copy = copy.deepcopy(df)
+        df_copy["proteinid"] = ["A", "B", "B", "B", "B", "B"]
+        dup_filter4 = RepeatsFilter(additional_cols=["proteinid"])
+        df_copy = dup_filter4(df_copy, df_copy[descriptor_names])
+        self.assertEqual(len(df_copy), 2)  # C (protein A, idx 0) and CCC are unique,
+                                           # but C (protein B, idx 3) is a duplicate
+                                           # of C (protein B, idx 4) and is dropped
 
     def testConsistency(self):
         dataset = self.createLargeTestDataSet()
