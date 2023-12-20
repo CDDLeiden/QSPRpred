@@ -26,6 +26,7 @@ from sklearn.metrics import (
 )
 from sklearn.metrics import make_scorer
 from sklearn.metrics import matthews_corrcoef, precision_score, recall_score
+from sklearn.model_selection import KFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
@@ -46,7 +47,7 @@ from ..models.monitors import (
     FileMonitor,
     ListMonitor,
 )
-from ..models.sklearn import SklearnModel
+from ..models.scikit_learn import SklearnModel
 from ..tasks import TargetTasks
 
 N_CPUS = 2
@@ -128,8 +129,24 @@ class ModelTestMixIn:
         model.cleanFiles()
         # perform crossvalidation
         score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
-        CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(model)
-        TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func)(model)
+        n_folds = 5
+        scores = CrossValAssessor(
+            mode=EarlyStoppingMode.RECORDING,
+            scoring=score_func,
+            split_multitask_scores=model.isMultiTask,
+            split=KFold(
+                n_splits=n_folds, shuffle=True, random_state=model.data.randomState
+            ),
+        )(model)
+        if model.isMultiTask:
+            self.assertEqual(scores.shape, (n_folds, len(model.targetProperties)))
+        scores = TestSetAssessor(
+            mode=EarlyStoppingMode.NOT_RECORDING,
+            scoring=score_func,
+            split_multitask_scores=model.isMultiTask,
+        )(model)
+        if model.isMultiTask:
+            self.assertEqual(scores.shape, (len(model.targetProperties),))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
@@ -460,6 +477,10 @@ class TestSklearnRegression(SklearnModelMixIn):
         self.assertListEqual(summary["R2"], expected_summary["R2"])
         self.assertListEqual(summary["RMSE"], expected_summary["RMSE"])
         self.assertListEqual(summary["Set"], expected_summary["Set"])
+
+
+class TestSklearnRegressionMultiTask(SklearnModelMixIn):
+    """Test the SklearnModel class for multi-task regression models."""
 
     @parameterized.expand(
         [

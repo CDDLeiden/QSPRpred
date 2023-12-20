@@ -7,11 +7,11 @@ from typing import Callable
 
 import numpy as np
 
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from ..data.data import PCMDataSet
 from ...data.tables.mol import MoleculeTable
 from ...models.models import QSPRModel
-from ...models.sklearn import SklearnModel
-from ..data.data import PCMDataSet
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from ...models.scikit_learn import SklearnModel
 
 
 class PCMModel(QSPRModel, ABC):
@@ -20,6 +20,7 @@ class PCMModel(QSPRModel, ABC):
     Extension of `QSPRModel` for proteochemometric models (PCM). It modifies
     the `predictMols` method to handle PCM descriptors and specification of protein ids.
     """
+
     def createPredictionDatasetFromMols(
         self,
         mols: list[str],
@@ -129,8 +130,9 @@ class PCMModel(QSPRModel, ABC):
                         "must have the same protein ids."
                     )
             if (
-                isinstance(calc, ProteinDescriptorCalculator) and calc.msaProvider and
-                protein_id not in calc.msaProvider.current.keys()
+                isinstance(calc, ProteinDescriptorCalculator)
+                and calc.msaProvider
+                and protein_id not in calc.msaProvider.current.keys()
             ):
                 raise ValueError(
                     f"Protein id {protein_id} not found in the available MSA, "

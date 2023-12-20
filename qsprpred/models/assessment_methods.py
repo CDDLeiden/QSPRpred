@@ -28,6 +28,7 @@ class ModelAssessor(ABC):
             is used
         useProba (bool): use probabilities for classification models
         mode (EarlyStoppingMode): early stopping mode for fitting
+        splitMultitaskScores (bool): whether to split the scores per task for multitask models
     """
     def __init__(
         self,
@@ -35,6 +36,7 @@ class ModelAssessor(ABC):
         monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
+        split_multitask_scores: bool = False,
     ):
         """Initialize the evaluation method class.
 
@@ -43,6 +45,7 @@ class ModelAssessor(ABC):
             monitor (AssessorMonitor): monitor to track the evaluation
             use_proba (bool): use probabilities for classification models
             mode (EarlyStoppingMode): early stopping mode for fitting
+            split_multitask_scores (bool): whether to split the scores per task for multitask models
         """
         self.monitor = monitor
         self.useProba = use_proba
@@ -50,14 +53,15 @@ class ModelAssessor(ABC):
         self.scoreFunc = (
             SklearnMetrics(scoring) if isinstance(scoring, str) else scoring
         )
+        self.splitMultitaskScores = split_multitask_scores
 
     @abstractmethod
     def __call__(
         self,
         model: QSPRModel,
-        save: bool,
-        parameters: dict | None,
-        monitor: AssessorMonitor,
+        save: bool = True,
+        parameters: dict | None = None,
+        monitor: AssessorMonitor | None = None,
         **kwargs,
     ) -> list[float]:
         """Evaluate the model.
@@ -128,6 +132,7 @@ class CrossValAssessor(ModelAssessor):
             is used
         mode (EarlyStoppingMode): mode to use for early stopping
         round (int): number of decimal places to round predictions to (default: 5)
+        splitMultitaskScores (bool): whether to split the scores per task for multitask models
     """
     def __init__(
         self,
@@ -137,8 +142,9 @@ class CrossValAssessor(ModelAssessor):
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
         round: int = 5,
+        split_multitask_scores: bool = False,
     ):
-        super().__init__(scoring, monitor, use_proba, mode)
+        super().__init__(scoring, monitor, use_proba, mode, split_multitask_scores)
         self.split = split
         if monitor is None:
             self.monitor = BaseMonitor()
@@ -206,10 +212,18 @@ class CrossValAssessor(ModelAssessor):
                 fold_predictions = model.predict(X_test, crossval_estimator)
             else:
                 fold_predictions = model.predictProba(X_test, crossval_estimator)
-
             # score
-            score = self.scoreFunc(y.iloc[idx_test], fold_predictions)
-            scores.append(score)
+            if self.splitMultitaskScores:
+                scores_tasks = []
+                for idx, prop in enumerate(model.data.targetProperties):
+                    scores_tasks.append(self.scoreFunc(
+                        y.iloc[idx_test, idx],
+                        fold_predictions[:, idx]
+                    ))
+                scores.append(scores_tasks)
+            else:
+                score = self.scoreFunc(y.iloc[idx_test], fold_predictions)
+                scores.append(score)
             # save molecule ids and fold number
             fold_counter[idx_test] = i
             logger.debug(
@@ -230,7 +244,7 @@ class CrossValAssessor(ModelAssessor):
             pd.concat(predictions).round(self.round
                                         ).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
         monitor.onAssessmentEnd(pd.concat(predictions))
-        return scores
+        return np.array(scores)
 
 
 class TestSetAssessor(ModelAssessor):
@@ -242,6 +256,7 @@ class TestSetAssessor(ModelAssessor):
             is used
         mode (EarlyStoppingMode): mode to use for early stopping
         round (int): number of decimal places to round predictions to (default: 3)
+        splitMultitaskScores (bool): whether to split the scores per task for multitask models
     """
     def __init__(
         self,
@@ -250,8 +265,9 @@ class TestSetAssessor(ModelAssessor):
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,
         round: int = 5,
+        split_multitask_scores: bool = False,
     ):
-        super().__init__(scoring, monitor, use_proba, mode)
+        super().__init__(scoring, monitor, use_proba, mode, split_multitask_scores)
         if monitor is None:
             self.monitor = BaseMonitor()
         self.round = round
@@ -297,7 +313,16 @@ class TestSetAssessor(ModelAssessor):
         else:
             predictions = model.predictProba(X_ind, ind_estimator)
         # score
-        score = self.scoreFunc(y_ind, predictions)
+        if self.splitMultitaskScores:
+            scores_tasks = []
+            for idx, prop in enumerate(model.data.targetProperties):
+                scores_tasks.append(self.scoreFunc(
+                    y_ind.iloc[:, idx],
+                    predictions[:, idx]
+                ))
+            score = scores_tasks
+        else:
+            score = [self.scoreFunc(y_ind, predictions)]
         predictions_df = self.predictionsToDataFrame(
             model, y_ind, predictions, y_ind.index
         )
@@ -307,4 +332,4 @@ class TestSetAssessor(ModelAssessor):
             predictions_df.round(self.round
                                 ).to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
         monitor.onAssessmentEnd(predictions_df)
-        return [score]
+        return np.array(score)

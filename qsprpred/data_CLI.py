@@ -39,7 +39,7 @@ from qsprpred.tasks import TargetTasks
 from .data.chem.scaffolds import Murcko
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
-from .models.sklearn import SklearnModel
+from .models.scikit_learn import SklearnModel
 
 
 def QSPRArgParser(txt=None):
