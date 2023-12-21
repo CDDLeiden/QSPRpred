@@ -1,7 +1,10 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold
 from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 
 from . import BenchmarkRunner, BenchmarkSettings, DataPrepSettings
@@ -119,17 +122,84 @@ class BenchmarkingTest(DataSetsMixIn, TestCase):
             data_dir=f"{self.generatedPath}/benchmarks",
             results_file=f"{self.generatedPath}/benchmarks/results.tsv",
         )
-        self.nCVs = len(
-            [a for a in self.settings.assessors if isinstance(a, CrossValAssessor)]
-        )
-        self.nAssessments = (
-            self.nCVs * self.nFolds + len(self.settings.assessors) - self.nCVs
-        )
 
-    def test(self):
-        """Run the test benchmark."""
+    def checkRunResults(self, results):
+        # TODO: more checks should be done here in the future
+        for tps in self.settings.target_props:
+            for assessor in self.settings.assessors:
+                score = assessor.scoreFunc.name
+                score_results = results[
+                    (results["ScoreFunc"] == score)
+                    & (results["Assessor"] == assessor.__class__.__name__)
+                    & (results["TargetProperty"].isin([tp.name for tp in tps]))
+                ]
+                self.assertTrue(len(score_results) > 0)
+
+    def testSingleTaskCLS(self):
+        """Run single task tests for classification."""
         results = self.benchmark.run(raise_errors=True)
-        self.assertEqual(
-            self.benchmark.nRuns * self.nAssessments,
-            len(results),
-        )
+        self.checkRunResults(results)
+
+    @skip("Not implemented yet")
+    def testSingleTaskREG(self):
+        pass
+
+    def testMultiTaskCLS(self):
+        """Run the test benchmark."""
+        self.settings.target_props = [
+            [
+                TargetProperty.fromDict(
+                    {
+                        "name": "CL",
+                        "task": TargetTasks.SINGLECLASS,
+                        "th": [10],
+                        "imputer": SimpleImputer(strategy="mean"),
+                    }
+                ),
+                TargetProperty.fromDict(
+                    {
+                        "name": "fu",
+                        "task": TargetTasks.SINGLECLASS,
+                        "th": [0.3],
+                        "imputer": SimpleImputer(strategy="mean"),
+                    }
+                ),
+            ]
+        ]
+        self.settings.models = [
+            SklearnModel(
+                name="RandomForestClassifier",
+                alg=RandomForestClassifier,
+                base_dir=f"{self.generatedPath}/models",
+            ),
+            SklearnModel(
+                name="KNeighborsClassifier",
+                alg=KNeighborsClassifier,
+                base_dir=f"{self.generatedPath}/models",
+            ),
+        ]
+        self.settings.assessors = [
+            CrossValAssessor(
+                scoring="roc_auc",
+                split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
+                split_multitask_scores=True,
+            ),
+            CrossValAssessor(
+                scoring="matthews_corrcoef",
+                split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
+                use_proba=False,
+                split_multitask_scores=True,
+            ),
+            TestSetAssessor(scoring="roc_auc", split_multitask_scores=True),
+            TestSetAssessor(
+                scoring="matthews_corrcoef",
+                use_proba=False,
+                split_multitask_scores=True,
+            ),
+        ]
+        results = self.benchmark.run(raise_errors=True)
+        self.checkRunResults(results)
+
+    @skip("Not implemented yet")
+    def testMultiTaskREG(self):
+        pass

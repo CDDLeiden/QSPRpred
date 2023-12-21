@@ -8,12 +8,12 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from ..data.sampling.splits import DataSplit
-from ..logs import logger
-from ..models.metrics import SklearnMetrics
 from .early_stopping import EarlyStoppingMode
 from .models import QSPRModel
 from .monitors import AssessorMonitor, BaseMonitor
+from ..data.sampling.splits import DataSplit
+from ..logs import logger
+from ..models.metrics import SklearnMetrics
 
 
 class ModelAssessor(ABC):
@@ -30,6 +30,7 @@ class ModelAssessor(ABC):
         mode (EarlyStoppingMode): early stopping mode for fitting
         splitMultitaskScores (bool): whether to split the scores per task for multitask models
     """
+
     def __init__(
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
@@ -63,7 +64,7 @@ class ModelAssessor(ABC):
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
         **kwargs,
-    ) -> list[float]:
+    ) -> float | np.ndarray:
         """Evaluate the model.
 
         Args:
@@ -109,8 +110,9 @@ class ModelAssessor(ABC):
                 df_out = pd.concat(
                     [
                         df_out,
-                        pd.DataFrame(predictions[idx], index=index
-                                    ).add_prefix(f"{prop.name}_ProbabilityClass_"),
+                        pd.DataFrame(predictions[idx], index=index).add_prefix(
+                            f"{prop.name}_ProbabilityClass_"
+                        ),
                     ],
                     axis=1,
                 )
@@ -134,6 +136,7 @@ class CrossValAssessor(ModelAssessor):
         round (int): number of decimal places to round predictions to (default: 5)
         splitMultitaskScores (bool): whether to split the scores per task for multitask models
     """
+
     def __init__(
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
@@ -191,8 +194,8 @@ class CrossValAssessor(ModelAssessor):
             data.iterFolds(split=split)
         ):
             logger.debug(
-                "cross validation fold %s started: %s" %
-                (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                "cross validation fold %s started: %s"
+                % (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
             monitor.onFoldStart(
                 fold=i, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test
@@ -213,13 +216,21 @@ class CrossValAssessor(ModelAssessor):
             else:
                 fold_predictions = model.predictProba(X_test, crossval_estimator)
             # score
-            if self.splitMultitaskScores:
+            if model.isMultiTask and self.splitMultitaskScores:
                 scores_tasks = []
                 for idx, prop in enumerate(model.data.targetProperties):
-                    scores_tasks.append(self.scoreFunc(
-                        y.iloc[idx_test, idx],
-                        fold_predictions[:, idx]
-                    ))
+                    if self.useProba and prop.task.isClassification():
+                        prop_predictions = fold_predictions[idx]
+                        prop_predictions = prop_predictions[:, 1]
+                        scores_tasks.append(
+                            self.scoreFunc(y.iloc[idx_test, idx], prop_predictions)
+                        )
+                    else:
+                        scores_tasks.append(
+                            self.scoreFunc(
+                                y.iloc[idx_test, idx], fold_predictions[:, idx]
+                            )
+                        )
                 scores.append(scores_tasks)
             else:
                 score = self.scoreFunc(y.iloc[idx_test], fold_predictions)
@@ -227,8 +238,8 @@ class CrossValAssessor(ModelAssessor):
             # save molecule ids and fold number
             fold_counter[idx_test] = i
             logger.debug(
-                "cross validation fold %s ended: %s" %
-                (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                "cross validation fold %s ended: %s"
+                % (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
             fold_predictions_df = self.predictionsToDataFrame(
                 model,
@@ -241,8 +252,9 @@ class CrossValAssessor(ModelAssessor):
             predictions.append(fold_predictions_df)
         # save results
         if save:
-            pd.concat(predictions).round(self.round
-                                        ).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
+            pd.concat(predictions).round(self.round).to_csv(
+                f"{model.outPrefix}.cv.tsv", sep="\t"
+            )
         monitor.onAssessmentEnd(pd.concat(predictions))
         return np.array(scores)
 
@@ -258,6 +270,7 @@ class TestSetAssessor(ModelAssessor):
         round (int): number of decimal places to round predictions to (default: 3)
         splitMultitaskScores (bool): whether to split the scores per task for multitask models
     """
+
     def __init__(
         self,
         scoring: str | Callable[[Iterable, Iterable], float],
@@ -279,7 +292,7 @@ class TestSetAssessor(ModelAssessor):
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
         **kwargs,
-    ):
+    ) -> float | np.ndarray:
         """Make predictions for independent test set.
 
         Arguments:
@@ -313,13 +326,19 @@ class TestSetAssessor(ModelAssessor):
         else:
             predictions = model.predictProba(X_ind, ind_estimator)
         # score
-        if self.splitMultitaskScores:
+        if model.isMultiTask and self.splitMultitaskScores:
             scores_tasks = []
             for idx, prop in enumerate(model.data.targetProperties):
-                scores_tasks.append(self.scoreFunc(
-                    y_ind.iloc[:, idx],
-                    predictions[:, idx]
-                ))
+                if self.useProba and prop.task.isClassification():
+                    prop_predictions = predictions[idx]
+                    prop_predictions = prop_predictions[:, 1]
+                    scores_tasks.append(
+                        self.scoreFunc(y_ind.iloc[:, idx], prop_predictions)
+                    )
+                else:
+                    scores_tasks.append(
+                        self.scoreFunc(y_ind.iloc[:, idx], predictions[:, idx])
+                    )
             score = scores_tasks
         else:
             score = [self.scoreFunc(y_ind, predictions)]
@@ -329,7 +348,8 @@ class TestSetAssessor(ModelAssessor):
         monitor.onFoldEnd(ind_estimator, predictions_df)
         # predict values for independent test set and save results
         if save:
-            predictions_df.round(self.round
-                                ).to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
+            predictions_df.round(self.round).to_csv(
+                f"{model.outPrefix}.ind.tsv", sep="\t"
+            )
         monitor.onAssessmentEnd(predictions_df)
         return np.array(score)

@@ -684,6 +684,10 @@ class TestSklearnClassification(SklearnModelMixIn):
         self.assertListEqual(summary["TestSet"], expected_summary["TestSet"])
         self.assertListEqual(summary["Value"], expected_summary["Value"])
 
+
+class TestSklearnClassificationMultiTask(SklearnModelMixIn):
+    """Test the SklearnModel class for multi-task classification models."""
+
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state)
