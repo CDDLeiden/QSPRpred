@@ -49,7 +49,7 @@ class BenchmarkSettings(JSONSerializable):
     prep_settings: list[DataPrepSettings]
     models: list[QSPRModel]
     assessors: list[ModelAssessor]
-    optimizers: list[HyperparameterOptimization]
+    optimizers: list[HyperparameterOptimization] = tuple()
 
     def __getstate__(self):
         o_dict = super().__getstate__()

@@ -53,7 +53,6 @@ class QSPRDataset(MoleculeTable):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
-        target_imputer: Optional[Callable] = None,
         index_cols: Optional[list[str]] = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
@@ -82,9 +81,7 @@ class QSPRDataset(MoleculeTable):
             drop_invalids (bool, optional): if true, invalid SMILES will be dropped.
                 Defaults to True.
             drop_empty (bool, optional): if true, rows with empty target property will
-                be removed.
-            target_imputer (Callable, optional): imputer for missing target property
-                values. Defaults to None.
+be removed.
             index_cols (list[str], optional): columns to be used as index in the
                 dataframe. Defaults to `None` in which case a custom ID will be
                 generated.
@@ -111,7 +108,7 @@ class QSPRDataset(MoleculeTable):
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
         # load target properties
-        self.setTargetProperties(target_props, drop_empty, target_imputer)
+        self.setTargetProperties(target_props, drop_empty)
         self.feature_standardizer = None
         # populate feature matrix and target property array
         self.X = None
@@ -173,12 +170,15 @@ class QSPRDataset(MoleculeTable):
         self,
         target_props: list[TargetProperty],
         drop_empty: bool = True,
-        target_imputer: Optional[Callable] = None,
     ):
         """Set list of target properties and apply transformations if specified.
 
         Args:
-            target_props (list[TargetProperty]): list of target properties
+            target_props (list[TargetProperty]):
+                list of target properties
+            drop_empty (bool, optional):
+                whether to drop rows with empty target property values. Defaults to
+                `True`.
         """
         # check target properties validity
         assert isinstance(target_props, list), (
@@ -210,33 +210,17 @@ class QSPRDataset(MoleculeTable):
                     addAs=[transformed_prop],
                 )
                 target_prop.name = transformed_prop
+            if target_prop.imputer is not None:
+                self.imputeProperties([target_prop.name], target_prop.imputer)
         # drop rows with missing smiles/no target property for any of
         # the target properties
         if drop_empty:
-            self.dropEmpty()
-        # impute missing target property values
-        if target_imputer is not None:
-            self.imputeTargetProperties(target_imputer)
+            self.dropEmptySmiles()
+            self.dropEmptyProperties(self.targetPropertyNames)
         # convert classification targets to integers
         for target_prop in self.targetProperties:
             if target_prop.task.isClassification():
                 self.makeClassification(target_prop)
-
-    def dropEmpty(self):
-        """Drop rows with empty target property value from the data set."""
-        self.df.dropna(subset=([self.smilesCol]), inplace=True)
-        self.df.dropna(subset=(self.targetPropertyNames), how="all", inplace=True)
-
-    def imputeTargetProperties(self, imputer: Callable):
-        """Impute missing target property values.
-
-        Args:
-            imputer (Callable): imputer object, should have a fit and transform method.
-        """
-        names = self.targetPropertyNames
-        for idx, target_prop in enumerate(self.targetProperties):
-            self.targetProperties[idx].name = f"{target_prop.name}_imputed"
-        self.df[self.targetPropertyNames] = imputer.fit_transform(self.df[names])
 
     @property
     def hasFeatures(self):
@@ -392,12 +376,17 @@ class QSPRDataset(MoleculeTable):
         logger.info("Target property converted to classification.")
         return target_property
 
+    def searchWithIndex(
+        self, index: pd.Index, name: str | None = None
+    ) -> "MoleculeTable":
+        ret = super().searchWithIndex(index, name)
+        return QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
+
     @staticmethod
     def fromMolTable(
         mol_table: MoleculeTable,
         target_props: list[TargetProperty | dict],
         name=None,
-        random_state=None,
         **kwargs,
     ) -> "QSPRDataset":
         """Create QSPRDataset from a MoleculeTable.
@@ -407,17 +396,36 @@ class QSPRDataset(MoleculeTable):
             target_props (list): list of target properties to use
             name (str, optional): name of the data set. Defaults to None.
             kwargs: additional keyword arguments to pass to the constructor
-            random_state(int, optional): seed to use for random operations
 
         Returns:
             QSPRDataset: created data set
         """
+        name = mol_table.name if name is None else name
         kwargs["store_dir"] = (
             mol_table.baseDir if "store_dir" not in kwargs else kwargs["store_dir"]
         )
-        name = mol_table.name if name is None else name
+        kwargs["random_state"] = (
+            mol_table.randomState
+            if "random_state" not in kwargs
+            else kwargs["random_state"]
+        )
+        kwargs["n_jobs"] = (
+            mol_table.nJobs if "n_jobs" not in kwargs else kwargs["n_jobs"]
+        )
+        kwargs["chunk_size"] = (
+            mol_table.chunkSize if "chunk_size" not in kwargs else kwargs["chunk_size"]
+        )
+        kwargs["smiles_col"] = (
+            mol_table.smilesCol if "smiles_col" not in kwargs else kwargs["smiles_col"]
+        )
+        kwargs["index_cols"] = (
+            mol_table.indexCols if "index_cols" not in kwargs else kwargs["index_cols"]
+        )
         ds = QSPRDataset(
-            name, target_props, mol_table.getDF(), random_state=random_state, **kwargs
+            name,
+            target_props,
+            mol_table.getDF(),
+            **kwargs,
         )
         ds.descriptors = mol_table.descriptors
         return ds

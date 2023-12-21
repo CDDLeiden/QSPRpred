@@ -73,10 +73,6 @@ class SklearnModel(QSPRModel):
         logger.info("parameters: %s" % self.parameters)
         logger.debug(f'Model "{self.name}" initialized in: "{self.baseDir}"')
 
-    def __getstate__(self):
-        o_dict = super().__getstate__()
-        o_dict["alg"] = f"{self.alg.__module__}.{self.alg.__name__}"
-        return o_dict
     @property
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""

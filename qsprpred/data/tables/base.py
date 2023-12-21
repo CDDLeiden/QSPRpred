@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, Generator
 
 import pandas as pd
 
 
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
+
     @abstractmethod
     def save(self):
         """Save the table to a file."""
@@ -31,7 +32,7 @@ class StoredTable(ABC):
         """
 
 
-class DataSet(StoredTable):
+class DataTable(StoredTable):
     @abstractmethod
     def __len__(self):
         pass
@@ -95,7 +96,7 @@ class DataSet(StoredTable):
         """
 
 
-class MoleculeDataSet(DataSet):
+class MoleculeDataTable(DataTable):
     @abstractmethod
     def addDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
         """
@@ -130,13 +131,23 @@ class MoleculeDataSet(DataSet):
     def hasDescriptors(self):
         """Indicates if the dataset has descriptors."""
 
+    @property
+    @abstractmethod
+    def smiles(self) -> Generator[str, None, None]:
+        """Get the SMILES strings of the molecules in the dataset.
+
+        Returns:
+            list[str]: The SMILES strings of the molecules in the dataset.
+        """
+
 
 class DataSetDependant:
     """Classes that need a data set to operate have to implement this."""
-    def __init__(self, dataset: MoleculeDataSet | None = None) -> None:
+
+    def __init__(self, dataset: MoleculeDataTable | None = None) -> None:
         self.dataSet = dataset
 
-    def setDataSet(self, dataset: MoleculeDataSet):
+    def setDataSet(self, dataset: MoleculeDataTable):
         self.dataSet = dataset
 
     @property
