@@ -19,7 +19,7 @@ bash -c "${RUN_CMD} && pip install jupyterlab pytest"
 git clone "${QSPRPRED_REPO}"
 cd QSPRpred
 git checkout "${QSPRPRED_REVISION}"
-bash -c "${RUN_CMD} && pip install -e .[full]"
+bash -c "${RUN_CMD} && pip install .[full]"
 echo "Checking for CUDA..."
 bash -c "${RUN_CMD} && python -c 'import torch; print(torch.cuda.is_available())'"
 echo "Checking for qsprpred version..."
