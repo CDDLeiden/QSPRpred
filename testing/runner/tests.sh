@@ -13,7 +13,7 @@ echo "Creating environment: ${ENV_NAME}"
 bash -c "${ACTIVATE_CMD} && conda create -n ${ENV_NAME} python=${PYTHON_VERSION}"
 bash -c "${RUN_CMD} && conda install cudatoolkit"
 bash -c "${RUN_CMD} && pip install cupy-cuda11x" # FIXME: do not hardcode version here
-bash -c "${RUN_CMD} && pip install jupyterlab"
+bash -c "${RUN_CMD} && pip install jupyterlab pytest"
 git clone "${QSPRPRED_REPO}"
 cd QSPRpred
 git checkout "${QSPRPRED_REVISION}"
