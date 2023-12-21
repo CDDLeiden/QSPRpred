@@ -58,7 +58,7 @@ from ..models.scikit_learn import SklearnModel
 from ..tasks import TargetProperty, TargetTasks
 from ..utils.stopwatch import StopWatch
 
-N_CPU = os.cpu_count()
+N_CPU = 1
 CHUNK_SIZE = 20
 TIME_SPLIT_YEAR = 2000
 logging.basicConfig(level=logging.DEBUG)
