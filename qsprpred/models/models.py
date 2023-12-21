@@ -624,7 +624,7 @@ class QSPRModel(JSONSerializable, ABC):
         estimator_path = estimator_path.replace(self.baseDir, ".")
         o_dict["py/state"]["baseDir"] = "."
         o_dict["py/state"]["estimator"] = estimator_path
-        o_dict["py/state"]["alg"] = f"{self.alg.__module__}.{self.alg.__name__}"
+        # o_dict["py/state"]["alg"] = f"{self.alg.__module__}.{self.alg.__name__}"
         return json.dumps(o_dict, indent=4)
 
     def save(self):

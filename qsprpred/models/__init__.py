@@ -1,5 +1,6 @@
 from .models import QSPRModel
 from .sklearn import SklearnModel
+from .random import RandomModel
 from .monitors import (
     BaseMonitor,
     FitMonitor,
