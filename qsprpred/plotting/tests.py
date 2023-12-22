@@ -172,28 +172,28 @@ class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
         model.save()
         # make plots
         plt = ConfusionMatrixPlot([model])
-        axes, cm_dict = plt.make("CL_class")
+        axes, cm_dict = plt.make()
         # assert all figures are sns.FacetGrid
         for ax in axes:
             self.assertIsInstance(ax, Figure)
         self.assertIsInstance(cm_dict, dict)
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_0.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_0.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_1.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_1.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_2.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_2.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_3.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_3.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_4.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_4.0_confusion_matrix.png")
         )
         self.assertTrue(
             os.path.exists(
-                f"{model.outPrefix}_CL_class_Independent Test_confusion_matrix.png"
+                f"{model.outPrefix}_CL_Independent Test_confusion_matrix.png"
             )
         )
