@@ -2,6 +2,7 @@ import json
 import numpy as np
 import pandas as pd
 import os
+import types
 
 from .models import QSPRModel
 from ..data.tables.qspr import QSPRDataset
@@ -25,7 +26,10 @@ class RandomModel(QSPRModel):
         self.name = name
         self.parameters = parameters
         self.estimator = self.loadEstimator(self.parameters)
-        self.alg = None
+
+        # Make alg an anonymous object having all necessary properties
+        self.alg = types.SimpleNamespace()
+        self.alg.__name__ = "Random"
         super().initFromData(data)
 
     def fit(
@@ -37,7 +41,6 @@ class RandomModel(QSPRModel):
         monitor: None = None,
         **kwargs,
     ):
-        #TODO: y might need to be transposed everywhere, didn't test with actual values yet
         # Values of X are irrelevant
         if (self.task.isClassification()):
             # Save ratios, these will be used as probability that a given bucket is
@@ -58,7 +61,6 @@ class RandomModel(QSPRModel):
         self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ):
         # Values of X are irrelevant
-        # TODO: might need to be len(X.T)
         # TODO: clumsy
 
         if (self.task.isClassification()):

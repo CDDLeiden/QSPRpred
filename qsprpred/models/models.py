@@ -8,6 +8,7 @@ import shutil
 import sys
 from abc import ABC, abstractmethod
 from datetime import datetime
+import types
 from typing import Any, Callable, List, Type, Union
 
 import numpy as np
@@ -629,7 +630,8 @@ class QSPRModel(JSONSerializable, ABC):
         estimator_path = estimator_path.replace(self.baseDir, ".")
         o_dict["py/state"]["baseDir"] = "."
         o_dict["py/state"]["estimator"] = estimator_path
-        # o_dict["py/state"]["alg"] = f"{self.alg.__module__}.{self.alg.__name__}"
+        if not isinstance(self.alg, types.SimpleNamespace):
+            o_dict["py/state"]["alg"] = f"{self.alg.__module__}.{self.alg.__name__}"
         return json.dumps(o_dict, indent=4)
 
     def save(self):
