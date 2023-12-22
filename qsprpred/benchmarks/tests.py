@@ -282,3 +282,4 @@ class BenchmarkingTest(DataSetsMixIn, TestCase):
             ),
         ]
         results = self.benchmark.run(raise_errors=True)
+        self.checkRunResults(results)
