@@ -1,10 +1,10 @@
-from unittest import TestCase, skip
+from unittest import TestCase
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold
 from sklearn.naive_bayes import GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.neural_network import MLPClassifier
 
 from . import BenchmarkRunner, BenchmarkSettings, DataPrepSettings
@@ -140,9 +140,43 @@ class BenchmarkingTest(DataSetsMixIn, TestCase):
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
 
-    @skip("Not implemented yet")
     def testSingleTaskREG(self):
-        pass
+        self.settings.target_props = [
+            [
+                TargetProperty.fromDict(
+                    {
+                        "name": "CL",
+                        "task": TargetTasks.REGRESSION,
+                    }
+                )
+            ]
+        ]
+        self.settings.models = [
+            SklearnModel(
+                name="RandomForestRegressor",
+                alg=RandomForestRegressor,
+                base_dir=f"{self.generatedPath}/models",
+            ),
+            SklearnModel(
+                name="KNeighborsRegressor",
+                alg=KNeighborsRegressor,
+                base_dir=f"{self.generatedPath}/models",
+            ),
+        ]
+        self.settings.assessors = [
+            CrossValAssessor(
+                scoring="r2",
+                split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
+            ),
+            CrossValAssessor(
+                scoring="neg_mean_squared_error",
+                split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
+            ),
+            TestSetAssessor(scoring="r2"),
+            TestSetAssessor(scoring="neg_mean_squared_error"),
+        ]
+        results = self.benchmark.run(raise_errors=True)
+        self.checkRunResults(results)
 
     def testMultiTaskCLS(self):
         """Run the test benchmark."""
@@ -200,6 +234,51 @@ class BenchmarkingTest(DataSetsMixIn, TestCase):
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
 
-    @skip("Not implemented yet")
     def testMultiTaskREG(self):
-        pass
+        self.settings.target_props = [
+            [
+                TargetProperty.fromDict(
+                    {
+                        "name": "CL",
+                        "task": TargetTasks.REGRESSION,
+                        "imputer": SimpleImputer(strategy="mean"),
+                    }
+                ),
+                TargetProperty.fromDict(
+                    {
+                        "name": "fu",
+                        "task": TargetTasks.REGRESSION,
+                        "imputer": SimpleImputer(strategy="mean"),
+                    }
+                ),
+            ]
+        ]
+        self.settings.models = [
+            SklearnModel(
+                name="RandomForestRegressor",
+                alg=RandomForestRegressor,
+                base_dir=f"{self.generatedPath}/models",
+            ),
+            SklearnModel(
+                name="KNeighborsRegressor",
+                alg=KNeighborsRegressor,
+                base_dir=f"{self.generatedPath}/models",
+            ),
+        ]
+        self.settings.assessors = [
+            CrossValAssessor(
+                scoring="r2",
+                split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
+                split_multitask_scores=True,
+            ),
+            CrossValAssessor(
+                scoring="neg_mean_squared_error",
+                split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
+                split_multitask_scores=True,
+            ),
+            TestSetAssessor(scoring="r2", split_multitask_scores=True),
+            TestSetAssessor(
+                scoring="neg_mean_squared_error", split_multitask_scores=True
+            ),
+        ]
+        results = self.benchmark.run(raise_errors=True)
