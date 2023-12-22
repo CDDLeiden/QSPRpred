@@ -44,6 +44,7 @@ From v2.1.0 to v3.0.0
   the `tutorials` folder instead of the `tutorial` folder.
 - `MetricsPlot` now supports multi-class and multi-task classification models.
 - `CorrelationPlot` now supports multi-task regression models.
+- `RepeatsFilter` argument `year_name` renamed to `time_col` and arugment `additional_cols` added.
 
 ## New Features
 
