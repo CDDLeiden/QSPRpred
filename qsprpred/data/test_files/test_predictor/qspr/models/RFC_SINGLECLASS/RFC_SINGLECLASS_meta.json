@@ -6,8 +6,7 @@
     "targetProperties": [
       {
         "py/object": "qsprpred.tasks.TargetProperty",
-        "name": "CL_class",
-        "originalName": "CL",
+        "name": "CL",
         "task": {
           "py/reduce": [
             {

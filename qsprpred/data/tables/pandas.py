@@ -411,29 +411,29 @@ class PandasDataTable(DataTable, JSONSerializable):
         return pd.concat(results, axis=0)
 
     def transform(
-        self, targets: list, transformer: Callable, addAs: list | None = None
+        self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
     ):
         """Transform the data frame (or its part) using a list of transformers.
 
         Each transformer is a function that takes the data frame (or a subset of it as
         defined by the `targets` argument) and returns a transformed data frame. The
-        transformed data frame can then be added to the original data frame if `addAs`
-        is set to a `list` of new column names. If `addAs` is not `None`, the result of
+        transformed data frame can then be added to the original data frame if `add_as`
+        is set to a `list` of new column names. If `add_as` is not `None`, the result of
         the application of transformers must have the same number of rows as the
         original data frame.
 
         Args:
-            targets (list): list of column names to transform.
+            targets (list[str]): list of column names to transform.
             transformer (Callable): Function that transforms the data in target columns
                 to a new representation.
-            addAs (list): If `True`, the transformed data is added to the original data
+            add_as (list): If `True`, the transformed data is added to the original data
                 frame and the
             names in this list are used as column names for the new data.
         """
         ret = self.df[targets]
         ret = transformer(ret)
-        if addAs:
-            self.df[addAs] = ret
+        if add_as:
+            self.df[add_as] = ret
         return ret
 
     def filter(self, table_filters: list[Callable]):
