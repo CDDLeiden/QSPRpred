@@ -1035,18 +1035,19 @@ class QSPRDataset(MoleculeTable):
         self.targetProperties.append(prop)
         # restore original values if they were transformed
         self.resetTargetProperty(prop)
-        # drop rows with missing smiles/no target property for any of
-        # the target properties
-        if drop_empty:
-            self.dropEmptyProperties([prop.name])
+        # impute the property
+        if prop.imputer is not None:
+            self.imputeProperties([prop.name], prop.imputer)
         # transform the property
         if prop.transformer is not None:
             self.transform(
                 [prop.name],
                 prop.transformer,
             )
-        if prop.imputer is not None:
-            self.imputeProperties([prop.name], prop.imputer)
+        # drop rows with missing smiles/no target property for any of
+        # the target properties
+        if drop_empty:
+            self.dropEmptyProperties([prop.name])
         # convert classification targets to integers
         if prop.task.isClassification():
             self.makeClassification(prop.name, prop.th)
