@@ -141,7 +141,10 @@ class TargetProperty(JSONSerializable):
         if task.isClassification():
             assert (
                 th is not None
-            ), f"Threshold not specified for classification task {name}"
+            ), (f"Threshold not specified for classification task `{name}`. "
+                "If the task is already precomputed, set `th` to `precomputed`, and "
+                "define the correct number of classes with `n_classes."
+                )
             self.th = th
             if isinstance(th, str) and th == "precomputed":
                 self.nClasses = n_classes
