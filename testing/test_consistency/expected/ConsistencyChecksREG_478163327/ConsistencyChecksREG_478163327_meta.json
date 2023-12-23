@@ -8,7 +8,6 @@
                 "py/object": "qsprpred.tasks.TargetProperty",
                 "py/state": {
                     "name": "pchembl_value_Mean",
-                    "originalName": "pchembl_value_Mean",
                     "task": {
                         "py/reduce": [
                             {
@@ -21,7 +20,8 @@
                             }
                         ]
                     },
-                    "transformer": null
+                    "transformer": null,
+                    "imputer": null
                 }
             }
         ],

@@ -64,11 +64,11 @@ class ROCPlotTest(ModelRetriever, TestCase):
         # make plots
         plt = ROCPlot([model])
         # cross validation plot
-        ax = plt.make("CL_class", validation="cv")[0]
+        ax = plt.make(validation="cv")[0]
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.cv.png"))
         # independent test set plot
-        ax = plt.make("CL_class", validation="ind")[0]
+        ax = plt.make(validation="ind")[0]
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.ind.png"))
 
@@ -107,7 +107,7 @@ class MetricsPlotTest(ModelRetriever, TestCase):
         model.save()
         # generate metrics plot and associated files
         plt = MetricsPlot([model])
-        figures, summary = plt.make("CL_class")
+        figures, summary = plt.make()
         for g in figures:
             self.assertIsInstance(g, sns.FacetGrid)
         self.assertIsInstance(summary, pd.DataFrame)
