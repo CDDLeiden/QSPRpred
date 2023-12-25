@@ -2,15 +2,15 @@ from typing import Callable
 
 import pandas as pd
 
-from ...data.tables.qspr import QSPRDataset
-from ...data.tables.mol import MoleculeTable
-from ...tasks import TargetProperty
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 from ...data.descriptors.calculators import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
+from ...data.tables.mol import MoleculeTable
+from ...data.tables.qspr import QSPRDataset
 from ...logs import logger
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from ...tasks import TargetProperty
 from ...utils.serialization import function_as_string, function_from_string
 
 
@@ -29,6 +29,7 @@ class PCMDataSet(QSPRDataset):
             function that takes a list of protein identifiers and returns a `dict`
             mapping those identifiers to their sequences. Defaults to `None`.
     """
+
     def __init__(
         self,
         name: str,
@@ -138,10 +139,7 @@ class PCMDataSet(QSPRDataset):
         return self.proteinSeqProvider(self.getProteinKeys())
 
     def addProteinDescriptors(
-        self,
-        calculator: ProteinDescriptorCalculator,
-        recalculate=False,
-        featurize=True
+        self, calculator: ProteinDescriptorCalculator, recalculate=False, featurize=True
     ):
         """
         Add protein descriptors to the data frame.
@@ -172,7 +170,8 @@ class PCMDataSet(QSPRDataset):
         # calculate the descriptors
         sequences, info = (
             self.proteinSeqProvider(self.df[self.proteinCol].unique().tolist())
-            if self.proteinSeqProvider else (None, {})
+            if self.proteinSeqProvider
+            else (None, {})
         )
         descriptors = calculator(self.df[self.proteinCol].unique(), sequences, **info)
         descriptors[self.proteinCol] = descriptors.index.values
@@ -243,11 +242,7 @@ class PCMDataSet(QSPRDataset):
         )
         name = mol_table.name if name is None else name
         ds = PCMDataSet(
-            name,
-            protein_col,
-            target_props=target_props,
-            df=mol_table.getDF(),
-            **kwargs
+            name, protein_col, target_props=target_props, df=mol_table.getDF(), **kwargs
         )
         if not ds.descriptors and mol_table.descriptors:
             ds.descriptors = mol_table.descriptors

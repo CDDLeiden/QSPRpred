@@ -16,13 +16,13 @@ from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.tasks import TargetTasks
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
 from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.early_stopping import EarlyStoppingMode
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
-from .models.sklearn import QSPRModel, SklearnModel
-from qsprpred.tasks import TargetTasks
+from .models.scikit_learn import QSPRModel, SklearnModel
 
 
 def QSPRArgParser(txt=None):
@@ -129,8 +129,7 @@ def QSPRArgParser(txt=None):
         "--optimization",
         type=str,
         default=None,
-        help=
-        "Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, \
+        help="Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, \
                             if 'bayes' bayesian optimization",
     )
     parser.add_argument(
@@ -259,10 +258,13 @@ def QSPR_modelling(args):
                     parameters["class_weight"] = class_weight
                 counts = dataset.y.value_counts()
                 scale_pos_weight = (
-                    counts[0] / counts[1] if (
-                        args.sample_weighing and len(tasks) == 1 and
-                        not tasks[0].isMultiClass()
-                    ) else 1
+                    counts[0] / counts[1]
+                    if (
+                        args.sample_weighing
+                        and len(tasks) == 1
+                        and not tasks[0].isMultiClass()
+                    )
+                    else 1
                 )
                 if alg_dict[model_type] == XGBClassifier:
                     parameters["scale_pos_weight"] = scale_pos_weight
@@ -279,8 +281,9 @@ def QSPR_modelling(args):
 
             # Create QSPR model object
             model_name = (
-                f"{model_type}_{dataset.name}" if not args.model_suffix else
-                f"{model_type}_{dataset.name}_{args.model_suffix}"
+                f"{model_type}_{dataset.name}"
+                if not args.model_suffix
+                else f"{model_type}_{dataset.name}_{args.model_suffix}"
             )
             if model_type == "DNN":
                 qspr_model = DNNModel(
@@ -324,10 +327,7 @@ def QSPR_modelling(args):
                         )
                     else:
                         search_space_bs.update(
-                            {
-                                "criterion":
-                                    ["categorical", ["squared_error", "poisson"]]
-                            }
+                            {"criterion": ["categorical", ["squared_error", "poisson"]]}
                         )
                 elif model_type == "RF":
                     search_space_bs.update(
@@ -344,9 +344,9 @@ def QSPR_modelling(args):
                 qspr_model.setParams(best_params)
 
             if args.model_evaluation:
-                CrossValAssessor(
-                    mode=EarlyStoppingMode.RECORDING, scoring=score_func
-                )(qspr_model)
+                CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(
+                    qspr_model
+                )
                 TestSetAssessor(
                     mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func
                 )(qspr_model)

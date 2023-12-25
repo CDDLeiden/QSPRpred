@@ -6,7 +6,6 @@ To add a new filter:
 from abc import ABC, abstractmethod
 from functools import partial
 from itertools import chain
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -16,6 +15,7 @@ from ...logs import logger
 
 class DataFilter(ABC):
     """Filter out some rows from a dataframe."""
+
     @abstractmethod
     def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
         """Filter out some rows from a dataframe.
@@ -36,6 +36,7 @@ class CategoryFilter(DataFilter):
         values (list[str]): filter values.
         keep (bool): whether to keep or discard values.
     """
+
     def __init__(self, name: str, values: list[str], keep=False) -> None:
         """Initialize the CategoryFilter with the name, values and keep attributes.
 
@@ -77,20 +78,46 @@ papyrusLowQualityFilter = partial(CategoryFilter, name="Quality", values=["Low"]
 
 
 class RepeatsFilter(DataFilter):
-    """To filter out duplicate molecules based on descriptor values
+    """To filter out duplicate molecules based on descriptor values.
 
     Attributes:
         keep (str): For duplicate entries determines how properties are treated,
             if False remove both (/all) duplicate entries, if True keep them,
-            if first, keep row of first entry (based on year), if last keep row of
-            last entry based on year.
+            if first, keep row of first entry (based on time), if last keep row of
+            last entry based on time.
             options: 'first', 'last', True, False
-        year_name (str, optional): name of column containing year of publication
+        timeCol (str, optional): name of column containing time of publication
             used if keep is 'first' or 'last'
+        additionalCols (list[str], optional): additional columns to use for
+            determining duplicates (e.g. proteinid, in case of PCM modelling),
+            so that compounds with same descriptors but different proteinid
+            are not removed.
     """
-    def __init__(self, keep: str = "first", year_name: Optional[str] = "Year"):
+
+    def __init__(
+        self,
+        keep: str | bool = False,
+        timecol: str | None = None,
+        additional_cols: list[str] = [],
+    ) -> None:
+        """Initialize the RepeatsFilter with the keep, timecol and additional_cols
+        attributes.
+
+        Args:
+            keep (str|bool, optional): For duplicate entries determines how properties
+                are treated, if False remove both (/all) duplicate entries, if True
+                keep them, if first, keep row of first entry (based on time), if last
+                keep row of last entry based on time. Defaults to False.
+            timecol (str, optional): name of column containing time of publication
+                used if keep is 'first' or 'last'. Defaults to None.
+            additional_cols (list[str], optional): additional columns to use for
+                determining duplicates (e.g. proteinid, in case of PCM modelling),
+                so that compounds with same descriptors but different proteinid
+                are not removed. Defaults to [].
+        """
         self.keep = keep
-        self.year_name = year_name
+        self.timeCol = timecol
+        self.additionalCols = additional_cols
 
     def __call__(self, df: pd.DataFrame, descriptors: pd.DataFrame) -> pd.DataFrame:
         """Filter rows from dataframe.
@@ -99,6 +126,7 @@ class RepeatsFilter(DataFilter):
             df (pandas dataframe): dataframe to filter
             descriptors (pandas dataframe): dataframe containing descriptors
         """
+
         def group_duplicate_index(df) -> list[list[int]]:
             """Group indices of duplicate rows
 
@@ -127,25 +155,29 @@ class RepeatsFilter(DataFilter):
             # Return list of lists of indices of duplicate rows
             return [sort_idxs[i:j] for i, j in zip(idx[::2], idx[1::2] + 1)]
 
+        # Adding additional columns to descriptors
+        for col in self.additionalCols:
+            if col in df.columns:
+                descriptors[col] = df[col]
+
         allrepeats = group_duplicate_index(descriptors)
 
         if self.keep is True:
             if len(allrepeats) > 0:
+                # print QSPRID of duplicate compounds
                 logger.warning(
                     "Dataframe contains duplicate compounds and/or compounds with "
                     "identical descriptors.\nThe following rows contain duplicates: "
-                    f"{allrepeats}"
+                    f"{[df.loc[repeats].index.values for repeats in allrepeats]}"
                 )
         elif self.keep is False:
             df = df.drop(list(chain(*allrepeats)))
         elif self.keep in ["first", "last"]:
-            logger.warning(
-                "For dataframe with multiple target properties it is "
-                "recommended to give target_props to prevent loss of "
-                "values for properties only occuring for some datapoints"
-            )
+            assert (
+                self.timeCol is not None
+            ), "timecol must be specified if keep is 'first' or 'last'"
             for repeat in allrepeats:
-                years = df.loc[repeat, self.year_name]
+                years = df.loc[repeat, self.timeCol]
                 years = pd.to_numeric(years, errors="coerce")
                 if self.keep == "first":
                     tokeep = years.idxmin()  # Use the first occurance
@@ -154,5 +186,4 @@ class RepeatsFilter(DataFilter):
                 repeat.remove(tokeep)  # Remove the one to keep from the allrepeats list
             df = df.drop(list(chain(*allrepeats)))
 
-        return df
         return df
