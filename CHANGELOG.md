@@ -45,6 +45,7 @@ From v2.1.0 to v3.0.0
 - `MetricsPlot` now supports multi-class and multi-task classification models.
 - `CorrelationPlot` now supports multi-task regression models.
 - `RepeatsFilter` argument `year_name` renamed to `time_col` and arugment `additional_cols` added.
+- The behaviour of `QSPRDataset` was changed with regards to target properties. It now remembers the original state of any target property and all changes are performed in place on the original property column (i.e. conversion to multi-class classification). This is to always maintain the same property name and always have the option to reset it to the raw original state (i.e. if we switch to regression or want to repeat a transformation).
 
 ## New Features
 
@@ -73,6 +74,10 @@ From v2.1.0 to v3.0.0
 - Added a `reset` method to `QSPRDataset`, which resets splits and loads all descriptors
   into the training set matrix again.
 - Added `ConfusionMatrixPlot` to plot confusion matrices.
+- Added the `searchWithIndex`, `searchOnProperty`, `searchWithSMARTS` and `sample` to `MoleculeTable` to facilitate more advanced sampling from data.
+- Assessors now have the `split_multitask_scores` flag that can be used to evaluate each task seperately with single-task metrics.
+- `MoleculeDataSet`s now has the `smiles` property to easily get smiles.
+- A Docker-based runner in `testing/runner` can now be used to test GPU-enabled features and run the full CI pipeline.
 
 ## Removed Features
 
