@@ -1,4 +1,4 @@
-QSPRID	pchembl_value_Mean_class_Label	pchembl_value_Mean_class_Prediction
+QSPRID	pchembl_value_Mean_Label	pchembl_value_Mean_Prediction
 ConsistencyChecks_222	True	True
 ConsistencyChecks_011	True	True
 ConsistencyChecks_154	False	False

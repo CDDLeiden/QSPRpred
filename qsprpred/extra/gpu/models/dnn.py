@@ -10,7 +10,7 @@ import pandas as pd
 import torch
 from sklearn.model_selection import ShuffleSplit
 
-from .. import DEFAULT_DEVICE, DEFAULT_GPUS
+from .. import DEFAULT_TORCH_DEVICE, DEFAULT_TORCH_GPUS
 from ....data.sampling.splits import DataSplit
 from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.neural_network import STFullyConnected
@@ -69,8 +69,8 @@ class DNNModel(QSPRModel):
         parameters: dict | None = None,
         random_state: int | None = None,
         autoload: bool = True,
-        device: torch.device = DEFAULT_DEVICE,
-        gpus: list[int] = DEFAULT_GPUS,
+        device: torch.device = DEFAULT_TORCH_DEVICE,
+        gpus: list[int] = DEFAULT_TORCH_GPUS,
         patience: int = 50,
         tol: float = 0,
     ):
@@ -91,9 +91,9 @@ class DNNModel(QSPRModel):
             autoload (bool, optional):
                 whether to load the model from file or not. Defaults to True.
             device (torch.device, optional):
-                The cuda device. Defaults to `DEFAULT_DEVICE`.
+                The cuda device. Defaults to `DEFAULT_TORCH_DEVICE`.
             gpus (list[int], optional):
-                gpu number(s) to use for model fitting. Defaults to `DEFAULT_GPUS`.
+                gpu number(s) to use for model fitting. Defaults to `DEFAULT_TORCH_GPUS`.
             patience (int, optional):
                 number of epochs to wait before early stop if no progress
                 on validation set score. Defaults to 50.

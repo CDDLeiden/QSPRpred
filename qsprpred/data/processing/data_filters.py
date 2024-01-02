@@ -6,7 +6,6 @@ To add a new filter:
 from abc import ABC, abstractmethod
 from functools import partial
 from itertools import chain
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -16,6 +15,7 @@ from ...logs import logger
 
 class DataFilter(ABC):
     """Filter out some rows from a dataframe."""
+
     @abstractmethod
     def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
         """Filter out some rows from a dataframe.
@@ -36,6 +36,7 @@ class CategoryFilter(DataFilter):
         values (list[str]): filter values.
         keep (bool): whether to keep or discard values.
     """
+
     def __init__(self, name: str, values: list[str], keep=False) -> None:
         """Initialize the CategoryFilter with the name, values and keep attributes.
 
@@ -92,7 +93,13 @@ class RepeatsFilter(DataFilter):
             so that compounds with same descriptors but different proteinid
             are not removed.
     """
-    def __init__(self, keep: str|bool = False, timecol: str|None = None, additional_cols: list[str] = []) -> None:
+
+    def __init__(
+        self,
+        keep: str | bool = False,
+        timecol: str | None = None,
+        additional_cols: list[str] = [],
+    ) -> None:
         """Initialize the RepeatsFilter with the keep, timecol and additional_cols
         attributes.
 
@@ -119,6 +126,7 @@ class RepeatsFilter(DataFilter):
             df (pandas dataframe): dataframe to filter
             descriptors (pandas dataframe): dataframe containing descriptors
         """
+
         def group_duplicate_index(df) -> list[list[int]]:
             """Group indices of duplicate rows
 
@@ -165,9 +173,9 @@ class RepeatsFilter(DataFilter):
         elif self.keep is False:
             df = df.drop(list(chain(*allrepeats)))
         elif self.keep in ["first", "last"]:
-            assert self.timeCol is not None, (
-                "timecol must be specified if keep is 'first' or 'last'"
-            )
+            assert (
+                self.timeCol is not None
+            ), "timecol must be specified if keep is 'first' or 'last'"
             for repeat in allrepeats:
                 years = df.loc[repeat, self.timeCol]
                 years = pd.to_numeric(years, errors="coerce")

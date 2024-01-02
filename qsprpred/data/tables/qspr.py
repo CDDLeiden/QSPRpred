@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import ClassVar, Optional, Callable, Generator
 
 import numpy as np
@@ -53,46 +54,43 @@ class QSPRDataset(MoleculeTable):
         chunk_size: int = 50,
         drop_invalids: bool = True,
         drop_empty: bool = True,
-        target_imputer: Optional[Callable] = None,
         index_cols: Optional[list[str]] = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if
-        specified.
+                specified.
 
-        Args:
-            name (str): data name, used in saving the data
-            target_props (list[TargetProperty | dict]): target properties, names
-                should correspond with target columnname in df
-            df (pd.DataFrame, optional): input dataframe containing smiles and target
-                property. Defaults to None.
-            smiles_col (str, optional): name of column in df containing SMILES.
-                Defaults to "SMILES".
-            add_rdkit (bool, optional): if true, column with rdkit molecules will be
-                added to df. Defaults to False.
-            store_dir (str, optional): directory for saving the output data.
-                Defaults to '.'.
-            overwrite (bool, optional): if already saved data at output dir if should
-                be overwritten. Defaults to False.
-            n_jobs (int, optional): number of parallel jobs. If <= 0, all available
-                cores will be used. Defaults to 1.
-            chunk_size (int, optional): chunk size for parallel processing.
-                Defaults to 50.
-            drop_invalids (bool, optional): if true, invalid SMILES will be dropped.
-                Defaults to True.
-            drop_empty (bool, optional): if true, rows with empty target property will
-                be removed.
-            target_imputer (Callable, optional): imputer for missing target property
-                values. Defaults to None.
-            index_cols (list[str], optional): columns to be used as index in the
-                dataframe. Defaults to `None` in which case a custom ID will be
-                generated.
-            autoindex_name (str): Column name to use for automatically generated IDs.
-            random_state (int, optional): random state for splitting the data.
+                Args:
+                    name (str): data name, used in saving the data
+                    target_props (list[TargetProperty | dict]): target properties, names
+                        should correspond with target columnname in df
+                    df (pd.DataFrame, optional): input dataframe containing smiles and target
+                        property. Defaults to None.
+                    smiles_col (str, optional): name of column in df containing SMILES.
+                        Defaults to "SMILES".
+                    add_rdkit (bool, optional): if true, column with rdkit molecules will be
+                        added to df. Defaults to False.
+                    store_dir (str, optional): directory for saving the output data.
+                        Defaults to '.'.
+                    overwrite (bool, optional): if already saved data at output dir if should
+                        be overwritten. Defaults to False.
+                    n_jobs (int, optional): number of parallel jobs. If <= 0, all available
+                        cores will be used. Defaults to 1.
+                    chunk_size (int, optional): chunk size for parallel processing.
+                        Defaults to 50.
+                    drop_invalids (bool, optional): if true, invalid SMILES will be dropped.
+                        Defaults to True.
+                    drop_empty (bool, optional): if true, rows with empty target property values will
+        be removed as well as rows with empty SMILES column values.
+                    index_cols (list[str], optional): columns to be used as index in the
+                        dataframe. Defaults to `None` in which case a custom ID will be
+                        generated.
+                    autoindex_name (str): Column name to use for automatically generated IDs.
+                    random_state (int, optional): random state for splitting the data.
 
-        Raises:
-            `ValueError`: Raised if threshold given with non-classification task.
+                Raises:
+                    `ValueError`: Raised if threshold given with non-classification task.
         """
         super().__init__(
             name,
@@ -110,21 +108,20 @@ class QSPRDataset(MoleculeTable):
         )
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
-        # load target properties
-        self.setTargetProperties(target_props, drop_empty, target_imputer)
         self.feature_standardizer = None
-        # populate feature matrix and target property array
+        # populate feature matrix and target properties
         self.X = None
         self.y = None
         self.X_ind = None
         self.y_ind = None
-        if drop_invalids:
-            self.dropInvalids()
-        self.restoreTrainingData()
+        self.targetProperties = []
+        self.setTargetProperties(target_props, drop_empty)
         logger.info(
             f"Dataset '{self.name}' created for target "
             f"targetProperties: '{self.targetProperties}'."
         )
+        if drop_invalids:
+            self.dropInvalids()
 
     def __setstate__(self, state):
         super().__setstate__(state)
@@ -169,18 +166,34 @@ class QSPRDataset(MoleculeTable):
             "convert from 'MoleculeTable' with 'fromMolTable'."
         )
 
+    def resetTargetProperty(self, prop: TargetProperty | str):
+        """Reset target property to its original value.
+
+        Args:
+            prop (TargetProperty | str): target property to reset
+        """
+        if isinstance(prop, str):
+            prop = self.getTargetProperties([prop])[0]
+        if f"{prop.name}_original" in self.df.columns:
+            self.df[prop.name] = self.df[f"{prop.name}_original"]
+        # save original values for next reset
+        self.df[f"{prop.name}_original"] = self.df[prop.name]
+        self.restoreTrainingData()
+
     def setTargetProperties(
         self,
-        target_props: list[TargetProperty],
+        target_props: list[TargetProperty | dict],
         drop_empty: bool = True,
-        target_imputer: Optional[Callable] = None,
     ):
         """Set list of target properties and apply transformations if specified.
 
         Args:
-            target_props (list[TargetProperty]): list of target properties
+            target_props (list[TargetProperty]):
+                list of target properties
+            drop_empty (bool, optional):
+                whether to drop rows with empty target property values. Defaults to
+                `True`.
         """
-        # check target properties validity
         assert isinstance(target_props, list), (
             "target_props should be a list of TargetProperty objects or dictionaries "
             "initialize TargetProperties from."
@@ -190,53 +203,15 @@ class QSPRDataset(MoleculeTable):
                 "target_props should be a list of TargetProperty objects or "
                 "dictionaries to initialize TargetProperties from, not a mix."
             )
-            self.targetProperties = TargetProperty.fromList(target_props)
+            target_props = TargetProperty.fromList(target_props)
         else:
             assert all(isinstance(d, TargetProperty) for d in target_props), (
                 "target_props should be a list of TargetProperty objects or "
                 "dictionaries to initialize TargetProperties from, not a mix."
             )
-            self.targetProperties = target_props
-        assert all(
-            prop in self.df.columns for prop in self.targetPropertyNames
-        ), "Not all target properties in dataframe columns."
-        # transform target properties
-        for target_prop in self.targetProperties:
-            if target_prop.transformer is not None:
-                transformed_prop = f"{target_prop.name}_transformed"
-                self.transform(
-                    [target_prop.name],
-                    target_prop.transformer,
-                    addAs=[transformed_prop],
-                )
-                target_prop.name = transformed_prop
-        # drop rows with missing smiles/no target property for any of
-        # the target properties
-        if drop_empty:
-            self.dropEmpty()
-        # impute missing target property values
-        if target_imputer is not None:
-            self.imputeTargetProperties(target_imputer)
-        # convert classification targets to integers
-        for target_prop in self.targetProperties:
-            if target_prop.task.isClassification():
-                self.makeClassification(target_prop)
-
-    def dropEmpty(self):
-        """Drop rows with empty target property value from the data set."""
-        self.df.dropna(subset=([self.smilesCol]), inplace=True)
-        self.df.dropna(subset=(self.targetPropertyNames), how="all", inplace=True)
-
-    def imputeTargetProperties(self, imputer: Callable):
-        """Impute missing target property values.
-
-        Args:
-            imputer (Callable): imputer object, should have a fit and transform method.
-        """
-        names = self.targetPropertyNames
-        for idx, target_prop in enumerate(self.targetProperties):
-            self.targetProperties[idx].name = f"{target_prop.name}_imputed"
-        self.df[self.targetPropertyNames] = imputer.fit_transform(self.df[names])
+        self.targetProperties = []
+        for prop in target_props:
+            self.setTargetProperty(prop, drop_empty)
 
     @property
     def hasFeatures(self):
@@ -269,6 +244,7 @@ class QSPRDataset(MoleculeTable):
         be empty. If descriptors are available, the resulting training matrices will
             be featurized.
         """
+        logger.debug("Restoring training data...")
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.y = self.df.query("Split_IsTrain")[self.targetPropertyNames]
@@ -283,34 +259,50 @@ class QSPRDataset(MoleculeTable):
         self.X = self.y.drop(self.y.columns, axis=1)
         self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
         self.featurizeSplits(shuffle=False)
+        logger.debug("Training data restored.")
+        logger.debug(f"Training features shape: {self.X.shape}")
+        logger.debug(f"Test set features shape: {self.X_ind.shape}")
+        logger.debug(f"Training labels shape: {self.y.shape}")
+        logger.debug(f"Test set labels shape: {self.y_ind.shape}")
+        logger.debug(f"Training features indices: {self.X.index}")
+        logger.debug(f"Test set features indices: {self.X_ind.index}")
+        logger.debug(f"Training labels indices: {self.y.index}")
+        logger.debug(f"Test set labels indices: {self.y_ind.index}")
 
-    def makeRegression(self, target_property: TargetProperty | str):
+    def makeRegression(self, target_property: str):
         """Switch to regression task using the given target property.
 
         Args:
             target_property (str): name of the target property to use for regression
         """
-        if isinstance(target_property, str):
-            target_property = self.getTargetProperties(
-                [target_property], original_names=True
-            )[0]
-        target_property.name = target_property.originalName
+        target_property = self.getTargetProperties([target_property])[0]
+        self.resetTargetProperty(target_property)
         target_property.task = TargetTasks.REGRESSION
-        del target_property.th
+        if hasattr(target_property, "th"):
+            del target_property.th
         self.restoreTrainingData()
+        logger.info("Target property converted to regression.")
 
     def makeClassification(
-        self, target_property: TargetProperty | str, th: Optional[list[float]] = None
+        self,
+        target_property: str,
+        th: Optional[list[float]] = None,
     ):
         """Switch to classification task using the given threshold values.
 
         Args:
-            target_property (TargetProperty): Target property to use for classification
+            target_property (str):
+                Target property to use for classification
                 or name of the target property.
-            th (list[float], optional): list of threshold values. If not provided, the
+            th (list[float], optional):
+                list of threshold values. If not provided, the
                 values will be inferred from th specified in TargetProperty.
                 Defaults to None.
         """
+        prop_name = target_property
+        target_property = self.getTargetProperties([target_property])[0]
+        self.resetTargetProperty(target_property)
+        # perform some checks
         if th is not None:
             assert (
                 isinstance(th, list) or th == "precomputed"
@@ -319,12 +311,8 @@ class QSPRDataset(MoleculeTable):
                 assert (
                     len(th) > 0
                 ), "Threshold values should be provided as a list of floats."
-
         if isinstance(target_property, str):
-            target_property = self.getTargetProperties(
-                [target_property], original_names=True
-            )[0]
-
+            target_property = self.getTargetProperties([target_property])[0]
         # check if the column only has nan values
         if self.df[target_property.name].isna().all():
             logger.debug(
@@ -332,7 +320,6 @@ class QSPRDataset(MoleculeTable):
                 " is all nan, assuming predictor."
             )
             return target_property
-
         # if no threshold values provided, use the ones specified in the TargetProperty
         if th is None:
             assert hasattr(target_property, "th"), (
@@ -340,26 +327,21 @@ class QSPRDataset(MoleculeTable):
                 "no threshold specified in function args."
             )
             th = target_property.th
-
-        new_prop = f"{target_property.originalName}_class"
-
         if th == "precomputed":
-            self.df[new_prop] = self.df[target_property.originalName]
             assert all(
                 value is None
                 or (type(value) in (int, bool))
                 or (isinstance(value, float) and value.is_integer())
-                for value in self.df[new_prop]
+                for value in self.df[prop_name]
             ), "Precomputed classification target must be integers or booleans."
-            nClasses = len(self.df[new_prop].dropna().unique())
+            n_classes = len(self.df[prop_name].dropna().unique())
             target_property.task = (
                 TargetTasks.MULTICLASS
-                if nClasses > 2  # noqa: PLR2004
+                if n_classes > 2  # noqa: PLR2004
                 else TargetTasks.SINGLECLASS
             )
             target_property.th = th
-            target_property.nClasses = nClasses
-            target_property.name = new_prop
+            target_property.nClasses = n_classes
         else:
             assert len(th) > 0, "Threshold list must contain at least one value."
             if len(th) > 1:
@@ -367,37 +349,40 @@ class QSPRDataset(MoleculeTable):
                     "For multi-class classification, "
                     "set more than 3 values as threshold."
                 )
-                assert max(self.df[target_property.originalName]) <= max(th), (
+                assert max(self.df[prop_name]) <= max(th), (
                     "Make sure final threshold value is not smaller "
                     "than largest value of property"
                 )
-                assert min(self.df[target_property.originalName]) >= min(th), (
+                assert min(self.df[prop_name]) >= min(th), (
                     "Make sure first threshold value is not larger "
                     "than smallest value of property"
                 )
-                self.df[f"{new_prop}_intervals"] = pd.cut(
-                    self.df[target_property.originalName], bins=th, include_lowest=True
+                self.df[f"{prop_name}_intervals"] = pd.cut(
+                    self.df[prop_name], bins=th, include_lowest=True
                 ).astype(str)
-                self.df[new_prop] = LabelEncoder().fit_transform(
-                    self.df[f"{new_prop}_intervals"]
+                self.df[prop_name] = LabelEncoder().fit_transform(
+                    self.df[f"{prop_name}_intervals"]
                 )
             else:
-                self.df[new_prop] = self.df[target_property.originalName] > th[0]
+                self.df[prop_name] = self.df[prop_name] > th[0]
             target_property.task = (
                 TargetTasks.SINGLECLASS if len(th) == 1 else TargetTasks.MULTICLASS
             )
             target_property.th = th
-            target_property.name = new_prop
         self.restoreTrainingData()
-        logger.info("Target property converted to classification.")
-        return target_property
+        logger.info(f"Target property '{prop_name}' converted to classification.")
+
+    def searchWithIndex(
+        self, index: pd.Index, name: str | None = None
+    ) -> "MoleculeTable":
+        ret = super().searchWithIndex(index, name)
+        return QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
 
     @staticmethod
     def fromMolTable(
         mol_table: MoleculeTable,
         target_props: list[TargetProperty | dict],
         name=None,
-        random_state=None,
         **kwargs,
     ) -> "QSPRDataset":
         """Create QSPRDataset from a MoleculeTable.
@@ -407,17 +392,36 @@ class QSPRDataset(MoleculeTable):
             target_props (list): list of target properties to use
             name (str, optional): name of the data set. Defaults to None.
             kwargs: additional keyword arguments to pass to the constructor
-            random_state(int, optional): seed to use for random operations
 
         Returns:
             QSPRDataset: created data set
         """
+        name = mol_table.name if name is None else name
         kwargs["store_dir"] = (
             mol_table.baseDir if "store_dir" not in kwargs else kwargs["store_dir"]
         )
-        name = mol_table.name if name is None else name
+        kwargs["random_state"] = (
+            mol_table.randomState
+            if "random_state" not in kwargs
+            else kwargs["random_state"]
+        )
+        kwargs["n_jobs"] = (
+            mol_table.nJobs if "n_jobs" not in kwargs else kwargs["n_jobs"]
+        )
+        kwargs["chunk_size"] = (
+            mol_table.chunkSize if "chunk_size" not in kwargs else kwargs["chunk_size"]
+        )
+        kwargs["smiles_col"] = (
+            mol_table.smilesCol if "smiles_col" not in kwargs else kwargs["smiles_col"]
+        )
+        kwargs["index_cols"] = (
+            mol_table.indexCols if "index_cols" not in kwargs else kwargs["index_cols"]
+        )
         ds = QSPRDataset(
-            name, target_props, mol_table.getDF(), random_state=random_state, **kwargs
+            name,
+            target_props,
+            mol_table.getDF(),
+            **kwargs,
         )
         ds.descriptors = mol_table.descriptors
         return ds
@@ -752,7 +756,7 @@ class QSPRDataset(MoleculeTable):
 
     def dropInvalids(self):
         ret = super().dropInvalids()
-        self.featurize()
+        self.restoreTrainingData()
         return ret
 
     def reset(self):
@@ -944,30 +948,21 @@ class QSPRDataset(MoleculeTable):
         else:
             return self.y, self.y_ind if self.y_ind is not None else self.y
 
-    def getTargetProperties(self, names: list, original_names: bool = False):
+    def getTargetProperties(self, names: list) -> list[TargetProperty]:
         """Get the target properties with the given names.
 
         Args:
             names (list[str]): name of the target properties
-            original_names (bool): if `True`, use the original names of the target
-                properties
 
         Returns:
-            `TargetProperty`: target property with the given name
+            list[TargetProperty]: list of target properties
         """
-        return TargetProperty.selectFromList(
-            self.targetProperties, names, original_names=original_names
-        )
+        return [tp for tp in self.targetProperties if tp.name in names]
 
     @property
     def targetPropertyNames(self):
         """Get the names of the target properties."""
         return TargetProperty.getNames(self.targetProperties)
-
-    @property
-    def targetPropertyOriginalNames(self):
-        """Get the original names of the target properties."""
-        return TargetProperty.getOriginalNames(self.targetProperties)
 
     @property
     def isMultiTask(self):
@@ -979,39 +974,83 @@ class QSPRDataset(MoleculeTable):
         return len(self.targetProperties) > 1
 
     @property
-    def nTasks(self):
+    def nTargetProperties(self):
         """Get the number of target properties in the dataset."""
         return len(self.targetProperties)
 
-    def dropTask(self, task):
-        """Drop the given task from the dataset.
+    def unsetTargetProperty(self, name: str | TargetProperty):
+        """Unset the target property. It will not remove it from the data set, but
+        will make it unavailable for training.
 
         Args:
-            task (str): name of the task to drop
+            name (str | TargetProperty):
+                name of the target property to drop or the property itself
         """
-        assert task in self.targetPropertyNames, f"Task {task} not found in dataset."
+        name = name.name if isinstance(name, TargetProperty) else name
+        assert (
+            name in self.targetPropertyNames
+        ), f"Target property '{name}' not found in dataset."
         assert (
             len(self.targetProperties) > 1
         ), "Cannot drop task from single-task dataset."
-        self.targetProperties = [tp for tp in self.targetProperties if tp.name != task]
+        self.targetProperties = [tp for tp in self.targetProperties if tp.name != name]
         self.restoreTrainingData()
 
-    def addTask(self, task: TargetProperty | dict):
-        """Add a task to the dataset.
+    def dropEmptyProperties(self, names: list[str]):
+        super().dropEmptyProperties(names)
+        self.restoreTrainingData()
+
+    def transform(
+        self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
+    ):
+        super().transform(targets, transformer, add_as)
+        if add_as is None and (set(targets) & set(self.targetPropertyNames)):
+            self.restoreTrainingData()
+
+    def imputeProperties(self, names: list[str], imputer: Callable):
+        super().imputeProperties(names, imputer)
+        self.restoreTrainingData()
+
+    def setTargetProperty(self, prop: TargetProperty | dict, drop_empty: bool = True):
+        """Add a target property to the dataset.
 
         Args:
-            task (TargetProperty): name of the task to add
+            prop (TargetProperty):
+                name of the target property to add
+            drop_empty (bool):
+                whether to drop rows with empty target property values. Defaults to
+                `True`.
         """
-        if isinstance(task, dict):
-            task = TargetProperty.fromDict(task)
-
-        assert (
-            task.name not in self.targetPropertyNames
-        ), f"Task {task} already exists in dataset."
-        assert task.name in self.df.columns, f"Task {task} not found in dataset."
-
-        self.targetProperties.append(task)
-        self.restoreTrainingData()
+        logger.debug(f"Adding target property '{prop}' to dataset.")
+        # deep copy the property to avoid modifying the original
+        prop = deepcopy(prop)
+        if isinstance(prop, dict):
+            prop = TargetProperty.fromDict(prop)
+        if prop.name in self.targetPropertyNames:
+            logger.warning(
+                f"Property '{prop}' already exists in dataset. It will be reset."
+            )
+        assert prop.name in self.df.columns, f"Property {prop} not found in data set."
+        # add the target property to the list
+        self.targetProperties.append(prop)
+        # restore original values if they were transformed
+        self.resetTargetProperty(prop)
+        # impute the property
+        if prop.imputer is not None:
+            self.imputeProperties([prop.name], prop.imputer)
+        # transform the property
+        if prop.transformer is not None:
+            self.transform(
+                [prop.name],
+                prop.transformer,
+            )
+        # drop rows with missing smiles/no target property for any of
+        # the target properties
+        if drop_empty:
+            self.dropEmptyProperties([prop.name])
+        # convert classification targets to integers
+        if prop.task.isClassification():
+            self.makeClassification(prop.name, prop.th)
 
     def iterFolds(
         self,
