@@ -232,7 +232,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
 
     def searchOnProperty(
         self, prop_name: str, values: list[str], name: str | None = None, exact=False
-    ) -> "MoleculeTable"
+    ) -> "MoleculeTable":
         """Create a new table from a list of property values.
 
         Args:
