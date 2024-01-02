@@ -64,7 +64,7 @@ class ModelAssessor(ABC):
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
         **kwargs,
-    ) -> float | np.ndarray:
+    ) -> np.ndarray:
         """Evaluate the model.
 
         Args:
@@ -76,7 +76,9 @@ class ModelAssessor(ABC):
             kwargs: additional arguments for fit function of the model
 
         Returns:
-            list[float]: scores of the model for each fold
+            np.ndarray: scores for the model. If splitMultitaskScores is True, each
+            column represents a task and each row a fold. Otherwise, a 1D array is
+            returned with the scores for each fold.
         """
 
     def predictionsToDataFrame(
@@ -160,7 +162,7 @@ class CrossValAssessor(ModelAssessor):
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
         **kwargs,
-    ) -> float | np.ndarray:
+    ) -> np.ndarray:
         """Perform cross validation on the model with the given parameters.
 
         Arguments:
@@ -172,7 +174,9 @@ class CrossValAssessor(ModelAssessor):
             **kwargs: additional keyword arguments for the fit function
 
         Returns:
-            float | np.ndarray: predictions on the validation set
+            np.ndarray: scores for the validation sets. If splitMultitaskScores is True, each
+            column represents a task and each row a fold. Otherwise, a 1D array is
+            returned with the scores for each fold.
         """
         monitor = monitor or self.monitor
         model.checkForData()
@@ -292,7 +296,7 @@ class TestSetAssessor(ModelAssessor):
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
         **kwargs,
-    ) -> float | np.ndarray:
+    ) -> np.ndarray:
         """Make predictions for independent test set.
 
         Arguments:
@@ -305,7 +309,9 @@ class TestSetAssessor(ModelAssessor):
             **kwargs: additional keyword arguments for the fit function
 
         Returns:
-            float | np.ndarray: predictions for evaluation
+            np.ndarray: scores for the test set. If splitMultitaskScores is True, each
+            column represents a task. Otherwise, a 1D array is returned with the score
+            for the test set.
         """
         monitor = monitor or self.monitor
         evalparams = model.parameters if parameters is None else parameters

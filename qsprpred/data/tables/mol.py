@@ -238,6 +238,21 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
     def searchOnProperty(
         self, prop_name: str, values: list[str], name: str | None = None, exact=False
     ) -> "MoleculeTable":
+        """Create a new table from a list of property values.
+
+        Args:
+            prop_name (str): name of the property to search on
+            values (list[str]): list of values to search for
+            name (str | None, optional): name of the new table. Defaults to the name of
+                the old table, plus the `_searched` suffix.
+            exact (bool, optional):  Whether to use exact matching, i.e. whether to
+                search for exact matches or partial matches. Defaults to False.
+
+        Returns:
+            MoleculeTable:
+                A new table with the molecules from the
+                old table with the given property values.
+        """
         mask = [False] * len(self.df)
         for value in values:
             mask = (

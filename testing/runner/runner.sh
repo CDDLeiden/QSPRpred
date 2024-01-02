@@ -11,4 +11,4 @@ docker-compose -p "test-runner-${TIMESTAMP}" logs >> "logs/${TIMESTAMP}.log"
 echo "Logs saved in logs/${TIMESTAMP}.log"
 echo "Cleaning up..."
 docker-compose -p "test-runner-${TIMESTAMP}" rm -f
-docker image rm "test-runner-${TIMESTAMP}"
+docker image rm "qsprpred-test-runner-${TIMESTAMP}"
