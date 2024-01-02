@@ -113,7 +113,7 @@ class RegressionPlot(ModelPlot, ABC):
 
 
 class CorrelationPlot(RegressionPlot):
-    """Class to plot the results of regression models. Plot predicted pX vs real pX."""
+    """Class to plot the results of regression models. Plot predicted pX_train vs real pX_train."""
     def make(
         self,
         save: bool = True,
@@ -121,7 +121,7 @@ class CorrelationPlot(RegressionPlot):
         property_name: str | None = None,
         out_path: str | None = None,
     ) -> tuple[sns.FacetGrid, pd.DataFrame]:
-        """Plot the results of regression models. Plot predicted pX vs real pX.
+        """Plot the results of regression models. Plot predicted pX_train vs real pX_train.
 
         Args:
             save (bool):
@@ -212,12 +212,14 @@ class WilliamsPlot(RegressionPlot):
             g (sns.FacetGrid):
                 the seaborn FacetGrid object used to make the plot
         """
-        def calculateLeverages(descriptors: pd.DataFrame) -> pd.DataFrame:
+        def calculateLeverages(features_train: pd.DataFrame, features_test: pd.DataFrame) -> pd.DataFrame:
             """Calculate the leverages for each compound in the dataset.
 
             Args:
-                descriptors (pd.DataFrame):
-                    the descriptors for each compound in the dataset
+                features_train (pd.DataFrame):
+                    the features for each compound in the training set
+                features_test (pd.DataFrame):
+                    the features for each compound in the test set
 
             Returns:
                 pd.DataFrame:
@@ -225,18 +227,31 @@ class WilliamsPlot(RegressionPlot):
                 float:
                     the h* value for the dataset
             """
-            X = descriptors.values
+            X_train = features_train.values
+            X_test = features_test.values
+
+            # assert the number of samples is greater than the number of features
+            assert X_train.shape[0] > X_train.shape[1], (
+                f"The number of samples ({X_train.shape[0]}) should be greater than the "
+                f"number of features ({X_train.shape[1]}) for calculating the leverages."
+            )
 
             # get the diagonal elements of the hat matrix
             # these are the leverages
-            leverages = np.diag(X @ np.linalg.pinv(X.T @ X) @ X.T)
-            leverages = pd.Series(leverages, index=descriptors.index)
+            pinv_XTX = np.linalg.pinv(X_train.T @ X_train)
+            leverages_train = np.diag(X_train @ pinv_XTX @ X_train.T)
+            leverages_train = pd.Series(leverages_train, index=features_train.index)
+
+            leverages_test = np.diag(X_test @ pinv_XTX @ X_test.T)
+            leverages_test = pd.Series(leverages_test, index=features_test.index)
+
+            leverages = pd.concat([leverages_train, leverages_test])
 
             # h* = (3(p+1)/N) is the cutoff for high leverage points
-            # p is the number of descriptors
+            # p is the number of features
             # N is the number of compounds
-            p = X.shape[1]
-            N = X.shape[0]
+            p = X_train.shape[1]
+            N = X_train.shape[0]
             h_star = (3*(p+1))/N
 
             return leverages, h_star
@@ -260,11 +275,11 @@ class WilliamsPlot(RegressionPlot):
         model_p = {} # number of descriptors
         for model_name, dataset in datasets.items():
             if dataset.hasFeatures:
-                features = pd.concat(dataset.getFeatures())
-                leverages, h_star = calculateLeverages(features )
+                features = dataset.getFeatures()
+                leverages, h_star = calculateLeverages(*features)
                 model_leverages[model_name] = leverages
                 model_h_star[model_name] = h_star
-                model_p[model_name] = features .shape[1]
+                model_p[model_name] = features[0].shape[1]
             else:
                 raise ValueError(
                     f"Dataset {dataset.name} does not have features, to"
