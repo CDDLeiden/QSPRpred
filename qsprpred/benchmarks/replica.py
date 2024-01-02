@@ -2,6 +2,7 @@ import json
 import os
 from copy import deepcopy
 
+import numpy as np
 import pandas as pd
 
 from .settings.benchmark import DataPrepSettings
@@ -148,6 +149,7 @@ class Replica(JSONSerializable):
                 desc_sets=deepcopy(self.descriptors)
             )
             self.ds.addDescriptors(desc_calculator, recalculate=True)
+            self.ds.setTargetProperties(deepcopy(self.targetProps))
             self.ds.save()
 
     def prepData(self):
@@ -195,25 +197,43 @@ class Replica(JSONSerializable):
         if self.model.data is None:
             raise ValueError("Model not initialized. Call initModel first.")
         self.results = None
+        scores_df = pd.DataFrame()
         for assessor in self.assessors:
             scores = assessor(self.model, save=True)
-            scores = pd.DataFrame(
-                {
-                    "Assessor": assessor.__class__.__name__,
-                    "ScoreFunc": assessor.scoreFunc.name,
-                    "Score": scores,
-                    "TargetProperties": "~".join(
-                        sorted([tp.name for tp in self.targetProps])
-                    ),
-                    "TargetTasks": "~".join(
-                        sorted([str(tp.task) for tp in self.targetProps])
-                    ),
-                }
-            )
+            if isinstance(scores, float):
+                scores = np.array([scores])
+            for i, fold_score in enumerate(scores):
+                if isinstance(fold_score, float):
+                    if self.model.isMultiTask:
+                        tp = self.targetProps[i]
+                    else:
+                        tp = self.targetProps[0]
+                    score_df = pd.DataFrame(
+                        {
+                            "Assessor": [assessor.__class__.__name__],
+                            "ScoreFunc": [assessor.scoreFunc.name],
+                            "Score": [fold_score],
+                            "TargetProperty": [tp.name],
+                            "TargetTask": [tp.task.name],
+                        }
+                    )
+                    scores_df = pd.concat([scores_df, score_df])
+                else:
+                    for tp_score, tp in zip(fold_score, self.targetProps):
+                        score_df = pd.DataFrame(
+                            {
+                                "Assessor": [assessor.__class__.__name__],
+                                "ScoreFunc": [assessor.scoreFunc.name],
+                                "Score": [tp_score],
+                                "TargetProperty": [tp.name],
+                                "TargetTask": [tp.task.name],
+                            }
+                        )
+                        scores_df = pd.concat([scores_df, score_df])
             if self.results is None:
-                self.results = scores
+                self.results = scores_df
             else:
-                self.results = pd.concat([self.results, scores])
+                self.results = pd.concat([self.results, scores_df])
 
     def createReport(self):
         """Creates a report from the results of this replica.

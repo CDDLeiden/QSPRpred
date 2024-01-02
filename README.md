@@ -33,7 +33,7 @@ pip install git+https://github.com/CDDLeiden/QSPRPred.git@main#egg=qsprpred[<opt
 The following options are available:
 - extra : include extra dependencies for PCM models and extra descriptor sets from packages other than RDKit
 - deep : include deep learning models (torch and chemprop)
-- pyboost : include pyboost model (requires cupy, `pip install cupy-cudaX`, replace X with your [cuda version](https://docs.cupy.dev/en/stable/install.html))
+- pyboost : include pyboost model (requires cupy, `pip install cupy-cudaX`, replace X with your [cuda version](https://docs.cupy.dev/en/stable/install.html), you can obtain cude toolkit from Anaconda as well: `conda install cudatoolkit`)
 - full : include all optional dependecies (requires cupy, `pip install cupy-cudaX`, replace X with your [cuda version](https://docs.cupy.dev/en/stable/install.html))
 
 ### Note on PCM Modelling

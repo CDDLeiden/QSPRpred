@@ -1,6 +1,9 @@
 from enum import Enum
 from typing import Literal, Optional, Callable
 
+import ml2json
+from sklearn import clone
+
 from qsprpred.utils.serialization import (
     JSONSerializable,
     function_as_string,
@@ -110,15 +113,17 @@ class TargetProperty(JSONSerializable):
             classification tasks
         transformer (Callable): function to transform the target property
     """
+
     def __init__(
         self,
         name: str,
-        task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
-                      TargetTasks.MULTICLASS],
-        original_name: Optional[str] = None,
+        task: Literal[
+            TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS
+        ],
         th: Optional[list[float] | str] = None,
         n_classes: Optional[int] = None,
         transformer: Optional[Callable] = None,
+        imputer: Optional[Callable] = None,
     ):
         """Initialize a TargetProperty object.
 
@@ -127,16 +132,14 @@ class TargetProperty(JSONSerializable):
             task (Literal[TargetTasks.REGRESSION,
               TargetTasks.SINGLECLASS,
               TargetTasks.MULTICLASS]): task type for the target property
-            original_name (str): original name of the target property, if not specified,
-                the name is used
             th (list[float] | str): threshold for the target property, only used
                 for classification tasks
             n_classes (int): number of classes for the target property (only used if th
                 is precomputed, otherwise it is inferred)
             transformer (Callable): function to transform the target property
+            imputer (Callable): function to impute the target property
         """
         self.name = name
-        self.originalName = original_name if original_name is not None else name
         self.task = task
         if task.isClassification():
             assert (
@@ -146,17 +149,22 @@ class TargetProperty(JSONSerializable):
             if isinstance(th, str) and th == "precomputed":
                 self.nClasses = n_classes
         self.transformer = transformer
+        self.imputer = imputer
 
     def __getstate__(self):
         o_dict = super().__getstate__()
         if self.transformer:
             o_dict["transformer"] = function_as_string(self.transformer)
+        if self.imputer:
+            o_dict["imputer"] = ml2json.to_dict(clone(self.imputer))
         return o_dict
 
     def __setstate__(self, state):
         super().__setstate__(state)
-        if self.transformer:
+        if self.transformer is not None:
             self.transformer = function_from_string(self.transformer)
+        if self.imputer is not None:
+            self.imputer = ml2json.from_dict(state["imputer"])
 
     @property
     def th(self):
@@ -266,22 +274,18 @@ class TargetProperty(JSONSerializable):
                 {
                     "name": target_prop.name,
                     "task": target_prop.task.name if task_as_str else target_prop.task,
-                    "original_name": target_prop.originalName,
                 }
             )
             if target_prop.task.isClassification():
                 target_props[-1].update(
-                    {
-                        "th": target_prop.th,
-                        "n_classes": target_prop.nClasses
-                    }
+                    {"th": target_prop.th, "n_classes": target_prop.nClasses}
                 )
             if not drop_transformer:
                 target_props[-1].update({"transformer": target_prop.transformer})
         return target_props
 
     @staticmethod
-    def selectFromList(_list: list, names: list, original_names: bool = False):
+    def selectFromList(_list: list, names: list):
         """Select a subset of TargetProperty objects from a list of TargetProperty
         objects.
 
@@ -294,8 +298,6 @@ class TargetProperty(JSONSerializable):
         Returns:
             list[TargetProperty]: list of TargetProperty objects
         """
-        if original_names:
-            return [t for t in _list if t.originalName in names]
         return [t for t in _list if t.name in names]
 
     @staticmethod
@@ -309,16 +311,3 @@ class TargetProperty(JSONSerializable):
             list[str]: list of names of the target properties
         """
         return [t.name for t in _list]
-
-    @staticmethod
-    def getOriginalNames(_list: list):
-        """Get the original names of the target properties from a list of TargetProperty
-        objects.
-
-        Args:
-            _list (list): list of TargetProperty objects
-
-        Returns:
-            list[str]: list of original names of the target properties
-        """
-        return [t.originalName for t in _list]

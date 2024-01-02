@@ -86,11 +86,14 @@ class BenchmarkRunner:
             results_file (str, optional):
                 Path to the results file. Defaults to "{data_dir}/data/results.tsv".
         """
+        logger.debug("Initializing BenchmarkRunner...")
         self.settings = settings
         self.nProc = n_proc or os.cpu_count()
         self.dataDir = data_dir
         self.resultsFile = results_file if results_file else f"{data_dir}/results.tsv"
         os.makedirs(self.dataDir, exist_ok=True)
+        logger.debug(f"Saving settings to: {self.dataDir}/settings.json")
+        self.settings.toFile(f"{self.dataDir}/settings.json")
 
     @property
     def nRuns(self) -> int:
@@ -130,9 +133,7 @@ class BenchmarkRunner:
             pd.DataFrame:
                 Results from the benchmarking experiments.
         """
-        logger.info(f"Saving settings to: {self.dataDir}/settings.json")
-        self.settings.toFile(f"{self.dataDir}/settings.json")
-        logger.info(f"Performing {self.nRuns} replica runs...")
+        logger.debug(f"Performing {self.nRuns} replica runs...")
         with ProcessPoolExecutor(max_workers=self.nProc) as executor:
             for result in executor.map(
                 self.runReplica, self.iterReplicas(), itertools.repeat(self.resultsFile)
@@ -144,7 +145,7 @@ class BenchmarkRunner:
                         logger.error(
                             f"Error in replica {result.replicaID}: {result.exception}"
                         )
-        logger.info("Finished all replica runs.")
+        logger.debug("Finished all replica runs.")
         return pd.read_table(self.resultsFile)
 
     def getSeedList(self, seed: int | None = None) -> list[int]:

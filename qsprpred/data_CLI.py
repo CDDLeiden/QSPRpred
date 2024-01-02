@@ -14,15 +14,6 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred.data.tables.qspr import QSPRDataset
-from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
-from qsprpred.data.sampling.splits import (
-    ClusterSplit,
-    ManualSplit,
-    RandomSplit,
-    ScaffoldSplit,
-    TemporalSplit,
-)
 from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
 from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
@@ -31,16 +22,25 @@ from qsprpred.data.descriptors.sets import (
     RDKitDescs,
     SmilesDesc,
 )
+from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
 from qsprpred.data.processing.feature_filters import (
     BorutaFilter,
     HighCorrelationFilter,
     LowVarianceFilter,
 )
+from qsprpred.data.sampling.splits import (
+    ClusterSplit,
+    ManualSplit,
+    RandomSplit,
+    ScaffoldSplit,
+    TemporalSplit,
+)
+from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.tasks import TargetTasks
 from .data.chem.scaffolds import Murcko
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
-from .models.sklearn import SklearnModel
-from qsprpred.tasks import TargetTasks
+from .models.scikit_learn import SklearnModel
 
 
 def QSPRArgParser(txt=None):
@@ -111,8 +111,7 @@ def QSPRArgParser(txt=None):
         "--regression",
         type=str,
         default=None,
-        help=
-        "If True, only regression model, if False, only classification, default both",
+        help="If True, only regression model, if False, only classification, default both",
     )
     parser.add_argument(
         "-th",
@@ -215,8 +214,7 @@ def QSPRArgParser(txt=None):
             "Mold2",
             "PaDEL",
             "DrugEx",
-            "Signature"
-            "MaccsFP",
+            "Signature" "MaccsFP",
             "AvalonFP",
             "TopologicalFP",
             "AtomPairFP",
@@ -313,7 +311,8 @@ def QSPR_dataprep(args):
                 else:
                     task = (
                         TargetTasks.SINGLECLASS
-                        if len(th) == 1 else TargetTasks.MULTICLASS
+                        if len(th) == 1
+                        else TargetTasks.MULTICLASS
                     )
                 if task == TargetTasks.REGRESSION and th:
                     log.warning(
@@ -322,27 +321,24 @@ def QSPR_dataprep(args):
                     )
                     th = None
                 transform_dict = {
-                    "log10": lambda x: (__import__('numpy').log10(x)),
-                    "log2": lambda x: (__import__('numpy').log2(x)),
-                    "log": lambda x: (__import__('numpy').log(x)),
-                    "sqrt": lambda x: (__import__('numpy').sqrt(x)),
-                    "cbrt": lambda x: (__import__('numpy').cbrt(x)),
-                    "exp": lambda x: (__import__('numpy').exp(x)),
-                    "square": lambda x: __import__('numpy').power(x, 2),
-                    "cube": lambda x: __import__('numpy').power(x, 3),
-                    "reciprocal": lambda x: __import__('numpy').reciprocal(x),
+                    "log10": lambda x: (__import__("numpy").log10(x)),
+                    "log2": lambda x: (__import__("numpy").log2(x)),
+                    "log": lambda x: (__import__("numpy").log(x)),
+                    "sqrt": lambda x: (__import__("numpy").sqrt(x)),
+                    "cbrt": lambda x: (__import__("numpy").cbrt(x)),
+                    "exp": lambda x: (__import__("numpy").exp(x)),
+                    "square": lambda x: __import__("numpy").power(x, 2),
+                    "cube": lambda x: __import__("numpy").power(x, 3),
+                    "reciprocal": lambda x: __import__("numpy").reciprocal(x),
                 }
                 target_props.append(
                     {
-                        "name":
-                            prop,
-                        "task":
-                            task,
-                        "th":
-                            th,
-                        "transformer":
-                            transform_dict[args.transform_data[prop]]
-                            if prop in args.transform_data else None,
+                        "name": prop,
+                        "task": task,
+                        "th": th,
+                        "transformer": transform_dict[args.transform_data[prop]]
+                        if prop in args.transform_data
+                        else None,
                     }
                 )
             # missing value imputation
@@ -357,7 +353,8 @@ def QSPR_dataprep(args):
                     sys.exit("invalid impute arg given")
             dataset_name = (
                 f"{props_name}_{task}_{args.data_suffix}"
-                if args.data_suffix else f"{props_name}_{task}"
+                if args.data_suffix
+                else f"{props_name}_{task}"
             )
             mydataset = QSPRDataset(
                 dataset_name,
@@ -367,9 +364,9 @@ def QSPR_dataprep(args):
                 n_jobs=args.ncpu,
                 store_dir=args.output_dir,
                 overwrite=True,
-                target_imputer=imputer if args.imputation is not None else None,
                 random_state=args.random_state
-                if args.random_state is not None else None,
+                if args.random_state is not None
+                else None,
             )
             # data filters
             datafilters = []
@@ -493,7 +490,8 @@ def QSPR_dataprep(args):
                 split=split,
                 feature_filters=featurefilters,
                 feature_standardizer=StandardScaler()
-                if "Smiles" not in args.features else None,
+                if "Smiles" not in args.features
+                else None,
                 feature_fill_value=args.fill_value,
             )
 
