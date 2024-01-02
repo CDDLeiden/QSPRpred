@@ -1,6 +1,7 @@
 """Module for plotting regression models."""
 from abc import ABC
 from copy import deepcopy
+from typing import List
 
 import pandas as pd
 import seaborn as sns
@@ -9,6 +10,8 @@ from sklearn import metrics
 
 from ..tasks import ModelTasks
 from ..plotting.base_plot import ModelPlot
+from ..data import QSPRDataset
+import numpy as np
 
 
 class RegressionPlot(ModelPlot, ABC):
@@ -180,3 +183,103 @@ class CorrelationPlot(RegressionPlot):
                     plt.savefig(f"{model.outPrefix}_correlation.png", dpi=300)
         plt.clf()
         return g, self.summary
+
+class WilliamsPlot(RegressionPlot):
+    """Williams plot: plot of standardized residuals ( y -axis) versus leverages (hat values; x axis)"""
+    def make(
+        self,
+        datasets: List[QSPRDataset]|None = None,
+        save: bool = True,
+        show: bool = False,
+        property_name: str | None = None,
+        out_path: str | None = None,
+    ) -> tuple[sns.FacetGrid, pd.DataFrame]:
+        """make Williams plot
+
+        Args:
+            datasets (List[QSPRDataSet]|None):
+                list of datasets to use for the plot. Should be a list of QSPRDataSet
+                in the same order as the models. If None, the models should have
+                datasets attached to them.
+            save (bool):
+                whether to save the plot
+            show (bool):
+                whether to show the plot
+            out_path (str | None):
+                path to save the plot to, e.g. "results/plot.png", if `None`, the plot
+                will be saved to each model's output directory.
+
+        Returns:
+            g (sns.FacetGrid):
+                the seaborn FacetGrid object used to make the plot
+        """
+        def calculateLeverages(descriptors: pd.DataFrame) -> pd.DataFrame:
+            """Calculate the leverages for each compound in the dataset."""
+            X = descriptors.values
+
+            # get the diagonal elements of the hat matrix
+            # these are the leverages
+            leverages = np.diag(X @ np.linalg.pinv(X.T @ X) @ X.T)
+            leverages = pd.Series(leverages, index=descriptors.index)
+
+            # h* = (3(p+1)/N) is the cutoff for high leverage points
+            # p is the number of descriptors
+            # N is the number of compounds
+            p = X.shape[1]
+            N = X.shape[0]
+            h_star = (3*(p+1))/N
+
+            return leverages, h_star
+
+        # prepare the dataframe for plotting
+        df = self.prepareRegressionResults(property_name)
+
+        if datasets is None:
+            datasets = []
+            for model in self.models:
+                if model.checkForDataset():
+                    datasets = [model.dataset]
+                else:
+                    raise ValueError(
+                        "Model does not have a dataset attached to it."
+                    )
+
+        model_leverages = {}
+        model_h_star = {}
+        for i, dataset in enumerate(datasets):
+            if dataset.hasDescriptors:
+                descriptors = dataset.getDescriptors()
+                leverages, h_star = calculateLeverages(descriptors)
+                model_leverages[self.models[i].name] = leverages
+                model_h_star[self.models[i].name] = h_star
+            else:
+                raise ValueError(
+                    f"Dataset {dataset.name} does not have descriptors, to"
+                    " calculate leverages, the dataset should have descriptors."
+                )
+        df["leverage"] = df.apply( lambda x: model_leverages[x["Model"]][x["QSPRID"]], axis=1)
+        df["residual"] = df["Label"] - df["Prediction"]
+        variance = df.groupby(["Model", "Fold", "Property"]).apply(
+            lambda x: np.var(x["residual"])
+        ).reset_index()
+        df["std_resid"] = df.apply( lambda x: x["residual"] / 
+                
+        # plot the results
+        g = sns.FacetGrid(
+            df,
+            col="Property",
+            row="Model",
+            margin_titles=True,
+            height=4,
+            sharex=False,
+            sharey=False,
+            hue="Set"
+        )
+        g.map(sns.scatterplot, "leverage", "std_resid", s=7, edgecolor="none")
+        # add the h* line to each plot based on the model's h*
+        # and add hlines at +/- 3
+        for k, ax in g.axes_dict.items():
+            ax.axvline(model_h_star[k[0]], c=".2", ls="--")
+            ax.axhline(3, c=".2", ls="--")
+            ax.axhline(-3, c=".2", ls="--")
+        return g
