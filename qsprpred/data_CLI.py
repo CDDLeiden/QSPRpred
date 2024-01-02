@@ -369,9 +369,9 @@ def QSPR_dataprep(args):
                 else None,
             )
             # data filters
-            datafilters = []
+            data_filters = []
             if args.low_quality:
-                datafilters.append(papyrusLowQualityFilter())
+                data_filters.append(papyrusLowQualityFilter())
             # data splitter
             if args.split == "scaffold":
                 split = ScaffoldSplit(
@@ -486,7 +486,7 @@ def QSPR_dataprep(args):
             # prepare dataset for modelling
             mydataset.prepareDataset(
                 feature_calculators=[MoleculeDescriptorsCalculator(descriptorsets)],
-                data_filters=datafilters,
+                data_filters=data_filters,
                 split=split,
                 feature_filters=featurefilters,
                 feature_standardizer=StandardScaler()
