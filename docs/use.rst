@@ -150,12 +150,13 @@ Feature filtering
 The calculated features can also be filtered. Three different filters are implemented in
 QSPRpred, namely a high correlation filter, a low variance filter and the boruta filter.
 The high correlation filter and low variance filter need to be set with a threshold
-for filtering.
+for filtering. The boruta filter needs a threshold for the comparison between shadow 
+and real features.
 
 ..  code-block::
 
     # input is in ./data/LIGAND_RAW_small.tsv
-       python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan -lv 0.1 -hc 0.9 -bf
+       python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o ./cli_tutorial/data -pr GABAAalpha -pr NMDA -r REG -sp random -sf 0.15 -fe Morgan -lv 0.1 -hc 0.9 -bf 90
 
 Papyrus Low quality filter
 """"""""""""""""""""""""""
