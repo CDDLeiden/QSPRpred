@@ -185,10 +185,10 @@ class CorrelationPlot(RegressionPlot):
         return g, self.summary
 
 class WilliamsPlot(RegressionPlot):
-    """Williams plot: plot of standardized residuals ( y -axis) versus leverages (hat values; x axis)"""
+    """Williams plot; plot of standardized residuals versus leverages"""
     def make(
         self,
-        datasets: List[QSPRDataset]|None = None,
+        datasets: dict[str, QSPRDataset] | None = None,
         save: bool = True,
         show: bool = False,
         property_name: str | None = None,
@@ -197,10 +197,9 @@ class WilliamsPlot(RegressionPlot):
         """make Williams plot
 
         Args:
-            datasets (List[QSPRDataSet]|None):
-                list of datasets to use for the plot. Should be a list of QSPRDataSet
-                in the same order as the models. If None, the models should have
-                datasets attached to them.
+            datasets (dict[str, QSPRDataset] | None):
+                dictionary of datasets to use for the plot, keys are the model names.
+                If None, the models should have datasets attached to them.
             save (bool):
                 whether to save the plot
             show (bool):
@@ -214,7 +213,18 @@ class WilliamsPlot(RegressionPlot):
                 the seaborn FacetGrid object used to make the plot
         """
         def calculateLeverages(descriptors: pd.DataFrame) -> pd.DataFrame:
-            """Calculate the leverages for each compound in the dataset."""
+            """Calculate the leverages for each compound in the dataset.
+
+            Args:
+                descriptors (pd.DataFrame):
+                    the descriptors for each compound in the dataset
+
+            Returns:
+                pd.DataFrame:
+                    the leverages for each compound in the dataset
+                float:
+                    the h* value for the dataset
+            """
             X = descriptors.values
 
             # get the diagonal elements of the hat matrix
@@ -235,35 +245,65 @@ class WilliamsPlot(RegressionPlot):
         df = self.prepareRegressionResults(property_name)
 
         if datasets is None:
-            datasets = []
+            datasets = {}
             for model in self.models:
                 if model.checkForDataset():
-                    datasets = [model.dataset]
+                    datasets[model.name] = model.dataset
                 else:
                     raise ValueError(
                         "Model does not have a dataset attached to it."
                     )
 
+        # calculate the leverages and h* for each model
         model_leverages = {}
         model_h_star = {}
-        for i, dataset in enumerate(datasets):
-            if dataset.hasDescriptors:
-                descriptors = dataset.getDescriptors()
-                leverages, h_star = calculateLeverages(descriptors)
-                model_leverages[self.models[i].name] = leverages
-                model_h_star[self.models[i].name] = h_star
+        model_p = {} # number of descriptors
+        for model_name, dataset in datasets.items():
+            if dataset.hasFeatures:
+                features = pd.concat(dataset.getFeatures())
+                leverages, h_star = calculateLeverages(features )
+                model_leverages[model_name] = leverages
+                model_h_star[model_name] = h_star
+                model_p[model_name] = features .shape[1]
             else:
                 raise ValueError(
-                    f"Dataset {dataset.name} does not have descriptors, to"
-                    " calculate leverages, the dataset should have descriptors."
+                    f"Dataset {dataset.name} does not have features, to"
+                    " calculate leverages, the dataset should have features ."
                 )
-        df["leverage"] = df.apply( lambda x: model_leverages[x["Model"]][x["QSPRID"]], axis=1)
+
+        # Add the levarages to the dataframe
+        df["leverage"] = df.apply(lambda x: model_leverages[x["Model"]][x["QSPRID"]], axis=1)
+        df["n_features"] = df["Model"].apply(lambda x: model_p[x])
+
+        # calculate the residuals
         df["residual"] = df["Label"] - df["Prediction"]
-        variance = df.groupby(["Model", "Fold", "Property"]).apply(
-            lambda x: np.var(x["residual"])
-        ).reset_index()
-        df["std_resid"] = df.apply( lambda x: x["residual"] / 
-                
+
+        # calculate the residuals standard deviation
+        df["n_samples"]  = df.groupby(["Model", "Fold", "Property"])["residual"].transform("count")
+
+        # calculate degrees of freedom
+        df["df"] = df["n_samples"] - df["n_features"] - 1
+
+        # check if the degrees of freedom is greater than 0 for each model, property, and fold
+        if (df["df"] <= 0).any():
+            for (model, fold, property), df_ in df.groupby(["Model", "Fold", "Property"]):
+                if df_["df"].iloc[0] <= 0:
+                    print(f"{model} {fold} {property}")
+                    print(df_[["n_samples", "n_features"]].iloc[0])
+            raise ValueError(
+                "Degrees of freedom is less than or equal to 0 for some models, "
+                "properties, and folds. Check the number of samples and features, the "
+                "number of samples should be greater than the number of features."
+            )
+
+        # calculate the residual standard error
+        df["RSE"] = np.sqrt(
+            (1/df["df"])*np.sum(df["residual"]**2)
+        )
+
+        # calculate the standardized residuals
+        df["std_resid"] = df["residual"] / (df["RSE"]*np.sqrt(1-df["leverage"]))
+
         # plot the results
         g = sns.FacetGrid(
             df,
@@ -280,6 +320,6 @@ class WilliamsPlot(RegressionPlot):
         # and add hlines at +/- 3
         for k, ax in g.axes_dict.items():
             ax.axvline(model_h_star[k[0]], c=".2", ls="--")
-            ax.axhline(3, c=".2", ls="--")
-            ax.axhline(-3, c=".2", ls="--")
+            ax.axhline(2, c=".2", ls="--")
+            ax.axhline(-2, c=".2", ls="--")
         return g
