@@ -494,7 +494,7 @@ def QSPR_dataprep(args):
                 feature_filters=featurefilters,
                 feature_standardizer=StandardScaler()
                 if "Smiles" not in args.features else None,
-                feature_fill_value=0.0,
+                feature_fill_value=args.fill_value,
             )
 
             # save dataset files and fingerprints
