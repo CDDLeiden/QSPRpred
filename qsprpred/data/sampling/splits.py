@@ -257,9 +257,9 @@ class TemporalSplit(DataSplit):
 
             if len(task_names) > 1:
                 logger.warning(
-                    "The TemporalSplit is not recommended for multitask\
-                    or PCM datasets might lead to very unbalanced subsets\
-                    for some tasks"
+                    "The TemporalSplit is not recommended for multitask "
+                    "or PCM datasets might lead to very unbalanced subsets "
+                    "for some tasks"
                 )
 
             indices = np.array(list(range(len(df))))
