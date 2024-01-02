@@ -6,7 +6,6 @@ To add a new filter:
 from abc import ABC, abstractmethod
 from functools import partial
 from itertools import chain
-from typing import Optional
 
 import numpy as np
 import pandas as pd
