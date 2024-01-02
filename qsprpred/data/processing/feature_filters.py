@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler
 
 from ...logs import logger
-from ...utils.randomized import Randomized
+from ...utils.interfaces.randomized import Randomized
 
 
 class FeatureFilter(ABC):

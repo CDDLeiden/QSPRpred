@@ -12,7 +12,7 @@ import pandas as pd
 from gbmtsplits import GloballyBalancedSplit
 from sklearn.model_selection import ShuffleSplit
 
-from qsprpred.utils.interfaces.randomized import Randomized
+from ...utils.interfaces.randomized import Randomized
 from ...data.chem.clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
