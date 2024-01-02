@@ -57,7 +57,7 @@ class RegressionPlot(ModelPlot, ABC):
         return df
 
     def prepareRegressionResults(
-        self, property_name: str | None = None
+        self,
     ) -> pd.DataFrame:
         """Prepare regression results dataframe for plotting.
 
@@ -118,7 +118,6 @@ class CorrelationPlot(RegressionPlot):
         self,
         save: bool = True,
         show: bool = False,
-        property_name: str | None = None,
         out_path: str | None = None,
     ) -> tuple[sns.FacetGrid, pd.DataFrame]:
         """Plot the results of regression models. Plot predicted pX_train vs real pX_train.
@@ -139,7 +138,7 @@ class CorrelationPlot(RegressionPlot):
                 the summary data used to make the plot
         """
         # prepare the dataframe for plotting
-        df = self.prepareRegressionResults(property_name)
+        df = self.prepareRegressionResults()
 
         if not hasattr(self, "summary"):
             self.getSummary()
@@ -171,9 +170,6 @@ class CorrelationPlot(RegressionPlot):
 
         g.add_legend()
 
-        # show the plot
-        if show:
-            plt.show()
         # save the plot
         if save:
             if out_path is not None:
@@ -181,6 +177,10 @@ class CorrelationPlot(RegressionPlot):
             else:
                 for model in self.models:
                     plt.savefig(f"{model.outPrefix}_correlation.png", dpi=300)
+        # show the plot
+        if show:
+            plt.show()
+
         plt.clf()
         return g, self.summary
 
@@ -191,7 +191,6 @@ class WilliamsPlot(RegressionPlot):
         datasets: dict[str, QSPRDataset] | None = None,
         save: bool = True,
         show: bool = False,
-        property_name: str | None = None,
         out_path: str | None = None,
     ) -> tuple[sns.FacetGrid, pd.DataFrame]:
         """make Williams plot
@@ -257,7 +256,7 @@ class WilliamsPlot(RegressionPlot):
             return leverages, h_star
 
         # prepare the dataframe for plotting
-        df = self.prepareRegressionResults(property_name)
+        df = self.prepareRegressionResults()
 
         if datasets is None:
             datasets = {}
@@ -337,4 +336,16 @@ class WilliamsPlot(RegressionPlot):
             ax.axvline(model_h_star[k[0]], c=".2", ls="--")
             ax.axhline(2, c=".2", ls="--")
             ax.axhline(-2, c=".2", ls="--")
+
+        # save the plot
+        if save:
+            if out_path is not None:
+                plt.savefig(out_path, dpi=300)
+            else:
+                for model in self.models:
+                    plt.savefig(f"{model.outPrefix}_williamsplot.png", dpi=300)
+        # show the plot
+        if show:
+            plt.show()
+        plt.clf()
         return g
