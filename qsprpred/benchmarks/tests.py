@@ -12,20 +12,20 @@ from .. import TargetProperty, TargetTasks
 from ..data import MoleculeTable, QSPRDataset
 from ..data.descriptors.sets import RDKitDescs
 from ..data.sources.data_source import DataSource
-from ..data.tests import DataSetsMixIn
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
 from ..utils.stringops import get_random_string
+from ..utils.testing.path_mixins import DataSetsPathMixIn
 
 
-class DataSourceTesting(DataSetsMixIn, DataSource):
+class DataSourceTesting(DataSetsPathMixIn, DataSource):
     """Data source for testing purposes. Simply prepares the default
-    data set from`DataSetsMixIn`.
+    data set from`DataSetsPathMixIn`.
     """
 
     def __init__(self, name):
         super().__init__()
-        self.setUp()
+        self.setUpPaths()
         self.name = name
 
     def getData(self, name: str | None = None, **kwargs) -> MoleculeTable:
@@ -42,7 +42,7 @@ class DataSourceTesting(DataSetsMixIn, DataSource):
         return self.createLargeTestDataSet(name, target_props=target_props)
 
 
-class BenchmarkingTest(DataSetsMixIn, TestCase):
+class BenchmarkingTest(DataSetsPathMixIn, TestCase):
     """Test benchmarking functionality on the test data set.
 
     Attributes:
@@ -54,6 +54,7 @@ class BenchmarkingTest(DataSetsMixIn, TestCase):
 
     def setUp(self):
         super().setUp()
+        self.setUpPaths()
         prep = self.getDefaultPrep()
         descriptors = prep["feature_calculators"][0].descSets
         del prep["feature_calculators"]

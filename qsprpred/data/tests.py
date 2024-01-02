@@ -1,12 +1,7 @@
 """This module holds the test for functions regarding QSPR data preparation."""
 
 import copy
-import itertools
-import logging
 import os
-import shutil
-from collections.abc import Iterable
-from unittest import TestCase
 
 import numpy as np
 import pandas as pd
@@ -25,12 +20,10 @@ from .chem.scaffolds import BemisMurcko, Murcko
 from .tables.qspr import QSPRDataset
 from ..data.descriptors.calculators import (
     CustomDescriptorsCalculator,
-    DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
 from ..data.descriptors.sets import (
     DataFrameDescriptorSet,
-    DescriptorSet,
     DrugExPhyschem,
     FingerprintSet,
     PredictorDesc,
@@ -57,431 +50,24 @@ from ..data.sampling.splits import (
 from ..models.scikit_learn import SklearnModel
 from ..tasks import TargetProperty, TargetTasks
 from ..utils.stopwatch import StopWatch
-
-N_CPU = 2
-CHUNK_SIZE = 20
-TIME_SPLIT_YEAR = 2000
-logging.basicConfig(level=logging.DEBUG)
+from ..utils.testing.base import QSPRTestCase
+from ..utils.testing.check_mixins import DataPrepCheckMixIn, DescriptorInDataCheckMixIn
+from ..utils.testing.path_mixins import PathMixIn, DataSetsPathMixIn
 
 
-class PathMixIn:
-    """Mix-in class that provides paths to test files and directories and handles their
-    creation and deletion.
-
-    Attributes:
-        generatedPath (str):
-            path to the directory where generated files are stored, this directory is
-            created before and cleared after each test
-
-    """
-
-    def setUp(self):
-        """Create the directories that are used for testing."""
-        self.generatedPath = f"{os.path.dirname(__file__)}/test_files/generated"
-        self.clearGenerated()
-        if not os.path.exists(self.generatedPath):
-            os.makedirs(self.generatedPath)
-
-    def tearDown(self):
-        """Remove all files and directories that are used for testing."""
-        self.clearGenerated()
-
-    def clearGenerated(self):
-        """Remove the directories that are used for testing."""
-        if os.path.exists(self.generatedPath):
-            shutil.rmtree(self.generatedPath)
+# self.nCPU = 2
+# self.chunkSize = 20
+# TIME_SPLIT_YEAR = 2000
+# logging.basicConfig(level=logging.DEBUG)
 
 
-class DataSetsMixIn(PathMixIn):
-    """Mix-in class that provides a small and large testing data set and some common
-    preparation settings to use in tests."""
-
-    def setUp(self):
-        """Create the directories that are used for testing."""
-        super().setUp()
-        self.inputDataPath = f"{os.path.dirname(__file__)}/test_files/data"
-        self.generatedDataPath = f"{self.generatedPath}/datasets"
-        if not os.path.exists(self.generatedDataPath):
-            os.makedirs(self.generatedDataPath)
-
-    @staticmethod
-    def getDefaultPrep():
-        """Return a dictionary with default preparation settings."""
-        return {
-            "feature_calculators": [
-                MoleculeDescriptorsCalculator(
-                    [FingerprintSet(fingerprint_type="MorganFP", radius=2, nBits=256)]
-                )
-            ],
-            "split": RandomSplit(test_fraction=0.1),
-            "feature_standardizer": StandardScaler(),
-            "feature_filters": [LowVarianceFilter(0.05), HighCorrelationFilter(0.8)],
-        }
-
-    @classmethod
-    def getAllDescriptors(cls):
-        """Return a list of (ideally) all available descriptor sets. For now
-        they need to be added manually to the list below.
-
-        TODO: would be nice to create the list automatically by implementing a
-        descriptor set registry that would hold all installed descriptor sets.
-
-        Returns:
-            list: `list` of `DescriptorCalculator` objects
-        """
-        descriptor_sets = [
-            RDKitDescs(),
-            DrugExPhyschem(),
-            PredictorDesc(
-                SklearnModel.fromFile(
-                    f"{os.path.dirname(__file__)}/test_files/test_predictor/"
-                    f"qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json"
-                )
-            ),
-            TanimotoDistances(
-                list_of_smiles=["C", "CC", "CCC"],
-                fingerprint_type="MorganFP",
-                radius=3,
-                nBits=1000,
-            ),
-            FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-        ]
-
-        return descriptor_sets
-
-    @classmethod
-    def getDefaultCalculatorCombo(cls):
-        """
-        Makes a list of default descriptor calculators that can be used in tests.
-        It creates a calculator with only morgan fingerprints and rdkit descriptors,
-        but also one with them both to test behaviour with multiple descriptor sets.
-        Override this method if you want to test with other descriptor sets and
-        calculator combinations.
-
-        Returns:
-            list: `list` of created `DescriptorCalculator` objects
-        """
-        feature_sets = [
-            FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024),
-            RDKitDescs(),
-        ]
-        mol_descriptor_calculators = [
-            [MoleculeDescriptorsCalculator(combo)]
-            for combo in itertools.combinations(feature_sets, 1)
-        ] + [
-            [MoleculeDescriptorsCalculator(combo)]
-            for combo in itertools.combinations(feature_sets, 2)
-        ]
-        return mol_descriptor_calculators
-
-    @classmethod
-    def getDataPrepGrid(cls):
-        """Return a list of many possible combinations of descriptor calculators,
-        splits, feature standardizers, feature filters and data filters. Again, this is
-        not exhaustive, but should cover a lot of cases.
-
-        Returns:
-            grid:
-                a generator that yields tuples of all possible combinations as stated
-                above, each tuple is defined as: (descriptor_calculator, split,
-                feature_standardizer, feature_filters, data_filters)
-        """
-        # get the feature calculators
-        descriptor_calculators = cls.getDefaultCalculatorCombo()
-        # lists with common preparation settings
-        splits = [None, RandomSplit(test_fraction=0.1)]
-        feature_standardizers = [None, StandardScaler()]
-        feature_filters = [None, HighCorrelationFilter(0.9)]
-        data_filters = [
-            None,
-            RepeatsFilter(),
-            # CategoryFilter(
-            # FIXME: this needs to be made more general and not specific to one dataset
-            #     name="moka_ionState7.4",
-            #     values=["cationic"]
-            # ),
-        ]
-        # All combinations of the above preparation settings (passed to prepareDataset)
-        return (
-            # deep copy to avoid conflicts cayed by operating on one instance twice
-            copy.deepcopy(combo)
-            for combo in itertools.product(
-                descriptor_calculators,
-                splits,
-                feature_standardizers,
-                feature_filters,
-                data_filters,
-            )
-        )
-
-    @staticmethod
-    def getPrepCombos():
-        """
-        Return a list of all possible preparation combinations as generated by
-        `getDataPrepGrid` as well as their names. The generated list can be used
-        to parameterize tests with the given named combinations.
-
-        Returns:
-            list: `list` of `list`s of all possible combinations of preparation
-        """
-
-        def get_name(obj: object):
-            """
-            Get the name of a data preparation object,
-            or its class name if it is not a string.
-
-            Args:
-                obj: the object to get name for
-
-            Returns:
-                str: the generated name of the object
-            """
-            return (
-                str(None)
-                if obj is None
-                else obj.__class__.__name__
-                if (not isinstance(obj, (DescriptorsCalculator, SKLearnStandardizer)))
-                else str(obj)
-            )
-
-        def get_name_list(obj: Iterable | object):
-            """
-            Parse an iterable of data preparation objects and return a string.
-            Note that the method proceeds recursively so nested iterables are also
-            parsed.
-
-            Args:
-                obj: the object or an iterable of objects to get name for
-
-            Returns:
-                str: the generated name of the object or a list of objects
-            """
-            if isinstance(obj, Iterable):
-                return "_".join([get_name_list(i) for i in obj])
-            else:
-                return get_name(obj)
-
-        ret = [
-            2 * [get_name_list(x)] + list(x) for x in DataSetsMixIn.getDataPrepGrid()
-        ]
-        return ret
-
-    def getBigDF(self):
-        """Get a large data frame for testing purposes.
-
-        Returns:
-            pd.DataFrame: a `pandas.DataFrame` containing the dataset
-        """
-        return pd.read_csv(f"{self.inputDataPath}/test_data_large.tsv", sep="\t")
-
-    def getSmallDF(self):
-        """Get a small data frame for testing purposes.
-
-        Returns:
-            pd.DataFrame: a `pandas.DataFrame` containing the dataset
-        """
-        return pd.read_csv(f"{self.inputDataPath}/test_data.tsv", sep="\t").sample(10)
-
-    def createLargeTestDataSet(
-        self,
-        name="QSPRDataset_test_large",
-        target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-        preparation_settings=None,
-        random_state=42,
-    ):
-        """Create a large dataset for testing purposes.
-
-        Args:
-            name (str): name of the dataset
-            target_props (List of dicts or TargetProperty): list of target properties
-            random_state (int): random state to use for splitting and shuffling
-            preparation_settings (dict): dictionary containing preparation settings
-
-        Returns:
-            QSPRDataset: a `QSPRDataset` object
-        """
-        return self.createTestDataSetFromFrame(
-            self.getBigDF(),
-            name=name,
-            target_props=target_props,
-            prep=preparation_settings,
-            random_state=random_state,
-        )
-
-    def createSmallTestDataSet(
-        self,
-        name="QSPRDataset_test_small",
-        target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-        preparation_settings=None,
-        random_state=42,
-    ):
-        """Create a small dataset for testing purposes.
-
-        Args:
-            name (str): name of the dataset
-            target_props (List of dicts or TargetProperty): list of target properties
-            random_state (int): random state to use for splitting and shuffling
-            preparation_settings (dict): dictionary containing preparation settings
-
-        Returns:
-            QSPRDataset: a `QSPRDataset` object
-        """
-        return self.createTestDataSetFromFrame(
-            self.getSmallDF(),
-            name=name,
-            target_props=target_props,
-            random_state=random_state,
-            prep=preparation_settings,
-        )
-
-    def createTestDataSetFromFrame(
-        self,
-        df,
-        name="QSPRDataset_test",
-        target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-        random_state=None,
-        prep=None,
-    ):
-        """Create a dataset for testing purposes from the given data frame.
-
-        Args:
-            df (pd.DataFrame): data frame containing the dataset
-            name (str): name of the dataset
-            target_props (List of dicts or TargetProperty): list of target properties
-            random_state (int): random state to use for splitting and shuffling
-            prep (dict): dictionary containing preparation settings
-
-        Returns:
-            QSPRDataset: a `QSPRDataset` object
-        """
-        ret = QSPRDataset(
-            name,
-            target_props=target_props,
-            df=df,
-            store_dir=self.generatedDataPath,
-            random_state=random_state,
-        )
-        if prep:
-            ret.prepareDataset(**prep)
-        return ret
-
-    def createLargeMultitaskDataSet(
-        self,
-        name="QSPRDataset_multi_test",
-        target_props=[
-            {"name": "HBD", "task": TargetTasks.MULTICLASS, "th": [-1, 1, 2, 100]},
-            {"name": "CL", "task": TargetTasks.REGRESSION},
-        ],
-        preparation_settings=None,
-        random_state=42,
-    ):
-        """Create a large dataset for testing purposes.
-
-        Args:
-            name (str): name of the dataset
-            target_props (List of dicts or TargetProperty): list of target properties
-            preparation_settings (dict): dictionary containing preparation settings
-            random_state (int): random state to use for splitting and shuffling
-
-        Returns:
-            QSPRDataset: a `QSPRDataset` object
-        """
-        return self.createTestDataSetFromFrame(
-            self.getBigDF(),
-            name=name,
-            target_props=target_props,
-            random_state=random_state,
-            prep=preparation_settings,
-        )
-
-    def validate_split(self, dataset):
-        """Check if the split has the data it should have after splitting."""
-        self.assertTrue(dataset.X is not None)
-        self.assertTrue(dataset.X_ind is not None)
-        self.assertTrue(dataset.y is not None)
-        self.assertTrue(dataset.y_ind is not None)
-
-
-class DescriptorCheckMixIn:
-    """Mixin class for common descriptor checks."""
-
-    def checkFeatures(self, ds: QSPRDataset, expected_length: int):
-        """Check if the feature names and the feature matrix of a data set is consistent
-        with expected number of variables.
-
-        Args:
-            ds (QSPRDataset): The data set to check.
-            expected_length (int): The expected number of features.
-
-        Raises:
-            AssertionError: If the feature names or the feature matrix is not consistent
-        """
-        self.assertEqual(len(ds.featureNames), expected_length)
-        self.assertEqual(len(ds.getFeatureNames()), expected_length)
-        if expected_length > 0:
-            features = ds.getFeatures(concat=True)
-        else:
-            self.assertRaises(ValueError, ds.getFeatures, concat=True)
-            features = pd.concat([ds.X, ds.X_ind])
-        self.assertEqual(features.shape[0], len(ds))
-        self.assertEqual(features.shape[1], expected_length)
-        self.assertEqual(ds.X.shape[1], expected_length)
-        self.assertEqual(ds.X_ind.shape[1], expected_length)
-        if expected_length > 0:
-            for fold in ds.iterFolds(split=KFold(n_splits=5)):
-                self.assertIsInstance(fold, tuple)
-                self.assertEqual(fold[0].shape[1], expected_length)
-                self.assertEqual(fold[1].shape[1], expected_length)
-        else:
-            self.assertRaises(
-                ValueError, lambda: list(ds.iterFolds(split=KFold(n_splits=5)))
-            )
-
-    def checkDescriptors(
-        self, dataset: QSPRDataset, target_props: list[dict | TargetProperty]
-    ):
-        """
-        Check if information about descriptors is consistent in the data set. Checks
-        if calculators are consistent with the descriptors contained in the data set.
-        This is tested also before and after serialization.
-
-        Args:
-            dataset (QSPRDataset): The data set to check.
-            target_props (List of dicts or TargetProperty): list of target properties
-
-        Raises:
-            AssertionError: If the consistency check fails.
-
-        """
-
-        # test some basic consistency rules on the resulting features
-        expected_length = 0
-        for calc in dataset.descriptorCalculators:
-            for descset in calc.descSets:
-                expected_length += len(descset.descriptors)
-        self.checkFeatures(dataset, expected_length)
-        # save to file, check if it can be loaded, and if the features are consistent
-        dataset.save()
-        ds_loaded = dataset.__class__.fromFile(dataset.metaFile)
-        ds_loaded.nJobs = N_CPU
-        ds_loaded.chunkSize = CHUNK_SIZE
-        for ds_loaded_prop, target_prop in zip(
-            ds_loaded.targetProperties, target_props
-        ):
-            if ds_loaded_prop.task.isClassification():
-                self.assertEqual(ds_loaded_prop.name, target_prop["name"])
-                self.assertEqual(ds_loaded_prop.task, target_prop["task"])
-        self.assertTrue(ds_loaded.descriptorCalculators)
-        for calc in ds_loaded.descriptorCalculators:
-            self.assertTrue(isinstance(calc, DescriptorsCalculator))
-            for descset in calc.descSets:
-                self.assertTrue(isinstance(descset, DescriptorSet))
-        self.checkFeatures(dataset, expected_length)
-
-
-class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
+class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
     """Simple tests for dataset creation and serialization under different conditions
     and error states."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     def checkConsistency(self, ds: QSPRDataset):
         self.assertNotIn("Notes", ds.getProperties())
@@ -565,8 +151,8 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             [{"name": "CL", "task": TargetTasks.REGRESSION}],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         self.assertIn("HBD", dataset.getProperties())
         dataset.removeProperty("HBD")
@@ -587,8 +173,8 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             "test_defaults",
             [{"name": "CL", "task": TargetTasks.REGRESSION}],
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         stopwatch.stop("Reinitialization took: ")
         self.checkConsistency(dataset_new)
@@ -596,11 +182,11 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
         stopwatch.reset()
         dataset_new = QSPRDataset.fromTableFile(
             "test_defaults",
-            f"{os.path.dirname(__file__)}/test_files/data/test_data.tsv",
+            f"{self.inputDataPath}/test_data.tsv",
             target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         stopwatch.stop("Loading from table file took: ")
         self.assertTrue(isinstance(dataset_new, QSPRDataset))
@@ -608,11 +194,11 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
         # creation from a table file with a new name
         dataset_new = QSPRDataset.fromTableFile(
             "test_defaults_new",  # new name implies HBD below should exist again
-            f"{os.path.dirname(__file__)}/test_files/data/test_data.tsv",
+            f"{self.inputDataPath}/test_data.tsv",
             target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         self.assertTrue(isinstance(dataset_new, QSPRDataset))
         self.assertIn("HBD", dataset_new.getProperties())
@@ -629,8 +215,8 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             ],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         # Check that the dataset is correctly initialized
         self.checkConsistencyMulticlass(dataset)
@@ -657,8 +243,8 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             ],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         # Check that the make classification method works as expected
         self.checkBadInit(dataset)
@@ -676,8 +262,8 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             [{"name": "CL", "task": TargetTasks.MULTICLASS, "th": "precomputed"}],
             df=df_new,
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         self.assertEqual(len(dataset.targetProperties), 1)
         self.assertEqual(dataset.targetProperties[0].task, TargetTasks.MULTICLASS)
@@ -704,8 +290,8 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             [{"name": "CL", "task": TargetTasks.REGRESSION}],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         # set index to SMILES column
         QSPRDataset(
@@ -713,8 +299,8 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             [{"name": "CL", "task": TargetTasks.REGRESSION}],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
             index_cols=["SMILES"],
         )
         # multiindex
@@ -723,8 +309,8 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             [{"name": "CL", "task": TargetTasks.REGRESSION}],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
             index_cols=["SMILES", "Name"],
         )
         # index with duplicates
@@ -735,8 +321,8 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
                 [{"name": "CL", "task": TargetTasks.REGRESSION}],
                 df=self.getSmallDF(),
                 store_dir=self.generatedDataPath,
-                n_jobs=N_CPU,
-                chunk_size=CHUNK_SIZE,
+                n_jobs=self.nCPU,
+                chunk_size=self.chunkSize,
                 index_cols=["moka_ionState7.4"],
             ),
         )
@@ -748,13 +334,13 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
                 [{"name": "CL", "task": TargetTasks.REGRESSION}],
                 df=self.getSmallDF(),
                 store_dir=self.generatedDataPath,
-                n_jobs=N_CPU,
-                chunk_size=CHUNK_SIZE,
+                n_jobs=self.nCPU,
+                chunk_size=self.chunkSize,
                 index_cols=["fu"],
             ),
         )
 
-    @parameterized.expand([(1,), (N_CPU,)])  # use one or more CPUs
+    @parameterized.expand([(1,), (2,)])  # use one or two CPUs
     def testInvalidsDetection(self, n_cpu):
         df = self.getBigDF()
         all_mols = len(df)
@@ -861,7 +447,11 @@ class TestDataSetCreationAndSerialization(DataSetsMixIn, TestCase):
             self.assertListEqual(train.iloc[train_index].index.tolist(), order_folds[i])
 
 
-class TestSearchFeatures(DataSetsMixIn, TestCase):
+class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def validateSearch(self, dataset: QSPRDataset, result: QSPRDataset, name: str):
         """Validate the results of a search."""
         self.assertTrue(len(result) < len(dataset))
@@ -935,7 +525,7 @@ def prop_transform(x):
     return np.log10(x)
 
 
-class TestTargetProperty(TestCase):
+class TestTargetProperty(QSPRTestCase):
     """Test the TargetProperty class."""
 
     def checkTargetProperty(self, target_prop, name, task, th):
@@ -1012,17 +602,22 @@ class TestTargetProperty(TestCase):
         )
 
 
-class TestDataSplitters(DataSetsMixIn, TestCase):
+class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
     """Small tests to only check if the data splitters work on their own.
 
     The tests here should be used to check for all their specific parameters and edge
     cases."""
 
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+        self.splitYear = 2000
+
     def testManualSplit(self):
         """Test the manual split function, where the split is done manually."""
         dataset = self.createLargeTestDataSet()
-        dataset.nJobs = N_CPU
-        dataset.chunkSize = CHUNK_SIZE
+        dataset.nJobs = self.nCPU
+        dataset.chunkSize = self.chunkSize
         # Add extra column to the data frame to use for splitting
         dataset.df["split"] = "train"
         dataset.df.loc[dataset.df.sample(frac=0.1).index, "split"] = "test"
@@ -1060,7 +655,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         else:
             dataset = self.createLargeTestDataSet()
         split = TemporalSplit(
-            timesplit=TIME_SPLIT_YEAR,
+            timesplit=self.splitYear,
             timeprop="Year of first disclosure",
         )
         # prepare and validate the split
@@ -1069,7 +664,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         # test if dates higher than 2000 are in test set
         test_set = dataset.getFeatures()[1]
         years = dataset.getDF().loc[test_set.index, "Year of first disclosure"]
-        self.assertTrue(all(years > TIME_SPLIT_YEAR))
+        self.assertTrue(all(years > self.splitYear))
         # test bootstrapping
         if multitask:
             dataset = self.createLargeMultitaskDataSet(
@@ -1078,7 +673,7 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         else:
             dataset = self.createLargeTestDataSet(name="TemporalSplit_bootstrap")
         split = TemporalSplit(
-            timesplit=[TIME_SPLIT_YEAR - 1, TIME_SPLIT_YEAR, TIME_SPLIT_YEAR + 1],
+            timesplit=[self.splitYear - 1, self.splitYear, self.splitYear + 1],
             timeprop="Year of first disclosure",
         )
         bootstrap_split = BootstrapSplit(
@@ -1198,11 +793,15 @@ class TestDataSplitters(DataSetsMixIn, TestCase):
         dataset_new.clearFiles()
 
 
-class TestFoldSplitters(DataSetsMixIn, TestCase):
+class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
     """Small tests to only check if the fold splitters work on their own.
 
     The tests here should be used to check for all their specific parameters and
     edge cases."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     def validateFolds(self, folds, more=None):
         """Check if the folds have the data they should have after splitting."""
@@ -1302,11 +901,15 @@ class TestFoldSplitters(DataSetsMixIn, TestCase):
         self.assertNotEqual(indices, indices_third)
 
 
-class TestDataFilters(DataSetsMixIn, TestCase):
+class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
     """Small tests to only check if the data filters work on their own.
 
     The tests here should be used to check for all their specific parameters and
     edge cases."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     def testCategoryFilter(self):
         """Test the category filter, which drops specific values from dataset
@@ -1336,7 +939,7 @@ class TestDataFilters(DataSetsMixIn, TestCase):
                     ["CC", 1, 2, 2, 6],  # 3rd "descriptor" is length of SMILES
                 ]
             ),
-            columns=["SMILES", *descriptor_names, "Year"]
+            columns=["SMILES", *descriptor_names, "Year"],
         )
         # only warnings
         df_copy = copy.deepcopy(df)
@@ -1363,8 +966,8 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         dup_filter4 = RepeatsFilter(additional_cols=["proteinid"])
         df_copy = dup_filter4(df_copy, df_copy[descriptor_names])
         self.assertEqual(len(df_copy), 2)  # C (protein A, idx 0) and CCC are unique,
-                                           # but C (protein B, idx 3) is a duplicate
-                                           # of C (protein B, idx 4) and is dropped
+        # but C (protein B, idx 3) is a duplicate
+        # of C (protein B, idx 4) and is dropped
 
     def testConsistency(self):
         dataset = self.createLargeTestDataSet()
@@ -1375,12 +978,13 @@ class TestDataFilters(DataSetsMixIn, TestCase):
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() == 0)
 
 
-class TestTargetImputation(PathMixIn, TestCase):
+class TestTargetImputation(PathMixIn, QSPRTestCase):
     """Small tests to only check if the target imputation works on its own."""
 
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
+        self.setUpPaths()
         self.descriptors = [
             "Descriptor_F1",
             "Descriptor_F2",
@@ -1420,8 +1024,8 @@ class TestTargetImputation(PathMixIn, TestCase):
             ],
             df=self.df,
             store_dir=self.generatedPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         self.assertEqual(self.dataset.targetProperties[0].name, "y")
         self.assertEqual(self.dataset.targetProperties[1].name, "z")
@@ -1431,12 +1035,13 @@ class TestTargetImputation(PathMixIn, TestCase):
         self.assertEqual(self.dataset.df["z"].isna().sum(), 0)
 
 
-class TestFeatureFilters(PathMixIn, TestCase):
+class TestFeatureFilters(PathMixIn, QSPRTestCase):
     """Tests to check if the feature filters work on their own."""
 
     def setUp(self):
         """Set up the small test Dataframe."""
         super().setUp()
+        self.setUpPaths()
         descriptors = [
             "Descriptor_F1",
             "Descriptor_F2",
@@ -1466,8 +1071,8 @@ class TestFeatureFilters(PathMixIn, TestCase):
             target_props=[{"name": "y", "task": TargetTasks.REGRESSION}],
             df=self.df,
             store_dir=self.generatedPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         self.df_descriptors.index = self.dataset.df.index
         calculator = CustomDescriptorsCalculator(
@@ -1502,12 +1107,13 @@ class TestFeatureFilters(PathMixIn, TestCase):
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors[-1:])
 
 
-class TestDescriptorCalculation(DataSetsMixIn, TestCase):
+class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
     """Test the calculation of descriptors."""
 
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
+        self.setUpPaths()
         self.dataset = self.createLargeTestDataSet(self.__class__.__name__)
 
     def testSwitching(self):
@@ -1539,12 +1145,13 @@ class TestDescriptorCalculation(DataSetsMixIn, TestCase):
         )
 
 
-class TestDescriptorSets(DataSetsMixIn, TestCase):
+class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
     """Test the descriptor sets."""
 
     def setUp(self):
         """Create the test Dataframe."""
         super().setUp()
+        self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
         self.dataset.shuffle()
 
@@ -1552,7 +1159,7 @@ class TestDescriptorSets(DataSetsMixIn, TestCase):
         """Test the PredictorDesc descriptor set."""
         # give path to saved model parameters
         meta_path = (
-            f"{os.path.dirname(__file__)}/test_files/test_predictor/"
+            f"{self.inputBasePath}/test_predictor/"
             f"qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json"
         )
         model = SklearnModel.fromFile(meta_path)
@@ -1643,12 +1250,13 @@ class TestDescriptorSets(DataSetsMixIn, TestCase):
         self.assertEqual(len_prev, self.dataset.getFeatures(concat=True).shape[0])
 
 
-class TestScaffolds(DataSetsMixIn, TestCase):
+class TestScaffolds(DataSetsPathMixIn, QSPRTestCase):
     """Test calculation of scaffolds."""
 
     def setUp(self):
         """Create a small dataset."""
         super().setUp()
+        self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
 
     def testScaffoldAdd(self):
@@ -1663,12 +1271,13 @@ class TestScaffolds(DataSetsMixIn, TestCase):
             self.assertTrue(isinstance(mol, Chem.rdchem.Mol))
 
 
-class TestFeatureStandardizer(DataSetsMixIn, TestCase):
+class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
     """Test the feature standardizer."""
 
     def setUp(self):
         """Create a small test dataset with MorganFP descriptors."""
         super().setUp()
+        self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
         self.dataset.addDescriptors(
             MoleculeDescriptorsCalculator(
@@ -1692,8 +1301,12 @@ class TestFeatureStandardizer(DataSetsMixIn, TestCase):
         )
 
 
-class TestStandardizers(DataSetsMixIn, TestCase):
+class TestStandardizers(DataSetsPathMixIn, QSPRTestCase):
     """Test the standardizers."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     def testInvalidFilter(self):
         """Test the invalid filter."""
@@ -1715,76 +1328,16 @@ class TestStandardizers(DataSetsMixIn, TestCase):
         self.assertEqual(len(dataset), orig_len - 1)
 
 
-class DataPrepTestMixIn(DescriptorCheckMixIn):
-    """Mixin for testing data preparation."""
-
-    def checkPrep(
-        self,
-        dataset,
-        feature_calculators,
-        split,
-        feature_standardizer,
-        feature_filter,
-        data_filter,
-        expected_target_props,
-    ):
-        """Check the consistency of the dataset after preparation."""
-        name = dataset.name
-        # if a split needs a dataset, give it one
-        if split and hasattr(split, "setDataSet"):
-            split.setDataSet(None)
-            self.assertRaises(ValueError, split.getDataSet)
-            split.setDataSet(dataset)
-            self.assertEquals(dataset, split.getDataSet())
-
-        # prepare the dataset and check consistency
-        dataset.prepareDataset(
-            feature_calculators=feature_calculators,
-            split=split if split else None,
-            feature_standardizer=feature_standardizer if feature_standardizer else None,
-            feature_filters=[feature_filter] if feature_filter else None,
-            data_filters=[data_filter] if data_filter else None,
-        )
-        expected_feature_count = len(dataset.featureNames)
-        original_features = dataset.featureNames
-        train, test = dataset.getFeatures()
-        self.checkFeatures(dataset, expected_feature_count)
-        # save the dataset
-        dataset.save()
-        # reload the dataset and check consistency again
-        dataset = dataset.__class__.fromFile(dataset.metaFile)
-        self.assertEqual(dataset.name, name)
-        self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
-        for idx, prop in enumerate(expected_target_props):
-            self.assertEqual(dataset.targetProperties[idx].name, prop)
-        for calc in dataset.descriptorCalculators:
-            self.assertIsInstance(calc, DescriptorsCalculator)
-        if feature_standardizer is not None:
-            self.assertIsInstance(dataset.feature_standardizer, SKLearnStandardizer)
-        else:
-            self.assertIsNone(dataset.feature_standardizer)
-        self.checkFeatures(dataset, expected_feature_count)
-        # verify prep results are the same after reloading
-        dataset.prepareDataset(
-            feature_calculators=feature_calculators,
-            split=split if split else None,
-            feature_standardizer=feature_standardizer if feature_standardizer else None,
-            feature_filters=[feature_filter] if feature_filter else None,
-            data_filters=[data_filter] if data_filter else None,
-        )
-        self.checkFeatures(dataset, expected_feature_count)
-        self.assertListEqual(sorted(dataset.featureNames), sorted(original_features))
-        train2, test2 = dataset.getFeatures()
-        self.assertTrue(train.index.equals(train2.index))
-        self.assertTrue(test.index.equals(test2.index))
-
-
-class TestDataSetPreparation(DataSetsMixIn, DataPrepTestMixIn, TestCase):
+class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase):
     """Test as many possible combinations of data sets and their preparation
     settings. These can run potentially for a long time so use the `skip` decorator
     if you want to skip all these tests to speed things up during development."""
 
-    @parameterized.expand(DataSetsMixIn.getPrepCombos())
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
+    @parameterized.expand(DataSetsPathMixIn.getPrepCombos())
     def testPrepCombos(
         self,
         _,
@@ -1799,7 +1352,7 @@ class TestDataSetPreparation(DataSetsMixIn, DataPrepTestMixIn, TestCase):
 
         This generates a large number of parameterized tests. Use the `skip` decorator
         if you want to skip all these tests. Note that the combinations are not
-        exhaustive, but defined by `DataSetsMixIn.getPrepCombos()`."""
+        exhaustive, but defined by `DataSetsPathMixIn.getPrepCombos()`."""
         np.random.seed(42)
         dataset = self.createLargeTestDataSet(name=name)
         self.checkPrep(
@@ -1813,39 +1366,12 @@ class TestDataSetPreparation(DataSetsMixIn, DataPrepTestMixIn, TestCase):
         )
 
 
-class TestDescriptorInDataMixIn(DescriptorCheckMixIn):
-    """Mixin for testing descriptor sets in data sets."""
-
-    @staticmethod
-    def getDatSetName(desc_set, target_props):
-        """Get a unique name for a data set."""
-        target_props_id = [
-            f"{target_prop['name']}_{target_prop['task']}"
-            for target_prop in target_props
-        ]
-        return f"{desc_set}_{target_props_id}"
-
-    def getCalculators(self, desc_sets):
-        """Get the calculators for a descriptor set."""
-        return [MoleculeDescriptorsCalculator(desc_sets)]
-
-    def checkDataSetContainsDescriptorSet(
-        self, dataset, desc_set, prep_combo, target_props
-    ):
-        """Check if a descriptor set is in a data set."""
-        # run the preparation
-        logging.debug(f"Testing descriptor set: {desc_set} in data set: {dataset.name}")
-        descriptor_sets = [desc_set]
-        preparation = {}
-        preparation.update(prep_combo)
-        preparation["feature_calculators"] = self.getCalculators(descriptor_sets)
-        dataset.prepareDataset(**preparation)
-        # test consistency
-        self.checkDescriptors(dataset, target_props)
-
-
-class TestDescriptorsAll(DataSetsMixIn, TestDescriptorInDataMixIn, TestCase):
+class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTestCase):
     """Test all descriptor sets in all data sets."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     @parameterized.expand(
         [
@@ -1860,7 +1386,7 @@ class TestDescriptorsAll(DataSetsMixIn, TestDescriptorInDataMixIn, TestCase):
                     }
                 ],
             )
-            for desc_set in DataSetsMixIn.getAllDescriptors()
+            for desc_set in DataSetsPathMixIn.getAllDescriptors()
         ]
         + [
             (
@@ -1868,7 +1394,7 @@ class TestDescriptorsAll(DataSetsMixIn, TestDescriptorInDataMixIn, TestCase):
                 desc_set,
                 [{"name": "CL", "task": TargetTasks.REGRESSION}],
             )
-            for desc_set in DataSetsMixIn.getAllDescriptors()
+            for desc_set in DataSetsPathMixIn.getAllDescriptors()
         ]
         + [
             (
@@ -1879,7 +1405,7 @@ class TestDescriptorsAll(DataSetsMixIn, TestDescriptorInDataMixIn, TestCase):
                     {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
                 ],
             )
-            for desc_set in DataSetsMixIn.getAllDescriptors()
+            for desc_set in DataSetsPathMixIn.getAllDescriptors()
         ]
     )
     def testDescriptorsAll(self, _, desc_set, target_props):
@@ -1887,8 +1413,8 @@ class TestDescriptorsAll(DataSetsMixIn, TestDescriptorInDataMixIn, TestCase):
 
         Note that they are not checked with all possible settings and all possible
         preparations, but only with the default settings provided by
-        `DataSetsMixIn.getDefaultPrep()`. The list itself is defined and configured by
-        `DataSetsMixIn.getAllDescriptors()`, so if you need a specific descriptor
+        `DataSetsPathMixIn.getDefaultPrep()`. The list itself is defined and configured by
+        `DataSetsPathMixIn.getAllDescriptors()`, so if you need a specific descriptor
         tested, add it there.
         """
         np.random.seed(42)

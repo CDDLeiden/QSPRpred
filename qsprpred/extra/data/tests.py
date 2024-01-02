@@ -40,22 +40,17 @@ from ...data.descriptors.sets import (
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
-from ...data.tests import (
-    CHUNK_SIZE,
-    N_CPU,
-    DataPrepTestMixIn,
-    DataSetsMixIn,
-    TestDescriptorInDataMixIn,
-)
 from ...extra.data.data import PCMDataSet
 from ...tasks import TargetProperty, TargetTasks
+from ...utils.testing.check_mixins import DataPrepCheckMixIn, DescriptorInDataCheckMixIn
+from ...utils.testing.path_mixins import DataSetsPathMixIn
 
 
-class DataSetsMixInExtras(DataSetsMixIn):
+class DataSetsMixInExtras(DataSetsPathMixIn):
     """MixIn class for testing data sets in extras."""
 
-    def setUp(self):
-        super().setUp()
+    def setUpPaths(self):
+        super().setUpPaths()
         self.dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
 
     @classmethod
@@ -173,7 +168,7 @@ class DataSetsMixInExtras(DataSetsMixIn):
     def createPCMDataSet(
         self,
         name: str = "QSPRDataset_test_pcm",
-        target_props: TargetProperty
+        target_props: list[TargetProperty]
         | list[dict] = [
             {"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}
         ],
@@ -205,8 +200,6 @@ class DataSetsMixInExtras(DataSetsMixIn):
             target_props=target_props,
             df=df,
             store_dir=self.generatedDataPath,
-            n_jobs=N_CPU,
-            chunk_size=CHUNK_SIZE,
             random_state=random_state,
         )
         if preparation_settings:
@@ -223,6 +216,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
 
     def setUp(self):
         super().setUp()
+        self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
         self.dataset.shuffle()
 
@@ -304,6 +298,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
+        self.setUpPaths()
         self.dataset = self.createPCMDataSet(self.__class__.__name__)
         self.sampleDescSet = ProDec(sets=["Zscale Hellberg"])
         self.defaultMSA = self.getMSAProvider()
@@ -442,8 +437,12 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
 
-class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepTestMixIn, TestCase):
+class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCase):
     """Test the preparation of the PCMDataSet."""
+
+    def setUp(self):
+        super().setUp()
+        super().setUpPaths()
 
     def fetchDataset(self, name: str) -> PCMDataSet:
         """Create a quick dataset with the given name.
@@ -495,7 +494,11 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepTestMixIn, TestCase
         )
 
 
-class TestDescriptorsExtra(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCase):
+class TestDescriptorsExtra(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     @parameterized.expand(
         [
             (
@@ -525,7 +528,7 @@ class TestDescriptorsExtra(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestC
         )
 
 
-class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCase):
+class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCase):
     """Test the calculation of PCM descriptors with data preparation.
 
     Attributes:
@@ -534,6 +537,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
 
     def setUp(self):
         super().setUp()
+        self.setUpPaths()
         self.defaultMSA = self.getMSAProvider()
 
     def getCalculators(self, desc_sets):
@@ -588,9 +592,9 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
         Note that they are not checked with all possible settings
         and all possible preparations,
         but only with the default settings provided
-        by `DataSetsMixIn.getDefaultPrep()`.
+        by `DataSetsPathMixIn.getDefaultPrep()`.
         The list itself is defined and configured
-        by `DataSetsMixIn.getAllDescriptors()`,
+        by `DataSetsPathMixIn.getAllDescriptors()`,
         so if you need a specific descriptor tested, add it there.
         """
         dataset = self.createPCMDataSet(
@@ -608,6 +612,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, TestDescriptorInDataMixIn, TestCas
 class TestPCMSplitters(DataSetsMixInExtras, TestCase):
     def setUp(self):
         super().setUp()
+        self.setUpPaths()
         self.dataset = self.createPCMDataSet(f"{self.__class__.__name__}_test")
         self.dataset.addProteinDescriptors(
             calculator=ProteinDescriptorCalculator(

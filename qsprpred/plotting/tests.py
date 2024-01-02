@@ -13,13 +13,13 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from ..data.tables.qspr import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
-from ..models.tests import ModelDataSetsMixIn
 from ..plotting.classification import MetricsPlot, ROCPlot, ConfusionMatrixPlot
 from ..plotting.regression import CorrelationPlot
 from ..tasks import TargetTasks
+from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
 
 
-class ModelRetriever(ModelDataSetsMixIn):
+class ModelRetriever(ModelDataSetsPathMixIn):
     def getModel(
         self, dataset: QSPRDataset, name: str, alg: Type = RandomForestClassifier
     ) -> SklearnModel:
