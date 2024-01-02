@@ -125,7 +125,11 @@ class BorutaFilter(FeatureFilter, Randomized):
         Returns:
             pd.DataFrame: filtered dataframe
         """
-        self.featSelector.fit(features.values, y_col.values)
+        if y_col.shape[1] > 1:
+            raise NotImplementedError(
+                "Boruta filter only works with one target column."
+            )
+        self.featSelector.fit(features.values, y_col.values.ravel())
 
         selected_features = features.loc[:, self.featSelector.support_]
         logger.info(
