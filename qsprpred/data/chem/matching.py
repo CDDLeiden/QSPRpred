@@ -14,7 +14,7 @@ def match_mol_to_smarts(
 
     Args:
         mol: Molecule to check.
-        smarts: SMARTS pattern to check.
+        smarts: SMARTS patterns to check.
         operator: Whether to use an "or" or "and" operator on patterns. Defaults to "or".
         use_chirality: Whether to use chirality in the search.
 
