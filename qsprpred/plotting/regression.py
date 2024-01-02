@@ -192,7 +192,7 @@ class WilliamsPlot(RegressionPlot):
         save: bool = True,
         show: bool = False,
         out_path: str | None = None,
-    ) -> tuple[sns.FacetGrid, pd.DataFrame]:
+    ) -> tuple[sns.FacetGrid, pd.DataFrame, List[float]]:
         """make Williams plot
 
         Args:
@@ -210,6 +210,10 @@ class WilliamsPlot(RegressionPlot):
         Returns:
             g (sns.FacetGrid):
                 the seaborn FacetGrid object used to make the plot
+            pd.DataFrame:
+                the leverages and standardized residuals for each compound
+            dict[str, float]:
+                the h* values for the datasets
         """
         def calculateLeverages(features_train: pd.DataFrame, features_test: pd.DataFrame) -> pd.DataFrame:
             """Calculate the leverages for each compound in the dataset.
@@ -337,6 +341,10 @@ class WilliamsPlot(RegressionPlot):
             ax.axhline(2, c=".2", ls="--")
             ax.axhline(-2, c=".2", ls="--")
 
+        # set y axis tile to standardized residuals
+        g.set_ylabels("Standardized Residuals")
+        g.add_legend()
+
         # save the plot
         if save:
             if out_path is not None:
@@ -348,4 +356,4 @@ class WilliamsPlot(RegressionPlot):
         if show:
             plt.show()
         plt.clf()
-        return g
+        return g, df[['Model', 'Fold', 'Property', 'leverage', 'std_resid', 'QSPRID']], model_h_star
