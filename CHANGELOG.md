@@ -54,6 +54,9 @@ From v2.1.0 to v3.0.0
   This is to always maintain the same property name and always have the option to reset
   it to the raw original state (i.e. if we switch to regression or want to repeat a
   transformation).
+- The default log level for the package was changed from `INFO` to `WARNING`. A new
+  tutorial
+  was added to explain how to change the log level.
 
 ## New Features
 
