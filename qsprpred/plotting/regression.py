@@ -257,6 +257,14 @@ class WilliamsPlot(RegressionPlot):
             N = X_train.shape[0]
             h_star = (3*(p+1))/N
 
+            # print waring if h* > 1
+            if h_star > 1:
+                print(
+                    f"Warning: h* = {h_star} is greater than 1, this may indicate that the "
+                    "number of samples is too small for the number of features. "
+                    "Leverage values are between 0 and 1, so h* should be less than 1."
+                )
+
             return leverages, h_star
 
         # prepare the dataframe for plotting
