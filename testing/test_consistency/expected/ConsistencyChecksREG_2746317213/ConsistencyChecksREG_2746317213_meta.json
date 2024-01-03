@@ -1,5 +1,5 @@
 {
-    "py/object": "qsprpred.models.sklearn.SklearnModel",
+    "py/object": "qsprpred.models.scikit_learn.SklearnModel",
     "py/state": {
         "name": "ConsistencyChecksREG_2746317213",
         "baseDir": ".",
@@ -1614,8 +1614,8 @@
         "parameters": {
             "random_state": 2746317213
         },
-        "randomState": 2746317213,
         "alg": "sklearn.ensemble._forest.ExtraTreesRegressor",
+        "randomState": 2746317213,
         "estimator": "./ConsistencyChecksREG_2746317213/ConsistencyChecksREG_2746317213.json"
     }
 }

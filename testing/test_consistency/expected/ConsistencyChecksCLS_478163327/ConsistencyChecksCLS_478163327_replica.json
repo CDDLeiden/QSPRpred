@@ -976,7 +976,6 @@
                 "py/object": "qsprpred.tasks.TargetProperty",
                 "py/state": {
                     "name": "pchembl_value_Mean",
-                    "originalName": "pchembl_value_Mean",
                     "task": {
                         "py/reduce": [
                             {
@@ -993,12 +992,23 @@
                         6.5
                     ],
                     "_nClasses": 2,
-                    "transformer": null
+                    "transformer": null,
+                    "imputer": null
                 }
             }
         ],
         "prepSettings": {
             "py/object": "qsprpred.benchmarks.settings.data_prep.DataPrepSettings",
+            "data_filters": {
+                "py/tuple": [
+                    {
+                        "py/object": "qsprpred.data.processing.data_filters.RepeatsFilter",
+                        "keep": true,
+                        "timeCol": null,
+                        "additionalCols": []
+                    }
+                ]
+            },
             "split": {
                 "py/object": "qsprpred.data.sampling.splits.RandomSplit",
                 "dataSet": null,
@@ -1021,7 +1031,8 @@
                     "_sklearn_version": "1.2.1"
                 }
             },
-            "feature_fill_value": 0.0
+            "feature_fill_value": 0.0,
+            "shuffle": true
         },
         "optimizer": null,
         "assessors": [
@@ -1044,6 +1055,7 @@
                     },
                     "name": "roc_auc_score"
                 },
+                "splitMultitaskScores": false,
                 "split": null,
                 "round": 5
             },
@@ -1066,6 +1078,7 @@
                     },
                     "name": "matthews_corrcoef"
                 },
+                "splitMultitaskScores": false,
                 "split": null,
                 "round": 5
             },
@@ -1088,6 +1101,7 @@
                     },
                     "name": "roc_auc_score"
                 },
+                "splitMultitaskScores": false,
                 "round": 5
             },
             {
@@ -1109,12 +1123,13 @@
                     },
                     "name": "matthews_corrcoef"
                 },
+                "splitMultitaskScores": false,
                 "round": 5
             }
         ],
         "randomSeed": 478163327,
+        "model": "/home/sichom/projects/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksCLS_478163327/ConsistencyChecksCLS_478163327_meta.json",
         "ds": null,
-        "results": null,
-        "model": "/zfsdata/data/helle/01_MainProjects/03_QSPRPred/Scripts/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksCLS_478163327/ConsistencyChecksCLS_478163327_meta.json"
+        "results": null
     }
 }
