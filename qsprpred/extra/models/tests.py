@@ -13,10 +13,10 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 from qsprpred.extra.data.descriptors.sets import ProDec
+from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.msa_calculator import ClustalMSA
 from qsprpred.tasks import TargetProperty, TargetTasks
-from ..data.data import PCMDataSet
-from ..data.tests import DataSetsMixInExtras
+from ..data.utils.testing.path_mixins import DataSetsMixInExtras
 from ..models.pcm import SklearnPCMModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import ModelCheckMixIn

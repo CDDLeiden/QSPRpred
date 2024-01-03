@@ -15,7 +15,7 @@ from qsprpred.data.sampling.splits import (
     ScaffoldSplit,
 )
 from qsprpred.data.tables.qspr import QSPRDataset
-from qsprpred.extra.data.data import PCMDataSet
+from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.tasks import TargetProperty
 
 
