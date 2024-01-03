@@ -213,12 +213,12 @@ class DataSetsPathMixIn(PathMixIn):
 
         def get_name_list(obj: Iterable | object):
             """
-            Parse an iterable of data preparation objects and return a string.
+            Parse an generator of data preparation objects and return a string.
             Note that the method proceeds recursively so nested iterables are also
             parsed.
 
             Args:
-                obj: the object or an iterable of objects to get name for
+                obj: the object or an generator of objects to get name for
 
             Returns:
                 str: the generated name of the object or a list of objects

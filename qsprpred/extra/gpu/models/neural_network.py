@@ -40,6 +40,7 @@ class Base(nn.Module):
         gpus (list):
             list of gpus to run the model on
     """
+
     def __init__(
         self,
         device: torch.device = DEFAULT_TORCH_DEVICE,
@@ -142,7 +143,7 @@ class Base(nn.Module):
             loss = None
             # decrease learning rate over the epochs
             for param_group in optimizer.param_groups:
-                param_group["lr"] = self.lr * (1 - 1 / self.n_epochs)**(epoch * 10)
+                param_group["lr"] = self.lr * (1 - 1 / self.n_epochs) ** (epoch * 10)
             for i, (Xb, yb) in enumerate(train_loader):
                 monitor.onBatchStart(i)
                 # Batch of target tenor and label tensor
@@ -246,7 +247,8 @@ class Base(nn.Module):
         """
         init_signature = inspect.signature(cls.__init__)
         parameters = [
-            p for p in init_signature.parameters.values()
+            p
+            for p in init_signature.parameters.values()
             if p.name != "self" and p.kind != p.VAR_KEYWORD
         ]
         return sorted([p.name for p in parameters])
@@ -310,7 +312,7 @@ class Base(nn.Module):
         return self
 
     def getDataLoader(self, X, y=None):
-        """Convert data to tensors and get iterable over dataset with dataloader.
+        """Convert data to tensors and get generator over dataset with dataloader.
 
         Args:
             X (numpy 2d array): input dataset
@@ -357,6 +359,7 @@ class STFullyConnected(Base):
         fc3 (torch.nn.Module): the fourth fully connected layer
         activation (torch.nn.Module): the activation function
     """
+
     def __init__(
         self,
         n_dim,

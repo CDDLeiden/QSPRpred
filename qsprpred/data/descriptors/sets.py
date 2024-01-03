@@ -10,16 +10,15 @@ from typing import Type
 import numpy as np
 import pandas as pd
 from rdkit import Chem, DataStructs
-from rdkit.Chem import Mol, Descriptors
 from rdkit.Chem import AllChem, Crippen
 from rdkit.Chem import Descriptors as desc
 from rdkit.Chem import Lipinski
+from rdkit.Chem import Mol, Descriptors
 from rdkit.ML.Descriptors import MoleculeDescriptors
 
-from ...utils.serialization import JSONSerializable
-from ...logs import logger
-
 from ...data.descriptors.fingerprints import get_fingerprint
+from ...logs import logger
+from ...utils.serialization import JSONSerializable
 
 
 class DescriptorSet(JSONSerializable, ABC):
@@ -81,6 +80,7 @@ class MoleculeDescriptorSet(DescriptorSet):
 
     Descriptorset: a collection of descriptors that can be calculated for a molecule.
     """
+
     @abstractmethod
     def __call__(self, mols: list[str | Mol]) -> np.ndarray | pd.DataFrame:
         """
@@ -96,11 +96,11 @@ class MoleculeDescriptorSet(DescriptorSet):
     @staticmethod
     def iterMols(mols: list[str | Mol], to_list=False):
         """
-        Create a molecule iterator or list from RDKit molecules or SMILES.
+        Create a molecule generator or list from RDKit molecules or SMILES.
 
         Args:
             mols: list of molecules (SMILES `str` or RDKit Mol)
-            to_list: if True, return a list instead of an iterator
+            to_list: if True, return a list instead of an generator
 
         Returns:
             an array or data frame of descriptor values of shape (n_mols, n_descriptors)
@@ -264,7 +264,7 @@ class DrugExPhyschem(MoleculeDescriptorSet):
             for j, prop in enumerate(self.props):
                 try:
                     scores[i, j] = self._prop_dict[prop](mol)
-                except Exception as exp:  # noqa: E722
+                except Exception as exp:
                     logger.warning(f"Could not calculate {prop} for {mol}.")
                     logger.exception(exp)
                     continue
@@ -328,10 +328,9 @@ class RDKitDescs(MoleculeDescriptorSet):
             descriptors will be calculated
         include_3d: if True, 3D descriptors will be calculated
     """
+
     def __init__(
-            self,
-            rdkit_descriptors: list[str] | None = None,
-            include_3d: bool = False
+        self, rdkit_descriptors: list[str] | None = None, include_3d: bool = False
     ):
         self._isFP = False
         self._descriptors = (
@@ -399,6 +398,7 @@ class TanimotoDistances(MoleculeDescriptorSet):
         *args: `fingerprint` arguments
         **kwargs: `fingerprint` keyword arguments, should contain fingerprint_type
     """
+
     def __init__(self, list_of_smiles, fingerprint_type, *args, **kwargs):
         """Initialize the descriptorset with a list of SMILES sequences and a
         fingerprint type.
@@ -444,8 +444,10 @@ class TanimotoDistances(MoleculeDescriptorSet):
         """Calculate the fingerprints for the list of SMILES sequences."""
         # Convert np.arrays to BitVects
         return [
-            DataStructs.CreateFromBitString("".join(map(str, x))) for x in self.
-            getFingerprint([Chem.MolFromSmiles(smiles) for smiles in list_of_smiles])
+            DataStructs.CreateFromBitString("".join(map(str, x)))
+            for x in self.getFingerprint(
+                [Chem.MolFromSmiles(smiles) for smiles in list_of_smiles]
+            )
         ]
 
     @property
@@ -492,6 +494,7 @@ class PredictorDesc(MoleculeDescriptorSet):
 
         if isinstance(model, str):
             from ...models.models import QSPRModel
+
             self.model = QSPRModel.fromFile(model)
         else:
             self.model = model
@@ -506,6 +509,7 @@ class PredictorDesc(MoleculeDescriptorSet):
     def __setstate__(self, state):
         super().__setstate__(state)
         from ...models.models import QSPRModel
+
         self.model = QSPRModel.fromFile(self.model)
 
     def __call__(self, mols):
@@ -531,9 +535,7 @@ class PredictorDesc(MoleculeDescriptorSet):
     def settings(self):
         """Return args and kwargs used to initialize the descriptorset."""
         return {
-            "model":
-                self.model.
-                metaFile  # FIXME: we save absolute path to meta file so this descriptor
+            "model": self.model.metaFile  # FIXME: we save absolute path to meta file so this descriptor
             # set is not really portable
         }
 
@@ -554,6 +556,7 @@ class PredictorDesc(MoleculeDescriptorSet):
 
 class SmilesDesc(MoleculeDescriptorSet):
     """Descriptorset that calculates descriptors from a SMILES sequence."""
+
     def __call__(self, mols: list[str | Mol]):
         """Return smiles as descriptors.
 
@@ -596,6 +599,7 @@ class _DescriptorSetRetriever:
     To support a new type of descriptor, just add a function "get_descname(self, *args,
     **kwargs)".
     """
+
     def getDescriptor(self, desc_type, *args, **kwargs):
         if desc_type.lower() == "descriptor":
             raise Exception("Please specify the type of fingerprint you want to use.")
