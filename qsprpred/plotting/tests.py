@@ -134,7 +134,7 @@ class CorrPlotTest(ModelRetriever, TestCase):
         # assert g is sns.FacetGrid
         self.assertIsInstance(g, sns.FacetGrid)
         self.assertTrue(os.path.exists(f"{model.outPrefix}_correlation.png"))
-        
+
 class WilliamsPlotTest(ModelRetriever, TestCase):
     """Test plotting Williams plot for single task."""
 

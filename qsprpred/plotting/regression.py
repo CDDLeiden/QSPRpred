@@ -302,22 +302,24 @@ class WilliamsPlot(RegressionPlot):
         # calculate degrees of freedom
         df["df"] = df["n_samples"] - df["n_features"] - 1
 
+        RSE = {}
         # check if the degrees of freedom is greater than 0 for each model, property, and set
-        if (df["df"] <= 0).any():
-            for (model, set, property), df_ in df.groupby(["Model", "Set", "Property"]):
+        for (model, set, property), df_ in df.groupby(["Model", "Set", "Property"]):
+            if set == "Cross Validation":
                 if df_["df"].iloc[0] <= 0:
                     print(f"{model} {set} {property}")
                     print(df_[["n_samples", "n_features"]].iloc[0])
-            raise ValueError(
-                "Degrees of freedom is less than or equal to 0 for some models, "
-                "properties, and folds. Check the number of samples and features, the "
-                "number of samples should be greater than the number of features."
-            )
+                    raise ValueError(
+                        "Degrees of freedom is less than or equal to 0 for some models, "
+                        "properties trainingset. Check the number of samples and features, the "
+                        "number of samples should be greater than the number of features."
+                    )
+                RSE[(model, property)] = np.sqrt(
+                    (1/df_["df"].iloc[0])*np.sum(df_["residual"]**2)
+                )
 
-        # calculate the residual standard error
-        df["RSE"] = np.sqrt(
-            (1/df["df"])*np.sum(df["residual"]**2)
-        )
+        # add the residual standard error to the df
+        df["RSE"] = df.apply(lambda x: RSE[(x["Model"], x["Property"])], axis=1)
 
         # calculate the standardized residuals
         df["std_resid"] = df["residual"] / (df["RSE"]*np.sqrt(1-df["leverage"]))
