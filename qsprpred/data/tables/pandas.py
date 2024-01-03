@@ -26,16 +26,12 @@ class PandasDataTable(DataTable, JSONSerializable):
             dataframe for a dataset that already exists on disk, the dataframe from
             disk will override the supplied data frame. Set 'overwrite' to `True` to
             override the data frame on disk.
-        storeDir (str): Directory to store the dataset files. Defaults to the
-            current directory. If it already contains files with the same name,
-            the existing data will be loaded.
         indexCols (List): List of columns to use as index. If None, the index
             will be a custom generated ID.
         nJobs (int): Number of jobs to use for parallel processing. If <= 0,
             all available cores will be used.
         chunkSize (int): Size of chunks to use per job in parallel processing.
         randomState (int): Random state to use for all random operations.
-
     """
 
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
@@ -101,6 +97,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         chunk_size: int = 1000,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
+        store_format: str = "pkl",
     ):
         """Initialize a `PandasDataTable` object.
         Args
@@ -124,7 +121,9 @@ class PandasDataTable(DataTable, JSONSerializable):
                 for reproducibility. If not specified, the state is generated randomly.
                 The state is saved upon `save` so if you want to change the state later,
                 call the `setRandomState` method after loading.
+            store_format (str): Format to use for storing the data frame. Currently only 'pkl' and 'csv' are supported.
         """
+        self.storeFormat = store_format
         self.randomState = None
         self.setRandomState(
             random_state or int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
@@ -175,7 +174,10 @@ class PandasDataTable(DataTable, JSONSerializable):
     def __getstate__(self):
         o_dict = super().__getstate__()
         os.makedirs(self.storeDir, exist_ok=True)
-        self.df.to_pickle(self.storePath)
+        if self.storeFormat == "csv":
+            self.df.to_csv(self.storePath)
+        else:
+            self.df.to_pickle(self.storePath)
         return o_dict
 
     def __setstate__(self, state):
@@ -192,7 +194,10 @@ class PandasDataTable(DataTable, JSONSerializable):
 
     @property
     def storePath(self):
-        return f"{self.storePrefix}_df.pkl"
+        if self.storeFormat == "csv":
+            return f"{self.storePrefix}_df.csv"
+        else:
+            return f"{self.storePrefix}_df.pkl"
 
     @property
     def storePrefix(self):
@@ -489,7 +494,11 @@ class PandasDataTable(DataTable, JSONSerializable):
 
     def reload(self):
         """Reload the data table from disk."""
-        self.df = pd.read_pickle(self.storePath)
+        if self.storeFormat == "csv":
+            self.df = pd.read_csv(self.storePath)
+            self.df.set_index(self.indexCols, inplace=True, drop=False)
+        else:
+            self.df = pd.read_pickle(self.storePath)
         self.indexCols = self.df.index.name.split("~")
         assert all(col in self.df.columns for col in self.indexCols)
 

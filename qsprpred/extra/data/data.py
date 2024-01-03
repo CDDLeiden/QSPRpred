@@ -48,6 +48,7 @@ class PCMDataSet(QSPRDataset):
         index_cols: list[str] | None = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
+        store_format: str = "pkl",
     ):
         """Construct a data set to handle PCM data.
 
@@ -90,6 +91,8 @@ class PCMDataSet(QSPRDataset):
                 Column name to use for automatically generated IDs.
             random_state (int, optional):
                 random state for reproducibility. Defaults to `None`.
+            store_format
+                format to use for storing the data ('pkl' or 'csv').
 
         Raises:
             `ValueError`:
@@ -110,6 +113,7 @@ class PCMDataSet(QSPRDataset):
             drop_empty=drop_empty,
             autoindex_name=autoindex_name,
             random_state=random_state,
+            store_format=store_format,
         )
         self.proteinCol = protein_col
         self.proteinSeqProvider = protein_seq_provider

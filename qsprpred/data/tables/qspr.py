@@ -57,40 +57,56 @@ class QSPRDataset(MoleculeTable):
         index_cols: Optional[list[str]] = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
+        store_format: str = "pkl",
     ):
         """Construct QSPRdata, also apply transformations of output property if
                 specified.
 
-                Args:
-                    name (str): data name, used in saving the data
-                    target_props (list[TargetProperty | dict]): target properties, names
-                        should correspond with target columnname in df
-                    df (pd.DataFrame, optional): input dataframe containing smiles and target
-                        property. Defaults to None.
-                    smiles_col (str, optional): name of column in df containing SMILES.
-                        Defaults to "SMILES".
-                    add_rdkit (bool, optional): if true, column with rdkit molecules will be
-                        added to df. Defaults to False.
-                    store_dir (str, optional): directory for saving the output data.
-                        Defaults to '.'.
-                    overwrite (bool, optional): if already saved data at output dir if should
-                        be overwritten. Defaults to False.
-                    n_jobs (int, optional): number of parallel jobs. If <= 0, all available
-                        cores will be used. Defaults to 1.
-                    chunk_size (int, optional): chunk size for parallel processing.
-                        Defaults to 50.
-                    drop_invalids (bool, optional): if true, invalid SMILES will be dropped.
-                        Defaults to True.
-                    drop_empty (bool, optional): if true, rows with empty target property values will
-        be removed as well as rows with empty SMILES column values.
-                    index_cols (list[str], optional): columns to be used as index in the
-                        dataframe. Defaults to `None` in which case a custom ID will be
-                        generated.
-                    autoindex_name (str): Column name to use for automatically generated IDs.
-                    random_state (int, optional): random state for splitting the data.
+        Args:
+            name (str):
+                data name, used in saving the data
+            target_props (list[TargetProperty | dict]):
+                target properties, names
+                should correspond with target columnname in df
+            df (pd.DataFrame, optional):
+                input dataframe containing smiles and target
+                property. Defaults to None.
+            smiles_col (str, optional):
+                name of column in df containing SMILES.
+                Defaults to "SMILES".
+            add_rdkit (bool, optional):
+                if true, column with rdkit molecules will be
+                added to df. Defaults to False.
+            store_dir (str, optional):
+                directory for saving the output data.
+                Defaults to '.'.
+            overwrite (bool, optional):
+                if already saved data at output dir if should
+                be overwritten. Defaults to False.
+            n_jobs (int, optional):
+                number of parallel jobs. If <= 0, all available
+                cores will be used. Defaults to 1.
+            chunk_size (int, optional):
+                chunk size for parallel processing.
+                Defaults to 50.
+            drop_invalids (bool, optional):
+                if true, invalid SMILES will be dropped.
+                Defaults to True.
+            drop_empty (bool, optional):
+                if true, rows with empty target property will  be removed.
+            index_cols (list[str], optional):
+                columns to be used as index in the
+                dataframe. Defaults to `None` in which case a custom ID will be
+                generated.
+            autoindex_name (str):
+                Column name to use for automatically generated IDs.
+            random_state (int, optional):
+                random state for splitting the data.
+            store_format (str, optional):
+                format to use for storing the data ('pkl' or 'csv').
 
-                Raises:
-                    `ValueError`: Raised if threshold given with non-classification task.
+        Raises:
+            `ValueError`: Raised if threshold given with non-classification task.
         """
         super().__init__(
             name,
@@ -105,6 +121,7 @@ class QSPRDataset(MoleculeTable):
             index_cols,
             autoindex_name,
             random_state,
+            store_format,
         )
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
@@ -526,9 +543,9 @@ class QSPRDataset(MoleculeTable):
             and not split.hasDataSet
         ):
             split.setDataSet(self)
-        if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
-            if self.split.getSeed() is None:
-                self.split.setSeed(self.randomState)
+        if hasattr(split, "setSeed") and hasattr(split, "getSeed"):
+            if split.getSeed() is None:
+                split.setSeed(self.randomState)
         # split the data into train and test
         folds = FoldsFromDataSplit(split)
         self.X, self.X_ind, self.y, self.y_ind, _, _ = next(
@@ -536,6 +553,10 @@ class QSPRDataset(MoleculeTable):
         )
         # select target properties
         logger.info("Total: train: %s test: %s" % (len(self.y), len(self.y_ind)))
+        logger.debug(f"First index train: {self.y.index[0]}")
+        logger.debug(f"First index test: {self.y_ind.index[0]}")
+        logger.debug(f"Last index train: {self.y.index[-1]}")
+        logger.debug(f"Last index test: {self.y_ind.index[-1]}")
         for prop in self.targetProperties:
             logger.info("Target property: %s" % prop.name)
             if prop.task == TargetTasks.SINGLECLASS:
@@ -775,7 +796,7 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        datafilters: list = [RepeatsFilter(keep=True)],
+        data_filters: list | None = (RepeatsFilter(keep=True),),
         split=None,
         feature_calculators: list | None = None,
         feature_filters: list | None = None,
@@ -791,7 +812,7 @@ class QSPRDataset(MoleculeTable):
             smiles_standardizer (str | Callable): either `chembl`, `old`, or a
                 partial function that reads and standardizes smiles. If `None`, no
                 standardization will be performed. Defaults to `chembl`.
-            datafilters (list of datafilter obj): filters number of rows from dataset
+            data_filters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             feature_calculators (list[DescriptorsCalculator]): calculate features using
                 different information from the data set
@@ -814,8 +835,8 @@ class QSPRDataset(MoleculeTable):
         if feature_calculators is not None:
             self.addFeatures(feature_calculators, recalculate=recalculate_features)
         # apply data filters
-        if datafilters is not None:
-            self.filter(datafilters)
+        if data_filters is not None:
+            self.filter(data_filters)
         # Replace any NaN values in featureNames by 0
         # FIXME: this is not very good, we should probably add option to do custom
         # data imputation here or drop rows with NaNs

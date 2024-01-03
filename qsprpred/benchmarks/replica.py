@@ -51,6 +51,8 @@ class Replica(JSONSerializable):
             `runAssessment` has been called.
     """
 
+    _notJSON = JSONSerializable._notJSON + ["ds", "results", "model"]
+
     def __init__(
         self,
         idx: int,
@@ -140,6 +142,7 @@ class Replica(JSONSerializable):
         if os.path.exists(self.ds.metaFile) and not reload:
             logger.info(f"Reloading existing {self.ds.name} from cache...")
             self.ds = QSPRDataset.fromFile(self.ds.metaFile)
+            self.ds.setRandomState(self.randomSeed)
             self.ds.setTargetProperties(deepcopy(self.targetProps))
         else:
             logger.info(f"Data set {self.ds.name} not yet found. It will be created.")
@@ -150,6 +153,7 @@ class Replica(JSONSerializable):
             )
             self.ds.addDescriptors(desc_calculator, recalculate=True)
             self.ds.setTargetProperties(deepcopy(self.targetProps))
+            self.ds.setRandomState(self.randomSeed)
             self.ds.save()
 
     def prepData(self):

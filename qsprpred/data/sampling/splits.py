@@ -99,7 +99,9 @@ class RandomSplit(DataSplit, Randomized):
                 "Random seed will be set randomly."
             )
         return ShuffleSplit(
-            1, test_size=self.testFraction, random_state=self.seed
+            1,
+            test_size=self.testFraction,
+            random_state=self.seed
         ).split(X, y)
 
 
@@ -376,7 +378,7 @@ class GBMTDataSplit(DataSplit):
             if self.customTestList
             else None
         )
-        print(self.split_kwargs)
+        logger.debug(f"Split arguments: {self.split_kwargs}")
         # Split dataset
         if self.nFolds == 1:
             sizes = [1 - self.testFraction, self.testFraction]
