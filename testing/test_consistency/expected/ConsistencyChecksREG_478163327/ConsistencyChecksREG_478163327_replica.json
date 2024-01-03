@@ -976,7 +976,6 @@
                 "py/object": "qsprpred.tasks.TargetProperty",
                 "py/state": {
                     "name": "pchembl_value_Mean",
-                    "originalName": "pchembl_value_Mean",
                     "task": {
                         "py/reduce": [
                             {
@@ -989,12 +988,23 @@
                             }
                         ]
                     },
-                    "transformer": null
+                    "transformer": null,
+                    "imputer": null
                 }
             }
         ],
         "prepSettings": {
             "py/object": "qsprpred.benchmarks.settings.data_prep.DataPrepSettings",
+            "data_filters": {
+                "py/tuple": [
+                    {
+                        "py/object": "qsprpred.data.processing.data_filters.RepeatsFilter",
+                        "keep": true,
+                        "timeCol": null,
+                        "additionalCols": []
+                    }
+                ]
+            },
             "split": {
                 "py/object": "qsprpred.data.sampling.splits.RandomSplit",
                 "dataSet": null,
@@ -1017,7 +1027,8 @@
                     "_sklearn_version": "1.2.1"
                 }
             },
-            "feature_fill_value": 0.0
+            "feature_fill_value": 0.0,
+            "shuffle": true
         },
         "optimizer": null,
         "assessors": [
@@ -1040,6 +1051,7 @@
                     },
                     "name": "r2_score"
                 },
+                "splitMultitaskScores": false,
                 "split": null,
                 "round": 5
             },
@@ -1064,6 +1076,7 @@
                     },
                     "name": "mean_squared_error"
                 },
+                "splitMultitaskScores": false,
                 "split": null,
                 "round": 5
             },
@@ -1086,6 +1099,7 @@
                     },
                     "name": "r2_score"
                 },
+                "splitMultitaskScores": false,
                 "round": 5
             },
             {
@@ -1109,12 +1123,13 @@
                     },
                     "name": "mean_squared_error"
                 },
+                "splitMultitaskScores": false,
                 "round": 5
             }
         ],
         "randomSeed": 478163327,
+        "model": "/home/sichom/projects/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksREG_478163327/ConsistencyChecksREG_478163327_meta.json",
         "ds": null,
-        "results": null,
-        "model": "/zfsdata/data/helle/01_MainProjects/03_QSPRPred/Scripts/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksREG_478163327/ConsistencyChecksREG_478163327_meta.json"
+        "results": null
     }
 }

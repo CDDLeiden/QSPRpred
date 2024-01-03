@@ -46,8 +46,6 @@ From v2.1.0 to v3.0.0
   the `tutorials` folder instead of the `tutorial` folder.
 - `MetricsPlot` now supports multi-class and multi-task classification models.
 - `CorrelationPlot` now supports multi-task regression models.
-- `RepeatsFilter` argument `year_name` renamed to `time_col` and
-  arugment `additional_cols` added.
 - The behaviour of `QSPRDataset` was changed with regards to target properties. It now
   remembers the original state of any target property and all changes are performed in
   place on the original property column (i.e. conversion to multi-class classification).
@@ -57,6 +55,8 @@ From v2.1.0 to v3.0.0
 - The default log level for the package was changed from `INFO` to `WARNING`. A new
   tutorial
   was added to explain how to change the log level.
+- `RepeatsFilter` argument `year_name` renamed to `time_col` and arugment `additional_cols` added.
+- The `perc` argument of `BorutaPy` can now be set from the CLI.
 
 ## New Features
 

@@ -12,7 +12,7 @@ import pandas as pd
 from gbmtsplits import GloballyBalancedSplit
 from sklearn.model_selection import ShuffleSplit
 
-from qsprpred.utils.interfaces.randomized import Randomized
+from ...utils.interfaces.randomized import Randomized
 from ...data.chem.clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
@@ -267,9 +267,9 @@ class TemporalSplit(DataSplit):
 
             if len(task_names) > 1:
                 logger.warning(
-                    "The TemporalSplit is not recommended for multitask\
-                    or PCM datasets might lead to very unbalanced subsets\
-                    for some tasks"
+                    "The TemporalSplit is not recommended for multitask "
+                    "or PCM datasets might lead to very unbalanced subsets "
+                    "for some tasks"
                 )
 
             indices = np.array(list(range(len(df))))
