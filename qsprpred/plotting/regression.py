@@ -265,8 +265,8 @@ class WilliamsPlot(RegressionPlot):
         if datasets is None:
             datasets = {}
             for model in self.models:
-                if model.checkForDataset():
-                    datasets[model.name] = model.dataset
+                if model.checkForData():
+                    datasets[model.name] = model.data
                 else:
                     raise ValueError(
                         "Model does not have a dataset attached to it."
@@ -286,7 +286,7 @@ class WilliamsPlot(RegressionPlot):
             else:
                 raise ValueError(
                     f"Dataset {dataset.name} does not have features, to"
-                    " calculate leverages, the dataset should have features ."
+                    " calculate leverages, the dataset should have features."
                 )
 
         # Add the levarages to the dataframe
@@ -297,16 +297,16 @@ class WilliamsPlot(RegressionPlot):
         df["residual"] = df["Label"] - df["Prediction"]
 
         # calculate the residuals standard deviation
-        df["n_samples"]  = df.groupby(["Model", "Fold", "Property"])["residual"].transform("count")
+        df["n_samples"]  = df.groupby(["Model", "Set", "Property"])["residual"].transform("count")
 
         # calculate degrees of freedom
         df["df"] = df["n_samples"] - df["n_features"] - 1
 
-        # check if the degrees of freedom is greater than 0 for each model, property, and fold
+        # check if the degrees of freedom is greater than 0 for each model, property, and set
         if (df["df"] <= 0).any():
-            for (model, fold, property), df_ in df.groupby(["Model", "Fold", "Property"]):
+            for (model, set, property), df_ in df.groupby(["Model", "Set", "Property"]):
                 if df_["df"].iloc[0] <= 0:
-                    print(f"{model} {fold} {property}")
+                    print(f"{model} {set} {property}")
                     print(df_[["n_samples", "n_features"]].iloc[0])
             raise ValueError(
                 "Degrees of freedom is less than or equal to 0 for some models, "
