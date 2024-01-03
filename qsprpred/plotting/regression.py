@@ -352,7 +352,7 @@ class WilliamsPlot(RegressionPlot):
             ax.axhline(-2, c=".2", ls="--")
 
         # set y axis tile to standardized residuals
-        g.set_ylabels("Standardized Residuals")
+        g.set_ylabels("Studentized Residuals")
         g.add_legend()
 
         # save the plot
