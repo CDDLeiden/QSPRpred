@@ -49,6 +49,10 @@ class ModelRetriever(ModelDataSetsPathMixIn):
 class ROCPlotTest(ModelRetriever, TestCase):
     """Test ROC curve plotting class."""
 
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def testPlotSingle(self):
         """Test plotting ROC curve for single task."""
         dataset = self.createLargeTestDataSet(
@@ -75,6 +79,10 @@ class ROCPlotTest(ModelRetriever, TestCase):
 
 class MetricsPlotTest(ModelRetriever, TestCase):
     """Test metrics plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     @parameterized.expand(
         [
@@ -117,6 +125,10 @@ class MetricsPlotTest(ModelRetriever, TestCase):
 class CorrPlotTest(ModelRetriever, TestCase):
     """Test correlation plotting class."""
 
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def testPlotSingle(self):
         """Test plotting correlation for single task."""
         dataset = self.createLargeTestDataSet(
@@ -140,6 +152,10 @@ class CorrPlotTest(ModelRetriever, TestCase):
 
 class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
     """Test confusion matrix plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     @parameterized.expand(
         [
