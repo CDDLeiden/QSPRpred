@@ -133,7 +133,7 @@ class TargetProperty(JSONSerializable):
               TargetTasks.SINGLECLASS,
               TargetTasks.MULTICLASS]): task type for the target property
             th (list[float] | str): threshold for the target property, only used
-                for classification tasks
+                for classification tasks. If th is precomputed, set it to "precomputed".
             n_classes (int): number of classes for the target property (only used if th
                 is precomputed, otherwise it is inferred)
             transformer (Callable): function to transform the target property
