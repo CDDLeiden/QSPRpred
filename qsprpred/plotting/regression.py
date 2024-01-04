@@ -3,15 +3,15 @@ from abc import ABC
 from copy import deepcopy
 from typing import List
 
+import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn import metrics
 
-from ..tasks import ModelTasks
-from ..plotting.base_plot import ModelPlot
 from ..data import QSPRDataset
-import numpy as np
+from ..plotting.base_plot import ModelPlot
+from ..tasks import ModelTasks
 
 
 class RegressionPlot(ModelPlot, ABC):
@@ -56,9 +56,7 @@ class RegressionPlot(ModelPlot, ABC):
             df["Set"] = "Cross Validation"
         return df
 
-    def prepareRegressionResults(
-        self,
-    ) -> pd.DataFrame:
+    def prepareRegressionResults(self, ) -> pd.DataFrame:
         """Prepare regression results dataframe for plotting.
 
         Returns:
@@ -184,6 +182,7 @@ class CorrelationPlot(RegressionPlot):
         plt.clf()
         return g, self.summary
 
+
 class WilliamsPlot(RegressionPlot):
     """Williams plot; plot of standardized residuals versus leverages"""
     def make(
@@ -215,7 +214,9 @@ class WilliamsPlot(RegressionPlot):
             dict[str, float]:
                 the h* values for the datasets
         """
-        def calculateLeverages(features_train: pd.DataFrame, features_test: pd.DataFrame) -> pd.DataFrame:
+        def calculateLeverages(
+            features_train: pd.DataFrame, features_test: pd.DataFrame
+        ) -> pd.DataFrame:
             """Calculate the leverages for each compound in the dataset.
 
             Args:
@@ -255,7 +256,7 @@ class WilliamsPlot(RegressionPlot):
             # N is the number of compounds
             p = X_train.shape[1]
             N = X_train.shape[0]
-            h_star = (3*(p+1))/N
+            h_star = (3 * (p + 1)) / N
 
             # print waring if h* > 1
             if h_star > 1:
@@ -276,14 +277,12 @@ class WilliamsPlot(RegressionPlot):
                 if model.checkForData():
                     datasets[model.name] = model.data
                 else:
-                    raise ValueError(
-                        "Model does not have a dataset attached to it."
-                    )
+                    raise ValueError("Model does not have a dataset attached to it.")
 
         # calculate the leverages and h* for each model
         model_leverages = {}
         model_h_star = {}
-        model_p = {} # number of descriptors
+        model_p = {}  # number of descriptors
         for model_name, dataset in datasets.items():
             if dataset.hasFeatures:
                 features = dataset.getFeatures()
@@ -298,14 +297,17 @@ class WilliamsPlot(RegressionPlot):
                 )
 
         # Add the levarages to the dataframe
-        df["leverage"] = df.apply(lambda x: model_leverages[x["Model"]][x["QSPRID"]], axis=1)
+        df["leverage"] = df.apply(
+            lambda x: model_leverages[x["Model"]][x["QSPRID"]], axis=1
+        )
         df["n_features"] = df["Model"].apply(lambda x: model_p[x])
 
         # calculate the residuals
         df["residual"] = df["Label"] - df["Prediction"]
 
         # calculate the residuals standard deviation
-        df["n_samples"]  = df.groupby(["Model", "Set", "Property"])["residual"].transform("count")
+        df["n_samples"] = df.groupby(["Model", "Set",
+                                      "Property"])["residual"].transform("count")
 
         # calculate degrees of freedom
         df["df"] = df["n_samples"] - df["n_features"] - 1
@@ -323,14 +325,14 @@ class WilliamsPlot(RegressionPlot):
                         "number of samples should be greater than the number of features."
                     )
                 RSE[(model, property)] = np.sqrt(
-                    (1/df_["df"].iloc[0])*np.sum(df_["residual"]**2)
+                    (1 / df_["df"].iloc[0]) * np.sum(df_["residual"]**2)
                 )
 
         # add the residual standard error to the df
         df["RSE"] = df.apply(lambda x: RSE[(x["Model"], x["Property"])], axis=1)
 
         # calculate the standardized residuals
-        df["std_resid"] = df["residual"] / (df["RSE"]*np.sqrt(1-df["leverage"]))
+        df["std_resid"] = df["residual"] / (df["RSE"] * np.sqrt(1 - df["leverage"]))
 
         # plot the results
         g = sns.FacetGrid(
@@ -341,7 +343,7 @@ class WilliamsPlot(RegressionPlot):
             height=4,
             sharex=False,
             sharey=False,
-            hue="Set"
+            hue="Set",
         )
         g.map(sns.scatterplot, "leverage", "std_resid", s=7, edgecolor="none")
         # add the h* line to each plot based on the model's h*
@@ -366,4 +368,8 @@ class WilliamsPlot(RegressionPlot):
         if show:
             plt.show()
         plt.clf()
-        return g, df[['Model', 'Fold', 'Property', 'leverage', 'std_resid', 'QSPRID']], model_h_star
+        return (
+            g,
+            df[["Model", "Fold", "Property", "leverage", "std_resid", "QSPRID"]],
+            model_h_star,
+        )

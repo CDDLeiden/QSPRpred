@@ -10,17 +10,22 @@ from matplotlib.figure import Figure
 from parameterized import parameterized
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
+from ..data.processing.feature_filters import LowVarianceFilter
 from ..data.tables.qspr import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
 from ..models.tests import ModelDataSetsMixIn
-from ..plotting.classification import MetricsPlot, ROCPlot, ConfusionMatrixPlot
+from ..plotting.classification import ConfusionMatrixPlot, MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot, WilliamsPlot
-from ..data.processing.feature_filters import LowVarianceFilter
+from ..tasks import TargetTasks
+
 
 class ModelRetriever(ModelDataSetsMixIn):
     def getModel(
-        self, dataset: QSPRDataset, name: str, alg: Type = RandomForestClassifier
+        self,
+        dataset: QSPRDataset,
+        name: str,
+        alg: Type = RandomForestClassifier
     ) -> SklearnModel:
         """Get a model for testing.
 
@@ -47,12 +52,15 @@ class ModelRetriever(ModelDataSetsMixIn):
 
 class ROCPlotTest(ModelRetriever, TestCase):
     """Test ROC curve plotting class."""
-
     def testPlotSingle(self):
         """Test plotting ROC curve for single task."""
         dataset = self.createLargeTestDataSet(
             "test_roc_plot_single_data",
-            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.SINGLECLASS,
+                "th": [6.5]
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
@@ -74,11 +82,9 @@ class ROCPlotTest(ModelRetriever, TestCase):
 
 class MetricsPlotTest(ModelRetriever, TestCase):
     """Test metrics plotting class."""
-
     @parameterized.expand(
         [
-            (task, task, th)
-            for task, th in (
+            (task, task, th) for task, th in (
                 ("binary", [6.5]),
                 ("multi_class", [0, 2, 10, 1100]),
             )
@@ -90,11 +96,13 @@ class MetricsPlotTest(ModelRetriever, TestCase):
             f"test_metrics_plot_single_{task}_data",
             target_props=[
                 {
-                    "name": "CL",
-                    "task": TargetTasks.SINGLECLASS
-                    if task == "binary"
-                    else TargetTasks.MULTICLASS,
-                    "th": th,
+                    "name":
+                        "CL",
+                    "task":
+                        TargetTasks.SINGLECLASS
+                        if task == "binary" else TargetTasks.MULTICLASS,
+                    "th":
+                        th,
                 }
             ],
             preparation_settings=self.getDefaultPrep(),
@@ -115,7 +123,6 @@ class MetricsPlotTest(ModelRetriever, TestCase):
 
 class CorrPlotTest(ModelRetriever, TestCase):
     """Test correlation plotting class."""
-
     def testPlotSingle(self):
         """Test plotting correlation for single task."""
         dataset = self.createLargeTestDataSet(
@@ -136,13 +143,14 @@ class CorrPlotTest(ModelRetriever, TestCase):
         self.assertIsInstance(g, sns.FacetGrid)
         self.assertTrue(os.path.exists(f"{model.outPrefix}_correlation.png"))
 
+
 class WilliamsPlotTest(ModelRetriever, TestCase):
     """Test plotting Williams plot for single task."""
-
     def testPlotSingle(self):
         """Test plotting Williams plot for single task."""
         dataset = self.createLargeTestDataSet(
-            "test_williams_plot_single_data", preparation_settings=self.getDefaultPrep()
+            "test_williams_plot_single_data",
+            preparation_settings=self.getDefaultPrep()
         )
         # filter features to below the number of samples in the test set
         # to avoid error in WilliamsPlot
@@ -151,8 +159,8 @@ class WilliamsPlotTest(ModelRetriever, TestCase):
             dataset, "test_williams_plot_single_model", alg=RandomForestRegressor
         )
         score_func = "r2"
-        CrossValAssessor(scoring = score_func)(model)
-        TestSetAssessor(scoring = score_func)(model)
+        CrossValAssessor(scoring=score_func)(model)
+        TestSetAssessor(scoring=score_func)(model)
         model.save()
         # generate metrics plot and associated files
         plt = WilliamsPlot([model])
@@ -163,13 +171,12 @@ class WilliamsPlotTest(ModelRetriever, TestCase):
         self.assertIsInstance(g, sns.FacetGrid)
         self.assertTrue(os.path.exists(f"{model.outPrefix}_williamsplot.png"))
 
+
 class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
     """Test confusion matrix plotting class."""
-
     @parameterized.expand(
         [
-            (task, task, th)
-            for task, th in (
+            (task, task, th) for task, th in (
                 ("binary", [6.5]),
                 ("multi_class", [0, 2, 10, 1100]),
             )
@@ -181,11 +188,13 @@ class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
             f"test_cm_plot_single_{task}_data",
             target_props=[
                 {
-                    "name": "CL",
-                    "task": TargetTasks.SINGLECLASS
-                    if task == "binary"
-                    else TargetTasks.MULTICLASS,
-                    "th": th,
+                    "name":
+                        "CL",
+                    "task":
+                        TargetTasks.SINGLECLASS
+                        if task == "binary" else TargetTasks.MULTICLASS,
+                    "th":
+                        th,
                 }
             ],
             preparation_settings=self.getDefaultPrep(),
@@ -218,7 +227,6 @@ class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
             os.path.exists(f"{model.outPrefix}_CL_4.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(
-                f"{model.outPrefix}_CL_Independent Test_confusion_matrix.png"
-            )
+            os.path.
+            exists(f"{model.outPrefix}_CL_Independent Test_confusion_matrix.png")
         )
