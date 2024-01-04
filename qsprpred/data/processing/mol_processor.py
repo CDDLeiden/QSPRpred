@@ -39,3 +39,29 @@ class MolProcessor(ABC):
     def requiredProps(self) -> list[str]:
         """The properties required by the processor."""
         return []
+
+
+class MolProcessorWithID(MolProcessor, ABC):
+    """A processor that requires a unique identifier for each molecule. Callers are
+    instructed to pass this property with the `requiredProps` attribute.
+
+    Attributes:
+        idProp (str):
+            The name of the passed property that contains
+            the molecule's unique identifier.
+    """
+
+    def __init__(self, id_prop: str | None = None):
+        """
+        Initialize the processor.
+
+        Args:
+            id_prop (str):
+                Name of the property that contains the molecule's unique identifier.
+                Defaults to "QSPRID".
+        """
+        self.idProp = id_prop if id_prop else "QSPRID"
+
+    @property
+    def requiredProps(self) -> list[str]:
+        return [self.idProp]

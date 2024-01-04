@@ -120,8 +120,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         add_rdkit: bool = False,
         store_dir: str = ".",
         overwrite: bool = False,
-        n_jobs: int = 1,
-        chunk_size: int = 50,
+        n_jobs: int | None = 1,
+        chunk_size: int | None = None,
         drop_invalids: bool = True,
         index_cols: Optional[list[str]] = None,
         autoindex_name: str = "QSPRID",
@@ -449,8 +449,16 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """Apply a function to the molecules in the data frame.
         The SMILES  or an RDKit molecule will be supplied as the first
         positional argument to the function. Additional properties
-        to provide can be specified with 'add_props', which will be
+        to provide from the data set can be specified with 'add_props', which will be
         a dictionary supplied as an additional positional argument to the function.
+
+        IMPORTANT: For successful parallel processing, the processor must be picklable.
+        Also note that
+        the returned generator will produce results as soon as they are ready,
+        which means that the chunks of data will
+        not be in the same order as the original data frame. However, you can pass the
+        value of `idProp` in `add_props` to identify the processed molecules.
+        See `CheckSmilesValid` for an example.
 
         Args:
             processor (Callable): Function to apply to the molecules.
@@ -459,7 +467,6 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             add_props (list, optional): List of properties to add to the data frame.
             add_rdkit (bool, optional): Whether to convert the molecules to RDKit
                 molecules before applying the function.
-            flatten (bool, optional): Whether to flatten the results of the function
 
         Returns:
             Generator: A generator that yields the results of the function applied to
@@ -470,6 +477,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         add_props = add_props or self.df.columns.tolist()
         if add_props is not None and self.smilesCol not in add_props:
             add_props.append(self.smilesCol)
+            add_props.append(self.idProp)
         for prop in processor.requiredProps:
             if prop not in self.df.columns:
                 raise ValueError(
@@ -480,13 +488,14 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             if prop not in add_props:
                 add_props.append(prop)
         if self.nJobs > 1 and processor.supportsParallel:
-            return self.apply(
+            for result in self.apply(
                 self._apply_to_mol_wrap,
                 func_args=[processor, add_rdkit, self.smilesCol, *proc_args],
                 func_kwargs=proc_kwargs,
                 on_props=add_props,
                 as_df=False,
-            )
+            ):
+                yield result
         else:
             for result in self.iterChunks(include_props=add_props, as_dict=True):
                 yield self._apply_to_mol_wrap(
@@ -509,12 +518,12 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         Returns:
             mask (pd.Series): Boolean series indicating whether each molecule is valid.
         """
-        mask = []
+        mask = pd.Series([False] * len(self), index=self.df.index, dtype=bool)
         for result in self.processMols(
-            CheckSmilesValid(), proc_kwargs={"throw": throw}
+            CheckSmilesValid(id_prop=self.idProp), proc_kwargs={"throw": throw}
         ):
-            mask.extend(result)
-        return pd.Series(mask, index=self.df.index)
+            mask.loc[result.index] = result.values
+        return mask
 
     def dropDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
         """
@@ -788,11 +797,6 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """
         del self.df[name]
 
-    @staticmethod
-    def _scaffold_calculator(mol, scaffold: Scaffold):
-        """Just a helper method to calculate the scaffold of a molecule more easily."""
-        return scaffold(mol[0])
-
     def addScaffolds(
         self,
         scaffolds: list[Scaffold],
@@ -815,13 +819,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         for scaffold in scaffolds:
             if not recalculate and f"Scaffold_{scaffold}" in self.df.columns:
                 continue
-            self.df[f"Scaffold_{scaffold}"] = self.apply(
-                self._scaffold_calculator,
-                func_args=(scaffold,),
-                subset=[self.smilesCol],
-                axis=1,
-                raw=False,
-            )
+            for scaffolds in self.processMols(scaffold):
+                self.df.loc[scaffolds.index, f"Scaffold_{scaffold}"] = scaffolds.values
             if add_rdkit_scaffold:
                 PandasTools.AddMoleculeColumnToFrame(
                     self.df,
@@ -845,16 +844,16 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             and (include_mols or not col.endswith("_RDMol"))
         ]
 
-    def getScaffolds(self, includeMols: bool = False):
+    def getScaffolds(self, include_mols: bool = False):
         """Get the subset of the data frame that contains only scaffolds.
 
         Args:
-            includeMols (bool): Whether to include the RDKit scaffold columns as well.
+            include_mols (bool): Whether to include the RDKit scaffold columns as well.
 
         Returns:
             pd.DataFrame: Data frame containing only scaffolds.
         """
-        if includeMols:
+        if include_mols:
             return self.df[
                 [col for col in self.df.columns if col.startswith("Scaffold_")]
             ]
@@ -880,7 +879,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         Args:
             mols_per_group (int): Number of molecules per scaffold group.
         """
-        scaffolds = self.getScaffolds(includeMols=False)
+        scaffolds = self.getScaffolds(include_mols=False)
         for scaffold in scaffolds.columns:
             counts = pd.value_counts(self.df[scaffold])
             mask = counts.lt(mols_per_group)

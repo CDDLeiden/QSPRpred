@@ -3,16 +3,17 @@
 import re
 from typing import Any
 
+import pandas as pd
 from chembl_structure_pipeline import standardizer as chembl_stand
 from rdkit import Chem
 from rdkit.Chem import Mol
 from rdkit.Chem.SaltRemover import SaltRemover
 
-from ..processing.mol_processor import MolProcessor
+from ..processing.mol_processor import MolProcessorWithID
 from ...logs import logger
 
 
-class CheckSmilesValid(MolProcessor):
+class CheckSmilesValid(MolProcessorWithID):
     def __call__(
         self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> Any:
@@ -32,13 +33,14 @@ class CheckSmilesValid(MolProcessor):
             except Exception as exp:
                 is_valid = False
                 exception = exp
-
             if exception and throw:
                 raise exception
             else:
                 ret.append(is_valid)
+        ret = pd.Series(ret, index=props[self.idProp])
         return ret
 
+    @property
     def supportsParallel(self) -> bool:
         return True
 

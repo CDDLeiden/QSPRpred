@@ -85,6 +85,7 @@ class PandasDataTable(DataTable, JSONSerializable):
                 Format to use for storing the data frame.
                 Currently only 'pkl' and 'csv' are supported.
         """
+        self.idProp = autoindex_name
         self.storeFormat = store_format
         self.randomState = None
         self.setRandomState(
@@ -94,7 +95,6 @@ class PandasDataTable(DataTable, JSONSerializable):
         self.indexCols = index_cols
         # parallel settings
         self.nJobs = n_jobs
-        self.chunkSize = chunk_size
         # paths
         self._storeDir = store_dir.rstrip("/")
         # data frame initialization
@@ -114,7 +114,7 @@ class PandasDataTable(DataTable, JSONSerializable):
                 if index_cols is not None:
                     self.setIndex(index_cols)
                 else:
-                    self.generateIndex(name=autoindex_name)
+                    self.generateIndex()
         else:
             if not self._isInStore("df"):
                 raise ValueError(
@@ -124,6 +124,7 @@ class PandasDataTable(DataTable, JSONSerializable):
                 )
             self.reload()
         assert self.df is not None, "Unknown error in data set creation."
+        self.chunkSize = chunk_size
 
     def __len__(self):
         """
@@ -152,7 +153,11 @@ class PandasDataTable(DataTable, JSONSerializable):
 
     @chunkSize.setter
     def chunkSize(self, value: int | None):
-        self._chunkSize = value if value is not None else int(len(self.df) / self.nJobs)
+        self._chunkSize = value if value is not None else int(len(self) / self.nJobs)
+        if self._chunkSize < 1:
+            self._chunkSize = len(self)
+        if self._chunkSize > len(self):
+            self._chunkSize = len(self)
 
     @property
     def nJobs(self):
@@ -200,13 +205,14 @@ class PandasDataTable(DataTable, JSONSerializable):
         self.df.index.name = "~".join(cols)
         self.indexCols = cols
 
-    def generateIndex(self, name: str = "QSPRID", prefix: str | None = None):
+    def generateIndex(self, name: str | None = None, prefix: str | None = None):
         """Generate a custom index for the data frame.
 
         Args:
-            name (str): name of the index column.
-            prefix (str): prefix to use for the index column values.
+            name (str | None): name of the index column.
+            prefix (str | None): prefix to use for the index column values.
         """
+        name = name if name is not None else self.idProp
         prefix = prefix if prefix is not None else self.name
         self.df[name] = generate_padded_index(self.df.index, prefix=prefix)
         self.setIndex([name])
@@ -296,24 +302,17 @@ class PandasDataTable(DataTable, JSONSerializable):
         """
         include_props = include_props or self.df.columns
         df_batches = batched_generator(
-            self.df[include_props].iterrows()
-            if include_props is not None
-            else self.df.iterrows(),
+            self.df[self.idProp] if include_props is not None else self.df.iterrows(),
             self.chunkSize,
         )
-        for df_batch in df_batches:
-            ret = {
-                "~".join(self.indexCols): [],
-            }
+        for ids in df_batches:
+            df_batch = self.df.loc[ids]
+            ret = {}
+            if self.idProp not in include_props:
+                include_props.append(self.idProp)
             for prop in include_props:
-                ret[prop] = []
-            for idx, row in df_batch:
-                ret["~".join(self.indexCols)].append(idx)
-                for prop in include_props:
-                    ret[prop].append(row[prop])
-            yield ret if as_dict else pd.DataFrame(
-                ret, index=ret["~".join(self.indexCols)]
-            )
+                ret[prop] = df_batch[prop].tolist()
+            yield ret if as_dict else df_batch
 
     def apply(
         self,
@@ -353,6 +352,10 @@ class PandasDataTable(DataTable, JSONSerializable):
                 hasattr(func, "noParallelization") and func.noParallelization is True
             )
         ):
+            logger.debug(
+                f"Applying function '{func!r}' in parallel on {n_cpus} CPUs, "
+                f"using chunk size: {self.chunkSize}."
+            )
             for result in parallel_generator(
                 self.iterChunks(include_props=on_props, as_dict=not as_df),
                 func,
@@ -360,11 +363,14 @@ class PandasDataTable(DataTable, JSONSerializable):
                 args=func_args,
                 kwargs=func_kwargs,
             ):
-                # FIXME: ensure the parallel code returns the molecules in the same order as they appear in the data set
+                logger.debug(f"Result for chunk returned: {result!r}")
                 yield result
         else:
+            logger.debug(f"Applying function '{func!r}' in serial.")
             for props in self.iterChunks(include_props=on_props, as_dict=not as_df):
-                yield func(props, *func_args, **func_kwargs)
+                result = func(props, *func_args, **func_kwargs)
+                logger.debug(f"Result for chunk returned: {result!r}")
+                yield result
 
     def transform(
         self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
