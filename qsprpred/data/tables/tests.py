@@ -650,3 +650,46 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
         self.assertTrue("z_before_impute" in self.dataset.df.columns)
         self.assertEqual(self.dataset.df["y"].isna().sum(), 0)
         self.assertEqual(self.dataset.df["z"].isna().sum(), 0)
+
+
+class TestApply(DataSetsPathMixIn, QSPRTestCase):
+    """Tests the apply method of the data set."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
+    @staticmethod
+    def regularFunc(props, *args, **kwargs):
+        df = pd.DataFrame(props)
+        for idx, arg in enumerate(args):
+            df[f"arg_{idx}"] = arg
+        for key, value in kwargs.items():
+            df[key] = value
+        return df
+
+    @parameterized.expand([(None, None), (2, None), (None, 50), (2, 50)])
+    def testRegular(self, n_jobs, chunk_size):
+        dataset = self.createLargeTestDataSet()
+        dataset.nJobs = n_jobs
+        dataset.chunkSize = chunk_size
+        result = dataset.apply(
+            self.regularFunc,
+            on_props=["CL", "fu"],
+            func_args=[1, 2, 3],
+            func_kwargs={"A_col": "A", "B_col": "B"},
+        )
+        for item in result:
+            self.assertIsInstance(item, pd.DataFrame)
+            self.assertTrue("CL" in item.columns)
+            self.assertTrue("fu" in item.columns)
+            self.assertTrue("A_col" in item.columns)
+            self.assertTrue("B_col" in item.columns)
+            self.assertTrue("arg_0" in item.columns)
+            self.assertTrue("arg_1" in item.columns)
+            self.assertTrue("arg_2" in item.columns)
+            self.assertTrue(all(item["arg_0"] == 1))
+            self.assertTrue(all(item["arg_1"] == 2))
+            self.assertTrue(all(item["arg_2"] == 3))
+            self.assertTrue(all(item["A_col"] == "A"))
+            self.assertTrue(all(item["B_col"] == "B"))

@@ -6,12 +6,13 @@ import numpy as np
 import pandas as pd
 from rdkit.Chem.rdchem import Mol
 
+from ..processing.mol_processor import MolProcessor
+from ...data.descriptors.sets import get_descriptor
 from ...logs import logger
 from ...utils.serialization import JSONSerializable
-from ...data.descriptors.sets import get_descriptor
 
 
-class DescriptorsCalculator(JSONSerializable, ABC):
+class DescriptorsCalculator(JSONSerializable, MolProcessor, ABC):
     """Calculator for various descriptors of molecules."""
 
     __in__ = __contains__ = lambda self, x: x in self.descSets
@@ -28,10 +29,15 @@ class DescriptorsCalculator(JSONSerializable, ABC):
         self.descSets = list(desc_sets)
         self.noParallelization = any(
             (
-                hasattr(descset, "noParallelization") and
-                descset.noParallelization is True
-            ) for descset in desc_sets
+                hasattr(descset, "noParallelization")
+                and descset.noParallelization is True
+            )
+            for descset in desc_sets
         )
+
+    def supportsParallel(self) -> bool:
+        """Return whether the calculator supports parallelization."""
+        return not self.noParallelization
 
     @classmethod
     def loadDescriptorSets(cls, fname: str) -> list["DescriptorSet"]:  # noqa: F821
@@ -90,9 +96,10 @@ class DescriptorsCalculator(JSONSerializable, ABC):
             descs_from_curr_set = [
                 f.replace(f"{self.getPrefix()}_{descriptorset}_", "")
                 for f in descriptors
-                if f.startswith(f"{self.getPrefix()}_{descriptorset}_") and (
-                    f.replace(f"{self.getPrefix()}_{descriptorset}_", "") in
-                    descriptorset.descriptors
+                if f.startswith(f"{self.getPrefix()}_{descriptorset}_")
+                and (
+                    f.replace(f"{self.getPrefix()}_{descriptorset}_", "")
+                    in descriptorset.descriptors
                 )
             ]
             # if there are none to keep from current descriptors set, skip the whole set
@@ -151,7 +158,8 @@ class DescriptorsCalculator(JSONSerializable, ABC):
 
 class MoleculeDescriptorsCalculator(DescriptorsCalculator):
     """Calculator for molecule properties."""
-    def __call__(self, mols: list[Mol], dtype=np.float32) -> pd.DataFrame:
+
+    def __call__(self, mols: list[Mol], props, dtype=np.float32) -> pd.DataFrame:
         """Calculate descriptors for list of mols.
 
         Args:
@@ -182,6 +190,7 @@ class MoleculeDescriptorsCalculator(DescriptorsCalculator):
 
 class CustomDescriptorsCalculator(DescriptorsCalculator):
     """Calculator for custom descriptors."""
+
     def __init__(self, desc_sets: list["DataFrameDescriptorSet"]) -> None:  # noqa: F821
         """Initialize calculator.
 

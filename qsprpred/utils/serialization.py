@@ -159,7 +159,7 @@ def function_from_string(func_str: str) -> Callable:
         func_str (str): string representation of the function
 
     Returns:
-        func (Callable): function
+        processor (Callable): function
     """
     try:
         return types.FunctionType(

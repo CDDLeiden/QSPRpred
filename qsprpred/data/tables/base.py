@@ -70,15 +70,16 @@ class DataTable(StoredTable):
     def apply(
         self,
         func: callable,
+        on_props: list[str] | None = None,
         func_args: list | None = None,
         func_kwargs: dict | None = None,
-        *args,
-        **kwargs,
     ):
-        """Apply a function to the dataset.
+        """Apply a function on all or selected properties. The properties are supplied
+        as the first positional argument to the function.
 
         Args:
             func (callable): The function to apply.
+            on_props (list, optional): The properties to include.
             func_args (list, optional): The positional arguments of the function.
             func_kwargs (dict, optional): The keyword arguments of the function.
         """

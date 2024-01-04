@@ -1,4 +1,3 @@
-import multiprocessing
 import os
 import pickle
 from multiprocessing import Pool
@@ -6,14 +5,16 @@ from typing import Optional, ClassVar, Generator, Literal, Callable
 
 import numpy as np
 import pandas as pd
+from rdkit import Chem
 from rdkit.Chem import PandasTools
 
 from qsprpred.data.tables.searchable import SearchableMolTable
 from .pandas import PandasDataTable
 from ..chem.matching import match_mol_to_smarts
+from ..processing.mol_processor import MolProcessor
 from ...data.chem.scaffolds import Scaffold
 from ...data.chem.standardization import (
-    check_smiles_valid,
+    CheckSmilesValid,
     chembl_smi_standardizer,
     old_standardize_sanitize,
 )
@@ -418,6 +419,85 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             **kwargs,
         )
 
+    @staticmethod
+    def _apply_to_mol_wrap(
+        props: dict,
+        func: MolProcessor,
+        add_rdkit: bool,
+        smiles_prop: str,
+        *args,
+        **kwargs,
+    ):
+        if add_rdkit:
+            mols = (
+                props["RDMol"]
+                if "RDMol" in props
+                else [Chem.MolFromSmiles(x) for x in props[smiles_prop]]
+            )
+        else:
+            mols = props[smiles_prop]
+        return func(mols, props, *args, **kwargs)
+
+    def processMols(
+        self,
+        processor: MolProcessor,
+        proc_args: list | None = None,
+        proc_kwargs: dict | None = None,
+        add_props: list[str] | None = None,
+        add_rdkit: bool = False,
+    ) -> Generator:
+        """Apply a function to the molecules in the data frame.
+        The SMILES  or an RDKit molecule will be supplied as the first
+        positional argument to the function. Additional properties
+        to provide can be specified with 'add_props', which will be
+        a dictionary supplied as an additional positional argument to the function.
+
+        Args:
+            processor (Callable): Function to apply to the molecules.
+            proc_args (list, optional): The positional arguments of the function.
+            proc_kwargs (dict, optional): The keyword arguments of the function.
+            add_props (list, optional): List of properties to add to the data frame.
+            add_rdkit (bool, optional): Whether to convert the molecules to RDKit
+                molecules before applying the function.
+            flatten (bool, optional): Whether to flatten the results of the function
+
+        Returns:
+            Generator: A generator that yields the results of the function applied to
+                each molecule in the data frame.
+        """
+        proc_args = proc_args or ()
+        proc_kwargs = proc_kwargs or {}
+        add_props = add_props or self.df.columns.tolist()
+        if add_props is not None and self.smilesCol not in add_props:
+            add_props.append(self.smilesCol)
+        for prop in processor.requiredProps:
+            if prop not in self.df.columns:
+                raise ValueError(
+                    f"Cannot apply function '{processor}' to {self.name} because "
+                    f"it requires the property '{prop}', which is not present in the "
+                    "data set."
+                )
+            if prop not in add_props:
+                add_props.append(prop)
+        if self.nJobs > 1 and processor.supportsParallel:
+            return self.apply(
+                self._apply_to_mol_wrap,
+                func_args=[processor, add_rdkit, self.smilesCol, *proc_args],
+                func_kwargs=proc_kwargs,
+                on_props=add_props,
+                as_df=False,
+            )
+        else:
+            for result in self.iterChunks(include_props=add_props, as_dict=True):
+                yield self._apply_to_mol_wrap(
+                    result,
+                    processor,
+                    add_rdkit,
+                    self.smilesCol,
+                    *proc_args,
+                    **proc_kwargs,
+                )
+
     def checkMols(self, throw: bool = True):
         """
         Returns a boolean array indicating whether each molecule is valid or not.
@@ -429,15 +509,12 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         Returns:
             mask (pd.Series): Boolean series indicating whether each molecule is valid.
         """
-        if self.nJobs > 1:
-            with multiprocessing.Pool(self.nJobs) as pool:
-                mask = pool.starmap(
-                    check_smiles_valid,
-                    zip(self.df[self.smilesCol], [throw] * len(self.df)),
-                )
-            return pd.Series(mask, index=self.df.index)
-        else:
-            return self.df[self.smilesCol].apply(check_smiles_valid, throw=throw)
+        mask = []
+        for result in self.processMols(
+            CheckSmilesValid(), proc_kwargs={"throw": throw}
+        ):
+            mask.extend(result)
+        return pd.Series(mask, index=self.df.index)
 
     def dropDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
         """
@@ -593,10 +670,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 )
                 raise exp
         # get the data frame with the descriptors
-        descriptors = self.apply(
-            calculator, axis=0, subset=[self.smilesCol], result_type="reduce"
-        )
-        descriptors = descriptors.to_list()
+        descriptors = []
+        for result in self.processMols(calculator):
+            descriptors.append(result)
         descriptors = pd.concat(descriptors, axis=0)
         descriptors.index = self.df.index
         descriptors[self.indexCols] = self.df[self.indexCols]

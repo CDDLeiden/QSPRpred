@@ -22,6 +22,10 @@ class TestParallel(QSPRTestCase):
         time.sleep(x)
         return x**2
 
+    @staticmethod
+    def func_args(x, *args, **kwargs):
+        return x, args, kwargs
+
     @parameterized.expand([
         (None, "multiprocessing"),
         (1, "pebble"),
@@ -69,3 +73,22 @@ class TestParallel(QSPRTestCase):
         self.assertListEqual([1, 4], result[0:-1])
         self.assertIsInstance(result[-1], futures.TimeoutError)
         self.assertTrue(str(timeout) in str(result[-1]))
+
+    @parameterized.expand([
+        ((0,), {"A": 1}),
+        (None, {"A": 1}),
+        ((0,), None),
+    ])
+    def test_arguments(self, args, kwargs):
+        generator = (x for x in range(10))
+        for idx, result in enumerate(parallel_generator(
+            generator,
+            self.func_args,
+            self.nCPU,
+            args=args,
+            kwargs=kwargs,
+        )):
+            self.assertEqual(
+                (idx, args if args else (), kwargs if kwargs else {}),
+                result
+            )

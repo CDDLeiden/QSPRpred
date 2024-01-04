@@ -1,16 +1,15 @@
-import concurrent
 import json
 import os
 import shutil
 import warnings
-from typing import ClassVar, Callable, Optional
+from typing import ClassVar, Callable, Optional, Generator
 
 import numpy as np
 import pandas as pd
-from tqdm.asyncio import tqdm
 
 from .base import DataTable
 from ...logs import logger
+from ...utils.parallel import batched_generator, parallel_generator
 from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
@@ -36,56 +35,6 @@ class PandasDataTable(DataTable, JSONSerializable):
 
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
 
-    class ParallelApplyWrapper:
-        """A wrapper class to parallelize pandas apply functions."""
-
-        def __init__(
-            self,
-            func: Callable,
-            func_args: list | None = None,
-            func_kwargs: dict | None = None,
-            axis: int = 0,
-            raw: bool = False,
-            result_type: str = "expand",
-        ):
-            """Initialize the instance with pandas parameters to apply to data chunks.
-
-            See `pandas.DataFrame.apply` for more information.
-
-            Args:
-                func (Callable): Function to apply to the data frame.
-                func_args (list): Positional arguments to pass to the function.
-                func_kwargs (dict): Keyword arguments to pass to the function.
-                axis (int): Axis to apply func along (0 for columns, 1 for rows).
-                raw (bool): Whether to pass Series object to func or raw array.
-                result_type (str): whether to expand/ignore the results.
-
-            """
-            self.args = func_args
-            self.kwargs = func_kwargs
-            self.func = func
-            self.axis = axis
-            self.raw = raw
-            self.result_type = result_type
-
-        def __call__(self, data: pd.DataFrame):
-            """Apply the function to the current chunk of data.
-
-            Args:
-                data (pd.DataFrame): chunk of data to apply function to
-
-            Returns:
-                result of applying function to chunk of data
-            """
-            return data.apply(
-                self.func,
-                raw=self.raw,
-                axis=self.axis,
-                result_type=self.result_type,
-                args=self.args,
-                **self.kwargs if self.kwargs else {},
-            )
-
     def __init__(
         self,
         name: str,
@@ -94,34 +43,47 @@ class PandasDataTable(DataTable, JSONSerializable):
         overwrite: bool = False,
         index_cols: Optional[list[str]] = None,
         n_jobs: int = 1,
-        chunk_size: int = 1000,
+        chunk_size: int | None = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
         store_format: str = "pkl",
     ):
         """Initialize a `PandasDataTable` object.
         Args
-            name (str): Name of the data set. You can use this name to load the dataset
+            name (str):
+                Name of the data set. You can use this name to load the dataset
                 from disk anytime and create a new instance.
-            df (pd.DataFrame): Pandas dataframe containing the data. If you provide a
+            df (pd.DataFrame):
+                Pandas dataframe containing the data. If you provide a
                 dataframe for a dataset that already exists on disk, the dataframe from
                 disk will override the supplied data frame. Set 'overwrite' to `True` to
                 override the data frame on disk.
-            store_dir (str): Directory to store the dataset files. Defaults to the
+            store_dir (str):
+                Directory to store the dataset files. Defaults to the
                 current directory. If it already contains files with the same name,
                 the existing data will be loaded.
-            overwrite (bool): Overwrite existing dataset.
-            index_cols (List): List of columns to use as index. If None, the index
+            overwrite (bool):
+                Overwrite existing dataset.
+            index_cols (List):
+                List of columns to use as index. If None, the index
                 will be a custom generated ID.
-            n_jobs (int): Number of jobs to use for parallel processing. If <= 0,
+            n_jobs (int):
+                Number of jobs to use for parallel processing. If <= 0,
                 all available cores will be used.
-            chunk_size (int): Size of chunks to use per job in parallel processing.
-            autoindex_name (str): Column name to use for automatically generated IDs.
-            random_state (int): Random state to use for all random operations
+            chunk_size (int):
+                Size of chunks to use per job in parallel processing. If `None`, the
+                chunk size will be set to the number of rows in the data frame divided
+                by `nJobs`.
+            autoindex_name (str):
+                Column name to use for automatically generated IDs.
+            random_state (int):
+                Random state to use for all random operations
                 for reproducibility. If not specified, the state is generated randomly.
                 The state is saved upon `save` so if you want to change the state later,
                 call the `setRandomState` method after loading.
-            store_format (str): Format to use for storing the data frame. Currently only 'pkl' and 'csv' are supported.
+            store_format (str):
+                Format to use for storing the data frame.
+                Currently only 'pkl' and 'csv' are supported.
         """
         self.storeFormat = store_format
         self.randomState = None
@@ -131,7 +93,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         self.name = name
         self.indexCols = index_cols
         # parallel settings
-        self.nJobs = n_jobs if n_jobs > 0 else os.cpu_count()
+        self.nJobs = n_jobs
         self.chunkSize = chunk_size
         # paths
         self._storeDir = store_dir.rstrip("/")
@@ -183,6 +145,22 @@ class PandasDataTable(DataTable, JSONSerializable):
     def __setstate__(self, state):
         super().__setstate__(state)
         self.reload()
+
+    @property
+    def chunkSize(self):
+        return self._chunkSize
+
+    @chunkSize.setter
+    def chunkSize(self, value: int | None):
+        self._chunkSize = value if value is not None else int(len(self.df) / self.nJobs)
+
+    @property
+    def nJobs(self):
+        return self._nJobs
+
+    @nJobs.setter
+    def nJobs(self, value: int | None):
+        self._nJobs = value if value is not None and value > 0 else os.cpu_count()
 
     @property
     def baseDir(self):
@@ -298,36 +276,76 @@ class PandasDataTable(DataTable, JSONSerializable):
         if self.df.columns.str.startswith(prefix).any():
             return self.df[self.df.columns[self.df.columns.str.startswith(prefix)]]
 
+    def iterChunks(
+        self,
+        include_props: list[str] | None = None,
+        as_dict: bool = False,
+    ) -> Generator[pd.DataFrame | dict, None, None]:
+        """Batch a data frame into chunks of the given size.
+
+        Args:
+            include_props (list[str]):
+                list of properties to include, if `None`, all
+                properties are included.
+            as_dict (bool):
+                If `True`, the generator yields dictionaries instead of data frames.
+
+        Returns:
+            Generator[pd.DataFrame, None, None]:
+                Generator that yields batches of the data frame as smaller data frames.
+        """
+        include_props = include_props or self.df.columns
+        df_batches = batched_generator(
+            self.df[include_props].iterrows()
+            if include_props is not None
+            else self.df.iterrows(),
+            self.chunkSize,
+        )
+        for df_batch in df_batches:
+            ret = {
+                "~".join(self.indexCols): [],
+            }
+            for prop in include_props:
+                ret[prop] = []
+            for idx, row in df_batch:
+                ret["~".join(self.indexCols)].append(idx)
+                for prop in include_props:
+                    ret[prop].append(row[prop])
+            yield ret if as_dict else pd.DataFrame(
+                ret, index=ret["~".join(self.indexCols)]
+            )
+
     def apply(
         self,
         func: Callable,
         func_args: list | None = None,
         func_kwargs: dict | None = None,
-        axis: int = 0,
-        raw: bool = False,
-        result_type: str = "expand",
-        subset: list | None = None,
-    ):
+        on_props: list[str] | None = None,
+        as_df: bool = False,
+    ) -> Generator:
         """Apply a function to the data frame.
 
         In addition to the arguments of `pandas.DataFrame.apply`, this method also
         supports parallelization using `multiprocessing.Pool`.
 
         Args:
-            func (Callable): Function to apply to the data frame.
-            func_args (list): Positional arguments to pass to the function.
-            func_kwargs (dict): Keyword arguments to pass to the function.
-            axis (int): Axis along which the function is applied
-                (0 for column, 1 for rows).
-            raw (bool): Whether to pass the data frame as-is to the function or to pass
-                each row/column as a Series to the function.
-            result_type (str): Whether to expand the result of the function to columns
-                or to leave it as a Series.
-            subset (list): list of column names if only a subset of the data should be
-                used (reduces memory consumption).
+            func (Callable):
+                Function to apply to the data frame.
+            func_args (list):
+                Positional arguments to pass to the function.
+            func_kwargs (dict):
+                Keyword arguments to pass to the function.
+            on_props (list[str]):
+                list of properties to send to the function as arguments
+            as_df (bool):
+                If `True`, the function is applied to chunks represented as data frames.
+
+        Returns:
+            Generator:
+                Generator that yields the results of the function applied to each chunk
+                of the data frame.
         """
         n_cpus = self.nJobs
-        chunk_size = self.chunkSize
         if (
             n_cpus
             and n_cpus > 1
@@ -335,85 +353,18 @@ class PandasDataTable(DataTable, JSONSerializable):
                 hasattr(func, "noParallelization") and func.noParallelization is True
             )
         ):
-            return self.papply(
+            for result in parallel_generator(
+                self.iterChunks(include_props=on_props, as_dict=not as_df),
                 func,
-                func_args,
-                func_kwargs,
-                axis,
-                raw,
-                result_type,
-                subset,
                 n_cpus,
-                chunk_size,
-            )
-        else:
-            df_sub = self.df[subset if subset else self.df.columns]
-            return df_sub.apply(
-                func,
-                raw=raw,
-                axis=axis,
-                result_type=result_type,
                 args=func_args,
-                **func_kwargs if func_kwargs else {},
-            )
-
-    def papply(
-        self,
-        func: Callable,
-        func_args: list | None = None,
-        func_kwargs: dict | None = None,
-        axis: int = 0,
-        raw: bool = False,
-        result_type: str = "expand",
-        subset: list | None = None,
-        n_cpus: int = 1,
-        chunk_size: int = 1000,
-    ):
-        """Parallelized version of `MoleculeTable.apply`.
-
-        Args:
-            func (Callable): Function to apply to the data frame.
-            func_args (list): Positional arguments to pass to the function.
-            func_kwargs (dict): Keyword arguments to pass to the function.
-            axis (int): Axis along which the function is applied
-                (0 for column, 1 for rows).
-            raw (bool): Whether to pass the data frame as-is to the function or to pass
-                each row/column as a Series to the function.
-            result_type (str): Whether to expand the result of the function to columns
-                or to leave it as a Series.
-            subset (list): list of column names if only a subset of the data should be
-                used (reduces memory consumption).
-            n_cpus (int): Number of CPUs to use for parallelization.
-            chunk_size (int): Number of rows to process in each chunk.
-
-        Returns:
-            result of applying function to data in chunks
-        """
-        n_cpus = n_cpus if n_cpus else os.cpu_count()
-        df_sub = self.df[subset if subset else self.df.columns]
-        data = [df_sub[i : i + chunk_size] for i in range(0, len(df_sub), chunk_size)]
-        # size of batches use in the process - more is faster, but uses more memory
-        batch_size = n_cpus
-        results = []
-        with concurrent.futures.ProcessPoolExecutor(max_workers=n_cpus) as executor:
-            batches = [
-                data[i : i + batch_size] for i in range(0, len(data), batch_size)
-            ]
-            for batch in tqdm(
-                batches, desc=f"Parallel apply in progress for {self.name}."
+                kwargs=func_kwargs,
             ):
-                wrapped = self.ParallelApplyWrapper(
-                    func,
-                    func_args=func_args,
-                    func_kwargs=func_kwargs,
-                    result_type=result_type,
-                    axis=axis,
-                    raw=raw,
-                )
-                for result in executor.map(wrapped, batch):
-                    results.append(result)
-
-        return pd.concat(results, axis=0)
+                # FIXME: ensure the parallel code returns the molecules in the same order as they appear in the data set
+                yield result
+        else:
+            for props in self.iterChunks(include_props=on_props, as_dict=not as_df):
+                yield func(props, *func_args, **func_kwargs)
 
     def transform(
         self, targets: list[str], transformer: Callable, add_as: list[str] | None = None

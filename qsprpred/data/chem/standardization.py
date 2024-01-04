@@ -1,33 +1,46 @@
 """Functions to pre-process SMILES for QSPR modelling."""
 
 import re
+from typing import Any
 
 from chembl_structure_pipeline import standardizer as chembl_stand
 from rdkit import Chem
+from rdkit.Chem import Mol
 from rdkit.Chem.SaltRemover import SaltRemover
 
+from ..processing.mol_processor import MolProcessor
 from ...logs import logger
 
 
-def check_smiles_valid(smiles, throw=True):
-    is_valid = True
-    exception = None
-    if not smiles:
-        is_valid = False
-        exception = ValueError(f"Empty molecule: {smiles}")
-    try:
-        mol = Chem.MolFromSmiles(smiles)
-        if not mol:
-            raise ValueError(f"Invalid molecule: {smiles}")
-        Chem.SanitizeMol(mol)
-    except Exception as exp:
-        is_valid = False
-        exception = exp
+class CheckSmilesValid(MolProcessor):
+    def __call__(
+        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> Any:
+        throw = kwargs.get("throw", False)
+        ret = []
+        for mol in mols:
+            is_valid = True
+            exception = None
+            if not mol:
+                is_valid = False
+                exception = ValueError(f"Empty molecule: {mol}")
+            try:
+                mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+                if not mol:
+                    raise ValueError(f"Invalid molecule: {mol}")
+                Chem.SanitizeMol(mol)
+            except Exception as exp:
+                is_valid = False
+                exception = exp
 
-    if exception and throw:
-        raise exception
-    else:
-        return is_valid
+            if exception and throw:
+                raise exception
+            else:
+                ret.append(is_valid)
+        return ret
+
+    def supportsParallel(self) -> bool:
+        return True
 
 
 def neutralize_atoms(mol):

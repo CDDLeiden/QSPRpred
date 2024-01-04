@@ -1,9 +1,13 @@
 import copy
+import itertools
 
 import numpy as np
 import pandas as pd
+from parameterized import parameterized
+from rdkit.Chem import Mol
 from sklearn.preprocessing import StandardScaler
 
+from .mol_processor import MolProcessor
 from ... import TargetTasks
 from ...data import QSPRDataset
 from ...data.descriptors.calculators import (
@@ -199,3 +203,76 @@ class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(
             np.array_equal(scaled_features, scaled_features_fromfile), True
         )
+
+
+def getCombos():
+    return list(
+        itertools.product(
+            [1, None],
+            [50, None],
+            [None, ["fu", "CL"], ["SMILES"]],
+            [True, False],
+            [None, [1, 2]],
+            [None, {"a": 1}],
+        )
+    )
+
+
+class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
+    class TestingProcessor(MolProcessor):
+        def __call__(self, mols, props, *args, **kwargs):
+            assert "QSPRID" in props, "QSPRID not in props"
+            result = []
+            for mol in mols:
+                result.append((mol, *props.keys(), *args, *kwargs.keys()))
+            return np.array(result)
+
+        @property
+        def supportsParallel(self):
+            return True
+
+        @property
+        def requiredProps(self) -> list[str]:
+            return ["QSPRID"]
+
+    @parameterized.expand([["_".join([str(i) for i in x]), *x] for x in getCombos()])
+    def testMolProcess(self, _, n_jobs, chunk_size, props, add_rdkit, args, kwargs):
+        dataset = self.createLargeTestDataSet()
+        dataset.nJobs = n_jobs
+        dataset.chunkSize = chunk_size
+        self.assertTrue(dataset.nJobs > 0)
+        self.assertTrue(dataset.chunkSize > 0)
+        result = dataset.processMols(
+            self.TestingProcessor(),
+            add_props=props,
+            add_rdkit=add_rdkit,
+            proc_args=args,
+            proc_kwargs=kwargs,
+        )
+        expected_props = (
+            [*props, "QSPRID", "SMILES"]
+            if props is not None
+            else dataset.getProperties()
+        )
+        expected_props = set(expected_props)
+        expected_args = set(args) if args is not None else set()
+        expected_kwargs = set(kwargs) if kwargs is not None else set()
+        expected_cols = (
+            len(expected_props) + len(expected_args) + len(expected_kwargs) + 1
+        )
+        for item in result:
+            self.assertTrue(item.shape[0] <= dataset.chunkSize)
+            self.assertEqual(
+                item.shape[1],
+                expected_cols,
+            )
+            for prop in expected_props:
+                self.assertIn(prop, item)
+            if add_rdkit:
+                self.assertIsInstance(item[0, 0], Mol)
+            else:
+                self.assertIsInstance(item[0, 0], str)
