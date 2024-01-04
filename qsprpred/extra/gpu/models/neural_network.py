@@ -11,7 +11,7 @@ from torch import nn, optim
 from torch.nn import functional as f
 from torch.utils.data import DataLoader, TensorDataset
 
-from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS
+from ....extra.gpu import DEFAULT_TORCH_DEVICE, DEFAULT_TORCH_GPUS
 from ....logs import logger
 from ....models.monitors import BaseMonitor, FitMonitor
 
@@ -42,8 +42,8 @@ class Base(nn.Module):
     """
     def __init__(
         self,
-        device: torch.device = DEFAULT_DEVICE,
-        gpus: list[int] = DEFAULT_GPUS,
+        device: torch.device = DEFAULT_TORCH_DEVICE,
+        gpus: list[int] = DEFAULT_TORCH_GPUS,
         n_epochs: int = 1000,
         lr: float = 1e-4,
         batch_size: int = 256,
@@ -361,8 +361,8 @@ class STFullyConnected(Base):
         self,
         n_dim,
         n_class=1,
-        device=DEFAULT_DEVICE,
-        gpus=DEFAULT_GPUS,
+        device=DEFAULT_TORCH_DEVICE,
+        gpus=DEFAULT_TORCH_GPUS,
         n_epochs=100,
         lr=None,
         batch_size=256,

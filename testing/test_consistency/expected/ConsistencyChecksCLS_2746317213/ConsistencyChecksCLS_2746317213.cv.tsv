@@ -1,4 +1,4 @@
-QSPRID	pchembl_value_Mean_class_Label	pchembl_value_Mean_class_Prediction	Fold
+QSPRID	pchembl_value_Mean_Label	pchembl_value_Mean_Prediction	Fold
 ConsistencyChecks_132	True	False	0.0
 ConsistencyChecks_051	False	True	0.0
 ConsistencyChecks_215	False	False	0.0

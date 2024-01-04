@@ -9,19 +9,11 @@ from datetime import datetime
 import numpy as np
 import optuna
 import pandas as pd
+from boruta import BorutaPy
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred.data.tables.qspr import QSPRDataset
-from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
-from qsprpred.data.sampling.splits import (
-    ClusterSplit,
-    ManualSplit,
-    RandomSplit,
-    ScaffoldSplit,
-    TemporalSplit,
-)
 from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
 from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
@@ -30,16 +22,25 @@ from qsprpred.data.descriptors.sets import (
     RDKitDescs,
     SmilesDesc,
 )
+from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
 from qsprpred.data.processing.feature_filters import (
     BorutaFilter,
     HighCorrelationFilter,
     LowVarianceFilter,
 )
+from qsprpred.data.sampling.splits import (
+    ClusterSplit,
+    ManualSplit,
+    RandomSplit,
+    ScaffoldSplit,
+    TemporalSplit,
+)
+from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.tasks import TargetTasks
 from .data.chem.scaffolds import Murcko
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
-from .models.sklearn import SklearnModel
-from qsprpred.tasks import TargetTasks
+from .models.scikit_learn import SklearnModel
 
 
 def QSPRArgParser(txt=None):
@@ -87,8 +88,7 @@ def QSPRArgParser(txt=None):
         "--smiles_col",
         type=str,
         default="SMILES",
-        help="Name of the column in the dataset\
-                        containing the smiles.",
+        help="Name of the column in the dataset containing the smiles.",
     )
     parser.add_argument(
         "-pr",
@@ -111,8 +111,7 @@ def QSPRArgParser(txt=None):
         "--regression",
         type=str,
         default=None,
-        help=
-        "If True, only regression model, if False, only classification, default both",
+        help="If True, only regression model, if False, only classification, default both",
     )
     parser.add_argument(
         "-th",
@@ -133,8 +132,8 @@ def QSPRArgParser(txt=None):
         "-lq",
         "--low_quality",
         action="store_true",
-        help="If lq, than low quality data will be \
-                        should be a column 'Quality' where all 'Low' will be removed",
+        help="If lq, than low quality data will be should be a column 'Quality' where "
+             "all 'Low' will be removed",
     )
     parser.add_argument(
         "-tr",
@@ -215,8 +214,7 @@ def QSPRArgParser(txt=None):
             "Mold2",
             "PaDEL",
             "DrugEx",
-            "Signature"
-            "MaccsFP",
+            "Signature" "MaccsFP",
             "AvalonFP",
             "TopologicalFP",
             "AtomPairFP",
@@ -244,22 +242,23 @@ def QSPRArgParser(txt=None):
         "--low_variability",
         type=float,
         default=None,
-        help="low variability threshold\
-                        for feature removal.",
+        help="low variability threshold for feature removal.",
     )
     parser.add_argument(
         "-hc",
         "--high_correlation",
         type=float,
         default=None,
-        help="high correlation threshold\
-                        for feature removal.",
+        help="high correlation threshold for feature removal.",
     )
     parser.add_argument(
         "-bf",
         "--boruta_filter",
-        action="store_true",
-        help="boruta filter with random forest",
+        type=float,
+        default=None,
+        help="Boruta filter with random forest estimator, value between 0 and 100 "
+        "for percentile threshold for comparison between shadow and real features"
+        "see https://github.com/scikit-learn-contrib/boruta_py for more info.",
     )
     # other
     parser.add_argument(
@@ -312,7 +311,8 @@ def QSPR_dataprep(args):
                 else:
                     task = (
                         TargetTasks.SINGLECLASS
-                        if len(th) == 1 else TargetTasks.MULTICLASS
+                        if len(th) == 1
+                        else TargetTasks.MULTICLASS
                     )
                 if task == TargetTasks.REGRESSION and th:
                     log.warning(
@@ -321,27 +321,24 @@ def QSPR_dataprep(args):
                     )
                     th = None
                 transform_dict = {
-                    "log10": lambda x: (__import__('numpy').log10(x)),
-                    "log2": lambda x: (__import__('numpy').log2(x)),
-                    "log": lambda x: (__import__('numpy').log(x)),
-                    "sqrt": lambda x: (__import__('numpy').sqrt(x)),
-                    "cbrt": lambda x: (__import__('numpy').cbrt(x)),
-                    "exp": lambda x: (__import__('numpy').exp(x)),
-                    "square": lambda x: __import__('numpy').power(x, 2),
-                    "cube": lambda x: __import__('numpy').power(x, 3),
-                    "reciprocal": lambda x: __import__('numpy').reciprocal(x),
+                    "log10": lambda x: (__import__("numpy").log10(x)),
+                    "log2": lambda x: (__import__("numpy").log2(x)),
+                    "log": lambda x: (__import__("numpy").log(x)),
+                    "sqrt": lambda x: (__import__("numpy").sqrt(x)),
+                    "cbrt": lambda x: (__import__("numpy").cbrt(x)),
+                    "exp": lambda x: (__import__("numpy").exp(x)),
+                    "square": lambda x: __import__("numpy").power(x, 2),
+                    "cube": lambda x: __import__("numpy").power(x, 3),
+                    "reciprocal": lambda x: __import__("numpy").reciprocal(x),
                 }
                 target_props.append(
                     {
-                        "name":
-                            prop,
-                        "task":
-                            task,
-                        "th":
-                            th,
-                        "transformer":
-                            transform_dict[args.transform_data[prop]]
-                            if prop in args.transform_data else None,
+                        "name": prop,
+                        "task": task,
+                        "th": th,
+                        "transformer": transform_dict[args.transform_data[prop]]
+                        if prop in args.transform_data
+                        else None,
                     }
                 )
             # missing value imputation
@@ -356,7 +353,8 @@ def QSPR_dataprep(args):
                     sys.exit("invalid impute arg given")
             dataset_name = (
                 f"{props_name}_{task}_{args.data_suffix}"
-                if args.data_suffix else f"{props_name}_{task}"
+                if args.data_suffix
+                else f"{props_name}_{task}"
             )
             mydataset = QSPRDataset(
                 dataset_name,
@@ -366,14 +364,14 @@ def QSPR_dataprep(args):
                 n_jobs=args.ncpu,
                 store_dir=args.output_dir,
                 overwrite=True,
-                target_imputer=imputer if args.imputation is not None else None,
                 random_state=args.random_state
-                if args.random_state is not None else None,
+                if args.random_state is not None
+                else None,
             )
             # data filters
-            datafilters = []
+            data_filters = []
             if args.low_quality:
-                datafilters.append(papyrusLowQualityFilter())
+                data_filters.append(papyrusLowQualityFilter())
             # data splitter
             if args.split == "scaffold":
                 split = ScaffoldSplit(
@@ -470,25 +468,31 @@ def QSPR_dataprep(args):
             if args.high_correlation:
                 featurefilters.append(HighCorrelationFilter(th=args.high_correlation))
             if args.boruta_filter:
-                if args.regression:
-                    featurefilters.append(
-                        BorutaFilter(estimator=RandomForestRegressor(n_jobs=args.ncpu))
+                #boruta filter can not be used for multi-task models
+                if len(props) > 1:
+                    raise ValueError(
+                        "Boruta filter can not be used for multi-task models"
                     )
-                else:
-                    featurefilters.append(
-                        BorutaFilter(
-                            estimator=RandomForestClassifier(n_jobs=args.ncpu)
-                        )
+                boruta_estimator = (
+                    RandomForestRegressor(n_jobs=args.ncpu)
+                    if args.regression else RandomForestClassifier(n_jobs=args.ncpu)
+                )
+                featurefilters.append(
+                    BorutaFilter(
+                        BorutaPy(estimator=boruta_estimator, perc=args.boruta_filter),
+                        args.random_state,
                     )
+                )
             # prepare dataset for modelling
             mydataset.prepareDataset(
                 feature_calculators=[MoleculeDescriptorsCalculator(descriptorsets)],
-                datafilters=datafilters,
+                data_filters=data_filters,
                 split=split,
                 feature_filters=featurefilters,
                 feature_standardizer=StandardScaler()
-                if "Smiles" not in args.features else None,
-                feature_fill_value=0.0,
+                if "Smiles" not in args.features
+                else None,
+                feature_fill_value=args.fill_value,
             )
 
             # save dataset files and fingerprints
