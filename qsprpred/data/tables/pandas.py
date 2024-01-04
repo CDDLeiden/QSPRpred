@@ -9,13 +9,13 @@ import numpy as np
 import pandas as pd
 from tqdm.asyncio import tqdm
 
-from .base import DataSet
+from .base import DataTable
 from ...logs import logger
 from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
 
-class PandasDataSet(DataSet, JSONSerializable):
+class PandasDataTable(DataTable, JSONSerializable):
     """A Pandas DataFrame wrapper class to enable data processing functions on
     QSPRpred data.
 
@@ -26,16 +26,12 @@ class PandasDataSet(DataSet, JSONSerializable):
             dataframe for a dataset that already exists on disk, the dataframe from
             disk will override the supplied data frame. Set 'overwrite' to `True` to
             override the data frame on disk.
-        storeDir (str): Directory to store the dataset files. Defaults to the
-            current directory. If it already contains files with the same name,
-            the existing data will be loaded.
         indexCols (List): List of columns to use as index. If None, the index
             will be a custom generated ID.
         nJobs (int): Number of jobs to use for parallel processing. If <= 0,
             all available cores will be used.
         chunkSize (int): Size of chunks to use per job in parallel processing.
         randomState (int): Random state to use for all random operations.
-
     """
 
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
@@ -101,8 +97,9 @@ class PandasDataSet(DataSet, JSONSerializable):
         chunk_size: int = 1000,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
+        store_format: str = "pkl",
     ):
-        """Initialize a `PandasDataSet` object.
+        """Initialize a `PandasDataTable` object.
         Args
             name (str): Name of the data set. You can use this name to load the dataset
                 from disk anytime and create a new instance.
@@ -124,7 +121,9 @@ class PandasDataSet(DataSet, JSONSerializable):
                 for reproducibility. If not specified, the state is generated randomly.
                 The state is saved upon `save` so if you want to change the state later,
                 call the `setRandomState` method after loading.
+            store_format (str): Format to use for storing the data frame. Currently only 'pkl' and 'csv' are supported.
         """
+        self.storeFormat = store_format
         self.randomState = None
         self.setRandomState(
             random_state or int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
@@ -175,7 +174,10 @@ class PandasDataSet(DataSet, JSONSerializable):
     def __getstate__(self):
         o_dict = super().__getstate__()
         os.makedirs(self.storeDir, exist_ok=True)
-        self.df.to_pickle(self.storePath)
+        if self.storeFormat == "csv":
+            self.df.to_csv(self.storePath)
+        else:
+            self.df.to_pickle(self.storePath)
         return o_dict
 
     def __setstate__(self, state):
@@ -192,7 +194,10 @@ class PandasDataSet(DataSet, JSONSerializable):
 
     @property
     def storePath(self):
-        return f"{self.storePrefix}_df.pkl"
+        if self.storeFormat == "csv":
+            return f"{self.storePrefix}_df.csv"
+        else:
+            return f"{self.storePrefix}_df.pkl"
 
     @property
     def storePrefix(self):
@@ -411,29 +416,29 @@ class PandasDataSet(DataSet, JSONSerializable):
         return pd.concat(results, axis=0)
 
     def transform(
-        self, targets: list, transformer: Callable, addAs: list | None = None
+        self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
     ):
         """Transform the data frame (or its part) using a list of transformers.
 
         Each transformer is a function that takes the data frame (or a subset of it as
         defined by the `targets` argument) and returns a transformed data frame. The
-        transformed data frame can then be added to the original data frame if `addAs`
-        is set to a `list` of new column names. If `addAs` is not `None`, the result of
+        transformed data frame can then be added to the original data frame if `add_as`
+        is set to a `list` of new column names. If `add_as` is not `None`, the result of
         the application of transformers must have the same number of rows as the
         original data frame.
 
         Args:
-            targets (list): list of column names to transform.
+            targets (list[str]): list of column names to transform.
             transformer (Callable): Function that transforms the data in target columns
                 to a new representation.
-            addAs (list): If `True`, the transformed data is added to the original data
+            add_as (list): If `True`, the transformed data is added to the original data
                 frame and the
             names in this list are used as column names for the new data.
         """
         ret = self.df[targets]
         ret = transformer(ret)
-        if addAs:
-            self.df[addAs] = ret
+        if add_as:
+            self.df[add_as] = ret
         return ret
 
     def filter(self, table_filters: list[Callable]):
@@ -489,12 +494,16 @@ class PandasDataSet(DataSet, JSONSerializable):
 
     def reload(self):
         """Reload the data table from disk."""
-        self.df = pd.read_pickle(self.storePath)
+        if self.storeFormat == "csv":
+            self.df = pd.read_csv(self.storePath)
+            self.df.set_index(self.indexCols, inplace=True, drop=False)
+        else:
+            self.df = pd.read_pickle(self.storePath)
         self.indexCols = self.df.index.name.split("~")
         assert all(col in self.df.columns for col in self.indexCols)
 
     @classmethod
-    def fromFile(cls, filename: str) -> "PandasDataSet":
+    def fromFile(cls, filename: str) -> "PandasDataTable":
         with open(filename, "r") as f:
             json_f = f.read()
         o_dict = json.loads(json_f)

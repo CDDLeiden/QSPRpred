@@ -12,6 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler
 
 from ...logs import logger
+from ...utils.interfaces.randomized import Randomized
 
 
 class FeatureFilter(ABC):
@@ -82,59 +83,55 @@ class HighCorrelationFilter(FeatureFilter):
         return df
 
 
-class BorutaFilter(FeatureFilter):
-    """Boruta filter from BorutaPy: feature selection based on Random Forest predictors.
+class BorutaFilter(FeatureFilter, Randomized):
+    """Boruta filter from BorutaPy: Boruta all-relevant feature selection.
+
+    Uses BorutaPy implementation from https://github.com/scikit-learn-contrib/boruta_py
 
     Attributes:
-        estimator (object): A supervised learning estimator, with a 'fit' method that
-            returns the feature_importances attribute. Important features must
-            correspond to high absolute values in the feature_importances.
-        n_estimators (int or string): If int sets the number of estimators in the chosen
-            ensemble method. If 'auto' this is determined automatically based on the
-            size of the dataset. The other parameters of the used estimators need to be
-            set with initialisation.
-        perc (int): Instead of the max we use the percentile defined by the user,
-            to pick our threshold for comparison between shadow and real features.
-            The max tends to be too stringent. This provides a finer control over this.
-            The lower perc is the more false positives will be picked as relevant
-            but also the less relevant features will be left out. The usual trade-off.
-            The default is essentially the vanilla Boruta corresponding to the max.
-        alpha (float): Level at which the corrected p-values will get rejected in
-            both correction steps.
-        max_iter (int): The number of maximum iterations to perform.
-        verbose (int): Controls verbosity of output.
-
+        featSelector (BorutaPy): BorutaPy feature selector
+        seed (int):
+            Random state to use for shuffling and other random operations.
     """
-    def __init__(
-        self,
-        estimator=RandomForestRegressor(),
-        n_estimators="auto",
-        perc=80,
-        alpha=0.05,
-        max_iter=200,
-        verbose=2,
-    ):
-        self.estimator = estimator
-        self.nEstimators = n_estimators
-        self.perc = perc
-        self.alpha = alpha
-        self.maxIter = max_iter
-        self.verbose = verbose
+    def __init__(self, boruta_feat_selector: BorutaPy = None, seed: int | None = None):
+        """Initialize the BorutaFilter class.
+
+        Args:
+            boruta_feat_selector (BorutaPy, optional): The BorutaPy feature selector.
+                If not provided, a default BorutaPy instance will be created.
+            seed (int | None, optional): Random state to use for shuffling and other
+                random operations. If None, the random state set in the BorutaPy
+                instance is used. Defaults to None.
+        """
+        Randomized.__init__(self, seed)
+        self.featSelector = boruta_feat_selector
+        if self.featSelector is None:
+            self.featSelector = BorutaPy(estimator=RandomForestRegressor())
+        if seed is not None:
+            self.featSelector.random_state = seed
+
+        # set seed from BorutaPy instance to class attribute
+        self.setSeed(self.featSelector.random_state)
 
     def __call__(
         self, features: pd.DataFrame, y_col: pd.DataFrame = None
     ) -> pd.DataFrame:
-        feat_selector = BorutaPy(
-            estimator=self.estimator,
-            n_estimators=self.nEstimators,
-            perc=self.perc,
-            alpha=self.alpha,
-            max_iter=self.maxIter,
-            verbose=self.verbose,
-        )
-        feat_selector.fit(features.values, y_col.values)
+        """Filter out uninformative features from a dataframe using BorutaPy.
 
-        selected_features = features.loc[:, feat_selector.support_]
+        Args:
+            features (pd.DataFrame): dataframe to be filtered
+            y_col (pd.DataFrame): target column(s)
+
+        Returns:
+            pd.DataFrame: filtered dataframe
+        """
+        if y_col.shape[1] > 1:
+            raise NotImplementedError(
+                "Boruta filter only works with one target column."
+            )
+        self.featSelector.fit(features.values, y_col.values.ravel())
+
+        selected_features = features.loc[:, self.featSelector.support_]
         logger.info(
             "Number of columns dropped Boruta filter: "
             f"{features.shape[1] - selected_features.shape[1]}"

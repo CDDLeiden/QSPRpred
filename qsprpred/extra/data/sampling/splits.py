@@ -6,11 +6,17 @@ To add a new data splitter:
 from typing import Iterable
 
 import numpy as np
+from sklearn.impute import SimpleImputer
 
+from qsprpred.data.sampling.splits import (
+    DataSplit,
+    ClusterSplit,
+    RandomSplit,
+    ScaffoldSplit,
+)
 from qsprpred.data.tables.qspr import QSPRDataset
-from qsprpred.tasks import TargetProperty
-from qsprpred.data.sampling.splits import DataSplit, ClusterSplit, RandomSplit, ScaffoldSplit
 from qsprpred.extra.data.data import PCMDataSet
+from qsprpred.tasks import TargetProperty
 
 
 class PCMSplit(DataSplit):
@@ -25,6 +31,7 @@ class PCMSplit(DataSplit):
         dataset (PCMDataSet): The dataset to split.
         splitter (DataSplit): The splitter to use on the initial clusters.
     """
+
     def __init__(self, splitter: DataSplit, dataset: PCMDataSet | None = None) -> None:
         super().__init__(dataset)
         self.splitter = splitter
@@ -76,9 +83,12 @@ class PCMSplit(DataSplit):
         ).reset_index()
         # Create target properties for multi-task dataset
         mt_targetProperties = [
-            TargetProperty(name=target, task=task, th=th) for target in proteins
+            TargetProperty(
+                name=target, task=task, th=th, imputer=SimpleImputer(strategy="median")
+            )
+            for target in proteins
         ]
-        # Create multi-task dataset and split it with the given splitter
+        # temporarily create multi-task dataset and split it with the given splitter
         ds_mt = QSPRDataset(
             name=f"PCM_{self.splitter.__class__.__name__}_{hash(self)}",
             df=df_mt,
@@ -96,10 +106,12 @@ class PCMSplit(DataSplit):
             targets = [col for col in cols if col in proteins]
             for target in targets:
                 # Get index in the original PCM dataset the SMILES-target pair
-                ds_idx = df[(df[ds.proteinCol] == target) &
-                            (df[ds.smilesCol] == smiles)].index.astype(str)[0]
-                # Convert to numeric index
-                test_indices.append(indices.index(ds_idx))
+                a = df[ds.smilesCol] == smiles
+                b = df[ds.proteinCol] == target
+                if any(a & b):
+                    ds_idx = df[a & b].index.astype(str)[0]
+                    # Convert to numeric index
+                    test_indices.append(indices.index(ds_idx))
         train_indices = [i for i in range(len(df)) if i not in test_indices]
         return iter([(train_indices, test_indices)])
 
@@ -190,8 +202,8 @@ class TemporalPerTarget(DataSplit):
             train_indices.extend([indices.index(i) for i in train])
             test_indices.extend([indices.index(i) for i in test])
 
-        assert len(set(train_indices)) + len(
-            set(test_indices)
-        ) == len(ds), "Train and test set do not cover the whole dataset!"
+        assert len(set(train_indices)) + len(set(test_indices)) == len(
+            ds
+        ), "Train and test set do not cover the whole dataset!"
 
         return iter([(train_indices, test_indices)])
