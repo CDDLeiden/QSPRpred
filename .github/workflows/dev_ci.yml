@@ -14,16 +14,16 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: [3.10, 3.11, 3.12]
+        python-version: ['3.10',' 3.11',' 3.12']
     defaults:
       run:
         shell: bash
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -39,7 +39,7 @@ jobs:
     - name: Install dependencies
       run: |
         python --version
-        python -m pip install ".[full]" 
+        python -m pip install ".[full]"  --no-cache-dir
         python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
         python -m pip install pytest
         python -m pip install jupyterlab
