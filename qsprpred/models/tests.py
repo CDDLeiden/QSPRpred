@@ -833,7 +833,15 @@ class TestMetrics(TestCase):
             top_k_accuracy_score(y_true, y_pred[0], k=2),
         )
 
+        ## multi-class discrete scorer (_PredictScorer)
+        qsprpred_scorer = SklearnMetrics("accuracy")
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred),
+            accuracy_score(y_true, np.argmax(y_pred[0], axis=1)),
+        )
+
         ## multi-task single class (same as multi-label in sklearn)
+        ### proba
         y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
         y_pred = [
             np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
@@ -844,6 +852,15 @@ class TestMetrics(TestCase):
         self.assertEqual(
             qsprpred_scorer(y_true, y_pred),
             roc_auc_score(y_true, y_pred_sklearn, multi_class="ovr"),
+        )
+
+        ### discrete
+        y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
+        y_pred = np.array([[0, 0], [1, 1], [0, 0], [0, 0], [1, 0]])
+        qsprpred_scorer = SklearnMetrics("accuracy")
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred),
+            accuracy_score(y_true, y_pred),
         )
 
 
