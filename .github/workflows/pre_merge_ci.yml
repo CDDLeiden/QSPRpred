@@ -1,0 +1,58 @@
+name: pre-merge Python3.10 CI
+
+on:
+  push:
+    branches:
+      - feature/**  # these branches as well
+      - enhancement/**
+      - fix/**
+
+jobs:
+  ubuntu_python_3_10:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+    
+    - name: Cache Python dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install External Software
+      run: |
+        wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
+        wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
+        export PATH=$PATH:$PWD/mafft-linux64/mafftdir/bin/:$PWD
+        export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
+        clustalo --version  # For debugging clustalo version
+        mafft --version  # For debugging mafft version
+
+    - name: Install dependencies
+      run: |
+        python --version
+        python -m pip install ".[full]" 
+        python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
+        python -m pip install pytest
+        python -m pip install jupyterlab
+        python -m pip freeze # For debugging environment
+    
+    - name: Run tests
+      run: pytest qsprpred
+    
+    - name: Run notebooks
+      run: |
+        cd clitest && ./run.sh
+        cd ../tutorial && ./run_all.sh

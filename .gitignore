@@ -1,5 +1,6 @@
 ### QSPRpred Specific
 /.*
+!.github
 !.gitignore
 !.gitlab-ci.yml
 !.pre-commit-config.yaml
