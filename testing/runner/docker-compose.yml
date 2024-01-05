@@ -5,6 +5,10 @@ services:
 
   qsprpred-test-runner:
     image: qsprpred-test-runner-${TIMESTAMP:-timestamp}:latest
+    logging:
+        driver: journald
+        options:
+            tag: qsprpred-test-runner-${TIMESTAMP:-timestamp}
     build:
       context: .
       dockerfile: Dockerfile
