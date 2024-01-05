@@ -1,9 +1,12 @@
+import os
 from abc import ABC, abstractmethod
 
 import numpy as np
+import pandas as pd
 from rdkit import Chem, DataStructs
 from rdkit.SimDivFilters import rdSimDivPickers
 
+from .. import MoleculeTable
 from ...logs import logger
 from ...data.descriptors.sets import FingerprintSet
 from .scaffolds import Murcko, Scaffold
@@ -100,9 +103,9 @@ class ScaffoldClusters(MoleculeClusters):
         """
 
         # Generate scaffolds for each molecule
-        scaffolds = [
-            self.scaffold(Chem.MolFromSmiles(smiles)) for smiles in smiles_list
-        ]
+        mt = MoleculeTable("scaffolds", pd.DataFrame({"SMILES": smiles_list}), n_jobs=os.cpu_count())
+        mt.addScaffolds([self.scaffold])
+        scaffolds = mt.getScaffolds([self.scaffold]).loc[mt.getDF().index, :].iloc[:, 0].tolist()
 
         # Get unique scaffolds and initialize clusters
         unique_scaffolds = sorted(list(set(scaffolds)))

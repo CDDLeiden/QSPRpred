@@ -828,23 +828,28 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                     molCol=f"Scaffold_{scaffold}_RDMol",
                 )
 
-    def getScaffoldNames(self, include_mols: bool = False):
+    def getScaffoldNames(self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False):
         """Get the names of the scaffolds in the data frame.
 
         Args:
             include_mols (bool): Whether to include the RDKit scaffold columns as well.
 
+
         Returns:
             list: List of scaffold names.
         """
-        return [
+        all_names = [
             col
             for col in self.df.columns
             if col.startswith("Scaffold_")
             and (include_mols or not col.endswith("_RDMol"))
         ]
+        if scaffolds:
+            wanted = [str(x) for x in scaffolds]
+            return [x for x in all_names if x.split("_", 1)[1] in wanted]
+        return all_names
 
-    def getScaffolds(self, include_mols: bool = False):
+    def getScaffolds(self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False):
         """Get the subset of the data frame that contains only scaffolds.
 
         Args:
@@ -853,12 +858,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         Returns:
             pd.DataFrame: Data frame containing only scaffolds.
         """
-        if include_mols:
-            return self.df[
-                [col for col in self.df.columns if col.startswith("Scaffold_")]
-            ]
-        else:
-            return self.df[self.getScaffoldNames()]
+        names = self.getScaffoldNames(scaffolds, include_mols=include_mols)
+        return self.df[names]
 
     @property
     def hasScaffolds(self):
