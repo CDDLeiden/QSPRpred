@@ -31,7 +31,7 @@ jobs:
       run: |
         if [ "${{ runner.os }}" = "macOS" ]; then
           wget http://www.clustal.org/omega/clustal-omega-1.2.3-macosx -O clustalo && chmod +x clustalo
-          wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-signed.pkg -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
+          brew install mafft
         elif [ "${{ runner.os }}" = "Linux" ]; then
           wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
           wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
