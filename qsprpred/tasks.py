@@ -112,6 +112,7 @@ class TargetProperty(JSONSerializable):
         nClasses (int): number of classes for the target property, only used for
             classification tasks
         transformer (Callable): function to transform the target property
+        imputer (Callable): function to impute the target property
     """
 
     def __init__(
@@ -134,8 +135,9 @@ class TargetProperty(JSONSerializable):
               TargetTasks.MULTICLASS]): task type for the target property
             th (list[float] | str): threshold for the target property, only used
                 for classification tasks. If th is precomputed, set it to "precomputed".
-            n_classes (int): number of classes for the target property (only used if th
-                is precomputed, otherwise it is inferred)
+                If th is precomputed, n_classes must be specified.
+            n_classes (int): number of classes for the target property. Must be
+                specified if th is precomputed, otherwise it is inferred from th.
             transformer (Callable): function to transform the target property
             imputer (Callable): function to impute the target property
         """
@@ -173,15 +175,19 @@ class TargetProperty(JSONSerializable):
     def th(self):
         """Set the threshold for the target property.
 
-        Args:
-            th (Union[list[int], str]): threshold for the target property
+        Returns:
+            th ([list[int] | str]): threshold for the target property
         """
         return self._th
 
     @th.setter
     def th(self, th: list[float] | str):
         """Set the threshold for the target property and the number of classes if th is
-        not precomputed."""
+        not precomputed.
+
+        Args:
+            th (list[float] | str): threshold for the target property
+        """
         assert (
             self.task.isClassification()
         ), "Threshold can only be set for classification tasks"
@@ -199,7 +205,11 @@ class TargetProperty(JSONSerializable):
 
     @property
     def nClasses(self):
-        """Get the number of classes for the target property."""
+        """Get the number of classes for the target property.
+
+        Returns:
+            nClasses (int): number of classes
+        """
         return self._nClasses
 
     @nClasses.setter
@@ -233,6 +243,10 @@ class TargetProperty(JSONSerializable):
 
         Args:
             d (dict): dictionary containing the target property information
+
+        Example:
+            >>> TargetProperty.fromDict({"name": "property_name", "task": "regression"})
+            TargetProperty(name=property_name, task=REGRESSION)
 
         Returns:
             TargetProperty: TargetProperty object
