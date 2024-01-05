@@ -197,13 +197,15 @@ class PandasDataTable(DataTable, JSONSerializable):
         Args:
             cols (list[str]): list of columns to use as index.
         """
-        self.df.set_index(cols, inplace=True, verify_integrity=True, drop=False)
+        self.indexCols = cols
+        self.idProp = "~".join(self.indexCols)
+        self.df[self.idProp] = self.df[self.indexCols].apply(lambda x: "~".join(map(str, x.tolist())), axis=1)
+        self.df.set_index(self.idProp, inplace=True, verify_integrity=True, drop=False)
         self.df.drop(
             inplace=True,
             columns=[c for c in self.df.columns if c.startswith("Unnamed")],
         )
-        self.df.index.name = "~".join(cols)
-        self.indexCols = cols
+        self.df.index.name = self.idProp
 
     def generateIndex(self, name: str | None = None, prefix: str | None = None):
         """Generate a custom index for the data frame.
