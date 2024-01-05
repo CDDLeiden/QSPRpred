@@ -40,6 +40,7 @@ jobs:
           export PATH=$PATH:$PWD/mafft-linux64/mafftdir/bin/:$PWD
           export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
         fi
+        echo "$PWD" >> $GITHUB_PATH
         clustalo --version  # For debugging clustalo version
         mafft --version  # For debugging mafft version
 
