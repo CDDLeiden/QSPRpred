@@ -366,7 +366,10 @@ class PandasDataTable(DataTable, JSONSerializable):
                 kwargs=func_kwargs,
             ):
                 logger.debug(f"Result for chunk returned: {result!r}")
-                yield result
+                if not isinstance(result, Exception):
+                    yield result
+                else:
+                    raise result
         else:
             logger.debug(f"Applying function '{func!r}' in serial.")
             for props in self.iterChunks(include_props=on_props, as_dict=not as_df):
