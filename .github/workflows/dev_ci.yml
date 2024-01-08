@@ -30,17 +30,22 @@ jobs:
 
     - name: Install Clustal Omega and MAFFT
       run: |
-        if [ "${{ runner.os }}" = "macOS" ]; then
-          wget http://www.clustal.org/omega/clustal-omega-1.2.3-macosx -O clustalo && chmod +x clustalo
-          echo "$PWD" >> $GITHUB_PATH
-          brew install mafft && unset MAFFT_BINARIES
-        elif [ "${{ runner.os }}" = "Linux" ]; then
-          wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
-          wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
-          export PATH=$PATH:$PWD/mafft-linux64/mafftdir/bin/:$PWD
-          export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
-        fi
+        export $HOME_DIR=$PWD
+        ls -la
         echo "$PWD" >> $GITHUB_PATH
+        if [ "${{ runner.os }}" = "macOS" ]; then
+        wget http://www.clustal.org/omega/clustal-omega-1.2.3-macosx -O clustalo && chmod +x clustalo
+        brew install mafft && unset MAFFT_BINARIES
+        elif [ "${{ runner.os }}" = "Linux" ]; then
+        wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
+        wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
+        echo "$PWD/mafft-linux64/mafftdir/bin/" >> $GITHUB_PATH
+        export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
+        fi
+        echo 'PATH, and GITHUB_PATH:'
+        echo $PATH
+        echo $GITHUB_PATH
+        ls -la
         clustalo --version  # For debugging clustalo version
         mafft --version  # For debugging mafft version
 
@@ -53,10 +58,14 @@ jobs:
         python -m pip install jupyterlab
         python -m pip freeze # For debugging environment
     
-    - name: Run tests
-      run: pytest qsprpred
+    - name: Run pytest
+      run: pytest -xv qsprpred # -x: stop on first failure, -v: verbose
     
-    - name: Run notebooks
-      run: |
-        cd clitest && ./run.sh
-        cd ../tutorial && ./run_all.sh
+    - name: Test CLI
+      run: cd test_cli && ./run.sh && cd "$HOME_DIR"
+      
+    - name: Test Tutorials
+      run: cd test_tutorial && ./run.sh && cd "$HOME_DIR"
+    
+    - name: Test Consistency
+      run: cd test_consistency && ./run.sh && cd "$HOME_DIR"

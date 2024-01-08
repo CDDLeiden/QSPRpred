@@ -24,7 +24,7 @@ jobs:
         python-version: '3.10'
     
     - name: Cache Python dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v3
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
@@ -33,10 +33,12 @@ jobs:
 
     - name: Install Clustal Omega and MAFFT
       run: |
+        export $HOME_DIR=$PWD
         wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
         wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
-        export PATH=$PATH:$PWD/mafft-linux64/mafftdir/bin/:$PWD
+        echo "$PWD/mafft-linux64/mafftdir/bin/" >> $GITHUB_PATH
         export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
+        echo $PWD >> $GITHUB_PATH
         clustalo --version  # For debugging clustalo version
         mafft --version  # For debugging mafft version
 
@@ -49,10 +51,14 @@ jobs:
         python -m pip install jupyterlab
         python -m pip freeze # For debugging environment
     
-    - name: Run tests
-      run: pytest qsprpred
+    - name: Run pytest
+      run: pytest -xv qsprpred # -x: stop on first failure, -v: verbose
     
-    - name: Run notebooks
-      run: |
-        cd clitest && ./run.sh
-        cd ../tutorial && ./run_all.sh
+    - name: Test CLI
+      run: cd test_cli && ./run.sh && cd "$HOME_DIR"
+      
+    - name: Test Tutorials
+      run: cd test_tutorial && ./run.sh && cd "$HOME_DIR"
+    
+    - name: Test Consistency
+      run: cd test_consistency && ./run.sh && cd "$HOME_DIR"
