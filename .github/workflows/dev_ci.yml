@@ -30,10 +30,7 @@ jobs:
 
     - name: Install Clustal Omega, MAFFT & add to PATH
       run: |
-        ls -la
         export HOME_DIR=$PWD
-        echo "Home directory is: $HOME_DIR"
-        echo "Current directory is: $PWD"
         if [ "${{ runner.os }}" = "macOS" ]; then
         wget http://www.clustal.org/omega/clustal-omega-1.2.3-macosx -O clustalo && chmod +x clustalo
         brew install mafft && unset MAFFT_BINARIES
@@ -43,14 +40,9 @@ jobs:
         echo "$HOME_DIR/mafft-linux64/mafftdir/bin/" >> $GITHUB_PATH
         fi
         echo "$HOME_DIR" >> $GITHUB_PATH
-        echo 'PATH, and GITHUB_PATH:'
-        echo $PATH
-        echo $GITHUB_PATH
-        ls -la
 
     - name: Print Clustal Omega & MAFFT versions
       run: |
-        ls -la
         clustalo --version  # For debugging clustalo version
         mafft --version  # For debugging mafft version
 
