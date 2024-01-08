@@ -2,7 +2,6 @@
 
 import os
 from typing import Type
-from unittest import TestCase
 
 import pandas as pd
 import seaborn as sns
@@ -17,10 +16,15 @@ from ..models.scikit_learn import SklearnModel
 from ..plotting.classification import ConfusionMatrixPlot, MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot, WilliamsPlot
 from ..tasks import TargetTasks
+from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
 
 
-class ModelRetriever(ModelDataSetsPathMixIn):
+class PlottingTest(ModelDataSetsPathMixIn, QSPRTestCase):
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def getModel(
         self, dataset: QSPRDataset, name: str, alg: Type = RandomForestClassifier
     ) -> SklearnModel:
@@ -47,7 +51,7 @@ class ModelRetriever(ModelDataSetsPathMixIn):
         )
 
 
-class ROCPlotTest(ModelRetriever, TestCase):
+class ROCPlotTest(PlottingTest):
     """Test ROC curve plotting class."""
 
     def testPlotSingle(self):
@@ -74,7 +78,7 @@ class ROCPlotTest(ModelRetriever, TestCase):
         self.assertTrue(os.path.exists(f"{model.outPrefix}.ind.png"))
 
 
-class MetricsPlotTest(ModelRetriever, TestCase):
+class MetricsPlotTest(PlottingTest):
     """Test metrics plotting class."""
 
     @parameterized.expand(
@@ -115,7 +119,7 @@ class MetricsPlotTest(ModelRetriever, TestCase):
         self.assertTrue(os.path.exists(f"{model.outPrefix}_precision.png"))
 
 
-class CorrPlotTest(ModelRetriever, TestCase):
+class CorrPlotTest(PlottingTest):
     """Test correlation plotting class."""
 
     def testPlotSingle(self):
@@ -139,7 +143,7 @@ class CorrPlotTest(ModelRetriever, TestCase):
         self.assertTrue(os.path.exists(f"{model.outPrefix}_correlation.png"))
 
 
-class WilliamsPlotTest(ModelRetriever, TestCase):
+class WilliamsPlotTest(PlottingTest):
     """Test plotting Williams plot for single task."""
 
     def testPlotSingle(self):
@@ -167,7 +171,7 @@ class WilliamsPlotTest(ModelRetriever, TestCase):
         self.assertTrue(os.path.exists(f"{model.outPrefix}_williamsplot.png"))
 
 
-class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
+class ConfusionMatrixPlotTest(PlottingTest):
     """Test confusion matrix plotting class."""
 
     @parameterized.expand(
