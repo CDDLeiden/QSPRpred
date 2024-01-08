@@ -93,6 +93,7 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         train_args = chemprop.args.TrainArgs()
         train_args.from_dict(args, skip_unsettable=True)
         train_args.process_args()
+        train_args.spectra_phase_mask = False # always disable spectra phase mask
         return train_args
 
 
@@ -223,20 +224,21 @@ class ChempropModel(QSPRModel):
         split = split or ShuffleSplit(
             n_splits=1, test_size=0.1, random_state=self.data.randomState
         )
-        monitor.onFitStart(self)
 
         # Create validation data when using early stopping
         X, y = self.convertToNumpy(X, y)
         if self.earlyStopping:
             train_index, val_index = next(split.split(X, y))
-            train_data = self.convertToMoleculeDataset(
-                X[train_index, :], y[train_index]
-            )
-            val_data = self.convertToMoleculeDataset(X[val_index, :], y[val_index])
+            train_data = X[train_index, :], y[train_index]
+            val_data = X[val_index, :], y[val_index]
+            monitor.onFitStart(self, *train_data, *val_data)
+            train_data = self.convertToMoleculeDataset(*train_data)
+            val_data = self.convertToMoleculeDataset(*val_data)
         else:
             train_data = self.convertToMoleculeDataset(
                 X, y
             )  # convert data to chemprop MoleculeDataset
+            monitor.onFitStart(self, X, y)
 
         args = estimator.args
 
