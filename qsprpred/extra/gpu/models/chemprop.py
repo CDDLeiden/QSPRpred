@@ -688,41 +688,12 @@ class ChempropModel(QSPRModel):
             args (chemprop.args.TrainArgs, dict): arguments to check
         """
         # List of arguments from chemprop that are using in the QSPRpred implementation.
-        used_args = [
-            "no_cuda", # Turn off cuda (i.e., use CPU instead of GPU).
-            "gpu", # wich gpu to use
-            "num_workers", # Number of workers for the parallel data loading (0 means sequential)
-            "batch_size", # Batch size
-            "no_cache_mol", # Whether to not cache the RDKit molecule for each SMILES string to reduce memory usage (cached by default).
-            "empty_cache", # Whether to empty all caches before training or predicting. This is necessary if multiple jobs are run within a single script and the atom or bond features change.
-            "loss_function", # Choice of loss function. Loss functions are limited to compatible dataset types  Literal['mse', 'bounded_mse', 'binary_cross_entropy', 'cross_entropy', 'mcc', 'sid', 'wasserstein', 'mve', 'evidential', 'dirichlet']
-            "seed", # random seed used to shuffle batches
-            "pytorch_seed",
-            "metric",
-            "bias",
-            "hidden_size",
-            "depth",
-            "mpn_shared",
-            "dropout",
-            "activation",
-            "atom_messages",
-            "undirected",
-            "ffn_hidden_size",
-            "ffn_num_layers",
-            "explicit_h",
-            "adding_h",
-            "epochs",
-            "warmup_epochs",
-            "init_lr",
-            "max_lr",
-            "final_lr",
-            "grad_clip",
-            "class_balance",
-            "evidential_regularization",
-            "minimize_score",
-            "num_tasks",
-            "dataset_type",
-            "metrics",
+        used_args = self.getAvailableParameters().keys()
+        used_args = list(used_args) + [
+            "minimize_score", # derived from metric
+            "num_tasks", # derived from target properties
+            "dataset_type", # derived from task
+            "metrics", # equal to metric in QSPRpred
             "task_names", # derived from target properties
         ]
 
@@ -772,12 +743,40 @@ class ChempropModel(QSPRModel):
 
             args = chemprop.args.TrainArgs().from_dict(args, skip_unsettable=True)
             args.process_args()
-
-        assert args.split_type in [
-            "random",
-            "scaffold_balanced",
-            "random_with_repeated_smiles",
-        ], (
-            "split_type must be 'random', 'scaffold_balanced' or "
-            "random_with_repeated_smiles'."
-        )
+    
+    @staticmethod
+    def getAvailableParameters():
+        """Return a dictionary of available parameters for the algorithm.
+        
+        Definitions and default values can be found on the Chemprop github 
+        (https://github.com/chemprop/chemprop/blob/master/chemprop/args.py)
+        """
+        return {
+            "no_cuda": "Turn off cuda (i.e., use CPU instead of GPU).",
+            "gpu": "Which GPU to use.",
+            "num_workers": "Number of workers for the parallel data loading (0 means sequential).",
+            "batch_size": "Batch size.",
+            "no_cache_mol": "Whether to not cache the RDKit molecule for each SMILES string to reduce memory usage (cached by default).",
+            "empty_cache": "Whether to empty all caches before training or predicting. This is necessary if multiple jobs are run within a single script and the atom or bond features change.",
+            "loss_function": "Choice of loss function. Loss functions are limited to compatible dataset types.",
+            "metric": "Metric to use with the validation set for early stopping. Defaults to 'auc' for classification, 'rmse' for regression. Note. In Chemprop this metric is also used for test-set evaluation, but in QSPRpred this is determined by the scoring parameter in assessment.",
+            "bias": "Whether to add bias to linear layers.",
+            "hidden_size": "Dimensionality of hidden layers in MPN.",
+            "depth": "Number of message passing steps.",
+            "mpn_shared": "Whether to use the same message passing neural network for all input molecule Only relevant if 'number_of_molecules > 1'",
+            "dropout": "Dropout probability.",
+            "activation": "Activation function.",
+            "atom_messages": "Centers messages on atoms instead of on bonds.",
+            "undirected": "Undirected edges (always sum the two relevant bond vectors).",
+            "ffn_hidden_size": "Hidden dim for higher-capacity FFN (defaults to hidden_size).",
+            "ffn_num_layers": "Number of layers in FFN after MPN encoding.",
+            "epochs": "Number of epochs to run.",
+            "warmup_epochs": "Number of epochs during which learning rate increases linearly from 'init_lr' to 'max_lr'. Afterwards, learning rate decreases exponentially from 'max_lr' to 'final_lr'.",
+            "init_lr": "Initial learning rate.",
+            "max_lr": "Maximum learning rate.",
+            "final_lr": "Final learning rate.",
+            "grad_clip": "Maximum magnitude of gradient during training.",
+            "class_balance": "Trains with an equal number of positives and negatives in each batch.",
+            "evidential_regularization": "Value used in regularization for evidential loss function. The default value recommended by Soleimany et al.(2021) is 0.2. Optimal value is dataset-dependent; it is recommended that users test different values to find the best value for their model.",
+        }
+        
