@@ -58,3 +58,5 @@ the [documentation](https://cddleiden.github.io/QSPRpred/docs/).
           train a multi-task model.
         - [PCM modelling](advanced/modelling/PCM_modelling.ipynb): How to prepare data
           for and train a proteochemometric model.
+        - [Chemprop models](advanced/modelling/chemprop_models.ipynb): How to use
+          Chemprop models in QSPRpred.
