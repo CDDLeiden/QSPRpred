@@ -4,7 +4,6 @@ Test module for testing extra models.
 """
 
 from typing import Type
-from unittest import TestCase
 
 from parameterized import parameterized
 from sklearn.cross_decomposition import PLSRegression
@@ -12,21 +11,29 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from qsprpred.tasks import TargetProperty, TargetTasks
-from ...models.tests import N_CPUS, ModelDataSetsMixIn, ModelTestMixIn
-from ..data.data import PCMDataSet
-from ..data.tests import DataSetsMixInExtras
-from qsprpred.extra.data.utils.msa_calculator import ClustalMSA
 from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 from qsprpred.extra.data.descriptors.sets import ProDec
+from qsprpred.extra.data.tables.pcm import PCMDataSet
+from qsprpred.extra.data.utils.msa_calculator import ClustalMSA
+from qsprpred.tasks import TargetProperty, TargetTasks
+from ..data.utils.testing.path_mixins import DataSetsMixInExtras
 from ..models.pcm import SklearnPCMModel
+from ...utils.testing.base import QSPRTestCase
+from ...utils.testing.check_mixins import ModelCheckMixIn
+from ...utils.testing.path_mixins import ModelDataSetsPathMixIn
 
 
-class ModelDataSetsMixInExtras(ModelDataSetsMixIn, DataSetsMixInExtras):
+class ModelDataSetsMixInExtras(ModelDataSetsPathMixIn, DataSetsMixInExtras):
     """This class holds the tests for testing models in extras."""
 
 
-class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
+class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
+    """Test class for testing PCM models."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def getModel(
         self,
         name: str,
@@ -60,30 +67,28 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
         [
             (
                 alg_name,
-                [{
-                    "name": "pchembl_value_Median",
-                    "task": TargetTasks.REGRESSION
-                }],
+                [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
                 alg_name,
                 alg,
                 random_state,
-            ) for alg, alg_name in ((XGBRegressor, "XGBR"), )
+            )
+            for alg, alg_name in ((XGBRegressor, "XGBR"),)
             for random_state in ([None], [1, 42], [42, 42])
-        ] + [
+        ]
+        + [
             (
                 alg_name,
-                [{
-                    "name": "pchembl_value_Median",
-                    "task": TargetTasks.REGRESSION
-                }],
+                [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
                 alg_name,
                 alg,
                 [None],
-            ) for alg, alg_name in (
+            )
+            for alg, alg_name in (
                 (PLSRegression, "PLSR"),
                 (SVR, "SVR"),
             )
-        ] + [
+        ]
+        + [
             (
                 alg_name,
                 [
@@ -96,10 +101,12 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
                 alg_name,
                 alg,
                 random_state,
-            ) for alg, alg_name in (
+            )
+            for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
-            ) for random_state in ([None], [1, 42], [42, 42])
+            )
+            for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testRegressionBasicFitPCM(
@@ -120,7 +127,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
 
         """
         if model_name not in ["SVR", "PLSR"]:
-            parameters = {"n_jobs": N_CPUS}
+            parameters = {"n_jobs": self.nCPU}
         else:
             parameters = None
         # initialize dataset

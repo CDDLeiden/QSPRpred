@@ -12,7 +12,6 @@
 *.gzip
 *.tar.gz
 *.out
-/**/test_files/generated/
 /**/tutorial/test_files/
 /**/tutorial/cli_tutorial/
 /**/tutorials/tutorial_data/papyrus/

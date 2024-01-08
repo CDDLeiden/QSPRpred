@@ -14,18 +14,15 @@ from ..data.processing.feature_filters import LowVarianceFilter
 from ..data.tables.qspr import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
-from ..models.tests import ModelDataSetsMixIn
 from ..plotting.classification import ConfusionMatrixPlot, MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot, WilliamsPlot
 from ..tasks import TargetTasks
+from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
 
 
-class ModelRetriever(ModelDataSetsMixIn):
+class ModelRetriever(ModelDataSetsPathMixIn):
     def getModel(
-        self,
-        dataset: QSPRDataset,
-        name: str,
-        alg: Type = RandomForestClassifier
+        self, dataset: QSPRDataset, name: str, alg: Type = RandomForestClassifier
     ) -> SklearnModel:
         """Get a model for testing.
 
@@ -52,15 +49,16 @@ class ModelRetriever(ModelDataSetsMixIn):
 
 class ROCPlotTest(ModelRetriever, TestCase):
     """Test ROC curve plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def testPlotSingle(self):
         """Test plotting ROC curve for single task."""
         dataset = self.createLargeTestDataSet(
             "test_roc_plot_single_data",
-            target_props=[{
-                "name": "CL",
-                "task": TargetTasks.SINGLECLASS,
-                "th": [6.5]
-            }],
+            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(dataset, "test_roc_plot_single_model")
@@ -82,9 +80,15 @@ class ROCPlotTest(ModelRetriever, TestCase):
 
 class MetricsPlotTest(ModelRetriever, TestCase):
     """Test metrics plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     @parameterized.expand(
         [
-            (task, task, th) for task, th in (
+            (task, task, th)
+            for task, th in (
                 ("binary", [6.5]),
                 ("multi_class", [0, 2, 10, 1100]),
             )
@@ -96,13 +100,11 @@ class MetricsPlotTest(ModelRetriever, TestCase):
             f"test_metrics_plot_single_{task}_data",
             target_props=[
                 {
-                    "name":
-                        "CL",
-                    "task":
-                        TargetTasks.SINGLECLASS
-                        if task == "binary" else TargetTasks.MULTICLASS,
-                    "th":
-                        th,
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS
+                    if task == "binary"
+                    else TargetTasks.MULTICLASS,
+                    "th": th,
                 }
             ],
             preparation_settings=self.getDefaultPrep(),
@@ -123,6 +125,11 @@ class MetricsPlotTest(ModelRetriever, TestCase):
 
 class CorrPlotTest(ModelRetriever, TestCase):
     """Test correlation plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def testPlotSingle(self):
         """Test plotting correlation for single task."""
         dataset = self.createLargeTestDataSet(
@@ -146,11 +153,15 @@ class CorrPlotTest(ModelRetriever, TestCase):
 
 class WilliamsPlotTest(ModelRetriever, TestCase):
     """Test plotting Williams plot for single task."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def testPlotSingle(self):
         """Test plotting Williams plot for single task."""
         dataset = self.createLargeTestDataSet(
-            "test_williams_plot_single_data",
-            preparation_settings=self.getDefaultPrep()
+            "test_williams_plot_single_data", preparation_settings=self.getDefaultPrep()
         )
         # filter features to below the number of samples in the test set
         # to avoid error in WilliamsPlot
@@ -174,9 +185,15 @@ class WilliamsPlotTest(ModelRetriever, TestCase):
 
 class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
     """Test confusion matrix plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     @parameterized.expand(
         [
-            (task, task, th) for task, th in (
+            (task, task, th)
+            for task, th in (
                 ("binary", [6.5]),
                 ("multi_class", [0, 2, 10, 1100]),
             )
@@ -188,13 +205,11 @@ class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
             f"test_cm_plot_single_{task}_data",
             target_props=[
                 {
-                    "name":
-                        "CL",
-                    "task":
-                        TargetTasks.SINGLECLASS
-                        if task == "binary" else TargetTasks.MULTICLASS,
-                    "th":
-                        th,
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS
+                    if task == "binary"
+                    else TargetTasks.MULTICLASS,
+                    "th": th,
                 }
             ],
             preparation_settings=self.getDefaultPrep(),
@@ -227,6 +242,7 @@ class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
             os.path.exists(f"{model.outPrefix}_CL_4.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.
-            exists(f"{model.outPrefix}_CL_Independent Test_confusion_matrix.png")
+            os.path.exists(
+                f"{model.outPrefix}_CL_Independent Test_confusion_matrix.png"
+            )
         )
