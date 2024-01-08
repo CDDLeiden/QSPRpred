@@ -33,7 +33,6 @@ jobs:
 
     - name: Install Clustal Omega and MAFFT
       run: |
-        export $HOME_DIR=$PWD
         wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
         wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
         echo "$PWD/mafft-linux64/mafftdir/bin/" >> $GITHUB_PATH

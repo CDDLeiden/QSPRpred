@@ -30,7 +30,6 @@ jobs:
 
     - name: Install Clustal Omega and MAFFT
       run: |
-        export $HOME_DIR=$PWD
         ls -la
         echo "$PWD" >> $GITHUB_PATH
         if [ "${{ runner.os }}" = "macOS" ]; then
