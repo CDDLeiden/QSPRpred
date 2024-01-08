@@ -61,31 +61,29 @@ class RandomModel(QSPRModel):
         self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ):
         # Values of X are irrelevant
-        # TODO: clumsy
         estimator = self.estimator if estimator is None else estimator
         if (self.task.isClassification()):
-            y_list = [pd.DataFrame(np.random.choice(estimator["ratios"].shape[0], len(X), p=estimator["ratios"][col]), columns=[col]) for col in list(estimator["ratios"])]
-            return pd.concat(y_list, axis=1)
+            y_list = [np.random.choice(estimator["ratios"].shape[0], len(X), p=estimator["ratios"][col]) for col in list(estimator["ratios"])]
         if (self.task.isRegression()):
-            y_list = [pd.DataFrame(np.random.normal(loc=estimator["mean"][col], scale=estimator["std"][col], size=len(X)), columns=[col]) for col in range(len(estimator["mean"]))]
-            y = pd.concat(y_list, axis=1).to_numpy()
-            if y.ndim == 1:
-                y = y.reshape(-1, 1)
-            return y
+            y_list = [np.random.normal(loc=estimator["mean"][col], scale=estimator["std"][col], size=len(X)) for col in range(len(estimator["mean"]))]
+        y = np.column_stack(y_list)
+        if y.ndim == 1:
+            y = y.reshape(-1, 1)
+        return y
 
     def predictProba(
         self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ):
         # Values of X are irrelevant
-        # TODO: might need to be len(X.T)
-        # TODO: clumsy
         estimator = self.estimator if estimator is None else estimator
         if (self.task.isClassification()):
-            y_list = [pd.DataFrame(np.random.choice(estimator["ratios"].shape[0], len(X), p=estimator["ratios"][col]), columns=[col]) for col in list(estimator["ratios"])]
-            return pd.concat(y_list, axis=1)
+            y_list = [np.random.choice(estimator["ratios"].shape[0], len(X), p=estimator["ratios"][col]) for col in list(estimator["ratios"])]
         if (self.task.isRegression()):
-            y_list = [pd.DataFrame(np.random.normal(loc=estimator["mean"][col], scale=estimator["std"][col], size=len(X)), columns=[col]) for col in list(estimator["mean"])]
-            return pd.concat(y_list, axis=1)
+            y_list = [np.random.normal(loc=estimator["mean"][col], scale=estimator["std"][col], size=len(X)) for col in range(len(estimator["mean"]))]
+        y = np.column_stack(y_list)
+        if y.ndim == 1:
+            y = y.reshape(-1, 1)
+        return y
 
     @property
     def supportsEarlyStopping(self) -> bool:
