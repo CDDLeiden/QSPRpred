@@ -137,7 +137,7 @@ def old_standardize_sanitize(smi: str) -> str:
         parent_smi = re.sub(s_acid_remover, "", parent_smi)
         try:
             Chem.MolFromSmiles(parent_smi)
-        except:  # noqa: 722
+        except:  # noqa: E722
             print(f"{parent_smi} could not be parsed after removing sulfuric acids!")
             return None
     # Removing external molecules by splitting on . and picking the largest smiles
@@ -145,7 +145,7 @@ def old_standardize_sanitize(smi: str) -> str:
         parent_smi = max(parent_smi.split("."), key=len)
         try:
             mol = Chem.MolFromSmiles(parent_smi)
-        except:  # noqa: 722
+        except:  # noqa: E722
             print(f"Compound, ({parent_smi}) could not be parsed!!")
             return None
     # Trying to remove the salts

@@ -362,7 +362,7 @@ class QSPRDataset(MoleculeTable):
         else:
             assert len(th) > 0, "Threshold list must contain at least one value."
             if len(th) > 1:
-                assert len(th) > 3, (  # noqa: PLR2004c
+                assert len(th) > 3, (  # noqa: PLR2004
                     "For multi-class classification, "
                     "set more than 3 values as threshold."
                 )

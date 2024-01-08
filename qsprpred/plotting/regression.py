@@ -1,14 +1,17 @@
 """Module for plotting regression models."""
 from abc import ABC
 from copy import deepcopy
+from typing import List
 
+import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn import metrics
 
-from ..tasks import ModelTasks
+from ..data import QSPRDataset
 from ..plotting.base_plot import ModelPlot
+from ..tasks import ModelTasks
 
 
 class RegressionPlot(ModelPlot, ABC):
@@ -53,9 +56,7 @@ class RegressionPlot(ModelPlot, ABC):
             df["Set"] = "Cross Validation"
         return df
 
-    def prepareRegressionResults(
-        self, property_name: str | None = None
-    ) -> pd.DataFrame:
+    def prepareRegressionResults(self, ) -> pd.DataFrame:
         """Prepare regression results dataframe for plotting.
 
         Returns:
@@ -110,15 +111,14 @@ class RegressionPlot(ModelPlot, ABC):
 
 
 class CorrelationPlot(RegressionPlot):
-    """Class to plot the results of regression models. Plot predicted pX vs real pX."""
+    """Class to plot the results of regression models. Plot predicted pX_train vs real pX_train."""
     def make(
         self,
         save: bool = True,
         show: bool = False,
-        property_name: str | None = None,
         out_path: str | None = None,
     ) -> tuple[sns.FacetGrid, pd.DataFrame]:
-        """Plot the results of regression models. Plot predicted pX vs real pX.
+        """Plot the results of regression models. Plot predicted pX_train vs real pX_train.
 
         Args:
             save (bool):
@@ -136,7 +136,7 @@ class CorrelationPlot(RegressionPlot):
                 the summary data used to make the plot
         """
         # prepare the dataframe for plotting
-        df = self.prepareRegressionResults(property_name)
+        df = self.prepareRegressionResults()
 
         if not hasattr(self, "summary"):
             self.getSummary()
@@ -168,9 +168,6 @@ class CorrelationPlot(RegressionPlot):
 
         g.add_legend()
 
-        # show the plot
-        if show:
-            plt.show()
         # save the plot
         if save:
             if out_path is not None:
@@ -178,5 +175,201 @@ class CorrelationPlot(RegressionPlot):
             else:
                 for model in self.models:
                     plt.savefig(f"{model.outPrefix}_correlation.png", dpi=300)
+        # show the plot
+        if show:
+            plt.show()
+
         plt.clf()
         return g, self.summary
+
+
+class WilliamsPlot(RegressionPlot):
+    """Williams plot; plot of standardized residuals versus leverages"""
+    def make(
+        self,
+        datasets: dict[str, QSPRDataset] | None = None,
+        save: bool = True,
+        show: bool = False,
+        out_path: str | None = None,
+    ) -> tuple[sns.FacetGrid, pd.DataFrame, List[float]]:
+        """make Williams plot
+
+        Args:
+            datasets (dict[str, QSPRDataset] | None):
+                dictionary of datasets to use for the plot, keys are the model names.
+                If None, the models should have datasets attached to them.
+            save (bool):
+                whether to save the plot
+            show (bool):
+                whether to show the plot
+            out_path (str | None):
+                path to save the plot to, e.g. "results/plot.png", if `None`, the plot
+                will be saved to each model's output directory.
+
+        Returns:
+            g (sns.FacetGrid):
+                the seaborn FacetGrid object used to make the plot
+            pd.DataFrame:
+                the leverages and standardized residuals for each compound
+            dict[str, float]:
+                the h* values for the datasets
+        """
+        def calculateLeverages(
+            features_train: pd.DataFrame, features_test: pd.DataFrame
+        ) -> pd.DataFrame:
+            """Calculate the leverages for each compound in the dataset.
+
+            Args:
+                features_train (pd.DataFrame):
+                    the features for each compound in the training set
+                features_test (pd.DataFrame):
+                    the features for each compound in the test set
+
+            Returns:
+                pd.DataFrame:
+                    the leverages for each compound in the dataset
+                float:
+                    the h* value for the dataset
+            """
+            X_train = features_train.values
+            X_test = features_test.values
+
+            # assert the number of samples is greater than the number of features
+            assert X_train.shape[0] > X_train.shape[1], (
+                f"The number of samples ({X_train.shape[0]}) should be greater than the "
+                f"number of features ({X_train.shape[1]}) for calculating the leverages."
+            )
+
+            # get the diagonal elements of the hat matrix
+            # these are the leverages
+            pinv_XTX = np.linalg.pinv(X_train.T @ X_train)
+            leverages_train = np.diag(X_train @ pinv_XTX @ X_train.T)
+            leverages_train = pd.Series(leverages_train, index=features_train.index)
+
+            leverages_test = np.diag(X_test @ pinv_XTX @ X_test.T)
+            leverages_test = pd.Series(leverages_test, index=features_test.index)
+
+            leverages = pd.concat([leverages_train, leverages_test])
+
+            # h* = (3(p+1)/N) is the cutoff for high leverage points
+            # p is the number of features
+            # N is the number of compounds
+            p = X_train.shape[1]
+            N = X_train.shape[0]
+            h_star = (3 * (p + 1)) / N
+
+            # print waring if h* > 1
+            if h_star > 1:
+                print(
+                    f"Warning: h* = {h_star} is greater than 1, this may indicate that the "
+                    "number of samples is too small for the number of features. "
+                    "Leverage values are between 0 and 1, so h* should be less than 1."
+                )
+
+            return leverages, h_star
+
+        # prepare the dataframe for plotting
+        df = self.prepareRegressionResults()
+
+        if datasets is None:
+            datasets = {}
+            for model in self.models:
+                if model.checkForData():
+                    datasets[model.name] = model.data
+                else:
+                    raise ValueError("Model does not have a dataset attached to it.")
+
+        # calculate the leverages and h* for each model
+        model_leverages = {}
+        model_h_star = {}
+        model_p = {}  # number of descriptors
+        for model_name, dataset in datasets.items():
+            if dataset.hasFeatures:
+                features = dataset.getFeatures()
+                leverages, h_star = calculateLeverages(*features)
+                model_leverages[model_name] = leverages
+                model_h_star[model_name] = h_star
+                model_p[model_name] = features[0].shape[1]
+            else:
+                raise ValueError(
+                    f"Dataset {dataset.name} does not have features, to"
+                    " calculate leverages, the dataset should have features."
+                )
+
+        # Add the levarages to the dataframe
+        df["leverage"] = df.apply(
+            lambda x: model_leverages[x["Model"]][x["QSPRID"]], axis=1
+        )
+        df["n_features"] = df["Model"].apply(lambda x: model_p[x])
+
+        # calculate the residuals
+        df["residual"] = df["Label"] - df["Prediction"]
+
+        # calculate the residuals standard deviation
+        df["n_samples"] = df.groupby(["Model", "Set",
+                                      "Property"])["residual"].transform("count")
+
+        # calculate degrees of freedom
+        df["df"] = df["n_samples"] - df["n_features"] - 1
+
+        RSE = {}
+        # check if the degrees of freedom is greater than 0 for each model, property, and set
+        for (model, set, property), df_ in df.groupby(["Model", "Set", "Property"]):
+            if set == "Cross Validation":
+                if df_["df"].iloc[0] <= 0:
+                    print(f"{model} {set} {property}")
+                    print(df_[["n_samples", "n_features"]].iloc[0])
+                    raise ValueError(
+                        "Degrees of freedom is less than or equal to 0 for some models, "
+                        "properties trainingset. Check the number of samples and features, the "
+                        "number of samples should be greater than the number of features."
+                    )
+                RSE[(model, property)] = np.sqrt(
+                    (1 / df_["df"].iloc[0]) * np.sum(df_["residual"]**2)
+                )
+
+        # add the residual standard error to the df
+        df["RSE"] = df.apply(lambda x: RSE[(x["Model"], x["Property"])], axis=1)
+
+        # calculate the standardized residuals
+        df["std_resid"] = df["residual"] / (df["RSE"] * np.sqrt(1 - df["leverage"]))
+
+        # plot the results
+        g = sns.FacetGrid(
+            df,
+            col="Property",
+            row="Model",
+            margin_titles=True,
+            height=4,
+            sharex=False,
+            sharey=False,
+            hue="Set",
+        )
+        g.map(sns.scatterplot, "leverage", "std_resid", s=7, edgecolor="none")
+        # add the h* line to each plot based on the model's h*
+        # and add hlines at +/- 3
+        for k, ax in g.axes_dict.items():
+            ax.axvline(model_h_star[k[0]], c=".2", ls="--")
+            ax.axhline(2, c=".2", ls="--")
+            ax.axhline(-2, c=".2", ls="--")
+
+        # set y axis tile to standardized residuals
+        g.set_ylabels("Studentized Residuals")
+        g.add_legend()
+
+        # save the plot
+        if save:
+            if out_path is not None:
+                plt.savefig(out_path, dpi=300)
+            else:
+                for model in self.models:
+                    plt.savefig(f"{model.outPrefix}_williamsplot.png", dpi=300)
+        # show the plot
+        if show:
+            plt.show()
+        plt.clf()
+        return (
+            g,
+            df[["Model", "Fold", "Property", "leverage", "std_resid", "QSPRID"]],
+            model_h_star,
+        )
