@@ -183,7 +183,7 @@ class CrossValAssessor(ModelAssessor):
         model.checkForData()
         data = model.data
         split = self.split or KFold(
-            n_splits=5, shuffle=True, random_state=self.randomState
+            n_splits=5, shuffle=True, random_state=model.randomState
         )
         evalparams = model.parameters if parameters is None else parameters
         # check if data is available
