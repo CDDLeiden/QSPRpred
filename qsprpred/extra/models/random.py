@@ -4,8 +4,8 @@ import pandas as pd
 import os
 import types
 
-from .models import QSPRModel
-from ..data.tables.qspr import QSPRDataset
+from ...models.models import QSPRModel
+from ...data.tables.qspr import QSPRDataset
 from typing import Any
 
 class RandomModel(QSPRModel):
@@ -26,6 +26,12 @@ class RandomModel(QSPRModel):
         # Make alg an anonymous object having all necessary properties
         self.alg = types.SimpleNamespace()
         self.alg.__name__ = "Random"
+        
+        self.randomState = random_state or (
+            data.randomState if data is not None else None
+        )
+        self.rng = np.random.default_rng(seed=self.randomState)
+
         super().initFromData(data)
 
     def fit(
@@ -63,9 +69,9 @@ class RandomModel(QSPRModel):
         # Values of X are irrelevant
         estimator = self.estimator if estimator is None else estimator
         if (self.task.isClassification()):
-            y_list = [np.random.choice(estimator["ratios"].shape[0], len(X), p=estimator["ratios"][col]) for col in list(estimator["ratios"])]
+            y_list = [self.rng.choice(estimator["ratios"].shape[0], len(X), p=estimator["ratios"][col]) for col in list(estimator["ratios"])]
         if (self.task.isRegression()):
-            y_list = [np.random.normal(loc=estimator["mean"][col], scale=estimator["std"][col], size=len(X)) for col in range(len(estimator["mean"]))]
+            y_list = [self.rng.normal(loc=estimator["mean"][col], scale=estimator["std"][col], size=len(X)) for col in range(len(estimator["mean"]))]
         y = np.column_stack(y_list)
         if y.ndim == 1:
             y = y.reshape(-1, 1)
@@ -77,9 +83,9 @@ class RandomModel(QSPRModel):
         # Values of X are irrelevant
         estimator = self.estimator if estimator is None else estimator
         if (self.task.isClassification()):
-            y_list = [np.random.choice(estimator["ratios"].shape[0], len(X), p=estimator["ratios"][col]) for col in list(estimator["ratios"])]
+            y_list = [self.rng.choice(estimator["ratios"].shape[0], len(X), p=estimator["ratios"][col]) for col in list(estimator["ratios"])]
         if (self.task.isRegression()):
-            y_list = [np.random.normal(loc=estimator["mean"][col], scale=estimator["std"][col], size=len(X)) for col in range(len(estimator["mean"]))]
+            y_list = [self.rng.normal(loc=estimator["mean"][col], scale=estimator["std"][col], size=len(X)) for col in range(len(estimator["mean"]))]
         y = np.column_stack(y_list)
         if y.ndim == 1:
             y = y.reshape(-1, 1)

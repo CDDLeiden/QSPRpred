@@ -7,7 +7,6 @@ from .hyperparam_optimization import (
 )
 from .metrics import SklearnMetrics
 from .models import QSPRModel
-from .random import RandomModel
 
 from .monitors import (
     BaseMonitor,
