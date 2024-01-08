@@ -135,6 +135,7 @@ class CrossValAssessor(ModelAssessor):
         monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
             is used
         mode (EarlyStoppingMode): mode to use for early stopping
+        split (DataSplit): split to use for cross validation (default: KFold, n_splits=5)
         round (int): number of decimal places to round predictions to (default: 5)
         splitMultitaskScores (bool): whether to split the scores per task for multitask models
     """
@@ -182,7 +183,7 @@ class CrossValAssessor(ModelAssessor):
         model.checkForData()
         data = model.data
         split = self.split or KFold(
-            n_splits=5, shuffle=True, random_state=data.randomState
+            n_splits=5, shuffle=True, random_state=self.randomState
         )
         evalparams = model.parameters if parameters is None else parameters
         # check if data is available

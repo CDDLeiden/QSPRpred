@@ -46,27 +46,6 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         self.args = args
         self.scaler = scaler
 
-    def initRandomState(self, random_state):
-        """Set random state if applicable.
-        Defaults to random state of dataset if no random state is provided by the constructor.
-
-        Args:
-            random_state (int): Random state to use for shuffling and other random operations.
-        """
-        new_random_state = random_state or (
-            self.data.randomState if self.data is not None else
-            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
-        )
-        self.randomState = new_random_state
-        if new_random_state is None:
-            logger.warning(
-                "No random state supplied, "
-                "and could not find random state on the dataset."
-            )
-        self.randomState = random_state
-        if random_state is not None:
-            torch.manual_seed(random_state)
-
     @classmethod
     def cast(cls, obj: chemprop.models.MoleculeModel) -> "ChempropMoleculeModel":
         """Cast a chemprop.models.MoleculeModel instance to a MoleculeModel instance.
@@ -174,6 +153,24 @@ class ChempropModel(QSPRModel):
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
         )
+        
+    def initRandomState(self, random_state):
+        """Set random state if applicable.
+        Defaults to random state of dataset if no random state is provided by the constructor.
+
+        Args:
+            random_state (int): Random state to use for shuffling and other random operations.
+        """
+        new_random_state = random_state or (
+            self.data.randomState if self.data is not None else None
+        )
+        if new_random_state is None:
+            self.randomState = int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+            logger.warning(
+                "No random state supplied, "
+                "and could not find random state on the dataset."
+            )
+        self.randomState = new_random_state
 
     def __setstate__(self, state):
         super().__setstate__(state)
@@ -298,7 +295,7 @@ class ChempropModel(QSPRModel):
             num_workers=num_workers,
             class_balance=args.class_balance,
             shuffle=True,
-            seed=args.seed,
+            seed=self.randomState,
         )
         if self.earlyStopping:
             val_data_loader = chemprop.data.MoleculeDataLoader(
@@ -526,7 +523,9 @@ class ChempropModel(QSPRModel):
         Returns:
             object: initialized estimator instance
         """
-        self.initRandomState(self.randomState)
+        # set torch random seed if applicable
+        if self.randomState is not None:
+            torch.manual_seed(self.randomState)
         self.checkArgs(params)
         new_parameters = self.getParameters(params)
         args = ChempropMoleculeModel.getTrainArgs(new_parameters, self.task)
@@ -548,6 +547,9 @@ class ChempropModel(QSPRModel):
         Returns:
             object: initialized estimator instance
         """
+        # set torch random seed if applicable
+        if self.randomState is not None:
+            torch.manual_seed(self.randomState)
         path = f"{self.outPrefix}.pt"
         # load model state from file
         if os.path.isfile(path):
@@ -685,15 +687,14 @@ class ChempropModel(QSPRModel):
         """
         # List of arguments from chemprop that are using in the QSPRpred implementation.
         used_args = [
-            "no_cuda",
-            "gpu",
-            "num_workers",
-            "batch_size",
-            "no_cache_mol",
-            "empty_cache",
-            "loss_function",
-            "split_sizes",
-            "seed",
+            "no_cuda", # Turn off cuda (i.e., use CPU instead of GPU).
+            "gpu", # wich gpu to use
+            "num_workers", # Number of workers for the parallel data loading (0 means sequential)
+            "batch_size", # Batch size
+            "no_cache_mol", # Whether to not cache the RDKit molecule for each SMILES string to reduce memory usage (cached by default).
+            "empty_cache", # Whether to empty all caches before training or predicting. This is necessary if multiple jobs are run within a single script and the atom or bond features change.
+            "loss_function", # Choice of loss function. Loss functions are limited to compatible dataset types  Literal['mse', 'bounded_mse', 'binary_cross_entropy', 'cross_entropy', 'mcc', 'sid', 'wasserstein', 'mve', 'evidential', 'dirichlet']
+            "seed", # random seed used to shuffle batches
             "pytorch_seed",
             "metric",
             "bias",
@@ -720,7 +721,7 @@ class ChempropModel(QSPRModel):
             "num_tasks",
             "dataset_type",
             "metrics",
-            "task_names",
+            "task_names", # derived from target properties
         ]
 
         # Create dummy args to check what default argument values are in chemprop
