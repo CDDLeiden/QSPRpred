@@ -3,19 +3,26 @@ from importlib import import_module, util
 from typing import Type
 from unittest import TestCase
 
+import chemprop
+import pandas as pd
 import pytest
 import torch
 from parameterized import parameterized
+from sklearn import metrics
 from sklearn.impute import SimpleImputer
+from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
-from qsprpred.tasks import TargetTasks, ModelTasks
+from qsprpred.tasks import ModelTasks, TargetTasks
+
 from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
+from ....models import CrossValAssessor
+from ....models.metrics import SklearnMetrics
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitorsMixIn
 
@@ -24,7 +31,6 @@ GPUS = list(range(torch.cuda.device_count()))
 
 class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
-
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -76,12 +82,10 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
                     [0, 1, 10, 1100],
                 ),
             )
-        ]
-        + [
+        ] + [
             (f"{alg_name}_{task}", task, alg_name, alg, th, random_state)
-            for alg, alg_name, task, th in (
-                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
-            )
+            for alg, alg_name, task, th in
+            ((STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None), )
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -106,7 +110,11 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
 
@@ -147,7 +155,6 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
-
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -182,8 +189,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name, th)
-            for alg_name, task, th in (
+            (f"{alg_name}_{task}", task, alg_name, th) for alg_name, task, th in (
                 ("MoleculeModel", TargetTasks.REGRESSION, None),
                 ("MoleculeModel", TargetTasks.SINGLECLASS, [6.5]),
                 ("MoleculeModel", TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
@@ -202,7 +208,11 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=None,
         )
         dataset.prepareDataset(
@@ -222,8 +232,7 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name)
-            for alg_name, task in (
+            (f"{alg_name}_{task}", task, alg_name) for alg_name, task in (
                 ("MoleculeModel", ModelTasks.MULTITASK_REGRESSION),
                 ("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS),
             )
@@ -240,8 +249,16 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
-                {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
-                {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]},
+                {
+                    "name": "fu",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [0.3]
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [6.5]
+                },
             ]
         else:
             target_props = [
@@ -279,11 +296,108 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
 
+    def testConsistency(self):
+        """Test if QSPRpred Chemprop and Chemprop models are consistent."""
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            name="consistency_data",
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
+            preparation_settings=None,
+        )
+        dataset.prepareDataset(
+            feature_calculators=[
+                MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
+            ],
+            split=RandomSplit(test_fraction=0.1),
+        )
+        # initialize model for training from class
+        model = self.getModel(
+            base_dir=self.generatedModelsPath,
+            name="consistency_data",
+            dataset=dataset
+        )
+
+        # chemprop by default uses sklearn rmse (squared=False) as metric
+        rmse = metrics.make_scorer(
+            metrics.mean_squared_error, greater_is_better=False, squared=False
+        )
+
+        # Run 1 fold of bootstrap cross validation (default cross validation in chemprop is bootstrap)
+        assessor = CrossValAssessor(
+            scoring=SklearnMetrics(rmse),
+            split=ShuffleSplit(
+                n_splits=1, test_size=0.1, random_state=dataset.randomState
+            ),
+        )
+        qsprpred_score = assessor(
+            model, split=RandomSplit(test_fraction=0.1, dataset=dataset)
+        )
+        qsprpred_score = -qsprpred_score[0]  # qsprpred_score is negative rmse
+
+        # save the cross-validation train, test and validation split to
+        # compare with true Chemprop model from the base monitor
+        df_train = pd.DataFrame(
+            assessor.monitor.fits[0]["fitData"]["X_train"], columns=["smiles"]
+        )
+        df_train["pchembl_value_Mean"] = assessor.monitor.fits[0]["fitData"]["y_train"]
+        df_train.to_csv(
+            f"{self.generatedModelsPath}/consistency_data_train.csv", index=False
+        )
+
+        df_val = pd.DataFrame(
+            assessor.monitor.fits[0]["fitData"]["X_val"], columns=["smiles"]
+        )
+        df_val["pchembl_value_Mean"] = assessor.monitor.fits[0]["fitData"]["y_val"]
+        df_val.to_csv(
+            f"{self.generatedModelsPath}/consistency_data_val.csv", index=False
+        )
+
+        df_test = pd.DataFrame(assessor.monitor.foldData[0]["X_test"])
+        df_test.rename(columns={"Descriptor_SmilesDesc_SMILES": "smiles"}, inplace=True)
+        df_test["pchembl_value_Mean"] = assessor.monitor.foldData[0]["y_test"]
+        df_test.to_csv(
+            f"{self.generatedModelsPath}/consistency_data_test.csv", index=False
+        )
+
+        # run chemprop with the same data and parameters
+        arguments = [
+            "--data_path",
+            f"{self.generatedModelsPath}/consistency_data_train.csv",
+            "--separate_val_path",
+            f"{self.generatedModelsPath}/consistency_data_val.csv",
+            "--separate_test_path",
+            f"{self.generatedModelsPath}/consistency_data_test.csv",
+            "--dataset_type",
+            "regression",
+            "--save_dir",
+            self.generatedModelsPath,
+            "--epochs",
+            "2",
+            "--gpu",
+            str(GPUS[0]) if len(GPUS) > 0 else None,
+            "--seed",
+            str(model.randomState),
+            "--pytorch_seed",
+            str(model.randomState),
+        ]
+
+        args = chemprop.args.TrainArgs().parse_args(arguments)
+        chemprop_score, _ = chemprop.train.cross_validate(
+            args=args, train_func=chemprop.train.run_training
+        )
+
+        # compare the scores
+        print(f"QSPRpred score: {qsprpred_score}")
+        print(f"Chemprop score: {chemprop_score}")
+        self.assertAlmostEqual(qsprpred_score, chemprop_score, places=5)
+
 
 @pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
 class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     """This class holds the tests for the PyBoostModel class."""
-
     @staticmethod
     def getModel(
         base_dir: str,
@@ -314,8 +428,7 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            ("PyBoost", TargetTasks.REGRESSION, "PyBoost", params)
-            for params in [
+            ("PyBoost", TargetTasks.REGRESSION, "PyBoost", params) for params in [
                 {
                     "loss": "mse",
                     "metric": "r2_score",
@@ -340,7 +453,10 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": task}],
+            target_props=[{
+                "name": "CL",
+                "task": task
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
@@ -360,8 +476,13 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         [
             (f"{'PyBoost'}_{task}", task, th, "PyBoost", params)
             for params, task, th in (
-                ({"loss": "bce", "metric": "auc"}, TargetTasks.SINGLECLASS, [6.5]),
-                ({"loss": "crossentropy"}, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
+                ({
+                    "loss": "bce",
+                    "metric": "auc"
+                }, TargetTasks.SINGLECLASS, [6.5]),
+                ({
+                    "loss": "crossentropy"
+                }, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             )
         ]
     )
@@ -370,7 +491,11 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -389,9 +514,11 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            ("PyBoost", "PyBoost", params)
-            for params in [
-                {"loss": "mse", "metric": "r2_score"},
+            ("PyBoost", "PyBoost", params) for params in [
+                {
+                    "loss": "mse",
+                    "metric": "r2_score"
+                },
                 # {
                 #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
                 #     "metric": "r2_score"
@@ -494,7 +621,6 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 class TestNNMonitoring(TestMonitorsMixIn, TestCase):
     """This class holds the tests for the monitoring classes."""
-
     @property
     def gridFile(self):
         """Return the path to the grid file with test
