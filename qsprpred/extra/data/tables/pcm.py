@@ -2,16 +2,16 @@ from typing import Callable
 
 import pandas as pd
 
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
-from ...data.descriptors.calculators import (
+from qsprpred.data.descriptors.calculators import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
-from ...data.tables.mol import MoleculeTable
-from ...data.tables.qspr import QSPRDataset
-from ...logs import logger
-from ...tasks import TargetProperty
-from ...utils.serialization import function_as_string, function_from_string
+from qsprpred.data.tables.mol import MoleculeTable
+from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from qsprpred.logs import logger
+from qsprpred.tasks import TargetProperty
+from qsprpred.utils.serialization import function_as_string, function_from_string
 
 
 class PCMDataSet(QSPRDataset):

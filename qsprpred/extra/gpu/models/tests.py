@@ -24,13 +24,20 @@ from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models import CrossValAssessor
 from ....models.metrics import SklearnMetrics
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
-from ....models.tests import ModelDataSetsMixIn, ModelTestMixIn, TestMonitorsMixIn
+from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
+from ....utils.testing.path_mixins import ModelDataSetsPathMixIn
 
 GPUS = list(range(torch.cuda.device_count()))
 
 
-class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
+
+    def setUp(self):
+        """Set up the test case."""
+        super().setUp()
+        self.setUpPaths()
+
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -96,7 +103,7 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         alg_name: str,
         alg: Type,
         th: float,
-        random_state: int | None,
+        random_state: list[int] | None,
     ):
         """Test the DNNModel model in one configuration.
 
@@ -153,8 +160,13 @@ class NeuralNet(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
             )
 
 
-class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     @property
     def gridFile(self):
         """Return the path to the grid file with test
@@ -174,7 +186,6 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         Args:
             base_dir: Base directory for model.
             name: Name of the model.
-            alg: Algorithm to use.
             dataset: Data set to use.
             parameters: Parameters to use.
         """
@@ -202,7 +213,6 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         Args:
             task: Task to test.
             alg_name: Name of the algorithm.
-            alg: Algorithm to use.
             th: Threshold to use for classification models.
         """
         # initialize dataset
@@ -244,8 +254,6 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         Args:
             task: Task to test.
             alg_name: Name of the algorithm.
-            alg: Algorithm to use.
-            th: Threshold to use for classification models.
         """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
@@ -396,8 +404,13 @@ class ChemProp(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
 
 
 @pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
-class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
+class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the PyBoostModel class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     @staticmethod
     def getModel(
         base_dir: str,
@@ -619,8 +632,13 @@ class TestPyBoostModel(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
     #     self.predictorTest(predictor)
 
 
-class TestNNMonitoring(TestMonitorsMixIn, TestCase):
+class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
     """This class holds the tests for the monitoring classes."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     @property
     def gridFile(self):
         """Return the path to the grid file with test

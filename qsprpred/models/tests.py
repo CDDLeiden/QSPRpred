@@ -1,353 +1,49 @@
 """This module holds the tests for functions regarding QSPR modelling."""
 
-import logging
-import numbers
 import os
-from copy import deepcopy
-from os.path import exists
-from typing import Literal, Type
+from typing import Type
 from unittest import TestCase
 
 import numpy as np
-import pandas as pd
 from parameterized import parameterized
-from sklearn import metrics
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import (
     accuracy_score,
     explained_variance_score,
-    f1_score,
     log_loss,
     top_k_accuracy_score,
     mean_squared_error,
     roc_auc_score,
 )
 from sklearn.metrics import make_scorer
-from sklearn.metrics import matthews_corrcoef, precision_score, recall_score
-from sklearn.model_selection import KFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 from ..data.tables.qspr import QSPRDataset
-from ..data.tests import DataSetsMixIn
-from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
-from ..models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from ..models.metrics import SklearnMetrics
-from ..models.models import QSPRModel
 from ..models.monitors import (
-    AssessorMonitor,
-    FitMonitor,
-    HyperparameterOptimizationMonitor,
     BaseMonitor,
     FileMonitor,
     ListMonitor,
 )
 from ..models.scikit_learn import SklearnModel
 from ..tasks import TargetTasks
+from ..utils.testing.base import QSPRTestCase
+from ..utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
+from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
 
-N_CPUS = 2
-logging.basicConfig(level=logging.DEBUG)
 
-
-class ModelDataSetsMixIn(DataSetsMixIn):
-    """This class sets up the datasets for the model tests."""
+class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTestCase):
+    """This class holds the tests for the SklearnModel class."""
 
     def setUp(self):
-        """Set up the test environment."""
         super().setUp()
-        self.generatedModelsPath = f"{self.generatedPath}/models/"
-        if not os.path.exists(self.generatedModelsPath):
-            os.makedirs(self.generatedModelsPath)
-
-
-class ModelTestMixIn:
-    """This class holds the tests for the QSPRmodel class."""
-
-    @property
-    def gridFile(self):
-        return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
-
-    def getParamGrid(self, model: QSPRModel, grid: str) -> dict:
-        """Get the parameter grid for a model.
-
-        Args:
-            model (QSPRModel): The model to get the parameter grid for.
-            grid (str): The grid type to get the parameter grid for.
-
-        Returns:
-            dict: The parameter grid.
-        """
-
-        mname = model.name.split("_")[0]
-        grid_params = model.__class__.loadParamsGrid(self.gridFile, grid, mname)
-        return grid_params[grid_params[:, 0] == mname, 1][0]
-
-    def fitTest(self, model: QSPRModel):
-        """Test model fitting, optimization and evaluation.
-
-        Args:
-            model (QSPRModel): The model to test.
-        """
-        # perform bayes optimization
-        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
-        search_space_bs = self.getParamGrid(model, "bayes")
-        bayesoptimizer = OptunaOptimization(
-            param_grid=search_space_bs,
-            n_trials=1,
-            model_assessor=CrossValAssessor(
-                scoring=score_func, mode=EarlyStoppingMode.NOT_RECORDING
-            ),
-        )
-        best_params = bayesoptimizer.optimize(model)
-        model.setParams(best_params)
-        model.save()
-        model_new = model.__class__.fromFile(model.metaFile)
-        for param in best_params:
-            self.assertEqual(model_new.parameters[param], best_params[param])
-        # perform grid search
-        search_space_gs = self.getParamGrid(model, "grid")
-        if model.task.isClassification():
-            score_func = SklearnMetrics("accuracy")
-        gridsearcher = GridSearchOptimization(
-            param_grid=search_space_gs,
-            score_aggregation=np.median,
-            model_assessor=TestSetAssessor(
-                scoring=score_func,
-                use_proba=False,
-                mode=EarlyStoppingMode.NOT_RECORDING,
-            ),
-        )
-        best_params = gridsearcher.optimize(model)
-        model_new = model.__class__.fromFile(model.metaFile)
-        for param in best_params:
-            self.assertEqual(model_new.parameters[param], best_params[param])
-        model.cleanFiles()
-        # perform crossvalidation
-        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
-        n_folds = 5
-        scores = CrossValAssessor(
-            mode=EarlyStoppingMode.RECORDING,
-            scoring=score_func,
-            split_multitask_scores=model.isMultiTask,
-            split=KFold(
-                n_splits=n_folds, shuffle=True, random_state=model.data.randomState
-            ),
-        )(model)
-        if model.isMultiTask:
-            self.assertEqual(scores.shape, (n_folds, len(model.targetProperties)))
-        scores = TestSetAssessor(
-            mode=EarlyStoppingMode.NOT_RECORDING,
-            scoring=score_func,
-            split_multitask_scores=model.isMultiTask,
-        )(model)
-        if model.isMultiTask:
-            self.assertEqual(scores.shape, (len(model.targetProperties),))
-        self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
-        self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
-        # train the model on all data
-        path = model.fitAttached()
-        self.assertTrue(exists(path))
-        self.assertTrue(exists(model.metaFile))
-        self.assertEqual(path, model.metaFile)
-
-    def predictorTest(
-        self,
-        predictor: QSPRModel,
-        expect_equal_result=True,
-        expected_pred_use_probas=None,
-        expected_pred_not_use_probas=None,
-        **pred_kwargs,
-    ):
-        """Test a model as predictor.
-
-        Args:
-            predictor (QSPRModel):
-                The model to test.
-            expect_equal_result (bool):
-                If pred values provided, specifies whether to check for equality or
-                inequality.
-            expected_pred_use_probas (float): Value to check with use_probas true.
-            expected_pred_not_use_probas (int | float):
-                Value to check with use_probas false. Ignored if expect_equal_result is
-                false.
-            **pred_kwargs:
-                Extra keyword arguments to pass to the predictor's `predictMols` method.
-        """
-
-        # load molecules to predict
-        df = pd.read_csv(
-            f"{os.path.dirname(__file__)}/test_files/data/test_data.tsv", sep="\t"
-        )
-
-        # define checks of the shape of the predictions
-        def check_shape(input_smiles):
-            if predictor.targetProperties[0].task.isClassification() and use_probas:
-                self.assertEqual(len(predictions), len(predictor.targetProperties))
-                self.assertEqual(
-                    predictions[0].shape,
-                    (len(input_smiles), predictor.targetProperties[0].nClasses),
-                )
-            else:
-                self.assertEqual(
-                    predictions.shape,
-                    (len(input_smiles), len(predictor.targetProperties)),
-                )
-
-        # predict the property
-        pred = []
-        for use_probas in [True, False]:
-            predictions = predictor.predictMols(
-                df.SMILES.to_list(), use_probas=use_probas, **pred_kwargs
-            )
-            check_shape(df.SMILES.to_list())
-            if isinstance(predictions, list):
-                for prediction in predictions:
-                    self.assertIsInstance(prediction, np.ndarray)
-            else:
-                self.assertIsInstance(predictions, np.ndarray)
-
-            singleoutput = (
-                predictions[0][0, 0]
-                if isinstance(predictions, list)
-                else predictions[0, 0]
-            )
-            if (
-                predictor.targetProperties[0].task == TargetTasks.REGRESSION
-                or use_probas
-            ):
-                self.assertIsInstance(singleoutput, numbers.Real)
-            elif predictor.targetProperties[
-                0
-            ].task == TargetTasks.MULTICLASS or isinstance(
-                predictor.estimator, XGBClassifier
-            ):
-                self.assertIsInstance(singleoutput, numbers.Integral)
-            elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:
-                self.assertIn(singleoutput, [1, 0])
-            else:
-                return AssertionError(f"Unknown task: {predictor.task}")
-            pred.append(singleoutput)
-            # test with an invalid smiles
-            invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
-            predictions = predictor.predictMols(
-                invalid_smiles, use_probas=use_probas, **pred_kwargs
-            )
-            check_shape(invalid_smiles)
-            singleoutput = (
-                predictions[0][0, 0]
-                if isinstance(predictions, list)
-                else predictions[0, 0]
-            )
-            self.assertEqual(
-                predictions[0][1, 0]
-                if isinstance(predictions, list)
-                else predictions[1, 0],
-                None,
-            )
-            if (
-                predictor.targetProperties[0].task == TargetTasks.SINGLECLASS
-                and not isinstance(predictor.estimator, XGBClassifier)
-                and not use_probas
-            ):
-                self.assertIn(singleoutput, [0, 1])
-            else:
-                self.assertIsInstance(singleoutput, numbers.Number)
-
-        if expect_equal_result:
-            if expected_pred_use_probas is not None:
-                self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=8)
-            if expected_pred_not_use_probas is not None:
-                self.assertAlmostEqual(pred[1], expected_pred_not_use_probas, places=8)
-        elif expected_pred_use_probas is not None:
-            # Skip not_use_probas test:
-            # For regression this is identical to use_probas result
-            # For classification there is no guarantee the classification result
-            # actually differs, unlike probas which will usually have different results
-            self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=8)
-
-        return pred[0], pred[1]
-
-    # NOTE: below code is taken from CorrelationPlot without the plotting code
-    # Would be nice if the summary code without plot was available regardless
-    def createCorrelationSummary(self, model):
-        cv_path = f"{model.outPrefix}.cv.tsv"
-        ind_path = f"{model.outPrefix}.ind.tsv"
-
-        cate = [cv_path, ind_path]
-        cate_names = ["cv", "ind"]
-        property_name = model.targetProperties[0].name
-        summary = {"ModelName": [], "R2": [], "RMSE": [], "Set": []}
-        for j, _ in enumerate(["Cross Validation", "Independent Test"]):
-            df = pd.read_table(cate[j])
-            coef = metrics.r2_score(
-                df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]
-            )
-            rmse = metrics.mean_squared_error(
-                df[f"{property_name}_Label"],
-                df[f"{property_name}_Prediction"],
-                squared=False,
-            )
-            summary["R2"].append(coef)
-            summary["RMSE"].append(rmse)
-            summary["Set"].append(cate_names[j])
-            summary["ModelName"].append(model.name)
-
-        return summary
-
-    # NOTE: below code is taken from MetricsPlot without the plotting code
-    # Would be nice if the summary code without plot was available regardless
-    def createMetricsSummary(self, model):
-        decision_threshold: float = 0.5
-        metrics = [
-            f1_score,
-            matthews_corrcoef,
-            precision_score,
-            recall_score,
-            accuracy_score,
-        ]
-        summary = {"Metric": [], "Model": [], "TestSet": [], "Value": []}
-        property_name = model.targetProperties[0].name
-
-        cv_path = f"{model.outPrefix}.cv.tsv"
-        ind_path = f"{model.outPrefix}.ind.tsv"
-
-        df = pd.read_table(cv_path)
-
-        # cross-validation
-        for fold in sorted(df.Fold.unique()):
-            y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-            y_pred_values = [1 if x > decision_threshold else 0 for x in y_pred]
-            y_true = df[f"{property_name}_Label"][df.Fold == fold]
-            for metric in metrics:
-                val = metric(y_true, y_pred_values)
-                summary["Metric"].append(metric.__name__)
-                summary["Model"].append(model.name)
-                summary["TestSet"].append(f"CV{fold + 1}")
-                summary["Value"].append(val)
-
-        # independent test set
-        df = pd.read_table(ind_path)
-        y_pred = df[f"{property_name}_ProbabilityClass_1"]
-        th = 0.5
-        y_pred_values = [1 if x > th else 0 for x in y_pred]
-        y_true = df[f"{property_name}_Label"]
-        for metric in metrics:
-            val = metric(y_true, y_pred_values)
-            summary["Metric"].append(metric.__name__)
-            summary["Model"].append(model.name)
-            summary["TestSet"].append("IND")
-            summary["Value"].append(val)
-
-        return summary
-
-
-class SklearnModelMixIn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
-    """This class holds the tests for the SklearnModel class."""
+        self.setUpPaths()
 
     def getModel(
         self,
@@ -381,7 +77,7 @@ class SklearnModelMixIn(ModelDataSetsMixIn, ModelTestMixIn, TestCase):
         )
 
 
-class TestSklearnRegression(SklearnModelMixIn):
+class TestSklearnRegression(SklearnBaseModelTestCase):
     """Test the SklearnModel class for regression models."""
 
     @parameterized.expand(
@@ -405,7 +101,7 @@ class TestSklearnRegression(SklearnModelMixIn):
     def testRegressionBasicFit(self, _, task, model_name, model_class, random_state):
         """Test model training for regression models."""
         if model_name not in ["SVR", "PLSR"]:
-            parameters = {"n_jobs": N_CPUS}
+            parameters = {"n_jobs": self.nCPU}
         else:
             parameters = None
         # initialize dataset
@@ -479,7 +175,7 @@ class TestSklearnRegression(SklearnModelMixIn):
         self.assertListEqual(summary["Set"], expected_summary["Set"])
 
 
-class TestSklearnRegressionMultiTask(SklearnModelMixIn):
+class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
     """Test the SklearnModel class for multi-task regression models."""
 
     @parameterized.expand(
@@ -543,7 +239,7 @@ class TestSklearnRegressionMultiTask(SklearnModelMixIn):
             )
 
 
-class TestSklearnSerialization(SklearnModelMixIn):
+class TestSklearnSerialization(SklearnBaseModelTestCase):
     def testJSON(self):
         dataset = self.createLargeTestDataSet(
             target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
@@ -553,7 +249,7 @@ class TestSklearnSerialization(SklearnModelMixIn):
             name="TestSerialization",
             alg=RandomForestClassifier,
             dataset=dataset,
-            parameters={"n_jobs": N_CPUS, "n_estimators": 10},
+            parameters={"n_jobs": self.nCPU, "n_estimators": 10},
             random_state=42,
         )
         model.save()
@@ -570,7 +266,7 @@ class TestSklearnSerialization(SklearnModelMixIn):
         self.assertEqual(model.toJSON(), model4.toJSON())
 
 
-class TestSklearnClassification(SklearnModelMixIn):
+class TestSklearnClassification(SklearnBaseModelTestCase):
     """Test the SklearnModel class for classification models."""
 
     @parameterized.expand(
@@ -604,7 +300,7 @@ class TestSklearnClassification(SklearnModelMixIn):
     ):
         """Test model training for classification models."""
         if model_name not in ["NB", "SVC"]:
-            parameters = {"n_jobs": N_CPUS}
+            parameters = {"n_jobs": self.nCPU}
         else:
             parameters = None
         # special case for SVC
@@ -651,7 +347,7 @@ class TestSklearnClassification(SklearnModelMixIn):
 
     def testRandomForestClassifierFitWithSeed(self):
         parameters = {
-            "n_jobs": N_CPUS,
+            "n_jobs": self.nCPU,
         }
         # initialize dataset
         dataset = self.createLargeTestDataSet(
@@ -685,7 +381,7 @@ class TestSklearnClassification(SklearnModelMixIn):
         self.assertListEqual(summary["Value"], expected_summary["Value"])
 
 
-class TestSklearnClassificationMultiTask(SklearnModelMixIn):
+class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
     """Test the SklearnModel class for multi-task classification models."""
 
     @parameterized.expand(
@@ -702,7 +398,7 @@ class TestSklearnClassificationMultiTask(SklearnModelMixIn):
     def testClassificationMultiTaskFit(self, _, model_name, model_class, random_state):
         """Test model training for multitask classification models."""
         if model_name not in ["NB", "SVC"]:
-            parameters = {"n_jobs": N_CPUS}
+            parameters = {"n_jobs": self.nCPU}
         else:
             parameters = {}
         # special case for SVC
@@ -833,7 +529,15 @@ class TestMetrics(TestCase):
             top_k_accuracy_score(y_true, y_pred[0], k=2),
         )
 
+        ## multi-class discrete scorer (_PredictScorer)
+        qsprpred_scorer = SklearnMetrics("accuracy")
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred),
+            accuracy_score(y_true, np.argmax(y_pred[0], axis=1)),
+        )
+
         ## multi-task single class (same as multi-label in sklearn)
+        ### proba
         y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
         y_pred = [
             np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
@@ -846,8 +550,21 @@ class TestMetrics(TestCase):
             roc_auc_score(y_true, y_pred_sklearn, multi_class="ovr"),
         )
 
+        ### discrete
+        y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
+        y_pred = np.array([[0, 0], [1, 1], [0, 0], [0, 0], [1, 0]])
+        qsprpred_scorer = SklearnMetrics("accuracy")
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred),
+            accuracy_score(y_true, y_pred),
+        )
 
-class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
+
+class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def test_earlyStoppingMode(self):
         """Test the early stopping mode enum."""
         # get the enum values
@@ -904,16 +621,12 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
         self.assertEqual(earlystopping.getEpochs(), 30)
 
         # check saving
-        earlystopping.toFile(
-            f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
-        )
-        self.assertTrue(
-            os.path.exists(f"{os.path.dirname(__file__)}/test_files/earlystopping.json")
-        )
+        earlystopping.toFile(f"{self.inputBasePath}/earlystopping.json")
+        self.assertTrue(os.path.exists(f"{self.inputBasePath}/earlystopping.json"))
 
         # check loading
         earlystopping2 = EarlyStopping.fromFile(
-            f"{os.path.dirname(__file__)}/test_files/earlystopping.json"
+            f"{self.inputBasePath}/earlystopping.json"
         )
         self.assertEqual(earlystopping2.trainedEpochs, [10, 20, 30, 40, 60])
         self.assertEqual(earlystopping2.mode, EarlyStoppingMode.OPTIMAL)
@@ -974,196 +687,11 @@ class TestEarlyStopping(ModelDataSetsMixIn, TestCase):
             _ = test_obj.test_func(None, None, None, best_epoch=40)
 
 
-class TestMonitorsMixIn(ModelDataSetsMixIn, ModelTestMixIn):
-    def trainModelWithMonitoring(
-        self,
-        model: QSPRModel,
-        hyperparam_monitor: HyperparameterOptimizationMonitor,
-        crossval_monitor: AssessorMonitor,
-        test_monitor: AssessorMonitor,
-        fit_monitor: FitMonitor,
-    ) -> (
-        HyperparameterOptimizationMonitor,
-        AssessorMonitor,
-        AssessorMonitor,
-        FitMonitor,
-    ):
-        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
-        search_space_gs = self.getParamGrid(model, "grid")
-        gridsearcher = GridSearchOptimization(
-            param_grid=search_space_gs,
-            model_assessor=CrossValAssessor(
-                scoring=score_func,
-                mode=EarlyStoppingMode.NOT_RECORDING,
-            ),
-            monitor=hyperparam_monitor,
-        )
-        best_params = gridsearcher.optimize(model)
-        model.setParams(best_params)
-        model.save()
-        # perform crossvalidation
-        CrossValAssessor(
-            mode=EarlyStoppingMode.RECORDING,
-            scoring=score_func,
-            monitor=crossval_monitor,
-        )(model)
-        TestSetAssessor(
-            mode=EarlyStoppingMode.NOT_RECORDING,
-            scoring=score_func,
-            monitor=test_monitor,
-        )(model)
-        # train the model on all data
-        model.fitAttached(monitor=fit_monitor)
-        return hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+class TestMonitors(MonitorsCheckMixIn, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
-    def baseMonitorTest(
-        self,
-        monitor: BaseMonitor,
-        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-        neural_net: bool,
-    ):
-        """Test the base monitor."""
-
-        def check_fit_empty(monitor):
-            self.assertEqual(len(monitor.fitLog), 0)
-            self.assertEqual(len(monitor.batchLog), 0)
-            self.assertIsNone(monitor.currentEpoch)
-            self.assertIsNone(monitor.currentBatch)
-            self.assertIsNone(monitor.bestEstimator)
-            self.assertIsNone(monitor.bestEpoch)
-
-        def check_assessment_empty(monitor):
-            self.assertIsNone(monitor.assessmentModel)
-            self.assertIsNone(monitor.asssessmentDataset)
-            self.assertDictEqual(monitor.foldData, {})
-            self.assertIsNone(monitor.predictions)
-            self.assertDictEqual(monitor.estimators, {})
-
-        def check_hyperparam_monitor(monitor):
-            # calculate number of iterations from config
-            n_iter = np.prod([len(v) for v in monitor.config["param_grid"].values()])
-            self.assertGreater(n_iter, 0)
-            self.assertEqual(len(monitor.assessments), n_iter)
-            self.assertEqual(len(monitor.parameters), n_iter)
-            self.assertEqual(monitor.scores.shape, (n_iter, 2))  # agg score + scores
-            self.assertEqual(
-                max(monitor.scores.aggregated_score),
-                monitor.bestScore,
-            )
-            self.assertDictEqual(
-                monitor.bestParameters,
-                monitor.parameters[monitor.scores.aggregated_score.argmax()],
-            )
-            check_assessment_empty(monitor)
-            check_fit_empty(monitor)
-
-        def check_assessor_monitor(monitor, n_folds, len_y):
-            self.assertEqual(
-                monitor.predictions.shape,
-                (len_y, 3 if n_folds > 1 else 2),  # labels + preds (+ fold)
-            )
-            self.assertEqual(len(monitor.foldData), n_folds)
-            self.assertEqual(len(monitor.fits), n_folds)
-            self.assertEqual(len(monitor.estimators), n_folds)
-            check_fit_empty(monitor)
-
-        def check_fit_monitor(monitor):
-            self.assertGreater(len(monitor.fitLog), 0)
-            self.assertGreater(len(monitor.batchLog), 0)
-            self.assertTrue(isinstance(monitor.bestEstimator, monitor.fitModel.alg))
-            self.assertIsNotNone(monitor.currentEpoch)
-            self.assertIsNotNone(monitor.currentBatch)
-
-        if monitor_type == "hyperparam":
-            check_hyperparam_monitor(monitor)
-        elif monitor_type == "crossval":
-            check_assessor_monitor(monitor, 5, len(monitor.assessmentDataset.y))
-        elif monitor_type == "test":
-            check_assessor_monitor(monitor, 1, len(monitor.assessmentDataset.y_ind))
-        elif monitor_type == "fit":
-            if neural_net:
-                check_fit_monitor(monitor)
-            else:
-                check_fit_empty(monitor)
-        else:
-            raise ValueError(f"Unknown monitor type {monitor_type}")
-
-    def fileMonitorTest(
-        self,
-        monitor: FileMonitor,
-        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-        neural_net: bool,
-    ):
-        """Test if the correct files are generated"""
-
-        def check_fit_files(path):
-            self.assertTrue(os.path.exists(f"{path}/fit_log.tsv"))
-            self.assertTrue(os.path.exists(f"{path}/batch_log.tsv"))
-
-        def check_assessment_files(path, monitor):
-            output_path = f"{path}/{monitor.assessmentType}"
-            self.assertTrue(os.path.exists(output_path))
-            self.assertTrue(
-                os.path.exists(
-                    f"{output_path}/{monitor.assessmentType}_predictions.tsv"
-                )
-            )
-
-            if monitor.saveFits and neural_net:
-                for fold in monitor.foldData:
-                    check_fit_files(f"{output_path}/fold_{fold}")
-
-        def check_hyperparam_files(path, monitor):
-            output_path = f"{path}/GridSearchOptimization"
-            self.assertTrue(os.path.exists(output_path))
-            self.assertTrue(
-                os.path.exists(f"{output_path}/GridSearchOptimization_scores.tsv")
-            )
-
-            if monitor.saveAssessments:
-                for assessment in monitor.assessments:
-                    check_assessment_files(
-                        f"{output_path}/iteration_{assessment}", monitor
-                    )
-
-        if monitor_type == "hyperparam":
-            check_hyperparam_files(monitor.outDir, monitor)
-        elif monitor_type in ["crossval", "test"]:
-            check_assessment_files(monitor.outDir, monitor)
-        elif monitor_type == "fit" and neural_net:
-            check_fit_files(monitor.outDir)
-
-    def listMonitorTest(
-        self,
-        monitor: ListMonitor,
-        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-        neural_net: bool,
-    ):
-        self.baseMonitorTest(monitor.monitors[0], monitor_type, neural_net)
-        self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
-
-    def runMonitorTest(
-        self, model, monitor_type, test_method, nerual_net, *args, **kwargs
-    ):
-        hyperparam_monitor = monitor_type(*args, **kwargs)
-        crossval_monitor = deepcopy(hyperparam_monitor)
-        test_monitor = deepcopy(hyperparam_monitor)
-        fit_monitor = deepcopy(hyperparam_monitor)
-        (
-            hyperparam_monitor,
-            crossval_monitor,
-            test_monitor,
-            fit_monitor,
-        ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
-        )
-        test_method(hyperparam_monitor, "hyperparam", nerual_net)
-        test_method(crossval_monitor, "crossval", nerual_net)
-        test_method(test_monitor, "test", nerual_net)
-        test_method(fit_monitor, "fit", nerual_net)
-
-
-class TestMonitors(TestMonitorsMixIn, TestCase):
     def testBaseMonitor(self):
         """Test the base monitor"""
         model = SklearnModel(
