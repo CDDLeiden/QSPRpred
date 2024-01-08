@@ -10,11 +10,12 @@ from matplotlib.figure import Figure
 from parameterized import parameterized
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
+from ..data.processing.feature_filters import LowVarianceFilter
 from ..data.tables.qspr import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
-from ..plotting.classification import MetricsPlot, ROCPlot, ConfusionMatrixPlot
-from ..plotting.regression import CorrelationPlot
+from ..plotting.classification import ConfusionMatrixPlot, MetricsPlot, ROCPlot
+from ..plotting.regression import CorrelationPlot, WilliamsPlot
 from ..tasks import TargetTasks
 from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
 
@@ -148,6 +149,38 @@ class CorrPlotTest(ModelRetriever, TestCase):
         # assert g is sns.FacetGrid
         self.assertIsInstance(g, sns.FacetGrid)
         self.assertTrue(os.path.exists(f"{model.outPrefix}_correlation.png"))
+
+
+class WilliamsPlotTest(ModelRetriever, TestCase):
+    """Test plotting Williams plot for single task."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
+    def testPlotSingle(self):
+        """Test plotting Williams plot for single task."""
+        dataset = self.createLargeTestDataSet(
+            "test_williams_plot_single_data", preparation_settings=self.getDefaultPrep()
+        )
+        # filter features to below the number of samples in the test set
+        # to avoid error in WilliamsPlot
+        dataset.filterFeatures([LowVarianceFilter(0.23)])
+        model = self.getModel(
+            dataset, "test_williams_plot_single_model", alg=RandomForestRegressor
+        )
+        score_func = "r2"
+        CrossValAssessor(scoring=score_func)(model)
+        TestSetAssessor(scoring=score_func)(model)
+        model.save()
+        # generate metrics plot and associated files
+        plt = WilliamsPlot([model])
+        g, leverages, hstar = plt.make()
+        self.assertIsInstance(leverages, pd.DataFrame)
+        self.assertIsInstance(hstar, dict)
+        # assert g is sns.FacetGrid
+        self.assertIsInstance(g, sns.FacetGrid)
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_williamsplot.png"))
 
 
 class ConfusionMatrixPlotTest(ModelRetriever, TestCase):

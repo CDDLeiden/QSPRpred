@@ -94,6 +94,7 @@ From v2.1.0 to v3.0.0
   and run the full CI pipeline.
 - It is now possible to save `PandasDataTable`s to a CSV file instead of the default
   pickle format (slower, but more human-readable).
+- New `RegressionPlot` class  `WilliamsPlot` added to plot Williams plots.
 
 ## Removed Features
 
