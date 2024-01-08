@@ -28,7 +28,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install Clustal Omega and MAFFT
+    - name: Install Clustal Omega, MAFFT & add to PATH
       run: |
         ls -la
         export HOME_DIR=$PWD
@@ -47,6 +47,10 @@ jobs:
         echo 'PATH, and GITHUB_PATH:'
         echo $PATH
         echo $GITHUB_PATH
+        ls -la
+
+    - name: Print Clustal Omega & MAFFT versions
+      run: |
         ls -la
         clustalo --version  # For debugging clustalo version
         mafft --version  # For debugging mafft version
