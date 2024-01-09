@@ -875,13 +875,24 @@ class FileMonitor(BaseMonitor):
                 sep="\t"
             )
 
-    def onFitStart(self, model: QSPRModel):
+    def onFitStart(
+        self, 
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None
+    ):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to be fitted
+            X_train (np.ndarray): training data
+            y_train (np.ndarray): training targets
+            X_val (np.ndarray | None): validation data, used for early stopping
+            y_val (np.ndarray | None): validation targets, used for early stopping
         """
-        super().onFitStart(model)
+        super().onFitStart(model, X_train, y_train, X_val, y_val)
         self.outDir = self.outDir or model.outDir
         self.fitPath = self.outDir
         if self.saveFits:
@@ -1008,13 +1019,20 @@ class WandBMonitor(BaseMonitor):
         self.wandb.log({"Test Results": wandbTable})
         self.wandb.finish()
 
-    def onFitStart(self, model: QSPRModel):
+    def onFitStart(
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None
+    ):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to train
         """
-        super().onFitStart(model)
+        super().onFitStart(model, X_train, y_train, X_val, y_val)
         # initialize wandb run if not already initialized
         if not self.wandb.run:
             self.wandb.init(
