@@ -25,7 +25,7 @@ class RandomModel(QSPRModel):
         # Make alg an anonymous object having all necessary properties
         self.alg = types.SimpleNamespace()
         self.alg.__name__ = "Random"
-        
+
         self.randomState = random_state or (
             data.randomState if data is not None else None
         )
@@ -36,6 +36,7 @@ class RandomModel(QSPRModel):
             new = self.fromFile(self.metaFile)
             self.__dict__.update(new.__dict__)
             self.estimator = new.estimator
+            self.data = data
 
     def fit(
         self,

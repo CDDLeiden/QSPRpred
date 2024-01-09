@@ -181,7 +181,11 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                 expected_pred_not_use_probas=pred_not_use_probas,
             )
 
-class TestRandom(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
+class TestRandom(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def getModel(
         self,
         name: str,
@@ -211,7 +215,7 @@ class TestRandom(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
 
     @parameterized.expand(
         [
-            ('bla', random_state)
+            ('RandomModel', random_state)
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
