@@ -51,7 +51,7 @@ class RandomModel(QSPRModel):
         elif isinstance(y, np.ndarray):
             y_df = pd.DataFrame(y)
         else:
-            raise Exception("What to do with QSPRDataset?")
+            y_df = y.df
 
         # Values of X are irrelevant
         if (self.task.isClassification()):
