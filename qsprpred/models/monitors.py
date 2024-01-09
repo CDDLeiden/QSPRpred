@@ -554,6 +554,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
 
         # fit data
         self.fitModel = None
+        self.fitData = None
         self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
         self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
         self.currentEpoch = None
