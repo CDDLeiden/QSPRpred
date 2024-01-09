@@ -99,14 +99,12 @@ class DataTable(StoredTable):
 
 class MoleculeDataTable(DataTable):
     @abstractmethod
-    def addDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
+    def addDescriptors(self, descriptors: list["DescriptorSet"]):  # noqa: F821
         """
         Add descriptors to the dataset.
 
         Args:
-            calculator (DescriptorsCalculator): An instance of the
-                `DescriptorsCalculator` class that wraps the descriptors to be
-                calculated.
+            descriptors (list[DescriptorSet]): The descriptors to add.
         """
 
     @abstractmethod

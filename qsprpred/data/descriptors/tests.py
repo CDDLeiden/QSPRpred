@@ -2,11 +2,10 @@ import numpy as np
 from parameterized import parameterized
 from rdkit.Chem import Descriptors
 
+from .fingerprints import MorganFP
 from ... import TargetTasks
 from ...data import RandomSplit
-from ...data.descriptors.calculators import MoleculeDescriptorsCalculator
 from ...data.descriptors.sets import (
-    FingerprintSet,
     DrugExPhyschem,
     PredictorDesc,
     TanimotoDistances,
@@ -27,22 +26,20 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         """Set up the test Dataframe."""
         super().setUp()
         self.setUpPaths()
-        self.dataset = self.createLargeTestDataSet(self.__class__.__name__)
 
     def testSwitching(self):
         """Test if the feature calculator can be switched to a new dataset."""
-        feature_calculator = MoleculeDescriptorsCalculator(
-            desc_sets=[
-                FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-                DrugExPhyschem(),
-            ]
-        )
+        dataset = self.createLargeTestDataSet("TestSwitching")
+        feature_calculators = [
+            MorganFP(radius=3, nBits=2048),
+            DrugExPhyschem(),
+        ]
         split = RandomSplit(test_fraction=0.1)
         lv = LowVarianceFilter(0.05)
         hc = HighCorrelationFilter(0.9)
-        self.dataset.prepareDataset(
+        dataset.prepareDataset(
             split=split,
-            feature_calculators=[feature_calculator],
+            feature_calculators=feature_calculators,
             feature_filters=[lv, hc],
             recalculate_features=True,
             feature_fill_value=np.nan,
@@ -51,7 +48,7 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         dataset_next = self.createLargeTestDataSet(self.__class__.__name__)
         dataset_next.prepareDataset(
             split=split,
-            feature_calculators=[feature_calculator],
+            feature_calculators=feature_calculators,
             feature_filters=[lv, hc],
             recalculate_features=True,
             feature_fill_value=np.nan,
@@ -76,25 +73,21 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
             f"qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json"
         )
         model = SklearnModel.fromFile(meta_path)
-        desc_calc = MoleculeDescriptorsCalculator([PredictorDesc(model)])
+        desc_calc = PredictorDesc(model)
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
         self.assertTrue(self.dataset.X.any().any())
         # test from file instantiation
         desc_calc.toFile(f"{self.generatedDataPath}/test_calc.json")
-        desc_calc_file = MoleculeDescriptorsCalculator.fromFile(
-            f"{self.generatedDataPath}/test_calc.json"
-        )
-        self.dataset.addDescriptors(desc_calc_file, recalculate=True)
+        desc_calc_file = desc_calc.fromFile(f"{self.generatedDataPath}/test_calc.json")
+        self.dataset.addDescriptors([desc_calc_file], recalculate=True)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
         self.assertTrue(self.dataset.X.any().any())
 
     def testFingerprintSet(self):
         """Test the fingerprint set descriptor calculator."""
-        desc_calc = MoleculeDescriptorsCalculator(
-            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]
-        )
-        self.dataset.addDescriptors(desc_calc)
+        desc_calc = (MorganFP(radius=3, nBits=2048),)
+        self.dataset.addDescriptors([desc_calc])
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1000))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
@@ -103,21 +96,19 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         """Test the Tanimoto distances descriptor calculator, which calculates the
         Tanimoto distances between a list of SMILES."""
         list_of_smiles = ["C", "CC", "CCC", "CCCC", "CCCCC", "CCCCCC", "CCCCCCC"]
-        desc_calc = MoleculeDescriptorsCalculator(
-            [
-                TanimotoDistances(
-                    list_of_smiles=list_of_smiles,
-                    fingerprint_type="MorganFP",
-                    radius=3,
-                    nBits=1000,
-                )
-            ]
-        )
+        desc_calc = [
+            TanimotoDistances(
+                list_of_smiles=list_of_smiles,
+                fingerprint_type="MorganFP",
+                radius=3,
+                nBits=1000,
+            )
+        ]
         self.dataset.addDescriptors(desc_calc)
 
     def testDrugExPhyschem(self):
         """Test the DrugExPhyschem descriptor calculator."""
-        desc_calc = MoleculeDescriptorsCalculator([DrugExPhyschem()])
+        desc_calc = [DrugExPhyschem()]
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 19))
         self.assertTrue(self.dataset.X.any().any())
@@ -125,14 +116,14 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
 
     def testRDKitDescs(self):
         """Test the rdkit descriptors calculator."""
-        desc_calc = MoleculeDescriptorsCalculator([RDKitDescs()])
+        desc_calc = [RDKitDescs()]
         self.dataset.addDescriptors(desc_calc)
         rdkit_desc_count = len(set(Descriptors._descList))
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), rdkit_desc_count))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
         # with 3D
-        desc_calc = MoleculeDescriptorsCalculator([RDKitDescs(include_3d=True)])
+        desc_calc = [RDKitDescs(include_3d=True)]
         self.dataset.addDescriptors(desc_calc, recalculate=True)
         self.assertEqual(
             self.dataset.X.shape, (len(self.dataset), rdkit_desc_count + 10)
@@ -140,7 +131,7 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
 
     def testSmilesDesc(self):
         """Test the smiles descriptors calculator."""
-        desc_calc = MoleculeDescriptorsCalculator([SmilesDesc()])
+        desc_calc = [SmilesDesc()]
         self.dataset.addDescriptors(desc_calc)
 
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
@@ -149,9 +140,7 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
     def testConsistency(self):
         """Test if the descriptor calculator is consistent with the dataset."""
         len_prev = len(self.dataset)
-        desc_calc = MoleculeDescriptorsCalculator(
-            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]
-        )
+        desc_calc = [MorganFP(radius=3, nBits=2048)]
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(len_prev, len(self.dataset))
         self.assertEqual(len_prev, len(self.dataset.getDescriptors()))

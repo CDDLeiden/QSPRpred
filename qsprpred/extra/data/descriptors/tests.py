@@ -160,9 +160,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         self.assertIsInstance(dataset_new, PCMDataSet)
         self.validate_split(dataset_new)
         self.assertEqual(dataset.X_ind.shape[0], round(ndata * 0.2))
-        self.assertEqual(
-            len(dataset_new.descriptorCalculators), len(dataset_new.descriptors)
-        )
+        self.assertEqual(len(dataset_new.descriptorSets), len(dataset_new.descriptors))
         self.assertTrue(dataset_new.feature_standardizer)
         self.assertTrue(len(dataset_new.featureNames) == len(self.sampleDescSet))
         self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
@@ -186,7 +184,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
             feature_fill_value=np.nan,
         )
         ndata = dataset.getDF().shape[0]
-        self.assertEqual(len(dataset.descriptorCalculators), len(dataset.descriptors))
+        self.assertEqual(len(dataset.descriptorSets), len(dataset.descriptors))
         self.assertEqual(
             dataset.X_ind.shape, (round(ndata * 0.5), len(self.sampleDescSet))
         )
@@ -200,7 +198,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
             feature_fill_value=np.nan,
         )
         self.assertEqual(
-            len(dataset_next.descriptorCalculators), len(dataset_next.descriptors)
+            len(dataset_next.descriptorSets), len(dataset_next.descriptors)
         )
         self.assertEqual(
             dataset_next.X_ind.shape, (round(ndata * 0.5), len(self.sampleDescSet))

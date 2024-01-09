@@ -416,9 +416,7 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         self.assertListEqual(dataset.getFeatureNames(), result.getFeatureNames())
         self.assertListEqual(dataset.targetPropertyNames, result.targetPropertyNames)
         self.assertEqual(len(dataset.descriptors), len(result.descriptors))
-        self.assertEqual(
-            len(dataset.descriptorCalculators), len(result.descriptorCalculators)
-        )
+        self.assertEqual(len(dataset.descriptorSets), len(result.descriptorSets))
         self.assertEqual(len(dataset.targetProperties), len(result.targetProperties))
         self.assertEqual(dataset.nTargetProperties, result.nTargetProperties)
 

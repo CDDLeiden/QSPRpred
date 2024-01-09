@@ -11,6 +11,7 @@ from rdkit.Chem import PandasTools
 from qsprpred.data.tables.searchable import SearchableMolTable
 from .pandas import PandasDataTable
 from ..chem.matching import match_mol_to_smarts
+from ..descriptors.sets import DescriptorSet
 from ..processing.mol_processor import MolProcessor
 from ...data.chem.scaffolds import Scaffold
 from ...data.chem.standardization import (
@@ -29,8 +30,8 @@ class DescriptorTable(PandasDataTable):
 
     def __init__(
         self,
-        calculator,
-        name_prefix: str,
+        calculator: "DescriptorSet",  # noqa: F821
+        name: str,
         df: Optional[pd.DataFrame] = None,
         store_dir: str = ".",
         overwrite: bool = False,
@@ -41,10 +42,10 @@ class DescriptorTable(PandasDataTable):
         """Initialize a `DescriptorTable` object.
 
         Args:
-            calculator (DescriptorsCalculator):
+            calculator (DescriptorSet):
                 `DescriptorsCalculator` used for descriptor calculation.
-            name_prefix (str):
-                Prefix to use for the name of the descriptor table.
+            name (str):
+                Name of the  new  descriptor table.
             df (pd.DataFrame):
                 data frame containing the descriptors. If you provide a
                 dataframe for a dataset that already exists on disk,
@@ -67,7 +68,7 @@ class DescriptorTable(PandasDataTable):
                 Size of chunks to use per job in parallel processing.
         """
         super().__init__(
-            f"{name_prefix}_{calculator.getPrefix()}",
+            name,
             df,
             store_dir,
             overwrite,
@@ -76,11 +77,6 @@ class DescriptorTable(PandasDataTable):
             chunk_size,
         )
         self.calculator = calculator
-
-    @property
-    def prefix(self):
-        """Get the prefix of the descriptors in this table."""
-        return self.calculator.getPrefix()
 
     @property
     def keyCols(self):
@@ -93,7 +89,7 @@ class DescriptorTable(PandasDataTable):
 
     def getDescriptorNames(self):
         """Get the names of the descriptors in this table."""
-        return [x for x in self.df.columns if x.startswith(f"{self.prefix}_")]
+        return self.df.columns[~self.df.columns.isin(self.indexCols)].tolist()
 
     def fillMissing(self, fill_value, names):
         """Fill missing values in the descriptor table.
@@ -221,11 +217,11 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             random_state=self.randomState,
             store_format=self.storeFormat,
         )
-        for table, calc in zip(self.descriptors, self.descriptorCalculators):
+        for table in self.descriptors:
             ret.descriptors.append(
                 DescriptorTable(
-                    calc,
-                    name_prefix=name,
+                    table.calculator,
+                    name=ret.generateDescriptorDataSetName(table.calculator),
                     df=table.getDF().loc[index, :],
                     store_dir=table.storeDir,
                     overwrite=True,
@@ -363,7 +359,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         return ret
 
     @property
-    def descriptorCalculators(self):
+    def descriptorSets(self):
         """Get the descriptor calculators for this table."""
         return [x.calculator for x in self.descriptors]
 
@@ -525,56 +521,36 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             mask.loc[result.index] = result.values
         return mask
 
-    def dropDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
+    def generateDescriptorDataSetName(self, ds_set: str | DescriptorSet):
+        """Generate a descriptor set name from a descriptor set."""
+        return f"Descriptor_{self.name}_{ds_set}"
+
+    def dropDescriptors(
+        self,
+        descriptors: list["DescriptorSet"] | list[str],
+    ):
         """
         Drop descriptors from the data frame
         that were calculated with a specific calculator.
 
         Args:
-            calculator (DescriptorsCalculator): DescriptorsCalculator object to
-                use for descriptor calculation.
+            descriptors (list): list of `DescriptorSet` objects or prefixes of
+                descriptors to drop.
         """
+        assert (
+            len(self.descriptors) == 0
+        ), "Cannot drop descriptors because the data set does not contain any."
+        assert len(descriptors) > 0, "No descriptors specified."
+        descriptors = [self.generateDescriptorDataSetName(x) for x in descriptors]
+
         to_remove = []
-        for idx, calc in enumerate(self.descriptorCalculators):
-            if calc.getPrefix() == calculator.getPrefix():
-                logger.debug(
-                    "Removing existing descriptors with prefix "
-                    f"{self.name}_{calculator.getPrefix()}"
-                )
+        for idx, ds in enumerate(self.descriptors):
+            if ds.name in descriptors:
+                logger.info(f"Removing descriptor set: {ds.name}")
                 to_remove.append(idx)
         for idx in reversed(to_remove):
             self.descriptors[idx].clearFiles()
             self.descriptors.pop(idx)
-
-    def addCustomDescriptors(
-        self,
-        calculator: "CustomDescriptorsCalculator",  # noqa: F821
-        recalculate: bool = False,
-        **kwargs,
-    ):
-        """
-        Add custom descriptors to the data frame using a `CustomDescriptorsCalculator`
-        object.
-
-        Args:
-            calculator (CustomDescriptorsCalculator): CustomDescriptorsCalculator object
-                to use for descriptor calculation.
-            recalculate (bool): Whether to recalculate descriptors even if they are
-                already present in the data frame. If `False`, existing descriptors
-                are kept and no calculation takes place.
-            **kwargs: Additional keyword arguments to pass to the calculator.
-        """
-        if recalculate:
-            self.dropDescriptors(calculator)
-        elif self.getDescriptorNames(prefix=calculator.getPrefix()):
-            logger.warning(
-                f"Custom molecular descriptors already exist in {self.name}. "
-                "Use `recalculate=True` to overwrite them."
-            )
-            return
-        descriptors = calculator(self.df.index, **kwargs)
-        descriptors[self.indexCols] = self.df[self.indexCols]
-        self.attachDescriptors(calculator, descriptors, self.indexCols)
 
     def imputeProperties(self, names: list[str], imputer: Callable):
         """Impute missing property values.
@@ -609,7 +585,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
 
     def attachDescriptors(
         self,
-        calculator: "DescriptorsCalculator",  # noqa: F821
+        calculator: DescriptorSet,
         descriptors: pd.DataFrame,
         index_cols: list,
     ):
@@ -624,7 +600,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         self.descriptors.append(
             DescriptorTable(
                 calculator,
-                self.name,
+                self.generateDescriptorDataSetName(calculator),
                 descriptors,
                 store_dir=self.storeDir,
                 n_jobs=self.nJobs,
@@ -636,7 +612,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
 
     def addDescriptors(
         self,
-        calculator: "MoleculeDescriptorsCalculator",  # noqa: F821
+        descriptors: list["DescriptorSet"],  # noqa: F821
         recalculate: bool = False,
         fail_on_invalid: bool = True,
     ):
@@ -644,23 +620,27 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         Add descriptors to the data frame using a `DescriptorsCalculator` object.
 
         Args:
-            calculator (MoleculeDescriptorsCalculator): DescriptorsCalculator object to
-                use for descriptor calculation.
+            descriptors (list): list of `DescriptorSet` objects to use for descriptor
+                calculation.
             recalculate (bool): Whether to recalculate descriptors even if they are
                 already present in the data frame. If `False`, existing descriptors are
                 kept and no calculation takes place.
             fail_on_invalid (bool): Whether to throw an exception if any molecule
                 is invalid.
         """
-        if recalculate:
-            self.dropDescriptors(calculator)
-        elif self.getDescriptorNames(prefix=calculator.getPrefix()):
-            logger.warning(
-                f"Molecular descriptors already exist in {self.name}. "
-                "Use `recalculate=True` to overwrite them."
-            )
-            return
-
+        if recalculate and self.hasDescriptors():
+            self.dropDescriptors(descriptors)
+        to_calculate = []
+        for desc_set, exists in zip(descriptors, self.hasDescriptors(descriptors)):
+            if exists:
+                logger.warning(
+                    f"Molecular descriptors already exist in {self.name}. "
+                    "Calculation will be skipped. "
+                    "Use `recalculate=True` to overwrite them."
+                )
+            else:
+                to_calculate.append(desc_set)
+        # check for invalid molecules if required
         if fail_on_invalid:
             try:
                 self.checkMols(throw=True)
@@ -679,14 +659,14 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 )
                 raise exp
         # get the data frame with the descriptors
-        descriptors = []
-        for result in self.processMols(calculator):
-            descriptors.append(result)
-        descriptors = pd.concat(descriptors, axis=0)
-        descriptors.index = self.df.index
-        descriptors[self.indexCols] = self.df[self.indexCols]
-        # add the descriptors to the descriptor list
-        self.attachDescriptors(calculator, descriptors, self.indexCols)
+        # and attach it to this table as descriptors
+        for calculator in to_calculate:
+            df_descriptors = []
+            for result in self.processMols(calculator):
+                df_descriptors.append(result)
+            df_descriptors = pd.concat(df_descriptors, axis=0)
+            df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]
+            self.attachDescriptors(calculator, df_descriptors, self.indexCols)
 
     def getDescriptors(self):
         """Get the calculated descriptors as a pandas data frame.
@@ -716,34 +696,49 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         ret.drop(columns=join_cols, inplace=True)
         return ret
 
-    def getDescriptorNames(self, prefix: Optional[str] = None):
-        """Get the names of the descriptors in the data frame.
-
-        Args:
-            prefix (str): Prefix of the descriptors to get. If `None`, all descriptors
-                are returned.
+    def getDescriptorNames(self):
+        """Get the names of the descriptors present for  molecules  in  this data  set.
 
         Returns:
             list: list of descriptor names.
         """
-        if not prefix:
-            prefixes = (
-                [f"{self.name}_{x.getPrefix()}" for x in self.descriptorCalculators]
-                if self.descriptorCalculators
-                else []
-            )
-        else:
-            prefixes = [f"{self.name}_{prefix}"]
+        prefixes = (
+            [f"Descriptor_{self.name}_{x.getPrefix()}" for x in self.descriptorSets]
+            if self.descriptorSets
+            else []
+        )
         names = []
         for x in self.descriptors:
             if f"{self.name}_{x.prefix}" in prefixes:
                 names.extend(x.getDescriptorNames())
         return names
 
-    @property
-    def hasDescriptors(self):
-        """Check whether the data frame contains descriptors."""
-        return len(self.getDescriptorNames()) > 0
+    def hasDescriptors(
+        self, descriptors: list[DescriptorSet | str] | None = None
+    ) -> bool | list[bool]:
+        """Check whether the data frame contains given descriptors.
+
+        Args:
+            descriptors (list): list of `DescriptorSet` objects or prefixes of
+                descriptors to check for. If `None`,
+                all descriptors are checked for and
+                a single boolean is returned if any descriptors are found.
+
+        Returns:
+            list: list of booleans indicating whether each descriptor is present or not.
+        """
+        if not descriptors:
+            return len(self.getDescriptorNames()) > 0
+        else:
+            descriptors = [self.generateDescriptorDataSetName(x) for x in descriptors]
+            descriptors_in = [x.name for x in self.descriptors]
+            ret = []
+            for name in descriptors:
+                if name in descriptors_in:
+                    ret.append(True)
+                else:
+                    ret.append(False)
+            return ret
 
     @property
     def smiles(self) -> Generator[str, None, None]:
@@ -828,7 +823,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                     molCol=f"Scaffold_{scaffold}_RDMol",
                 )
 
-    def getScaffoldNames(self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False):
+    def getScaffoldNames(
+        self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False
+    ):
         """Get the names of the scaffolds in the data frame.
 
         Args:
@@ -849,7 +846,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             return [x for x in all_names if x.split("_", 1)[1] in wanted]
         return all_names
 
-    def getScaffolds(self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False):
+    def getScaffolds(
+        self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False
+    ):
         """Get the subset of the data frame that contains only scaffolds.
 
         Args:

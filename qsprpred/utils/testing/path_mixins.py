@@ -9,12 +9,8 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 from ...data import RandomSplit, QSPRDataset
-from ...data.descriptors.calculators import (
-    MoleculeDescriptorsCalculator,
-    DescriptorsCalculator,
-)
+from ...data.descriptors.fingerprints import MorganFP
 from ...data.descriptors.sets import (
-    FingerprintSet,
     RDKitDescs,
     DrugExPhyschem,
     PredictorDesc,
@@ -75,11 +71,7 @@ class DataSetsPathMixIn(PathMixIn):
     def getDefaultPrep():
         """Return a dictionary with default preparation settings."""
         return {
-            "feature_calculators": [
-                MoleculeDescriptorsCalculator(
-                    [FingerprintSet(fingerprint_type="MorganFP", radius=2, nBits=256)]
-                )
-            ],
+            "feature_calculators": [[MorganFP(radius=3, nBits=2048)]],
             "split": RandomSplit(test_fraction=0.1),
             "feature_standardizer": StandardScaler(),
             "feature_filters": [LowVarianceFilter(0.05), HighCorrelationFilter(0.8)],
@@ -107,11 +99,11 @@ class DataSetsPathMixIn(PathMixIn):
             ),
             TanimotoDistances(
                 list_of_smiles=["C", "CC", "CCC"],
-                fingerprint_type="MorganFP",
+                fingerprint_type=MorganFP(radius=3, nBits=128),
                 radius=3,
                 nBits=1000,
             ),
-            FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
+            MorganFP(radius=3, nBits=128),
         ]
 
         return descriptor_sets
@@ -129,16 +121,12 @@ class DataSetsPathMixIn(PathMixIn):
             list: `list` of created `DescriptorCalculator` objects
         """
         feature_sets = [
-            FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024),
+            MorganFP(radius=3, nBits=128),
             RDKitDescs(),
         ]
         mol_descriptor_calculators = [
-            [MoleculeDescriptorsCalculator(combo)]
-            for combo in itertools.combinations(feature_sets, 1)
-        ] + [
-            [MoleculeDescriptorsCalculator(combo)]
-            for combo in itertools.combinations(feature_sets, 2)
-        ]
+            [combo] for combo in itertools.combinations(feature_sets, 1)
+        ] + [[combo] for combo in itertools.combinations(feature_sets, 2)]
         return mol_descriptor_calculators
 
     @classmethod
@@ -207,7 +195,7 @@ class DataSetsPathMixIn(PathMixIn):
                 str(None)
                 if obj is None
                 else obj.__class__.__name__
-                if (not isinstance(obj, (DescriptorsCalculator, SKLearnStandardizer)))
+                if (not isinstance(obj, SKLearnStandardizer))
                 else str(obj)
             )
 
