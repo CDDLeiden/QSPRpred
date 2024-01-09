@@ -12,7 +12,7 @@ import pandas as pd
 from gbmtsplits import GloballyBalancedSplit
 from sklearn.model_selection import ShuffleSplit
 
-from qsprpred.utils.interfaces.randomized import Randomized
+from ...utils.interfaces.randomized import Randomized
 from ...data.chem.clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
@@ -99,7 +99,9 @@ class RandomSplit(DataSplit, Randomized):
                 "Random seed will be set randomly."
             )
         return ShuffleSplit(
-            1, test_size=self.testFraction, random_state=self.seed
+            1,
+            test_size=self.testFraction,
+            random_state=self.seed
         ).split(X, y)
 
 
@@ -265,9 +267,9 @@ class TemporalSplit(DataSplit):
 
             if len(task_names) > 1:
                 logger.warning(
-                    "The TemporalSplit is not recommended for multitask\
-                    or PCM datasets might lead to very unbalanced subsets\
-                    for some tasks"
+                    "The TemporalSplit is not recommended for multitask "
+                    "or PCM datasets might lead to very unbalanced subsets "
+                    "for some tasks"
                 )
 
             indices = np.array(list(range(len(df))))
@@ -376,7 +378,7 @@ class GBMTDataSplit(DataSplit):
             if self.customTestList
             else None
         )
-        print(self.split_kwargs)
+        logger.debug(f"Split arguments: {self.split_kwargs}")
         # Split dataset
         if self.nFolds == 1:
             sizes = [1 - self.testFraction, self.testFraction]

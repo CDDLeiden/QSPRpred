@@ -1,4 +1,5 @@
 import itertools
+import logging
 import os
 import random
 import traceback
@@ -12,7 +13,8 @@ from .replica import Replica
 from .settings.benchmark import BenchmarkSettings
 from ..logs import logger
 
-lock = Lock()
+lock_data = Lock()
+lock_report = Lock()
 
 
 class BenchmarkRunner:
@@ -65,6 +67,8 @@ class BenchmarkRunner:
             """
             self.replicaID = replica_id
             self.exception = exception
+
+    logLevel = logging.DEBUG
 
     def __init__(
         self,
@@ -145,6 +149,8 @@ class BenchmarkRunner:
                         logger.error(
                             f"Error in replica {result.replicaID}: {result.exception}"
                         )
+                else:
+                    logger.debug(f"Return success from replica: {result}")
         logger.debug("Finished all replica runs.")
         return pd.read_table(self.resultsFile)
 
@@ -209,14 +215,116 @@ class BenchmarkRunner:
         )
         seeds = self.getSeedList(benchmark_settings.random_seed)
         for idx, settings in enumerate(product):
-            yield Replica(
+            yield self.makeReplica(
                 *settings,
                 random_seed=seeds[idx],
                 assessors=benchmark_settings.assessors,
             )
 
+    def makeReplica(self, *args, **kwargs) -> Replica:
+        """Returns a `Replica` object for the given settings. This is useful
+        for debugging.
+
+        Returns:
+            Replica:
+                Replica object.
+        """
+        return Replica(*args, **kwargs)
+
     @classmethod
-    def runReplica(cls, replica: Replica, results_file: str):
+    def getLoggerForReplica(cls, replica: Replica, level: int = logging.DEBUG):
+        """Returns a logger for the given replica.
+
+        Args:
+            replica (Replica):
+                Replica to get the logger for.
+            level (int, optional):
+                Log level. Defaults to logging.DEBUG.
+        """
+        replica_logger = logging.getLogger(replica.id)
+        if len(replica_logger.handlers) > 0:
+            return replica_logger
+        replica_logger.setLevel(level)
+        sh = logging.StreamHandler()
+        formatter = logging.Formatter(
+            "%(name)s - %(levelname)s - %(message)s"
+        )
+        sh.setFormatter(formatter)
+        sh.setLevel(level)
+        replica_logger.addHandler(sh)
+        return replica_logger
+
+    @classmethod
+    def checkReplicaInResultsFile(cls, replica: Replica, results_file: str) -> bool:
+        """Checks if the replica is already present in the results file.
+        This method is thread-safe.
+
+        Args:
+            replica (Replica):
+                Replica to check.
+            results_file (str):
+                Path to the results file.
+
+        Returns:
+            bool:
+                Whether the replica is already present in the results file.
+        """
+        if not os.path.exists(results_file):
+            return False
+        df_results = pd.read_table(results_file)
+        return df_results.ReplicaID.isin([replica.id]).any()
+
+    @classmethod
+    def replicaToReport(cls, replica: Replica) -> pd.DataFrame:
+        """Converts a replica to a report.
+
+        Args:
+            replica (Replica):
+                Replica to convert.
+
+        Returns:
+            pd.DataFrame:
+                Report from the replica.
+        """
+        return replica.createReport()
+
+    @classmethod
+    def appendReportToResults(cls, df_report: pd.DataFrame, results_file: str):
+        """Appends a report to the results file. This method is thread-safe.
+
+        Args:
+            df_report (pd.DataFrame):
+                Report to append.
+            results_file (str):
+                Path to the results file.
+        """
+        df_report.to_csv(
+            results_file,
+            sep="\t",
+            index=False,
+            mode="a",
+            header=not os.path.exists(results_file),
+        )
+
+    @classmethod
+    def initData(cls, replica: Replica):
+        """Initializes the data set for this replica.
+        This method is thread-safe.
+
+        Args:
+            replica (Replica):
+                Replica to initialize.
+        """
+        logger = cls.getLoggerForReplica(replica, cls.logLevel)
+        logger.debug("Initializing data set...")
+        replica.initData()
+        logger.debug("Done.")
+        logger.debug("Adding descriptors...")
+        replica.addDescriptors()
+        logger.debug("Done.")
+
+    @classmethod
+    def runReplica(cls, replica: Replica, results_file: str) -> str | ReplicaException:
         """Runs a single replica. This is executed in parallel by the `run` method.
         It is a classmethod so that it can be pickled and executed in parallel
         more easily.
@@ -228,35 +336,40 @@ class BenchmarkRunner:
                 Path to the results file.
 
         Returns:
-            pd.DataFrame | ReplicaException:
-                Results from the replica or a `ReplicaException` if an error occurred.
+            str | ReplicaException:
+                ID of the replica that was run or a `ReplicaException` if an error
+                was encountered.
         """
+        logger = cls.getLoggerForReplica(replica, cls.logLevel)
+        logger.debug(f"Starting replica: {replica.id}")
         try:
-            with lock:
-                df_results = None
-                if os.path.exists(results_file):
-                    df_results = pd.read_table(results_file)
-                if (
-                    df_results is not None
-                    and df_results.ReplicaID.isin([replica.id]).any()
-                ):
-                    logger.warning(f"Skipping {replica.id}")
-                    return
-                replica.initData()
-                replica.addDescriptors()
+            with lock_data:
+                logger.debug(f"Checking {replica.id} in results file: {results_file}")
+                if cls.checkReplicaInResultsFile(replica, results_file):
+                    logger.warning(f"Skipping {replica.id}. Already in results file.")
+                    return replica.id
+                logger.debug("Initializing data...")
+                cls.initData(replica)
+                logger.debug("Done.")
+            logger.debug("Preparing data set...")
             replica.prepData()
+            logger.debug("Done.")
+            logger.debug("Initializing model...")
             replica.initModel()
+            logger.debug("Done.")
+            logger.debug("Running assessments...")
             replica.runAssessment()
-            with lock:
-                df_report = replica.createReport()
-                df_report.to_csv(
-                    results_file,
-                    sep="\t",
-                    index=False,
-                    mode="a",
-                    header=not os.path.exists(results_file),
-                )
-                return df_report
+            logger.debug("Done.")
+            logger.debug("Creating report...")
+            df_report = cls.replicaToReport(replica)
+            logger.debug("Done.")
+            with lock_report:
+                logger.debug(f"Adding report to: {results_file}")
+                cls.appendReportToResults(df_report, results_file)
+                logger.debug("Done.")
+            logger.debug(f"Finished replica: {replica.id}")
+            return replica.id
         except Exception as e:
+            logger.error(f"Error in replica: {e}")
             traceback.print_exception(type(e), e, e.__traceback__)
             return cls.ReplicaException(replica.id, e)

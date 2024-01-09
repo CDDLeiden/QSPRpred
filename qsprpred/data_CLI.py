@@ -9,6 +9,7 @@ from datetime import datetime
 import numpy as np
 import optuna
 import pandas as pd
+from boruta import BorutaPy
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
@@ -87,8 +88,7 @@ def QSPRArgParser(txt=None):
         "--smiles_col",
         type=str,
         default="SMILES",
-        help="Name of the column in the dataset\
-                        containing the smiles.",
+        help="Name of the column in the dataset containing the smiles.",
     )
     parser.add_argument(
         "-pr",
@@ -132,8 +132,8 @@ def QSPRArgParser(txt=None):
         "-lq",
         "--low_quality",
         action="store_true",
-        help="If lq, than low quality data will be \
-                        should be a column 'Quality' where all 'Low' will be removed",
+        help="If lq, than low quality data will be should be a column 'Quality' where "
+             "all 'Low' will be removed",
     )
     parser.add_argument(
         "-tr",
@@ -242,22 +242,23 @@ def QSPRArgParser(txt=None):
         "--low_variability",
         type=float,
         default=None,
-        help="low variability threshold\
-                        for feature removal.",
+        help="low variability threshold for feature removal.",
     )
     parser.add_argument(
         "-hc",
         "--high_correlation",
         type=float,
         default=None,
-        help="high correlation threshold\
-                        for feature removal.",
+        help="high correlation threshold for feature removal.",
     )
     parser.add_argument(
         "-bf",
         "--boruta_filter",
-        action="store_true",
-        help="boruta filter with random forest",
+        type=float,
+        default=None,
+        help="Boruta filter with random forest estimator, value between 0 and 100 "
+        "for percentile threshold for comparison between shadow and real features"
+        "see https://github.com/scikit-learn-contrib/boruta_py for more info.",
     )
     # other
     parser.add_argument(
@@ -368,9 +369,9 @@ def QSPR_dataprep(args):
                 else None,
             )
             # data filters
-            datafilters = []
+            data_filters = []
             if args.low_quality:
-                datafilters.append(papyrusLowQualityFilter())
+                data_filters.append(papyrusLowQualityFilter())
             # data splitter
             if args.split == "scaffold":
                 split = ScaffoldSplit(
@@ -467,24 +468,31 @@ def QSPR_dataprep(args):
             if args.high_correlation:
                 featurefilters.append(HighCorrelationFilter(th=args.high_correlation))
             if args.boruta_filter:
-                if args.regression:
-                    featurefilters.append(
-                        BorutaFilter(estimator=RandomForestRegressor(n_jobs=args.ncpu))
+                #boruta filter can not be used for multi-task models
+                if len(props) > 1:
+                    raise ValueError(
+                        "Boruta filter can not be used for multi-task models"
                     )
-                else:
-                    featurefilters.append(
-                        BorutaFilter(estimator=RandomForestClassifier(n_jobs=args.ncpu))
+                boruta_estimator = (
+                    RandomForestRegressor(n_jobs=args.ncpu)
+                    if args.regression else RandomForestClassifier(n_jobs=args.ncpu)
+                )
+                featurefilters.append(
+                    BorutaFilter(
+                        BorutaPy(estimator=boruta_estimator, perc=args.boruta_filter),
+                        args.random_state,
                     )
+                )
             # prepare dataset for modelling
             mydataset.prepareDataset(
                 feature_calculators=[MoleculeDescriptorsCalculator(descriptorsets)],
-                datafilters=datafilters,
+                data_filters=data_filters,
                 split=split,
                 feature_filters=featurefilters,
                 feature_standardizer=StandardScaler()
                 if "Smiles" not in args.features
                 else None,
-                feature_fill_value=0.0,
+                feature_fill_value=args.fill_value,
             )
 
             # save dataset files and fingerprints

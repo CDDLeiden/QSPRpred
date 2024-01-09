@@ -262,8 +262,7 @@ class QSPRModel(JSONSerializable, ABC):
             )
         self.randomState = new_random_state
         constructor_params = [
-            name
-            for name, _ in inspect.signature(self.alg.__init__).parameters.items()
+            name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
         ]
         common_params = ["seed", "random_seed", "random_state"]
         random_param = None
@@ -483,8 +482,9 @@ class QSPRModel(JSONSerializable, ABC):
             drop_invalids=False,
             n_jobs=n_jobs,
         )
-        for targetproperty in self.targetProperties:
-            dataset.addProperty(targetproperty.name, np.nan)
+        for target_property in self.targetProperties:
+            target_property.imputer = None
+            dataset.addProperty(target_property.name, np.nan)
         # create the dataset and get failed molecules
         dataset = QSPRDataset.fromMolTable(
             dataset,

@@ -70,12 +70,12 @@ class SklearnMetrics(Metric):
         if isinstance(y_pred, list):
             if self.scorer.__class__.__name__ == "_PredictScorer":
                 # convert to discrete values
-                y_pred = np.transpose([np.argmax(y_pred, axis=1) for y_pred in y_pred])
+                y_pred = [np.argmax(yp, axis=1) for yp in y_pred]
             else:
                 # for each task if single class take second column
                 y_pred = [
-                    y_pred[:, 1].reshape(-1, 1) if y_pred.shape[1] == 2 else y_pred
-                    for y_pred in y_pred
+                    yp[:, 1].reshape(-1, 1) if yp.shape[1] == 2 else yp
+                    for yp in y_pred
                 ]
 
             if len(y_pred) > 1:

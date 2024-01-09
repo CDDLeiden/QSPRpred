@@ -8,7 +8,7 @@ from typing import Callable
 import numpy as np
 
 from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
-from ..data.data import PCMDataSet
+from qsprpred.extra.data.tables.pcm import PCMDataSet
 from ...data.tables.mol import MoleculeTable
 from ...models.models import QSPRModel
 from ...models.scikit_learn import SklearnModel

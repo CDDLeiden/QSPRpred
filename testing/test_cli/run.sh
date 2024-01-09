@@ -45,7 +45,7 @@ python -m qsprpred.data_CLI \
 -st 2000 \
 -fe Morgan \
 -fe RDkit \
--pd ../../qsprpred/data/test_files/test_predictor/qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json \
+-pd ../../qsprpred/utils/testing/test_files/test_predictor/qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json \
 -lv 0.01 \
 -hc 0.9 \
 -fv 0.0

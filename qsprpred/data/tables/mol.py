@@ -125,6 +125,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         index_cols: Optional[list[str]] = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
+        store_format: str = "pkl",
     ):
         """Initialize a `MoleculeTable` object.
 
@@ -154,6 +155,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 will be a custom generated ID.
             autoindex_name (str): Column name to use for automatically generated IDs.
             random_state (int): Random state to use for shuffling and other random ops.
+            store_format (str): Format to use for storing the data ('pkl' or 'csv').
         """
         super().__init__(
             name,
@@ -165,6 +167,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             chunk_size,
             autoindex_name,
             random_state,
+            store_format,
         )
         # the descriptors
         self.descriptors = []
@@ -214,6 +217,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             chunk_size=self.chunkSize,
             drop_invalids=False,
             index_cols=self.indexCols,
+            random_state=self.randomState,
+            store_format=self.storeFormat,
         )
         for table, calc in zip(self.descriptors, self.descriptorCalculators):
             ret.descriptors.append(
@@ -233,6 +238,21 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
     def searchOnProperty(
         self, prop_name: str, values: list[str], name: str | None = None, exact=False
     ) -> "MoleculeTable":
+        """Create a new table from a list of property values.
+
+        Args:
+            prop_name (str): name of the property to search on
+            values (list[str]): list of values to search for
+            name (str | None, optional): name of the new table. Defaults to the name of
+                the old table, plus the `_searched` suffix.
+            exact (bool, optional):  Whether to use exact matching, i.e. whether to
+                search for exact matches or partial matches. Defaults to False.
+
+        Returns:
+            MoleculeTable:
+                A new table with the molecules from the
+                old table with the given property values.
+        """
         mask = [False] * len(self.df)
         for value in values:
             mask = (

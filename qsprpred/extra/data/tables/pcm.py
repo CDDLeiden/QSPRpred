@@ -2,16 +2,16 @@ from typing import Callable
 
 import pandas as pd
 
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
-from ...data.descriptors.calculators import (
+from qsprpred.data.descriptors.calculators import (
     DescriptorsCalculator,
     MoleculeDescriptorsCalculator,
 )
-from ...data.tables.mol import MoleculeTable
-from ...data.tables.qspr import QSPRDataset
-from ...logs import logger
-from ...tasks import TargetProperty
-from ...utils.serialization import function_as_string, function_from_string
+from qsprpred.data.tables.mol import MoleculeTable
+from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from qsprpred.logs import logger
+from qsprpred.tasks import TargetProperty
+from qsprpred.utils.serialization import function_as_string, function_from_string
 
 
 class PCMDataSet(QSPRDataset):
@@ -48,6 +48,7 @@ class PCMDataSet(QSPRDataset):
         index_cols: list[str] | None = None,
         autoindex_name: str = "QSPRID",
         random_state: int | None = None,
+        store_format: str = "pkl",
     ):
         """Construct a data set to handle PCM data.
 
@@ -90,6 +91,8 @@ class PCMDataSet(QSPRDataset):
                 Column name to use for automatically generated IDs.
             random_state (int, optional):
                 random state for reproducibility. Defaults to `None`.
+            store_format
+                format to use for storing the data ('pkl' or 'csv').
 
         Raises:
             `ValueError`:
@@ -110,6 +113,7 @@ class PCMDataSet(QSPRDataset):
             drop_empty=drop_empty,
             autoindex_name=autoindex_name,
             random_state=random_state,
+            store_format=store_format,
         )
         self.proteinCol = protein_col
         self.proteinSeqProvider = protein_seq_provider

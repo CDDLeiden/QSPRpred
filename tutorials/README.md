@@ -10,7 +10,7 @@ running `tutorial_data/create_tutorial_data.py`.
 
 A Quick Start tutorial is designed to get you up and running with QSPRpred as quickly as
 possible.
-The rest of the the tutorials is diveded into two categories: basic and advanced.
+The rest of the tutorials is divided into two categories: basic and advanced.
 The Basics tutorials cover all basic functionality of QSPRpred that you will need in
 most projects. The Advanced tutorials cover more advanced topics and are designed for
 users who are already familiar with the basics of QSPRpred.

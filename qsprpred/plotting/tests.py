@@ -10,16 +10,17 @@ from matplotlib.figure import Figure
 from parameterized import parameterized
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
+from ..data.processing.feature_filters import LowVarianceFilter
 from ..data.tables.qspr import QSPRDataset
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
-from ..models.tests import ModelDataSetsMixIn
-from ..plotting.classification import MetricsPlot, ROCPlot, ConfusionMatrixPlot
-from ..plotting.regression import CorrelationPlot
+from ..plotting.classification import ConfusionMatrixPlot, MetricsPlot, ROCPlot
+from ..plotting.regression import CorrelationPlot, WilliamsPlot
 from ..tasks import TargetTasks
+from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
 
 
-class ModelRetriever(ModelDataSetsMixIn):
+class ModelRetriever(ModelDataSetsPathMixIn):
     def getModel(
         self, dataset: QSPRDataset, name: str, alg: Type = RandomForestClassifier
     ) -> SklearnModel:
@@ -49,6 +50,10 @@ class ModelRetriever(ModelDataSetsMixIn):
 class ROCPlotTest(ModelRetriever, TestCase):
     """Test ROC curve plotting class."""
 
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def testPlotSingle(self):
         """Test plotting ROC curve for single task."""
         dataset = self.createLargeTestDataSet(
@@ -64,17 +69,21 @@ class ROCPlotTest(ModelRetriever, TestCase):
         # make plots
         plt = ROCPlot([model])
         # cross validation plot
-        ax = plt.make("CL_class", validation="cv")[0]
+        ax = plt.make(validation="cv")[0]
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.cv.png"))
         # independent test set plot
-        ax = plt.make("CL_class", validation="ind")[0]
+        ax = plt.make(validation="ind")[0]
         self.assertIsInstance(ax, Figure)
         self.assertTrue(os.path.exists(f"{model.outPrefix}.ind.png"))
 
 
 class MetricsPlotTest(ModelRetriever, TestCase):
     """Test metrics plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     @parameterized.expand(
         [
@@ -107,7 +116,7 @@ class MetricsPlotTest(ModelRetriever, TestCase):
         model.save()
         # generate metrics plot and associated files
         plt = MetricsPlot([model])
-        figures, summary = plt.make("CL_class")
+        figures, summary = plt.make()
         for g in figures:
             self.assertIsInstance(g, sns.FacetGrid)
         self.assertIsInstance(summary, pd.DataFrame)
@@ -116,6 +125,10 @@ class MetricsPlotTest(ModelRetriever, TestCase):
 
 class CorrPlotTest(ModelRetriever, TestCase):
     """Test correlation plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     def testPlotSingle(self):
         """Test plotting correlation for single task."""
@@ -138,8 +151,44 @@ class CorrPlotTest(ModelRetriever, TestCase):
         self.assertTrue(os.path.exists(f"{model.outPrefix}_correlation.png"))
 
 
+class WilliamsPlotTest(ModelRetriever, TestCase):
+    """Test plotting Williams plot for single task."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
+    def testPlotSingle(self):
+        """Test plotting Williams plot for single task."""
+        dataset = self.createLargeTestDataSet(
+            "test_williams_plot_single_data", preparation_settings=self.getDefaultPrep()
+        )
+        # filter features to below the number of samples in the test set
+        # to avoid error in WilliamsPlot
+        dataset.filterFeatures([LowVarianceFilter(0.23)])
+        model = self.getModel(
+            dataset, "test_williams_plot_single_model", alg=RandomForestRegressor
+        )
+        score_func = "r2"
+        CrossValAssessor(scoring=score_func)(model)
+        TestSetAssessor(scoring=score_func)(model)
+        model.save()
+        # generate metrics plot and associated files
+        plt = WilliamsPlot([model])
+        g, leverages, hstar = plt.make()
+        self.assertIsInstance(leverages, pd.DataFrame)
+        self.assertIsInstance(hstar, dict)
+        # assert g is sns.FacetGrid
+        self.assertIsInstance(g, sns.FacetGrid)
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_williamsplot.png"))
+
+
 class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
     """Test confusion matrix plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     @parameterized.expand(
         [
@@ -172,28 +221,28 @@ class ConfusionMatrixPlotTest(ModelRetriever, TestCase):
         model.save()
         # make plots
         plt = ConfusionMatrixPlot([model])
-        axes, cm_dict = plt.make("CL_class")
+        axes, cm_dict = plt.make()
         # assert all figures are sns.FacetGrid
         for ax in axes:
             self.assertIsInstance(ax, Figure)
         self.assertIsInstance(cm_dict, dict)
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_0.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_0.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_1.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_1.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_2.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_2.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_3.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_3.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_class_4.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_4.0_confusion_matrix.png")
         )
         self.assertTrue(
             os.path.exists(
-                f"{model.outPrefix}_CL_class_Independent Test_confusion_matrix.png"
+                f"{model.outPrefix}_CL_Independent Test_confusion_matrix.png"
             )
         )

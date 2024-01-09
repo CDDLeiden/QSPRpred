@@ -1,5 +1,5 @@
 {
-    "py/object": "qsprpred.models.sklearn.SklearnModel",
+    "py/object": "qsprpred.models.scikit_learn.SklearnModel",
     "py/state": {
         "name": "ConsistencyChecksCLS_2746317213",
         "baseDir": ".",
@@ -7,8 +7,7 @@
             {
                 "py/object": "qsprpred.tasks.TargetProperty",
                 "py/state": {
-                    "name": "pchembl_value_Mean_class",
-                    "originalName": "pchembl_value_Mean",
+                    "name": "pchembl_value_Mean",
                     "task": {
                         "py/reduce": [
                             {
@@ -25,7 +24,8 @@
                         6.5
                     ],
                     "_nClasses": 2,
-                    "transformer": null
+                    "transformer": null,
+                    "imputer": null
                 }
             }
         ],
@@ -1618,8 +1618,8 @@
         "parameters": {
             "random_state": 2746317213
         },
-        "randomState": 2746317213,
         "alg": "sklearn.ensemble._forest.ExtraTreesClassifier",
+        "randomState": 2746317213,
         "estimator": "./ConsistencyChecksCLS_2746317213/ConsistencyChecksCLS_2746317213.json"
     }
 }

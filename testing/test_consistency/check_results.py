@@ -79,7 +79,7 @@ for f in os.listdir("expected"):
 if not success:
     sys.stderr.write(
         "Comparison of benchmark outputs failed! "
-        "One or more files did not match:\n" + "\n".join(failed_files)
+        "One or more files did not match:\n" + "\t\n".join(failed_files) + "\n"
     )
     sys.exit(1)
 else:

@@ -264,7 +264,7 @@ class DrugExPhyschem(MoleculeDescriptorSet):
             for j, prop in enumerate(self.props):
                 try:
                     scores[i, j] = self._prop_dict[prop](mol)
-                except Exception as exp:  # noqa: E722
+                except Exception as exp:
                     logger.warning(f"Could not calculate {prop} for {mol}.")
                     logger.exception(exp)
                     continue

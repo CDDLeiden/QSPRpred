@@ -112,13 +112,15 @@ class TargetProperty(JSONSerializable):
         nClasses (int): number of classes for the target property, only used for
             classification tasks
         transformer (Callable): function to transform the target property
+        imputer (Callable): function to impute the target property
     """
+
     def __init__(
         self,
         name: str,
-        task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
-                      TargetTasks.MULTICLASS],
-        original_name: Optional[str] = None,
+        task: Literal[
+            TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS
+        ],
         th: Optional[list[float] | str] = None,
         n_classes: Optional[int] = None,
         transformer: Optional[Callable] = None,
@@ -131,22 +133,23 @@ class TargetProperty(JSONSerializable):
             task (Literal[TargetTasks.REGRESSION,
               TargetTasks.SINGLECLASS,
               TargetTasks.MULTICLASS]): task type for the target property
-            original_name (str): original name of the target property, if not specified,
-                the name is used
             th (list[float] | str): threshold for the target property, only used
-                for classification tasks
-            n_classes (int): number of classes for the target property (only used if th
-                is precomputed, otherwise it is inferred)
+                for classification tasks. If th is precomputed, set it to "precomputed".
+                If th is precomputed, n_classes must be specified.
+            n_classes (int): number of classes for the target property. Must be
+                specified if th is precomputed, otherwise it is inferred from th.
             transformer (Callable): function to transform the target property
             imputer (Callable): function to impute the target property
         """
         self.name = name
-        self.originalName = original_name if original_name is not None else name
         self.task = task
         if task.isClassification():
             assert (
                 th is not None
-            ), f"Threshold not specified for classification task {name}"
+            ), (f"Threshold not specified for classification task `{name}`. "
+                "If the task is already precomputed, set `th` to `precomputed`, and "
+                "define the correct number of classes with `n_classes."
+                )
             self.th = th
             if isinstance(th, str) and th == "precomputed":
                 self.nClasses = n_classes
@@ -172,15 +175,19 @@ class TargetProperty(JSONSerializable):
     def th(self):
         """Set the threshold for the target property.
 
-        Args:
-            th (Union[list[int], str]): threshold for the target property
+        Returns:
+            th ([list[int] | str]): threshold for the target property
         """
         return self._th
 
     @th.setter
     def th(self, th: list[float] | str):
         """Set the threshold for the target property and the number of classes if th is
-        not precomputed."""
+        not precomputed.
+
+        Args:
+            th (list[float] | str): threshold for the target property
+        """
         assert (
             self.task.isClassification()
         ), "Threshold can only be set for classification tasks"
@@ -198,7 +205,11 @@ class TargetProperty(JSONSerializable):
 
     @property
     def nClasses(self):
-        """Get the number of classes for the target property."""
+        """Get the number of classes for the target property.
+
+        Returns:
+            nClasses (int): number of classes
+        """
         return self._nClasses
 
     @nClasses.setter
@@ -232,6 +243,10 @@ class TargetProperty(JSONSerializable):
 
         Args:
             d (dict): dictionary containing the target property information
+
+        Example:
+            >>> TargetProperty.fromDict({"name": "property_name", "task": "regression"})
+            TargetProperty(name=property_name, task=REGRESSION)
 
         Returns:
             TargetProperty: TargetProperty object
@@ -276,22 +291,18 @@ class TargetProperty(JSONSerializable):
                 {
                     "name": target_prop.name,
                     "task": target_prop.task.name if task_as_str else target_prop.task,
-                    "original_name": target_prop.originalName,
                 }
             )
             if target_prop.task.isClassification():
                 target_props[-1].update(
-                    {
-                        "th": target_prop.th,
-                        "n_classes": target_prop.nClasses
-                    }
+                    {"th": target_prop.th, "n_classes": target_prop.nClasses}
                 )
             if not drop_transformer:
                 target_props[-1].update({"transformer": target_prop.transformer})
         return target_props
 
     @staticmethod
-    def selectFromList(_list: list, names: list, original_names: bool = False):
+    def selectFromList(_list: list, names: list):
         """Select a subset of TargetProperty objects from a list of TargetProperty
         objects.
 
@@ -304,8 +315,6 @@ class TargetProperty(JSONSerializable):
         Returns:
             list[TargetProperty]: list of TargetProperty objects
         """
-        if original_names:
-            return [t for t in _list if t.originalName in names]
         return [t for t in _list if t.name in names]
 
     @staticmethod
@@ -319,16 +328,3 @@ class TargetProperty(JSONSerializable):
             list[str]: list of names of the target properties
         """
         return [t.name for t in _list]
-
-    @staticmethod
-    def getOriginalNames(_list: list):
-        """Get the original names of the target properties from a list of TargetProperty
-        objects.
-
-        Args:
-            _list (list): list of TargetProperty objects
-
-        Returns:
-            list[str]: list of original names of the target properties
-        """
-        return [t.originalName for t in _list]
