@@ -10,6 +10,7 @@ from parameterized import parameterized
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVR
+from sklearn.impute import SimpleImputer
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.tasks import TargetProperty, TargetTasks
@@ -20,6 +21,7 @@ from qsprpred.extra.data.utils.msa_calculator import ClustalMSA
 from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 from qsprpred.extra.data.descriptors.sets import ProDec
 from ..models.pcm import SklearnPCMModel
+from ..models.random import RandomModel
 
 
 class ModelDataSetsMixInExtras(ModelDataSetsMixIn, DataSetsMixInExtras):
@@ -167,6 +169,87 @@ class TestPCM(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
             self.predictorTest(
                 predictor,
                 protein_id=dataset.getDF()["accession"].iloc[0],
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+
+class TestRandom(ModelDataSetsMixInExtras, ModelTestMixIn, TestCase):
+    def getModel(
+        self,
+        name: str,
+        dataset: PCMDataSet | None = None,
+        parameters: dict | None = None,
+        random_state: int | None = None,
+    ):
+        """Initialize dataset and model.
+
+        Args:
+            name (str): Name of the model.
+            alg (Type | None): Algorithm class.
+            dataset (PCMDataSet | None): Dataset to use.
+            parameters (dict | None): Parameters to use.
+            random_state (int | None): Random seed to use.
+
+        Returns:
+            RandomModel: Initialized model.
+        """
+        return RandomModel(
+            base_dir=self.generatedModelsPath,
+            data=dataset,
+            name=name,
+            parameters=parameters,
+            random_state=random_state,
+        )
+
+    @parameterized.expand(
+        [
+            ('bla', random_state)
+            for random_state in ([None], [1, 42], [42, 42])
+        ]
+    )
+    def testRegressionMultiTaskFit(self, model_name, random_state: list[int | None]):
+        """Test model training for multitask regression models."""
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            target_props=[
+                {
+                    "name": "fu",
+                    "task": TargetTasks.REGRESSION,
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION,
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
+            ],
+            preparation_settings=self.getDefaultPrep(),
+        )
+        # test classifier
+        # initialize model for training from class
+        model = self.getModel(
+            name=f"RandomModel_multitask_regression",
+            dataset=dataset,
+            random_state=random_state[0],
+        )
+        self.fitTest(model)
+        predictor = RandomModel(
+            name=f"RandomModel_multitask_regression", base_dir=model.baseDir
+        )
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=f"RandomModel_multitask_regression",
+                dataset=dataset,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = RandomModel(
+                name=f"RandomModel_multitask_regression", base_dir=model.baseDir
+            )
+            self.predictorTest(
+                predictor,
                 expect_equal_result=random_state[0] == random_state[1],
                 expected_pred_use_probas=pred_use_probas,
                 expected_pred_not_use_probas=pred_not_use_probas,
