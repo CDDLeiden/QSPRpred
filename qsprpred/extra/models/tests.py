@@ -181,7 +181,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                 expected_pred_not_use_probas=pred_not_use_probas,
             )
 
-class TestRandom(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
+class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -213,6 +213,48 @@ class TestRandom(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
             random_state=random_state,
         )
 
+class TestRandomModelRegression(RandomBaseModelTestCase):
+    """Test the RandomModel class for regression models."""
+
+    @parameterized.expand(
+        [
+            ('RandomModel', TargetTasks.REGRESSION, random_state)
+            for random_state in ([None], [1, 42], [42, 42])
+        ]
+    )
+    def testRegressionBasicFit(self, model_name, task, random_state):
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            target_props=[{"name": "CL", "task": task}],
+            preparation_settings=self.getDefaultPrep(),
+        )
+        # initialize model for training from class
+        model = self.getModel(
+            name=f"{model_name}_{task}",
+            dataset=dataset,
+            random_state=random_state[0],
+        )
+        self.fitTest(model)
+        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=f"{model_name}_{task}",
+                dataset=dataset,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = RandomModel(
+                name=f"{model_name}_{task}", base_dir=model.baseDir
+            )
+            self.predictorTest(
+                predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+
     @parameterized.expand(
         [
             ('RandomModel', random_state)
@@ -240,24 +282,24 @@ class TestRandom(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         # test classifier
         # initialize model for training from class
         model = self.getModel(
-            name=f"RandomModel_multitask_regression",
+            name=f"{model_name}_multitask_regression",
             dataset=dataset,
             random_state=random_state[0],
         )
         self.fitTest(model)
         predictor = RandomModel(
-            name=f"RandomModel_multitask_regression", base_dir=model.baseDir
+            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
         if random_state[0] is not None:
             model = self.getModel(
-                name=f"RandomModel_multitask_regression",
+                name=f"{model_name}_multitask_regression",
                 dataset=dataset,
                 random_state=random_state[1],
             )
             self.fitTest(model)
             predictor = RandomModel(
-                name=f"RandomModel_multitask_regression", base_dir=model.baseDir
+                name=f"{model_name}_multitask_regression", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
