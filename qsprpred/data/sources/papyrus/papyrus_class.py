@@ -21,6 +21,7 @@ class Papyrus(DataSource):
     Attributes:
         DEFAULT_DIR (str): default directory for Papyrus database and the extracted data
         dataDir (str): storage directory for Papyrus database and the extracted data
+        _papyrusDir (str): directory where the Papyrus database is located, os.path.join(dataDir, "papyrus")
         version (list): Papyrus database version
         descriptors (list, str, None): descriptors to download if not already present
         stereo (bool): use version with stereochemistry
@@ -60,6 +61,7 @@ class Papyrus(DataSource):
                 use only plusplus version, only high quality data
         """
         self.dataDir = data_dir
+        self._papyrusDir = os.path.join(self.dataDir, "papyrus")
         self.version = version
         self.descriptors = descriptors
         self.stereo = stereo
@@ -73,8 +75,8 @@ class Papyrus(DataSource):
         Only newly requested data is downloaded. Remove the files if you want to
         reload the data completely.
         """
-        os.makedirs(self.dataDir, exist_ok=True)
-        if not os.path.exists(os.path.join(self.dataDir, "papyrus")):
+        if not os.path.exists(self._papyrusDir):
+            os.makedirs(self.dataDir, exist_ok=True)
             logger.info("Downloading Papyrus database...")
             download_papyrus(
                 outdir=self.dataDir,
@@ -87,10 +89,8 @@ class Papyrus(DataSource):
             )
         else:
             logger.info(
-                f"Papyrus database already"
-                f" downloaded. Using existing data. "
-                f"Delete the following folder to reload the data: "
-                f"{os.path.join(self.dataDir, 'papyrus')}"
+                "Papyrus database already downloaded. Using existing data. "
+                f"Delete the following folder to reload the data: {self._papyrusDir}"
             )
 
     def getData(
@@ -121,7 +121,7 @@ class Papyrus(DataSource):
         Returns:
             MolculeTable: the filtered data set
         """
-        logger.debug(f"Getting data from Papyrus data source...")
+        logger.debug("Getting data from Papyrus data source...")
         assert acc_keys is not None, "Please provide a list of accession keys."
         name = name or "papyrus"
         self.download()
@@ -143,7 +143,7 @@ class Papyrus(DataSource):
             plusplus=self.plusplus,
             papyrus_dir=self.dataDir,
         )
-        logger.debug(f"Finished filtering Papyrus data set.")
+        logger.debug("Finished filtering Papyrus data set.")
         logger.debug(f"Creating MoleculeTable from '{path}'.")
         ret = MoleculeTable.fromTableFile(name, path, store_dir=output_dir, **kwargs)
         logger.debug(f"Finished creating MoleculeTable from '{path}'.")
@@ -175,7 +175,9 @@ class Papyrus(DataSource):
         if os.path.exists(path) and use_existing:
             return pd.read_table(path)
         else:
-            protein_data = papyrus_scripts.read_protein_set(version=self.version)
+            protein_data = papyrus_scripts.read_protein_set(
+                source_path=self.dataDir, version=self.version
+            )
             protein_data["accession"] = protein_data["target_id"].apply(
                 lambda x: x.split("_")[0]
             )
