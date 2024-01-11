@@ -192,7 +192,8 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         if parameters is None:
             parameters = {}
 
-        parameters["gpu"] = GPUS[0] if len(GPUS) > 0 else None
+        if len(GPUS) > 0:
+            parameters["gpu"] = GPUS[0]
         parameters["epochs"] = 2
         return ChempropModel(
             base_dir=base_dir, data=dataset, name=name, parameters=parameters
@@ -384,13 +385,14 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             self.generatedModelsPath,
             "--epochs",
             "2",
-            "--gpu",
-            str(GPUS[0]) if len(GPUS) > 0 else None,
             "--seed",
             str(model.randomState),
             "--pytorch_seed",
             str(model.randomState),
         ]
+        
+        if len(GPUS) > 0:
+            arguments.extend(["--gpu", str(GPUS[0])])
 
         args = chemprop.args.TrainArgs().parse_args(arguments)
         chemprop_score, _ = chemprop.train.cross_validate(
