@@ -242,15 +242,12 @@ class QSPRDataset(MoleculeTable):
         Returns:
             list[str]: list of feature names
         """
-        features = None if not self.hasDescriptors else self.getDescriptorNames()
-        if self.descriptorSets:
-            features = []
+        features = []
+        if not self.hasDescriptors:
+            return features
+        else:
             for calc in self.descriptorSets:
-                prefix = calc.getPrefix()
-                for descset in calc.descSets:
-                    features.extend(
-                        [f"{prefix}_{descset}_{x}" for x in descset.descriptors]
-                    )
+                features.extend(calc.descriptors)
         return features
 
     def restoreTrainingData(self):
@@ -737,7 +734,12 @@ class QSPRDataset(MoleculeTable):
             logger.info(f"Selected features: {self.featureNames}")
             # update descriptor calculator
             for ds in self.descriptors:
-                ds.keepDescriptors(self.featureNames)
+                to_keep = [
+                    x
+                    for x in ds.getDescriptorNames(active_only=False)
+                    if x in self.featureNames
+                ]
+                ds.keepDescriptors(to_keep)
 
     def setFeatureStandardizer(self, feature_standardizer):
         """Set feature standardizer.

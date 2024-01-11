@@ -78,18 +78,25 @@ class DescriptorTable(PandasDataTable):
         )
         self.calculator = calculator
 
-    @property
-    def keyCols(self):
-        """Get the key columns of this table."""
-        return self.indexCols
-
-    def getDescriptors(self):
+    def getDescriptors(self, active_only=True):
         """Get the descriptors in this table."""
-        return self.df[self.getDescriptorNames()]
+        return self.df[self.getDescriptorNames(active_only=active_only)]
 
-    def getDescriptorNames(self):
-        """Get the names of the descriptors in this table."""
-        return self.df.columns[~self.df.columns.isin(self.indexCols)].tolist()
+    def getDescriptorNames(self, active_only=True):
+        """Get the names of the descriptors in this represented by this table.
+        By default, only active descriptors are returned. You can use active_only=False
+        to get all descriptors saved in the table.
+
+        Args:
+            active_only (bool): Whether to return only descriptors that are active in
+                the current descriptor set. Defaults to `True`.
+
+        """
+        all_descs = self.df.columns[~self.df.columns.isin(self.indexCols)].tolist()
+        if active_only:
+            return [x for x in all_descs if x in self.calculator.descriptors]
+        else:
+            return all_descs
 
     def fillMissing(self, fill_value, names):
         """Fill missing values in the descriptor table.
@@ -101,6 +108,22 @@ class DescriptorTable(PandasDataTable):
         """
         columns = names if names else self.getDescriptorNames()
         self.df[columns] = self.df[columns].fillna(fill_value)
+
+    def keepDescriptors(self, descriptors: list[str]) -> list[str]:
+        """Mark only the given descriptors as active in this set.
+
+        Args:
+            descriptors (list): list of descriptor names to keep
+
+        Returns:
+            list[str]: list of descriptor names that were kept
+
+        Raises:
+            ValueError: If any of the descriptors are not present in the table.
+        """
+        all_descs = self.getDescriptorNames(active_only=False)
+        self.calculator.descriptors = set(all_descs) & set(descriptors)
+        return self.getDescriptorNames()
 
 
 class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
@@ -523,7 +546,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
 
     def generateDescriptorDataSetName(self, ds_set: str | DescriptorSet):
         """Generate a descriptor set name from a descriptor set."""
-        return f"Descriptor_{self.name}_{ds_set}"
+        return f"Descriptors_{self.name}_{ds_set}"
 
     def dropDescriptors(
         self,
@@ -676,7 +699,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """
         join_cols = set()
         for descriptors in self.descriptors:
-            join_cols.update(set(descriptors.keyCols))
+            join_cols.update(set(descriptors.indexCols))
         join_cols = list(join_cols)
         ret = self.df[join_cols].copy()
         ret.reset_index(drop=True, inplace=True)
@@ -684,12 +707,12 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             df_descriptors = descriptors.getDF()
             ret = ret.merge(
                 df_descriptors,
-                left_on=descriptors.keyCols,
+                left_on=descriptors.indexCols,
                 how="left",
                 right_index=True,
                 suffixes=("_left", "_right"),
             )
-            for x in descriptors.keyCols:
+            for x in descriptors.indexCols:
                 ret.drop(columns=[f"{x}_right"], inplace=True)
                 ret.rename(columns={f"{x}_left": x}, inplace=True)
         ret.set_index(self.df.index, inplace=True)
@@ -702,15 +725,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         Returns:
             list: list of descriptor names.
         """
-        prefixes = (
-            [f"Descriptor_{self.name}_{x.getPrefix()}" for x in self.descriptorSets]
-            if self.descriptorSets
-            else []
-        )
         names = []
-        for x in self.descriptors:
-            if f"{self.name}_{x.prefix}" in prefixes:
-                names.extend(x.getDescriptorNames())
+        for ds in self.descriptors:
+            names.extend(ds.getDescriptorNames())
         return names
 
     def hasDescriptors(
