@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 import ml2json
-import numpy as np
+import pandas as pd
 from mlchemad.base import ApplicabilityDomain as MLChemApplicabilityDomain
 
 from ...logs import logger
@@ -17,33 +17,33 @@ class ApplicabilityDomain(JSONSerializable, ABC):
     domain.
     """
     @abstractmethod
-    def fit(self, X: np.ndarray) -> None:
+    def fit(self, X: pd.DataFrame) -> None:
         """Fit the applicability domain model.
 
         Args:
-            X (np.ndarray): array of features to fit model on
+            X (pd.DataFrame): array of features to fit model on
         """
 
     @abstractmethod
-    def contains(self, X: np.ndarray) -> np.ndarray:
+    def contains(self, X: pd.DataFrame) -> pd.DataFrame:
         """Check if the applicability domain contains the features.
 
         Args:
-            X (np.ndarray): array of features to check
+            X (pd.DataFrame): array of features to check
 
         Returns:
-            np.ndarray: array of booleans indicating if the features are in the
+            pd.DataFrame: array of booleans indicating if the features are in the
                 applicability domain
         """
 
-    def filter(self, X: np.ndarray) -> np.ndarray:
+    def filter(self, X: pd.DataFrame) -> pd.DataFrame:
         """Filter out some rows from a dataframe.
 
         Args:
-            X (np.ndarray): array of features to filter
+            X (pd.DataFrame): array of features to filter
 
         Returns:
-            The filtered np.ndarray
+            The filtered pd.DataFrame
         """
         if X.shape[0] == 0:
             logger.warning("Empty dataframe, nothing to filter")
@@ -79,27 +79,29 @@ class MLChemAD(ApplicabilityDomain):
         super().__setstate__(state)
         self.applicabilityDomain = ml2json.from_dict(state["applicabilityDomain"])
 
-    def fit(self, X: np.ndarray) -> None:
+    def fit(self, X: pd.DataFrame) -> None:
         """Fit the applicability domain model.
 
         Args:
-            X (np.ndarray): array of features to fit model on
+            X (pd.DataFrame): array of features to fit model on
         """
         self.applicabilityDomain.fit(X)
 
-    def contains(self, X: np.ndarray) -> np.ndarray:
+    def contains(self, X: pd.DataFrame) -> pd.DataFrame:
         """Check if the applicability domain contains the features.
 
         Args:
-            X (np.ndarray): array of features to check
+            X (pd.DataFrame): array of features to check
 
         Returns:
-            np.ndarray: array of booleans indicating if the features are in the
+            pd.DataFrame: array of booleans indicating if the features are in the
                 applicability domain
         """
         if not self.fitted:
             raise RuntimeError("Applicability domain not fitted, call fit first")
-        return self.applicabilityDomain.contains(X)
+        return pd.DataFrame(
+            self.applicabilityDomain.contains(X), index=X.index, columns=["in_domain"]
+        )
 
     @property
     def fitted(self) -> bool:
