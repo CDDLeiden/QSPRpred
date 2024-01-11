@@ -174,12 +174,6 @@ class ChempropModel(QSPRModel):
             )
         self.randomState = new_random_state
 
-    def __setstate__(self, state):
-        super().__setstate__(state)
-        self.chempropLogger = chemprop.utils.create_logger(
-            name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
-        )
-
     def supportsEarlyStopping(self) -> bool:
         """Return if the model supports early stopping.
 
@@ -819,3 +813,11 @@ class ChempropModel(QSPRModel):
                 "value is dataset-dependent; it is recommended that users test "
                 "different values to find the best value for their model.",
         }
+
+    @classmethod
+    def fromFile(cls, filename: str) -> "ChempropModel":
+        ret = super().fromFile(filename)
+        ret.chempropLogger = chemprop.utils.create_logger(
+            name="chemprop_logger", save_dir=ret.outDir, quiet=ret.quietLogger
+        )
+        return ret

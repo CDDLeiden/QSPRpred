@@ -230,7 +230,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             feature_calculators=[
                 MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
             ],
-            split=RandomSplit(test_fraction=0.1),
+            split=RandomSplit(test_fraction=0.1, dataset=dataset),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
@@ -294,7 +294,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             feature_calculators=[
                 MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
             ],
-            split=RandomSplit(test_fraction=0.1),
+            split=RandomSplit(test_fraction=0.1, dataset=dataset),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
