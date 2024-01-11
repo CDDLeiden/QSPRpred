@@ -561,9 +561,13 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 descriptors to drop.
         """
         assert (
-            len(self.descriptors) == 0
+            len(self.descriptors) != 0
         ), "Cannot drop descriptors because the data set does not contain any."
-        assert len(descriptors) > 0, "No descriptors specified."
+        if len(descriptors) == 0:
+            logger.warning(
+                "No descriptors specified to drop. All descriptors will be retained."
+            )
+            return
         descriptors = [self.generateDescriptorDataSetName(x) for x in descriptors]
 
         to_remove = []

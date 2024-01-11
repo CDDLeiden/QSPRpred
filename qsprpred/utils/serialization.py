@@ -96,7 +96,7 @@ class JSONSerializable(FileSerializable):
         return os.path.abspath(filename)
 
     @classmethod
-    def fromFile(cls, filename: str) -> object:
+    def fromFile(cls, filename: str) -> Any:
         """Initialize a new instance from a JSON file.
 
         Args:

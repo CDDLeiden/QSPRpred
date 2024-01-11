@@ -44,7 +44,7 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
             recalculate_features=True,
             feature_fill_value=np.nan,
         )
-        # create new dataset with different feature calculator
+        # create new dataset with the same calculator
         dataset_next = self.createLargeTestDataSet(self.__class__.__name__)
         dataset_next.prepareDataset(
             split=split,
@@ -53,6 +53,7 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
             recalculate_features=True,
             feature_fill_value=np.nan,
         )
+        self.assertEqual(dataset.X.shape, dataset_next.X.shape)
 
 
 class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
@@ -74,7 +75,7 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         )
         model = SklearnModel.fromFile(meta_path)
         desc_calc = PredictorDesc(model)
-        self.dataset.addDescriptors(desc_calc)
+        self.dataset.addDescriptors([desc_calc])
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
         self.assertTrue(self.dataset.X.any().any())
         # test from file instantiation

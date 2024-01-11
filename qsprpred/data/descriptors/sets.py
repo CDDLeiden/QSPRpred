@@ -5,7 +5,7 @@ To add a new descriptor or fingerprint calculator:
 * Add a function to retrieve your descriptor by name to the descriptor retriever class
 """
 from abc import ABC, abstractmethod
-from typing import Type, Any
+from typing import Type, Any, Generator
 
 import numpy as np
 import pandas as pd
@@ -25,16 +25,18 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
     """Abstract base class for descriptor sets."""
 
     @staticmethod
-    def iterMols(mols: list[str | Mol], to_list=False):
+    def iterMols(
+        mols: list[str | Mol], to_list=False
+    ) -> list[Mol] | Generator[Mol, None, None]:
         """
         Create a molecule generator or list from RDKit molecules or SMILES.
 
         Args:
             mols: list of molecules (SMILES `str` or RDKit Mol)
-            to_list: if True, return a list instead of an generator
+            to_list: if True, return a list instead of a generator
 
         Returns:
-            an array or data frame of descriptor values of shape (n_mols, n_descriptors)
+            a list  or  generator of RDKit molecules
         """
         ret = (Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol for mol in mols)
         if to_list:
