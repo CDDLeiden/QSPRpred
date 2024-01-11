@@ -54,6 +54,10 @@ class PlottingTest(ModelDataSetsPathMixIn, QSPRTestCase):
 class ROCPlotTest(PlottingTest):
     """Test ROC curve plotting class."""
 
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def testPlotSingle(self):
         """Test plotting ROC curve for single task."""
         dataset = self.createLargeTestDataSet(
@@ -80,6 +84,10 @@ class ROCPlotTest(PlottingTest):
 
 class MetricsPlotTest(PlottingTest):
     """Test metrics plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     @parameterized.expand(
         [
@@ -122,6 +130,10 @@ class MetricsPlotTest(PlottingTest):
 class CorrPlotTest(PlottingTest):
     """Test correlation plotting class."""
 
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
     def testPlotSingle(self):
         """Test plotting correlation for single task."""
         dataset = self.createLargeTestDataSet(
@@ -145,6 +157,10 @@ class CorrPlotTest(PlottingTest):
 
 class WilliamsPlotTest(PlottingTest):
     """Test plotting Williams plot for single task."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     def testPlotSingle(self):
         """Test plotting Williams plot for single task."""
@@ -173,6 +189,10 @@ class WilliamsPlotTest(PlottingTest):
 
 class ConfusionMatrixPlotTest(PlottingTest):
     """Test confusion matrix plotting class."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
 
     @parameterized.expand(
         [
