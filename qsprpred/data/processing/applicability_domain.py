@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
-import numpy as np
-from ...utils.serialization import JSONSerializable
-from mlchemad.base import ApplicabilityDomain as MLChemApplicabilityDomain
+
 import ml2json
+import numpy as np
+from mlchemad.base import ApplicabilityDomain as MLChemApplicabilityDomain
+
 from ...logs import logger
+from ...utils.serialization import JSONSerializable
+
 
 class ApplicabilityDomain(JSONSerializable, ABC):
     """Define the applicability domain for a dataset.
@@ -13,7 +16,6 @@ class ApplicabilityDomain(JSONSerializable, ABC):
     in the applicability domain or just to check if a molecule is in the applicability
     domain.
     """
-
     @abstractmethod
     def fit(self, X: np.ndarray) -> None:
         """Fit the applicability domain model.
@@ -47,6 +49,7 @@ class ApplicabilityDomain(JSONSerializable, ABC):
             logger.warning("Empty dataframe, nothing to filter")
             return X
         return X[self.contains(X)]
+
 
 class MLChemAD(ApplicabilityDomain):
     """Define the applicability domain for a dataset using the MLChemAD package.
