@@ -199,7 +199,9 @@ class PandasDataTable(DataTable, JSONSerializable):
         """
         self.indexCols = cols
         self.idProp = "~".join(self.indexCols)
-        self.df[self.idProp] = self.df[self.indexCols].apply(lambda x: "~".join(map(str, x.tolist())), axis=1)
+        self.df[self.idProp] = self.df[self.indexCols].apply(
+            lambda x: "~".join(map(str, x.tolist())), axis=1
+        )
         self.df.set_index(self.idProp, inplace=True, verify_integrity=True, drop=False)
         self.df.drop(
             inplace=True,
@@ -347,13 +349,7 @@ class PandasDataTable(DataTable, JSONSerializable):
                 of the data frame.
         """
         n_cpus = self.nJobs
-        if (
-            n_cpus
-            and n_cpus > 1
-            and not (
-                hasattr(func, "noParallelization") and func.noParallelization is True
-            )
-        ):
+        if n_cpus > 1:
             logger.debug(
                 f"Applying function '{func!r}' in parallel on {n_cpus} CPUs, "
                 f"using chunk size: {self.chunkSize}."

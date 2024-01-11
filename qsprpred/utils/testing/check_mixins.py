@@ -96,8 +96,7 @@ class DescriptorCheckMixIn:
         # test some basic consistency rules on the resulting features
         expected_length = 0
         for calc in dataset.descriptorSets:
-            for descset in calc.descSets:
-                expected_length += len(descset.descriptors)
+            expected_length += len(calc.descriptors)
         self.checkFeatures(dataset, expected_length)
         # save to file, check if it can be loaded, and if the features are consistent
         dataset.save()
@@ -195,20 +194,15 @@ class DescriptorInDataCheckMixIn(DescriptorCheckMixIn):
         ]
         return f"{desc_set}_{target_props_id}"
 
-    def getCalculators(self, desc_sets):
-        """Get the calculators for a descriptor set."""
-        return [desc_sets]
-
     def checkDataSetContainsDescriptorSet(
         self, dataset, desc_set, prep_combo, target_props
     ):
         """Check if a descriptor set is in a data set."""
         # run the preparation
         logging.debug(f"Testing descriptor set: {desc_set} in data set: {dataset.name}")
-        descriptor_sets = [desc_set]
         preparation = {}
         preparation.update(prep_combo)
-        preparation["feature_calculators"] = self.getCalculators(descriptor_sets)
+        preparation["feature_calculators"] = [desc_set]
         dataset.prepareDataset(**preparation)
         # test consistency
         self.checkDescriptors(dataset, target_props)

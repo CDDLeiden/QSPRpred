@@ -27,9 +27,12 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         super().setUp()
         self.setUpPaths()
 
-    def testSwitching(self):
+    @parameterized.expand([(None, None), (1, None), (2, None), (4, 50)])
+    def testSwitching(self, n_cpu, chunk_size):
         """Test if the feature calculator can be switched to a new dataset."""
-        dataset = self.createLargeTestDataSet("TestSwitching")
+        dataset = self.createLargeTestDataSet(
+            "TestSwitching", n_jobs=n_cpu, chunk_size=chunk_size
+        )
         feature_calculators = [
             MorganFP(radius=3, nBits=2048),
             DrugExPhyschem(),
@@ -63,7 +66,9 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         """Create the test Dataframe."""
         super().setUp()
         self.setUpPaths()
-        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
+        self.dataset = self.createLargeTestDataSet(self.__class__.__name__)
+        self.dataset.nJobs = self.nCPU
+        self.dataset.chunkSize = None
         self.dataset.shuffle()
 
     def testPredictorDescriptor(self):
@@ -87,9 +92,9 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
 
     def testFingerprintSet(self):
         """Test the fingerprint set descriptor calculator."""
-        desc_calc = (MorganFP(radius=3, nBits=2048),)
+        desc_calc = MorganFP(radius=3, nBits=128)
         self.dataset.addDescriptors([desc_calc])
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1000))
+        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 128))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
@@ -100,9 +105,7 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         desc_calc = [
             TanimotoDistances(
                 list_of_smiles=list_of_smiles,
-                fingerprint_type="MorganFP",
-                radius=3,
-                nBits=1000,
+                fingerprint_type=MorganFP(radius=3, nBits=128),
             )
         ]
         self.dataset.addDescriptors(desc_calc)
@@ -141,15 +144,15 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
     def testConsistency(self):
         """Test if the descriptor calculator is consistent with the dataset."""
         len_prev = len(self.dataset)
-        desc_calc = [MorganFP(radius=3, nBits=2048)]
+        desc_calc = [MorganFP(radius=3, nBits=128)]
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(len_prev, len(self.dataset))
         self.assertEqual(len_prev, len(self.dataset.getDescriptors()))
         self.assertEqual(len_prev, len(self.dataset.X))
-        self.assertEqual(1000, self.dataset.getDescriptors().shape[1])
-        self.assertEqual(1000, self.dataset.X.shape[1])
-        self.assertEqual(1000, self.dataset.X_ind.shape[1])
-        self.assertEqual(1000, self.dataset.getFeatures(concat=True).shape[1])
+        self.assertEqual(128, self.dataset.getDescriptors().shape[1])
+        self.assertEqual(128, self.dataset.X.shape[1])
+        self.assertEqual(128, self.dataset.X_ind.shape[1])
+        self.assertEqual(128, self.dataset.getFeatures(concat=True).shape[1])
         self.assertEqual(len_prev, self.dataset.getFeatures(concat=True).shape[0])
 
 
@@ -206,7 +209,10 @@ class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTest
         """
         np.random.seed(42)
         dataset = self.createLargeTestDataSet(
-            name=self.getDatSetName(desc_set, target_props), target_props=target_props
+            name=self.getDatSetName(desc_set, target_props),
+            target_props=target_props,
+            n_jobs=self.nCPU,
+            chunk_size=None,
         )
         self.checkDataSetContainsDescriptorSet(
             dataset, desc_set, self.getDefaultPrep(), target_props

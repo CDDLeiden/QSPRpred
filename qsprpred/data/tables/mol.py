@@ -507,6 +507,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             if prop not in add_props:
                 add_props.append(prop)
         if self.nJobs > 1 and processor.supportsParallel:
+            logger.debug(
+                f"Applying processor '{processor}' to '{self.name}' in parallel."
+            )
             for result in self.apply(
                 self._apply_to_mol_wrap,
                 func_args=[processor, add_rdkit, self.smilesCol, *proc_args],
@@ -516,6 +519,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             ):
                 yield result
         else:
+            logger.debug(
+                f"Applying processor '{processor}' to '{self.name}' in serial."
+            )
             for result in self.iterChunks(include_props=add_props, as_dict=True):
                 yield self._apply_to_mol_wrap(
                     result,
@@ -639,7 +645,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
 
     def addDescriptors(
         self,
-        descriptors: list["DescriptorSet"],  # noqa: F821
+        descriptors: list[DescriptorSet],
         recalculate: bool = False,
         fail_on_invalid: bool = True,
     ):

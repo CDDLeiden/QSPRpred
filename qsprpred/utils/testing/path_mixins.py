@@ -244,6 +244,8 @@ class DataSetsPathMixIn(PathMixIn):
         target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
         preparation_settings=None,
         random_state=42,
+        n_jobs=1,
+        chunk_size=None,
     ):
         """Create a large dataset for testing purposes.
 
@@ -262,6 +264,8 @@ class DataSetsPathMixIn(PathMixIn):
             target_props=target_props,
             prep=preparation_settings,
             random_state=random_state,
+            n_jobs=n_jobs,
+            chunk_size=chunk_size,
         )
 
     def createSmallTestDataSet(
@@ -297,6 +301,8 @@ class DataSetsPathMixIn(PathMixIn):
         target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
         random_state=None,
         prep=None,
+        n_jobs=1,
+        chunk_size=None,
     ):
         """Create a dataset for testing purposes from the given data frame.
 
@@ -316,6 +322,8 @@ class DataSetsPathMixIn(PathMixIn):
             df=df,
             store_dir=self.generatedDataPath,
             random_state=random_state,
+            n_jobs=n_jobs,
+            chunk_size=chunk_size,
         )
         if prep:
             ret.prepareDataset(**prep)
