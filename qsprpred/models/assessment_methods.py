@@ -225,8 +225,7 @@ class CrossValAssessor(ModelAssessor):
                 scores_tasks = []
                 for idx, prop in enumerate(model.data.targetProperties):
                     if self.useProba and prop.task.isClassification():
-                        prop_predictions = fold_predictions[idx]
-                        prop_predictions = prop_predictions[:, 1]
+                        prop_predictions = [fold_predictions[idx]]
                         scores_tasks.append(
                             self.scoreFunc(y.iloc[idx_test, idx], prop_predictions)
                         )
@@ -337,8 +336,7 @@ class TestSetAssessor(ModelAssessor):
             scores_tasks = []
             for idx, prop in enumerate(model.data.targetProperties):
                 if self.useProba and prop.task.isClassification():
-                    prop_predictions = predictions[idx]
-                    prop_predictions = prop_predictions[:, 1]
+                    prop_predictions = [predictions[idx]]
                     scores_tasks.append(
                         self.scoreFunc(y_ind.iloc[:, idx], prop_predictions)
                     )
