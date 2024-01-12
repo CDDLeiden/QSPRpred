@@ -7,7 +7,6 @@ import pandas as pd
 
 from .settings.benchmark import DataPrepSettings
 from ..data import QSPRDataset
-from ..data.descriptors.calculators import MoleculeDescriptorsCalculator
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
 from ..logs import logger
@@ -148,10 +147,7 @@ class Replica(JSONSerializable):
             logger.info(f"Data set {self.ds.name} not yet found. It will be created.")
             # calculate descriptors if necessary
             logger.info(f"Calculating descriptors for {self.ds.name}.")
-            desc_calculator = MoleculeDescriptorsCalculator(
-                desc_sets=deepcopy(self.descriptors)
-            )
-            self.ds.addDescriptors(desc_calculator, recalculate=True)
+            self.ds.addDescriptors(deepcopy(self.descriptors), recalculate=True)
             self.ds.setTargetProperties(deepcopy(self.targetProps))
             self.ds.setRandomState(self.randomSeed)
             self.ds.save()
