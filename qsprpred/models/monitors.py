@@ -497,26 +497,37 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
     internally, but not logged. This class can be used as a base class for other
     other monitors that do log the information elsewhere.
 
+    If used to monitor hyperparameter optimization, the information about the
+    underlying assessments and fits is stored in the assessments and fits
+    attributes, respectively. If used to monitor assessment, the information
+    about the fits is stored in the fits attribute.
+
     Attributes:
         config (dict): configuration of the hyperparameter optimization
         bestScore (float): best score found during optimization
         bestParameters (dict): best parameters found during optimization
         assessments (dict): dictionary of assessments, keyed by the iteration number
+            (each assessment includes: assessmentModel, assessmentDataset, foldData,
+                predictions, estimators, fits)
         scores (pd.DataFrame): scores for each hyperparameter search iteration
         model (QSPRModel): model to optimize
         data (QSPRDataset): dataset used in optimization
+
         assessmentType (str): type of current assessment
         assessmentModel (QSPRModel): model to assess in current assessment
         assessmentDataset (QSPRDataset): data set used in current assessment
         foldData (dict): dictionary of input data, keyed by the fold index, of the
             current assessment
-        predictions (np.ndarray): predictions of the current fold of the
-            current assessment
+        predictions (pd.DataFrame): predictions for the dataset of the current assessment
         estimators (dict): dictionary of fitted estimators, keyed by the fold index of
             the current assessment
         currentFold (int): index of the current fold of the
             current assessment
         fits (dict): dictionary of fit data, keyed by the fold index of the current
+            assessment (each fit includes: fitData, fitLog, batchLog, bestEstimator,
+                bestEpoch)
+
+        fitData (dict): dictionary of input data of the current fit of the current
             assessment
         fitModel (QSPRModel): model to fit in current fit of the current assessment
         fitLog (pd.DataFrame): log of the training process of the current fit of the
