@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 
 from qsprpred.data.descriptors.calculators import DescriptorsCalculator
-from qsprpred.extra.data.utils.msa_calculator import ClustalMSA, MSAProvider
 from qsprpred.extra.data.descriptors.sets import ProteinDescriptorSet
+from qsprpred.extra.data.utils.msa_calculator import ClustalMSA, MSAProvider
 
 
 class ProteinDescriptorCalculator(DescriptorsCalculator):
@@ -17,6 +17,7 @@ class ProteinDescriptorCalculator(DescriptorsCalculator):
         msa_provider(ClustalMSA): a provider of multiple sequence alignment (MSA)
             functionality. Defaults to ClustalMSA().
     """
+
     def __init__(
         self,
         desc_sets: list[ProteinDescriptorSet],

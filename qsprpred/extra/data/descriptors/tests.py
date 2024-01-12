@@ -1,5 +1,6 @@
+import platform
 from typing import Type
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 import numpy as np
 from parameterized import parameterized
@@ -7,17 +8,27 @@ from sklearn.preprocessing import StandardScaler
 
 from qsprpred import TargetTasks, TargetProperty
 from qsprpred.data import RandomSplit
-from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
+from qsprpred.data.descriptors.fingerprints import MorganFP
 from qsprpred.data.descriptors.sets import (
-    FingerprintSet,
     DrugExPhyschem,
-    MoleculeDescriptorSet,
+    DescriptorSet,
 )
 from qsprpred.data.processing.feature_filters import (
     LowVarianceFilter,
     HighCorrelationFilter,
 )
 from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from qsprpred.extra.data.descriptors.fingerprints import (
+    CDKFP,
+    CDKExtendedFP,
+    CDKGraphOnlyFP,
+    CDKMACCSFP,
+    CDKPubchemFP,
+    CDKEStateFP,
+    CDKSubstructureFP,
+    CDKKlekotaRothFP,
+    CDKAtomPairs2DFP,
+)
 from qsprpred.extra.data.descriptors.sets import (
     Mold2,
     PaDEL,
@@ -44,41 +55,37 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
         self.dataset.shuffle()
 
+    @skipIf(platform.system() == "Darwin", "Mordred not supported on Mac OS")
     def testMold2(self):
         """Test the Mold2 descriptor calculator."""
-        desc_calc = MoleculeDescriptorsCalculator([Mold2()])
-        self.dataset.addDescriptors(desc_calc)
+        self.dataset.addDescriptors([Mold2()])
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 777))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
     def testPaDELDescriptors(self):
         """Test the PaDEL descriptor calculator."""
-        desc_calc = MoleculeDescriptorsCalculator([PaDEL()])
-        self.dataset.addDescriptors(desc_calc)
+        self.dataset.addDescriptors([PaDEL()])
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1444))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
     @parameterized.expand(
         [
-            ("CDKFP", 1024),
-            ("CDKExtendedFP", 1024),
-            ("CDKGraphOnlyFP", 1024),
-            ("CDKMACCSFP", 166),
-            ("CDKPubchemFP", 881),
-            ("CDKEStateFP", 79),
-            ("CDKSubstructureFP", 307),
-            ("CDKKlekotaRothFP", 4860),
-            ("CDKAtomPairs2DFP", 780),
+            (CDKFP, 1024),
+            (CDKExtendedFP, 1024),
+            (CDKGraphOnlyFP, 1024),
+            (CDKMACCSFP, 166),
+            (CDKPubchemFP, 881),
+            (CDKEStateFP, 79),
+            (CDKSubstructureFP, 307),
+            (CDKKlekotaRothFP, 4860),
+            (CDKAtomPairs2DFP, 780),
         ]
     )
     def testPaDELFingerprints(self, fp_type, nbits):
-        desc_calc = MoleculeDescriptorsCalculator(
-            [FingerprintSet(fingerprint_type=fp_type)]
-        )
         dataset = self.createSmallTestDataSet(f"{self.__class__.__name__}_{fp_type}")
-        dataset.addDescriptors(desc_calc)
+        dataset.addDescriptors([fp_type()])
         self.assertEqual(dataset.X.shape, (len(dataset), nbits))
         self.assertTrue(dataset.X.any().any())
         self.assertTrue(dataset.X.any().sum() > 1)
@@ -88,8 +95,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
         import mordred
         from mordred import descriptors
 
-        desc_calc = MoleculeDescriptorsCalculator([Mordred()])
-        self.dataset.addDescriptors(desc_calc)
+        self.dataset.addDescriptors([Mordred()])
         self.assertEqual(
             self.dataset.X.shape,
             (
@@ -102,8 +108,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
 
     def testExtendedValenceSignature(self):
         """Test the SMILES based signature descriptor calculator."""
-        desc_calc = MoleculeDescriptorsCalculator([ExtendedValenceSignature(1)])
-        self.dataset.addDescriptors(desc_calc, recalculate=True)
+        self.dataset.addDescriptors([ExtendedValenceSignature(1)], recalculate=True)
         self.dataset.featurize()
         self.assertTrue(self.dataset.X.shape[1] > 0)
         self.assertTrue(self.dataset.X.any().any())
@@ -209,17 +214,11 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
 
     def testWithMolDescriptors(self):
         """Test the calculation of protein and molecule descriptors."""
-        protein_feature_calculator = ProteinDescriptorCalculator(
-            desc_sets=[ProDec(sets=["Zscale Hellberg"])],
-            msa_provider=self.defaultMSA,
-        )
-        mol_feature_calculator = MoleculeDescriptorsCalculator(
-            desc_sets=[
-                FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048),
-                DrugExPhyschem(),
-            ]
-        )
-        calcs = [protein_feature_calculator, mol_feature_calculator]
+        calcs = [
+            ProDec(sets=["Zscale Hellberg"]),
+            MorganFP(radius=2, nBits=128),
+            DrugExPhyschem(),
+        ]
         self.dataset.prepareDataset(
             feature_calculators=calcs,
             feature_standardizer=StandardScaler(),
@@ -228,8 +227,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         # test if all descriptors are there
         expected_length = 0
         for calc in calcs:
-            for descset in calc.descSets:
-                expected_length += len(descset)
+            expected_length += len(calc)
         self.assertEqual(self.dataset.X.shape[1], expected_length)
         # filter features and test if they are there after saving and loading
         self.dataset.filterFeatures(
@@ -280,7 +278,7 @@ class TestDescriptorsExtra(DataSetsMixInExtras, DescriptorInDataCheckMixIn, Test
     def testDescriptorsExtraAll(
         self,
         _,
-        desc_set: MoleculeDescriptorSet,
+        desc_set: DescriptorSet,
         target_props: list[dict | TargetProperty],
     ):
         """Test the calculation of extra descriptors with data preparation."""
