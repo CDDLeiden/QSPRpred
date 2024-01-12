@@ -441,30 +441,6 @@ class QSPRDataset(MoleculeTable):
         ds.descriptors = mol_table.descriptors
         return ds
 
-    def addCustomDescriptors(
-        self,
-        calculator: "CustomDescriptorsCalculator",  # noqa: F821
-        recalculate: bool = False,
-        featurize: bool = True,
-        **kwargs,
-    ):
-        """Add custom descriptors to the data set.
-
-        If descriptors are already present, they will be recalculated if `recalculate`
-        is `True`.
-
-        Args:
-            calculator (CustomDescriptorsCalculator): calculator instance to use for
-                descriptor calculation
-            recalculate (bool, optional): whether to recalculate descriptors if they
-                are already present. Defaults to `False`.
-            featurize (bool, optional): whether to featurize the data set splits
-                after adding descriptors. Defaults to `True`.
-            kwargs: additional keyword arguments to pass to the calculator
-        """
-        super().addCustomDescriptors(calculator, recalculate, **kwargs)
-        self.featurize(update_splits=featurize)
-
     def filter(self, table_filters: list[Callable]):
         """Filter the data set using the given filters.
 

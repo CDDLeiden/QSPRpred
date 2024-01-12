@@ -76,9 +76,10 @@ class MorganFP(Fingerprint):
 
         Args:
             mols: molecules to obtain the fingerprint of
+            props: dictionary of properties
 
         Returns:
-            fingerprint (list): `list` of fingerprints for "mols"
+            array: `np.ndarray` of fingerprints for "mols", shape (n_mols, n_bits)
         """
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
@@ -123,10 +124,6 @@ class RDKitMACCSFP(Fingerprint):
 
         return ret
 
-    @property
-    def settings(self):
-        return {}
-
     def __len__(self):
         return 167
 
@@ -152,10 +149,6 @@ class MaccsFP(Fingerprint):
             ret[idx] = np_fp
         return ret
 
-    @property
-    def settings(self):
-        return {"nBits": self.nBits}
-
     def __len__(self):
         return self.nBits
 
@@ -180,10 +173,6 @@ class AvalonFP(Fingerprint):
             convertFP(fp, np_fp)
             ret[idx] = np_fp
         return ret
-
-    @property
-    def settings(self):
-        return {"nBits": self.nBits}
 
     def __len__(self):
         return self.nBits
@@ -212,10 +201,6 @@ class TopologicalFP(Fingerprint):
             ret[idx] = np_fp
         return ret
 
-    @property
-    def settings(self):
-        return {"nBits": self.nBits}
-
     def __len__(self):
         return self.nBits
 
@@ -242,10 +227,6 @@ class AtomPairFP(Fingerprint):
             convertFP(fp, np_fp)
             ret[idx] = np_fp
         return ret
-
-    @property
-    def settings(self):
-        return {"nBits": self.nBits}
 
     def __len__(self):
         return self.nBits
@@ -280,10 +261,6 @@ class RDKitFP(Fingerprint):
             ret[idx] = np_fp
         return ret
 
-    @property
-    def settings(self):
-        return {"minPath": self.minPath, "maxPath": self.maxPath, "nBits": self.nBits}
-
     def __len__(self):
         return self.nBits
 
@@ -308,10 +285,6 @@ class PatternFP(Fingerprint):
             ret[idx] = np_fp
 
         return ret
-
-    @property
-    def settings(self):
-        return {"nBits": self.nBits}
 
     def __len__(self):
         return self.nBits
@@ -345,10 +318,6 @@ class LayeredFP(Fingerprint):
             convertFP(fp, np_fp)
             ret[idx] = np_fp
         return ret
-
-    @property
-    def settings(self):
-        return {"minPath": self.minPath, "maxPath": self.maxPath, "nBits": self.nBits}
 
     def __len__(self):
         return self.nBits

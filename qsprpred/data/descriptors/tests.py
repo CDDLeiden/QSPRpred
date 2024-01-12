@@ -3,15 +3,15 @@ from parameterized import parameterized
 from rdkit.Chem import Descriptors
 
 from .fingerprints import MorganFP
-from ... import TargetTasks
-from ...data import RandomSplit
-from ...data.descriptors.sets import (
+from .sets import (
     DrugExPhyschem,
     PredictorDesc,
     TanimotoDistances,
     RDKitDescs,
     SmilesDesc,
 )
+from ... import TargetTasks
+from ...data import RandomSplit
 from ...data.processing.feature_filters import LowVarianceFilter, HighCorrelationFilter
 from ...models import SklearnModel
 from ...utils.testing.base import QSPRTestCase

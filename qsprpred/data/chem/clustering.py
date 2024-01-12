@@ -150,7 +150,9 @@ class FPSimilarityClusters(MoleculeClusters):
 
         # Get fingerprints for each molecule
         mols = [Chem.MolFromSmiles(smiles) for smiles in smiles_list]
-        fps = self.fp_calculator.getFingerprint(mols)
+        fps = self.fp_calculator.getDescriptors(
+            mols, props={self.fp_calculator.idProp: [str(x) for x in range(len(mols))]}
+        )
 
         # Convert np fingerprints to rdkit fingerprints
         fps = [
@@ -236,7 +238,7 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
         similarity_threshold: float = 0.7,
         fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
     ):
-        super().__init__()
+        super().__init__(fp_calculator=fp_calculator)
         self.similarityThreshold = similarity_threshold
         self.fpCalculator = fp_calculator
 

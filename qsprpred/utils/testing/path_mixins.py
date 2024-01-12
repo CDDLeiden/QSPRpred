@@ -71,7 +71,7 @@ class DataSetsPathMixIn(PathMixIn):
     def getDefaultPrep():
         """Return a dictionary with default preparation settings."""
         return {
-            "feature_calculators": [[MorganFP(radius=3, nBits=2048)]],
+            "feature_calculators": [MorganFP(radius=2, nBits=128)],
             "split": RandomSplit(test_fraction=0.1),
             "feature_standardizer": StandardScaler(),
             "feature_filters": [LowVarianceFilter(0.05), HighCorrelationFilter(0.8)],
@@ -99,11 +99,11 @@ class DataSetsPathMixIn(PathMixIn):
             ),
             TanimotoDistances(
                 list_of_smiles=["C", "CC", "CCC"],
-                fingerprint_type=MorganFP(radius=3, nBits=128),
-                radius=3,
-                nBits=1000,
+                fingerprint_type=MorganFP(radius=2, nBits=128),
+                radius=2,
+                nBits=128,
             ),
-            MorganFP(radius=3, nBits=128),
+            MorganFP(radius=2, nBits=128),
         ]
 
         return descriptor_sets
@@ -124,9 +124,9 @@ class DataSetsPathMixIn(PathMixIn):
             MorganFP(radius=3, nBits=128),
             RDKitDescs(),
         ]
-        mol_descriptor_calculators = [
-            [combo] for combo in itertools.combinations(feature_sets, 1)
-        ] + [[combo] for combo in itertools.combinations(feature_sets, 2)]
+        mol_descriptor_calculators = list(
+            itertools.combinations(feature_sets, 1)
+        ) + list(itertools.combinations(feature_sets, 2))
         return mol_descriptor_calculators
 
     @classmethod

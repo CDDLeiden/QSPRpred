@@ -66,9 +66,9 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         """Set the descriptor names."""
 
     @property
-    @abstractmethod
     def isFP(self):
         """Return True if descriptor set is fingerprint."""
+        return False
 
     @abstractmethod
     def __str__(self):
@@ -136,42 +136,40 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
 #         return ret
 
 
-# class DataFrameDescriptorSet(DescriptorSet):
-#     def __init__(self, df: pd.DataFrame):
-#         self._df = df
-#         self._descriptors = df.columns.tolist() if df is not None else []
-#
-#     def getDF(self):
-#         return self._df
-#
-#     def getIndex(self):
-#         return self._df.index if self._df is not None else None
-#
-#     def __call__(self, index, *args, **kwargs):
-#         if self._df is None:
-#             raise ValueError("No dataframe set.")
-#         ret = pd.DataFrame(index=index)
-#         ret = ret.merge(self._df, how="left", left_index=True, right_index=True)
-#         return ret[self.descriptors]
-#
-#     @property
-#     def descriptors(self):
-#         return self._descriptors
-#
-#     @descriptors.setter
-#     def descriptors(self, value):
-#         self._descriptors = value
-#
-#     @property
-#     def isFP(self):
-#         return False
-#
-#     @property
-#     def settings(self):
-#         return {"df": None}
-#
-#     def __str__(self):
-#         return "DataFrame"
+class DataFrameDescriptorSet(DescriptorSet):
+    def __init__(self, df: pd.DataFrame):
+        super().__init__()
+        self._df = df
+        self._descriptors = df.columns.tolist() if df is not None else []
+
+    def getDF(self):
+        return self._df
+
+    def getIndex(self):
+        return self._df.index if self._df is not None else None
+
+    def getDescriptors(
+        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
+        index = pd.Index(props[self.idProp], name=self.idProp)
+        if self._df is None:
+            raise ValueError("No dataframe set.")
+        ret = pd.DataFrame(index=index)
+        ret = ret.merge(self._df, how="left", left_index=True, right_index=True)
+        return ret[self.descriptors]
+
+    @property
+    def descriptors(self):
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, value):
+        self._descriptors = value
+
+    def __str__(self):
+        return "DataFrame"
+
+
 #
 #
 # class FingerprintSet(MoleculeDescriptorSet):
@@ -280,7 +278,6 @@ class DrugExPhyschem(DescriptorSet):
             self.props = physchem_props
         else:
             self.props = list(self._prop_dict.keys())
-        self._isFP = False
 
     def getDescriptors(self, mols, props, *args, **kwargs):
         """Calculate the DrugEx properties for a molecule."""
@@ -299,10 +296,6 @@ class DrugExPhyschem(DescriptorSet):
     def __setstate__(self, state):
         super().__setstate__(state)
         self._prop_dict = self.getPropDict()
-
-    @property
-    def isFP(self):
-        return self._isFP
 
     @property
     def settings(self):
@@ -359,7 +352,6 @@ class RDKitDescs(DescriptorSet):
         self, rdkit_descriptors: list[str] | None = None, include_3d: bool = False
     ):
         super().__init__()
-        self._isFP = False
         self._descriptors = (
             rdkit_descriptors
             if rdkit_descriptors is not None
@@ -391,17 +383,6 @@ class RDKitDescs(DescriptorSet):
             except AttributeError:
                 continue
         return scores
-
-    @property
-    def isFP(self):
-        return self._isFP
-
-    @property
-    def settings(self):
-        return {
-            "rdkit_descriptors": self.descriptors,
-            "include_3d": self.include3D,
-        }
 
     @property
     def descriptors(self):
@@ -440,7 +421,6 @@ class TanimotoDistances(DescriptorSet):
         self.fingerprintType = fingerprint_type
         self._args = args
         self._kwargs = kwargs
-        self._isFP = False
 
         # intialize fingerprint calculator
         self.fp = fingerprint_type
@@ -476,10 +456,6 @@ class TanimotoDistances(DescriptorSet):
                 props={"QSPRID": list_of_smiles},
             )
         ]
-
-    @property
-    def isFP(self):
-        return self._isFP
 
     @property
     def descriptors(self):
@@ -544,10 +520,6 @@ class PredictorDesc(DescriptorSet):
         return self.model.predictMols(mols, use_probas=False)
 
     @property
-    def isFP(self):
-        return False
-
-    @property
     def descriptors(self):
         return self._descriptors
 
@@ -577,10 +549,6 @@ class SmilesDesc(DescriptorSet):
             return np.array([Chem.MolToSmiles(mol) for mol in mols])
         else:
             raise ValueError("Molecules should be either SMILES or RDKit Mol objects.")
-
-    @property
-    def isFP(self):
-        return False
 
     @property
     def descriptors(self):

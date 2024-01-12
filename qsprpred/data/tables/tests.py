@@ -6,10 +6,9 @@ from parameterized import parameterized
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import ShuffleSplit, KFold
 
+from ..descriptors.fingerprints import MorganFP
 from ... import TargetTasks, TargetProperty
 from ...data import QSPRDataset
-from ...data.descriptors.calculators import MoleculeDescriptorsCalculator
-from ...data.descriptors.sets import FingerprintSet
 from ...utils.stopwatch import StopWatch
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
@@ -312,11 +311,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertRaises(ValueError, lambda: dataset.checkMols())
         self.assertRaises(
             ValueError,
-            lambda: dataset.addDescriptors(
-                MoleculeDescriptorsCalculator(
-                    [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-                )
-            ),
+            lambda: dataset.addDescriptors([MorganFP(radius=2, nBits=128)]),
         )
         invalids = dataset.checkMols(throw=False)
         self.assertEqual(sum(~invalids), 1)
@@ -343,9 +338,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         # create and save the data set
         dataset = self.createLargeTestDataSet()
         dataset.addDescriptors(
-            MoleculeDescriptorsCalculator(
-                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-            ),
+            [MorganFP(radius=2, nBits=128)],
             featurize=False,
         )
         dataset.save()
@@ -371,13 +364,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset = self.createLargeTestDataSet()
         dataset.save()
         # calculate descriptors and iterate over folds
-        dataset.prepareDataset(
-            feature_calculators=[
-                MoleculeDescriptorsCalculator(
-                    [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-                ),
-            ]
-        )
+        dataset.prepareDataset(feature_calculators=[MorganFP(radius=2, nBits=128)])
         train, _ = dataset.getFeatures()
         order_train = train.index.tolist()
         order_folds = []
@@ -386,13 +373,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             order_folds.append(train.iloc[train_index].index.tolist())
         # reload and check if orders are the same if we redo the folds from saved data
         dataset = QSPRDataset.fromFile(dataset.metaFile)
-        dataset.prepareDataset(
-            feature_calculators=[
-                MoleculeDescriptorsCalculator(
-                    [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-                ),
-            ]
-        )
+        dataset.prepareDataset(feature_calculators=[MorganFP(radius=2, nBits=128)])
         train, _ = dataset.getFeatures()
         self.assertListEqual(train.index.tolist(), order_train)
         split = KFold(5, shuffle=True, random_state=dataset.randomState)

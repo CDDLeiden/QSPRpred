@@ -8,13 +8,10 @@ from rdkit.Chem import Mol
 from sklearn.preprocessing import StandardScaler
 
 from .mol_processor import MolProcessor
+from ..descriptors.fingerprints import MorganFP
+from ..descriptors.sets import DataFrameDescriptorSet
 from ... import TargetTasks
 from ...data import QSPRDataset
-from ...data.descriptors.calculators import (
-    CustomDescriptorsCalculator,
-    MoleculeDescriptorsCalculator,
-)
-from ...data.descriptors.sets import DataFrameDescriptorSet, FingerprintSet
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
 from ...data.processing.feature_filters import (
     LowVarianceFilter,
@@ -143,10 +140,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             chunk_size=self.chunkSize,
         )
         self.df_descriptors.index = self.dataset.df.index
-        calculator = CustomDescriptorsCalculator(
-            [DataFrameDescriptorSet(self.df_descriptors)]
-        )
-        self.dataset.addCustomDescriptors(calculator)
+        self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors)])
         self.descriptors = self.dataset.featureNames
 
     def testLowVarianceFilter(self):
@@ -183,11 +177,7 @@ class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
         super().setUp()
         self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
-        self.dataset.addDescriptors(
-            MoleculeDescriptorsCalculator(
-                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]
-            )
-        )
+        self.dataset.addDescriptors([MorganFP(radius=3, nBits=128)])
 
     def testFeaturesStandardizer(self):
         """Test the feature standardizer fitting, transforming and serialization."""
@@ -199,7 +189,7 @@ class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
         )
         scaled_features_fromfile = scaler_fromfile(self.dataset.X)
         self.assertIsInstance(scaled_features, np.ndarray)
-        self.assertEqual(scaled_features.shape, (len(self.dataset), 1000))
+        self.assertEqual(scaled_features.shape, (len(self.dataset), 128))
         self.assertEqual(
             np.array_equal(scaled_features, scaled_features_fromfile), True
         )
