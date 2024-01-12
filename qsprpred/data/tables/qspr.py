@@ -125,7 +125,8 @@ class QSPRDataset(MoleculeTable):
         )
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
-        self.feature_standardizer = None
+        self.featureStandardizer = None
+        self.applicabilityDomain = None
         # populate feature matrix and target properties
         self.X = None
         self.y = None
@@ -657,7 +658,7 @@ class QSPRDataset(MoleculeTable):
         """If the data set has descriptors, load them into the train and test splits.
 
         If no descriptors are available, remove all features from
-        the splits They will become zero length along the feature axis (columns), but
+        the splits. They will become zero length along the feature axis (columns), but
         will retain their original length along the sample axis (rows). This is useful
         for the case where the data set has no descriptors, but the user wants to retain
         train and test splits.
@@ -751,7 +752,7 @@ class QSPRDataset(MoleculeTable):
         """
         if not hasattr(feature_standardizer, "toFile"):
             feature_standardizer = SKLearnStandardizer(feature_standardizer)
-        self.feature_standardizer = feature_standardizer
+        self.featureStandardizer = feature_standardizer
 
     def addFeatures(
         self,
@@ -868,16 +869,24 @@ class QSPRDataset(MoleculeTable):
             raise ValueError("X has no rows.")
 
     def fitFeatureStandardizer(self):
-        """Fit the feature standardizers on the training set.
+        """Fit the feature standardizers on the data set.
 
         Returns:
-            X (pd.DataFrame): standardized training set
+            X (pd.DataFrame): standardized data set
         """
         if self.hasDescriptors:
             X = self.getDescriptors()
             if self.featureNames is not None:
                 X = X[self.featureNames]
-            return apply_feature_standardizer(self.feature_standardizer, X, fit=True)[0]
+            return apply_feature_standardizer(self.featureStandardizer, X, fit=True)[0]
+
+    def fitApplicabilityDomain(self):
+        """Fit the applicability domain on the data set."""
+        if self.hasDescriptors:
+            X = self.getDescriptors()
+            if self.featureNames is not None:
+                X = X[self.featureNames]
+            self.ApplicabilityDomain.fit(X)
 
     def getFeatures(
         self,
@@ -928,13 +937,13 @@ class QSPRDataset(MoleculeTable):
 
         X = df_X.values
         X_ind = df_X_ind.values if df_X_ind is not None else None
-        if not raw and self.feature_standardizer:
-            X, self.feature_standardizer = apply_feature_standardizer(
-                self.feature_standardizer, df_X, fit=True
+        if not raw and self.featureStandardizer:
+            X, self.featureStandardizer = apply_feature_standardizer(
+                self.featureStandardizer, df_X, fit=True
             )
             if X_ind is not None and X_ind.shape[0] > 0:
                 X_ind, _ = apply_feature_standardizer(
-                    self.feature_standardizer, df_X_ind, fit=False
+                    self.featureStandardizer, df_X_ind, fit=False
                 )
 
         X = pd.DataFrame(X, index=df_X.index, columns=df_X.columns)
@@ -1103,5 +1112,5 @@ class QSPRDataset(MoleculeTable):
                 for each fold
         """
         self.checkFeatures()
-        folds = FoldsFromDataSplit(split, self.feature_standardizer)
+        folds = FoldsFromDataSplit(split, self.featureStandardizer)
         return folds.iterFolds(self, concat=concat)

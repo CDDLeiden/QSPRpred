@@ -168,9 +168,9 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
         for calc in dataset.descriptorCalculators:
             self.assertIsInstance(calc, DescriptorsCalculator)
         if feature_standardizer is not None:
-            self.assertIsInstance(dataset.feature_standardizer, SKLearnStandardizer)
+            self.assertIsInstance(dataset.featureStandardizer, SKLearnStandardizer)
         else:
-            self.assertIsNone(dataset.feature_standardizer)
+            self.assertIsNone(dataset.featureStandardizer)
         self.checkFeatures(dataset, expected_feature_count)
         # verify prep results are the same after reloading
         dataset.prepareDataset(

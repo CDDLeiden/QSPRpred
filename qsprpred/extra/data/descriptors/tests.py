@@ -163,7 +163,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         self.assertEqual(
             len(dataset_new.descriptorCalculators), len(dataset_new.descriptors)
         )
-        self.assertTrue(dataset_new.feature_standardizer)
+        self.assertTrue(dataset_new.featureStandardizer)
         self.assertTrue(len(dataset_new.featureNames) == len(self.sampleDescSet))
         self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
         self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))

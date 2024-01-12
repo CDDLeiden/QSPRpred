@@ -234,7 +234,7 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties = self.data.targetProperties
             self.nTargets = len(self.targetProperties)
             self.featureCalculators = self.data.descriptorCalculators
-            self.featureStandardizer = self.data.feature_standardizer
+            self.featureStandardizer = self.data.featureStandardizer
         else:
             self.data = None
             self.targetProperties = None
