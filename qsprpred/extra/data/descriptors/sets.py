@@ -348,10 +348,12 @@ class ProteinDescriptorSet(DescriptorSet):
         *args,
         **kwargs,
     ) -> np.ndarray:
-        protein_features = self.getProteinDescriptors(
-            sorted(set(props["acc_keys"])), props["sequences"], **kwargs
-        )
-        # TODO: match compounds with their protein descriptors on accession keys, basically do what calcualtor did before
+        acc_keys = sorted(set(props["acc_keys"]))
+        values = self.getProteinDescriptors(acc_keys, kwargs["sequences"], **kwargs)
+        df = pd.DataFrame({"Mol": mols, "AccKey": props["acc_keys"]})
+        df = df.set_index("AccKey")
+        df = df.merge(values, left_index=True, right_index=True)
+        return df.values
 
     def requiredProps(self) -> list[str]:
         existing = super().requiredProps

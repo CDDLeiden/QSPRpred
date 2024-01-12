@@ -1,7 +1,7 @@
 import os
 import pickle
 from multiprocessing import Pool
-from typing import Optional, ClassVar, Generator, Literal, Callable
+from typing import Optional, ClassVar, Generator, Literal, Callable, Any
 
 import numpy as np
 import pandas as pd
@@ -438,12 +438,13 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             **kwargs,
         )
 
-    @staticmethod
-    def _apply_to_mol_wrap(
-        props: dict,
+    @classmethod
+    def runMolProcess(
+        cls,
+        props: dict[str, list],
         func: MolProcessor,
         add_rdkit: bool,
-        smiles_prop: str,
+        smiles_col: str,
         *args,
         **kwargs,
     ):
@@ -451,17 +452,17 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             mols = (
                 props["RDMol"]
                 if "RDMol" in props
-                else [Chem.MolFromSmiles(x) for x in props[smiles_prop]]
+                else [Chem.MolFromSmiles(x) for x in props[smiles_col]]
             )
         else:
-            mols = props[smiles_prop]
+            mols = props[smiles_col]
         return func(mols, props, *args, **kwargs)
 
     def processMols(
         self,
         processor: MolProcessor,
-        proc_args: list | None = None,
-        proc_kwargs: dict | None = None,
+        proc_args: tuple[Any] | None = None,
+        proc_kwargs: dict[str, Any] | None = None,
         add_props: list[str] | None = None,
         add_rdkit: bool = False,
     ) -> Generator:
@@ -511,7 +512,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 f"Applying processor '{processor}' to '{self.name}' in parallel."
             )
             for result in self.apply(
-                self._apply_to_mol_wrap,
+                self.runMolProcess,
                 func_args=[processor, add_rdkit, self.smilesCol, *proc_args],
                 func_kwargs=proc_kwargs,
                 on_props=add_props,
@@ -523,7 +524,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 f"Applying processor '{processor}' to '{self.name}' in serial."
             )
             for result in self.iterChunks(include_props=add_props, as_dict=True):
-                yield self._apply_to_mol_wrap(
+                yield self.runMolProcess(
                     result,
                     processor,
                     add_rdkit,
@@ -648,6 +649,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         descriptors: list[DescriptorSet],
         recalculate: bool = False,
         fail_on_invalid: bool = True,
+        *args,
+        **kwargs,
     ):
         """
         Add descriptors to the data frame using a `DescriptorsCalculator` object.
@@ -660,6 +663,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 kept and no calculation takes place.
             fail_on_invalid (bool): Whether to throw an exception if any molecule
                 is invalid.
+            *args: Additional positional arguments to pass to each descriptor set.
+            **kwargs: Additional keyword arguments to pass to each descriptor set.
         """
         if recalculate and self.hasDescriptors():
             self.dropDescriptors(descriptors)
@@ -695,7 +700,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         # and attach it to this table as descriptors
         for calculator in to_calculate:
             df_descriptors = []
-            for result in self.processMols(calculator):
+            for result in self.processMols(
+                calculator, proc_args=args, proc_kwargs=kwargs
+            ):
                 df_descriptors.append(result)
             df_descriptors = pd.concat(df_descriptors, axis=0)
             df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]

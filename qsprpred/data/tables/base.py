@@ -3,6 +3,8 @@ from typing import Callable, Generator
 
 import pandas as pd
 
+from qsprpred.data.descriptors.sets import DescriptorSet
+
 
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
@@ -99,12 +101,14 @@ class DataTable(StoredTable):
 
 class MoleculeDataTable(DataTable):
     @abstractmethod
-    def addDescriptors(self, descriptors: list["DescriptorSet"]):  # noqa: F821
+    def addDescriptors(self, descriptors: DescriptorSet, *args, **kwargs):
         """
         Add descriptors to the dataset.
 
         Args:
             descriptors (list[DescriptorSet]): The descriptors to add.
+            args: Additional positional arguments to be passed to each descriptor set.
+            kwargs: Additional keyword arguments to be passed to each descriptor set.
         """
 
     @abstractmethod

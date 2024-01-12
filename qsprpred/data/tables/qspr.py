@@ -453,9 +453,11 @@ class QSPRDataset(MoleculeTable):
 
     def addDescriptors(
         self,
-        descriptors: list["DescriptorSet"],  # noqa: F821
+        descriptors: list[DescriptorSet],
         recalculate: bool = False,
         featurize: bool = True,
+        *args,
+        **kwargs,
     ):
         """Add descriptors to the data set.
 
@@ -470,8 +472,10 @@ class QSPRDataset(MoleculeTable):
                 already present. Defaults to `False`.
             featurize (bool, optional): whether to featurize the data set splits after
                 adding descriptors. Defaults to `True`.
+            *args: additional positional arguments to pass to each descriptor set
+            **kwargs: additional keyword arguments to pass to each descriptor set
         """
-        super().addDescriptors(descriptors, recalculate)
+        super().addDescriptors(descriptors, recalculate, *args, **kwargs)
         self.featurize(update_splits=featurize)
 
     def featurize(self, update_splits=True):
