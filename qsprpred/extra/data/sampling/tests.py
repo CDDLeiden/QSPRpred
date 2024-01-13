@@ -1,11 +1,9 @@
 from unittest import TestCase
 
 from parameterized import parameterized
-from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
 
 from qsprpred.data import RandomSplit, ScaffoldSplit, ClusterSplit
 from qsprpred.data.descriptors.sets import RDKitDescs
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 from qsprpred.extra.data.descriptors.sets import ProDec
 from qsprpred.extra.data.sampling.splits import (
     PCMSplit,
@@ -22,15 +20,8 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.setUpPaths()
         self.msaProvider = self.getMSAProvider(self.generatedDataPath)
         self.dataset = self.createPCMDataSet(f"{self.__class__.__name__}_test")
-        self.dataset.addProteinDescriptors(
-            calculator=ProteinDescriptorCalculator(
-                desc_sets=[ProDec(["Zscale Hellberg"], self.msaProvider)],
-                msa_provider=self.getMSAProvider(self.generatedDataPath),
-            )
-        )
-        self.dataset.addDescriptors(
-            calculator=MoleculeDescriptorsCalculator(desc_sets=[RDKitDescs()])
-        )
+        self.dataset.addDescriptors([ProDec(["Zscale Hellberg"], self.msaProvider)])
+        self.dataset.addDescriptors([RDKitDescs()])
 
     @parameterized.expand([(RandomSplit(),), (ScaffoldSplit(),), (ClusterSplit(),)])
     def testPCMSplit(self, splitter):

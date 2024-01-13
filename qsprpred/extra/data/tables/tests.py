@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from parameterized import parameterized
 
-from qsprpred.data.descriptors.calculators import DescriptorsCalculator
+from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.extra.data.tables.pcm import PCMDataSet
@@ -36,7 +36,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
         self,
         _,
         name: str,
-        feature_calculators: list[DescriptorsCalculator],
+        feature_calculators: list[DescriptorSet],
         split: DataSplit,
         feature_standardizer: SKLearnStandardizer,
         feature_filter: Callable,
