@@ -284,8 +284,9 @@ class ExtendedValenceSignature(DescriptorSet):
         self._descriptors = []
         # Flag initialization of descriptors after first calculation
         self._descriptors_init = False
-        # Force calculator to be single process
-        self.noParallelization = True
+
+    def supportsParallel(self) -> bool:
+        return False
 
     def getDescriptors(
         self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
