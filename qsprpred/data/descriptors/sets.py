@@ -100,7 +100,7 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
 
     @abstractmethod
     def getDescriptors(
-        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the descriptors for a list of molecules.
 
@@ -113,27 +113,6 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         Returns:
             data frame of descriptor values of shape (n_mols, n_descriptors)
         """
-
-
-# class MoleculeDescriptorSet(DescriptorSet, ABC):
-#     """Abstract base class for descriptor sets pertaining to molecules."""
-#
-#     @staticmethod
-#     def iterMols(mols: list[str | Mol], to_list=False):
-#         """
-#         Create a molecule generator or list from RDKit molecules or SMILES.
-#
-#         Args:
-#             mols: list of molecules (SMILES `str` or RDKit Mol)
-#             to_list: if True, return a list instead of an generator
-#
-#         Returns:
-#             an array or data frame of descriptor values of shape (n_mols, n_descriptors)
-#         """
-#         ret = (Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol for mol in mols)
-#         if to_list:
-#             ret = list(ret)
-#         return ret
 
 
 class DataFrameDescriptorSet(DescriptorSet):
@@ -149,7 +128,7 @@ class DataFrameDescriptorSet(DescriptorSet):
         return self._df.index if self._df is not None else None
 
     def getDescriptors(
-        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         index = pd.Index(props[self.idProp], name=self.idProp)
         if self._df is None:
@@ -168,92 +147,6 @@ class DataFrameDescriptorSet(DescriptorSet):
 
     def __str__(self):
         return "DataFrame"
-
-
-#
-#
-# class FingerprintSet(MoleculeDescriptorSet):
-#     """Generic fingerprint descriptorset can be used to calculate any fingerprint type
-#     defined in descriptorutils.fingerprints.
-#     """
-#
-#     _notJSON = [*MoleculeDescriptorSet._notJSON, "getFingerprint"]
-#
-#     def __init__(self, fingerprint_type, *args, **kwargs):
-#         """
-#         Initialize the descriptor with the same arguments as you would pass to your
-#         fingerprint type of choice.
-#
-#         Args:
-#             fingerprint_type: fingerprint type
-#             *args: fingerprint specific arguments
-#             **kwargs: fingerprint specific arguments keyword arguments
-#         """
-#         self._isFP = True
-#         self.fingerprintType = fingerprint_type
-#         self._args = args
-#         self._kwargs = kwargs
-#         self.getFingerprint = get_fingerprint(
-#             self.fingerprintType, *self._args, **self._kwargs
-#         )
-#         self._keepindices = None
-#
-#     def __setstate__(self, state):
-#         super().__setstate__(state)
-#         self.getFingerprint = get_fingerprint(
-#             self.fingerprintType, *self._args, **self._kwargs
-#         )
-#
-#     def __call__(self, mols):
-#         """Calculate the fingerprint for a list of molecules."""
-#         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
-#         ret = self.getFingerprint(mols)
-#
-#         if self.keepindices:
-#             ret = ret[:, self.keepindices]
-#
-#         return ret
-#
-#     @property
-#     def keepindices(self):
-#         """Return the indices of the fingerprint to keep."""
-#         return self._keepindices
-#
-#     @keepindices.setter
-#     def keepindices(self, val):
-#         """Set the indices of the fingerprint to keep."""
-#         self._keepindices = [int(x) for x in val] if val else None
-#
-#     @property
-#     def isFP(self):
-#         """Return True if descriptorset is fingerprint."""
-#         return self._isFP
-#
-#     @property
-#     def settings(self):
-#         """Return dictionary with arguments used to initialize the descriptorset."""
-#         return {
-#             "fingerprint_type": self.fingerprintType,
-#             **self.getFingerprint.settings,
-#         }
-#
-#     def getLen(self):
-#         """Return the length of the fingerprint."""
-#         return len(self.getFingerprint)
-#
-#     def __str__(self):
-#         return f"FingerprintSet_{self.fingerprintType}"
-#
-#     @property
-#     def descriptors(self):
-#         """Return the indices of the fingerprint that are kept."""
-#         indices = self.keepindices if self.keepindices else range(self.getLen())
-#         return [f"{idx}" for idx in indices]
-#
-#     @descriptors.setter
-#     def descriptors(self, value):
-#         """Set the indices of the fingerprint to keep."""
-#         self.keepindices = value
 
 
 class DrugExPhyschem(DescriptorSet):
@@ -296,10 +189,6 @@ class DrugExPhyschem(DescriptorSet):
     def __setstate__(self, state):
         super().__setstate__(state)
         self._prop_dict = self.getPropDict()
-
-    @property
-    def settings(self):
-        return {"physchem_props": self.props}
 
     @property
     def descriptors(self):
@@ -373,7 +262,9 @@ class RDKitDescs(DescriptorSet):
             ]
         self.include3D = include_3d
 
-    def getDescriptors(self, mols, props, *args, **kwargs):
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         mols = self.iterMols(mols, to_list=True)
         scores = np.zeros((len(mols), len(self.descriptors)))
         calc = MoleculeDescriptors.MolecularDescriptorCalculator(self.descriptors)
@@ -426,7 +317,9 @@ class TanimotoDistances(DescriptorSet):
         self.fp = fingerprint_type
         self.fps = self.calculate_fingerprints(list_of_smiles)
 
-    def getDescriptors(self, mols, props, *args, **kwargs):
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Calculate the Tanimoto distances to the list of SMILES sequences.
 
         Args:
@@ -441,10 +334,12 @@ class TanimotoDistances(DescriptorSet):
             DataStructs.CreateFromBitString("".join(map(str, x)))
             for x in self.fp.getDescriptors(mols, props, *args, **kwargs)
         ]
-        return [
-            list(1 - np.array(DataStructs.BulkTanimotoSimilarity(fp, self.fps)))
-            for fp in fps
-        ]
+        return np.array(
+            [
+                list(1 - np.array(DataStructs.BulkTanimotoSimilarity(fp, self.fps)))
+                for fp in fps
+            ]
+        )
 
     def calculate_fingerprints(self, list_of_smiles):
         """Calculate the fingerprints for the list of SMILES sequences."""
@@ -534,7 +429,9 @@ class PredictorDesc(DescriptorSet):
 class SmilesDesc(DescriptorSet):
     """Descriptorset that calculates descriptors from a SMILES sequence."""
 
-    def getDescriptors(self, mols, props, *args, **kwargs):
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Return smiles as descriptors.
 
         Args:
@@ -560,82 +457,3 @@ class SmilesDesc(DescriptorSet):
 
     def __str__(self):
         return "SmilesDesc"
-
-
-# class _DescriptorSetRetriever:
-#     """Based on recipe 8.21 of the book "Python Cookbook".
-#
-#     To support a new type of descriptor, just add a function "get_descname(self, *args,
-#     **kwargs)".
-#     """
-#
-#     def getDescriptor(self, desc_type, *args, **kwargs):
-#         if desc_type.lower() == "descriptor":
-#             raise Exception("Please specify the type of fingerprint you want to use.")
-#         method_name = "get" + desc_type
-#         method = getattr(self, method_name)
-#         if method is None:
-#             raise Exception(f"{desc_type} is not a supported descriptor set type.")
-#         return method(*args, **kwargs)
-#
-#     def getFingerprintSet(self, *args, **kwargs):
-#         """Wrapper to get a fingerprint set."""
-#         return FingerprintSet(*args, **kwargs)
-#
-#     def getDrugExPhyschem(self, *args, **kwargs):
-#         """Wrapper to get DrugEx physichochemical properties."""
-#         return DrugExPhyschem(*args, **kwargs)
-#
-#     def getMordred(self, *args, **kwargs):
-#         """Wrapper to get Mordred descriptors - depends on optional dependency."""
-#         from qsprpred.extra.data.descriptors.sets import Mordred
-#
-#         return Mordred(*args, **kwargs)
-#
-#     def getMold2(self, *args, **kwargs):
-#         """Wrapper to get Mold2 descriptors - depends on optional dependency."""
-#         from qsprpred.extra.data.descriptors.sets import Mold2
-#
-#         return Mold2(*args, **kwargs)
-#
-#     def getPaDEL(self, *args, **kwargs):
-#         """Wrapper to get PaDEL descriptors - depends on optional dependency."""
-#         from qsprpred.extra.data.descriptors.sets import PaDEL
-#
-#         return PaDEL(*args, **kwargs)
-#
-#     def getRDkit(self, *args, **kwargs):
-#         """Wrapper to get rdkit descriptors."""
-#         return RDKitDescs(*args, **kwargs)
-#
-#     def getExtendedValenceSignature(self, *args, **kwargs):
-#         from qsprpred.extra.data.descriptors.sets import ExtendedValenceSignature
-#
-#         return ExtendedValenceSignature(*args, **kwargs)
-#
-#     def getPredictorDesc(self, *args, **kwargs):
-#         """Wrapper to get predictors as descriptors."""
-#         return PredictorDesc(*args, **kwargs)
-#
-#     def getProDec(self, *args, **kwargs):
-#         """Wrapper to get protein descriptorsfrom prodec - depends on optional
-#         dependency."""
-#         from qsprpred.extra.data.descriptors.sets import ProDec
-#
-#         return ProDec(*args, **kwargs)
-#
-#     def getTanimotoDistances(self, *args, **kwargs):
-#         """Wrapper to get bulk tanimoto distances."""
-#         return TanimotoDistances(*args, **kwargs)
-#
-#     def getSmilesDesc(self, *args, **kwargs):
-#         """Wrapper to get SMILES as descriptors."""
-#         return SmilesDesc(*args, **kwargs)
-#
-#     def getDataFrame(self, *args, **kwargs):
-#         return DataFrameDescriptorSet(*args, **kwargs)
-#
-#
-# def get_descriptor(desc_type: str, *args, **kwargs):
-#     """Wrapper to get a descriptorfunction from _DescriptorSetRetriever."""
-#     return _DescriptorSetRetriever().getDescriptor(desc_type, *args, **kwargs)

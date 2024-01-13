@@ -17,7 +17,6 @@ from qsprpred.data.processing.feature_filters import (
     LowVarianceFilter,
     HighCorrelationFilter,
 )
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 from qsprpred.extra.data.descriptors.fingerprints import (
     CDKFP,
     CDKExtendedFP,
@@ -115,8 +114,8 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
 
-class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
-    """Test the calculation of protein descriptors.
+class TestPCMDataSet(DataSetsMixInExtras, TestCase):
+    """Test the PCM data set features.
 
     Attributes:
         dataset (QSPRDataset): dataset for testing
@@ -129,8 +128,10 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         super().setUp()
         self.setUpPaths()
         self.dataset = self.createPCMDataSet(self.__class__.__name__)
-        self.sampleDescSet = ProDec(sets=["Zscale Hellberg"])
-        self.defaultMSA = self.getMSAProvider()
+        self.defaultMSA = self.getMSAProvider(self.generatedDataPath)
+        self.sampleDescSet = ProDec(
+            sets=["Zscale Hellberg"], msa_provider=self.defaultMSA
+        )
 
     @parameterized.expand(
         [
@@ -145,12 +146,12 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
             msa_provider_cls (BioPythonMSA): MSA provider class
         """
         provider = msa_provider_cls(out_dir=self.generatedDataPath)
+        self.sampleDescSet.msaProvider = provider
         dataset = self.createPCMDataSet(self.__class__.__name__)
         split = RandomSplit(test_fraction=0.2)
-        calculator = ProteinDescriptorCalculator([self.sampleDescSet], provider)
         dataset.prepareDataset(
             split=split,
-            feature_calculators=[calculator],
+            feature_calculators=[self.sampleDescSet],
             feature_standardizer=StandardScaler(),
             feature_filters=[LowVarianceFilter(0.05), HighCorrelationFilter(0.9)],
         )
@@ -178,12 +179,11 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         """Test if the feature calculator can be switched to a new dataset."""
         dataset = self.createPCMDataSet(self.__class__.__name__)
         split = RandomSplit(test_fraction=0.5)
-        calculator = ProteinDescriptorCalculator([self.sampleDescSet], self.defaultMSA)
         lv = LowVarianceFilter(0.05)
         hc = HighCorrelationFilter(0.9)
         dataset.prepareDataset(
             split=split,
-            feature_calculators=[calculator],
+            feature_calculators=[self.sampleDescSet],
             feature_filters=[lv, hc],
             recalculate_features=True,
             feature_fill_value=np.nan,
@@ -197,7 +197,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
         dataset_next = self.createPCMDataSet(f"{self.__class__.__name__}_next")
         dataset_next.prepareDataset(
             split=split,
-            feature_calculators=[calculator],
+            feature_calculators=[self.sampleDescSet],
             feature_filters=[lv, hc],
             recalculate_features=True,
             feature_fill_value=np.nan,
@@ -215,7 +215,7 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
     def testWithMolDescriptors(self):
         """Test the calculation of protein and molecule descriptors."""
         calcs = [
-            ProDec(sets=["Zscale Hellberg"]),
+            ProDec(sets=["Zscale Hellberg"], msa_provider=self.defaultMSA),
             MorganFP(radius=2, nBits=128),
             DrugExPhyschem(),
         ]
@@ -246,12 +246,8 @@ class TestPCMDescriptorCalculation(DataSetsMixInExtras, TestCase):
     )
     def testProDec(self, _, provider_class):
         provider = provider_class(out_dir=self.generatedDataPath)
-        descset = ProDec(sets=["Zscale Hellberg"])
-        protein_feature_calculator = ProteinDescriptorCalculator(
-            desc_sets=[descset],
-            msa_provider=provider,
-        )
-        self.dataset.addProteinDescriptors(calculator=protein_feature_calculator)
+        descset = ProDec(sets=["Zscale Hellberg"], msa_provider=provider)
+        self.dataset.addDescriptors([descset])
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(descset)))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
@@ -301,14 +297,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
     def setUp(self):
         super().setUp()
         self.setUpPaths()
-        self.defaultMSA = self.getMSAProvider()
-
-    def getCalculators(self, desc_sets):
-        return [
-            ProteinDescriptorCalculator(
-                desc_sets=desc_sets, msa_provider=self.defaultMSA
-            )
-        ]
+        self.defaultMSA = self.getMSAProvider(self.generatedDataPath)
 
     @parameterized.expand(
         [
@@ -323,7 +312,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
                     }
                 ],
             )
-            for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
+            for desc_set in [(ProDec, "Zscale Hellberg"), (ProDec, "Sneath")]
         ]
         + [
             (
@@ -331,7 +320,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
                 desc_set,
                 [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
             )
-            for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
+            for desc_set in [(ProDec, "Zscale Hellberg"), (ProDec, "Sneath")]
         ]
         + [
             (
@@ -346,7 +335,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
                     },
                 ],
             )
-            for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
+            for desc_set in [(ProDec, "Zscale Hellberg"), (ProDec, "Sneath")]
         ]
     )
     def testDescriptorsPCMAll(self, _, desc_set, target_props):
@@ -360,6 +349,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
         by `DataSetsPathMixIn.getAllDescriptors()`,
         so if you need a specific descriptor tested, add it there.
         """
+        desc_set = desc_set(desc_set[0]([desc_set[1]], msa_provider=self.defaultMSA))
         dataset = self.createPCMDataSet(
             name=f"{self.getDatSetName(desc_set, target_props)}_pcm",
             target_props=target_props,

@@ -134,7 +134,9 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         prep = self.getDefaultPrep()
         prep["feature_calculators"] = prep["feature_calculators"] + [
             ProteinDescriptorCalculator(
-                desc_sets=[ProDec(sets=["Sneath"])],
+                desc_sets=[
+                    ProDec(["Sneath"], self.getMSAProvider(self.generatedDataPath))
+                ],
                 msa_provider=ClustalMSA(self.generatedDataPath),
             )
         ]

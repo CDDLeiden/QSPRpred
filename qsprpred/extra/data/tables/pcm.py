@@ -147,9 +147,7 @@ class PCMDataSet(QSPRDataset):
         self.df["acc_keys"] = self.df[self.proteinCol]
         # get protein sequences and metadata
         sequences, info = (
-            self.proteinSeqProvider(self.df[self.proteinCol].unique().tolist())
-            if self.proteinSeqProvider
-            else (None, {})
+            self.getProteinSequences() if self.proteinSeqProvider else (None, {})
         )
         # append sequences and metadata to kwargs
         kwargs["sequences"] = sequences

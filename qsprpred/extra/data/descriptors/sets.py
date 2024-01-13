@@ -138,7 +138,9 @@ class Mold2(DescriptorSet):
         self._descriptors = self._defaultDescs[:]
         self._keepindices = list(range(len(self._descriptors)))
 
-    def __call__(self, mols: list[str, Chem.Mol]) -> [pd.DataFrame, np.ndarray]:
+    def getDescriptors(
+        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         values = self._mold2.calculate(self.iterMols(mols), show_banner=False)
         # Drop columns
         values = values[self._descriptors].values
@@ -322,7 +324,7 @@ class ProteinDescriptorSet(DescriptorSet):
     @abstractmethod
     def getProteinDescriptors(
         self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None, **kwargs
-    ):
+    ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.
 
@@ -349,15 +351,16 @@ class ProteinDescriptorSet(DescriptorSet):
         **kwargs,
     ) -> np.ndarray:
         acc_keys = sorted(set(props["acc_keys"]))
-        values = self.getProteinDescriptors(acc_keys, kwargs["sequences"], **kwargs)
-        df = pd.DataFrame({"Mol": mols, "AccKey": props["acc_keys"]})
-        df = df.set_index("AccKey")
+        values = self.getProteinDescriptors(acc_keys, **kwargs)
+        df = pd.DataFrame({"acc_keys": props["acc_keys"]})
+        df = df.set_index("acc_keys")
         df = df.merge(values, left_index=True, right_index=True)
         return df.values
 
+    @property
     def requiredProps(self) -> list[str]:
         existing = super().requiredProps
-        return ["acc_keys", "sequences", *existing]
+        return ["acc_keys", *existing]
 
     def supportsParallel(self) -> bool:
         return False
@@ -386,7 +389,6 @@ class ProDec(ProteinDescriptorSet):
                 (see https://github.com/OlivierBeq/ProDEC)
         """
         super().__init__()
-        self._settings = {"sets": sets}
         self.factory = prodec.ProteinDescriptors()
         self.sets = self.factory.available_descriptors if sets is None else sets
         self._descriptors = None
@@ -435,7 +437,7 @@ class ProDec(ProteinDescriptorSet):
 
     def getProteinDescriptors(
         self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None, **kwargs
-    ):
+    ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.
 
