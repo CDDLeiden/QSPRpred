@@ -534,12 +534,11 @@ class QSPRDataset(MoleculeTable):
         if you want to use feature matrices instead of the raw data frame.
 
         Args:
-            split (DataSplit) :
+            split (DataSplit):
                 split instance orchestrating the split
             featurize (bool):
                 whether to featurize the data set splits after splitting.
                 Defaults to `False`.
-
         """
         if (
             hasattr(split, "hasDataSet")
@@ -807,6 +806,7 @@ class QSPRDataset(MoleculeTable):
         feature_standardizer: SKLearnStandardizer | None = None,
         feature_fill_value: float = np.nan,
         applicability_domain: applicabilityDomain | None = None,
+        drop_outliers: bool = False,
         recalculate_features: bool = False,
         shuffle: bool = True,
         random_state: int | None = None,
@@ -827,9 +827,10 @@ class QSPRDataset(MoleculeTable):
             feature_fill_value (float): value to fill missing values with.
                 Defaults to `numpy.nan`
             applicability_domain (applicabilityDomain obj): attaches an
-                applicability domain calculator to the dataset, which can be used to
-                filter out compounds that are outside the applicability domain of the
-                model.
+                applicability domain calculator to the dataset and fits it on
+                the training set
+            drop_outliers (bool): whether to drop samples that are outside the
+                applicability domain from the test set, if one is attached.
             recalculate_features (bool): recalculate features even if they are already
                 present in the file
             shuffle (bool): whether to shuffle the created training and test sets
@@ -865,8 +866,13 @@ class QSPRDataset(MoleculeTable):
         # set feature standardizers
         if feature_standardizer:
             self.setFeatureStandardizer(feature_standardizer)
+        # set applicability domain and fit it on the training set
         if applicability_domain:
             self.applicabilityDomain = applicability_domain
+            self.fitApplicabilityDomain()
+        # drop outliers from test set based on applicability domain
+        if drop_outliers:
+            self.dropOutliers()
 
     def checkFeatures(self):
         """Check consistency of features and descriptors."""
@@ -1108,19 +1114,47 @@ class QSPRDataset(MoleculeTable):
         folds = FoldsFromDataSplit(split, self.featureStandardizer)
         return folds.iterFolds(self, concat=concat)
 
-    def addApplicabilityDomain(self, applicability_domain: applicabilityDomain | None):
-        """Add a column with applicability domain values to the data set.
+    def fitApplicabilityDomain(self, concat: bool = False):
+        """Fit the applicability domain calculator
+
+        Fitted on the training data only, if test data is present.
+        If concat is True, the applicability domain calculator will be fitted on the
+        whole data set.
+        Applicability domain calculator must be attached to the data set before calling.
 
         Args:
-            applicability_domain (applicabilityDomain):
-                applicability domain calculator, if None, the attached applicability
-                domain calculator will be used.
+            concat (bool):
+                whether to concatenate the training and test feature matrices
         """
-        if applicability_domain is None:
-            applicability_domain = self.applicabilityDomain
-        if applicability_domain is None:
+        if self.applicabilityDomain is None:
             raise ValueError(
                 "No applicability domain calculator attached to the data set."
             )
-        features = self.getFeatures(concat=True, ordered=True)
-        self.df["within_applicability_domain"] = applicability_domain.contains(features)
+        features = self.getFeatures(concat=concat)
+        if not concat:
+            # fit on training data only, if test data is present
+            features = features[0]
+        self.applicabilityDomain.fit(features)
+
+    def dropOutliers(self):
+        """Drop outliers from the test set based on the applicability domain."""
+        if self.applicabilityDomain is None:
+            raise ValueError(
+                "No applicability domain calculator attached to the data set."
+            )
+        X, X_ind = self.getFeatures()
+        mask = self.applicabilityDomain.contains(X_ind)
+        self.X_ind = self.X_ind.loc[mask, :]
+        self.y_ind = self.y_ind.loc[mask, :]
+        logger.info(
+            f"Dropped {len(self.y_ind) - len(self.y_ind)} "
+            "outliers from the test set."
+        )
+
+    def addApplicabilityDomain(self):
+        """Add a column with applicability domain values to the data set."""
+        if self.applicabilityDomain is None:
+            raise ValueError(
+                "No applicability domain calculator attached to the data set."
+            )
+        self.df["within_applicability_domain"] = self.applicabilityDomain.contains(self.getFeatures(concat = True, ordered = True))
