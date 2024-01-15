@@ -285,6 +285,7 @@ class ExtendedValenceSignature(DescriptorSet):
         # Flag initialization of descriptors after first calculation
         self._descriptors_init = False
 
+    @property
     def supportsParallel(self) -> bool:
         return False
 
