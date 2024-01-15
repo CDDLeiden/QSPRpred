@@ -282,7 +282,6 @@ class TestDescriptorsExtra(
         target_props: list[dict | TargetProperty],
     ):
         """Test the calculation of extra descriptors with data preparation."""
-        np.random.seed(42)
         dataset = self.createLargeTestDataSet(
             name=self.getDatSetName(desc_set, target_props),
             target_props=target_props,
