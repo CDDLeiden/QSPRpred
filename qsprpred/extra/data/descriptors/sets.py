@@ -484,4 +484,4 @@ class ProDec(ProteinDescriptorSet):
         self._descriptors = value
 
     def __str__(self):
-        return "ProDec"
+        return "ProDec_" + "_".join(self.sets)
