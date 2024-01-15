@@ -25,6 +25,30 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
     """Abstract base class for descriptor sets."""
 
     @staticmethod
+    def treatInfs(df: pd.DataFrame) -> pd.DataFrame:
+        """Replace infinite values by NaNs.
+
+        Args:
+            df: dataframe to treat
+
+        Returns:
+            dataframe with infinite values replaced by NaNs
+        """
+        if np.isinf(df).any().any():
+            col_names = df.columns
+            x_loc, y_loc = np.where(np.isinf(df.values))
+            inf_cols = np.take(col_names, np.unique(y_loc))
+            logger.debug(
+                "Infinite values in dataframe at columns:"
+                f"\n{inf_cols}"
+                "And rows:"
+                f"\n{np.unique(x_loc)}"
+            )
+            # Convert absurdly high values to NaNs
+            df = df.replace([np.inf, -np.inf], np.NAN)
+        return df
+
+    @staticmethod
     def iterMols(
         mols: list[str | Mol], to_list=False
     ) -> list[Mol] | Generator[Mol, None, None]:
@@ -92,10 +116,12 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         Returns:
             data frame of descriptor values of shape (n_mols, n_descriptors)
         """
-        mols = list(self.iterMols(mols, to_list=True))
+        mols = self.iterMols(mols, to_list=True)
         values = self.getDescriptors(mols, props, *args, **kwargs)
         df = pd.DataFrame(values, index=props[self.idProp])
         df.columns = self.descriptors
+        df = df.astype(float)
+        df = self.treatInfs(df)
         return df
 
     @abstractmethod

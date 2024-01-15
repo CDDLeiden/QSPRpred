@@ -290,6 +290,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         self,
         include_props: list[str] | None = None,
         as_dict: bool = False,
+        chunk_size: int | None = None,
     ) -> Generator[pd.DataFrame | dict, None, None]:
         """Batch a data frame into chunks of the given size.
 
@@ -299,15 +300,19 @@ class PandasDataTable(DataTable, JSONSerializable):
                 properties are included.
             as_dict (bool):
                 If `True`, the generator yields dictionaries instead of data frames.
+            chunk_size (int):
+                Size of chunks to use per job in parallel processing.
+                If `None`, `self.chunkSize` is used.
 
         Returns:
             Generator[pd.DataFrame, None, None]:
                 Generator that yields batches of the data frame as smaller data frames.
         """
+        chunk_size = chunk_size if chunk_size is not None else self.chunkSize
         include_props = include_props or self.df.columns
         df_batches = batched_generator(
             self.df[self.idProp] if include_props is not None else self.df.iterrows(),
-            self.chunkSize,
+            chunk_size,
         )
         for ids in df_batches:
             df_batch = self.df.loc[ids]
@@ -325,6 +330,8 @@ class PandasDataTable(DataTable, JSONSerializable):
         func_kwargs: dict | None = None,
         on_props: list[str] | None = None,
         as_df: bool = False,
+        chunk_size: int | None = None,
+        n_jobs: int | None = None,
     ) -> Generator:
         """Apply a function to the data frame.
 
@@ -342,22 +349,33 @@ class PandasDataTable(DataTable, JSONSerializable):
                 list of properties to send to the function as arguments
             as_df (bool):
                 If `True`, the function is applied to chunks represented as data frames.
+            chunk_size (int):
+                Size of chunks to use per job in parallel processing. If `None`,
+                the chunk size will be set to `self.chunkSize`. The chunk size will
+                always be set to the number of rows in the data frame if `n_jobs`
+                or `self.nJobs is 1.
+            n_jobs (int):
+                Number of jobs to use for parallel processing. If `None`,
+                `self.nJobs` is used.
 
         Returns:
             Generator:
                 Generator that yields the results of the function applied to each chunk
-                of the data frame.
+                of the data frame as determined by `chunk_size` and `n_jobs`.
         """
-        n_cpus = self.nJobs
-        if n_cpus > 1:
+        n_jobs = self.nJobs if n_jobs is None else n_jobs
+        chunk_size = chunk_size if chunk_size is not None else self.chunkSize
+        if n_jobs > 1:
             logger.debug(
-                f"Applying function '{func!r}' in parallel on {n_cpus} CPUs, "
-                f"using chunk size: {self.chunkSize}."
+                f"Applying function '{func!r}' in parallel on {n_jobs} CPUs, "
+                f"using chunk size: {chunk_size}."
             )
             for result in parallel_generator(
-                self.iterChunks(include_props=on_props, as_dict=not as_df),
+                self.iterChunks(
+                    include_props=on_props, as_dict=not as_df, chunk_size=chunk_size
+                ),
                 func,
-                n_cpus,
+                n_jobs,
                 args=func_args,
                 kwargs=func_kwargs,
             ):
@@ -368,7 +386,9 @@ class PandasDataTable(DataTable, JSONSerializable):
                     raise result
         else:
             logger.debug(f"Applying function '{func!r}' in serial.")
-            for props in self.iterChunks(include_props=on_props, as_dict=not as_df):
+            for props in self.iterChunks(
+                include_props=on_props, as_dict=not as_df, chunk_size=len(self)
+            ):
                 result = func(props, *func_args, **func_kwargs)
                 logger.debug(f"Result for chunk returned: {result!r}")
                 yield result

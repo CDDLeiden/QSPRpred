@@ -467,6 +467,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         proc_kwargs: dict[str, Any] | None = None,
         add_props: list[str] | None = None,
         add_rdkit: bool = False,
+        chunk_size: int | None = None,
+        n_jobs: int | None = None,
     ) -> Generator:
         """Apply a function to the molecules in the data frame.
         The SMILES  or an RDKit molecule will be supplied as the first
@@ -489,11 +491,18 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             add_props (list, optional): List of properties to add to the data frame.
             add_rdkit (bool, optional): Whether to convert the molecules to RDKit
                 molecules before applying the function.
+            chunk_size (int, optional): Size of chunks to use per job in parallel.
+            If not specified, `self.chunkSize` is used.
+            n_jobs (int, optional): Number of jobs to use for parallel processing.
+            If not specified, `self.nJobs` is used.
 
         Returns:
-            Generator: A generator that yields the results of the function applied to
-                each molecule in the data frame.
+            Generator:
+                A generator that yields the results of the supplied processor on
+                the chunked molecules from the data set.
         """
+        chunk_size = chunk_size or self.chunkSize
+        n_jobs = n_jobs or self.nJobs
         proc_args = proc_args or ()
         proc_kwargs = proc_kwargs or {}
         add_props = add_props or self.df.columns.tolist()
@@ -519,13 +528,17 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 func_kwargs=proc_kwargs,
                 on_props=add_props,
                 as_df=False,
+                chunk_size=chunk_size,
+                n_jobs=n_jobs,
             ):
                 yield result
         else:
             logger.debug(
                 f"Applying processor '{processor}' to '{self.name}' in serial."
             )
-            for result in self.iterChunks(include_props=add_props, as_dict=True):
+            for result in self.iterChunks(
+                include_props=add_props, as_dict=True, chunk_size=len(self)
+            ):
                 yield self.runMolProcess(
                     result,
                     processor,
