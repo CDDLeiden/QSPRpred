@@ -38,10 +38,11 @@ from qsprpred.extra.data.descriptors.sets import (
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.msa_calculator import MAFFT, ClustalMSA, BioPythonMSA
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
+from qsprpred.utils.testing.base import QSPRTestCase
 from qsprpred.utils.testing.check_mixins import DescriptorInDataCheckMixIn
 
 
-class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
+class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
     """Test descriptor sets with extra features.
 
     Attributes:
@@ -107,9 +108,10 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, TestCase):
 
     def testExtendedValenceSignature(self):
         """Test the SMILES based signature descriptor calculator."""
-        self.dataset.addDescriptors([ExtendedValenceSignature(1)], recalculate=True)
+        desc_set = ExtendedValenceSignature(1)
+        self.dataset.addDescriptors([desc_set], recalculate=True)
         self.dataset.featurize()
-        self.assertTrue(self.dataset.X.shape[1] > 0)
+        self.assertTrue(self.dataset.X.shape[1] == len(desc_set))
         self.assertTrue(self.dataset.X.any().any())
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
@@ -253,7 +255,9 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         self.assertTrue(self.dataset.X.any().sum() > 1)
 
 
-class TestDescriptorsExtra(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCase):
+class TestDescriptorsExtra(
+    DataSetsMixInExtras, DescriptorInDataCheckMixIn, QSPRTestCase
+):
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -280,7 +284,10 @@ class TestDescriptorsExtra(DataSetsMixInExtras, DescriptorInDataCheckMixIn, Test
         """Test the calculation of extra descriptors with data preparation."""
         np.random.seed(42)
         dataset = self.createLargeTestDataSet(
-            name=self.getDatSetName(desc_set, target_props), target_props=target_props
+            name=self.getDatSetName(desc_set, target_props),
+            target_props=target_props,
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
         )
         self.checkDataSetContainsDescriptorSet(
             dataset, desc_set, self.getDefaultPrep(), target_props
@@ -312,7 +319,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
                     }
                 ],
             )
-            for desc_set in [(ProDec, "Zscale Hellberg"), (ProDec, "Sneath")]
+            for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
         ]
         + [
             (
@@ -320,7 +327,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
                 desc_set,
                 [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
             )
-            for desc_set in [(ProDec, "Zscale Hellberg"), (ProDec, "Sneath")]
+            for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
         ]
         + [
             (
@@ -335,7 +342,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
                     },
                 ],
             )
-            for desc_set in [(ProDec, "Zscale Hellberg"), (ProDec, "Sneath")]
+            for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
         ]
     )
     def testDescriptorsPCMAll(self, _, desc_set, target_props):
@@ -349,7 +356,6 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
         by `DataSetsPathMixIn.getAllDescriptors()`,
         so if you need a specific descriptor tested, add it there.
         """
-        desc_set = desc_set(desc_set[0]([desc_set[1]], msa_provider=self.defaultMSA))
         dataset = self.createPCMDataSet(
             name=f"{self.getDatSetName(desc_set, target_props)}_pcm",
             target_props=target_props,

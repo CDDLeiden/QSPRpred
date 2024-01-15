@@ -78,7 +78,7 @@ class Mordred(DescriptorSet):
         self.descriptors = [str(d) for d in descs]
 
     def getDescriptors(
-        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         df = self._mordred.pandas(self.iterMols(mols), quiet=True, nproc=1)
         df = df.apply(pd.to_numeric, errors="coerce")  # replace errors by nan values
@@ -139,7 +139,7 @@ class Mold2(DescriptorSet):
         self._keepindices = list(range(len(self._descriptors)))
 
     def getDescriptors(
-        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         values = self._mold2.calculate(self.iterMols(mols), show_banner=False)
         # Drop columns
@@ -215,13 +215,13 @@ class PaDEL(DescriptorSet):
             self.descriptors = descs
 
     def getDescriptors(
-        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
-        values = self._padel.calculate(mols, show_banner=False, njobs=1)
-        intersection = list(set(self._keep).intersection(values.columns))
-        values = values[intersection]
-        return values
+        df = self._padel.calculate(mols, show_banner=False, njobs=1)
+        intersection = list(set(self._keep).intersection(df.columns))
+        df = df[intersection]
+        return df.values
 
     @property
     def descriptors(self):
@@ -289,19 +289,19 @@ class ExtendedValenceSignature(DescriptorSet):
         return False
 
     def getDescriptors(
-        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
-        values = self._signature.calculate(
+        df = self._signature.calculate(
             mols, depth=self._depth, show_banner=False, njobs=1
         ).fillna(0)
         if not self._descriptors_init:
-            self._descriptors = values.columns.tolist()
+            self.descriptors = df.columns.tolist()
             self._descriptors_init = True
         else:
-            intersection = list(set(self._descriptors).intersection(values.columns))
-            values = values[intersection]
-        return values
+            intersection = list(set(self.descriptors).intersection(df.columns))
+            df = df[intersection]
+        return df.values
 
     @property
     def descriptors(self):
@@ -346,7 +346,7 @@ class ProteinDescriptorSet(DescriptorSet):
 
     def getDescriptors(
         self,
-        mols: list[str | Mol],
+        mols: list[Mol],
         props: dict[str, list[Any] | dict[str, str]],
         *args,
         **kwargs,
