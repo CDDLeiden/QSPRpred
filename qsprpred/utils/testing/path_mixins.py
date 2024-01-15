@@ -26,6 +26,8 @@ from ...data.processing.feature_filters import (
     HighCorrelationFilter,
 )
 from ...data.processing.feature_standardizers import SKLearnStandardizer
+from ...data.processing.applicability_domain import MLChemAD
+from mlchemad.applicability_domains import TopKatApplicabilityDomain
 from ...models import SklearnModel
 from ...tasks import TargetTasks
 
@@ -159,6 +161,7 @@ class DataSetsPathMixIn(PathMixIn):
         splits = [None, RandomSplit(test_fraction=0.1)]
         feature_standardizers = [None, StandardScaler()]
         feature_filters = [None, HighCorrelationFilter(0.9)]
+        applicability_domains = [None, MLChemAD(TopKatApplicabilityDomain())]
         data_filters = [
             None,
             RepeatsFilter(),
@@ -178,6 +181,7 @@ class DataSetsPathMixIn(PathMixIn):
                 feature_standardizers,
                 feature_filters,
                 data_filters,
+                applicability_domains,
             )
         )
 

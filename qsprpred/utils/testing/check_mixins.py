@@ -80,6 +80,15 @@ class DescriptorCheckMixIn:
                 ValueError, lambda: list(ds.iterFolds(split=KFold(n_splits=5)))
             )
 
+        # check if outliers are dropped
+        if "TestOutlier" in ds.df.columns:
+            num_dropped = ds.df.TestOutlier.sum()
+            # expected number of samples is the total number of samples minus the number
+            # of samples in the training set, minus the number of dropped
+            expected_num_samples = len(ds) - (len(ds.X)) - num_dropped
+            X, X_ind = ds.getFeatures(concat=False)
+            self.assertEqual(X_ind.shape[0], expected_num_samples)
+
     def checkDescriptors(
         self, dataset: QSPRDataset, target_props: list[dict | TargetProperty]
     ):
@@ -134,6 +143,7 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
         feature_standardizer,
         feature_filter,
         data_filter,
+        applicability_domain,
         expected_target_props,
     ):
         """Check the consistency of the dataset after preparation."""
@@ -152,6 +162,8 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
             feature_standardizer=feature_standardizer if feature_standardizer else None,
             feature_filters=[feature_filter] if feature_filter else None,
             data_filters=[data_filter] if data_filter else None,
+            applicability_domain=applicability_domain,
+            drop_outliers=True if applicability_domain is not None else False,
         )
         expected_feature_count = len(dataset.featureNames)
         original_features = dataset.featureNames
@@ -179,6 +191,8 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
             feature_standardizer=feature_standardizer if feature_standardizer else None,
             feature_filters=[feature_filter] if feature_filter else None,
             data_filters=[data_filter] if data_filter else None,
+            applicability_domain=applicability_domain,
+            drop_outliers=True if applicability_domain is not None else False,
         )
         self.checkFeatures(dataset, expected_feature_count)
         self.assertListEqual(sorted(dataset.featureNames), sorted(original_features))

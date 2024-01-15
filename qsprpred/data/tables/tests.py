@@ -576,6 +576,7 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
         feature_standardizer,
         feature_filter,
         data_filter,
+        applicability_domain
     ):
         """Tests one combination of a data set and its preparation settings.
 
@@ -591,6 +592,7 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
             feature_standardizer,
             feature_filter,
             data_filter,
+            applicability_domain,
             ["CL"],
         )
 

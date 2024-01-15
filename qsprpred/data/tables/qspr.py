@@ -11,7 +11,7 @@ from ...data.processing.feature_standardizers import (
     SKLearnStandardizer,
     apply_feature_standardizer,
 )
-from ...data.processing.applicability_domain import applicabilityDomain
+from ...data.processing.applicability_domain import ApplicabilityDomain
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...logs import logger
 from ...tasks import TargetProperty
@@ -37,6 +37,12 @@ class QSPRDataset(MoleculeTable):
         y_ind (np.ndarray/pd.DataFrame) : m-l label array for independent set, where m
             is the number of samples and equals to row of X_ind, and l is the number of
             types.
+        X_ind_outliers (np.ndarray/pd.DataFrame) : m x n Feature matrix for outliers
+            in independent set, where m is the number of samples and n is the number of
+            features.
+        y_ind_outliers (np.ndarray/pd.DataFrame) : m-l label array for outliers in
+            independent set, where m is the number of samples and equals to row of
+            X_ind_outliers, and l is the number of types.
         featureNames (list of str) : feature names
         featureStandardizer (SKLearnStandardizer) : feature standardizer
         applicabilityDomain (ApplicabilityDomain) : applicability domain
@@ -279,6 +285,7 @@ class QSPRDataset(MoleculeTable):
             ]
         self.X = self.y.drop(self.y.columns, axis=1)
         self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
+
         self.featurizeSplits(shuffle=False)
         logger.debug("Training data restored.")
         logger.debug(f"Training features shape: {self.X.shape}")
@@ -491,7 +498,7 @@ class QSPRDataset(MoleculeTable):
 
         If descriptors are already present, they will be recalculated if `recalculate`
         is `True`. Featurization will be performed after adding descriptors if
-        `featurize` is `True`. Featurazation converts current data matrices to pure
+        `featurize` is `True`. Featurization converts current data matrices to pure
         numeric matrices of selected descriptors (features).
 
         Args:
@@ -593,6 +600,8 @@ class QSPRDataset(MoleculeTable):
                 if self.y[prop.name].dtype.name == "category":
                     self.y[prop.name] = self.y[prop.name].cat.codes
                     self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
+        if "TestOutlier" in self.df.columns:
+            self.df = self.df.drop("TestOutlier", axis=1)
         # convert splits to features if required
         if featurize:
             self.featurizeSplits(shuffle=False)
@@ -805,7 +814,7 @@ class QSPRDataset(MoleculeTable):
         feature_filters: list | None = None,
         feature_standardizer: SKLearnStandardizer | None = None,
         feature_fill_value: float = np.nan,
-        applicability_domain: applicabilityDomain | None = None,
+        applicability_domain: ApplicabilityDomain | None = None,
         drop_outliers: bool = False,
         recalculate_features: bool = False,
         shuffle: bool = True,
@@ -894,7 +903,8 @@ class QSPRDataset(MoleculeTable):
         """Get the current feature sets (training and test) from the dataset.
 
         This method also applies any feature standardizers that have been set on the
-        dataset during preparation.
+        dataset during preparation. Outliers are dropped from the test set if they are
+        present, unless `concat` is `True`.
 
         Args:
             inplace (bool): If `True`, the created feature matrices will be saved to the
@@ -946,8 +956,10 @@ class QSPRDataset(MoleculeTable):
         if X_ind is not None:
             X_ind = pd.DataFrame(X_ind, index=df_X_ind.index, columns=df_X_ind.columns)
 
-        if self.applicabilityDomain is not None:
-            self.applicabilityDomain.fit(X)
+        # drop outliers from test set
+        if "TestOutlier" in self.df.columns and not concat:
+            if X_ind is not None:
+                X_ind = X_ind.loc[~self.df["TestOutlier"], :]
 
         if inplace:
             self.X = X
@@ -975,7 +987,11 @@ class QSPRDataset(MoleculeTable):
             )
             return ret.loc[self.df.index, :] if ordered else ret
         else:
-            return self.y, self.y_ind if self.y_ind is not None else self.y
+            if self.y_ind is not None and "TestOutlier" in self.df.columns:
+                y_ind = self.y_ind.loc[~self.df["TestOutlier"], :]
+            else:
+                y_ind = self.y_ind
+            return self.y, y_ind if y_ind is not None else self.y
 
     def getTargetProperties(self, names: list) -> list[TargetProperty]:
         """Get the target properties with the given names.
@@ -1142,14 +1158,26 @@ class QSPRDataset(MoleculeTable):
             raise ValueError(
                 "No applicability domain calculator attached to the data set."
             )
-        X, X_ind = self.getFeatures()
+        _, X_ind = self.getFeatures()
+        if X_ind.shape[0] == 0:
+            logger.warning(
+                "No test samples available, skipping outlier removal from test set."
+            )
+            return
         mask = self.applicabilityDomain.contains(X_ind)
-        self.X_ind = self.X_ind.loc[mask, :]
-        self.y_ind = self.y_ind.loc[mask, :]
-        logger.info(
-            f"Dropped {len(self.y_ind) - len(self.y_ind)} "
-            "outliers from the test set."
-        )
+        # check if all samples are outside the applicability domain
+        if not mask.sum().any():
+            logger.warning(
+                "All samples in the test set are outside the applicability domain,"
+                "outliers will not be dropped."
+            )
+            return
+        # Set TestOutlier column if it does not exist
+        if "TestOutlier" not in self.df.columns:
+            self.df["TestOutlier"] = False
+        self.df.loc[X_ind.index, "TestOutlier"] = ~mask["in_domain"]
+
+        logger.info(f"Marked {(~mask).sum().sum()} samples from the test set as outlier.")
 
     def addApplicabilityDomain(self):
         """Add a column with applicability domain values to the data set."""
