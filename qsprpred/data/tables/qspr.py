@@ -11,6 +11,7 @@ from ...data.processing.feature_standardizers import (
     SKLearnStandardizer,
     apply_feature_standardizer,
 )
+from ...data.processing.applicability_domain import applicabilityDomain
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...logs import logger
 from ...tasks import TargetProperty
@@ -37,6 +38,8 @@ class QSPRDataset(MoleculeTable):
             is the number of samples and equals to row of X_ind, and l is the number of
             types.
         featureNames (list of str) : feature names
+        featureStandardizer (SKLearnStandardizer) : feature standardizer
+        applicabilityDomain (ApplicabilityDomain) : applicability domain
     """
 
     _notJSON: ClassVar = [*MoleculeTable._notJSON, "X", "X_ind", "y", "y_ind"]
@@ -801,11 +804,12 @@ class QSPRDataset(MoleculeTable):
         split=None,
         feature_calculators: list | None = None,
         feature_filters: list | None = None,
-        feature_standardizer: Optional[SKLearnStandardizer] = None,
+        feature_standardizer: SKLearnStandardizer | None = None,
         feature_fill_value: float = np.nan,
+        applicability_domain: applicabilityDomain | None = None,
         recalculate_features: bool = False,
         shuffle: bool = True,
-        random_state: Optional[int] = None,
+        random_state: int | None = None,
     ):
         """Prepare the dataset for use in QSPR model.
 
@@ -820,10 +824,14 @@ class QSPRDataset(MoleculeTable):
             feature_filters (list of feature filter objs): filters features
             feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator):
                 standardizes and/or scales features
-            recalculate_features (bool): recalculate features even if they are already
-                present in the file
             feature_fill_value (float): value to fill missing values with.
                 Defaults to `numpy.nan`
+            applicability_domain (applicabilityDomain obj): attaches an
+                applicability domain calculator to the dataset, which can be used to
+                filter out compounds that are outside the applicability domain of the
+                model.
+            recalculate_features (bool): recalculate features even if they are already
+                present in the file
             shuffle (bool): whether to shuffle the created training and test sets
             random_state (int): random state for shuffling
         """
@@ -857,6 +865,8 @@ class QSPRDataset(MoleculeTable):
         # set feature standardizers
         if feature_standardizer:
             self.setFeatureStandardizer(feature_standardizer)
+        if applicability_domain:
+            self.applicabilityDomain = applicability_domain
 
     def checkFeatures(self):
         """Check consistency of features and descriptors."""
@@ -867,26 +877,6 @@ class QSPRDataset(MoleculeTable):
             )
         elif self.X.shape[0] == 0:
             raise ValueError("X has no rows.")
-
-    def fitFeatureStandardizer(self):
-        """Fit the feature standardizers on the data set.
-
-        Returns:
-            X (pd.DataFrame): standardized data set
-        """
-        if self.hasDescriptors:
-            X = self.getDescriptors()
-            if self.featureNames is not None:
-                X = X[self.featureNames]
-            return apply_feature_standardizer(self.featureStandardizer, X, fit=True)[0]
-
-    def fitApplicabilityDomain(self):
-        """Fit the applicability domain on the data set."""
-        if self.hasDescriptors:
-            X = self.getDescriptors()
-            if self.featureNames is not None:
-                X = X[self.featureNames]
-            self.ApplicabilityDomain.fit(X)
 
     def getFeatures(
         self,
@@ -949,6 +939,9 @@ class QSPRDataset(MoleculeTable):
         X = pd.DataFrame(X, index=df_X.index, columns=df_X.columns)
         if X_ind is not None:
             X_ind = pd.DataFrame(X_ind, index=df_X_ind.index, columns=df_X_ind.columns)
+
+        if self.applicabilityDomain is not None:
+            self.applicabilityDomain.fit(X)
 
         if inplace:
             self.X = X
@@ -1114,3 +1107,20 @@ class QSPRDataset(MoleculeTable):
         self.checkFeatures()
         folds = FoldsFromDataSplit(split, self.featureStandardizer)
         return folds.iterFolds(self, concat=concat)
+
+    def addApplicabilityDomain(self, applicability_domain: applicabilityDomain | None):
+        """Add a column with applicability domain values to the data set.
+
+        Args:
+            applicability_domain (applicabilityDomain):
+                applicability domain calculator, if None, the attached applicability
+                domain calculator will be used.
+        """
+        if applicability_domain is None:
+            applicability_domain = self.applicabilityDomain
+        if applicability_domain is None:
+            raise ValueError(
+                "No applicability domain calculator attached to the data set."
+            )
+        features = self.getFeatures(concat=True, ordered=True)
+        self.df["within_applicability_domain"] = applicability_domain.contains(features)
