@@ -102,6 +102,10 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
     def supportsParallel(self) -> bool:
         return True
 
+    @property
+    def dtype(self):
+        return np.float32
+
     def __call__(
         self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> pd.DataFrame:
@@ -120,8 +124,19 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         values = self.getDescriptors(mols, props, *args, **kwargs)
         df = pd.DataFrame(values, index=props[self.idProp])
         df.columns = self.descriptors
-        df = df.astype(float)
-        df = self.treatInfs(df)
+        try:
+            df = df.astype(self.dtype)
+        except ValueError as exp:
+            logger.warning(
+                f"Could not convert descriptor values to '{self.dtype}': {exp}\n"
+                f"Keeping original types: {df.dtypes}"
+            )
+        try:
+            df = self.treatInfs(df)
+        except TypeError as exp:
+            logger.warning(
+                f"Could not treat infinite values because of type mismatch: {exp}"
+            )
         return df
 
     @abstractmethod
@@ -455,6 +470,10 @@ class PredictorDesc(DescriptorSet):
 class SmilesDesc(DescriptorSet):
     """Descriptorset that calculates descriptors from a SMILES sequence."""
 
+    @staticmethod
+    def treatInfs(df: pd.DataFrame) -> pd.DataFrame:
+        return df
+
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
@@ -472,6 +491,10 @@ class SmilesDesc(DescriptorSet):
             return np.array([Chem.MolToSmiles(mol) for mol in mols])
         else:
             raise ValueError("Molecules should be either SMILES or RDKit Mol objects.")
+
+    @property
+    def dtype(self):
+        return str
 
     @property
     def descriptors(self):
