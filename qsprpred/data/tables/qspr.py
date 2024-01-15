@@ -134,12 +134,17 @@ class QSPRDataset(MoleculeTable):
         self.y_ind = None
         self.targetProperties = []
         self.setTargetProperties(target_props, drop_empty)
-        logger.info(
-            f"Dataset '{self.name}' created for target "
-            f"targetProperties: '{self.targetProperties}'."
-        )
+        self.chunkSize = chunk_size
         if drop_invalids:
             self.dropInvalids()
+            self.chunkSize = chunk_size
+        logger.info(
+            f"Dataset '{self.name}' created for "
+            f"target Properties: '{self.targetProperties}'. "
+            f"Number of samples: {len(self.df)}. "
+            f"Chunk size: {self.chunkSize}. "
+            f"Number of CPUs: {self.nJobs}."
+        )
 
     def __setstate__(self, state):
         super().__setstate__(state)

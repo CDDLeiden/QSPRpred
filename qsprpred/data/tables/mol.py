@@ -194,6 +194,11 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         # settings
         self.smilesCol = smiles_col
         self.includesRdkit = add_rdkit
+        # drop invalid columns
+        if drop_invalids:
+            self.dropInvalids()
+            # update chunk size if count changed
+            self.chunkSize = chunk_size
         # add rdkit molecules if requested
         if self.includesRdkit and "RDMol" not in self.df.columns:
             PandasTools.AddMoleculeColumnToFrame(
@@ -203,9 +208,6 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 includeFingerprints=False,
             )
             self.includesRdkit = True
-        # drop invalid columns
-        if drop_invalids:
-            self.dropInvalids()
 
     def searchWithIndex(
         self, index: pd.Index, name: str | None = None
