@@ -286,7 +286,7 @@ class TestDescriptorsExtra(
         dataset = self.createLargeTestDataSet(
             name=self.getDatSetName(desc_set, target_props),
             target_props=target_props,
-            n_jobs=self.nCPU,
+            n_jobs=2,
             chunk_size=self.chunkSize,
         )
         self.checkDataSetContainsDescriptorSet(

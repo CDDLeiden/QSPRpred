@@ -29,9 +29,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
         """
         return self.createPCMDataSet(name)
 
-    @parameterized.expand(
-        DataSetsMixInExtras.getPrepCombos()
-    )  # add @skip("Not now...") below this line to skip these tests
+    @parameterized.expand(DataSetsMixInExtras.getPrepCombos())
     def testPrepCombinations(
         self,
         _,

@@ -84,7 +84,7 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
 
     @classmethod
     def getDefaultCalculatorCombo(cls):
-        mol_descriptor_calculators = super().getDefaultCalculatorCombo()
+        mol_descriptor_calculators = [super().getDefaultCalculatorCombo()[0]]
         feature_sets_pcm = cls.getAllProteinDescriptors()
         protein_descriptor_calculators = list(
             itertools.combinations(feature_sets_pcm, 1)
