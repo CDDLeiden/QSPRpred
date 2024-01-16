@@ -41,6 +41,8 @@ the [documentation](https://cddleiden.github.io/QSPRpred/docs/).
           QSPRpred.
 - **Advanced**
     - Data
+        - [Parallelization](advanced/data/parallelization.ipynb): How to parallelize
+          data functions across data sets.
         - [Custom descriptors](advanced/data/custom_descriptors.ipynb): How to use
           custom descriptors.
         - [Custom data splitting](advanced/data/custom_splitting.ipynb): How to use
