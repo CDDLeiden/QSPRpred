@@ -10,14 +10,22 @@ import numpy as np
 import optuna
 import pandas as pd
 from boruta import BorutaPy
+from rdkit.Chem.rdFingerprintGenerator import TopologicalTorsionFP
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
+from qsprpred.data.descriptors.fingerprints import (
+    MorganFP,
+    RDKitMACCSFP,
+    AtomPairFP,
+    LayeredFP,
+    PatternFP,
+    RDKitFP,
+    AvalonFP,
+)
 from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
-    FingerprintSet,
     PredictorDesc,
     RDKitDescs,
     SmilesDesc,
@@ -133,7 +141,7 @@ def QSPRArgParser(txt=None):
         "--low_quality",
         action="store_true",
         help="If lq, than low quality data will be should be a column 'Quality' where "
-             "all 'Low' will be removed",
+        "all 'Low' will be removed",
     )
     parser.add_argument(
         "-tr",
@@ -417,9 +425,7 @@ def QSPR_dataprep(args):
                     PaDEL,
                 )
             if "Morgan" in args.features:
-                descriptorsets.append(
-                    FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048)
-                )
+                descriptorsets.append(MorganFP(radius=3, nBits=2048))
             if "RDkit" in args.features:
                 descriptorsets.append(RDKitDescs())
             if "Mordred" in args.features:
@@ -433,21 +439,19 @@ def QSPR_dataprep(args):
             if "Signature" in args.features:
                 descriptorsets.append(ExtendedValenceSignature(depth=1))
             if "MaccsFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="MACCS"))
+                descriptorsets.append(RDKitMACCSFP())
             if "AtomPairFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="AtomPairFP"))
+                descriptorsets.append(AtomPairFP())
             if "TopologicalFP" in args.features:
-                descriptorsets.append(
-                    FingerprintSet(fingerprint_type="TopologicalTorsionFP")
-                )
+                descriptorsets.append(TopologicalTorsionFP())
             if "AvalonFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="AvalonFP"))
+                descriptorsets.append(AvalonFP())
             if "RDKitFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="RDKitFP"))
+                descriptorsets.append(RDKitFP())
             if "PatternFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="PatternFP"))
+                descriptorsets.append(PatternFP())
             if "LayeredFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="LayeredFP"))
+                descriptorsets.append(LayeredFP())
             if "Smiles" in args.features:
                 descriptorsets.append(SmilesDesc())
             if args.predictor_descs:
@@ -468,14 +472,15 @@ def QSPR_dataprep(args):
             if args.high_correlation:
                 featurefilters.append(HighCorrelationFilter(th=args.high_correlation))
             if args.boruta_filter:
-                #boruta filter can not be used for multi-task models
+                # boruta filter can not be used for multi-task models
                 if len(props) > 1:
                     raise ValueError(
                         "Boruta filter can not be used for multi-task models"
                     )
                 boruta_estimator = (
                     RandomForestRegressor(n_jobs=args.ncpu)
-                    if args.regression else RandomForestClassifier(n_jobs=args.ncpu)
+                    if args.regression
+                    else RandomForestClassifier(n_jobs=args.ncpu)
                 )
                 featurefilters.append(
                     BorutaFilter(
@@ -485,7 +490,7 @@ def QSPR_dataprep(args):
                 )
             # prepare dataset for modelling
             mydataset.prepareDataset(
-                feature_calculators=[MoleculeDescriptorsCalculator(descriptorsets)],
+                feature_calculators=descriptorsets,
                 data_filters=data_filters,
                 split=split,
                 feature_filters=featurefilters,
