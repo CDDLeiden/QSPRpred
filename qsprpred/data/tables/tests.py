@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from parameterized import parameterized
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import ShuffleSplit, KFold
+from sklearn.model_selection import KFold, ShuffleSplit
 
-from ... import TargetTasks, TargetProperty
+from ... import TargetProperty, TargetTasks
 from ...data import QSPRDataset
 from ...data.descriptors.calculators import MoleculeDescriptorsCalculator
 from ...data.descriptors.sets import FingerprintSet
@@ -19,7 +19,6 @@ from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
 class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
     """Simple tests for dataset creation and serialization under different conditions
     and error states."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -103,7 +102,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         # create a basic regression data set
         dataset = QSPRDataset(
             "test_defaults",
-            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            [{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
             n_jobs=self.nCPU,
@@ -126,7 +128,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         stopwatch.reset()
         dataset_new = QSPRDataset(
             "test_defaults",
-            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            [{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             store_dir=self.generatedDataPath,
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
@@ -138,7 +143,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset_new = QSPRDataset.fromTableFile(
             "test_defaults",
             f"{self.inputDataPath}/test_data.tsv",
-            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             store_dir=self.generatedDataPath,
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
@@ -150,7 +158,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset_new = QSPRDataset.fromTableFile(
             "test_defaults_new",  # new name implies HBD below should exist again
             f"{self.inputDataPath}/test_data.tsv",
-            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             store_dir=self.generatedDataPath,
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
@@ -165,8 +176,14 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset = QSPRDataset(
             "testMultitask",
             [
-                {"name": "CL", "task": TargetTasks.REGRESSION},
-                {"name": "fu", "task": TargetTasks.REGRESSION},
+                {
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION
+                },
+                {
+                    "name": "fu",
+                    "task": TargetTasks.REGRESSION
+                },
             ],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
@@ -193,8 +210,14 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset = QSPRDataset(
             "testTargetProperty",
             [
-                {"name": "CL", "task": TargetTasks.REGRESSION},
-                {"name": "fu", "task": TargetTasks.REGRESSION},
+                {
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION
+                },
+                {
+                    "name": "fu",
+                    "task": TargetTasks.REGRESSION
+                },
             ],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
@@ -214,7 +237,11 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         del df_new["CL_original"]
         dataset = QSPRDataset(
             "testTargetProperty-precomputed",
-            [{"name": "CL", "task": TargetTasks.MULTICLASS, "th": "precomputed"}],
+            [{
+                "name": "CL",
+                "task": TargetTasks.MULTICLASS,
+                "th": "precomputed"
+            }],
             df=df_new,
             store_dir=self.generatedDataPath,
             n_jobs=self.nCPU,
@@ -242,7 +269,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         # default index
         QSPRDataset(
             "testTargetProperty",
-            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            [{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
             n_jobs=self.nCPU,
@@ -251,7 +281,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         # set index to SMILES column
         QSPRDataset(
             "testTargetProperty",
-            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            [{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
             n_jobs=self.nCPU,
@@ -261,7 +294,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         # multiindex
         QSPRDataset(
             "testTargetProperty",
-            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            [{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             df=self.getSmallDF(),
             store_dir=self.generatedDataPath,
             n_jobs=self.nCPU,
@@ -273,7 +309,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             ValueError,
             lambda: QSPRDataset(
                 "testTargetProperty",
-                [{"name": "CL", "task": TargetTasks.REGRESSION}],
+                [{
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION
+                }],
                 df=self.getSmallDF(),
                 store_dir=self.generatedDataPath,
                 n_jobs=self.nCPU,
@@ -286,7 +325,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             ValueError,
             lambda: QSPRDataset(
                 "testTargetProperty",
-                [{"name": "CL", "task": TargetTasks.REGRESSION}],
+                [{
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION
+                }],
                 df=self.getSmallDF(),
                 store_dir=self.generatedDataPath,
                 n_jobs=self.nCPU,
@@ -295,13 +337,16 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             ),
         )
 
-    @parameterized.expand([(1,), (2,)])  # use one or two CPUs
+    @parameterized.expand([(1, ), (2, )])  # use one or two CPUs
     def testInvalidsDetection(self, n_cpu):
         df = self.getBigDF()
         all_mols = len(df)
         dataset = QSPRDataset(
             "testInvalidsDetection",
-            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            [{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             df=df,
             store_dir=self.generatedDataPath,
             drop_invalids=False,
@@ -482,7 +527,6 @@ def prop_transform(x):
 
 class TestTargetProperty(QSPRTestCase):
     """Test the TargetProperty class."""
-
     def checkTargetProperty(self, target_prop, name, task, th):
         # Check the target property creation consistency
         self.assertEqual(target_prop.name, name)
@@ -513,11 +557,18 @@ class TestTargetProperty(QSPRTestCase):
         )
         # Check from dictionary creation
         targetprop = TargetProperty.fromDict(
-            {"name": "CL", "task": TargetTasks.REGRESSION}
+            {
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }
         )
         self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, None)
         targetprop = TargetProperty.fromDict(
-            {"name": "CL", "task": TargetTasks.MULTICLASS, "th": [0, 1, 10, 1200]}
+            {
+                "name": "CL",
+                "task": TargetTasks.MULTICLASS,
+                "th": [0, 1, 10, 1200]
+            }
         )
         self.checkTargetProperty(
             targetprop, "CL", TargetTasks.MULTICLASS, [0, 1, 10, 1200]
@@ -525,8 +576,14 @@ class TestTargetProperty(QSPRTestCase):
         # Check from list creation, selection and serialization support functions
         targetprops = TargetProperty.fromList(
             [
-                {"name": "CL", "task": TargetTasks.REGRESSION},
-                {"name": "fu", "task": TargetTasks.REGRESSION},
+                {
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION
+                },
+                {
+                    "name": "fu",
+                    "task": TargetTasks.REGRESSION
+                },
             ]
         )
         self.checkTargetProperty(targetprops[0], "CL", TargetTasks.REGRESSION, None)
@@ -561,7 +618,6 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
     """Test as many possible combinations of data sets and their preparation
     settings. These can run potentially for a long time so use the `skip` decorator
     if you want to skip all these tests to speed things up during development."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -576,7 +632,7 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
         feature_standardizer,
         feature_filter,
         data_filter,
-        applicability_domain
+        applicability_domain,
     ):
         """Tests one combination of a data set and its preparation settings.
 
@@ -599,7 +655,6 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
 
 class TestTargetImputation(PathMixIn, QSPRTestCase):
     """Small tests to only check if the target imputation works on its own."""
-
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()

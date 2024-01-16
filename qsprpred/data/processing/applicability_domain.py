@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import ml2json
 import pandas as pd
-from mlchemad.base import ApplicabilityDomain as MLChemApplicabilityDomain
+from mlchemad.base import ApplicabilityDomain as MLChemADApplicabilityDomain
 
 from ...logs import logger
 from ...utils.serialization import JSONSerializable
@@ -50,8 +50,14 @@ class ApplicabilityDomain(JSONSerializable, ABC):
             return X
         return X[self.contains(X)]
 
+    @property
+    @abstractmethod
+    def fitted(self) -> bool:
+        """Return whether the applicability domain is fitted or not."""
 
-class MLChemAD(ApplicabilityDomain):
+
+
+class MLChemADWrapper(ApplicabilityDomain):
     """Define the applicability domain for a dataset using the MLChemAD package.
 
     This class uses the MLChemAD package to filter out molecules that are not in the
@@ -62,7 +68,7 @@ class MLChemAD(ApplicabilityDomain):
         applicabilityDomain (MLChemApplicabilityDomain): applicability domain object
         fitted (bool): whether the applicability domain is fitted or not
     """
-    def __init__(self, applicability_domain: MLChemApplicabilityDomain) -> None:
+    def __init__(self, applicability_domain: MLChemADApplicabilityDomain) -> None:
         """Initialize the MLChemADFilter with the domain_type attribute.
 
         Args:

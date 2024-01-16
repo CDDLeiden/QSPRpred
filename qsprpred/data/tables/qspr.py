@@ -3,9 +3,12 @@ from typing import Callable, ClassVar, Generator, Optional
 
 import numpy as np
 import pandas as pd
+from mlchemad.applicability_domains import (
+    ApplicabilityDomain as MLChemADApplicabilityDomain,
+)
 from sklearn.preprocessing import LabelEncoder
 
-from ...data.processing.applicability_domain import ApplicabilityDomain
+from ...data.processing.applicability_domain import ApplicabilityDomain, MLChemADWrapper
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_standardizers import (
     SKLearnStandardizer,
@@ -266,9 +269,8 @@ class QSPRDataset(MoleculeTable):
 
         If the data frame contains a column 'Split_IsTrain',
         the data will be split into training and independent sets. Otherwise, the
-            independent set will
-        be empty. If descriptors are available, the resulting training matrices will
-            be featurized.
+        independent set will be empty. If descriptors are available, the resulting
+        training matrices will be featurized.
         """
         logger.debug("Restoring training data...")
         # split data into training and independent sets if saved previously
@@ -526,6 +528,8 @@ class QSPRDataset(MoleculeTable):
         """
         if save_split:
             self.saveSplit()
+        elif "Split_IsTrain" in self.df.columns:
+            self.df.drop("Split_IsOutlier", axis=1, inplace=True)
         super().save()
 
     def split(self, split: "DataSplit", featurize: bool = False):
@@ -591,8 +595,8 @@ class QSPRDataset(MoleculeTable):
                 if self.y[prop.name].dtype.name == "category":
                     self.y[prop.name] = self.y[prop.name].cat.codes
                     self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
-        if "TestOutlier" in self.df.columns:
-            self.df = self.df.drop("TestOutlier", axis=1)
+        if "Split_IsOutlier" in self.df.columns:
+            self.df = self.df.drop("Split_IsOutlier", axis=1)
         # convert splits to features if required
         if featurize:
             self.featurizeSplits(shuffle=False)
@@ -805,7 +809,8 @@ class QSPRDataset(MoleculeTable):
         feature_filters: list | None = None,
         feature_standardizer: SKLearnStandardizer | None = None,
         feature_fill_value: float = np.nan,
-        applicability_domain: ApplicabilityDomain | None = None,
+        applicability_domain: ApplicabilityDomain | MLChemADApplicabilityDomain |
+        None = None,
         drop_outliers: bool = False,
         recalculate_features: bool = False,
         shuffle: bool = True,
@@ -868,8 +873,7 @@ class QSPRDataset(MoleculeTable):
             self.setFeatureStandardizer(feature_standardizer)
         # set applicability domain and fit it on the training set
         if applicability_domain:
-            self.applicabilityDomain = applicability_domain
-            self.fitApplicabilityDomain()
+            self.setApplicabilityDomain(applicability_domain)
         # drop outliers from test set based on applicability domain
         if drop_outliers:
             self.dropOutliers()
@@ -948,9 +952,9 @@ class QSPRDataset(MoleculeTable):
             X_ind = pd.DataFrame(X_ind, index=df_X_ind.index, columns=df_X_ind.columns)
 
         # drop outliers from test set
-        if "TestOutlier" in self.df.columns and not concat:
+        if "Split_IsOutlier" in self.df.columns and not concat:
             if X_ind is not None:
-                X_ind = X_ind.loc[~self.df["TestOutlier"], :]
+                X_ind = X_ind.loc[~self.df["Split_IsOutlier"], :]
 
         if inplace:
             self.X = X
@@ -978,8 +982,8 @@ class QSPRDataset(MoleculeTable):
             )
             return ret.loc[self.df.index, :] if ordered else ret
         else:
-            if self.y_ind is not None and "TestOutlier" in self.df.columns:
-                y_ind = self.y_ind.loc[~self.df["TestOutlier"], :]
+            if self.y_ind is not None and "Split_IsOutlier" in self.df.columns:
+                y_ind = self.y_ind.loc[~self.df["Split_IsOutlier"], :]
             else:
                 y_ind = self.y_ind
             return self.y, y_ind if y_ind is not None else self.y
@@ -1124,27 +1128,19 @@ class QSPRDataset(MoleculeTable):
         folds = FoldsFromDataSplit(split, self.featureStandardizer)
         return folds.iterFolds(self, concat=concat)
 
-    def fitApplicabilityDomain(self, concat: bool = False):
-        """Fit the applicability domain calculator
-
-        Fitted on the training data only, if test data is present.
-        If concat is True, the applicability domain calculator will be fitted on the
-        whole data set.
-        Applicability domain calculator must be attached to the data set before calling.
+    def setApplicabilityDomain(
+        self, applicability_domain: ApplicabilityDomain | MLChemADApplicabilityDomain
+    ):
+        """Set the applicability domain calculator.
 
         Args:
-            concat (bool):
-                whether to concatenate the training and test feature matrices
+            applicability_domain (ApplicabilityDomain | MLChemADApplicabilityDomain):
+                applicability domain calculator instance
         """
-        if self.applicabilityDomain is None:
-            raise ValueError(
-                "No applicability domain calculator attached to the data set."
-            )
-        features = self.getFeatures(concat=concat)
-        if not concat:
-            # fit on training data only, if test data is present
-            features = features[0]
-        self.applicabilityDomain.fit(features)
+        if isinstance(applicability_domain, MLChemADApplicabilityDomain):
+            self.applicabilityDomain = MLChemADWrapper(applicability_domain)
+        else:
+            self.applicabilityDomain = applicability_domain
 
     def dropOutliers(self):
         """Drop outliers from the test set based on the applicability domain."""
@@ -1152,35 +1148,24 @@ class QSPRDataset(MoleculeTable):
             raise ValueError(
                 "No applicability domain calculator attached to the data set."
             )
-        _, X_ind = self.getFeatures()
+        X, X_ind = self.getFeatures()
         if X_ind.shape[0] == 0:
             logger.warning(
                 "No test samples available, skipping outlier removal from test set."
             )
             return
+        # fit applicability domain on the training set
+        self.applicabilityDomain.fit(X)
         mask = self.applicabilityDomain.contains(X_ind)
-        # check if all samples are outside the applicability domain
         if not mask.sum().any():
             logger.warning(
                 "All samples in the test set are outside the applicability domain,"
                 "outliers will not be dropped."
             )
             return
-        # Set TestOutlier column if it does not exist
-        if "TestOutlier" not in self.df.columns:
-            self.df["TestOutlier"] = False
-        self.df.loc[X_ind.index, "TestOutlier"] = ~mask["in_domain"]
+        self.df["Split_IsOutlier"] = False
+        self.df.loc[X_ind.index, "Split_IsOutlier"] = ~mask["in_domain"]
 
         logger.info(
             f"Marked {(~mask).sum().sum()} samples from the test set as outlier."
-        )
-
-    def addApplicabilityDomain(self):
-        """Add a column with applicability domain values to the data set."""
-        if self.applicabilityDomain is None:
-            raise ValueError(
-                "No applicability domain calculator attached to the data set."
-            )
-        self.df["within_applicability_domain"] = self.applicabilityDomain.contains(
-            self.getFeatures(concat=True, ordered=True)
         )

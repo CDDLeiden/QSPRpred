@@ -12,7 +12,7 @@ from ...data.descriptors.calculators import (
     MoleculeDescriptorsCalculator,
 )
 from ...data.descriptors.sets import DataFrameDescriptorSet, FingerprintSet
-from ...data.processing.applicability_domain import MLChemAD
+from ...data.processing.applicability_domain import MLChemADWrapper
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
 from ...data.processing.feature_filters import (
     BorutaFilter,
@@ -218,7 +218,7 @@ class testApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
 
     def testApplicabilityDomain(self):
         """Test the applicability domain fitting, transforming and serialization."""
-        ad = MLChemAD(
+        ad = MLChemADWrapper(
             KNNApplicabilityDomain(
                 dist="rogerstanimoto", scaling=None, hard_threshold=0.75
             )
@@ -229,7 +229,7 @@ class testApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
         self.assertIsInstance(filtered_dataset, pd.DataFrame)
 
         ad.toFile(f"{self.generatedPath}/test_ad.json")
-        ad_fromfile = MLChemAD.fromFile(f"{self.generatedPath}/test_ad.json")
+        ad_fromfile = MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")
         self.assertIsInstance(ad_fromfile.contains(self.dataset.X), pd.DataFrame)
         filtered_dataset_fromfile = ad_fromfile.filter(self.dataset.X)
         self.assertIsInstance(filtered_dataset_fromfile, pd.DataFrame)
