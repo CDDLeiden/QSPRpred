@@ -234,6 +234,8 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
         dataset = self.createLargeTestDataSet()
         dataset.nJobs = n_jobs
         dataset.chunkSize = chunk_size
+        self.assertTrue(dataset.nJobs is not None)
+        self.assertTrue(dataset.chunkSize is not None)
         self.assertTrue(dataset.nJobs > 0)
         self.assertTrue(dataset.chunkSize > 0)
         result = dataset.processMols(
@@ -255,7 +257,10 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
             len(expected_props) + len(expected_args) + len(expected_kwargs) + 1
         )
         for item in result:
-            self.assertTrue(item.shape[0] <= dataset.chunkSize)
+            if dataset.nJobs > 1:
+                self.assertTrue(item.shape[0] <= dataset.chunkSize)
+            else:
+                self.assertTrue(item.shape[0] == len(dataset))
             self.assertEqual(
                 item.shape[1],
                 expected_cols,
