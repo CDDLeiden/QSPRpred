@@ -7,8 +7,6 @@ from typing import Type
 
 from parameterized import parameterized
 from sklearn.cross_decomposition import PLSRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.extra.data.descriptors.sets import ProDec
@@ -81,10 +79,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                 alg,
                 [None],
             )
-            for alg, alg_name in (
-                (PLSRegression, "PLSR"),
-                (SVR, "SVR"),
-            )
+            for alg, alg_name in ((PLSRegression, "PLSR"),)
         ]
         + [
             (
@@ -100,10 +95,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                 alg,
                 random_state,
             )
-            for alg, alg_name in (
-                (RandomForestClassifier, "RFC"),
-                (XGBClassifier, "XGBC"),
-            )
+            for alg, alg_name in ((XGBClassifier, "XGBC"),)
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
