@@ -55,7 +55,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
         self.dataset.shuffle()
 
-    @skipIf(platform.system() == "Darwin", "Mordred not supported on Mac OS")
+    @skipIf(platform.system() == "Darwin", "Mold2 not supported on Mac OS")
     def testMold2(self):
         """Test the Mold2 descriptor calculator."""
         self.dataset.addDescriptors([Mold2()])

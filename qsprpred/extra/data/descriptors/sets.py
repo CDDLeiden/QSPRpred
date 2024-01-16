@@ -138,6 +138,10 @@ class Mold2(DescriptorSet):
         self._descriptors = self._defaultDescs[:]
         self._keepindices = list(range(len(self._descriptors)))
 
+    @property
+    def supportsParallel(self) -> bool:
+        return False
+
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
