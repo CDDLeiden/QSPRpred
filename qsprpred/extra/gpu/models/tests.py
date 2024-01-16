@@ -156,7 +156,7 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             )
 
 
-class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
+class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
 
     def setUp(self):
@@ -324,7 +324,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # save the cross-validation train, test and validation split to
         # compare with true Chemprop model from the base monitor
         df_train = pd.DataFrame(
-            assessor.monitor.fits[0]["fitData"]["X_train"], columns=["smiles"]
+            assessor.monitor.fits[0]["fitData"]["X_train"], columns=["SMILES"]
         )
         df_train["pchembl_value_Mean"] = assessor.monitor.fits[0]["fitData"]["y_train"]
         df_train.to_csv(
@@ -332,7 +332,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
 
         df_val = pd.DataFrame(
-            assessor.monitor.fits[0]["fitData"]["X_val"], columns=["smiles"]
+            assessor.monitor.fits[0]["fitData"]["X_val"], columns=["SMILES"]
         )
         df_val["pchembl_value_Mean"] = assessor.monitor.fits[0]["fitData"]["y_val"]
         df_val.to_csv(
@@ -340,7 +340,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
 
         df_test = pd.DataFrame(assessor.monitor.foldData[0]["X_test"])
-        df_test.rename(columns={"Descriptor_SmilesDesc_SMILES": "smiles"}, inplace=True)
+        df_test.rename(columns={"Descriptor_SmilesDesc_SMILES": "SMILES"}, inplace=True)
         df_test["pchembl_value_Mean"] = assessor.monitor.foldData[0]["y_test"]
         df_test.to_csv(
             f"{self.generatedModelsPath}/consistency_data_test.csv", index=False
