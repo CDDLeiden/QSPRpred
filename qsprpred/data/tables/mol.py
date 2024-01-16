@@ -720,6 +720,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             ):
                 df_descriptors.append(result)
             df_descriptors = pd.concat(df_descriptors, axis=0)
+            df_descriptors[self.indexCols] = None
             df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]
             self.attachDescriptors(calculator, df_descriptors, self.indexCols)
 
