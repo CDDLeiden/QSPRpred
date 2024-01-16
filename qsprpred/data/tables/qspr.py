@@ -1154,6 +1154,14 @@ class QSPRDataset(MoleculeTable):
                 "No test samples available, skipping outlier removal from test set."
             )
             return
+        # check if X or X_ind contain any nan values
+        if X.isna().any().any() or X_ind.isna().any().any():
+            logger.warning(
+                "Feature matrix contains NaN values. "
+                "Please fill them before applying outlier removal."
+                "Outliers will not be dropped."
+            )
+            return
         # fit applicability domain on the training set
         self.applicabilityDomain.fit(X)
         mask = self.applicabilityDomain.contains(X_ind)
