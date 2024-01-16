@@ -10,7 +10,8 @@ from xgboost import XGBClassifier, XGBRegressor
 from qsprpred import TargetProperty, TargetTasks
 from qsprpred.benchmarks import BenchmarkSettings, DataPrepSettings, BenchmarkRunner
 from qsprpred.data import MoleculeTable, RandomSplit
-from qsprpred.data.descriptors.sets import FingerprintSet, RDKitDescs
+from qsprpred.data.descriptors.fingerprints import MorganFP
+from qsprpred.data.descriptors.sets import RDKitDescs
 from qsprpred.data.processing.feature_filters import LowVarianceFilter
 from qsprpred.data.sources import DataSource
 from qsprpred.models import SklearnModel, TestSetAssessor, CrossValAssessor
@@ -58,7 +59,7 @@ settings = BenchmarkSettings(
     data_sources=[source],
     descriptors=[
         [
-            FingerprintSet(fingerprint_type="MorganFP", radius=2, nBits=256),
+            MorganFP(radius=2, nBits=256),
             RDKitDescs(),
         ],
     ],
