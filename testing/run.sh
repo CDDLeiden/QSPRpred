@@ -5,7 +5,9 @@ set -e
 WD=$(pwd)
 RUN_EXTRAS=${QSPPRED_TEST_EXTRAS:-true}
 RUN_TUTORIAL=${QSPPRED_TEST_TUTORIAL:-true}
-echo "Running tests with RUN_EXTRAS=$RUN_EXTRAS"
+echo "Running tests with:"
+echo "  RUN_EXTRAS=$RUN_EXTRAS"
+echo "  RUN_TUTORIAL=$RUN_TUTORIAL"
 
 # -x: stop on first failure, -v: verbose
 pytest -xv ../qsprpred/benchmarks
