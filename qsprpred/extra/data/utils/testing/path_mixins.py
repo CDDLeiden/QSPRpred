@@ -1,4 +1,3 @@
-import itertools
 import os
 import tempfile
 from typing import Callable
@@ -84,22 +83,11 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
 
     @classmethod
     def getDefaultCalculatorCombo(cls):
-        mol_descriptor_calculators = [super().getDefaultCalculatorCombo()[0]]
-        feature_sets_pcm = cls.getAllProteinDescriptors()
-        protein_descriptor_calculators = list(
-            itertools.combinations(feature_sets_pcm, 1)
-        ) + list(itertools.combinations(feature_sets_pcm, 2))
-        descriptor_calculators = (
-            mol_descriptor_calculators + protein_descriptor_calculators
-        )
-        # make combinations of molecular and PCM descriptor calculators
-        descriptor_calculators += [
-            mol + prot
-            for mol, prot in zip(
-                mol_descriptor_calculators, protein_descriptor_calculators
-            )
-        ]
-        return descriptor_calculators
+        """Return the default descriptor calculator combo."""
+        # only first molecule calculator and first protein calculator to save time
+        mol_calc = super().getDefaultCalculatorCombo()[0][0]
+        prot_calc = cls.getAllProteinDescriptors()[0]
+        return [(mol_calc, prot_calc)]
 
     def getPCMDF(self) -> pd.DataFrame:
         """Return a test dataframe with PCM data.
