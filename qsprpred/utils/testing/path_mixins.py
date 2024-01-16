@@ -104,7 +104,7 @@ class DataSetsPathMixIn(PathMixIn):
             PredictorDesc(
                 SklearnModel.fromFile(
                     f"{os.path.dirname(__file__)}/test_files/test_predictor/"
-                    f"qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json"
+                    f"RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json"
                 )
             ),
             TanimotoDistances(
