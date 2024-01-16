@@ -73,7 +73,7 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         # give path to saved model parameters
         meta_path = (
             f"{self.inputBasePath}/test_predictor/"
-            f"qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json"
+            f"RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json"
         )
         model = SklearnModel.fromFile(meta_path)
         desc_calc = MoleculeDescriptorsCalculator([PredictorDesc(model)])
