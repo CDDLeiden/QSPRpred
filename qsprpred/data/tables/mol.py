@@ -466,7 +466,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         proc_args: tuple[Any] | None = None,
         proc_kwargs: dict[str, Any] | None = None,
         add_props: list[str] | None = None,
-        add_rdkit: bool = False,
+        as_rdkit: bool = False,
         chunk_size: int | None = None,
         n_jobs: int | None = None,
     ) -> Generator:
@@ -489,7 +489,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             proc_args (list, optional): The positional arguments of the function.
             proc_kwargs (dict, optional): The keyword arguments of the function.
             add_props (list, optional): List of properties to add to the data frame.
-            add_rdkit (bool, optional): Whether to convert the molecules to RDKit
+            as_rdkit (bool, optional): Whether to convert the molecules to RDKit
                 molecules before applying the function.
             chunk_size (int, optional): Size of chunks to use per job in parallel.
             If not specified, `self.chunkSize` is used.
@@ -524,7 +524,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             )
             for result in self.apply(
                 self.runMolProcess,
-                func_args=[processor, add_rdkit, self.smilesCol, *proc_args],
+                func_args=[processor, as_rdkit, self.smilesCol, *proc_args],
                 func_kwargs=proc_kwargs,
                 on_props=add_props,
                 as_df=False,
@@ -542,7 +542,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 yield self.runMolProcess(
                     result,
                     processor,
-                    add_rdkit,
+                    as_rdkit,
                     self.smilesCol,
                     *proc_args,
                     **proc_kwargs,

@@ -241,7 +241,7 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
         result = dataset.processMols(
             self.TestingProcessor(),
             add_props=props,
-            add_rdkit=add_rdkit,
+            as_rdkit=add_rdkit,
             proc_args=args,
             proc_kwargs=kwargs,
         )
