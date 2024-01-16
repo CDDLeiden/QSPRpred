@@ -93,8 +93,6 @@ class PandasDataTable(DataTable, JSONSerializable):
         )
         self.name = name
         self.indexCols = index_cols
-        # parallel settings
-        self.nJobs = n_jobs
         # paths
         self._storeDir = store_dir.rstrip("/")
         # data frame initialization
@@ -124,6 +122,8 @@ class PandasDataTable(DataTable, JSONSerializable):
                 )
             self.reload()
         assert self.df is not None, "Unknown error in data set creation."
+        # parallel settings
+        self.nJobs = n_jobs
         self.chunkSize = chunk_size
 
     def __len__(self):
@@ -166,6 +166,7 @@ class PandasDataTable(DataTable, JSONSerializable):
     @nJobs.setter
     def nJobs(self, value: int | None):
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
+        self.chunkSize = None
 
     @property
     def baseDir(self):
