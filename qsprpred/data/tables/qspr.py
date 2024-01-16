@@ -1,21 +1,20 @@
 from copy import deepcopy
-from typing import ClassVar, Optional, Callable, Generator
+from typing import Callable, ClassVar, Generator, Optional
 
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-from .mol import MoleculeTable
+from ...data.processing.applicability_domain import ApplicabilityDomain
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_standardizers import (
     SKLearnStandardizer,
     apply_feature_standardizer,
 )
-from ...data.processing.applicability_domain import ApplicabilityDomain
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...logs import logger
-from ...tasks import TargetProperty
-from ...tasks import TargetTasks
+from ...tasks import TargetProperty, TargetTasks
+from .mol import MoleculeTable
 
 
 class QSPRDataset(MoleculeTable):
@@ -275,14 +274,12 @@ class QSPRDataset(MoleculeTable):
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.y = self.df.query("Split_IsTrain")[self.targetPropertyNames]
-            self.y_ind = self.df.loc[
-                ~self.df.index.isin(self.y.index), self.targetPropertyNames
-            ]
+            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
+                                     self.targetPropertyNames]
         else:
             self.y = self.df[self.targetPropertyNames]
-            self.y_ind = self.df.loc[
-                ~self.df.index.isin(self.y.index), self.targetPropertyNames
-            ]
+            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
+                                     self.targetPropertyNames]
         self.X = self.y.drop(self.y.columns, axis=1)
         self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
 
@@ -357,15 +354,13 @@ class QSPRDataset(MoleculeTable):
             th = target_property.th
         if th == "precomputed":
             assert all(
-                value is None
-                or (type(value) in (int, bool))
-                or (isinstance(value, float) and value.is_integer())
+                value is None or (type(value) in (int, bool)) or
+                (isinstance(value, float) and value.is_integer())
                 for value in self.df[prop_name]
             ), "Precomputed classification target must be integers or booleans."
             n_classes = len(self.df[prop_name].dropna().unique())
             target_property.task = (
-                TargetTasks.MULTICLASS
-                if n_classes > 2  # noqa: PLR2004
+                TargetTasks.MULTICLASS if n_classes > 2  # noqa: PLR2004
                 else TargetTasks.SINGLECLASS
             )
             target_property.th = th
@@ -430,8 +425,7 @@ class QSPRDataset(MoleculeTable):
         )
         kwargs["random_state"] = (
             mol_table.randomState
-            if "random_state" not in kwargs
-            else kwargs["random_state"]
+            if "random_state" not in kwargs else kwargs["random_state"]
         )
         kwargs["n_jobs"] = (
             mol_table.nJobs if "n_jobs" not in kwargs else kwargs["n_jobs"]
@@ -548,9 +542,8 @@ class QSPRDataset(MoleculeTable):
                 Defaults to `False`.
         """
         if (
-            hasattr(split, "hasDataSet")
-            and hasattr(split, "setDataSet")
-            and not split.hasDataSet
+            hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and
+            not split.hasDataSet
         ):
             split.setDataSet(self)
         if hasattr(split, "setSeed") and hasattr(split, "getSeed"):
@@ -571,15 +564,13 @@ class QSPRDataset(MoleculeTable):
             logger.info("Target property: %s" % prop.name)
             if prop.task == TargetTasks.SINGLECLASS:
                 logger.info(
-                    "    In train: active: %s not active: %s"
-                    % (
+                    "    In train: active: %s not active: %s" % (
                         sum(self.y[prop.name]),
                         len(self.y[prop.name]) - sum(self.y[prop.name]),
                     )
                 )
                 logger.info(
-                    "    In test:  active: %s not active: %s\n"
-                    % (
+                    "    In test:  active: %s not active: %s\n" % (
                         sum(self.y_ind[prop.name]),
                         len(self.y_ind[prop.name]) - sum(self.y_ind[prop.name]),
                     )
@@ -808,7 +799,7 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        data_filters: list | None = (RepeatsFilter(keep=True),),
+        data_filters: list | None = (RepeatsFilter(keep=True), ),
         split=None,
         feature_calculators: list | None = None,
         feature_filters: list | None = None,
@@ -1046,7 +1037,10 @@ class QSPRDataset(MoleculeTable):
         self.restoreTrainingData()
 
     def transform(
-        self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
+        self,
+        targets: list[str],
+        transformer: Callable,
+        add_as: list[str] | None = None
     ):
         super().transform(targets, transformer, add_as)
         if add_as is None and (set(targets) & set(self.targetPropertyNames)):
@@ -1177,7 +1171,9 @@ class QSPRDataset(MoleculeTable):
             self.df["TestOutlier"] = False
         self.df.loc[X_ind.index, "TestOutlier"] = ~mask["in_domain"]
 
-        logger.info(f"Marked {(~mask).sum().sum()} samples from the test set as outlier.")
+        logger.info(
+            f"Marked {(~mask).sum().sum()} samples from the test set as outlier."
+        )
 
     def addApplicabilityDomain(self):
         """Add a column with applicability domain values to the data set."""
@@ -1185,4 +1181,6 @@ class QSPRDataset(MoleculeTable):
             raise ValueError(
                 "No applicability domain calculator attached to the data set."
             )
-        self.df["within_applicability_domain"] = self.applicabilityDomain.contains(self.getFeatures(concat = True, ordered = True))
+        self.df["within_applicability_domain"] = self.applicabilityDomain.contains(
+            self.getFeatures(concat=True, ordered=True)
+        )
