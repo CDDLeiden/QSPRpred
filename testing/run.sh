@@ -22,6 +22,7 @@ if [ "$RUN_EXTRAS" == "true" ]; then
   pytest -xv ../qsprpred/extra/models
 fi
 cd test_cli && ./run.sh && cd "$WD"
+cd test_tutorial && ./prepare.sh && cd "$WD"
 cd test_consistency && ./run.sh && cd "$WD"
 if [ "$RUN_TUTORIAL" == "true" ]; then
   cd test_tutorial && ./run.sh && cd "$WD"
