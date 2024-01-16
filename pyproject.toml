@@ -50,10 +50,11 @@ dependencies = [
     "xgboost",
     "boruta",
     "tqdm",
-    "ml2json >= 0.2.2",
+    "ml2json @ git+https://github.com/HellevdM/ml2json.git",
     "jsonpickle",
     "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
     "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits@0.0.4",
+    "mlchemad"
 ]
 
 [project.optional-dependencies]
