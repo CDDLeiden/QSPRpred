@@ -2,6 +2,8 @@ import multiprocessing
 from concurrent import futures
 from typing import Iterable, Callable, Literal, Generator
 
+from qsprpred.logs import logger
+
 
 def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
     """
@@ -12,7 +14,7 @@ def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
         batch_size: Number of items to include in each batch.
 
     Returns:
-        A generator that yields batches of the input generator.
+        A generator that yields batches of the input generator one at a time.
     """
     batch = []
     for item in iterable:
@@ -24,7 +26,7 @@ def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
         yield batch
 
 
-def parallel_generator(
+def parallel_jit_generator(
         generator: Generator,
         process_func: Callable,
         n_cpus: int,
@@ -34,11 +36,15 @@ def parallel_generator(
         kwargs: dict | None = None
 ) -> Generator:
     """
-    A generator that yields the results of a function applied in parallel to each item
-    in an iterable. The advantage of this implementation is that it yields results as
-    soon as they are available and that only one item from the iterable is loaded into
-    memory at a time. If a timeout for a long-running process is required, the 'pebble'
-    pool_type can be used.
+    A parallel 'JIT (Just In Time)' generator that yields the results of a function
+    applied in parallel to each item of a supplied generator. The advantage of this JIT
+    implementation is that it only evaluates the next item in the input generator
+    as soon as it is needed for the calculation. This means that only one item from
+    the iterable is loaded into memory at a time.
+
+    The generator also supports timeout for each job. The 'pebble'
+    pool_type can be used to support this feature. In all other cases,
+    the 'multiprocessing' pool_type is sufficient.
 
     Args:
         generator(SupportsNext):
@@ -103,6 +109,7 @@ def parallel_generator(
                 # no more data, clear out the slice generator
                 done = True
             # wait for a free worker or until all remaining workers finish
+            logger.debug(f"Waiting for {len(queue)} workers to finish...")
             while queue and ((len(queue) >= n_cpus) or done):
                 # grab a process response from the top
                 process = queue.pop(0)
@@ -114,29 +121,32 @@ def parallel_generator(
                             futures.TimeoutError
                         ]:
                     yield process._exception
-                    # make sure to pop the next item in the queue
+                    # make sure to pop the next item from the generator
                     break
                 # check if result available
                 try:
                     if pool_type == "pebble":
+                        # get the result, timeout error if not result yet available
                         result = process.result(timeout=0.1)
                         yield result
                     else:
                         process.wait(0.1)
+                        # check if process is done
                         if not process.ready():
-                            # if process not finished, add it back to queue
+                            # not finished, add it back to queue
                             queue.append(process)
                         else:
-                            # yield the result when available
+                            # finished, yield the result
                             yield process.get()
                 except (futures.TimeoutError, TimeoutError):
-                    # add it back to the queue
+                    # not done yet, add it back to the queue
                     queue.append(process)
                 except Exception as exp:
-                    print(type(exp))
-                    print(repr(process))
+                    # something went wrong, log and yield the exception
+                    logger.error(type(exp))
+                    logger.error(repr(process))
                     if pool_type == "pebble":
                         yield process._exception
                     else:
                         yield exp
-                    break  # make sure to pop the next item in the queue
+                    break  # make sure to pop the next item from the generator

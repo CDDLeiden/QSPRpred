@@ -3,7 +3,7 @@ from concurrent import futures
 
 from parameterized import parameterized
 
-from .parallel import parallel_generator, batched_generator
+from .parallel import parallel_jit_generator, batched_generator
 from .testing.base import QSPRTestCase
 
 
@@ -34,7 +34,7 @@ class TestParallel(QSPRTestCase):
         generator = (x for x in range(10))
         self.assertListEqual(
             [0, 1, 4, 9, 16, 25, 36, 49, 64, 81],
-            list(parallel_generator(
+            list(parallel_jit_generator(
                     generator,
                     self.func,
                     self.nCPU,
@@ -51,7 +51,7 @@ class TestParallel(QSPRTestCase):
         generator = batched_generator(range(10), 2)
         self.assertListEqual(
             [[0, 1], [4, 9], [16, 25], [36, 49], [64, 81]],
-            list(parallel_generator(
+            list(parallel_jit_generator(
                 generator,
                 self.func_batched,
                 self.nCPU,
@@ -63,7 +63,7 @@ class TestParallel(QSPRTestCase):
     def test_timeout(self):
         generator = (x for x in [1, 2, 10])
         timeout = 4
-        result = list(parallel_generator(
+        result = list(parallel_jit_generator(
             generator,
             self.func_timeout,
             self.nCPU,
@@ -81,7 +81,7 @@ class TestParallel(QSPRTestCase):
     ])
     def test_arguments(self, args, kwargs):
         generator = (x for x in range(10))
-        for idx, result in enumerate(parallel_generator(
+        for idx, result in enumerate(parallel_jit_generator(
             generator,
             self.func_args,
             self.nCPU,

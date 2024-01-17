@@ -9,7 +9,7 @@ import pandas as pd
 
 from .base import DataTable
 from ...logs import logger
-from ...utils.parallel import batched_generator, parallel_generator
+from ...utils.parallel import batched_generator, parallel_jit_generator
 from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
@@ -371,7 +371,7 @@ class PandasDataTable(DataTable, JSONSerializable):
                 f"Applying function '{func!r}' in parallel on {n_jobs} CPUs, "
                 f"using chunk size: {chunk_size}."
             )
-            for result in parallel_generator(
+            for result in parallel_jit_generator(
                 self.iterChunks(
                     include_props=on_props, as_dict=not as_df, chunk_size=chunk_size
                 ),
