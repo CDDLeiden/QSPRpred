@@ -5,6 +5,7 @@ from parameterized import parameterized
 
 from qsprpred.data.descriptors.calculators import DescriptorsCalculator
 from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
+from qsprpred.data.processing.applicability_domain import ApplicabilityDomain
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
@@ -41,6 +42,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
         feature_standardizer: SKLearnStandardizer,
         feature_filter: Callable,
         data_filter: Callable,
+        applicability_domain: ApplicabilityDomain,
     ):
         """Test the preparation of the dataset.
 
@@ -55,6 +57,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
             feature_standardizer (SKLearnStandardizer): Feature standardizer.
             feature_filter (Callable): Feature filter.
             data_filter (Callable): Data filter.
+            applicability_domain (Callable): Applicability domain.
         """
         dataset = self.createPCMDataSet(name=name)
         self.checkPrep(
@@ -64,5 +67,6 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
             feature_standardizer,
             feature_filter,
             data_filter,
+            applicability_domain,
             ["pchembl_value_Median"],
         )
