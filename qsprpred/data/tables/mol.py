@@ -38,6 +38,9 @@ class DescriptorTable(PandasDataTable):
         key_cols: list | None = None,
         n_jobs: int = 1,
         chunk_size: int = 1000,
+        autoindex_name: str = "QSPRID",
+        random_state: int | None = None,
+        store_format: str = "pkl",
     ):
         """Initialize a `DescriptorTable` object.
 
@@ -75,6 +78,9 @@ class DescriptorTable(PandasDataTable):
             key_cols,
             n_jobs,
             chunk_size,
+            autoindex_name,
+            random_state,
+            store_format,
         )
         self.calculator = calculator
 
@@ -253,6 +259,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                     key_cols=table.indexCols,
                     n_jobs=table.nJobs,
                     chunk_size=table.chunkSize,
+                    store_format=table.storeFormat,
+                    random_state=table.randomState,
                 )
             )
         return ret
@@ -656,6 +664,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 overwrite=True,
                 key_cols=index_cols,
                 chunk_size=self.chunkSize,
+                random_state=self.randomState,
+                store_format=self.storeFormat,
             )
         )
 

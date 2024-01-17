@@ -437,6 +437,11 @@ class QSPRDataset(MoleculeTable):
         kwargs["index_cols"] = (
             mol_table.indexCols if "index_cols" not in kwargs else kwargs["index_cols"]
         )
+        kwargs["store_format"] = (
+            mol_table.storeFormat
+            if "store_format" not in kwargs
+            else kwargs["store_format"]
+        )
         ds = QSPRDataset(
             name,
             target_props,
