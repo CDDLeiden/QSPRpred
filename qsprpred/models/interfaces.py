@@ -593,7 +593,7 @@ class QSPRModel(ABC):
                 data matrix and/or target matrix in np.ndarray format
         """
         if isinstance(X, QSPRDataset):
-            X = X.getFeatures(raw=True, concat=True)
+            X = X.getFeatures(concat=True)
         if isinstance(X, pd.DataFrame):
             X = X.values
         if y is not None:
