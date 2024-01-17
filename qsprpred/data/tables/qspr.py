@@ -789,7 +789,7 @@ class QSPRDataset(MoleculeTable):
 
     def reset(self):
         """Reset the data set. Splits will be removed and all descriptors will be
-        moved to the training data. Feature standardization and molecule
+        moved to the training data. Molecule
         standardization and molecule filtering are not affected.
         """
         if self.featureNames is not None:
@@ -798,6 +798,8 @@ class QSPRDataset(MoleculeTable):
             self.X_ind = None
             self.y = None
             self.y_ind = None
+            self.featureStandardizer = None
+            self.applicabilityDomain = None
             self.loadDescriptorsToSplits(shuffle=False)
 
     def prepareDataset(
