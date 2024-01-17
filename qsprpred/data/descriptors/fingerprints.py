@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from rdkit import DataStructs
+from rdkit import DataStructs, Chem
 from rdkit.Avalon import pyAvalonTools
 from rdkit.Chem import AllChem, MACCSkeys, rdMolDescriptors, rdmolops, Mol
 
@@ -53,6 +53,7 @@ class Fingerprint(DescriptorSet, ABC):
             data frame of descriptor values of shape (n_mols, n_descriptors)
         """
         mols = list(self.iterMols(mols, to_list=True))
+        mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
         values = self.getDescriptors(mols, props, *args, **kwargs)
         values = values[:, self.usedBits]
         df = pd.DataFrame(values, index=props[self.idProp])
