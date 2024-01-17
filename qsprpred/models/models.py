@@ -617,6 +617,9 @@ class QSPRModel(JSONSerializable, ABC):
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
+        if self.data.appplicabilityDomain is not None:
+            self.data.appplicabilityDomain.fit(X_all)
+            self.applicabilityDomain = self.data.appplicabilityDomain
         if save_data:
             self.data.save()
         # save model and return path
