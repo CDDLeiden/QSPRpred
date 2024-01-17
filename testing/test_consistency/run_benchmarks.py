@@ -46,6 +46,7 @@ class DataSourceTesting(DataSource):
             ),
             name=name,
             store_dir=self.storeDir,
+            store_format="csv",
             **kwargs,
         )
 
