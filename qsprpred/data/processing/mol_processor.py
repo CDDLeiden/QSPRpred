@@ -1,5 +1,4 @@
-"""Abstract class that defines a simple callback interface to process molecules.
-"""
+"""Abstract class that defines a simple callback interface to process molecules."""
 
 from abc import ABC, abstractmethod
 from typing import Any
@@ -8,7 +7,9 @@ from rdkit.Chem import Mol
 
 
 class MolProcessor(ABC):
-    """Processes either SMILES or RDKit molecules and  returns any result."""
+    """A callable that processes a list of molecules either specified as strings or
+    RDKit molecules.
+    """
 
     @abstractmethod
     def __call__(
@@ -20,7 +21,11 @@ class MolProcessor(ABC):
             mols (list[str | Mol]):
                 A list of SMILES or RDKit molecules to process.
             props (dict):
-                A dictionary of properties related to the molecules to process.
+                A dictionary of properties related to the molecules to process. The
+                dictionary uses property names as keys and lists of values as values.
+                Each value in the list corresponds to a molecule in the list of
+                molecules. Thus, the length of the list of values for each property
+                can be expected to be the same as the length of the list of molecules.
             args:
                 Additional positional arguments.
             kwargs:
@@ -37,7 +42,10 @@ class MolProcessor(ABC):
 
     @property
     def requiredProps(self) -> list[str]:
-        """The properties required by the processor."""
+        """The properties required by the processor. This is to inform the caller
+        that the processor requires certain properties to be passed to the
+        `__call__` method. By default, no properties are required.
+        """
         return []
 
 
@@ -53,7 +61,8 @@ class MolProcessorWithID(MolProcessor, ABC):
 
     def __init__(self, id_prop: str | None = None):
         """
-        Initialize the processor.
+        Initialize the processor with the name of the property that contains the
+        molecule's unique identifier.
 
         Args:
             id_prop (str):

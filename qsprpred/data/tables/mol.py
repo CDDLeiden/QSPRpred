@@ -24,13 +24,16 @@ from ...utils.interfaces.summarizable import Summarizable
 
 
 class DescriptorTable(PandasDataTable):
-    """Pandas table that holds descriptor data
-    for modelling and other analyses.
+    """Pandas table that holds descriptor data for modelling and other analyses.
+
+    Attributes:
+        calculator (DescriptorSet):
+            `DescriptorSet` used for descriptor calculation.
     """
 
     def __init__(
         self,
-        calculator: "DescriptorSet",  # noqa: F821
+        calculator: DescriptorSet,
         name: str,
         df: Optional[pd.DataFrame] = None,
         store_dir: str = ".",
@@ -46,7 +49,7 @@ class DescriptorTable(PandasDataTable):
 
         Args:
             calculator (DescriptorSet):
-                `DescriptorsCalculator` used for descriptor calculation.
+                `DescriptorSet` used for descriptor calculation.
             name (str):
                 Name of the  new  descriptor table.
             df (pd.DataFrame):
@@ -69,6 +72,12 @@ class DescriptorTable(PandasDataTable):
                 all available cores will be used.
             chunk_size (int):
                 Size of chunks to use per job in parallel processing.
+            autoindex_name (str):
+                Column name to use for automatically generated IDs.
+            random_state (int):
+                Random state to use for shuffling and other random ops.
+            store_format (str):
+                Format to use for storing the data ('pkl' or 'csv').
         """
         super().__init__(
             name,
@@ -85,7 +94,7 @@ class DescriptorTable(PandasDataTable):
         self.calculator = calculator
 
     def getDescriptors(self, active_only=True):
-        """Get the descriptors in this table."""
+        """Get the descriptors stored in this table."""
         return self.df[self.getDescriptorNames(active_only=active_only)]
 
     def getDescriptorNames(self, active_only=True):
@@ -133,7 +142,19 @@ class DescriptorTable(PandasDataTable):
 
 
 class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
-    """Class that holds and prepares molecule data for modelling and other analyses."""
+    """Class that holds and prepares molecule data for modelling and other analyses.
+
+    Attributes:
+        smilesCol (str):
+            Name of the column containing the SMILES sequences
+            of molecules.
+        includesRdkit (bool):
+            Whether the data frame contains RDKit molecules as one of
+            the properties.
+        descriptors (list[DescriptorTable]):
+            List of `DescriptorTable` objects containing the descriptors
+            calculated for this table.
+    """
 
     _notJSON: ClassVar = PandasDataTable._notJSON + ["descriptors"]
 
@@ -218,12 +239,12 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
     def searchWithIndex(
         self, index: pd.Index, name: str | None = None
     ) -> "MoleculeTable":
-        """
-        Create a new table from a list of indices.
+        """Search in this table using a pandas index. The return values
+        is a new table with the molecules from the old table with the given indices.
 
         Args:
             index(pd.Index):
-                Indices in this table to create the new table from.
+                Indices to search for in this table.
             name(str):
                 Name of the new table. Defaults to the name of the old table,
                 plus the `_searched` suffix.
@@ -268,15 +289,26 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
     def searchOnProperty(
         self, prop_name: str, values: list[str], name: str | None = None, exact=False
     ) -> "MoleculeTable":
-        """Create a new table from a list of property values.
+        """Search in this table using a property name and a list of values. It is
+        assumed that the property is searchable with string matching. Either an
+        exact match or a partial match can be used. If 'exact' is `False`, the
+        search will be performed with partial matching, i.e. all molecules that
+        contain any of the given values in the property will be returned. If
+        'exact' is `True`, only molecules that have the exact property value for
+        any of the given values will be returned.
 
         Args:
-            prop_name (str): name of the property to search on
-            values (list[str]): list of values to search for
-            name (str | None, optional): name of the new table. Defaults to the name of
+            prop_name (str):
+                Name of the property to search on.
+            values (list[str]):
+                List of values to search for. If any of the values is found in the
+                property, the molecule will be considered a match.
+            name (str | None, optional):
+                Name of the new table. Defaults to the name of
                 the old table, plus the `_searched` suffix.
-            exact (bool, optional):  Whether to use exact matching, i.e. whether to
-                search for exact matches or partial matches. Defaults to False.
+            exact (bool, optional):
+                Whether to use exact matching, i.e. whether to
+                search for exact strings or just substrings. Defaults to False.
 
         Returns:
             MoleculeTable:
@@ -299,9 +331,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         operator: Literal["or", "and"] = "or",
         use_chirality: bool = False,
         name: str | None = None,
+        match_function: Callable = match_mol_to_smarts,
     ) -> "MoleculeTable":
-        """
-        Search the molecules in the table with a SMARTS pattern.
+        """Search the molecules in the table with a SMARTS pattern.
 
         Args:
             patterns:
@@ -313,13 +345,16 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             name:
                 Name of the new table. Defaults to the name of the old table,
                 plus the `smarts_searched` suffix.
+            match_function:
+                Function to use for matching the molecules to the SMARTS patterns.
+                Defaults to `match_mol_to_smarts`.
 
         Returns:
             (MolTable): A dataframe with the molecules that match the pattern.
         """
         matches = self.df.index[
             self.df[self.smilesCol].apply(
-                lambda x: match_mol_to_smarts(
+                lambda x: match_function(
                     x, patterns, operator=operator, use_chirality=use_chirality
                 )
             )
@@ -333,6 +368,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         Make a summary with some statistics about the molecules in this table.
         The summary contains the number of molecules per target and the number of
         unique molecules per target.
+
+        Requires this data set to be imported from Papyrus for now.
 
         Returns:
             (pd.DataFrame): A dataframe with the summary statistics.
@@ -349,7 +386,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         return pd.DataFrame(summary)
 
     def sample(
-        self, n: int, name: str | None = None, random_state: int = None
+        self, n: int, name: str | None = None, random_state: int | None = None
     ) -> "MoleculeTable":
         """
         Sample n molecules from the table.
@@ -451,13 +488,33 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
     @classmethod
     def runMolProcess(
         cls,
-        props: dict[str, list],
+        props: dict[str, list] | pd.DataFrame,
         func: MolProcessor,
         add_rdkit: bool,
         smiles_col: str,
         *args,
         **kwargs,
     ):
+        """A helper method to run a `MolProcessor` on a list of molecules via `apply`.
+        It converts the SMILES to RDKit molecules if required and then applies the
+        function to the `MolProcessor` object.
+
+        Args:
+            props (dict):
+                Dictionary of properties that will be passed in addition to the
+                molecule structure.
+            func (MolProcessor):
+                `MolProcessor` object to use for processing.
+            add_rdkit (bool):
+                Whether to convert the SMILES to RDKit molecules before
+                applying the function.
+            smiles_col (str):
+                Name of the property containing the SMILES sequences.
+            *args:
+                Additional positional arguments to pass to the function.
+            **kwargs:
+                Additional keyword arguments to pass to the function.
+        """
         if add_rdkit:
             mols = (
                 props["RDMol"]
@@ -493,16 +550,24 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         See `CheckSmilesValid` for an example.
 
         Args:
-            processor (Callable): Function to apply to the molecules.
-            proc_args (list, optional): The positional arguments of the function.
-            proc_kwargs (dict, optional): The keyword arguments of the function.
-            add_props (list, optional): List of properties to add to the data frame.
-            as_rdkit (bool, optional): Whether to convert the molecules to RDKit
-                molecules before applying the function.
-            chunk_size (int, optional): Size of chunks to use per job in parallel.
-            If not specified, `self.chunkSize` is used.
-            n_jobs (int, optional): Number of jobs to use for parallel processing.
-            If not specified, `self.nJobs` is used.
+            processor (MolProcessor):
+                `MolProcessor` object to use for processing.
+            proc_args (list, optional):
+                Any additional positional arguments to pass to the processor.
+            proc_kwargs (dict, optional):
+                Any additional keyword arguments to pass to the processor.
+            add_props (list, optional):
+                List of data set properties to send to the processor. If `None`, all
+                properties will be sent.
+            as_rdkit (bool, optional):
+                Whether to convert the molecules to RDKit
+                molecules before applying the processor.
+            chunk_size (int, optional):
+                Size of chunks to use per job in parallel.
+                If not specified, `self.chunkSize` is used.
+            n_jobs (int, optional):
+                Number of jobs to use for parallel processing.
+                If not specified, `self.nJobs` is used.
 
         Returns:
             Generator:
@@ -580,7 +645,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
 
     def dropDescriptors(
         self,
-        descriptors: list["DescriptorSet"] | list[str],
+        descriptors: list[DescriptorSet] | list[str],
     ):
         """
         Drop descriptors from the data frame
@@ -590,6 +655,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             descriptors (list): list of `DescriptorSet` objects or prefixes of
                 descriptors to drop.
         """
+        # sanity check
         assert (
             len(self.descriptors) != 0
         ), "Cannot drop descriptors because the data set does not contain any."
@@ -598,8 +664,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 "No descriptors specified to drop. All descriptors will be retained."
             )
             return
+        # convert descriptors to descriptor set names
         descriptors = [self.generateDescriptorDataSetName(x) for x in descriptors]
-
+        # drop the descriptors
         to_remove = []
         for idx, ds in enumerate(self.descriptors):
             if ds.name in descriptors:
@@ -677,19 +744,23 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         *args,
         **kwargs,
     ):
-        """
-        Add descriptors to the data frame using a `DescriptorsCalculator` object.
+        """Add descriptors to the data frame with the given descriptor calculators.
 
         Args:
-            descriptors (list): list of `DescriptorSet` objects to use for descriptor
+            descriptors (list[DescriptorSet]):
+                List of `DescriptorSet` objects to use for descriptor
                 calculation.
-            recalculate (bool): Whether to recalculate descriptors even if they are
+            recalculate (bool):
+                Whether to recalculate descriptors even if they are
                 already present in the data frame. If `False`, existing descriptors are
                 kept and no calculation takes place.
-            fail_on_invalid (bool): Whether to throw an exception if any molecule
+            fail_on_invalid (bool):
+                Whether to throw an exception if any molecule
                 is invalid.
-            *args: Additional positional arguments to pass to each descriptor set.
-            **kwargs: Additional keyword arguments to pass to each descriptor set.
+            *args:
+                Additional positional arguments to pass to each descriptor set.
+            **kwargs:
+                Additional keyword arguments to pass to each descriptor set.
         """
         if recalculate and self.hasDescriptors():
             self.dropDescriptors(descriptors)

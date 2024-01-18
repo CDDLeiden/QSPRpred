@@ -12,7 +12,11 @@ from qsprpred.data.descriptors.sets import DescriptorSet
 
 
 class Fingerprint(DescriptorSet, ABC):
-    """Base class for fingerprints."""
+    """Base class for calculation of binary fingerprints.
+
+    Attributes:
+        usedBits (list): list of bits of the fingerprint currently being used
+    """
 
     def __init__(self, used_bits: list[int] | None = None):
         super().__init__()
@@ -45,7 +49,8 @@ class Fingerprint(DescriptorSet, ABC):
     def __call__(
         self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> pd.DataFrame:
-        """Calculate the descriptors for a list of molecules.
+        """Calculate binary fingerprints for the input molecules. Only the bits
+        specified by `usedBits` will be returned if more bits are calculated.
 
         Args:
             mols(list): list of SMILES or RDKit molecules

@@ -40,8 +40,12 @@ class DataTable(StoredTable):
         pass
 
     @abstractmethod
+    def getProperty(self, name: str):
+        """Get values of a given property."""
+
+    @abstractmethod
     def getProperties(self):
-        """Get the properties of the dataset."""
+        """Get the property names contained in the dataset."""
 
     @abstractmethod
     def addProperty(self, name: str, data: list):

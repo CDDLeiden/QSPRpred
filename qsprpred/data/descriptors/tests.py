@@ -34,7 +34,7 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
             "TestSwitching", n_jobs=n_cpu, chunk_size=chunk_size
         )
         feature_calculators = [
-            MorganFP(radius=3, nBits=2048),
+            MorganFP(radius=3, nBits=256),
             DrugExPhyschem(),
         ]
         split = RandomSplit(test_fraction=0.1)

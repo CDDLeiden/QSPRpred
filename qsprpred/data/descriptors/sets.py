@@ -22,7 +22,7 @@ from ...utils.serialization import JSONSerializable
 
 
 class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
-    """Abstract base class for descriptor sets."""
+    """`MolProcessorWithID` that calculates descriptors for a molecule."""
 
     @staticmethod
     def treatInfs(df: pd.DataFrame) -> pd.DataFrame:
@@ -68,6 +68,7 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         return ret
 
     def __len__(self):
+        """Return the number of descriptors currently calculated by this instance."""
         return len(self.descriptors)
 
     def __getstate__(self):
@@ -81,39 +82,47 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
 
     @property
     @abstractmethod
-    def descriptors(self):
-        """Return a list of descriptor names."""
+    def descriptors(self) -> list[str]:
+        """Return a list of current descriptor names."""
 
     @descriptors.setter
     @abstractmethod
-    def descriptors(self, value):
-        """Set the descriptor names."""
+    def descriptors(self, names: list[str]):
+        """Set calculated descriptors for this instance."""
 
     @property
     def isFP(self):
-        """Return True if descriptor set is fingerprint."""
+        """Return True if descriptor set is a binary fingerprint."""
         return False
 
     @abstractmethod
     def __str__(self):
-        """Return string representation of the descriptor set."""
+        """Return string representation of the descriptor set.
+        This is used to uniquely identify the descriptor set.
+        It is used to name the created `DescriptorTable` instances.
+        """
 
     @property
     def supportsParallel(self) -> bool:
+        """Return `True` if the descriptor set supports parallel calculation."""
         return True
 
     @property
     def dtype(self):
+        """Convert the descriptor values to this type."""
         return np.float32
 
     def __call__(
         self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> pd.DataFrame:
-        """Calculate the descriptors for a list of molecules.
+        """Calculate the descriptors for a list of molecules and convert them
+        to a data frame with the molecule IDs as index. The values are converted
+        to the dtype specified by `self.dtype`. Infinite values are replaced by NaNs
+        using the `treatInfs` method.
 
         Args:
             mols(list): list of SMILES or RDKit molecules
-            props(dict): dictionary of properties
+            props(dict): dictionary of properties for the passed molecules
             *args: positional arguments
             **kwargs: keyword arguments
 
@@ -143,7 +152,7 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
-        """Calculate the descriptors for a list of molecules.
+        """Main method to calculate descriptors for a list of molecules.
 
         Args:
             mols(list): list of SMILES or RDKit molecules
@@ -152,31 +161,52 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
             **kwargs: keyword arguments
 
         Returns:
-            data frame of descriptor values of shape (n_mols, n_descriptors)
+            numpy array of descriptor values of shape (n_mols, n_descriptors)
         """
 
 
 class DataFrameDescriptorSet(DescriptorSet):
+    """`DescriptorSet` that uses a `pandas.DataFrame` of precalculated descriptors."""
+
     def __init__(self, df: pd.DataFrame):
+        """Initialize the descriptor set with a dataframe of descriptors.
+
+        Args:
+            df: dataframe of descriptors
+        """
         super().__init__()
         self._df = df
         self._descriptors = df.columns.tolist() if df is not None else []
 
     def getDF(self):
+        """Return the dataframe of descriptors."""
         return self._df
 
     def getIndex(self):
+        """Return the index of the dataframe."""
         return self._df.index if self._df is not None else None
 
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Return the descriptors for the input molecules. It simply searches
+        for descriptor values in the data frame using the `idProp` as index.
+
+        Args:
+            mols: list of SMILES or RDKit molecules
+            props: dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+
+        Returns:
+            numpy array of descriptor values of shape (n_mols, n_descriptors)
+        """
         index = pd.Index(props[self.idProp], name=self.idProp)
         if self._df is None:
             raise ValueError("No dataframe set.")
         ret = pd.DataFrame(index=index)
         ret = ret.merge(self._df, how="left", left_index=True, right_index=True)
-        return ret[self.descriptors]
+        return ret[self.descriptors].values
 
     @property
     def descriptors(self):
@@ -191,11 +221,7 @@ class DataFrameDescriptorSet(DescriptorSet):
 
 
 class DrugExPhyschem(DescriptorSet):
-    """Various properties used for scoring in DrugEx.
-
-    Args:
-        props: list of properties to calculate
-    """
+    """Various properties used for scoring in DrugEx."""
 
     _notJSON = [*DescriptorSet._notJSON, "_prop_dict"]
 

@@ -2,7 +2,7 @@ import json
 import os
 import shutil
 import warnings
-from typing import ClassVar, Callable, Optional, Generator
+from typing import ClassVar, Callable, Optional, Generator, Any
 
 import numpy as np
 import pandas as pd
@@ -19,18 +19,42 @@ class PandasDataTable(DataTable, JSONSerializable):
     QSPRpred data.
 
     Attributes:
-        name (str): Name of the data set. You can use this name to load the dataset
+        name (str):
+            Name of the data set. You can use this name to load the dataset
             from disk anytime and create a new instance.
-        df (pd.DataFrame): Pandas dataframe containing the data. If you provide a
-            dataframe for a dataset that already exists on disk, the dataframe from
-            disk will override the supplied data frame. Set 'overwrite' to `True` to
-            override the data frame on disk.
-        indexCols (List): List of columns to use as index. If None, the index
-            will be a custom generated ID.
-        nJobs (int): Number of jobs to use for parallel processing. If <= 0,
-            all available cores will be used.
-        chunkSize (int): Size of chunks to use per job in parallel processing.
-        randomState (int): Random state to use for all random operations.
+        df (pd.DataFrame):
+            Pandas dataframe containing the data. You can modify this one directly,
+            but note that removing rows, adding rows, or changing the index or other
+            automatic properties of the data frame might break the data set. In that
+            case, it is recommended to recreate the data set from scratch.
+        indexCols (List):
+            List of columns to use as index. If `None`, the index
+            will be a custom generated ID. Note that if you specify multiple columns
+            their values will be joined with a '~' character rather than using the
+            default pandas multi-index.
+        nJobs (int):
+            Number of jobs to use for parallel processing. If set to `None` or `0`,
+            all available cores will be set.
+        chunkSize (int):
+            Size of chunks to use per job in parallel processing. This is automatically
+            set to the number of rows in the data frame divided by `nJobs`. However,
+            you can also set it manually if you want to use a different chunk size.
+            Set to `None` to again use the default value determined by `nJobs`.
+        randomState (int):
+            Random state to use for all random operations.
+        idProp (str):
+            Column name to use for automatically generated IDs. Defaults to 'QSPRID'.
+            If `indexCols` is set, this will be the names of the columns joined by '~'.
+        storeFormat (str):
+            Format to use for storing the data frame. Currently only
+            'pkl' and 'csv' are supported. Defaults to 'pkl' because it is faster.
+            However, 'csv' is more portable and can be opened in other programs.
+        parallelGenerator (Callable):
+            A parallel generator function to use for parallel processing.
+            Defaults to `qsprpred.utils.parallel.parallel_jit_generator`.
+            You can replace this with your own parallel generator function if you
+            want to use a different parallelization strategy (i.e. utilize
+            remote servers instead of local processes).
     """
 
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
@@ -125,13 +149,10 @@ class PandasDataTable(DataTable, JSONSerializable):
         # parallel settings
         self.nJobs = n_jobs
         self.chunkSize = chunk_size
+        self.parallelGenerator = parallel_jit_generator
 
-    def __len__(self):
-        """
-        Get the number of rows in the data frame.
-
-        Returns: number of rows in the data frame.
-        """
+    def __len__(self) -> int:
+        """Get the number of rows in the data frame."""
         return len(self.df)
 
     def __getstate__(self):
@@ -148,7 +169,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         self.reload()
 
     @property
-    def chunkSize(self):
+    def chunkSize(self) -> int:
         return self._chunkSize
 
     @chunkSize.setter
@@ -169,15 +190,18 @@ class PandasDataTable(DataTable, JSONSerializable):
         self.chunkSize = None
 
     @property
-    def baseDir(self):
+    def baseDir(self) -> str:
+        """The base directory of the data set folder."""
         return self._storeDir
 
     @property
     def storeDir(self):
+        """The data set folder containing the data set files after saving."""
         return f"{self.baseDir}/{self.name}"
 
     @property
     def storePath(self):
+        """The path to the main data set file."""
         if self.storeFormat == "csv":
             return f"{self.storePrefix}_df.csv"
         else:
@@ -185,15 +209,20 @@ class PandasDataTable(DataTable, JSONSerializable):
 
     @property
     def storePrefix(self):
+        """The prefix of the data set files."""
         return f"{self.storeDir}/{self.name}"
 
     @property
     def metaFile(self):
+        """The path to the meta file of this data set."""
         return f"{self.storePrefix}_meta.json"
 
     def setIndex(self, cols: list[str]):
-        """
-        Set the index of the data frame.
+        """Create and index column from several columns of the data set.
+        This also resets the `idProp` attribute to be the name of the index columns
+        joined by a '~' character. The values of the columns are also joined in the
+        same way to create the index. Thus, make sure the values of the columns are
+        unique together and can be joined to a string.
 
         Args:
             cols (list[str]): list of columns to use as index.
@@ -211,10 +240,10 @@ class PandasDataTable(DataTable, JSONSerializable):
         self.df.index.name = self.idProp
 
     def generateIndex(self, name: str | None = None, prefix: str | None = None):
-        """Generate a custom index for the data frame.
+        """Generate a custom index for the data frame automatically.
 
         Args:
-            name (str | None): name of the index column.
+            name (str | None): name of the resulting index column.
             prefix (str | None): prefix to use for the index column values.
         """
         name = name if name is not None else self.idProp
@@ -236,7 +265,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         )
 
     def getProperty(self, name: str) -> pd.Series:
-        """Get a property of the data set.
+        """Get property values from the data set.
 
         Args:
             name (str): Name of the property to get.
@@ -326,7 +355,7 @@ class PandasDataTable(DataTable, JSONSerializable):
 
     def apply(
         self,
-        func: Callable,
+        func: Callable[[dict[str, list[Any]] | pd.DataFrame, ...], Any],
         func_args: list | None = None,
         func_kwargs: dict | None = None,
         on_props: list[str] | None = None,
@@ -334,10 +363,18 @@ class PandasDataTable(DataTable, JSONSerializable):
         chunk_size: int | None = None,
         n_jobs: int | None = None,
     ) -> Generator:
-        """Apply a function to the data frame.
+        """Apply a function to the data frame. The properties of the data set
+        are passed as the first positional argument to the function. This
+        will be a dictionary of the form `{'prop1': [...], 'prop2': [...], ...}`.
+        If `as_df` is `True`, the properties will be passed as a data frame instead.
 
-        In addition to the arguments of `pandas.DataFrame.apply`, this method also
-        supports parallelization using `multiprocessing.Pool`.
+        Any additional arguments specified in `func_args` and `func_kwargs` will
+        be passed to the function after the properties as positional and keyword
+        arguments, respectively.
+
+        If `on_props` is specified, only the properties
+        in this list will be passed to the function. If `on_props` is `None`,
+        all properties will be passed to the function.
 
         Args:
             func (Callable):
@@ -362,7 +399,9 @@ class PandasDataTable(DataTable, JSONSerializable):
         Returns:
             Generator:
                 Generator that yields the results of the function applied to each chunk
-                of the data frame as determined by `chunk_size` and `n_jobs`.
+                of the data frame as determined by `chunk_size` and `n_jobs`. Each
+                item in the generator will be the result of the function
+                applied to one chunk of the data set.
         """
         n_jobs = self.nJobs if n_jobs is None else n_jobs
         chunk_size = chunk_size if chunk_size is not None else self.chunkSize
@@ -371,7 +410,7 @@ class PandasDataTable(DataTable, JSONSerializable):
                 f"Applying function '{func!r}' in parallel on {n_jobs} CPUs, "
                 f"using chunk size: {chunk_size}."
             )
-            for result in parallel_jit_generator(
+            for result in self.parallelGenerator(
                 self.iterChunks(
                     include_props=on_props, as_dict=not as_df, chunk_size=chunk_size
                 ),
