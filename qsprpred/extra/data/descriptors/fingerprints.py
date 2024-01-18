@@ -11,11 +11,13 @@
 - `CDKKlekotaRothFP`: CDK hashed Klekota-Roth fingerprint
 
 """
+from typing import Any
 
 import numpy as np
 from PaDEL_pywrapper import PaDEL as PaDEL_calculator
 from PaDEL_pywrapper import descriptor as cdk_fps
 from rdkit import Chem
+from rdkit.Chem import Mol
 
 from qsprpred.data.descriptors.fingerprints import Fingerprint
 
@@ -27,6 +29,7 @@ class CDKFP(Fingerprint):
         size (int): size of the fingerprint
         searchDepth (int): search depth of the fingerprint
     """
+
     def __init__(self, size: int = 1024, search_depth: int = 7):
         """Initialize the CDK fingerprint.
 
@@ -35,11 +38,14 @@ class CDKFP(Fingerprint):
             search_depth (int): search depth of the fingerprint
         """
         self.size = size
+        super().__init__()
         self.searchDepth = search_depth
         fp = cdk_fps.FP(size=size, searchDepth=search_depth)
         self._padel = PaDEL_calculator([fp])
 
-    def getFingerprints(self, mols: list[Chem.Mol]) -> np.ndarray:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Return the CDK fingerprint for the input molecules.
 
         Args:
@@ -59,17 +65,21 @@ class CDKFP(Fingerprint):
     def __len__(self):
         return self.size
 
-    def getKey(self):
+    def __str__(self):
         return "CDKFP"
 
 
 class CDKExtendedFP(Fingerprint):
     """CDK extended fingerprint with 25 additional ring features and isotopic masses."""
+
     def __init__(self):
+        super().__init__()
         fp = cdk_fps.ExtendedFP
         self._padel = PaDEL_calculator([fp])
 
-    def getFingerprints(self, mols: list[Chem.Mol]) -> np.ndarray:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Return the CDK extended fingerprint for the input molecules.
 
         Args:
@@ -81,24 +91,24 @@ class CDKExtendedFP(Fingerprint):
         """
         return self._padel.calculate(mols, show_banner=False).values
 
-    @property
-    def settings(self):
-        return {}
-
     def __len__(self):
         return 1024
 
-    def getKey(self):
+    def __str__(self):
         return "CDKExtendedFP"
 
 
 class CDKEStateFP(Fingerprint):
     """CDK EState fingerprint."""
+
     def __init__(self):
+        super().__init__()
         fp = cdk_fps.EStateFP
         self._padel = PaDEL_calculator([fp])
 
-    def getFingerprints(self, mols: list[Chem.Mol]) -> np.ndarray:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Return the CDK estate fingerprint for the input molecules.
 
         Args:
@@ -110,14 +120,10 @@ class CDKEStateFP(Fingerprint):
         """
         return self._padel.calculate(mols, show_banner=False).values
 
-    @property
-    def settings(self):
-        return {}
-
     def __len__(self):
         return 79
 
-    def getKey(self):
+    def __str__(self):
         return "CDKEStateFP"
 
 
@@ -128,13 +134,17 @@ class CDKGraphOnlyFP(Fingerprint):
         size (int): Number of bits in the CDK fingerprints (ignored for others)
         searchDepth (int): Search depth for the CDK fingerprints (ignored for others)
     """
+
     def __init__(self, size: int = 1024, search_depth: int = 7):
         self.size = size
+        super().__init__()
         self.searchDepth = search_depth
         fp = cdk_fps.GraphOnlyFP(size=size, searchDepth=self.searchDepth)
         self._padel = PaDEL_calculator([fp])
 
-    def getFingerprints(self, mols: list[Chem.Mol]) -> np.ndarray:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Return the CDK graph only fingerprint for the input molecules.
 
         Args:
@@ -146,24 +156,24 @@ class CDKGraphOnlyFP(Fingerprint):
         """
         return self._padel.calculate(mols, show_banner=False).values
 
-    @property
-    def settings(self):
-        return {"size": self.size, "search_depth": self.searchDepth}
-
     def __len__(self):
         return self.size
 
-    def getKey(self):
+    def __str__(self):
         return "CDKGraphOnlyFP"
 
 
 class CDKMACCSFP(Fingerprint):
     """CDK MACCS fingerprint."""
+
     def __init__(self):
+        super().__init__()
         fp = cdk_fps.MACCSFP
         self._padel = PaDEL_calculator([fp])
 
-    def getFingerprints(self, mols: list[Chem.Mol]) -> np.ndarray:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Return the CDK MACCS fingerprint for the input molecules.
 
         Args:
@@ -175,24 +185,24 @@ class CDKMACCSFP(Fingerprint):
         """
         return self._padel.calculate(mols, show_banner=False).values
 
-    @property
-    def settings(self):
-        return {}
-
     def __len__(self):
         return 166
 
-    def getKey(self):
+    def __str__(self):
         return "CDKMACCSFP"
 
 
 class CDKPubchemFP(Fingerprint):
     """CDK PubChem fingerprint."""
+
     def __init__(self):
+        super().__init__()
         fp = cdk_fps.PubchemFP
         self._padel = PaDEL_calculator([fp])
 
-    def getFingerprints(self, mols):
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Return the CDK PubChem fingerprint for the input molecules.
 
         Args:
@@ -203,14 +213,10 @@ class CDKPubchemFP(Fingerprint):
         """
         return self._padel.calculate(mols, show_banner=False).values
 
-    @property
-    def settings(self):
-        return {}
-
     def __len__(self):
         return 881
 
-    def getKey(self):
+    def __str__(self):
         return "CDKPubchemFP"
 
 
@@ -223,7 +229,9 @@ class CDKSubstructureFP(Fingerprint):
         useCounts (bool):
             whether to use counts instead of presence/absence
     """
+
     def __init__(self, use_counts: bool = False):
+        super().__init__()
         self.useCounts = use_counts
         if use_counts:
             fp = cdk_fps.SubstructureFPCount
@@ -231,7 +239,9 @@ class CDKSubstructureFP(Fingerprint):
             fp = cdk_fps.SubstructureFP
         self._padel = PaDEL_calculator([fp])
 
-    def getFingerprints(self, mols: list[Chem.Mol]) -> np.ndarray:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Return the CDK Substructure fingerprint for the input molecules.
 
         Args:
@@ -243,14 +253,10 @@ class CDKSubstructureFP(Fingerprint):
         """
         return self._padel.calculate(mols, show_banner=False).values
 
-    @property
-    def settings(self):
-        return {"use_counts": self.useCounts}
-
     def __len__(self):
         return 307
 
-    def getKey(self):
+    def __str__(self):
         if self.useCounts:
             return "CDKSubstructureFPCount"
         return "CDKSubstructureFP"
@@ -258,6 +264,7 @@ class CDKSubstructureFP(Fingerprint):
 
 class CDKKlekotaRothFP(Fingerprint):
     """CDK Klekota & Roth fingerprint."""
+
     def __init__(self, use_counts: bool = False):
         """Initialise the fingerprint.
 
@@ -265,6 +272,7 @@ class CDKKlekotaRothFP(Fingerprint):
             use_counts (bool):
                 whether to use counts instead of presence/absence
         """
+        super().__init__()
         self.useCounts = use_counts
         if use_counts:
             fp = cdk_fps.KlekotaRothFPCount
@@ -272,7 +280,9 @@ class CDKKlekotaRothFP(Fingerprint):
             fp = cdk_fps.KlekotaRothFP
         self._padel = PaDEL_calculator([fp])
 
-    def getFingerprints(self, mols: list[Chem.Mol]) -> np.ndarray:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Return the CDK Klekota & Roth fingerprint for the input molecules.
 
         Args:
@@ -284,14 +294,10 @@ class CDKKlekotaRothFP(Fingerprint):
         """
         return self._padel.calculate(mols, show_banner=False).values
 
-    @property
-    def settings(self):
-        return {"use_counts": self.useCounts}
-
     def __len__(self):
         return 4860
 
-    def getKey(self):
+    def __str__(self):
         if self.useCounts:
             return "CDKKlekotaRothFPCount"
         return "CDKKlekotaRothFP"
@@ -304,6 +310,7 @@ class CDKAtomPairs2DFP(Fingerprint):
         useCounts (bool):
             whether to use counts instead of presence/absence
     """
+
     def __init__(self, use_counts: bool = False):
         """
         Initialise the fingerprint.
@@ -312,6 +319,7 @@ class CDKAtomPairs2DFP(Fingerprint):
             use_counts:
                 whether to use counts instead of presence/absence
         """
+        super().__init__()
         self.useCounts = use_counts
         if use_counts:
             fp = cdk_fps.AtomPairs2DFPCount
@@ -319,7 +327,9 @@ class CDKAtomPairs2DFP(Fingerprint):
             fp = cdk_fps.AtomPairs2DFP
         self._padel = PaDEL_calculator([fp])
 
-    def getFingerprints(self, mols: list[Chem.Mol]) -> np.ndarray:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """
         Return the CDK atom pairs and topological fingerprint for the input molecules.
 
@@ -332,14 +342,10 @@ class CDKAtomPairs2DFP(Fingerprint):
         """
         return self._padel.calculate(mols, show_banner=False).values
 
-    @property
-    def settings(self):
-        return {"use_counts": self.useCounts}
-
     def __len__(self):
         return 780
 
-    def getKey(self):
+    def __str__(self):
         if self.useCounts:
             return "CDKAtomPairs2DFPCount"
         return "CDKAtomPairs2DFP"

@@ -7,8 +7,8 @@ from typing import Callable
 
 import numpy as np
 
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 from qsprpred.extra.data.tables.pcm import PCMDataSet
+from ..data.descriptors.sets import ProteinDescriptorSet
 from ...data.tables.mol import MoleculeTable
 from ...models.models import QSPRModel
 from ...models.scikit_learn import SklearnModel
@@ -120,17 +120,18 @@ class PCMModel(QSPRModel, ABC):
         is_pcm = False
         protein_ids = set()
         for calc in self.featureCalculators:
-            if isinstance(calc, ProteinDescriptorCalculator):
+            if isinstance(calc, ProteinDescriptorSet):
                 is_pcm = True
-                if not protein_ids:
+                if not protein_ids and hasattr(calc, "msaProvider"):
                     protein_ids = set(calc.msaProvider.current.keys())
-                else:
+                if protein_ids and hasattr(calc, "msaProvider"):
                     assert protein_ids == set(calc.msaProvider.current.keys()), (
                         "All protein descriptor calculators "
                         "must have the same protein ids."
                     )
             if (
-                isinstance(calc, ProteinDescriptorCalculator)
+                isinstance(calc, ProteinDescriptorSet)
+                and hasattr(calc, "msaProvider")
                 and calc.msaProvider
                 and protein_id not in calc.msaProvider.current.keys()
             ):

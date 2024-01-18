@@ -1,16 +1,17 @@
 import copy
+import itertools
 
 import numpy as np
 import pandas as pd
+from parameterized import parameterized
+from rdkit.Chem import Mol
 from sklearn.preprocessing import StandardScaler
 
+from .mol_processor import MolProcessor
+from ..descriptors.fingerprints import MorganFP
+from ..descriptors.sets import DataFrameDescriptorSet
 from ... import TargetTasks
 from ...data import QSPRDataset
-from ...data.descriptors.calculators import (
-    CustomDescriptorsCalculator,
-    MoleculeDescriptorsCalculator,
-)
-from ...data.descriptors.sets import DataFrameDescriptorSet, FingerprintSet
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
 from ...data.processing.feature_filters import (
     LowVarianceFilter,
@@ -139,10 +140,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             chunk_size=self.chunkSize,
         )
         self.df_descriptors.index = self.dataset.df.index
-        calculator = CustomDescriptorsCalculator(
-            [DataFrameDescriptorSet(self.df_descriptors)]
-        )
-        self.dataset.addCustomDescriptors(calculator)
+        self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors)])
         self.descriptors = self.dataset.featureNames
 
     def testLowVarianceFilter(self):
@@ -179,11 +177,7 @@ class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
         super().setUp()
         self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
-        self.dataset.addDescriptors(
-            MoleculeDescriptorsCalculator(
-                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]
-            )
-        )
+        self.dataset.addDescriptors([MorganFP(radius=3, nBits=128)])
 
     def testFeaturesStandardizer(self):
         """Test the feature standardizer fitting, transforming and serialization."""
@@ -195,7 +189,85 @@ class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
         )
         scaled_features_fromfile = scaler_fromfile(self.dataset.X)
         self.assertIsInstance(scaled_features, np.ndarray)
-        self.assertEqual(scaled_features.shape, (len(self.dataset), 1000))
+        self.assertEqual(scaled_features.shape, (len(self.dataset), 128))
         self.assertEqual(
             np.array_equal(scaled_features, scaled_features_fromfile), True
         )
+
+
+def getCombos():
+    return list(
+        itertools.product(
+            [1, None],
+            [50, None],
+            [None, ["fu", "CL"], ["SMILES"]],
+            [True, False],
+            [None, [1, 2]],
+            [None, {"a": 1}],
+        )
+    )
+
+
+class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
+    class TestingProcessor(MolProcessor):
+        def __call__(self, mols, props, *args, **kwargs):
+            assert "QSPRID" in props, "QSPRID not in props"
+            result = []
+            for mol in mols:
+                result.append((mol, *props.keys(), *args, *kwargs.keys()))
+            return np.array(result)
+
+        @property
+        def supportsParallel(self):
+            return True
+
+        @property
+        def requiredProps(self) -> list[str]:
+            return ["QSPRID"]
+
+    @parameterized.expand([["_".join([str(i) for i in x]), *x] for x in getCombos()])
+    def testMolProcess(self, _, n_jobs, chunk_size, props, add_rdkit, args, kwargs):
+        dataset = self.createLargeTestDataSet()
+        dataset.nJobs = n_jobs
+        dataset.chunkSize = chunk_size
+        self.assertTrue(dataset.nJobs is not None)
+        self.assertTrue(dataset.chunkSize is not None)
+        self.assertTrue(dataset.nJobs > 0)
+        self.assertTrue(dataset.chunkSize > 0)
+        result = dataset.processMols(
+            self.TestingProcessor(),
+            add_props=props,
+            as_rdkit=add_rdkit,
+            proc_args=args,
+            proc_kwargs=kwargs,
+        )
+        expected_props = (
+            [*props, "QSPRID", "SMILES"]
+            if props is not None
+            else dataset.getProperties()
+        )
+        expected_props = set(expected_props)
+        expected_args = set(args) if args is not None else set()
+        expected_kwargs = set(kwargs) if kwargs is not None else set()
+        expected_cols = (
+            len(expected_props) + len(expected_args) + len(expected_kwargs) + 1
+        )
+        for item in result:
+            if dataset.nJobs > 1:
+                self.assertTrue(item.shape[0] <= dataset.chunkSize)
+            else:
+                self.assertTrue(item.shape[0] == len(dataset))
+            self.assertEqual(
+                item.shape[1],
+                expected_cols,
+            )
+            for prop in expected_props:
+                self.assertIn(prop, item)
+            if add_rdkit:
+                self.assertIsInstance(item[0, 0], Mol)
+            else:
+                self.assertIsInstance(item[0, 0], str)

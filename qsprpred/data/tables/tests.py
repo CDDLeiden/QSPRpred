@@ -6,10 +6,9 @@ from parameterized import parameterized
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import ShuffleSplit, KFold
 
+from ..descriptors.fingerprints import MorganFP
 from ... import TargetTasks, TargetProperty
 from ...data import QSPRDataset
-from ...data.descriptors.calculators import MoleculeDescriptorsCalculator
-from ...data.descriptors.sets import FingerprintSet
 from ...utils.stopwatch import StopWatch
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
@@ -312,11 +311,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertRaises(ValueError, lambda: dataset.checkMols())
         self.assertRaises(
             ValueError,
-            lambda: dataset.addDescriptors(
-                MoleculeDescriptorsCalculator(
-                    [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-                )
-            ),
+            lambda: dataset.addDescriptors([MorganFP(radius=2, nBits=128)]),
         )
         invalids = dataset.checkMols(throw=False)
         self.assertEqual(sum(~invalids), 1)
@@ -343,9 +338,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         # create and save the data set
         dataset = self.createLargeTestDataSet()
         dataset.addDescriptors(
-            MoleculeDescriptorsCalculator(
-                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-            ),
+            [MorganFP(radius=2, nBits=128)],
             featurize=False,
         )
         dataset.save()
@@ -371,13 +364,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset = self.createLargeTestDataSet()
         dataset.save()
         # calculate descriptors and iterate over folds
-        dataset.prepareDataset(
-            feature_calculators=[
-                MoleculeDescriptorsCalculator(
-                    [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-                ),
-            ]
-        )
+        dataset.prepareDataset(feature_calculators=[MorganFP(radius=2, nBits=128)])
         train, _ = dataset.getFeatures()
         order_train = train.index.tolist()
         order_folds = []
@@ -386,13 +373,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             order_folds.append(train.iloc[train_index].index.tolist())
         # reload and check if orders are the same if we redo the folds from saved data
         dataset = QSPRDataset.fromFile(dataset.metaFile)
-        dataset.prepareDataset(
-            feature_calculators=[
-                MoleculeDescriptorsCalculator(
-                    [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-                ),
-            ]
-        )
+        dataset.prepareDataset(feature_calculators=[MorganFP(radius=2, nBits=128)])
         train, _ = dataset.getFeatures()
         self.assertListEqual(train.index.tolist(), order_train)
         split = KFold(5, shuffle=True, random_state=dataset.randomState)
@@ -416,9 +397,7 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         self.assertListEqual(dataset.getFeatureNames(), result.getFeatureNames())
         self.assertListEqual(dataset.targetPropertyNames, result.targetPropertyNames)
         self.assertEqual(len(dataset.descriptors), len(result.descriptors))
-        self.assertEqual(
-            len(dataset.descriptorCalculators), len(result.descriptorCalculators)
-        )
+        self.assertEqual(len(dataset.descriptorSets), len(result.descriptorSets))
         self.assertEqual(len(dataset.targetProperties), len(result.targetProperties))
         self.assertEqual(dataset.nTargetProperties, result.nTargetProperties)
 
@@ -650,3 +629,46 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
         self.assertTrue("z_before_impute" in self.dataset.df.columns)
         self.assertEqual(self.dataset.df["y"].isna().sum(), 0)
         self.assertEqual(self.dataset.df["z"].isna().sum(), 0)
+
+
+class TestApply(DataSetsPathMixIn, QSPRTestCase):
+    """Tests the apply method of the data set."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
+    @staticmethod
+    def regularFunc(props, *args, **kwargs):
+        df = pd.DataFrame(props)
+        for idx, arg in enumerate(args):
+            df[f"arg_{idx}"] = arg
+        for key, value in kwargs.items():
+            df[key] = value
+        return df
+
+    @parameterized.expand([(None, None), (2, None), (None, 50), (2, 50)])
+    def testRegular(self, n_jobs, chunk_size):
+        dataset = self.createLargeTestDataSet()
+        dataset.nJobs = n_jobs
+        dataset.chunkSize = chunk_size
+        result = dataset.apply(
+            self.regularFunc,
+            on_props=["CL", "fu"],
+            func_args=[1, 2, 3],
+            func_kwargs={"A_col": "A", "B_col": "B"},
+        )
+        for item in result:
+            self.assertIsInstance(item, pd.DataFrame)
+            self.assertTrue("CL" in item.columns)
+            self.assertTrue("fu" in item.columns)
+            self.assertTrue("A_col" in item.columns)
+            self.assertTrue("B_col" in item.columns)
+            self.assertTrue("arg_0" in item.columns)
+            self.assertTrue("arg_1" in item.columns)
+            self.assertTrue("arg_2" in item.columns)
+            self.assertTrue(all(item["arg_0"] == 1))
+            self.assertTrue(all(item["arg_1"] == 2))
+            self.assertTrue(all(item["arg_2"] == 3))
+            self.assertTrue(all(item["A_col"] == "A"))
+            self.assertTrue(all(item["B_col"] == "B"))

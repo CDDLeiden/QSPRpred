@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 from .mol import MoleculeTable
+from ..descriptors.sets import DescriptorSet
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_standardizers import (
     SKLearnStandardizer,
@@ -50,8 +51,8 @@ class QSPRDataset(MoleculeTable):
         add_rdkit: bool = False,
         store_dir: str = ".",
         overwrite: bool = False,
-        n_jobs: int = 1,
-        chunk_size: int = 50,
+        n_jobs: int | None = 1,
+        chunk_size: int | None = None,
         drop_invalids: bool = True,
         drop_empty: bool = True,
         index_cols: Optional[list[str]] = None,
@@ -133,12 +134,17 @@ class QSPRDataset(MoleculeTable):
         self.y_ind = None
         self.targetProperties = []
         self.setTargetProperties(target_props, drop_empty)
-        logger.info(
-            f"Dataset '{self.name}' created for target "
-            f"targetProperties: '{self.targetProperties}'."
-        )
+        self.chunkSize = chunk_size
         if drop_invalids:
             self.dropInvalids()
+            self.chunkSize = chunk_size
+        logger.info(
+            f"Dataset '{self.name}' created for "
+            f"target Properties: '{self.targetProperties}'. "
+            f"Number of samples: {len(self.df)}. "
+            f"Chunk size: {self.chunkSize}. "
+            f"Number of CPUs: {self.nJobs}."
+        )
 
     def __setstate__(self, state):
         super().__setstate__(state)
@@ -241,15 +247,12 @@ class QSPRDataset(MoleculeTable):
         Returns:
             list[str]: list of feature names
         """
-        features = None if not self.hasDescriptors else self.getDescriptorNames()
-        if self.descriptorCalculators:
-            features = []
-            for calc in self.descriptorCalculators:
-                prefix = calc.getPrefix()
-                for descset in calc.descSets:
-                    features.extend(
-                        [f"{prefix}_{descset}_{x}" for x in descset.descriptors]
-                    )
+        features = []
+        if not self.hasDescriptors:
+            return features
+        else:
+            for calc in self.descriptorSets:
+                features.extend(calc.descriptors)
         return features
 
     def restoreTrainingData(self):
@@ -434,6 +437,11 @@ class QSPRDataset(MoleculeTable):
         kwargs["index_cols"] = (
             mol_table.indexCols if "index_cols" not in kwargs else kwargs["index_cols"]
         )
+        kwargs["store_format"] = (
+            mol_table.storeFormat
+            if "store_format" not in kwargs
+            else kwargs["store_format"]
+        )
         ds = QSPRDataset(
             name,
             target_props,
@@ -442,30 +450,6 @@ class QSPRDataset(MoleculeTable):
         )
         ds.descriptors = mol_table.descriptors
         return ds
-
-    def addCustomDescriptors(
-        self,
-        calculator: "CustomDescriptorsCalculator",  # noqa: F821
-        recalculate: bool = False,
-        featurize: bool = True,
-        **kwargs,
-    ):
-        """Add custom descriptors to the data set.
-
-        If descriptors are already present, they will be recalculated if `recalculate`
-        is `True`.
-
-        Args:
-            calculator (CustomDescriptorsCalculator): calculator instance to use for
-                descriptor calculation
-            recalculate (bool, optional): whether to recalculate descriptors if they
-                are already present. Defaults to `False`.
-            featurize (bool, optional): whether to featurize the data set splits
-                after adding descriptors. Defaults to `True`.
-            kwargs: additional keyword arguments to pass to the calculator
-        """
-        super().addCustomDescriptors(calculator, recalculate, **kwargs)
-        self.featurize(update_splits=featurize)
 
     def filter(self, table_filters: list[Callable]):
         """Filter the data set using the given filters.
@@ -479,9 +463,11 @@ class QSPRDataset(MoleculeTable):
 
     def addDescriptors(
         self,
-        calculator: "MoleculeDescriptorsCalculator",  # noqa: F821
+        descriptors: list[DescriptorSet],
         recalculate: bool = False,
         featurize: bool = True,
+        *args,
+        **kwargs,
     ):
         """Add descriptors to the data set.
 
@@ -491,14 +477,15 @@ class QSPRDataset(MoleculeTable):
         numeric matrices of selected descriptors (features).
 
         Args:
-            calculator (MoleculeDescriptorsCalculator): calculator instance to use for
-                descriptor calculation
+            descriptors (list[DescriptorSet]): list of descriptor sets to add
             recalculate (bool, optional): whether to recalculate descriptors if they are
                 already present. Defaults to `False`.
             featurize (bool, optional): whether to featurize the data set splits after
                 adding descriptors. Defaults to `True`.
+            *args: additional positional arguments to pass to each descriptor set
+            **kwargs: additional keyword arguments to pass to each descriptor set
         """
-        super().addDescriptors(calculator, recalculate)
+        super().addDescriptors(descriptors, recalculate, *args, **kwargs)
         self.featurize(update_splits=featurize)
 
     def featurize(self, update_splits=True):
@@ -736,11 +723,13 @@ class QSPRDataset(MoleculeTable):
                 self.X_ind = self.X_ind[self.featureNames]
             logger.info(f"Selected features: {self.featureNames}")
             # update descriptor calculator
-            for calc in self.descriptorCalculators:
-                prefix = calc.getPrefix()
-                calc.keepDescriptors(
-                    [x for x in self.featureNames if x.startswith(prefix)]
-                )
+            for ds in self.descriptors:
+                to_keep = [
+                    x
+                    for x in ds.getDescriptorNames(active_only=False)
+                    if x in self.featureNames
+                ]
+                ds.keepDescriptors(to_keep)
 
     def setFeatureStandardizer(self, feature_standardizer):
         """Set feature standardizer.
@@ -755,25 +744,21 @@ class QSPRDataset(MoleculeTable):
 
     def addFeatures(
         self,
-        feature_calculators: list["DescriptorsCalculator"] | None = None,  # noqa: F821
+        feature_calculators: list[DescriptorSet],
         recalculate: bool = False,
     ):
         """Add features to the data set.
 
         Args:
-            feature_calculators (List[DescriptorsCalculator], optional): list of
+            feature_calculators (list[DescriptorSet]): list of
                 feature calculators to add. Defaults to None.
             recalculate (bool): if True, recalculate features even if they are already
                 present in the data set. Defaults to False.
         """
-        if feature_calculators is not None:
-            for calc in feature_calculators:
-                # we avoid isinstance() here to avoid circular imports
-                if calc.__class__.__name__ == "MoleculeDescriptorsCalculator":
-                    self.addDescriptors(calc, recalculate=recalculate, featurize=False)
-                else:
-                    raise ValueError("Unknown feature calculator type: %s" % type(calc))
-            self.featurize()
+        self.addDescriptors(
+            feature_calculators, recalculate=recalculate, featurize=False
+        )
+        self.featurize()
 
     def dropInvalids(self):
         ret = super().dropInvalids()
@@ -798,7 +783,7 @@ class QSPRDataset(MoleculeTable):
         smiles_standardizer: str | Callable | None = "chembl",
         data_filters: list | None = (RepeatsFilter(keep=True),),
         split=None,
-        feature_calculators: list | None = None,
+        feature_calculators: list["DescriptorSet"] | None = None,
         feature_filters: list | None = None,
         feature_standardizer: Optional[SKLearnStandardizer] = None,
         feature_fill_value: float = np.nan,
@@ -814,8 +799,7 @@ class QSPRDataset(MoleculeTable):
                 standardization will be performed. Defaults to `chembl`.
             data_filters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
-            feature_calculators (list[DescriptorsCalculator]): calculate features using
-                different information from the data set
+            feature_calculators (list[DescriptorSet]): descriptor sets to add to the data set
             feature_filters (list of feature filter objs): filters features
             feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator):
                 standardizes and/or scales features

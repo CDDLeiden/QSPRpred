@@ -10,24 +10,24 @@ readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 keywords = ["qsar", "machine learning", "cheminformatics"]
-authors = [{name = "Helle van den Maagdenberg", email = "h.w.van.den.maagdenberg@lacdr.leidenuniv.nl"},
-           {name = "Linde Schoenmaker", email = "l.schoenmaker@lacdr.leidenuniv.nl"},
-           {name = "Martin Sicho", email = "m.sicho@lacdr.leidenuniv.nl"},
-           {name = "David Araripe", email = "d.figueiredo.vidal@lacdr.leidenuniv.nl"},
-           {name = "Sohvi Luukkonen", email = "s.luukkonen@lacdr.leidenuniv.nl"},
-           {name = "Olivier Béquignon", email = "o.j.m.bequignon@lacdr.leidenuniv.nl"},
-           {name = "Marina Gorostiola Gonzalez", email = "m.gorostiola.gonzalez@lacdr.leidenuniv.nl"},
-           {name = "Remco van den Broek", email = "r.l.van.den.broek@umail.leidenuniv.nl"},
-           {name = "Gerard van Westen", email = "gerard@lacdr.leidenuniv.nl"}]
-maintainers = [{name = "Helle van den Maagdenberg", email = "h.w.van.den.maagdenberg@lacdr.leidenuniv.nl"},
-               {name = "Linde Schoenmaker", email = "l.schoenmaker@lacdr.leidenuniv.nl"}, 
-               {name = "Martin Sicho", email = "m.sicho@lacdr.leidenuniv.nl"},
-               {name = "David Araripe", email = "d.figueiredo.vidal@lacdr.leidenuniv.nl"},
-               {name = "Sohvi Luukkonen", email = "s.luukkonen@lacdr.leidenuniv.nl"},
-               {name = "Olivier Béquignon", email = "o.j.m.bequignon@lacdr.leidenuniv.nl"}, 
-               {name = "Marina Gorostiola Gonzalez", email = "m.gorostiola.gonzalez@lacdr.leidenuniv.nl"},
-               {name = "Remco van den Broek", email = "r.l.van.den.broek@umail.leidenuniv.nl"},
-               {name = "Gerard van Westen", email = "gerard@lacdr.leidenuniv.nl"}]
+authors = [{ name = "Helle van den Maagdenberg", email = "h.w.van.den.maagdenberg@lacdr.leidenuniv.nl" },
+    { name = "Linde Schoenmaker", email = "l.schoenmaker@lacdr.leidenuniv.nl" },
+    { name = "Martin Sicho", email = "m.sicho@lacdr.leidenuniv.nl" },
+    { name = "David Araripe", email = "d.figueiredo.vidal@lacdr.leidenuniv.nl" },
+    { name = "Sohvi Luukkonen", email = "s.luukkonen@lacdr.leidenuniv.nl" },
+    { name = "Olivier Béquignon", email = "o.j.m.bequignon@lacdr.leidenuniv.nl" },
+    { name = "Marina Gorostiola Gonzalez", email = "m.gorostiola.gonzalez@lacdr.leidenuniv.nl" },
+    { name = "Remco van den Broek", email = "r.l.van.den.broek@umail.leidenuniv.nl" },
+    { name = "Gerard van Westen", email = "gerard@lacdr.leidenuniv.nl" }]
+maintainers = [{ name = "Helle van den Maagdenberg", email = "h.w.van.den.maagdenberg@lacdr.leidenuniv.nl" },
+    { name = "Linde Schoenmaker", email = "l.schoenmaker@lacdr.leidenuniv.nl" },
+    { name = "Martin Sicho", email = "m.sicho@lacdr.leidenuniv.nl" },
+    { name = "David Araripe", email = "d.figueiredo.vidal@lacdr.leidenuniv.nl" },
+    { name = "Sohvi Luukkonen", email = "s.luukkonen@lacdr.leidenuniv.nl" },
+    { name = "Olivier Béquignon", email = "o.j.m.bequignon@lacdr.leidenuniv.nl" },
+    { name = "Marina Gorostiola Gonzalez", email = "m.gorostiola.gonzalez@lacdr.leidenuniv.nl" },
+    { name = "Remco van den Broek", email = "r.l.van.den.broek@umail.leidenuniv.nl" },
+    { name = "Gerard van Westen", email = "gerard@lacdr.leidenuniv.nl" }]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Operating System :: OS Independent", # We tested it on Mac and Windows as well?
@@ -39,6 +39,7 @@ classifiers = [
 ]
 dependencies = [
     "parameterized",
+    "pebble",
     "numpy >= 1.19, <1.24.0",
     "scikit-learn >= 1.0.2",
     "pandas >= 1.2.2",
@@ -59,8 +60,8 @@ dependencies = [
 [project.optional-dependencies]
 
 extra = [
-  "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
-  "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper",
+    "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
+    "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper",
 ]
 pyboost = ["py-boost"]
 deep = ["torch >= 1.7.0", "chemprop >= 1.6.0"]
@@ -95,105 +96,105 @@ src_paths = ["qsprpred"]
 known_first_party = 'qsprpred'
 
 [tool.ruff]
- line-length = 88
- target-version = "py39"
- fix = true
- fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
- unfixable = []
+line-length = 88
+target-version = "py39"
+fix = true
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+unfixable = []
 
- # inspired by the configuration used in the pandas project
- select = [
-   # pyflakes
-   "F",
-   # pycodestyle
-   "E", "W",
-   # flake8-2020
-   "YTT",
-   # flake8-bugbear
-   "B",
-   # flake8-quotes
-   "Q",
-   # flake8-debugger
-   "T10",
-   # flake8-gettext
-   "INT",
-   # pylint
-   "PLC", "PLE", "PLR", "PLW",
-   # misc lints
-   "PIE",
-   # flake8-pyi
-   "PYI",
-   # tidy imports
-   "TID",
-   # implicit string concatenation
-   "ISC",
-   # type-checking imports
-   "TCH",
-   # comprehensions
-   "C4",
-   # pygrep-hooks
-   "PGH",
-   # Ruff-specific rules
-   "RUF",
- ]
+# inspired by the configuration used in the pandas project
+select = [
+    # pyflakes
+    "F",
+    # pycodestyle
+    "E", "W",
+    # flake8-2020
+    "YTT",
+    # flake8-bugbear
+    "B",
+    # flake8-quotes
+    "Q",
+    # flake8-debugger
+    "T10",
+    # flake8-gettext
+    "INT",
+    # pylint
+    "PLC", "PLE", "PLR", "PLW",
+    # misc lints
+    "PIE",
+    # flake8-pyi
+    "PYI",
+    # tidy imports
+    "TID",
+    # implicit string concatenation
+    "ISC",
+    # type-checking imports
+    "TCH",
+    # comprehensions
+    "C4",
+    # pygrep-hooks
+    "PGH",
+    # Ruff-specific rules
+    "RUF",
+]
 
- ignore = [
-   # line length - somes lines are just too long
-   "E501",
-   # we decided on having relative rather than absolute imports
-   "TID252",
-   # module level import not at top of file
-   "E402",
-   # do not assign a lambda expression, use a def
-   "E731",
-   # controversial
-   "B006",
-   # controversial
-   "B007",
-   # controversial
-   "B008",
-   # tests use assert False
-   "B011",
-   # tests use comparisons but not their returned value
-   "B015",
-   # false positives
-   "B019",
-   # Loop control variable overrides iterable it iterates
-   "B020",
-   # Function definition does not bind loop variable
-   "B023",
-   # Only works with python >=3.10
-   "B905",
-   # Too many arguments to function call
-   "PLR0913",
-   # Too many returns
-   "PLR0911",
-   # Too many branches
-   "PLR0912",
-   # Too many statements
-   "PLR0915",
-   # Redefined loop name
-   "PLW2901",
-   # Global statements are discouraged
-   "PLW0603",
-   # Docstrings should not be included in stubs
-   "PYI021",
-   # No builtin `eval()` allowed
-   "PGH001",
-   # compare-to-empty-string
-   "PLC1901",
-   # pairwise-over-zipped (>=PY310 only)
-   "RUF007",
-   # Within an except clause, raise exceptions with ...
-   "B904",
-   # Use "collections.abc.*" instead of "typing.*" (PEP 585 syntax)
-   # "PYI027",  # not yet implemented
-   # while int | float can be shortened to float, the former is more explicit
-   # "PYI041",  # not yet implemented
- ]
+ignore = [
+    # line length - somes lines are just too long
+    "E501",
+    # we decided on having relative rather than absolute imports
+    "TID252",
+    # module level import not at top of file
+    "E402",
+    # do not assign a lambda expression, use a def
+    "E731",
+    # controversial
+    "B006",
+    # controversial
+    "B007",
+    # controversial
+    "B008",
+    # tests use assert False
+    "B011",
+    # tests use comparisons but not their returned value
+    "B015",
+    # false positives
+    "B019",
+    # Loop control variable overrides generator it iterates
+    "B020",
+    # Function definition does not bind loop variable
+    "B023",
+    # Only works with python >=3.10
+    "B905",
+    # Too many arguments to function call
+    "PLR0913",
+    # Too many returns
+    "PLR0911",
+    # Too many branches
+    "PLR0912",
+    # Too many statements
+    "PLR0915",
+    # Redefined loop name
+    "PLW2901",
+    # Global statements are discouraged
+    "PLW0603",
+    # Docstrings should not be included in stubs
+    "PYI021",
+    # No builtin `eval()` allowed
+    "PGH001",
+    # compare-to-empty-string
+    "PLC1901",
+    # pairwise-over-zipped (>=PY310 only)
+    "RUF007",
+    # Within an except clause, raise exceptions with ...
+    "B904",
+    # Use "collections.abc.*" instead of "typing.*" (PEP 585 syntax)
+    # "PYI027",  # not yet implemented
+    # while int | float can be shortened to float, the former is more explicit
+    # "PYI041",  # not yet implemented
+]
 
 # Esclude a variety of commonly ignored dictionaries
- exclude = [
+exclude = [
     "docs/*.py",
     ".bzr",
     ".direnv",

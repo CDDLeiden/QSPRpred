@@ -12,11 +12,9 @@ from sklearn import metrics
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import ShuffleSplit
 
-from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.tasks import ModelTasks, TargetTasks
-
 from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
@@ -89,10 +87,12 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                     [0, 1, 10, 1100],
                 ),
             )
-        ] + [
+        ]
+        + [
             (f"{alg_name}_{task}", task, alg_name, alg, th, random_state)
-            for alg, alg_name, task, th in
-            ((STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None), )
+            for alg, alg_name, task, th in (
+                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
+            )
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -117,11 +117,7 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=self.getDefaultPrep(),
         )
 
@@ -160,7 +156,7 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             )
 
 
-class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
+class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
 
     def setUp(self):
@@ -201,7 +197,8 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name, th) for alg_name, task, th in (
+            (f"{alg_name}_{task}", task, alg_name, th)
+            for alg_name, task, th in (
                 ("MoleculeModel", TargetTasks.REGRESSION, None),
                 ("MoleculeModel", TargetTasks.SINGLECLASS, [6.5]),
                 ("MoleculeModel", TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
@@ -219,17 +216,11 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=None,
         )
         dataset.prepareDataset(
-            feature_calculators=[
-                MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
-            ],
+            feature_calculators=[SmilesDesc()],
             split=RandomSplit(test_fraction=0.1, dataset=dataset),
         )
         # initialize model for training from class
@@ -243,7 +234,8 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name) for alg_name, task in (
+            (f"{alg_name}_{task}", task, alg_name)
+            for alg_name, task in (
                 ("MoleculeModel", ModelTasks.MULTITASK_REGRESSION),
                 ("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS),
             )
@@ -258,16 +250,8 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
-                {
-                    "name": "fu",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [0.3]
-                },
-                {
-                    "name": "CL",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5]
-                },
+                {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
+                {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]},
             ]
         else:
             target_props = [
@@ -291,9 +275,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             preparation_settings=None,
         )
         dataset.prepareDataset(
-            feature_calculators=[
-                MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
-            ],
+            feature_calculators=[SmilesDesc()],
             split=RandomSplit(test_fraction=0.1, dataset=dataset),
         )
         # initialize model for training from class
@@ -310,23 +292,16 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name="consistency_data",
-            target_props=[{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
+            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
             preparation_settings=None,
         )
         dataset.prepareDataset(
-            feature_calculators=[
-                MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
-            ],
+            feature_calculators=[SmilesDesc()],
             split=RandomSplit(test_fraction=0.1),
         )
         # initialize model for training from class
         model = self.getModel(
-            base_dir=self.generatedModelsPath,
-            name="consistency_data",
-            dataset=dataset
+            base_dir=self.generatedModelsPath, name="consistency_data", dataset=dataset
         )
 
         # chemprop by default uses sklearn rmse (squared=False) as metric
@@ -349,7 +324,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # save the cross-validation train, test and validation split to
         # compare with true Chemprop model from the base monitor
         df_train = pd.DataFrame(
-            assessor.monitor.fits[0]["fitData"]["X_train"], columns=["smiles"]
+            assessor.monitor.fits[0]["fitData"]["X_train"], columns=["SMILES"]
         )
         df_train["pchembl_value_Mean"] = assessor.monitor.fits[0]["fitData"]["y_train"]
         df_train.to_csv(
@@ -357,7 +332,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
 
         df_val = pd.DataFrame(
-            assessor.monitor.fits[0]["fitData"]["X_val"], columns=["smiles"]
+            assessor.monitor.fits[0]["fitData"]["X_val"], columns=["SMILES"]
         )
         df_val["pchembl_value_Mean"] = assessor.monitor.fits[0]["fitData"]["y_val"]
         df_val.to_csv(
@@ -365,7 +340,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
 
         df_test = pd.DataFrame(assessor.monitor.foldData[0]["X_test"])
-        df_test.rename(columns={"Descriptor_SmilesDesc_SMILES": "smiles"}, inplace=True)
+        df_test.rename(columns={"Descriptor_SmilesDesc_SMILES": "SMILES"}, inplace=True)
         df_test["pchembl_value_Mean"] = assessor.monitor.foldData[0]["y_test"]
         df_test.to_csv(
             f"{self.generatedModelsPath}/consistency_data_test.csv", index=False
@@ -390,7 +365,7 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             "--pytorch_seed",
             str(model.randomState),
         ]
-        
+
         if len(GPUS) > 0:
             arguments.extend(["--gpu", str(GPUS[0])])
 
@@ -443,7 +418,8 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
     @parameterized.expand(
         [
-            ("PyBoost", TargetTasks.REGRESSION, "PyBoost", params) for params in [
+            ("PyBoost", TargetTasks.REGRESSION, "PyBoost", params)
+            for params in [
                 {
                     "loss": "mse",
                     "metric": "r2_score",
@@ -468,10 +444,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": task
-            }],
+            target_props=[{"name": "CL", "task": task}],
             preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
@@ -491,13 +464,8 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         [
             (f"{'PyBoost'}_{task}", task, th, "PyBoost", params)
             for params, task, th in (
-                ({
-                    "loss": "bce",
-                    "metric": "auc"
-                }, TargetTasks.SINGLECLASS, [6.5]),
-                ({
-                    "loss": "crossentropy"
-                }, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
+                ({"loss": "bce", "metric": "auc"}, TargetTasks.SINGLECLASS, [6.5]),
+                ({"loss": "crossentropy"}, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             )
         ]
     )
@@ -506,11 +474,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -529,11 +493,9 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
     @parameterized.expand(
         [
-            ("PyBoost", "PyBoost", params) for params in [
-                {
-                    "loss": "mse",
-                    "metric": "r2_score"
-                },
+            ("PyBoost", "PyBoost", params)
+            for params in [
+                {"loss": "mse", "metric": "r2_score"},
                 # {
                 #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
                 #     "metric": "r2_score"
