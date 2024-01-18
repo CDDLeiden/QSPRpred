@@ -232,7 +232,7 @@ class PandasDataTable(DataTable, JSONSerializable):
             bool: `True` if the file exists, `False` otherwise.
         """
         return os.path.exists(self.storePath) and self.storePath.endswith(
-            f"_{name}.pkl"
+            f"_{name}.{self.storeFormat}"
         )
 
     def getProperty(self, name: str) -> pd.Series:
