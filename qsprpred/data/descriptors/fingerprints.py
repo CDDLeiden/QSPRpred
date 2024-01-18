@@ -38,6 +38,10 @@ class Fingerprint(DescriptorSet, ABC):
     def isFP(self):
         return True
 
+    @property
+    def dtype(self):
+        return bool
+
     def __call__(
         self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> pd.DataFrame:
