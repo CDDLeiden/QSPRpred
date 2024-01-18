@@ -1,5 +1,4 @@
 """Descriptorset: a collection of descriptors that can be calculated for a molecule.
-
 To add a new descriptor or fingerprint calculator:
 * Add a descriptor subclass for your descriptor calculator
 * Add a function to retrieve your descriptor by name to the descriptor retriever class
