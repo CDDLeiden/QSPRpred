@@ -30,6 +30,9 @@ the [documentation](https://cddleiden.github.io/QSPRpred/docs/).
           training, validation, and test sets.
         - [Descriptors](basics/data/descriptors.ipynb): How to calculate descriptors for
           molecules.
+        - [Searching, Filtering and Plotting](basics/data/searching_filtering_plotting.ipynb):
+          How to
+          search and filter data.
     - Modelling
         - [Classification](basics/modelling/classification.ipynb): How to train a
           classification model.
