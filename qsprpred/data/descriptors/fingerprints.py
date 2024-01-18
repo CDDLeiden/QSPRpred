@@ -60,6 +60,7 @@ class Fingerprint(DescriptorSet, ABC):
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
         values = self.getDescriptors(mols, props, *args, **kwargs)
         values = values[:, self.usedBits]
+        values = values.astype(self.dtype)
         df = pd.DataFrame(values, index=props[self.idProp])
         df.columns = self.descriptors
         return df
