@@ -1,6 +1,6 @@
 # Change Log
 
-From v2.1.0 to v3.0.0
+From v2.1.1 to v3.0.0
 
 ## Fixes
 
