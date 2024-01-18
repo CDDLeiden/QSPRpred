@@ -44,5 +44,5 @@ def table_to_grid(
     **kwargs,
 ):
     return smiles_to_grid(
-        table.smiles, *args, molsPerRow=mols_per_row, impl=impl, **kwargs
+        table.smiles, *args, mols_per_row=mols_per_row, impl=impl, **kwargs
     )
