@@ -118,9 +118,18 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model)
-        predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
+        # make predictions with the trained model and check if the results are equal to
+        # predictions on the molecules from the same dataset with predictMols
+        expected_result = model.predict(dataset.getFeatures(concat=True, ordered=True))
+        predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        predictions = self.predictorTest(
+            predictor,
+            dataset=dataset,
+            expected_result=expected_result,
+        )
+
+        # compare results with different or equal random state
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
@@ -135,9 +144,9 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                expected_result=predictions,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
             )
 
     def testPLSRegressionSummaryWithSeed(self):
@@ -216,10 +225,16 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model)
-        predictor = SklearnModel(
-            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
+
+        # make predictions with the trained model and check if the results are equal to
+        # predictions on the molecules from the same dataset with predictMols
+        expected_result = model.predict(dataset.getFeatures(concat=True, ordered=True))
+        predictor = SklearnModel(name=f"{model_name}_multitask_regression", base_dir=model.baseDir)
+        predictions = self.predictorTest(
+            predictor,
+            dataset=dataset,
+            expected_result=expected_result,
         )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
         if random_state[0] is not None and model_name in ["RFR"]:
             model = self.getModel(
                 name=f"{model_name}_multitask_regression",
@@ -233,9 +248,9 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                expected_result=predictions,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
             )
 
 
@@ -324,8 +339,14 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model)
+        # make predictions with the trained model and check if the results are equal to
+        # predictions on the molecules from the same dataset with predictMols
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+
+        expected_result = model.predictProba(dataset.getFeatures(concat=True, ordered=True))
+        predictions_probas = self.predictorTest(predictor, dataset, expected_result)
+        expected_result = model.predict(dataset.getFeatures(concat=True, ordered=True))
+        predictions = self.predictorTest(predictor, dataset, expected_result, False)
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
@@ -340,10 +361,18 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                expected_result=predictions_probas,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
             )
+            self.predictorTest(
+                predictor,
+                dataset=dataset,
+                expected_result=predictions,
+                use_probas=False,
+                expect_equal_result=random_state[0] == random_state[1],
+            )
+
 
     def testRandomForestClassifierFitWithSeed(self):
         parameters = {
@@ -432,10 +461,14 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model)
-        predictor = SklearnModel(
-            name=f"{model_name}_multitask_classification", base_dir=model.baseDir
-        )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        # make predictions with the trained model and check if the results are equal to
+        # predictions on the molecules from the same dataset with predictMols
+        predictor = SklearnModel(name=f"{model_name}_multitask_classification", base_dir=model.baseDir)
+
+        expected_result = model.predictProba(dataset.getFeatures(concat=True, ordered=True))
+        predictions_probas = self.predictorTest(predictor, dataset, expected_result)
+        expected_result = model.predict(dataset.getFeatures(concat=True, ordered=True))
+        predictions = self.predictorTest(predictor, dataset, expected_result, False)
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_multitask_classification",
@@ -450,9 +483,16 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                expected_result=predictions_probas,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+            self.predictorTest(
+                predictor,
+                dataset=dataset,
+                expected_result=predictions,
+                use_probas=False,
+                expect_equal_result=random_state[0] == random_state[1],
             )
 
 

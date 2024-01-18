@@ -308,7 +308,62 @@ class ModelCheckMixIn:
         self.assertTrue(exists(model.metaFile))
         self.assertEqual(path, model.metaFile)
 
-    def predictorTest(
+    def predictorTest(self, model: QSPRModel, dataset: QSPRDataset, expected_result: list | np.ndarray, use_probas: bool=True, expect_equal_result=True):
+        """Test model prediction.
+
+        Args:
+            model (QSPRModel): The model to make predictions with.
+            dataset (QSPRDataset): The dataset to make predictions for.
+            expected_result (list | np.ndarray): The expected result of the prediction.
+            use_probas (bool): Whether to use probabilities or not.
+            expect_equal_result (bool): Whether the expected result should be equal or 
+                not equal to the prediction.
+        """
+        # define checks of the shape of the predictions
+        def check_shape(predictions, model, num_smiles, use_probas):
+            if model.task.isClassification() and use_probas:
+                print(predictions)
+                # check predictions are a list of arrays of shape (n_smiles, n_classes)
+                self.assertEqual(len(predictions), len(model.targetProperties))
+                for i in range(len(model.targetProperties)):
+                    self.assertEqual(
+                        predictions[i].shape,
+                        (num_smiles, model.targetProperties[i].nClasses),
+                    )
+            else:
+                # check predictions are an array of shape (n_smiles, n_targets)
+                self.assertEqual(
+                    predictions.shape,
+                    (num_smiles, len(model.targetProperties)),
+                )
+
+        # make predictions
+        smiles = dataset.getDF()[dataset.smilesCol].to_list()
+        predictions = model.predictMols(smiles, use_probas=use_probas)
+
+        # check the shape of the predictions
+        check_shape(predictions, model, len(smiles), use_probas=use_probas)
+
+        # make predictions with invalid smiles added to the list
+        invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
+        predictions_with_invalids = model.predictMols(smiles + invalid_smiles, use_probas=use_probas)
+        new_len = len(smiles) + len(invalid_smiles)
+
+        # check the shape of the predictions
+        check_shape(predictions_with_invalids, model, new_len, use_probas=use_probas)
+
+        # check predictions are almost equal to expected result (rtol=1e-5)
+        # or not equal to expected result for should_not_be_equal
+        check_outcome = self.assertTrue if expect_equal_result else self.assertFalse
+        if isinstance(expected_result, list):
+            for i in range(len(expected_result)):
+                check_outcome(np.allclose(predictions[i], expected_result[i]))
+        else:
+            check_outcome(np.allclose(predictions, expected_result))
+
+        return predictions
+
+    def oldpredictorTest(
         self,
         predictor: QSPRModel,
         expect_equal_result=True,
@@ -351,24 +406,29 @@ class ModelCheckMixIn:
                     (len(input_smiles), len(predictor.targetProperties)),
                 )
 
-        # predict the property
+        # check the predictions for different settings of use_probas
         pred = []
         for use_probas in [True, False]:
+            # make predictions
             predictions = predictor.predictMols(
                 df.SMILES.to_list(), use_probas=use_probas, **pred_kwargs
             )
+            # check the shape of the predictions
             check_shape(df.SMILES.to_list())
+            # check the type of the predictions
             if isinstance(predictions, list):
                 for prediction in predictions:
                     self.assertIsInstance(prediction, np.ndarray)
             else:
                 self.assertIsInstance(predictions, np.ndarray)
 
+            # check the first predicted value
             singleoutput = (
                 predictions[0][0, 0]
                 if isinstance(predictions, list)
                 else predictions[0, 0]
             )
+            # check the type of the first predicted value depending on the task
             if (
                 predictor.targetProperties[0].task == TargetTasks.REGRESSION
                 or use_probas
@@ -385,12 +445,13 @@ class ModelCheckMixIn:
             else:
                 return AssertionError(f"Unknown task: {predictor.task}")
             pred.append(singleoutput)
-            # test with an invalid smiles
+            # test with invalid smiles
             invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
             predictions = predictor.predictMols(
                 invalid_smiles, use_probas=use_probas, **pred_kwargs
             )
             check_shape(invalid_smiles)
+            # check that the first prediction is None
             singleoutput = (
                 predictions[0][0, 0]
                 if isinstance(predictions, list)
@@ -402,6 +463,7 @@ class ModelCheckMixIn:
                 else predictions[1, 0],
                 None,
             )
+            # check the type of the first predicted value depending on the task
             if (
                 predictor.targetProperties[0].task == TargetTasks.SINGLECLASS
                 and not isinstance(predictor.estimator, XGBClassifier)
@@ -411,6 +473,8 @@ class ModelCheckMixIn:
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
+        # check that the predictions are the same for use_probas=True and False as
+        # expected
         if expect_equal_result:
             if expected_pred_use_probas is not None:
                 self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=8)
