@@ -64,12 +64,13 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
             ExtendedValenceSignature(1),
         ]
         if platform.system() != "Darwin":
+            ret.append(Mold2())
+        else:
             # not supported on macOS
             logger.warning(
                 "Mold2 is not supported on macOS. "
                 "Skipping Mold2 descriptor set in tests."
             )
-            ret.append(Mold2())
         return ret
 
     @classmethod
