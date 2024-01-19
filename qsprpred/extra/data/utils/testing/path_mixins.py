@@ -1,4 +1,5 @@
 import os
+import platform
 import tempfile
 from typing import Callable
 
@@ -27,6 +28,7 @@ from qsprpred.extra.data.descriptors.sets import (
 )
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.msa_calculator import ClustalMSA
+from qsprpred.logs import logger
 from qsprpred.utils.testing.path_mixins import DataSetsPathMixIn
 
 
@@ -44,9 +46,8 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
         Returns:
             list: list of `MoleculeDescriptorSet` objects
         """
-        return [
+        ret = [
             Mordred(),
-            Mold2(),
             CDKFP(size=2048, search_depth=7),
             CDKExtendedFP(),
             CDKEStateFP(),
@@ -62,6 +63,15 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
             PaDEL(),
             ExtendedValenceSignature(1),
         ]
+        if platform.system() != "Darwin":
+            ret.append(Mold2())
+        else:
+            # not supported on macOS
+            logger.warning(
+                "Mold2 is not supported on macOS. "
+                "Skipping Mold2 descriptor set in tests."
+            )
+        return ret
 
     @classmethod
     def getAllProteinDescriptors(cls) -> list[ProteinDescriptorSet]:

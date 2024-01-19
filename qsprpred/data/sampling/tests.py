@@ -110,7 +110,11 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
     @parameterized.expand(
         [
             (False, Murcko(), None),
-            (False, BemisMurcko(), ["ScaffoldSplit_000", "ScaffoldSplit_001"]),
+            (
+                False,
+                BemisMurcko(use_csk=True),
+                ["ScaffoldSplit_000", "ScaffoldSplit_001"],
+            ),
             (True, Murcko(), None),
         ]
     )
