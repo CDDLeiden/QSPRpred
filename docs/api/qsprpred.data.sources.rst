@@ -9,6 +9,17 @@ Subpackages
 
    qsprpred.data.sources.papyrus
 
+Submodules
+----------
+
+qsprpred.data.sources.data\_source module
+-----------------------------------------
+
+.. automodule:: qsprpred.data.sources.data_source
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

@@ -4,6 +4,14 @@ qsprpred.plotting package
 Submodules
 ----------
 
+qsprpred.plotting.base\_plot module
+-----------------------------------
+
+.. automodule:: qsprpred.plotting.base_plot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 qsprpred.plotting.classification module
 ---------------------------------------
 
@@ -12,10 +20,10 @@ qsprpred.plotting.classification module
    :undoc-members:
    :show-inheritance:
 
-qsprpred.plotting.interfaces module
------------------------------------
+qsprpred.plotting.grid\_visualizers module
+------------------------------------------
 
-.. automodule:: qsprpred.plotting.interfaces
+.. automodule:: qsprpred.plotting.grid_visualizers
    :members:
    :undoc-members:
    :show-inheritance:
