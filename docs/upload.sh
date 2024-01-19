@@ -28,4 +28,4 @@ fi
 touch .nojekyll
 git add -A
 git commit -m "$MSG"
-#git push origin gh_pages
+git push origin gh_pages
