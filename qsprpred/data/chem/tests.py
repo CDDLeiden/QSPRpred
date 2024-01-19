@@ -21,6 +21,9 @@ class TestScaffolds(DataSetsPathMixIn, QSPRTestCase):
         [
             ("Murcko", Murcko()),
             ("BemisMurcko", BemisMurcko()),
+            ("BemisMurckoCSK", BemisMurcko(True, True)),
+            ("BemisMurckoJustCSK", BemisMurcko(False, True)),
+            ("BemisMurckoOff", BemisMurcko(False, False)),
         ]
     )
     def testScaffoldAdd(self, _, scaffold):
