@@ -1,12 +1,15 @@
-name: pre-merge Python3.10 CI
+name: Python3.10 CI with Basic Tests
 
 on:
   push:
     branches:
-      - enhancement/docs/versioned_docs
+      - '**' # all branches
+      - '!dev' # except dev
+      - '!master' # except master
 
 env:
   QSPPRED_TEST_EXTRAS: false
+  QSPPRED_TEST_SPLIT_UNITS: false
 
 jobs:
   tests-basic:

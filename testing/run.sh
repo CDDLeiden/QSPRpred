@@ -4,10 +4,7 @@ set -e
 
 WD=$(pwd)
 export QSPPRED_TEST_TUTORIAL=${QSPPRED_TEST_TUTORIAL:-true}
-export QSPPRED_TEST_EXTRAS=${QSPPRED_TEST_EXTRAS:-true}
-echo "Running tests with:"
-echo "QSPPRED_TEST_TUTORIAL=$QSPPRED_TEST_TUTORIAL"
-echo "QSPPRED_TEST_EXTRAS=$QSPPRED_TEST_EXTRAS"
+echo "Setting QSPPRED_TEST_TUTORIAL=$QSPPRED_TEST_TUTORIAL"
 
 cd test_pytest && ./run.sh && cd "$WD"
 cd test_cli && ./run.sh && cd "$WD"

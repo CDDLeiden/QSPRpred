@@ -2,17 +2,16 @@
 
 set -e
 
-PYTEST_ARGS="-xv"
-REPORT_FILE="pytest_report.xml"
-REPO_ROOT=$(git rev-parse --show-toplevel)
-pytest "${PYTEST_ARGS}" "$REPO_ROOT"/qsprpred/benchmarks --junitxml="$REPORT_FILE"
-pytest "${PYTEST_ARGS}" "$REPO_ROOT"/qsprpred/data --junitxml="$REPORT_FILE"
-pytest "${PYTEST_ARGS}" "$REPO_ROOT"/qsprpred/plotting --junitxml="$REPORT_FILE"
-# only run extras if explicitly requested
-if [ "$QSPPRED_TEST_EXTRAS" == "true" ]; then
-  pytest "${PYTEST_ARGS}" "$REPO_ROOT"/qsprpred/extra/data/descriptors --junitxml="$REPORT_FILE"
-  pytest "${PYTEST_ARGS}" "$REPO_ROOT"/qsprpred/extra/data/sampling --junitxml="$REPORT_FILE"
-  pytest "${PYTEST_ARGS}" "$REPO_ROOT"/qsprpred/extra/data/tables --junitxml="$REPORT_FILE"
-  pytest "${PYTEST_ARGS}" "$REPO_ROOT"/qsprpred/extra/gpu --junitxml="$REPORT_FILE"
-  pytest "${PYTEST_ARGS}" "$REPO_ROOT"/qsprpred/extra/models --junitxml="$REPORT_FILE"
+export QSPPRED_TEST_SPLIT_UNITS=${QSPPRED_TEST_SPLIT_UNITS:-true}
+export QSPPRED_TEST_EXTRAS=${QSPPRED_TEST_EXTRAS:-true}
+echo "Setting QSPPRED_TEST_SPLIT_UNITS=$QSPPRED_TEST_SPLIT_UNITS"
+echo "Setting QSPPRED_TEST_EXTRAS=$QSPPRED_TEST_EXTRAS"
+
+# run all if QSPPRED_TEST_SPLIT_UNITS is false, otherwise run split
+if [ "$QSPPRED_TEST_SPLIT_UNITS" != "true" ]; then
+  echo "Running all tests at once."
+  ./run_all.sh
+else
+  echo "Running tests in split units."
+  ./run_split.sh
 fi
