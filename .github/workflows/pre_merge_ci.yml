@@ -9,7 +9,7 @@ env:
   QSPPRED_TEST_EXTRAS: false
 
 jobs:
-  ubuntu_python_3_10:
+  tests-basic:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     defaults:
