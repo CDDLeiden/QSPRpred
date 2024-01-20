@@ -37,10 +37,14 @@ jobs:
         run: |
           source .github/setup.sh ${{ runner.os }} $env
 
-      - name: Print Clustal Omega & MAFFT versions
+      - name: Check Environment Info
         run: |
-          clustalo --version  # For debugging clustalo version
-          mafft --version  # For debugging mafft version
+          echo "Clustal Omega version: $(clustalo --version)"
+          echo "MAFFT version: $(mafft --version)"
+          python -m pip freeze
+          python -c "print('Python version: ' + '$(python --version)')"
+          python -c "import platform; print('System info: ', platform.system(), platform.release())"
+          python -c "import qsprpred; print('QSPRpred version:', qsprpred.__version__)"
 
       - name: Run pytest
         run: cd testing/test_pytest && ./run.sh

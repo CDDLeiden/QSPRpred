@@ -22,10 +22,6 @@ echo "::add-path::$env:ProgramFiles\MAFFT"
 fi
 
 # Set up Python environment
-python -c "print('Python version: ' + '$(python --version)')"
-python -c "import platform; print('System info: ', platform.system(), platform.release())" # For debugging OS version
 python -m pip install ".[full]"  --no-cache-dir
-python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
 python -m pip install pytest
 python -m pip install jupyterlab
-python -m pip freeze # For debugging environment
