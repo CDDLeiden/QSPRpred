@@ -37,6 +37,11 @@ jobs:
         run: |
           source .github/setup.sh ${{ runner.os }} $env
 
+      - name: Print Clustal Omega & MAFFT versions
+        run: |
+          clustalo --version  # For debugging clustalo version
+          mafft --version  # For debugging mafft version
+
       - name: Run pytest
         run: cd testing/test_pytest && ./run.sh
 

@@ -20,8 +20,6 @@ choco install clustal-omega mafft
 echo "::add-path::$env:ProgramFiles\Clustal Omega"
 echo "::add-path::$env:ProgramFiles\MAFFT"
 fi
-clustalo --version  # For debugging clustalo version
-mafft --version  # For debugging mafft version
 
 # Set up Python environment
 python -c "print('Python version: ' + '$(python --version)')"
