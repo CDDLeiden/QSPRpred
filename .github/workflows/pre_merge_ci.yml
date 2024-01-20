@@ -35,7 +35,7 @@ jobs:
 
       - name: Set Up Dependencies
         run: |
-          source .github/setup.sh
+          source .github/setup.sh ${{ runner.os }} $env
 
       - name: Run pytest
         run: cd testing/test_pytest && ./run.sh
