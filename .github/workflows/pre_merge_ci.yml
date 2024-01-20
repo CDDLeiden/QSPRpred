@@ -7,7 +7,6 @@ on:
 
 env:
   QSPPRED_TEST_EXTRAS: false
-  QSPPRED_PYTEST_ARGS: "--junitxml=test_report.xml"
 
 jobs:
   ubuntu_python_3_10:
