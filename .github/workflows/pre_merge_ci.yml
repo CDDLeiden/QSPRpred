@@ -3,9 +3,11 @@ name: pre-merge Python3.10 CI
 on:
   push:
     branches:
-      - feature/**  # these branches as well
-      - enhancement/**
-      - fix/**
+      - enhancement/docs/versioned_docs
+
+env:
+  QSPPRED_TEST_EXTRAS: false
+  QSPPRED_PYTEST_ARGS: "--junitxml=test_report.xml"
 
 jobs:
   ubuntu_python_3_10:
@@ -16,61 +18,36 @@ jobs:
         shell: bash
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-    
-    - name: Cache Python dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+      - uses: actions/checkout@v4
 
-    - name: Install Clustal Omega, MAFFT & add to PATH
-      run: |
-        export HOME_DIR=$PWD
-        echo "HOME_DIR=$PWD" >> $GITHUB_ENV # used later in the workflow
-        wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
-        wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
-        echo "MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/" >> $GITHUB_ENV
-        echo "$HOME_DIR/mafft-linux64/mafftdir/bin/" >> $GITHUB_PATH
-        echo "$HOME_DIR" >> $GITHUB_PATH # make clustalo available in the next steps
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Print Clustal Omega & MAFFT versions
-      run: |
-          clustalo --version  # For debugging clustalo version
-          mafft --version  # For debugging mafft version
-  
-    - name: Install dependencies
-      run: |
-        python -c "print('Python version: ' + '$(python --version)')"
-        python -c "import platform; print('System info: ', platform.system(), platform.release())" # For debugging OS version
-        python -c "import platform; print(platform.system(), platform.release())" # For debugging OS version
-        python -m pip install ".[full]"
-        python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
-        python -m pip install pytest
-        python -m pip install jupyterlab
-        python -m pip freeze # For debugging environment
-    
-    - name: Run pytest
-      run: pytest -xv qsprpred --junitxml=$HOME_DIR/test_report.xml # -x: stop on first failure, -v: verbose
-    
-    - name: Publish Test Report
-      uses: mikepenz/action-junit-report@v4
-      if: success() || failure() # always run even if the previous step fails
-      with:
-        report_paths: 'test_report.xml'
-    
-    - name: Test CLI
-      run: cd testing/test_cli && ./run.sh
-      
-    - name: Test Tutorials
-      run: cd testing/test_tutorial && ./run.sh
-    
-    - name: Test Consistency
-      run: cd testing/test_consistency && ./run.sh
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Set Up Dependencies
+        run: |
+          source .github/setup.sh
+
+      - name: Run pytest
+        run: cd testing/test_pytest && ./run.sh
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: 'testing/test_pytest/test_report.xml'
+
+      - name: Test CLI
+        run: cd testing/test_cli && ./run.sh
+
+      - name: Test Consistency
+        run: cd testing/test_consistency && ./run.sh
