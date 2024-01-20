@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 PYTEST_ARGS="-xv $QSPPRED_PYTEST_ARGS"
 REPO_ROOT=$(git rev-parse --show-toplevel)
 pytest "${PYTEST_ARGS}" "$REPO_ROOT"/qsprpred/benchmarks
