@@ -17,7 +17,7 @@ HTML_DIR="$BASE_DIR/_build/html/"
 TEMP_REPO_DIR="/tmp/docs/$USER/QSPRpred/"
 rm -rf "$TEMP_REPO_DIR"
 mkdir -p -m 0755 "$TEMP_REPO_DIR"
-git clone --single-branch --branch gh_pages "$(git config --get remote.$REMOTE_NAME.url)" "$TEMP_REPO_DIR"
+git clone --single-branch --branch gh_pages "$REMOTE_URL" "$TEMP_REPO_DIR"
 
 # Update the web page directories
 cd "$TEMP_REPO_DIR"
