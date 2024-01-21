@@ -27,11 +27,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      #      - name: Cache Python dependencies
-      #        uses: actions/cache@v3
-      #        with:
-      #          path: ~/.cache/pip
-      #          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
       #          restore-keys: |
       #            ${{ runner.os }}-pip-
 
