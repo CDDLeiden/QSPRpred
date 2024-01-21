@@ -5,7 +5,8 @@ on:
     branches:
       - '**' # all branches
       - '!dev' # except dev
-      - '!master' # except master
+      - '!main' # except main
+      - '!gh_pages' # except gh_pages
 
 env:
   QSPPRED_TEST_EXTRAS: false
