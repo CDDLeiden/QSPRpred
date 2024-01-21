@@ -7,7 +7,7 @@ COMMIT_ID=$(git rev-parse --short HEAD)
 QSPPRED_VERSION=$(python -c "import qsprpred; print(qsprpred.__version__)")
 MSG="Adding docs to gh_pages for $COMMIT_ID"
 REMOTE_NAME="origin"
-REMOTE_URL=$(git config --get remote.$REMOTE_NAME.url)
+#REMOTE_URL=$(git config --get remote.$REMOTE_NAME.url)
 
 # Clone a temporary copy of the repo with just the gh_pages branch
 BASE_DIR=$(pwd)
@@ -34,5 +34,5 @@ touch .nojekyll
 # commit and push changes
 git add -A
 git commit -m "$MSG"
-git remote add $REMOTE_NAME "$REMOTE_URL"
+#git remote add $REMOTE_NAME "$REMOTE_URL"
 git push $REMOTE_NAME gh_pages
