@@ -1,4 +1,4 @@
-name: Multi-OS Python Version Test
+name: Build and Deploy Documentation
 
 # run on push to dev branch
 on:
@@ -35,6 +35,7 @@ jobs:
       - name: Set Up Dependencies
         run: |
           source .github/setup.sh ${{ runner.os }} $env
+          python -m pip install -r docs/requirements.txt
 
       - name: Build and Deploy Documentation
         run: |
