@@ -37,13 +37,8 @@ jobs:
           source .github/setup.sh ${{ runner.os }} $env
           python -m pip install -r docs/requirements.txt
 
-      - name: Load SSH Key for Deployment
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.DOCS_DEPLOY_KEY }}
-
       - name: Build and Deploy Documentation
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "${{ env.CI_COMMIT_EMAIL }}"
-          cd docs && ./make.sh && ./upload.sh
+          cd docs && ./make.sh && REPO_URL=https://${{ github.token }}@github.com/${{ github.repository }}.git ./upload.sh
