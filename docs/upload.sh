@@ -35,4 +35,5 @@ touch .nojekyll
 git add -A
 git commit -m "$MSG"
 #git remote add $REMOTE_NAME "$REMOTE_URL"
+echo "Pushing to $REMOTE_NAME gh_pages. Remote URL: $(git config --get remote.$REMOTE_NAME.url)"
 git push $REMOTE_NAME gh_pages
