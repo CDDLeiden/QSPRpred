@@ -22,6 +22,7 @@ echo "::add-path::$env:ProgramFiles\MAFFT"
 fi
 
 # Set up Python environment
+python -m pip install --upgrade pip
 python -m pip install ".[full]"  --upgrade --upgrade-strategy eager
 python -m pip install pytest
 python -m pip install jupyterlab

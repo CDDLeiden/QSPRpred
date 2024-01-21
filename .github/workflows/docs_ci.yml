@@ -41,4 +41,4 @@ jobs:
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "${{ env.CI_COMMIT_EMAIL }}"
-          cd docs && ./make.sh && REPO_URL=https://${{ github.token }}@github.com/${{ github.repository }}.git ./upload.sh
+          cd docs && ./make.sh && REPO_URL=https://${{ github.actor }}:${{ github.token }}@github.com/${{ github.repository }}.git ./upload.sh
