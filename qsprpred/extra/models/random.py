@@ -1,52 +1,99 @@
+import json
 import numpy as np
 import pandas as pd
 import os
 import types
 
+from qsprpred.models.early_stopping import EarlyStoppingMode
+from qsprpred.models.monitors import FitMonitor
+
 from ...models.models import QSPRModel
 from ...data.tables.qspr import QSPRDataset
-from typing import Any
+from typing import Any, Optional, Type
+
+class RandomDistributionAlgorithm:
+    """ Distributions used: normal distribution for regression, not to be used for classification
+    """
+
+    def __init__(self, random_state=None):
+        self.mean = None
+        self.std = None
+        self.ratios = None,
+        self.random_state=random_state
+        self.rng = np.random.default_rng(seed=random_state)
+
+    def __call__(self, X_test: np.ndarray):
+        # Values of X are irrelevant
+        # if (self.task.isClassification()):
+        #     y_list = [self.rng.choice(self.ratios.shape[0], len(X_test), p=self.ratios.values[col]) for col in range(len(self.ratios))]
+        # if (self.task.isRegression()):
+        y_list = [self.rng.normal(loc=self.mean.values[col], scale=self.std.values[col], size=len(X_test)) for col in range(len(self.mean))]
+        y = np.column_stack(y_list)
+        if y.ndim == 1:
+            y = y.reshape(-1, 1)
+
+        return y
 
 class RandomModel(QSPRModel):
-    def __init__(self,
-        base_dir: str,
-        alg=None,
-        data: QSPRDataset = None,
-        name: str | None = None,
-        parameters: dict | None = None,
-        autoload: bool = True,
-        random_state: int | None = None,
-    ):
-        self.baseDir = os.path.abspath(base_dir.rstrip("/"))
-        self.name = name
-        self.parameters = parameters
-        self.estimator = self.loadEstimator(self.parameters)
-
-        # Make alg an anonymous object having all necessary properties
-        self.alg = types.SimpleNamespace()
-        self.alg.__name__ = "Random"
-
-        self.randomState = random_state or (
-            data.randomState if data is not None else None
-        )
-        self.rng = np.random.default_rng(seed=self.randomState)
-
-        super().initFromData(data)
-        if autoload and os.path.exists(self.metaFile):
-            new = self.fromFile(self.metaFile)
-            self.__dict__.update(new.__dict__)
-            self.estimator = new.estimator
-            self.data = data
-
-    def fit(
+    def __init__(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None,
-        mode: Any = None,
-        monitor: None = None,
-        **kwargs,
+        base_dir: str,
+        data: Optional[QSPRDataset] = None,
+        name: Optional[str] = None,
+        parameters: Optional[dict] = None,
+        autoload=True,
+        random_state: int | None = None
     ):
+        """Initialize a QSPR model instance.
+
+        If the model is loaded from file, the data set is not required.
+        Note that the data set is required for fitting and optimization.
+
+        Args:
+            base_dir (str):
+                base directory of the model,
+                the model files are stored in a subdirectory `{baseDir}/{outDir}/`
+            data (QSPRDataset): data set used to train the model
+            name (str): name of the model
+            parameters (dict): dictionary of algorithm specific parameters
+            autoload (bool):
+                if `True`, the estimator is loaded from the serialized file
+                if it exists, otherwise a new instance of alg is created
+        """
+        super().__init__(base_dir, RandomDistributionAlgorithm, data, name, parameters, autoload, random_state=random_state)
+
+    @property
+    def supportsEarlyStopping(self) -> bool:
+        """Check if the model supports early stopping.
+        
+        Returns:
+            (bool): whether the model supports early stopping or not
+        """
+        return False
+    
+    def fit(
+            self,
+            X: pd.DataFrame | np.ndarray | QSPRDataset,
+            y: pd.DataFrame | np.ndarray | QSPRDataset,
+            estimator: Type[RandomDistributionAlgorithm] = None,
+            mode: EarlyStoppingMode = None,
+            monitor: FitMonitor | None = None,
+            **kwargs
+    ) -> RandomDistributionAlgorithm:
+        """Fit the model to the given data matrix or `QSPRDataset`.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
+            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            estimator (Any): estimator instance to use for fitting
+            mode (EarlyStoppingMode): early stopping mode, unused
+            monitor (FitMonitor): monitor instance to track the fitting process, unused
+            kwargs: additional keyword arguments for the fit function
+
+        Returns:
+            (RandomDistributionAlgorithm): fitted estimator instance
+        """
+        estimator = self.estimator if estimator is None else estimator
         if isinstance(y, pd.DataFrame):
             y_df = y
         elif isinstance(y, np.ndarray):
@@ -61,69 +108,111 @@ class RandomModel(QSPRModel):
 
             # TODO: this is probably clumsy, I shouldn't have to go from dataframe
             # to dict to dataframe
-            estimator = pd.DataFrame({
-                "ratios": pd.DataFrame.from_dict({col: y_df[col].value_counts() / y_df.shape[0] for col in list(y_df)})
-            })
+            estimator.ratios = pd.DataFrame.from_dict({col: y_df[col].value_counts() / y_df.shape[0] for col in list(y_df)})
 
         if (self.task.isRegression()):
             # Calculate the mean and standard deviation of each column
-            estimator = pd.DataFrame({
-                "mean": y_df.mean(),
-                "std": y_df.std()
-            })
-        
-        self.estimator = estimator
-        return estimator
+            estimator.mean = y_df.mean()
+            estimator.std = y_df.std()
 
+        return estimator
+    
     def predict(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
-    ):
-        # Values of X are irrelevant
-        estimator = self.estimator
-        if (self.task.isClassification()):
-            y_list = [self.rng.choice(estimator["ratios"].shape[0], len(X), p=estimator["ratios"][col]) for col in list(estimator["ratios"])]
-        if (self.task.isRegression()):
-            y_list = [self.rng.normal(loc=estimator["mean"][col], scale=estimator["std"][col], size=len(X)) for col in range(len(estimator["mean"]))]
-        y = np.column_stack(y_list)
-        if y.ndim == 1:
-            y = y.reshape(-1, 1)
-        return y
+            self,
+            X: pd.DataFrame | np.ndarray | QSPRDataset,
+            estimator: Any = None
+    ) -> np.ndarray:
+        """Make predictions for the given data matrix or `QSPRDataset`.
+
+        Args:
+            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
+            estimator (Any): estimator instance to use for fitting
+
+        Returns:
+            np.ndarray:
+                2D array containing the predictions, where each row corresponds
+                to a sample in the data and each column to a target property
+        """
+        estimator = self.estimator if estimator is None else estimator
+        return estimator(X)
 
     def predictProba(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self,
+            X: pd.DataFrame | np.ndarray | QSPRDataset,
+            estimator: Any = None
     ):
-        #TODO: return ratios?
-        estimator = self.estimator
         return self.predict(X, estimator)
+    
+    def loadEstimator(self, params: Optional[dict] = None) -> object:
+        """Initialize estimator instance with the given parameters.
 
-    @property
-    def supportsEarlyStopping(self) -> bool:
-        """Whether the model supports early stopping or not."""
-        return False
+        If `params` is `None`, the default parameters will be used.
 
-    def loadEstimator(self, params: dict | None = None) -> object:
-        #TODO: seems strange...
-        # print("loadEstimator")
-        return pd.DataFrame({})
+        Arguments:
+            params (dict): algorithm parameters
 
-    def loadEstimatorFromFile(self, params: dict | None = None) -> object:
-        # print("loadEstimatorFromFile")
+        Returns:
+            object: initialized estimator instance
+        """
+        new_parameters = self.getParameters(
+            params)  # combine self.parameters and params
+        if new_parameters is not None:
+            return self.alg(**new_parameters)
+        else:
+            return self.alg()
+        
+    def loadEstimatorFromFile(self, params: Optional[dict] = None,
+                              fallback_load=True) -> object:
+        """Load estimator instance from file and apply the given parameters.
+
+        Args:
+            params (dict): algorithm parameters
+
+        Returns:
+            object: initialized estimator instance
+        """
         path = f"{self.outPrefix}.json"
         if os.path.isfile(path):
-            estimator = pd.read_json(path)
-            new_parameters = self.getParameters(params)
-            if new_parameters:
-                print(new_parameters)
+            with open(path, "r") as f:
+                loaded_dict = json.load(f)
+                mean = pd.DataFrame({"mean": json.loads(loaded_dict["mean"])}) if loaded_dict[
+                                                                  "mean"] is not None else None
+                std = pd.DataFrame({"std": json.loads(loaded_dict["std"])}) if loaded_dict[
+                                                                  "std"] is not None else None
+                # ratios = pd.DataFrame({"ratios": loaded_dict["ratios"]}) if loaded_dict[
+                #                                                   "ratios"] is not None else None
+                loaded_params = loaded_dict["parameters"]
+            if params is not None:
+                loaded_params.update(params)
+
+            estimator = self.loadEstimator(loaded_params)
+            estimator.mean = mean
+            estimator.std = std
+            # estimator.ratios = ratios
             return estimator
+
+        elif fallback_load:
+            return self.loadEstimator(params)
         else:
             raise FileNotFoundError(
                 f"No estimator found at {path}, loading estimator from file failed."
             )
 
-    
     def saveEstimator(self) -> str:
-        """See `QSPRModel.saveEstimator`."""
+        """Save the underlying estimator to file.
+
+        Returns:
+            path (str): path to the saved estimator
+        """
         estimator_path = f"{self.outPrefix}.json"
-        self.estimator.to_json(estimator_path)
+
+        param_dictionary = {"parameters": {},
+                            "mean": self.estimator.mean.to_json() if self.estimator.mean is not None else None,
+                            "std": self.estimator.std.to_json() if self.estimator.std is not None else None,
+                            # "ratios": self.estimator.ratios.to_json() if self.estimator.ratios is not None else None
+                            }
+
+        with open(estimator_path, "w") as outfile:
+            json.dump(param_dictionary, outfile)
+
         return estimator_path
-    

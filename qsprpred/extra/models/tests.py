@@ -22,7 +22,7 @@ from ..models.pcm import SklearnPCMModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import ModelCheckMixIn
 from ...utils.testing.path_mixins import ModelDataSetsPathMixIn
-from ..models.random import RandomModel
+from .random import RandomModel
 
 
 class ModelDataSetsMixInExtras(ModelDataSetsPathMixIn, DataSetsMixInExtras):
