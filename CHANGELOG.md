@@ -1,6 +1,6 @@
 # Change Log
 
-From v2.1.0 to v3.0.0
+From v2.1.1 to v3.0.0
 
 ## Fixes
 
@@ -17,6 +17,7 @@ From v2.1.0 to v3.0.0
 - Add missing implementation of `QSPRDataset.removeProperty`
 - Improved behavior of the Papyrus data source (does not attempt to connect to the
   internet if the data set already exists).
+- It is now possible to define new descriptor sets outside the package without errors.
 
 ## Changes
 
@@ -55,8 +56,17 @@ From v2.1.0 to v3.0.0
 - The default log level for the package was changed from `INFO` to `WARNING`. A new
   tutorial
   was added to explain how to change the log level.
-- `RepeatsFilter` argument `year_name` renamed to `time_col` and arugment `additional_cols` added.
+- `RepeatsFilter` argument `year_name` renamed to `time_col` and
+  arugment `additional_cols` added.
 - The `perc` argument of `BorutaPy` can now be set from the CLI.
+- Descriptor calculators (previously used to aggregate and manage descriptor sets) were
+  completely removed from the API and descriptor sets can now be added directly to the
+  molecule tables.
+- The rdkit-like descriptor and fingerprint retrieval functions were removed from the
+  API because they complicated implementation of customized descriptors.
+- The `apply` method was simplified and a new API was clearly defined for parallel
+  processing of properties over data sets. To improve molecule processing,
+  a `processMols` method was added to `MoleculeTable`.
 
 ## New Features
 
@@ -95,6 +105,9 @@ From v2.1.0 to v3.0.0
 - It is now possible to save `PandasDataTable`s to a CSV file instead of the default
   pickle format (slower, but more human-readable).
 - New `RegressionPlot` class  `WilliamsPlot` added to plot Williams plots.
+- Data sets can now be optionally stored in the `csv` format and not just as a pickle
+  file. This makes it easier to debug and share data sets, but it is slower to load and
+  save.
 
 ## Removed Features
 

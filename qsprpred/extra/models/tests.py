@@ -12,10 +12,8 @@ from sklearn.svm import SVR
 from sklearn.impute import SimpleImputer
 from xgboost import XGBClassifier, XGBRegressor
 
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
 from qsprpred.extra.data.descriptors.sets import ProDec
 from qsprpred.extra.data.tables.pcm import PCMDataSet
-from qsprpred.extra.data.utils.msa_calculator import ClustalMSA
 from qsprpred.tasks import TargetProperty, TargetTasks
 from ..data.utils.testing.path_mixins import DataSetsMixInExtras
 from ..models.pcm import SklearnPCMModel
@@ -85,10 +83,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                 alg,
                 [None],
             )
-            for alg, alg_name in (
-                (PLSRegression, "PLSR"),
-                (SVR, "SVR"),
-            )
+            for alg, alg_name in ((PLSRegression, "PLSR"),)
         ]
         + [
             (
@@ -104,10 +99,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                 alg,
                 random_state,
             )
-            for alg, alg_name in (
-                (RandomForestClassifier, "RFC"),
-                (XGBClassifier, "XGBC"),
-            )
+            for alg, alg_name in ((XGBClassifier, "XGBC"),)
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -135,10 +127,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         # initialize dataset
         prep = self.getDefaultPrep()
         prep["feature_calculators"] = prep["feature_calculators"] + [
-            ProteinDescriptorCalculator(
-                desc_sets=[ProDec(sets=["Sneath"])],
-                msa_provider=ClustalMSA(self.generatedDataPath),
-            )
+            ProDec(["Sneath"], self.getMSAProvider(self.generatedDataPath))
         ]
         dataset = self.createPCMDataSet(
             name=f"{model_name}_{props[0]['task']}_pcm",

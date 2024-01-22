@@ -8,23 +8,25 @@
 """
 
 from abc import abstractmethod
-from typing import Optional
+from typing import Optional, Any
 
 import mordred
 import numpy as np
 import pandas as pd
 import prodec
 from Mold2_pywrapper import Mold2 as Mold2_calculator
-from mordred import descriptors as Mordred_descriptors
 from PaDEL_pywrapper import PaDEL as PaDELCalculator
 from PaDEL_pywrapper import descriptors as PaDEL_descriptors
-from rdkit import Chem
 from Signature_pywrapper import Signature as Signature_calculator
+from mordred import descriptors as Mordred_descriptors
+from rdkit import Chem
+from rdkit.Chem import Mol
 
-from qsprpred.data.descriptors.sets import DescriptorSet, MoleculeDescriptorSet
+from qsprpred.data.descriptors.sets import DescriptorSet
+from qsprpred.extra.data.utils.msa_calculator import MSAProvider, ClustalMSA
 
 
-class Mordred(MoleculeDescriptorSet):
+class Mordred(DescriptorSet):
     """Descriptors from molecular descriptor calculation software Mordred.
 
     From https://github.com/mordred-descriptor/mordred.
@@ -37,6 +39,7 @@ class Mordred(MoleculeDescriptorSet):
         config (str): path to config file if available
 
     """
+
     def __init__(
         self,
         descs: list[str] | None = None,
@@ -57,6 +60,7 @@ class Mordred(MoleculeDescriptorSet):
             ignore_3D (bool): ignore 3D information
             config (str): path to config file?
         """
+        super().__init__()
         if descs:
             # if mordred descriptor module is passed,
             # convert to list of descriptor instances
@@ -69,28 +73,16 @@ class Mordred(MoleculeDescriptorSet):
         self.version = version
         self.ignore3D = ignore_3D
         self.config = config
-        self._isFP = False
         self._mordred = None
         # convert to list of descriptor names if descriptor instances are passed
         self.descriptors = [str(d) for d in descs]
 
-    def __call__(self, mols: list[str, Chem.Mol]) -> [pd.DataFrame, np.ndarray]:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         df = self._mordred.pandas(self.iterMols(mols), quiet=True, nproc=1)
         df = df.apply(pd.to_numeric, errors="coerce")  # replace errors by nan values
         return df.values
-
-    @property
-    def isFP(self):
-        return self._isFP
-
-    @property
-    def settings(self):
-        return {
-            "descs": self.descriptors,
-            "version": self.version,
-            "ignore_3D": self.ignore3D,
-            "config": self.config,
-        }
 
     @property
     def descriptors(self):
@@ -119,7 +111,7 @@ class Mordred(MoleculeDescriptorSet):
         return "Mordred"
 
 
-class Mold2(MoleculeDescriptorSet):
+class Mold2(DescriptorSet):
     """Descriptors from molecular descriptor calculation software Mold2.
 
     From https://github.com/OlivierBeq/Mold2_pywrapper.
@@ -129,6 +121,7 @@ class Mold2(MoleculeDescriptorSet):
     Arguments:
         descs: names of Mold2 descriptors to be calculated (e.g. D001)
     """
+
     def __init__(self, descs: list[str] | None = None):
         """Initialize a Mold2 descriptor calculator.
 
@@ -136,7 +129,7 @@ class Mold2(MoleculeDescriptorSet):
             descs (list[str] | None):
                 names of Mold2 descriptors to be calculated (e.g. D001)
         """
-        self._isFP = False
+        super().__init__()
         self._descs = descs
         self._mold2 = Mold2_calculator()
         self._defaultDescs = self._mold2.calculate(
@@ -145,19 +138,17 @@ class Mold2(MoleculeDescriptorSet):
         self._descriptors = self._defaultDescs[:]
         self._keepindices = list(range(len(self._descriptors)))
 
-    def __call__(self, mols: list[str, Chem.Mol]) -> [pd.DataFrame, np.ndarray]:
+    @property
+    def supportsParallel(self) -> bool:
+        return False
+
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         values = self._mold2.calculate(self.iterMols(mols), show_banner=False)
         # Drop columns
         values = values[self._descriptors].values
         return values
-
-    @property
-    def isFP(self):
-        return self._isFP
-
-    @property
-    def settings(self):
-        return {"descs": self._descs}
 
     @property
     def descriptors(self):
@@ -194,7 +185,7 @@ class Mold2(MoleculeDescriptorSet):
         return "Mold2"
 
 
-class PaDEL(MoleculeDescriptorSet):
+class PaDEL(DescriptorSet):
     """Descriptors from molecular descriptor calculation software PaDEL.
 
     From https://github.com/OlivierBeq/PaDEL_pywrapper.
@@ -202,6 +193,7 @@ class PaDEL(MoleculeDescriptorSet):
     Attributes:
         descriptors (list[str]): list of PaDEL descriptor names
     """
+
     def __init__(self, descs: list[str] | None = None, ignore_3D: bool = True):
         """Initialize a PaDEL calculator
 
@@ -209,11 +201,9 @@ class PaDEL(MoleculeDescriptorSet):
             descs: list of PaDEL descriptor short names
             ignore_3D (bool): skip 3D descriptor calculation
         """
+        super().__init__()
         self._descs = descs
         self._ignore3D = ignore_3D
-
-        self._isFP = False
-
         # Obtain default descriptor names
         self._nameMapping = {}
         for descriptor in PaDEL_descriptors:
@@ -228,20 +218,14 @@ class PaDEL(MoleculeDescriptorSet):
         else:
             self.descriptors = descs
 
-    def __call__(self, mols: list[str, Chem.Mol]) -> [pd.DataFrame, np.ndarray]:
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
-        values = self._padel.calculate(mols, show_banner=False, njobs=1)
-        intersection = list(set(self._keep).intersection(values.columns))
-        values = values[intersection]
-        return values
-
-    @property
-    def isFP(self):
-        return self._isFP
-
-    @property
-    def settings(self):
-        return {"descs": self._descs, "ignore_3D": self._ignore3D}
+        df = self._padel.calculate(mols, show_banner=False, njobs=1)
+        intersection = list(set(self._keep).intersection(df.columns))
+        df = df[intersection]
+        return df.values
 
     @property
     def descriptors(self):
@@ -271,7 +255,8 @@ class PaDEL(MoleculeDescriptorSet):
         if names is None:
             self._keep = [
                 name
-                for name, desc in self._nameMapping.items() if desc in self._descriptors
+                for name, desc in self._nameMapping.items()
+                if desc in self._descriptors
             ]
         else:
             self._keep = names
@@ -280,7 +265,7 @@ class PaDEL(MoleculeDescriptorSet):
         return "PaDEL"
 
 
-class ExtendedValenceSignature(MoleculeDescriptorSet):
+class ExtendedValenceSignature(DescriptorSet):
     """SMILES signature based on extended valence sequence from
 
     The Signature Molecular Descriptor.
@@ -290,41 +275,38 @@ class ExtendedValenceSignature(MoleculeDescriptorSet):
     Journal of Chemical Information and Computer Sciences 2003 43 (3), 707-720
     DOI: 10.1021/ci020345w
     """
+
     def __init__(self, depth: int | list[int]):
         """Initialize a ExtendedValenceSignature calculator
 
         Args:
             depth: depth of the signature
         """
+        super().__init__()
         self._depth = depth
-        self._isFP = False
         self._signature = Signature_calculator()
         self._descriptors = []
         # Flag initialization of descriptors after first calculation
         self._descriptors_init = False
-        # Force calculator to be single process
-        self.noParallelization = True
 
-    def __call__(self, mols):
+    @property
+    def supportsParallel(self) -> bool:
+        return False
+
+    def getDescriptors(
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
-        values = self._signature.calculate(
+        df = self._signature.calculate(
             mols, depth=self._depth, show_banner=False, njobs=1
         ).fillna(0)
         if not self._descriptors_init:
-            self._descriptors = values.columns.tolist()
+            self.descriptors = df.columns.tolist()
             self._descriptors_init = True
         else:
-            intersection = list(set(self._descriptors).intersection(values.columns))
-            values = values[intersection]
-        return values
-
-    @property
-    def isFP(self):
-        return self._isFP
-
-    @property
-    def settings(self):
-        return {"depth": self._depth}
+            intersection = list(set(self.descriptors).intersection(df.columns))
+            df = df[intersection]
+        return df.values
 
     @property
     def descriptors(self):
@@ -343,23 +325,12 @@ class ExtendedValenceSignature(MoleculeDescriptorSet):
 
 
 class ProteinDescriptorSet(DescriptorSet):
-    """
-    Abstract base class for protein descriptor sets.
+    """Abstract base class for protein descriptor sets."""
 
-    Arguments:
-        acc_keys: target accession keys, the resulting data frame will be indexed by
-        these keys
-        sequences: optional list of protein sequences matched to the accession keys
-        **kwargs: additional data mapped to the accession keys, each parameter
-            should follow the same format as the sequences (dict(str : str))
-    """
     @abstractmethod
-    def __call__(
-        self,
-        acc_keys: list[str],
-        sequences: Optional[dict[str, str]] = None,
-        **kwargs
-    ):
+    def getProteinDescriptors(
+        self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None, **kwargs
+    ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.
 
@@ -378,37 +349,30 @@ class ProteinDescriptorSet(DescriptorSet):
                 indexed by `acc_keys`
         """
 
+    def getDescriptors(
+        self,
+        mols: list[Mol],
+        props: dict[str, list[Any] | dict[str, str]],
+        *args,
+        **kwargs,
+    ) -> np.ndarray:
+        acc_keys = sorted(set(props["acc_keys"]))
+        values = self.getProteinDescriptors(acc_keys, **kwargs)
+        df = pd.DataFrame({"acc_keys": props["acc_keys"]})
+        df = df.set_index("acc_keys")
+        df = df.merge(values, left_index=True, right_index=True)
+        return df.values
 
-class NeedsMSAMixIn:
-    """Provides an interface for protein descriptors that require
-    a multiple sequence alignment.
+    @property
+    def requiredProps(self) -> list[str]:
+        existing = super().requiredProps
+        return ["acc_keys", *existing]
 
-    Derive from this interface and implement to receive a multiple sequence alignment
-    from `ProteinDescriptorCalculator`.
-
-    Attributes:
-        msa (dict[str, str]):
-            mapping of accession keys to sequences with gaps
-            from the multiple sequence alignment
-
-    """
-    def __init__(self):
-        self.msa = None
-
-    def setMSA(self, msa: dict[str, str]):
-        """
-        Set the multiple sequence alignment for the protein descriptor set.
-
-        Args:
-            msa (dict):
-                mapping of accession keys to gapped sequences as obtained
-                from the multiple sequence alignment (all values must
-                be the same length)
-        """
-        self.msa = msa
+    def supportsParallel(self) -> bool:
+        return False
 
 
-class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
+class ProDec(ProteinDescriptorSet):
     """Protein descriptors from the ProDec package.
 
     See https://github.com/OlivierBeq/ProDEC.
@@ -419,7 +383,10 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
         factory (prodec.ProteinDescriptors):
             factory to calculate descriptors
     """
-    def __init__(self, sets: list[str] | None = None):
+
+    def __init__(
+        self, sets: list[str] | None = None, msa_provider: MSAProvider = ClustalMSA()
+    ):
         """Initialize a ProDec calculator.
 
         Args:
@@ -428,10 +395,11 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
                 (see https://github.com/OlivierBeq/ProDEC)
         """
         super().__init__()
-        self._settings = {"sets": sets}
         self.factory = prodec.ProteinDescriptors()
         self.sets = self.factory.available_descriptors if sets is None else sets
         self._descriptors = None
+        self.msaProvider = msa_provider
+        self.msa = None
 
     def __getstate__(self):
         o_dict = super().__getstate__()
@@ -473,12 +441,9 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
         protein_features.set_index("ID", inplace=True)
         return protein_features
 
-    def __call__(
-        self,
-        acc_keys: list[str],
-        sequences: Optional[dict[str, str]] = None,
-        **kwargs
-    ):
+    def getProteinDescriptors(
+        self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None, **kwargs
+    ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.
 
@@ -494,6 +459,9 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
         Returns:
             a data frame of descriptor values of shape (acc_keys, n_descriptors),
         """
+        # calculate MSA
+        if not self.msa:
+            self.msa = self.msaProvider(sequences, **kwargs)
         # calculate descriptors
         df = pd.DataFrame(index=pd.Index(acc_keys, name="ID"))
         for descriptor in self.sets:
@@ -520,13 +488,5 @@ class ProDec(ProteinDescriptorSet, NeedsMSAMixIn):
     def descriptors(self, value):
         self._descriptors = value
 
-    @property
-    def isFP(self):
-        return False
-
-    @property
-    def settings(self):
-        return self._settings
-
     def __str__(self):
-        return "ProDec"
+        return "ProDec_" + "_".join(self.sets)

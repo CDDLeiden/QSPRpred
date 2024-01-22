@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold
@@ -15,6 +13,7 @@ from ..data.sources.data_source import DataSource
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
 from ..utils.stringops import get_random_string
+from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.path_mixins import DataSetsPathMixIn
 
 
@@ -42,7 +41,7 @@ class DataSourceTesting(DataSetsPathMixIn, DataSource):
         return self.createLargeTestDataSet(name, target_props=target_props)
 
 
-class BenchmarkingTest(DataSetsPathMixIn, TestCase):
+class BenchmarkingTest(DataSetsPathMixIn, QSPRTestCase):
     """Test benchmarking functionality on the test data set.
 
     Attributes:
@@ -56,7 +55,7 @@ class BenchmarkingTest(DataSetsPathMixIn, TestCase):
         super().setUp()
         self.setUpPaths()
         prep = self.getDefaultPrep()
-        descriptors = prep["feature_calculators"][0].descSets
+        descriptors = prep["feature_calculators"]
         del prep["feature_calculators"]
         descriptors.append(RDKitDescs())
         self.seed = 42

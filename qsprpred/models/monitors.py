@@ -16,11 +16,21 @@ from .models import QSPRModel
 class FitMonitor(ABC):
     """Base class for monitoring the fitting of a model."""
     @abstractmethod
-    def onFitStart(self, model: QSPRModel):
+    def onFitStart(
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to be fitted
+            X_train (np.ndarray): training data
+            y_train (np.ndarray): training targets
+            X_val (np.ndarray | None): validation data, used for early stopping
+            y_val (np.ndarray | None): validation targets, used for early stopping
         """
 
     @abstractmethod
@@ -91,19 +101,19 @@ class AssessorMonitor(FitMonitor):
     def onFoldStart(
         self,
         fold: int,
-        X_train: np.array,
-        y_train: np.array,
-        X_test: np.array,
-        y_test: np.array,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
         Args:
             fold (int): index of the current fold
-            X_train (np.array): training data of the current fold
-            y_train (np.array): training targets of the current fold
-            X_test (np.array): test data of the current fold
-            y_test (np.array): test targets of the current fold
+            X_train (np.ndarray): training data of the current fold
+            y_train (np.ndarray): training targets of the current fold
+            X_test (np.ndarray): test data of the current fold
+            y_test (np.ndarray): test targets of the current fold
         """
 
     @abstractmethod
@@ -164,11 +174,21 @@ class HyperparameterOptimizationMonitor(AssessorMonitor):
 
 class NullMonitor(HyperparameterOptimizationMonitor):
     """Monitor that does nothing."""
-    def onFitStart(self, model: QSPRModel):
+    def onFitStart(
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to be fitted
+            X_train (np.ndarray): training data
+            y_train (np.ndarray): training targets
+            X_val (np.ndarray | None): validation data, used for early stopping
+            y_val (np.ndarray | None): validation targets, used for early stopping
         """
 
     def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
@@ -228,19 +248,19 @@ class NullMonitor(HyperparameterOptimizationMonitor):
     def onFoldStart(
         self,
         fold: int,
-        X_train: np.array,
-        y_train: np.array,
-        X_test: np.array,
-        y_test: np.array,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
         Args:
             fold (int): index of the current fold
-            X_train (np.array): training data of the current fold
-            y_train (np.array): training targets of the current fold
-            X_test (np.array): test data of the current fold
-            y_test (np.array): test targets of the current fold
+            X_train (np.ndarray): training data of the current fold
+            y_train (np.ndarray): training targets of the current fold
+            X_test (np.ndarray): test data of the current fold
+            y_test (np.ndarray): test targets of the current fold
         """
 
     def onFoldEnd(
@@ -305,14 +325,24 @@ class ListMonitor(HyperparameterOptimizationMonitor):
         """
         self.monitors = monitors
 
-    def onFitStart(self, model: QSPRModel):
+    def onFitStart(
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to be fitted
+            X_train (np.ndarray): training data
+            y_train (np.ndarray): training targets
+            X_val (np.ndarray | None): validation data, used for early stopping
+            y_val (np.ndarray | None): validation targets, used for early stopping
         """
         for monitor in self.monitors:
-            monitor.onFitStart(model)
+            monitor.onFitStart(model, X_train, y_train, X_val, y_val)
 
     def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
@@ -385,19 +415,19 @@ class ListMonitor(HyperparameterOptimizationMonitor):
     def onFoldStart(
         self,
         fold: int,
-        X_train: np.array,
-        y_train: np.array,
-        X_test: np.array,
-        y_test: np.array,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
         Args:
             fold (int): index of the current fold
-            X_train (np.array): training data of the current fold
-            y_train (np.array): training targets of the current fold
-            X_test (np.array): test data of the current fold
-            y_test (np.array): test targets of the current fold
+            X_train (np.ndarray): training data of the current fold
+            y_train (np.ndarray): training targets of the current fold
+            X_test (np.ndarray): test data of the current fold
+            y_test (np.ndarray): test targets of the current fold
         """
         for monitor in self.monitors:
             monitor.onFoldStart(fold, X_train, y_train, X_test, y_test)
@@ -524,6 +554,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
 
         # fit data
         self.fitModel = None
+        self.fitData = None
         self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
         self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
         self.currentEpoch = None
@@ -600,19 +631,19 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
     def onFoldStart(
         self,
         fold: int,
-        X_train: np.array,
-        y_train: np.array,
-        X_test: np.array,
-        y_test: np.array,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
         Args:
             fold (int): index of the current fold
-            X_train (np.array): training data of the current fold
-            y_train (np.array): training targets of the current fold
-            X_test (np.array): test data of the current fold
-            y_test (np.array): test targets of the current fold
+            X_train (np.ndarray): training data of the current fold
+            y_train (np.ndarray): training targets of the current fold
+            X_test (np.ndarray): test data of the current fold
+            y_test (np.ndarray): test targets of the current fold
         """
         self.currentFold = fold
         self.foldData[fold] = {
@@ -657,13 +688,29 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
             "fits": self.fits,
         }
 
-    def onFitStart(self, model: QSPRModel):
+    def onFitStart(
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to be fitted
+            X_train (np.ndarray): training data
+            y_train (np.ndarray): training targets
+            X_val (np.ndarray | None): validation data, used for early stopping
+            y_val (np.ndarray | None): validation targets, used for early stopping
         """
         self.fitModel = model
+        self.fitData = {
+            "X_train": X_train,
+            "y_train": y_train,
+            "X_val": X_val,
+            "y_val": y_val,
+        }
         self.currentEpoch = 0
         self.currentBatch = 0
 
@@ -715,6 +762,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
     def _clearFit(self):
         self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])
         self.batchLog = pd.DataFrame(columns=["epoch", "batch", "loss"])
+        self.fitData = None
         self.currentEpoch = None
         self.currentBatch = None
         self.bestEstimator = None
@@ -722,6 +770,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
 
     def _getFit(self) -> tuple[pd.DataFrame, pd.DataFrame, Any, int]:
         return {
+            "fitData": self.fitData,
             "fitLog": self.fitLog,
             "batchLog": self.batchLog,
             "bestEstimator": self.bestEstimator,
@@ -826,13 +875,24 @@ class FileMonitor(BaseMonitor):
                 sep="\t"
             )
 
-    def onFitStart(self, model: QSPRModel):
+    def onFitStart(
+        self, 
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None
+    ):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to be fitted
+            X_train (np.ndarray): training data
+            y_train (np.ndarray): training targets
+            X_val (np.ndarray | None): validation data, used for early stopping
+            y_val (np.ndarray | None): validation targets, used for early stopping
         """
-        super().onFitStart(model)
+        super().onFitStart(model, X_train, y_train, X_val, y_val)
         self.outDir = self.outDir or model.outDir
         self.fitPath = self.outDir
         if self.saveFits:
@@ -881,19 +941,19 @@ class WandBMonitor(BaseMonitor):
     def onFoldStart(
         self,
         fold: int,
-        X_train: np.array,
-        y_train: np.array,
-        X_test: np.array,
-        y_test: np.array,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
         Args:
             fold (int): index of the current fold
-            X_train (np.array): training data of the current fold
-            y_train (np.array): training targets of the current fold
-            X_test (np.array): test data of the current fold
-            y_test (np.array): test targets of the current fold
+            X_train (np.ndarray): training data of the current fold
+            y_train (np.ndarray): training targets of the current fold
+            X_test (np.ndarray): test data of the current fold
+            y_test (np.ndarray): test targets of the current fold
         """
         super().onFoldStart(fold, X_train, y_train, X_test, y_test)
         config = {
@@ -959,13 +1019,20 @@ class WandBMonitor(BaseMonitor):
         self.wandb.log({"Test Results": wandbTable})
         self.wandb.finish()
 
-    def onFitStart(self, model: QSPRModel):
+    def onFitStart(
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None
+    ):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to train
         """
-        super().onFitStart(model)
+        super().onFitStart(model, X_train, y_train, X_val, y_val)
         # initialize wandb run if not already initialized
         if not self.wandb.run:
             self.wandb.init(

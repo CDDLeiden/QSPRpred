@@ -140,7 +140,6 @@ class PyBoostModel(QSPRModel):
         split = split or ShuffleSplit(
             n_splits=1, test_size=0.1, random_state=self.data.randomState
         )
-        monitor.onFitStart(self)
         X, y = self.convertToNumpy(X, y)
 
         if self.task == ModelTasks.MULTICLASS:
@@ -150,6 +149,13 @@ class PyBoostModel(QSPRModel):
             # split cross validation fold train set into train
             # and validation set for early stopping
             train_index, val_index = next(split.split(X, y))
+            monitor.onFitStart(
+                self,
+                X[train_index, :],
+                y[train_index],
+                X[val_index, :],
+                y[val_index],
+            )
             estimator.fit(
                 X[train_index, :],
                 y[train_index],
@@ -158,6 +164,7 @@ class PyBoostModel(QSPRModel):
             monitor.onFitEnd(estimator, estimator.best_round)
             return estimator, estimator.best_round
 
+        monitor.onFitStart(self, X, y)
         estimator.params.update({"ntrees": self.earlyStopping.getEpochs()})
         estimator.fit(X, y)
 

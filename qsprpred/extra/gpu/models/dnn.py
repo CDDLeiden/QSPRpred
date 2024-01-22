@@ -258,12 +258,18 @@ class DNNModel(QSPRModel):
             n_splits=1, test_size=0.1, random_state=self.data.randomState
         )
         X, y = self.convertToNumpy(X, y)
-        monitor.onFitStart(self)
         # fit with early stopping
         if self.earlyStopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
             train_index, val_index = next(split.split(X, y))
+            monitor.onFitStart(
+                self,
+                X[train_index, :],
+                y[train_index],
+                X[val_index, :],
+                y[val_index]
+            )
             estimator_fit = estimator.fit(
                 X[train_index, :],
                 y[train_index],
@@ -274,6 +280,7 @@ class DNNModel(QSPRModel):
             )
             monitor.onFitEnd(estimator_fit[0], estimator_fit[1])
             return estimator_fit
+        monitor.onFitStart(self, X, y)
         # set fixed number of epochs if early stopping is not used
         estimator.n_epochs = self.earlyStopping.getEpochs()
         estimator_fit = estimator.fit(X, y, monitor=monitor, **kwargs)

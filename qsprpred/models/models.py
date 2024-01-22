@@ -12,6 +12,8 @@ from typing import Any, Callable, List, Type, Union
 
 import numpy as np
 import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import Mol
 
 from ..data.tables.mol import MoleculeTable
 from ..data.tables.qspr import QSPRDataset
@@ -233,7 +235,7 @@ class QSPRModel(JSONSerializable, ABC):
             self.data = data
             self.targetProperties = self.data.targetProperties
             self.nTargets = len(self.targetProperties)
-            self.featureCalculators = self.data.descriptorCalculators
+            self.featureCalculators = self.data.descriptorSets
             self.featureStandardizer = self.data.feature_standardizer
         else:
             self.data = None
@@ -423,7 +425,7 @@ class QSPRModel(JSONSerializable, ABC):
                 data matrix and/or target matrix in np.ndarray format
         """
         if isinstance(X, QSPRDataset):
-            X = X.getFeatures(raw=True, concat=True)
+            X = X.getFeatures(concat=True)
         if isinstance(X, pd.DataFrame):
             X = X.values
         if y is not None:
@@ -456,7 +458,7 @@ class QSPRModel(JSONSerializable, ABC):
 
     def createPredictionDatasetFromMols(
         self,
-        mols: list[str],
+        mols: list[str | Mol],
         smiles_standardizer: str | Callable[[str], str] = "chembl",
         n_jobs: int = 1,
         fill_value: float = np.nan,
@@ -464,7 +466,7 @@ class QSPRModel(JSONSerializable, ABC):
         """Create a `QSPRDataset` instance from a list of SMILES strings.
 
         Args:
-            mols (list): list of SMILES strings
+            mols (list[str | Mol]): list of SMILES strings
             smiles_standardizer (str, callable): smiles standardizer to use
             n_jobs (int): number of parallel jobs to use
             fill_value (float): value to fill for missing features
@@ -475,6 +477,8 @@ class QSPRModel(JSONSerializable, ABC):
                 indicating which molecules failed to be processed
         """
         # make a molecule table first and add the target properties
+        if isinstance(mols[0], Mol):
+            mols = [Chem.MolToSmiles(mol) for mol in mols]
         dataset = MoleculeTable.fromSMILES(
             f"{self.__class__.__name__}_{hash(self)}",
             mols,
@@ -531,7 +535,7 @@ class QSPRModel(JSONSerializable, ABC):
 
     def predictMols(
         self,
-        mols: List[str],
+        mols: List[str | Mol],
         use_probas: bool = False,
         smiles_standardizer: Union[str, callable] = "chembl",
         n_jobs: int = 1,
@@ -541,7 +545,7 @@ class QSPRModel(JSONSerializable, ABC):
         Make predictions for the given molecules.
 
         Args:
-            mols (List[str]): list of SMILES strings
+            mols (List[str  | Mol]): list of SMILES strings
             use_probas (bool): use probabilities for classification models
             smiles_standardizer:
                 either `chembl`, `old`, or a partial function

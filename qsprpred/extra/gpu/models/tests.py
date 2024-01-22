@@ -3,19 +3,24 @@ from importlib import import_module, util
 from typing import Type
 from unittest import TestCase
 
+import chemprop
+import pandas as pd
 import pytest
 import torch
 from parameterized import parameterized
+from sklearn import metrics
 from sklearn.impute import SimpleImputer
+from sklearn.model_selection import ShuffleSplit
 
-from qsprpred.data.descriptors.calculators import MoleculeDescriptorsCalculator
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
-from qsprpred.tasks import TargetTasks, ModelTasks
+from qsprpred.tasks import ModelTasks, TargetTasks
 from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
+from ....models import CrossValAssessor
+from ....models.metrics import SklearnMetrics
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
 from ....utils.testing.path_mixins import ModelDataSetsPathMixIn
@@ -151,7 +156,7 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             )
 
 
-class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
+class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
 
     def setUp(self):
@@ -183,7 +188,8 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         if parameters is None:
             parameters = {}
 
-        parameters["gpu"] = GPUS[0] if len(GPUS) > 0 else None
+        if len(GPUS) > 0:
+            parameters["gpu"] = GPUS[0]
         parameters["epochs"] = 2
         return ChempropModel(
             base_dir=base_dir, data=dataset, name=name, parameters=parameters
@@ -214,10 +220,8 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             preparation_settings=None,
         )
         dataset.prepareDataset(
-            feature_calculators=[
-                MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
-            ],
-            split=RandomSplit(test_fraction=0.1),
+            feature_calculators=[SmilesDesc()],
+            split=RandomSplit(test_fraction=0.1, dataset=dataset),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
@@ -271,10 +275,8 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             preparation_settings=None,
         )
         dataset.prepareDataset(
-            feature_calculators=[
-                MoleculeDescriptorsCalculator(desc_sets=[SmilesDesc()])
-            ],
-            split=RandomSplit(test_fraction=0.1),
+            feature_calculators=[SmilesDesc()],
+            split=RandomSplit(test_fraction=0.1, dataset=dataset),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
@@ -284,6 +286,98 @@ class ChemProp(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         self.fitTest(model)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
+
+    def testConsistency(self):
+        """Test if QSPRpred Chemprop and Chemprop models are consistent."""
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            name="consistency_data",
+            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
+            preparation_settings=None,
+        )
+        dataset.prepareDataset(
+            feature_calculators=[SmilesDesc()],
+            split=RandomSplit(test_fraction=0.1),
+        )
+        # initialize model for training from class
+        model = self.getModel(
+            base_dir=self.generatedModelsPath, name="consistency_data", dataset=dataset
+        )
+
+        # chemprop by default uses sklearn rmse (squared=False) as metric
+        rmse = metrics.make_scorer(
+            metrics.mean_squared_error, greater_is_better=False, squared=False
+        )
+
+        # Run 1 fold of bootstrap cross validation (default cross validation in chemprop is bootstrap)
+        assessor = CrossValAssessor(
+            scoring=SklearnMetrics(rmse),
+            split=ShuffleSplit(
+                n_splits=1, test_size=0.1, random_state=dataset.randomState
+            ),
+        )
+        qsprpred_score = assessor(
+            model, split=RandomSplit(test_fraction=0.1, dataset=dataset)
+        )
+        qsprpred_score = -qsprpred_score[0]  # qsprpred_score is negative rmse
+
+        # save the cross-validation train, test and validation split to
+        # compare with true Chemprop model from the base monitor
+        df_train = pd.DataFrame(
+            assessor.monitor.fits[0]["fitData"]["X_train"], columns=["SMILES"]
+        )
+        df_train["pchembl_value_Mean"] = assessor.monitor.fits[0]["fitData"]["y_train"]
+        df_train.to_csv(
+            f"{self.generatedModelsPath}/consistency_data_train.csv", index=False
+        )
+
+        df_val = pd.DataFrame(
+            assessor.monitor.fits[0]["fitData"]["X_val"], columns=["SMILES"]
+        )
+        df_val["pchembl_value_Mean"] = assessor.monitor.fits[0]["fitData"]["y_val"]
+        df_val.to_csv(
+            f"{self.generatedModelsPath}/consistency_data_val.csv", index=False
+        )
+
+        df_test = pd.DataFrame(assessor.monitor.foldData[0]["X_test"])
+        df_test.rename(columns={"Descriptor_SmilesDesc_SMILES": "SMILES"}, inplace=True)
+        df_test["pchembl_value_Mean"] = assessor.monitor.foldData[0]["y_test"]
+        df_test.to_csv(
+            f"{self.generatedModelsPath}/consistency_data_test.csv", index=False
+        )
+
+        # run chemprop with the same data and parameters
+        arguments = [
+            "--data_path",
+            f"{self.generatedModelsPath}/consistency_data_train.csv",
+            "--separate_val_path",
+            f"{self.generatedModelsPath}/consistency_data_val.csv",
+            "--separate_test_path",
+            f"{self.generatedModelsPath}/consistency_data_test.csv",
+            "--dataset_type",
+            "regression",
+            "--save_dir",
+            self.generatedModelsPath,
+            "--epochs",
+            "2",
+            "--seed",
+            str(model.randomState),
+            "--pytorch_seed",
+            str(model.randomState),
+        ]
+
+        if len(GPUS) > 0:
+            arguments.extend(["--gpu", str(GPUS[0])])
+
+        args = chemprop.args.TrainArgs().parse_args(arguments)
+        chemprop_score, _ = chemprop.train.cross_validate(
+            args=args, train_func=chemprop.train.run_training
+        )
+
+        # compare the scores
+        print(f"QSPRpred score: {qsprpred_score}")
+        print(f"Chemprop score: {chemprop_score}")
+        self.assertAlmostEqual(qsprpred_score, chemprop_score, places=5)
 
 
 @pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
