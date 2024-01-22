@@ -6,7 +6,7 @@
 - `ProDec`: Protein descriptors from the ProDec package.
 
 """
-
+import os
 from abc import abstractmethod
 from typing import Optional, Any
 
@@ -194,35 +194,56 @@ class PaDEL(DescriptorSet):
         descriptors (list[str]): list of PaDEL descriptor names
     """
 
-    def __init__(self, descs: list[str] | None = None, ignore_3D: bool = True):
+    _notJSON = ["_nameMapping", "_padel", "_descriptors", *DescriptorSet._notJSON]
+
+    def __init__(
+        self,
+        descs: list[str] | None = None,
+        ignore_3d: bool = True,
+        n_jobs: int | None = None,
+    ):
         """Initialize a PaDEL calculator
 
         Args:
             descs: list of PaDEL descriptor short names
-            ignore_3D (bool): skip 3D descriptor calculation
+            ignore_3d (bool): skip 3D descriptor calculation
         """
         super().__init__()
+        self.nJobs = n_jobs or os.cpu_count()
         self._descs = descs
-        self._ignore3D = ignore_3D
-        # Obtain default descriptor names
-        self._nameMapping = {}
-        for descriptor in PaDEL_descriptors:
-            # Skip if desc is 3D and set to be ignored
-            if ignore_3D and descriptor.is_3D:
-                continue
-            for name in descriptor.description.name:
-                self._nameMapping[name] = descriptor
+        self._ignore3D = ignore_3d
+        # Initialize name mapping
+        self._initMapping()
         # Initialize descriptors and calculator
         if descs is None:
             self.descriptors = None
         else:
             self.descriptors = descs
 
+    @property
+    def supportsParallel(self) -> bool:
+        return False
+
+    def _initMapping(self):
+        # Obtain default descriptor names
+        self._nameMapping = {}
+        for descriptor in PaDEL_descriptors:
+            # Skip if desc is 3D and set to be ignored
+            if self._ignore3D and descriptor.is_3D:
+                continue
+            for name in descriptor.description.name:
+                self._nameMapping[name] = descriptor
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._initMapping()
+        self.descriptors = state["_keep"]
+
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
-        df = self._padel.calculate(mols, show_banner=False, njobs=1)
+        df = self._padel.calculate(mols, show_banner=False, njobs=self.nJobs)
         intersection = list(set(self._keep).intersection(df.columns))
         df = df[intersection]
         return df.values
