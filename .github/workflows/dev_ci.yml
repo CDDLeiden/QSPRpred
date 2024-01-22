@@ -39,6 +39,7 @@ jobs:
 
       - name: Set Up Dependencies
         run: |
+          python -m pip cache purge
           source .github/setup.sh ${{ runner.os }} $env
 
       - name: Check Environment Info
