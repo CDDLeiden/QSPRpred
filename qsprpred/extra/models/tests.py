@@ -20,7 +20,7 @@ from ..models.pcm import SklearnPCMModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import ModelCheckMixIn
 from ...utils.testing.path_mixins import ModelDataSetsPathMixIn
-from .random import RandomModel
+from .random import NormalDistributionAlgorithm, RandomModel, RatioDistributionAlgorithm
 
 
 class ModelDataSetsMixInExtras(ModelDataSetsPathMixIn, DataSetsMixInExtras):
@@ -178,6 +178,7 @@ class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTes
     def getModel(
         self,
         name: str,
+        alg: NormalDistributionAlgorithm | RatioDistributionAlgorithm = NormalDistributionAlgorithm,
         dataset: PCMDataSet | None = None,
         parameters: dict | None = None,
         random_state: int | None = None,
@@ -198,6 +199,7 @@ class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTes
             base_dir=self.generatedModelsPath,
             data=dataset,
             name=name,
+            alg=alg,
             parameters=parameters,
             random_state=random_state,
         )
@@ -289,6 +291,63 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             self.fitTest(model)
             predictor = RandomModel(
                 name=f"{model_name}_multitask_regression", base_dir=model.baseDir
+            )
+            self.predictorTest(
+                predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+
+class TestRandomModelClassification(RandomBaseModelTestCase):
+    """Test the RandomModel class for regression models."""
+    @parameterized.expand(
+        [
+            (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
+            for alg, alg_name in (
+                (RatioDistributionAlgorithm, "RandomModel"),
+            )
+            for task, th in (
+                (TargetTasks.SINGLECLASS, [6.5]),
+                (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
+            )
+            for random_state in ([None], [1, 42], [42, 42])
+        ]
+    )
+    def testClassificationBasicFit(
+        self, _, task, th, model_name, model_class, random_state
+    ):
+        """Test model training for classification models."""
+        parameters = None
+
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            target_props=[{"name": "CL", "task": task, "th": th}],
+            preparation_settings=self.getDefaultPrep(),
+        )
+        # test classifier
+        # initialize model for training from class
+        model = self.getModel(
+            name=f"{model_name}_{task}",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters,
+            random_state=random_state[0],
+        )
+        self.fitTest(model)
+        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=f"{model_name}_{task}",
+                alg=model_class,
+                dataset=dataset,
+                parameters=parameters,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = RandomModel(
+                name=f"{model_name}_{task}", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,

@@ -2,7 +2,6 @@ import json
 import numpy as np
 import pandas as pd
 import os
-import types
 
 from qsprpred.models.early_stopping import EarlyStoppingMode
 from qsprpred.models.monitors import FitMonitor
@@ -11,22 +10,39 @@ from ...models.models import QSPRModel
 from ...data.tables.qspr import QSPRDataset
 from typing import Any, Optional, Type
 
-class RandomDistributionAlgorithm:
-    """ Distributions used: normal distribution for regression, not to be used for classification
+class RatioDistributionAlgorithm:
+    """
+    Categorical distribution using ratio of categories as probabilities
+    Values of X are irrelevant, only distribution of y is used
+    """
+    def __init__(self, random_state=None):
+        self.ratios = None
+        self.random_state=random_state
+        self.rng = np.random.default_rng(seed=random_state)
+
+    def __call__(self, X_test: np.ndarray):
+        # TODO: fix
+        y_list = [self.rng.choice(len(self.ratios.values), len(X_test), p=[r[col] for r in self.ratios.values]) for col in range(len(self.ratios.values[0]))]
+        y = np.column_stack(y_list)
+        if y.ndim == 1:
+            y = y.reshape(-1, 1)
+
+        print(y)
+        return y
+
+class NormalDistributionAlgorithm:
+    """
+    Distributions used: normal distribution for regression, not to be used for classification
+    Values of X are irrelevant, only distribution of y is used
     """
 
     def __init__(self, random_state=None):
         self.mean = None
         self.std = None
-        self.ratios = None,
         self.random_state=random_state
         self.rng = np.random.default_rng(seed=random_state)
 
     def __call__(self, X_test: np.ndarray):
-        # Values of X are irrelevant
-        # if (self.task.isClassification()):
-        #     y_list = [self.rng.choice(self.ratios.shape[0], len(X_test), p=self.ratios.values[col]) for col in range(len(self.ratios))]
-        # if (self.task.isRegression()):
         y_list = [self.rng.normal(loc=self.mean.values[col], scale=self.std.values[col], size=len(X_test)) for col in range(len(self.mean))]
         y = np.column_stack(y_list)
         if y.ndim == 1:
@@ -38,6 +54,7 @@ class RandomModel(QSPRModel):
     def __init__(
         self,
         base_dir: str,
+        alg: NormalDistributionAlgorithm | RatioDistributionAlgorithm = NormalDistributionAlgorithm,
         data: Optional[QSPRDataset] = None,
         name: Optional[str] = None,
         parameters: Optional[dict] = None,
@@ -60,7 +77,8 @@ class RandomModel(QSPRModel):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
         """
-        super().__init__(base_dir, RandomDistributionAlgorithm, data, name, parameters, autoload, random_state=random_state)
+        super().__init__(base_dir, alg, data, name, parameters, autoload, random_state=random_state)
+        print(self.alg.__name__)
 
     @property
     def supportsEarlyStopping(self) -> bool:
@@ -75,11 +93,11 @@ class RandomModel(QSPRModel):
             self,
             X: pd.DataFrame | np.ndarray | QSPRDataset,
             y: pd.DataFrame | np.ndarray | QSPRDataset,
-            estimator: Type[RandomDistributionAlgorithm] = None,
+            estimator: Type[NormalDistributionAlgorithm] | Type[RatioDistributionAlgorithm] = None,
             mode: EarlyStoppingMode = None,
             monitor: FitMonitor | None = None,
             **kwargs
-    ) -> RandomDistributionAlgorithm:
+    ) -> NormalDistributionAlgorithm | RatioDistributionAlgorithm:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
         Args:
@@ -91,7 +109,7 @@ class RandomModel(QSPRModel):
             kwargs: additional keyword arguments for the fit function
 
         Returns:
-            (RandomDistributionAlgorithm): fitted estimator instance
+            (NormalDistributionAlgorithm | RatioDistributionAlgorithm): fitted estimator instance
         """
         estimator = self.estimator if estimator is None else estimator
         if isinstance(y, pd.DataFrame):
@@ -175,19 +193,24 @@ class RandomModel(QSPRModel):
         if os.path.isfile(path):
             with open(path, "r") as f:
                 loaded_dict = json.load(f)
-                mean = pd.DataFrame({"mean": json.loads(loaded_dict["mean"])}) if loaded_dict[
-                                                                  "mean"] is not None else None
-                std = pd.DataFrame({"std": json.loads(loaded_dict["std"])}) if loaded_dict[
-                                                                  "std"] is not None else None
-                # ratios = pd.DataFrame({"ratios": loaded_dict["ratios"]}) if loaded_dict[
-                #                                                   "ratios"] is not None else None
+                if loaded_dict["name"] == "NormalDistributionAlgorithm":
+                    mean = pd.DataFrame({"mean": json.loads(loaded_dict["mean"])}) if loaded_dict[
+                                                                    "mean"] is not None else None
+                    std = pd.DataFrame({"std": json.loads(loaded_dict["std"])}) if loaded_dict[
+                                                                    "std"] is not None else None
+                else:
+                    ratios = pd.DataFrame({"ratios": json.loads(loaded_dict["ratios"])}) if loaded_dict[
+                                                                    "ratios"] is not None else None
                 loaded_params = loaded_dict["parameters"]
             if params is not None:
                 loaded_params.update(params)
 
             estimator = self.loadEstimator(loaded_params)
-            estimator.mean = mean
-            estimator.std = std
+            if loaded_dict["name"] == "NormalDistributionAlgorithm":
+                estimator.mean = mean
+                estimator.std = std
+            else:
+                estimator.ratios = ratios
             # estimator.ratios = ratios
             return estimator
 
@@ -206,12 +229,17 @@ class RandomModel(QSPRModel):
         """
         estimator_path = f"{self.outPrefix}.json"
 
-        param_dictionary = {"parameters": {},
+        if isinstance(self.estimator, NormalDistributionAlgorithm):
+            param_dictionary = {"parameters": {},
                             "mean": self.estimator.mean.to_json() if self.estimator.mean is not None else None,
                             "std": self.estimator.std.to_json() if self.estimator.std is not None else None,
-                            # "ratios": self.estimator.ratios.to_json() if self.estimator.ratios is not None else None
+                            "name": "NormalDistributionAlgorithm"
                             }
-
+        else:
+            param_dictionary = {"parameters": {},
+                            "ratios": self.estimator.ratios.to_json() if self.estimator.ratios is not None else None,
+                            "name": "RatioDistributionAlgorithm"
+                            }
         with open(estimator_path, "w") as outfile:
             json.dump(param_dictionary, outfile)
 
