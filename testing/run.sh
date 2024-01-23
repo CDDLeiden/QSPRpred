@@ -3,27 +3,13 @@
 set -e
 
 WD=$(pwd)
-RUN_EXTRAS=${QSPPRED_TEST_EXTRAS:-true}
-RUN_TUTORIAL=${QSPPRED_TEST_TUTORIAL:-true}
-echo "Running tests with:"
-echo "  RUN_EXTRAS=$RUN_EXTRAS"
-echo "  RUN_TUTORIAL=$RUN_TUTORIAL"
+export QSPPRED_TEST_TUTORIAL=${QSPPRED_TEST_TUTORIAL:-true}
+echo "Setting QSPPRED_TEST_TUTORIAL=$QSPPRED_TEST_TUTORIAL"
 
-# -x: stop on first failure, -v: verbose
-pytest -xv ../qsprpred/benchmarks
-pytest -xv ../qsprpred/data
-pytest -xv ../qsprpred/plotting
-# only run extras if explicitly requested
-if [ "$RUN_EXTRAS" == "true" ]; then
-  pytest -xv ../qsprpred/extra/data/descriptors
-  pytest -xv ../qsprpred/extra/data/sampling
-  pytest -xv ../qsprpred/extra/data/tables
-  pytest -xv ../qsprpred/extra/gpu
-  pytest -xv ../qsprpred/extra/models
-fi
+cd test_pytest && ./run.sh && cd "$WD"
 cd test_cli && ./run.sh && cd "$WD"
 cd test_tutorial && ./prepare.sh && cd "$WD"
 cd test_consistency && ./run.sh && cd "$WD"
-if [ "$RUN_TUTORIAL" == "true" ]; then
+if [ "$QSPPRED_TEST_TUTORIAL" == "true" ]; then
   cd test_tutorial && ./run.sh && cd "$WD"
 fi

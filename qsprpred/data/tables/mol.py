@@ -818,17 +818,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         ret = self.df[join_cols].copy()
         ret.reset_index(drop=True, inplace=True)
         for descriptors in self.descriptors:
-            df_descriptors = descriptors.getDF()
-            ret = ret.merge(
-                df_descriptors,
-                left_on=descriptors.indexCols,
-                how="left",
-                right_index=True,
-                suffixes=("_left", "_right"),
-            )
-            for x in descriptors.indexCols:
-                ret.drop(columns=[f"{x}_right"], inplace=True)
-                ret.rename(columns={f"{x}_left": x}, inplace=True)
+            df_descriptors = descriptors.getDescriptors()
+            ret = ret.join(df_descriptors, on=descriptors.indexCols, how="left")
         ret.set_index(self.df.index, inplace=True)
         ret.drop(columns=join_cols, inplace=True)
         return ret

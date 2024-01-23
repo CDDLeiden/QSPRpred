@@ -135,10 +135,30 @@ class BenchmarkingTest(DataSetsPathMixIn, QSPRTestCase):
                 ]
                 self.assertTrue(len(score_results) > 0)
 
+    def checkSettings(self):
+        self.assertTrue(len(self.settings.data_sources) > 0)
+        self.assertTrue(len(self.settings.descriptors) > 0)
+        self.assertTrue(len(self.settings.target_props) > 0)
+        self.assertTrue(len(self.settings.prep_settings) > 0)
+        self.assertTrue(len(self.settings.models) > 0)
+        self.assertTrue(len(self.settings.assessors) > 0)
+        self.settings.toFile(f"{self.generatedPath}/benchmarks/settings.json")
+        settings = BenchmarkSettings.fromFile(
+            f"{self.generatedPath}/benchmarks/settings.json"
+        )
+        self.assertEqual(len(self.settings.data_sources), len(settings.data_sources))
+        self.assertEqual(len(self.settings.descriptors), len(settings.descriptors))
+        self.assertEqual(len(self.settings.target_props), len(settings.target_props))
+        self.assertEqual(len(self.settings.prep_settings), len(settings.prep_settings))
+        self.assertEqual(len(self.settings.models), len(settings.models))
+        self.assertEqual(len(self.settings.assessors), len(settings.assessors))
+
     def testSingleTaskCLS(self):
         """Run single task tests for classification."""
+        self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
+        self.checkSettings()
 
     def testSingleTaskREG(self):
         self.settings.target_props = [
@@ -175,8 +195,10 @@ class BenchmarkingTest(DataSetsPathMixIn, QSPRTestCase):
             TestSetAssessor(scoring="r2"),
             TestSetAssessor(scoring="neg_mean_squared_error"),
         ]
+        self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
+        self.checkSettings()
 
     def testMultiTaskCLS(self):
         """Run the test benchmark."""
@@ -231,8 +253,10 @@ class BenchmarkingTest(DataSetsPathMixIn, QSPRTestCase):
                 split_multitask_scores=True,
             ),
         ]
+        self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
+        self.checkSettings()
 
     def testMultiTaskREG(self):
         self.settings.target_props = [
@@ -281,5 +305,7 @@ class BenchmarkingTest(DataSetsPathMixIn, QSPRTestCase):
                 scoring="neg_mean_squared_error", split_multitask_scores=True
             ),
         ]
+        self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
+        self.checkSettings()
