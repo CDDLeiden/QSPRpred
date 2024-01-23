@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.predict_CLI &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.predict_CLI</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.predict_CLI</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">optuna</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">.logs.utils</span> <span class="kn">import</span> <span class="n">backup_files</span><span class="p">,</span> <span class="n">enable_file_logger</span>
+<span class="kn">from</span> <span class="nn">.models.models</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
+
+
+<div class="viewcode-block" id="QSPRArgParser">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.predict_CLI.QSPRArgParser">[docs]</a>
+<span class="k">def</span> <span class="nf">QSPRArgParser</span><span class="p">(</span><span class="n">txt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define and read command line arguments.&quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span>
+    <span class="p">)</span>
+
+    <span class="c1"># base arguments</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--output_path&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;./predictions.tsv&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output path to save results&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-sb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--skip_backup&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Skip backup of files. WARNING: this may overwrite &quot;</span>
+        <span class="s2">&quot;previous results, use with caution.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-de&quot;</span><span class="p">,</span> <span class="s2">&quot;--debug&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-ran&quot;</span><span class="p">,</span> <span class="s2">&quot;--random_state&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Seed for the random state&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-i&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--input&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;./dataset.tsv&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;path to tsv file name that contains SMILES&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-sm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--smiles_col&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;SMILES&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;SMILES column name in input file.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-ncpu&quot;</span><span class="p">,</span> <span class="s2">&quot;--ncpu&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of CPUs&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-gpus&quot;</span><span class="p">,</span> <span class="s2">&quot;--gpus&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;List of GPUs&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-pr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--use_probas&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;If included use probabilities instead of predictions &quot;</span>
+            <span class="s2">&quot;for classification tasks.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># model predictions arguments</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-mp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--model_paths&quot;</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to model meta file for each model to be used.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># other</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-fv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--fill_value&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Fill value for missing values in the calculated features&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">txt</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">args</span></div>
+
+
+
+<div class="viewcode-block" id="QSPR_predict">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.predict_CLI.QSPR_predict">[docs]</a>
+<span class="k">def</span> <span class="nf">QSPR_predict</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make predictions with pre-trained QSPR models for a set of smiles.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset file (</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="si">}</span><span class="s2">) not found&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="n">smiles_list</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">smiles_col</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;SMILES&quot;</span><span class="p">:</span> <span class="n">smiles_list</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">model_path</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">model_paths</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">model_path</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_path</span><span class="si">}</span><span class="s2"> does not exist. Model skipped.&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">QSPRModel</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+            <span class="n">smiles_list</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">use_probas</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">fill_value</span>
+        <span class="p">)</span>
+        <span class="c1"># if predictions 2d array with more than 1 column, add as separate columns</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">use_probas</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                            <span class="p">{</span>
+                                <span class="sa">f</span><span class="s2">&quot;preds_</span><span class="si">{</span><span class="n">predictor</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_class_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span>
+                                    <span class="n">predictions</span><span class="p">[</span><span class="n">idx</span><span class="p">][:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                            <span class="p">}</span>
+                        <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                            <span class="p">{</span>
+                                <span class="sa">f</span><span class="s2">&quot;preds_</span><span class="si">{</span><span class="n">predictor</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_class_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span>
+                                    <span class="n">predictions</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                            <span class="p">}</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="sa">f</span><span class="s2">&quot;preds_</span><span class="si">{</span><span class="n">predictor</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span>
+                            <span class="n">predictions</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+    <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Predictions saved to </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">QSPRArgParser</span><span class="p">()</span>
+
+    <span class="c1"># Backup files</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">skip_backup</span><span class="p">:</span>
+        <span class="n">backup_msg</span> <span class="o">=</span> <span class="n">backup_files</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_path</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_path</span><span class="p">)),</span>
+            <span class="n">cp_suffix</span><span class="o">=</span><span class="s2">&quot;_params&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_path</span><span class="p">)):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_path</span><span class="p">))</span>
+
+    <span class="n">logSettings</span> <span class="o">=</span> <span class="n">enable_file_logger</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_path</span><span class="p">)),</span>
+        <span class="s2">&quot;QSPRpredict.log&quot;</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">debug</span><span class="p">,</span>
+        <span class="vm">__name__</span><span class="p">,</span>
+        <span class="nb">vars</span><span class="p">(</span><span class="n">args</span><span class="p">),</span>
+        <span class="n">disable_existing_loggers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logSettings</span><span class="o">.</span><span class="n">log</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">skip_backup</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">backup_msg</span><span class="p">)</span>
+
+    <span class="c1"># Add optuna logging</span>
+    <span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">enable_propagation</span><span class="p">()</span>  <span class="c1"># Propagate logs to the root logger.</span>
+    <span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">disable_default_handler</span><span class="p">()</span>  <span class="c1"># Stop showing logs in sys.stderr.</span>
+    <span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="c1"># Create json log file with used commandline arguments</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_path</span><span class="p">)</span><span class="si">}</span><span class="s2">/QSPRpredict.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="c1"># Optimize, evaluate and train estimators according to QSPR arguments</span>
+    <span class="n">QSPR_predict</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

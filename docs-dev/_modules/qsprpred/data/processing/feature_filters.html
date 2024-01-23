@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.processing.feature_filters &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.processing.feature_filters</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.data.processing.feature_filters</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Different filters to select features from trainingset.</span>
+
+<span class="sd">To add a new feature filters:</span>
+<span class="sd">* Add a FeatureFilter subclass for your new filter</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">boruta</span> <span class="kn">import</span> <span class="n">BorutaPy</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+
+<span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">...utils.interfaces.randomized</span> <span class="kn">import</span> <span class="n">Randomized</span>
+
+
+<div class="viewcode-block" id="FeatureFilter">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.feature_filters.FeatureFilter">[docs]</a>
+<span class="k">class</span> <span class="nc">FeatureFilter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter out uninformative featureNames from a dataframe.&quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y_col</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter out uninformative features from a dataframe.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): dataframe to be filtered</span>
+<span class="sd">            y_col (pd.DataFrame, optional): output dataframe if the filtering method</span>
+<span class="sd">                requires it</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The filtered pd.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="LowVarianceFilter">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.feature_filters.LowVarianceFilter">[docs]</a>
+<span class="k">class</span> <span class="nc">LowVarianceFilter</span><span class="p">(</span><span class="n">FeatureFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove features with variance lower than a given threshold after MinMax scaling.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        th (float): threshold for removing features</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">th</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">th</span> <span class="o">=</span> <span class="n">th</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y_col</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="c1"># scale values between 0 and 1</span>
+        <span class="n">colnames</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="n">data_scaled</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">variance</span> <span class="o">=</span> <span class="n">data_scaled</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">low_var_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">variance</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">th</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># drop from both the minmax scaled descriptors df and the original dataframe</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">colnames</span><span class="p">[</span><span class="n">low_var_cols</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;number of columns dropped low variance filter: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">low_var_cols</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;number of columns left: </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="HighCorrelationFilter">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.feature_filters.HighCorrelationFilter">[docs]</a>
+<span class="k">class</span> <span class="nc">HighCorrelationFilter</span><span class="p">(</span><span class="n">FeatureFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove features with correlation higher than a given threshold.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        th (float): threshold for correlation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">th</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">th</span> <span class="o">=</span> <span class="n">th</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y_col</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">df</span>
+        <span class="c1"># make absolute, because we also want to filter out large negative correlation</span>
+        <span class="n">correlation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">high_corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">correlation</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">th</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;number of columns dropped high correlation filter: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">high_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">high_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;number of columns left: </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="BorutaFilter">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.feature_filters.BorutaFilter">[docs]</a>
+<span class="k">class</span> <span class="nc">BorutaFilter</span><span class="p">(</span><span class="n">FeatureFilter</span><span class="p">,</span> <span class="n">Randomized</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Boruta filter from BorutaPy: Boruta all-relevant feature selection.</span>
+
+<span class="sd">    Uses BorutaPy implementation from https://github.com/scikit-learn-contrib/boruta_py</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        featSelector (BorutaPy): BorutaPy feature selector</span>
+<span class="sd">        seed (int):</span>
+<span class="sd">            Random state to use for shuffling and other random operations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boruta_feat_selector</span><span class="p">:</span> <span class="n">BorutaPy</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the BorutaFilter class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            boruta_feat_selector (BorutaPy, optional): The BorutaPy feature selector.</span>
+<span class="sd">                If not provided, a default BorutaPy instance will be created.</span>
+<span class="sd">            seed (int | None, optional): Random state to use for shuffling and other</span>
+<span class="sd">                random operations. If None, the random state set in the BorutaPy</span>
+<span class="sd">                instance is used. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Randomized</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featSelector</span> <span class="o">=</span> <span class="n">boruta_feat_selector</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featSelector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featSelector</span> <span class="o">=</span> <span class="n">BorutaPy</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">RandomForestRegressor</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featSelector</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">seed</span>
+
+        <span class="c1"># set seed from BorutaPy instance to class attribute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSeed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">featSelector</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y_col</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter out uninformative features from a dataframe using BorutaPy.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            features (pd.DataFrame): dataframe to be filtered</span>
+<span class="sd">            y_col (pd.DataFrame): target column(s)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: filtered dataframe</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">y_col</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Boruta filter only works with one target column.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featSelector</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_col</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+
+        <span class="n">selected_features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featSelector</span><span class="o">.</span><span class="n">support_</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Number of columns dropped Boruta filter: &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">selected_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of columns left: </span><span class="si">{</span><span class="n">selected_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">selected_features</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

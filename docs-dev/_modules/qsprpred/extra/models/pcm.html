@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.models.pcm &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.models.pcm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.extra.models.pcm</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Specialized models for proteochemometric models (PCM).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">qsprpred.extra.data.tables.pcm</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
+<span class="kn">from</span> <span class="nn">..data.descriptors.sets</span> <span class="kn">import</span> <span class="n">ProteinDescriptorSet</span>
+<span class="kn">from</span> <span class="nn">...data.tables.mol</span> <span class="kn">import</span> <span class="n">MoleculeTable</span>
+<span class="kn">from</span> <span class="nn">...models.models</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">from</span> <span class="nn">...models.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
+
+
+<div class="viewcode-block" id="PCMModel">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel">[docs]</a>
+<span class="k">class</span> <span class="nc">PCMModel</span><span class="p">(</span><span class="n">QSPRModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for PCM models.</span>
+
+<span class="sd">    Extension of `QSPRModel` for proteochemometric models (PCM). It modifies</span>
+<span class="sd">    the `predictMols` method to handle PCM descriptors and specification of protein ids.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PCMModel.createPredictionDatasetFromMols">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.createPredictionDatasetFromMols">[docs]</a>
+    <span class="k">def</span> <span class="nf">createPredictionDatasetFromMols</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">protein_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>  <span class="c1"># FIXME: this changes the signature from the base class</span>
+        <span class="n">smiles_standardizer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span> <span class="o">=</span> <span class="s2">&quot;chembl&quot;</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PCMDataSet</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a prediction data set of compounds using a PCM model</span>
+<span class="sd">        given as a list of SMILES strings and a protein identifier.</span>
+<span class="sd">        The protein identifier is used to calculate the protein descriptors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list[str]):</span>
+<span class="sd">                List of SMILES strings.</span>
+<span class="sd">            protein_id (str):</span>
+<span class="sd">                Protein identifier.</span>
+<span class="sd">            smiles_standardizer (str | Callable, optional):</span>
+<span class="sd">                Smiles standardizer. Defaults to &quot;chembl&quot;.</span>
+<span class="sd">            n_jobs (int, optional):</span>
+<span class="sd">                Number of parallel jobs. Defaults to 1.</span>
+<span class="sd">            fill_value (float, optional):</span>
+<span class="sd">                Value to fill missing features with. Defaults to np.nan.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            PCMDataSet:</span>
+<span class="sd">                Dataset with the features calculated for the molecules.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">MoleculeTable</span><span class="o">.</span><span class="n">fromSMILES</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">mols</span><span class="p">,</span>
+            <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">targetproperty</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">:</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="n">targetproperty</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="s2">&quot;protein_id&quot;</span><span class="p">,</span> <span class="n">protein_id</span><span class="p">)</span>
+        <span class="c1"># convert to PCMDataSet</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">PCMDataSet</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span>
+            <span class="s2">&quot;protein_id&quot;</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span>
+            <span class="n">drop_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># standardize smiles</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">standardizeSmiles</span><span class="p">(</span><span class="n">smiles_standardizer</span><span class="p">,</span> <span class="n">drop_invalid</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">failed_mask</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># calculate features and prepare dataset</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
+            <span class="n">smiles_standardizer</span><span class="o">=</span><span class="n">smiles_standardizer</span><span class="p">,</span>
+            <span class="n">feature_calculators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span><span class="p">,</span>
+            <span class="n">feature_standardizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">,</span>
+            <span class="n">feature_fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">failed_mask</span></div>
+
+
+<div class="viewcode-block" id="PCMModel.predictMols">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.predictMols">[docs]</a>
+    <span class="k">def</span> <span class="nf">predictMols</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">protein_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>  <span class="c1"># FIXME: this changes the signature from the base class</span>
+        <span class="n">use_probas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">smiles_standardizer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span> <span class="o">=</span> <span class="s2">&quot;chembl&quot;</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict the target properties of a list of molecules using a PCM model.</span>
+<span class="sd">        The protein identifier is used to calculate the protein descriptors for</span>
+<span class="sd">        a target of interest.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list[str]):</span>
+<span class="sd">                List of SMILES strings.</span>
+<span class="sd">            protein_id (str):</span>
+<span class="sd">                Protein identifier.</span>
+<span class="sd">            use_probas (bool, optional):</span>
+<span class="sd">                Whether to return class probabilities. Defaults to False.</span>
+<span class="sd">            smiles_standardizer (str | Callable, optional):</span>
+<span class="sd">                Smiles standardizer. Defaults to &quot;chembl&quot;.</span>
+<span class="sd">            n_jobs (int, optional):</span>
+<span class="sd">                Number of parallel jobs. Defaults to 1.</span>
+<span class="sd">            fill_value (float, optional):</span>
+<span class="sd">                Value to fill missing features with. Defaults to np.nan.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray:</span>
+<span class="sd">                Array of predictions.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if the model contains a feature calculator</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No feature calculator set on this instance.&quot;</span><span class="p">)</span>
+        <span class="c1"># run PCM checks to validate the protein ids and descriptors</span>
+        <span class="n">is_pcm</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">protein_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">calc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">ProteinDescriptorSet</span><span class="p">):</span>
+                <span class="n">is_pcm</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">protein_ids</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="s2">&quot;msaProvider&quot;</span><span class="p">):</span>
+                    <span class="n">protein_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">calc</span><span class="o">.</span><span class="n">msaProvider</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">protein_ids</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="s2">&quot;msaProvider&quot;</span><span class="p">):</span>
+                    <span class="k">assert</span> <span class="n">protein_ids</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">calc</span><span class="o">.</span><span class="n">msaProvider</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="p">(</span>
+                        <span class="s2">&quot;All protein descriptor calculators &quot;</span>
+                        <span class="s2">&quot;must have the same protein ids.&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">ProteinDescriptorSet</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="s2">&quot;msaProvider&quot;</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">calc</span><span class="o">.</span><span class="n">msaProvider</span>
+                <span class="ow">and</span> <span class="n">protein_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">calc</span><span class="o">.</span><span class="n">msaProvider</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Protein id </span><span class="si">{</span><span class="n">protein_id</span><span class="si">}</span><span class="s2"> not found in the available MSA, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;cannot calculate PCM descriptors. Options are: </span><span class="si">{</span><span class="n">protein_ids</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_pcm</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No protein descriptors found on this instance. &quot;</span>
+                <span class="s2">&quot;Are you sure this is a PCM model?&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># create data set from mols</span>
+        <span class="n">dataset</span><span class="p">,</span> <span class="n">failed_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPredictionDatasetFromMols</span><span class="p">(</span>
+            <span class="n">mols</span><span class="p">,</span> <span class="n">protein_id</span><span class="p">,</span> <span class="n">smiles_standardizer</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">fill_value</span>
+        <span class="p">)</span>
+        <span class="c1"># make predictions for the dataset</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictDataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">use_probas</span><span class="p">)</span>
+        <span class="c1"># handle invalids</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handleInvalidsInPredictions</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">failed_mask</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">predictions</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="SklearnPCMModel">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel">[docs]</a>
+<span class="k">class</span> <span class="nc">SklearnPCMModel</span><span class="p">(</span><span class="n">SklearnModel</span><span class="p">,</span> <span class="n">PCMModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper for sklearn models for PCM.</span>
+
+<span class="sd">    Just replaces some methods in `SklearnModel` with those in `PCMModel`.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

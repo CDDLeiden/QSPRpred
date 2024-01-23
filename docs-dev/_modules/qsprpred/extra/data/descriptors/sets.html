@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.data.descriptors.sets &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.data.descriptors.sets</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.extra.data.descriptors.sets</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module with definitions of various extra descriptor sets:</span>
+
+<span class="sd">- `Mordred`: Descriptors from molecular descriptor calculation software Mordred.</span>
+<span class="sd">- `Mold2`: Descriptors from molecular descriptor calculation software Mold2.</span>
+<span class="sd">- `PaDEL`: Descriptors from molecular descriptor calculation software PaDEL.</span>
+<span class="sd">- `ProDec`: Protein descriptors from the ProDec package.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">mordred</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">prodec</span>
+<span class="kn">from</span> <span class="nn">Mold2_pywrapper</span> <span class="kn">import</span> <span class="n">Mold2</span> <span class="k">as</span> <span class="n">Mold2_calculator</span>
+<span class="kn">from</span> <span class="nn">PaDEL_pywrapper</span> <span class="kn">import</span> <span class="n">PaDEL</span> <span class="k">as</span> <span class="n">PaDELCalculator</span>
+<span class="kn">from</span> <span class="nn">PaDEL_pywrapper</span> <span class="kn">import</span> <span class="n">descriptors</span> <span class="k">as</span> <span class="n">PaDEL_descriptors</span>
+<span class="kn">from</span> <span class="nn">Signature_pywrapper</span> <span class="kn">import</span> <span class="n">Signature</span> <span class="k">as</span> <span class="n">Signature_calculator</span>
+<span class="kn">from</span> <span class="nn">mordred</span> <span class="kn">import</span> <span class="n">descriptors</span> <span class="k">as</span> <span class="n">Mordred_descriptors</span>
+<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">Mol</span>
+
+<span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
+<span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.msa_calculator</span> <span class="kn">import</span> <span class="n">MSAProvider</span><span class="p">,</span> <span class="n">ClustalMSA</span>
+
+
+<div class="viewcode-block" id="Mordred">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mordred">[docs]</a>
+<span class="k">class</span> <span class="nc">Mordred</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Descriptors from molecular descriptor calculation software Mordred.</span>
+
+<span class="sd">    From https://github.com/mordred-descriptor/mordred.</span>
+
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        descs (list[str]): List of Mordred descriptor names.</span>
+<span class="sd">        version (str): version of mordred</span>
+<span class="sd">        ignore_3D (bool): ignore 3D information</span>
+<span class="sd">        config (str): path to config file if available</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">descs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ignore_3D</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the descriptor with the same arguments as you would pass</span>
+<span class="sd">        to `DescriptorsCalculator` function of Mordred, except the</span>
+<span class="sd">        `descs` argument, which can also be a `list` of mordred descriptor names instead</span>
+<span class="sd">        of a mordred descriptor module.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            descs (list[str]): List of Mordred descriptor names, a Mordred descriptor</span>
+<span class="sd">                module or `None` for all mordred descriptors</span>
+<span class="sd">            version (str): version of mordred</span>
+<span class="sd">            ignore_3D (bool): ignore 3D information</span>
+<span class="sd">            config (str): path to config file?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">descs</span><span class="p">:</span>
+            <span class="c1"># if mordred descriptor module is passed,</span>
+            <span class="c1"># convert to list of descriptor instances</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">descs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">descs</span> <span class="o">=</span> <span class="n">mordred</span><span class="o">.</span><span class="n">Calculator</span><span class="p">(</span><span class="n">descs</span><span class="p">)</span><span class="o">.</span><span class="n">descriptors</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># use all mordred descriptors if no descriptors are specified</span>
+            <span class="n">descs</span> <span class="o">=</span> <span class="n">mordred</span><span class="o">.</span><span class="n">Calculator</span><span class="p">(</span><span class="n">Mordred_descriptors</span><span class="p">)</span><span class="o">.</span><span class="n">descriptors</span>
+        <span class="c1"># init member variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignore3D</span> <span class="o">=</span> <span class="n">ignore_3D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mordred</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># convert to list of descriptor names if descriptor instances are passed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">descs</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Mordred.getDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mordred.getDescriptors">[docs]</a>
+    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mordred</span><span class="o">.</span><span class="n">pandas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iterMols</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nproc</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">)</span>  <span class="c1"># replace errors by nan values</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span>
+
+    <span class="nd">@descriptors</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the descriptors to calculate.</span>
+
+<span class="sd">        Converts a list of Mordred descriptor names to Mordred descriptor instances,</span>
+<span class="sd">        which is used to initialize a Mordred calculator with the specified descriptors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            names (list[str]): List of Mordred descriptor names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">calc</span> <span class="o">=</span> <span class="n">mordred</span><span class="o">.</span><span class="n">Calculator</span><span class="p">(</span><span class="n">Mordred_descriptors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mordred</span> <span class="o">=</span> <span class="n">mordred</span><span class="o">.</span><span class="n">Calculator</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">calc</span><span class="o">.</span><span class="n">descriptors</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="n">names</span><span class="p">],</span>
+            <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="n">ignore_3D</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ignore3D</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="n">names</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Mordred&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Mold2">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mold2">[docs]</a>
+<span class="k">class</span> <span class="nc">Mold2</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Descriptors from molecular descriptor calculation software Mold2.</span>
+
+<span class="sd">    From https://github.com/OlivierBeq/Mold2_pywrapper.</span>
+<span class="sd">    Initialize the descriptor with no arguments.</span>
+<span class="sd">    All descriptors are always calculated.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        descs: names of Mold2 descriptors to be calculated (e.g. D001)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a Mold2 descriptor calculator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            descs (list[str] | None):</span>
+<span class="sd">                names of Mold2 descriptors to be calculated (e.g. D001)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descs</span> <span class="o">=</span> <span class="n">descs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mold2</span> <span class="o">=</span> <span class="n">Mold2_calculator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_defaultDescs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mold2</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)],</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultDescs</span><span class="p">[:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_keepindices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="Mold2.getDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mold2.getDescriptors">[docs]</a>
+    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mold2</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iterMols</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># Drop columns</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">return</span> <span class="n">values</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span>
+
+    <span class="nd">@descriptors</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the descriptors to calculate.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            names (list[str] | None): list of Mold2 descriptor names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultDescs</span><span class="p">[:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_keepindices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="p">)))</span>
+            <span class="k">return</span>
+        <span class="c1"># Find descriptors not part of Mold2</span>
+        <span class="n">remainder</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_defaultDescs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remainder</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;names are not valid Mold2 descriptor names: </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">remainder</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">new_descs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">desc_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_defaultDescs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">desc_name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                    <span class="n">new_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">new_descs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_defaultDescs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="n">new_descs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_keepindices</span> <span class="o">=</span> <span class="n">new_indices</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Mold2&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="PaDEL">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.PaDEL">[docs]</a>
+<span class="k">class</span> <span class="nc">PaDEL</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Descriptors from molecular descriptor calculation software PaDEL.</span>
+
+<span class="sd">    From https://github.com/OlivierBeq/PaDEL_pywrapper.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        descriptors (list[str]): list of PaDEL descriptor names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_notJSON</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_nameMapping&quot;</span><span class="p">,</span> <span class="s2">&quot;_padel&quot;</span><span class="p">,</span> <span class="s2">&quot;_descriptors&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">DescriptorSet</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">descs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ignore_3d</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a PaDEL calculator</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            descs: list of PaDEL descriptor short names</span>
+<span class="sd">            ignore_3d (bool): skip 3D descriptor calculation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="n">n_jobs</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descs</span> <span class="o">=</span> <span class="n">descs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ignore3D</span> <span class="o">=</span> <span class="n">ignore_3d</span>
+        <span class="c1"># Initialize name mapping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initMapping</span><span class="p">()</span>
+        <span class="c1"># Initialize descriptors and calculator</span>
+        <span class="k">if</span> <span class="n">descs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">descs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_initMapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Obtain default descriptor names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nameMapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">descriptor</span> <span class="ow">in</span> <span class="n">PaDEL_descriptors</span><span class="p">:</span>
+            <span class="c1"># Skip if desc is 3D and set to be ignored</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ignore3D</span> <span class="ow">and</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">is_3D</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nameMapping</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">descriptor</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initMapping</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_keep&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="PaDEL.getDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.PaDEL.getDescriptors">[docs]</a>
+    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">mols</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterMols</span><span class="p">(</span><span class="n">mols</span><span class="p">)]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">njobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="p">)</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_keep</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">intersection</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keep</span>
+
+    <span class="nd">@descriptors</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the descriptors to calculate.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            names (list[str] | None): list of PaDEL descriptor names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># convert from name to PaDEL descriptor sub-classes</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nameMapping</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">remainder</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nameMapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remainder</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;names are not valid PaDEL descriptor names: &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">remainder</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">_nameMapping</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">})</span>
+        <span class="c1"># Instantiate calculator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDELCalculator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="p">,</span> <span class="n">ignore_3D</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ignore3D</span><span class="p">)</span>
+        <span class="c1"># Set names to keep when calculating</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_keep</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">name</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">desc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nameMapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">desc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_keep</span> <span class="o">=</span> <span class="n">names</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;PaDEL&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="ExtendedValenceSignature">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ExtendedValenceSignature">[docs]</a>
+<span class="k">class</span> <span class="nc">ExtendedValenceSignature</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;SMILES signature based on extended valence sequence from</span>
+
+<span class="sd">    The Signature Molecular Descriptor.</span>
+
+<span class="sd">    1. Using Extended Valence Sequences in QSAR and QSPR StudiesJean-Loup</span>
+<span class="sd">    Faulon, Donald P. Visco, and Ramdas S. Pophale</span>
+<span class="sd">    Journal of Chemical Information and Computer Sciences 2003 43 (3), 707-720</span>
+<span class="sd">    DOI: 10.1021/ci020345w</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a ExtendedValenceSignature calculator</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            depth: depth of the signature</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span> <span class="o">=</span> <span class="n">depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_signature</span> <span class="o">=</span> <span class="n">Signature_calculator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Flag initialization of descriptors after first calculation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors_init</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="ExtendedValenceSignature.getDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ExtendedValenceSignature.getDescriptors">[docs]</a>
+    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">mols</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterMols</span><span class="p">(</span><span class="n">mols</span><span class="p">)]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signature</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span>
+            <span class="n">mols</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_depth</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">njobs</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors_init</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors_init</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">intersection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">intersection</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span>
+
+    <span class="nd">@descriptors</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="n">names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors_init</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;ExtendedValenceSignature&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="ProteinDescriptorSet">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet">[docs]</a>
+<span class="k">class</span> <span class="nc">ProteinDescriptorSet</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for protein descriptor sets.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ProteinDescriptorSet.getProteinDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet.getProteinDescriptors">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">getProteinDescriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">acc_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">sequences</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the protein descriptors for a given target.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            acc_keys (list[str]):</span>
+<span class="sd">                target accession keys, the resulting data frame</span>
+<span class="sd">                will be indexed by these keys</span>
+<span class="sd">            sequences (dict[str, str]):</span>
+<span class="sd">                optional list of protein sequences matched to the accession keys</span>
+<span class="sd">            **kwargs:</span>
+<span class="sd">                additional data passed from `ProteinDescriptorCalculator`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">                a data frame of descriptor values of shape (acc_keys, n_descriptors),</span>
+<span class="sd">                indexed by `acc_keys`</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ProteinDescriptorSet.getDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet.getDescriptors">[docs]</a>
+    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span>
+        <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">acc_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">]))</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProteinDescriptors</span><span class="p">(</span><span class="n">acc_keys</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">:</span> <span class="n">props</span><span class="p">[</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">]})</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">requiredProps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">requiredProps</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">existing</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ProteinDescriptorSet.supportsParallel">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet.supportsParallel">[docs]</a>
+    <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ProDec">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec">[docs]</a>
+<span class="k">class</span> <span class="nc">ProDec</span><span class="p">(</span><span class="n">ProteinDescriptorSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protein descriptors from the ProDec package.</span>
+
+<span class="sd">    See https://github.com/OlivierBeq/ProDEC.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        sets (list[str]):</span>
+<span class="sd">            list of ProDec descriptor names  (see https://github.com/OlivierBeq/ProDEC)</span>
+<span class="sd">        factory (prodec.ProteinDescriptors):</span>
+<span class="sd">            factory to calculate descriptors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">msa_provider</span><span class="p">:</span> <span class="n">MSAProvider</span> <span class="o">=</span> <span class="n">ClustalMSA</span><span class="p">()</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a ProDec calculator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sets:</span>
+<span class="sd">                list of ProDec descriptor names, if `None`, all available are used</span>
+<span class="sd">                (see https://github.com/OlivierBeq/ProDEC)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">prodec</span><span class="o">.</span><span class="n">ProteinDescriptors</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">available_descriptors</span> <span class="k">if</span> <span class="n">sets</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">sets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msaProvider</span> <span class="o">=</span> <span class="n">msa_provider</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msa</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
+        <span class="c1"># Remove factory from state</span>
+        <span class="k">del</span> <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;factory&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">o_dict</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="c1"># Add factory to state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">prodec</span><span class="o">.</span><span class="n">ProteinDescriptors</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ProDec.calculateDescriptor">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec.calculateDescriptor">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">calculateDescriptor</span><span class="p">(</span>
+        <span class="n">factory</span><span class="p">:</span> <span class="n">prodec</span><span class="o">.</span><span class="n">ProteinDescriptors</span><span class="p">,</span> <span class="n">msa</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">descriptor</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate a protein descriptor for given targets</span>
+<span class="sd">        using a given multiple sequence alignment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            factory (ProteinDescriptors):</span>
+<span class="sd">                factory to create the descriptor</span>
+<span class="sd">            msa (dict):</span>
+<span class="sd">                mapping of accession keys to sequences from the multiple</span>
+<span class="sd">                sequence alignment</span>
+<span class="sd">            descriptor (str):</span>
+<span class="sd">                name of the descriptor to calculate (see</span>
+<span class="sd">                https://github.com/OlivierBeq/ProDEC)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            a data frame of descriptor values of shape (acc_keys, n_descriptors),</span>
+<span class="sd">            indexed by acc_keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get protein descriptor from ProDEC</span>
+        <span class="n">prodec_descriptor</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">get_descriptor</span><span class="p">(</span><span class="n">descriptor</span><span class="p">)</span>
+        <span class="c1"># Calculate descriptor features for aligned sequences of interest</span>
+        <span class="n">protein_features</span> <span class="o">=</span> <span class="n">prodec_descriptor</span><span class="o">.</span><span class="n">pandas_get</span><span class="p">(</span><span class="n">msa</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">ids</span><span class="o">=</span><span class="n">msa</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">protein_features</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">protein_features</span></div>
+
+
+<div class="viewcode-block" id="ProDec.getProteinDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec.getProteinDescriptors">[docs]</a>
+    <span class="k">def</span> <span class="nf">getProteinDescriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">acc_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">sequences</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the protein descriptors for a given target.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            acc_keys:</span>
+<span class="sd">                target accession keys, defines the resulting index of</span>
+<span class="sd">                the returned `pd.DataFrame`</span>
+<span class="sd">            sequences:</span>
+<span class="sd">                optional list of protein sequences matched to the accession keys</span>
+<span class="sd">            **kwargs:</span>
+<span class="sd">                any additional data passed from `ProteinDescriptorCalculator`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            a data frame of descriptor values of shape (acc_keys, n_descriptors),</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate MSA</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msaProvider</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># calculate descriptors</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">acc_keys</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">descriptor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sets</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">calculateDescriptor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">),</span>
+                <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># Keep only descriptors that were requested to keep</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+                <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="p">],</span>
+                <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span>
+
+    <span class="nd">@descriptors</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;ProDec_&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sets</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

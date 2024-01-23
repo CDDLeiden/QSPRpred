@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.data.sampling package &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.extra.data.tables package" href="qsprpred.extra.data.tables.html" />
+    <link rel="prev" title="qsprpred.extra.data.descriptors package" href="qsprpred.extra.data.descriptors.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html">qsprpred.benchmarks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="qsprpred.extra.html">qsprpred.extra package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.tasks">qsprpred.tasks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Python API</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.extra.html">qsprpred.extra package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.extra.data.html">qsprpred.extra.data package</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.data.sampling package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-extra-data-sampling-package">
+<h1>qsprpred.extra.data.sampling package<a class="headerlink" href="#qsprpred-extra-data-sampling-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.extra.data.sampling.splits">
+<span id="qsprpred-extra-data-sampling-splits-module"></span><h2>qsprpred.extra.data.sampling.splits module<a class="headerlink" href="#module-qsprpred.extra.data.sampling.splits" title="Link to this heading"></a></h2>
+<p>Different splitters to create train and tests for evalutating QSPR model performance.</p>
+<p>To add a new data splitter:
+* Add a datasplit subclass for your new splitter</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.sampling.splits.</span></span><span class="sig-name descname"><span class="pre">LeaveTargetsOut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet" title="qsprpred.extra.data.tables.pcm.PCMDataSet"><span class="pre">PCMDataSet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/splits.html#LeaveTargetsOut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit" title="qsprpred.data.sampling.splits.DataSplit"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSplit</span></code></a></p>
+<p>Creates a leave target out splitter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – the identifiers of the targets to leave out as test set</p></li>
+<li><p><strong>dataset</strong> (<em>PCMDataset</em>) – a <code class="xref any docutils literal notranslate"><span class="pre">PCMDataset</span></code> instance to split</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut.getDataSet">
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.getDataSet" title="Link to this definition"></a></dt>
+<dd><p>Get the data set attached to this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If no data set is attached to this object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut.hasDataSet">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasDataSet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.hasDataSet" title="Link to this definition"></a></dt>
+<dd><p>Indicates if this object has a data set attached to it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut.setDataSet">
+<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable" title="qsprpred.data.tables.base.MoleculeDataTable"><span class="pre">MoleculeDataTable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.setDataSet" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/splits.html#LeaveTargetsOut.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.split" title="Link to this definition"></a></dt>
+<dd><p>Split the given data into one or multiple train/test subsets.</p>
+<p>These classes handle partitioning of a feature matrix
+by returning an generator of train
+and test indices. It is compatible with the approach taken
+in the <code class="xref any docutils literal notranslate"><span class="pre">sklearn</span></code> package (see <code class="xref any docutils literal notranslate"><span class="pre">sklearn.model_selection._BaseKFold</span></code>).
+This can be used for both cross-validation or a one time train/test split.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em><em> | </em><em>pd.DataFrame</em>) – the input data matrix</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em><em> | </em><em>pd.DataFrame</em><em> | </em><em>pd.Series</em>) – the target variable(s)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an generator over the generated subsets represented as a tuple of
+(train_indices, test_indices) where the indices are the row indices of the
+input data matrix X (note that these are integer indices, rather than a
+pandas index!)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut.splitDataset">
+<span class="sig-name descname"><span class="pre">splitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.splitDataset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.sampling.splits.</span></span><span class="sig-name descname"><span class="pre">PCMSplit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">splitter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit" title="qsprpred.data.sampling.splits.DataSplit"><span class="pre">DataSplit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet" title="qsprpred.extra.data.tables.pcm.PCMDataSet"><span class="pre">PCMDataSet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/splits.html#PCMSplit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit" title="qsprpred.data.sampling.splits.DataSplit"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSplit</span></code></a></p>
+<p>Splits a dataset into train and test set such that the subsets are balanced with
+respect to each of the protein targets.</p>
+<p>This is done with <a class="reference external" href="https://github.com/sohviluukkonen/gbmt-splits">https://github.com/sohviluukkonen/gbmt-splits</a>, linear programming
+of initial clusters (random-, scaffold- or cluster-based) to get a balanced split.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet" title="qsprpred.extra.data.tables.pcm.PCMDataSet"><em>PCMDataSet</em></a>) – The dataset to split.</p></li>
+<li><p><strong>splitter</strong> (<a class="reference internal" href="qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit" title="qsprpred.data.sampling.splits.DataSplit"><em>DataSplit</em></a>) – The splitter to use on the initial clusters.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit.getDataSet">
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.getDataSet" title="Link to this definition"></a></dt>
+<dd><p>Get the data set attached to this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If no data set is attached to this object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit.hasDataSet">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasDataSet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.hasDataSet" title="Link to this definition"></a></dt>
+<dd><p>Indicates if this object has a data set attached to it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit.setDataSet">
+<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable" title="qsprpred.data.tables.base.MoleculeDataTable"><span class="pre">MoleculeDataTable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.setDataSet" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Iterable" title="(in Python v3.9)"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/splits.html#PCMSplit.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.split" title="Link to this definition"></a></dt>
+<dd><p>Split the PCM dataset into train and test set such that the subsets are balanced
+with respect to the protein targets and there is not data leakage between the
+train and test set.</p>
+<p>Converts the PCM dataset into a multi-task dataset with protein targets as
+columns and uses the given splitter to split the multi-task dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em><em> | </em><em>pd.DataFrame</em>) – the input data matrix</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em><em> | </em><em>pd.DataFrame</em><em> | </em><em>pd.Series</em>) – the target variable(s)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an generator over the generated subsets represented as a tuple of
+(train_indices, test_indices) where the indices are the row indices of the
+input data matrix X (note that these are integer indices, rather than a
+pandas index!)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit.splitDataset">
+<span class="sig-name descname"><span class="pre">splitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.splitDataset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.sampling.splits.</span></span><span class="sig-name descname"><span class="pre">TemporalPerTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firts_year_per_compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet" title="qsprpred.extra.data.tables.pcm.PCMDataSet"><span class="pre">PCMDataSet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/splits.html#TemporalPerTarget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit" title="qsprpred.data.sampling.splits.DataSplit"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSplit</span></code></a></p>
+<p>Creates a temporal split that is consistent across targets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>year_col</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the name of the column in the dataframe that
+contains the year information</p></li>
+<li><p><strong>split_years</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) – a dictionary with target keys as keys
+and split years as values</p></li>
+<li><p><strong>firts_year_per_compound</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – if True, the first year a compound appears in the dataset is used
+for all targets</p></li>
+<li><p><strong>dataset</strong> (<em>PCMDataset</em>) – a <code class="xref any docutils literal notranslate"><span class="pre">PCMDataset</span></code> instance to split</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget.getDataSet">
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.getDataSet" title="Link to this definition"></a></dt>
+<dd><p>Get the data set attached to this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If no data set is attached to this object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget.hasDataSet">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasDataSet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.hasDataSet" title="Link to this definition"></a></dt>
+<dd><p>Indicates if this object has a data set attached to it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget.setDataSet">
+<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable" title="qsprpred.data.tables.base.MoleculeDataTable"><span class="pre">MoleculeDataTable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.setDataSet" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Iterable" title="(in Python v3.9)"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/splits.html#TemporalPerTarget.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.split" title="Link to this definition"></a></dt>
+<dd><p>Split the given data into one or multiple train/test subsets.</p>
+<p>These classes handle partitioning of a feature matrix
+by returning an generator of train
+and test indices. It is compatible with the approach taken
+in the <code class="xref any docutils literal notranslate"><span class="pre">sklearn</span></code> package (see <code class="xref any docutils literal notranslate"><span class="pre">sklearn.model_selection._BaseKFold</span></code>).
+This can be used for both cross-validation or a one time train/test split.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em><em> | </em><em>pd.DataFrame</em>) – the input data matrix</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em><em> | </em><em>pd.DataFrame</em><em> | </em><em>pd.Series</em>) – the target variable(s)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an generator over the generated subsets represented as a tuple of
+(train_indices, test_indices) where the indices are the row indices of the
+input data matrix X (note that these are integer indices, rather than a
+pandas index!)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget.splitDataset">
+<span class="sig-name descname"><span class="pre">splitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.splitDataset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.extra.data.sampling.tests">
+<span id="qsprpred-extra-data-sampling-tests-module"></span><h2>qsprpred.extra.data.sampling.tests module<a class="headerlink" href="#module-qsprpred.extra.data.sampling.tests" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.sampling.tests.</span></span><span class="sig-name descname"><span class="pre">TestPCMSplitters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/tests.html#TestPCMSplitters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras" title="qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetsMixInExtras</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.addClassCleanup">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addClassCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.addClassCleanup" title="Link to this definition"></a></dt>
+<dd><p>Same as addCleanup, except the cleanup items are called even if
+setUpClass fails (unlike tearDownClass).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.addCleanup">
+<span class="sig-name descname"><span class="pre">addCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.addCleanup" title="Link to this definition"></a></dt>
+<dd><p>Add a function, with arguments, to be called when the test is
+completed. Functions added are called on a LIFO basis and are
+called after tearDown on test failure or success.</p>
+<p>Cleanup items are called even if setUp fails (unlike tearDown).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.addTypeEqualityFunc">
+<span class="sig-name descname"><span class="pre">addTypeEqualityFunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typeobj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.addTypeEqualityFunc" title="Link to this definition"></a></dt>
+<dd><p>Add a type specific assertEqual style function to compare a type.</p>
+<p>This method is for use by TestCase subclasses that need to register
+their own type equality functions to provide nicer error messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>typeobj</strong> – The data type to call this function on when both values
+are of the same type in assertEqual().</p></li>
+<li><p><strong>function</strong> – The callable taking two arguments and an optional
+msg= argument that raises self.failureException with a
+useful error message when the two arguments are not equal.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertAlmostEqual" title="Link to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is more than the given
+delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>If the two objects compare equal then they will automatically
+compare almost equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertAlmostEquals">
+<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertAlmostEquals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertCountEqual">
+<span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertCountEqual" title="Link to this definition"></a></dt>
+<dd><p>Asserts that two iterables have the same elements, the same number of
+times, without regard to order.</p>
+<blockquote>
+<div><blockquote>
+<div><dl class="simple">
+<dt>self.assertEqual(Counter(list(first)),</dt><dd><p>Counter(list(second)))</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Example:</dt><dd><ul class="simple">
+<li><p>[0, 1, 1] and [1, 0, 1] compare equal.</p></li>
+<li><p>[0, 0, 1] and [0, 1] compare unequal.</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertDictContainsSubset">
+<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertDictContainsSubset" title="Link to this definition"></a></dt>
+<dd><p>Checks whether dictionary is a superset of subset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertDictEqual">
+<span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertDictEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertEqual">
+<span class="sig-name descname"><span class="pre">assertEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertEqual" title="Link to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by the ‘==’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertEquals">
+<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertEquals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertFalse">
+<span class="sig-name descname"><span class="pre">assertFalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertFalse" title="Link to this definition"></a></dt>
+<dd><p>Check that the expression is false.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertGreater">
+<span class="sig-name descname"><span class="pre">assertGreater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertGreater" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertGreaterEqual">
+<span class="sig-name descname"><span class="pre">assertGreaterEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertGreaterEqual" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIn">
+<span class="sig-name descname"><span class="pre">assertIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIn" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIs">
+<span class="sig-name descname"><span class="pre">assertIs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIs" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIsInstance">
+<span class="sig-name descname"><span class="pre">assertIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIsInstance" title="Link to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(isinstance(obj, cls)), with a nicer
+default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIsNone">
+<span class="sig-name descname"><span class="pre">assertIsNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIsNone" title="Link to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(obj is None), with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIsNot">
+<span class="sig-name descname"><span class="pre">assertIsNot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIsNot" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is not b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIsNotNone">
+<span class="sig-name descname"><span class="pre">assertIsNotNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertIsNotNone" title="Link to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsNone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertLess">
+<span class="sig-name descname"><span class="pre">assertLess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertLess" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertLessEqual">
+<span class="sig-name descname"><span class="pre">assertLessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertLessEqual" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertListEqual">
+<span class="sig-name descname"><span class="pre">assertListEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertListEqual" title="Link to this definition"></a></dt>
+<dd><p>A list-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list1</strong> – The first list to compare.</p></li>
+<li><p><strong>list2</strong> – The second list to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertLogs">
+<span class="sig-name descname"><span class="pre">assertLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertLogs" title="Link to this definition"></a></dt>
+<dd><p>Fail unless a log message of level <em>level</em> or higher is emitted
+on <em>logger_name</em> or its children.  If omitted, <em>level</em> defaults to
+INFO and <em>logger</em> defaults to the root logger.</p>
+<p>This method must be used as a context manager, and will yield
+a recording object with two attributes: <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> and <code class="xref any docutils literal notranslate"><span class="pre">records</span></code>.
+At the end of the context manager, the <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> attribute will
+be a list of the matching formatted log messages and the
+<code class="xref any docutils literal notranslate"><span class="pre">records</span></code> attribute will be a list of the corresponding LogRecord
+objects.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertLogs</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;first message&#39;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo.bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;second message&#39;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;INFO:foo:first message&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;ERROR:foo.bar:second message&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertMultiLineEqual">
+<span class="sig-name descname"><span class="pre">assertMultiLineEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertMultiLineEqual" title="Link to this definition"></a></dt>
+<dd><p>Assert that two multi-line strings are equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNoLogs">
+<span class="sig-name descname"><span class="pre">assertNoLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNoLogs" title="Link to this definition"></a></dt>
+<dd><p>Fail unless no log messages of level <em>level</em> or higher are emitted
+on <em>logger_name</em> or its children.</p>
+<p>This method must be used as a context manager.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertNotAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotAlmostEqual" title="Link to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is less than the given delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>Objects that are equal automatically fail.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotAlmostEquals">
+<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotAlmostEquals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotEqual">
+<span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotEqual" title="Link to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by the ‘!=’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotEquals">
+<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotEquals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotIn">
+<span class="sig-name descname"><span class="pre">assertNotIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotIn" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a not in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotIsInstance">
+<span class="sig-name descname"><span class="pre">assertNotIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotIsInstance" title="Link to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsInstance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotRegex">
+<span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotRegex" title="Link to this definition"></a></dt>
+<dd><p>Fail the test if the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotRegexpMatches">
+<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertNotRegexpMatches" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRaises">
+<span class="sig-name descname"><span class="pre">assertRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRaises" title="Link to this definition"></a></dt>
+<dd><p>Fail unless an exception of class expected_exception is raised
+by the callable when invoked with specified positional and
+keyword arguments. If a different type of exception is
+raised, it will not be caught, and the test case will be
+deemed to have suffered an error, exactly as for an
+unexpected exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertRaises
+is used as a context object.</p>
+<p>The context manager keeps a reference to the exception as
+the ‘exception’ attribute. This allows you to inspect the
+exception after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_exception</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">exception</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_exception</span><span class="o">.</span><span class="n">error_code</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRaisesRegex">
+<span class="sig-name descname"><span class="pre">assertRaisesRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRaisesRegex" title="Link to this definition"></a></dt>
+<dd><p>Asserts that the message in a raised exception matches a regex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_exception</strong> – Exception class expected to be raised.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertRaisesRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRaisesRegexp">
+<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRaisesRegexp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRegex">
+<span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRegex" title="Link to this definition"></a></dt>
+<dd><p>Fail the test unless the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRegexpMatches">
+<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertRegexpMatches" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertSequenceEqual">
+<span class="sig-name descname"><span class="pre">assertSequenceEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertSequenceEqual" title="Link to this definition"></a></dt>
+<dd><p>An equality assertion for ordered sequences (like lists and tuples).</p>
+<p>For the purposes of this function, a valid ordered sequence type is one
+which can be indexed, has a length, and has an equality operator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq1</strong> – The first sequence to compare.</p></li>
+<li><p><strong>seq2</strong> – The second sequence to compare.</p></li>
+<li><p><strong>seq_type</strong> – The expected datatype of the sequences, or None if no
+datatype should be enforced.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertSetEqual">
+<span class="sig-name descname"><span class="pre">assertSetEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertSetEqual" title="Link to this definition"></a></dt>
+<dd><p>A set-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>set1</strong> – The first set to compare.</p></li>
+<li><p><strong>set2</strong> – The second set to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+<p>assertSetEqual uses ducktyping to support different types of sets, and
+is optimized for sets specifically (parameters must support a
+difference method).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertTrue">
+<span class="sig-name descname"><span class="pre">assertTrue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertTrue" title="Link to this definition"></a></dt>
+<dd><p>Check that the expression is true.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertTupleEqual">
+<span class="sig-name descname"><span class="pre">assertTupleEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuple1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuple2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertTupleEqual" title="Link to this definition"></a></dt>
+<dd><p>A tuple-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tuple1</strong> – The first tuple to compare.</p></li>
+<li><p><strong>tuple2</strong> – The second tuple to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertWarns">
+<span class="sig-name descname"><span class="pre">assertWarns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertWarns" title="Link to this definition"></a></dt>
+<dd><p>Fail unless a warning of class warnClass is triggered
+by the callable when invoked with specified positional and
+keyword arguments.  If a different type of warning is
+triggered, it will not be handled: depending on the other
+warning filtering rules in effect, it might be silenced, printed
+out, or raised as an exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertWarns
+is used as a context object.</p>
+<p>The context manager keeps a reference to the first matching
+warning as the ‘warning’ attribute; similarly, the ‘filename’
+and ‘lineno’ attributes give you information about the line
+of Python code from which the warning was triggered.
+This allows you to inspect the warning after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_warning</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">warning</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_warning</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">,</span> <span class="mi">147</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertWarnsRegex">
+<span class="sig-name descname"><span class="pre">assertWarnsRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assertWarnsRegex" title="Link to this definition"></a></dt>
+<dd><p>Asserts that the message in a triggered warning matches a regexp.
+Basic functioning is similar to assertWarns() with the addition
+that only warnings whose messages also match the regular expression
+are considered successful matches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_warning</strong> – Warning class expected to be triggered.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertWarnsRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.assert_">
+<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.assert_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.clearGenerated">
+<span class="sig-name descname"><span class="pre">clearGenerated</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.clearGenerated" title="Link to this definition"></a></dt>
+<dd><p>Remove the directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.countTestCases">
+<span class="sig-name descname"><span class="pre">countTestCases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.countTestCases" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.createLargeMultitaskDataSet">
+<span class="sig-name descname"><span class="pre">createLargeMultitaskDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_multi_test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'HBD',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.MULTICLASS,</span> <span class="pre">'th':</span> <span class="pre">[-1,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">100]},</span> <span class="pre">{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.createLargeMultitaskDataSet" title="Link to this definition"></a></dt>
+<dd><p>Create a large dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.createLargeTestDataSet">
+<span class="sig-name descname"><span class="pre">createLargeTestDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_test_large'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.createLargeTestDataSet" title="Link to this definition"></a></dt>
+<dd><p>Create a large dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.createPCMDataSet">
+<span class="sig-name descname"><span class="pre">createPCMDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'QSPRDataset_test_pcm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><span class="pre">TargetProperty</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'pchembl_value_Median',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protein_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'accession'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.createPCMDataSet" title="Link to this definition"></a></dt>
+<dd><p>Create a small dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – name of the dataset. Defaults to “QSPRDataset_test”.</p></li>
+<li><p><strong>target_props</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>]</em><em>, </em><em>optional</em>) – target properties.</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em> | </em><em>None</em><em>, </em><em>optional</em>) – preparation settings. Defaults to None.</p></li>
+<li><p><strong>protein_col</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – name of the column with protein accessions. Defaults to “accession”.</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – random seed to use in the dataset. Defaults to <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.createSmallTestDataSet">
+<span class="sig-name descname"><span class="pre">createSmallTestDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_test_small'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.createSmallTestDataSet" title="Link to this definition"></a></dt>
+<dd><p>Create a small dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.createTestDataSetFromFrame">
+<span class="sig-name descname"><span class="pre">createTestDataSetFromFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.createTestDataSetFromFrame" title="Link to this definition"></a></dt>
+<dd><p>Create a dataset for testing purposes from the given data frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – data frame containing the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.debug" title="Link to this definition"></a></dt>
+<dd><p>Run the test without collecting errors in a TestResult</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.defaultTestResult">
+<span class="sig-name descname"><span class="pre">defaultTestResult</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.defaultTestResult" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.doClassCleanups">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">doClassCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.doClassCleanups" title="Link to this definition"></a></dt>
+<dd><p>Execute all class cleanup functions. Normally called for you after
+tearDownClass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.doCleanups">
+<span class="sig-name descname"><span class="pre">doCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.doCleanups" title="Link to this definition"></a></dt>
+<dd><p>Execute all cleanup functions. Normally called for you after
+tearDown.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.fail">
+<span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.fail" title="Link to this definition"></a></dt>
+<dd><p>Fail immediately, with the given message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.failIf">
+<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.failIf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.failIfAlmostEqual">
+<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.failIfAlmostEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.failIfEqual">
+<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.failIfEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.failUnless">
+<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.failUnless" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.failUnlessAlmostEqual">
+<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.failUnlessAlmostEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.failUnlessEqual">
+<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.failUnlessEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.failUnlessRaises">
+<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.failUnlessRaises" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.failureException">
+<span class="sig-name descname"><span class="pre">failureException</span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.failureException" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#AssertionError" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AssertionError</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getAllDescriptors">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllDescriptors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DescriptorSet" title="qsprpred.data.descriptors.sets.DescriptorSet"><span class="pre">DescriptorSet</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getAllDescriptors" title="Link to this definition"></a></dt>
+<dd><p>Return a list of all available molecule descriptor sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of <code class="xref any docutils literal notranslate"><span class="pre">MoleculeDescriptorSet</span></code> objects</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getAllProteinDescriptors">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllProteinDescriptors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet" title="qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet"><span class="pre">ProteinDescriptorSet</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getAllProteinDescriptors" title="Link to this definition"></a></dt>
+<dd><p>Return a list of all available protein descriptor sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of <a class="reference internal" href="qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet" title="qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ProteinDescriptorSet</span></code></a> objects</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getBigDF">
+<span class="sig-name descname"><span class="pre">getBigDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getBigDF" title="Link to this definition"></a></dt>
+<dd><p>Get a large data frame for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> containing the dataset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getDataPrepGrid">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getDataPrepGrid" title="Link to this definition"></a></dt>
+<dd><p>Return a list of many possible combinations of descriptor calculators,
+splits, feature standardizers, feature filters and data filters. Again, this is
+not exhaustive, but should cover a lot of cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a generator that yields tuples of all possible combinations as stated
+above, each tuple is defined as: (descriptor_calculator, split,
+feature_standardizer, feature_filters, data_filters)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>grid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getDefaultCalculatorCombo">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
+<dd><p>Return the default descriptor calculator combo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getDefaultPrep">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getDefaultPrep" title="Link to this definition"></a></dt>
+<dd><p>Return a dictionary with default preparation settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getMSAProvider">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getMSAProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getMSAProvider" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getPCMDF">
+<span class="sig-name descname"><span class="pre">getPCMDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getPCMDF" title="Link to this definition"></a></dt>
+<dd><p>Return a test dataframe with PCM data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dataframe with PCM data</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getPCMSeqProvider">
+<span class="sig-name descname"><span class="pre">getPCMSeqProvider</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Callable" title="(in Python v3.9)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getPCMSeqProvider" title="Link to this definition"></a></dt>
+<dd><p>Return a function that provides sequences for given accessions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function that provides sequences for given accessions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Callable[[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]], <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>], <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getPCMTargetsDF">
+<span class="sig-name descname"><span class="pre">getPCMTargetsDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getPCMTargetsDF" title="Link to this definition"></a></dt>
+<dd><p>Return a test dataframe with PCM targets and their sequences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dataframe with PCM targets and their sequences</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getPrepCombos">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getPrepCombos" title="Link to this definition"></a></dt>
+<dd><p>Return a list of all possible preparation combinations as generated by
+<a class="reference internal" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getDataPrepGrid" title="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getDataPrepGrid"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getDataPrepGrid</span></code></a> as well as their names. The generated list can be used
+to parameterize tests with the given named combinations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id1"><span class="problematic" id="id2">`</span></a>list`s of all possible combinations of preparation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getSmallDF">
+<span class="sig-name descname"><span class="pre">getSmallDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getSmallDF" title="Link to this definition"></a></dt>
+<dd><p>Get a small data frame for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> containing the dataset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.longMessage">
+<span class="sig-name descname"><span class="pre">longMessage</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.longMessage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.maxDiff">
+<span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.maxDiff" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/tests.html#TestPCMSplitters.setUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.setUp" title="Link to this definition"></a></dt>
+<dd><p>Hook method for setting up the test fixture before exercising it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.setUpClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.setUpClass" title="Link to this definition"></a></dt>
+<dd><p>Hook method for setting up class fixture before running tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.setUpPaths">
+<span class="sig-name descname"><span class="pre">setUpPaths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.setUpPaths" title="Link to this definition"></a></dt>
+<dd><p>Create the directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.shortDescription">
+<span class="sig-name descname"><span class="pre">shortDescription</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.shortDescription" title="Link to this definition"></a></dt>
+<dd><p>Returns a one-line description of the test, or None if no
+description has been provided.</p>
+<p>The default implementation of this method returns the first line of
+the specified test method’s docstring.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.skipTest">
+<span class="sig-name descname"><span class="pre">skipTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reason</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.skipTest" title="Link to this definition"></a></dt>
+<dd><p>Skip this test.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.subTest">
+<span class="sig-name descname"><span class="pre">subTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.subTest" title="Link to this definition"></a></dt>
+<dd><p>Return a context manager that will return the enclosed block
+of code in a subtest identified by the optional message and
+keyword parameters.  A failure in the subtest marks the test
+case as failed but resumes execution at the end of the enclosed
+block, allowing further test code to be executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.tearDown">
+<span class="sig-name descname"><span class="pre">tearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.tearDown" title="Link to this definition"></a></dt>
+<dd><p>Remove all files and directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.tearDownClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.tearDownClass" title="Link to this definition"></a></dt>
+<dd><p>Hook method for deconstructing the class fixture after running all tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.testLeaveTargetOut">
+<span class="sig-name descname"><span class="pre">testLeaveTargetOut</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/tests.html#TestPCMSplitters.testLeaveTargetOut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testLeaveTargetOut" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplit">
+<span class="sig-name descname"><span class="pre">testPCMSplit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplitRandomShuffle">
+<span class="sig-name descname"><span class="pre">testPCMSplitRandomShuffle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/tests.html#TestPCMSplitters.testPCMSplitRandomShuffle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplitRandomShuffle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplit_0">
+<span class="sig-name descname"><span class="pre">testPCMSplit_0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplit_0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplit_1">
+<span class="sig-name descname"><span class="pre">testPCMSplit_1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplit_1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplit_2">
+<span class="sig-name descname"><span class="pre">testPCMSplit_2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplit_2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPerTargetTemporal">
+<span class="sig-name descname"><span class="pre">testPerTargetTemporal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/sampling/tests.html#TestPCMSplitters.testPerTargetTemporal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPerTargetTemporal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.validate_split">
+<span class="sig-name descname"><span class="pre">validate_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.validate_split" title="Link to this definition"></a></dt>
+<dd><p>Check if the split has the data it should have after splitting.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.extra.data.sampling">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.extra.data.sampling" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.extra.data.descriptors.html" class="btn btn-neutral float-left" title="qsprpred.extra.data.descriptors package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.extra.data.tables.html" class="btn btn-neutral float-right" title="qsprpred.extra.data.tables package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

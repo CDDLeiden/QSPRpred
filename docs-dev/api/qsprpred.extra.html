@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra package &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.extra.data package" href="qsprpred.extra.data.html" />
+    <link rel="prev" title="qsprpred.data.tables package" href="qsprpred.data.tables.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html">qsprpred.benchmarks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">qsprpred.extra package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.tasks">qsprpred.tasks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Python API</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-extra-package">
+<h1>qsprpred.extra package<a class="headerlink" href="#qsprpred-extra-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.extra.data.html">qsprpred.extra.data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.descriptors.html">qsprpred.extra.data.descriptors package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.descriptors.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.descriptors.html#module-qsprpred.extra.data.descriptors.fingerprints">qsprpred.extra.data.descriptors.fingerprints module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.descriptors.html#module-qsprpred.extra.data.descriptors.sets">qsprpred.extra.data.descriptors.sets module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.descriptors.html#module-qsprpred.extra.data.descriptors.tests">qsprpred.extra.data.descriptors.tests module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.descriptors.html#module-qsprpred.extra.data.descriptors">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.sampling.html">qsprpred.extra.data.sampling package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.sampling.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.sampling.html#module-qsprpred.extra.data.sampling.splits">qsprpred.extra.data.sampling.splits module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.sampling.html#module-qsprpred.extra.data.sampling.tests">qsprpred.extra.data.sampling.tests module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.sampling.html#module-qsprpred.extra.data.sampling">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.tables.html">qsprpred.extra.data.tables package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#module-qsprpred.extra.data.tables.pcm">qsprpred.extra.data.tables.pcm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#module-qsprpred.extra.data.tables.tests">qsprpred.extra.data.tables.tests module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#module-qsprpred.extra.data.tables">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.html">qsprpred.extra.data.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.html#module-qsprpred.extra.data.utils.msa_calculator">qsprpred.extra.data.utils.msa_calculator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.html#module-qsprpred.extra.data.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.html#module-qsprpred.extra.data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.extra.gpu.html">qsprpred.extra.gpu package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.gpu.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.gpu.models.html">qsprpred.extra.gpu.models package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.chemprop">qsprpred.extra.gpu.models.chemprop module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.dnn">qsprpred.extra.gpu.models.dnn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.neural_network">qsprpred.extra.gpu.models.neural_network module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#qsprpred-extra-gpu-models-pyboost-module">qsprpred.extra.gpu.models.pyboost module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.tests">qsprpred.extra.gpu.models.tests module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.gpu.html#module-qsprpred.extra.gpu">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.extra.models.html">qsprpred.extra.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.models.html#module-qsprpred.extra.models.pcm">qsprpred.extra.models.pcm module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel"><code class="docutils literal notranslate"><span class="pre">PCMModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.checkForData"><code class="docutils literal notranslate"><span class="pre">PCMModel.checkForData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.classPath"><code class="docutils literal notranslate"><span class="pre">PCMModel.classPath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.cleanFiles"><code class="docutils literal notranslate"><span class="pre">PCMModel.cleanFiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.convertToNumpy"><code class="docutils literal notranslate"><span class="pre">PCMModel.convertToNumpy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.createPredictionDatasetFromMols"><code class="docutils literal notranslate"><span class="pre">PCMModel.createPredictionDatasetFromMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.fit"><code class="docutils literal notranslate"><span class="pre">PCMModel.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.fitAttached"><code class="docutils literal notranslate"><span class="pre">PCMModel.fitAttached()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.fromFile"><code class="docutils literal notranslate"><span class="pre">PCMModel.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.fromJSON"><code class="docutils literal notranslate"><span class="pre">PCMModel.fromJSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.getParameters"><code class="docutils literal notranslate"><span class="pre">PCMModel.getParameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.handleInvalidsInPredictions"><code class="docutils literal notranslate"><span class="pre">PCMModel.handleInvalidsInPredictions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.initFromData"><code class="docutils literal notranslate"><span class="pre">PCMModel.initFromData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.initRandomState"><code class="docutils literal notranslate"><span class="pre">PCMModel.initRandomState()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.isMultiTask"><code class="docutils literal notranslate"><span class="pre">PCMModel.isMultiTask</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.loadEstimator"><code class="docutils literal notranslate"><span class="pre">PCMModel.loadEstimator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.loadEstimatorFromFile"><code class="docutils literal notranslate"><span class="pre">PCMModel.loadEstimatorFromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.loadParamsGrid"><code class="docutils literal notranslate"><span class="pre">PCMModel.loadParamsGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.metaFile"><code class="docutils literal notranslate"><span class="pre">PCMModel.metaFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.optimalEpochs"><code class="docutils literal notranslate"><span class="pre">PCMModel.optimalEpochs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.outDir"><code class="docutils literal notranslate"><span class="pre">PCMModel.outDir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.outPrefix"><code class="docutils literal notranslate"><span class="pre">PCMModel.outPrefix</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.predict"><code class="docutils literal notranslate"><span class="pre">PCMModel.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.predictDataset"><code class="docutils literal notranslate"><span class="pre">PCMModel.predictDataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.predictMols"><code class="docutils literal notranslate"><span class="pre">PCMModel.predictMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.predictProba"><code class="docutils literal notranslate"><span class="pre">PCMModel.predictProba()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.save"><code class="docutils literal notranslate"><span class="pre">PCMModel.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.saveEstimator"><code class="docutils literal notranslate"><span class="pre">PCMModel.saveEstimator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.setParams"><code class="docutils literal notranslate"><span class="pre">PCMModel.setParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.supportsEarlyStopping"><code class="docutils literal notranslate"><span class="pre">PCMModel.supportsEarlyStopping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.task"><code class="docutils literal notranslate"><span class="pre">PCMModel.task</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.toFile"><code class="docutils literal notranslate"><span class="pre">PCMModel.toFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel.toJSON"><code class="docutils literal notranslate"><span class="pre">PCMModel.toJSON()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.checkForData"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.checkForData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.classPath"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.classPath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.cleanFiles"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.cleanFiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.convertToNumpy"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.convertToNumpy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.createPredictionDatasetFromMols"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.createPredictionDatasetFromMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.fit"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.fitAttached"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.fitAttached()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.fromFile"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.fromJSON"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.fromJSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.getParameters"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.getParameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.handleInvalidsInPredictions"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.handleInvalidsInPredictions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.initFromData"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.initFromData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.initRandomState"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.initRandomState()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.isMultiTask"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.isMultiTask</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.loadEstimator"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.loadEstimator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.loadEstimatorFromFile"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.loadEstimatorFromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.loadParamsGrid"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.loadParamsGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.metaFile"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.metaFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.optimalEpochs"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.optimalEpochs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.outDir"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.outDir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.outPrefix"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.outPrefix</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.predict"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.predictDataset"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.predictDataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.predictMols"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.predictMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.predictProba"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.predictProba()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.save"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.saveEstimator"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.saveEstimator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.setParams"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.setParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.supportsEarlyStopping"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.supportsEarlyStopping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.task"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.task</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.toFile"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.toFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.pcm.SklearnPCMModel.toJSON"><code class="docutils literal notranslate"><span class="pre">SklearnPCMModel.toJSON()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.models.html#module-qsprpred.extra.models.tests">qsprpred.extra.models.tests module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.clearGenerated"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.clearGenerated()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.createLargeMultitaskDataSet"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.createLargeMultitaskDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.createLargeTestDataSet"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.createLargeTestDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.createPCMDataSet"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.createPCMDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.createSmallTestDataSet"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.createSmallTestDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.createTestDataSetFromFrame"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.createTestDataSetFromFrame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getAllDescriptors"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getAllDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getAllProteinDescriptors"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getAllProteinDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getBigDF"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getBigDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getDataPrepGrid"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getDataPrepGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getDefaultCalculatorCombo"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getDefaultCalculatorCombo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getDefaultPrep"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getDefaultPrep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getMSAProvider"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getMSAProvider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getPCMDF"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getPCMDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getPCMSeqProvider"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getPCMSeqProvider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getPCMTargetsDF"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getPCMTargetsDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getPrepCombos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getSmallDF"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.setUpPaths"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.setUpPaths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.tearDown"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.tearDown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.validate_split"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.validate_split()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM"><code class="docutils literal notranslate"><span class="pre">TestPCM</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.addClassCleanup"><code class="docutils literal notranslate"><span class="pre">TestPCM.addClassCleanup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.addCleanup"><code class="docutils literal notranslate"><span class="pre">TestPCM.addCleanup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.addTypeEqualityFunc"><code class="docutils literal notranslate"><span class="pre">TestPCM.addTypeEqualityFunc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertAlmostEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertAlmostEquals"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertAlmostEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertCountEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertCountEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertDictContainsSubset"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertDictContainsSubset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertDictEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertDictEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertEquals"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertFalse"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertFalse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertGreater"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertGreater()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertGreaterEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertGreaterEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertIn"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertIn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertIs"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertIs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertIsInstance"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertIsInstance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertIsNone"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertIsNone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertIsNot"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertIsNot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertIsNotNone"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertIsNotNone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertLess"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertLess()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertLessEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertLessEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertListEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertListEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertLogs"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertLogs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertMultiLineEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertMultiLineEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertNoLogs"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertNoLogs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertNotAlmostEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertNotAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertNotAlmostEquals"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertNotAlmostEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertNotEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertNotEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertNotEquals"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertNotEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertNotIn"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertNotIn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertNotIsInstance"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertNotIsInstance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertNotRegex"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertNotRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertNotRegexpMatches"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertNotRegexpMatches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertRaises"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertRaises()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertRaisesRegex"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertRaisesRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertRaisesRegexp"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertRaisesRegexp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertRegex"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertRegexpMatches"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertRegexpMatches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertSequenceEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertSequenceEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertSetEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertSetEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertTrue"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertTrue()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertTupleEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertTupleEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertWarns"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertWarns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assertWarnsRegex"><code class="docutils literal notranslate"><span class="pre">TestPCM.assertWarnsRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.assert_"><code class="docutils literal notranslate"><span class="pre">TestPCM.assert_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.clearGenerated"><code class="docutils literal notranslate"><span class="pre">TestPCM.clearGenerated()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.countTestCases"><code class="docutils literal notranslate"><span class="pre">TestPCM.countTestCases()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.createCorrelationSummary"><code class="docutils literal notranslate"><span class="pre">TestPCM.createCorrelationSummary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.createLargeMultitaskDataSet"><code class="docutils literal notranslate"><span class="pre">TestPCM.createLargeMultitaskDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.createLargeTestDataSet"><code class="docutils literal notranslate"><span class="pre">TestPCM.createLargeTestDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.createMetricsSummary"><code class="docutils literal notranslate"><span class="pre">TestPCM.createMetricsSummary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.createPCMDataSet"><code class="docutils literal notranslate"><span class="pre">TestPCM.createPCMDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.createSmallTestDataSet"><code class="docutils literal notranslate"><span class="pre">TestPCM.createSmallTestDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.createTestDataSetFromFrame"><code class="docutils literal notranslate"><span class="pre">TestPCM.createTestDataSetFromFrame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.debug"><code class="docutils literal notranslate"><span class="pre">TestPCM.debug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.defaultTestResult"><code class="docutils literal notranslate"><span class="pre">TestPCM.defaultTestResult()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.doClassCleanups"><code class="docutils literal notranslate"><span class="pre">TestPCM.doClassCleanups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.doCleanups"><code class="docutils literal notranslate"><span class="pre">TestPCM.doCleanups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.fail"><code class="docutils literal notranslate"><span class="pre">TestPCM.fail()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.failIf"><code class="docutils literal notranslate"><span class="pre">TestPCM.failIf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.failIfAlmostEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.failIfAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.failIfEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.failIfEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.failUnless"><code class="docutils literal notranslate"><span class="pre">TestPCM.failUnless()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.failUnlessAlmostEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.failUnlessAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.failUnlessEqual"><code class="docutils literal notranslate"><span class="pre">TestPCM.failUnlessEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.failUnlessRaises"><code class="docutils literal notranslate"><span class="pre">TestPCM.failUnlessRaises()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.failureException"><code class="docutils literal notranslate"><span class="pre">TestPCM.failureException</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.fitTest"><code class="docutils literal notranslate"><span class="pre">TestPCM.fitTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getAllDescriptors"><code class="docutils literal notranslate"><span class="pre">TestPCM.getAllDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getAllProteinDescriptors"><code class="docutils literal notranslate"><span class="pre">TestPCM.getAllProteinDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getBigDF"><code class="docutils literal notranslate"><span class="pre">TestPCM.getBigDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getDataPrepGrid"><code class="docutils literal notranslate"><span class="pre">TestPCM.getDataPrepGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getDefaultCalculatorCombo"><code class="docutils literal notranslate"><span class="pre">TestPCM.getDefaultCalculatorCombo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getDefaultPrep"><code class="docutils literal notranslate"><span class="pre">TestPCM.getDefaultPrep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getMSAProvider"><code class="docutils literal notranslate"><span class="pre">TestPCM.getMSAProvider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getModel"><code class="docutils literal notranslate"><span class="pre">TestPCM.getModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getPCMDF"><code class="docutils literal notranslate"><span class="pre">TestPCM.getPCMDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getPCMSeqProvider"><code class="docutils literal notranslate"><span class="pre">TestPCM.getPCMSeqProvider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getPCMTargetsDF"><code class="docutils literal notranslate"><span class="pre">TestPCM.getPCMTargetsDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getParamGrid"><code class="docutils literal notranslate"><span class="pre">TestPCM.getParamGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">TestPCM.getPrepCombos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getSmallDF"><code class="docutils literal notranslate"><span class="pre">TestPCM.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.gridFile"><code class="docutils literal notranslate"><span class="pre">TestPCM.gridFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.id"><code class="docutils literal notranslate"><span class="pre">TestPCM.id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.longMessage"><code class="docutils literal notranslate"><span class="pre">TestPCM.longMessage</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.maxDiff"><code class="docutils literal notranslate"><span class="pre">TestPCM.maxDiff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.predictorTest"><code class="docutils literal notranslate"><span class="pre">TestPCM.predictorTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.run"><code class="docutils literal notranslate"><span class="pre">TestPCM.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.setUp"><code class="docutils literal notranslate"><span class="pre">TestPCM.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.setUpClass"><code class="docutils literal notranslate"><span class="pre">TestPCM.setUpClass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.setUpPaths"><code class="docutils literal notranslate"><span class="pre">TestPCM.setUpPaths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.shortDescription"><code class="docutils literal notranslate"><span class="pre">TestPCM.shortDescription()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.skipTest"><code class="docutils literal notranslate"><span class="pre">TestPCM.skipTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.subTest"><code class="docutils literal notranslate"><span class="pre">TestPCM.subTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.tearDown"><code class="docutils literal notranslate"><span class="pre">TestPCM.tearDown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.tearDownClass"><code class="docutils literal notranslate"><span class="pre">TestPCM.tearDownClass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.testRegressionBasicFitPCM"><code class="docutils literal notranslate"><span class="pre">TestPCM.testRegressionBasicFitPCM</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.testRegressionBasicFitPCM_0_XGBR"><code class="docutils literal notranslate"><span class="pre">TestPCM.testRegressionBasicFitPCM_0_XGBR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.testRegressionBasicFitPCM_1_XGBR"><code class="docutils literal notranslate"><span class="pre">TestPCM.testRegressionBasicFitPCM_1_XGBR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.testRegressionBasicFitPCM_2_XGBR"><code class="docutils literal notranslate"><span class="pre">TestPCM.testRegressionBasicFitPCM_2_XGBR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.testRegressionBasicFitPCM_3_PLSR"><code class="docutils literal notranslate"><span class="pre">TestPCM.testRegressionBasicFitPCM_3_PLSR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.testRegressionBasicFitPCM_4_XGBC"><code class="docutils literal notranslate"><span class="pre">TestPCM.testRegressionBasicFitPCM_4_XGBC()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.testRegressionBasicFitPCM_5_XGBC"><code class="docutils literal notranslate"><span class="pre">TestPCM.testRegressionBasicFitPCM_5_XGBC()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.testRegressionBasicFitPCM_6_XGBC"><code class="docutils literal notranslate"><span class="pre">TestPCM.testRegressionBasicFitPCM_6_XGBC()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.validate_split"><code class="docutils literal notranslate"><span class="pre">TestPCM.validate_split()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.models.html#module-qsprpred.extra.models">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-qsprpred.extra">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.extra" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.data.tables.html" class="btn btn-neutral float-left" title="qsprpred.data.tables package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.extra.data.html" class="btn btn-neutral float-right" title="qsprpred.extra.data package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

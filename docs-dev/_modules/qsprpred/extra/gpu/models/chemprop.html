@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.gpu.models.chemprop &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.gpu.models.chemprop</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.extra.gpu.models.chemprop</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;QSPRPpred wrapper for chemprop models.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">chemprop</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">ShuffleSplit</span>
+<span class="kn">from</span> <span class="nn">tensorboardX</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
+<span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">ExponentialLR</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">trange</span>
+
+<span class="kn">from</span> <span class="nn">qsprpred.data.sampling.splits</span> <span class="kn">import</span> <span class="n">DataSplit</span>
+<span class="kn">from</span> <span class="nn">qsprpred.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
+<span class="kn">from</span> <span class="nn">....data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">....logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">....models.early_stopping</span> <span class="kn">import</span> <span class="n">EarlyStoppingMode</span><span class="p">,</span> <span class="n">early_stopping</span>
+<span class="kn">from</span> <span class="nn">....models.models</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">from</span> <span class="nn">....models.monitors</span> <span class="kn">import</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="n">FitMonitor</span>
+
+
+<div class="viewcode-block" id="ChempropMoleculeModel">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropMoleculeModel">[docs]</a>
+<span class="k">class</span> <span class="nc">ChempropMoleculeModel</span><span class="p">(</span><span class="n">chemprop</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">MoleculeModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper for chemprop.models.MoleculeModel.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        args (chemprop.args.TrainArgs): arguments for training the model,</span>
+<span class="sd">        scaler (chemprop.data.scaler.StandardScaler):</span>
+<span class="sd">            scaler for scaling the targets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">:</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">TrainArgs</span><span class="p">,</span>
+        <span class="n">scaler</span><span class="p">:</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">StandardScaler</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a MoleculeModel instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            args (chemprop.args.TrainArgs): arguments for training the model,</span>
+<span class="sd">            scaler (chemprop.data.scaler.StandardScaler):</span>
+<span class="sd">                scaler for scaling the targets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">scaler</span>
+
+<div class="viewcode-block" id="ChempropMoleculeModel.cast">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropMoleculeModel.cast">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">cast</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">MoleculeModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ChempropMoleculeModel&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cast a chemprop.models.MoleculeModel instance to a MoleculeModel instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj (chemprop.models.MoleculeModel): instance to cast</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            MoleculeModel: casted MoleculeModel instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">obj</span><span class="p">,</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">MoleculeModel</span>
+        <span class="p">),</span> <span class="s2">&quot;obj is not a chemprop.models.MoleculeModel instance.&quot;</span>
+        <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+<div class="viewcode-block" id="ChempropMoleculeModel.getTrainArgs">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropMoleculeModel.getTrainArgs">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getTrainArgs</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">ModelTasks</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">TrainArgs</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a chemprop.args.TrainArgs instance from a dictionary.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            args (dict): dictionary of arguments</span>
+<span class="sd">            task (ModelTasks): task type</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            chemprop.args.TrainArgs: arguments for training the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># chemprop TrainArgs requires a dictionary with a &quot;data_path&quot; key</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
+
+        <span class="c1"># set dataset type</span>
+        <span class="k">if</span> <span class="n">task</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">]:</span>
+            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;dataset_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;regression&quot;</span>
+        <span class="k">elif</span> <span class="n">task</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">]:</span>
+            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;dataset_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;classification&quot;</span>
+        <span class="k">elif</span> <span class="n">task</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">]:</span>
+            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;dataset_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;multiclass&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2"> not supported.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># create TrainArgs instance from dictionary</span>
+        <span class="n">train_args</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">TrainArgs</span><span class="p">()</span>
+        <span class="n">train_args</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">skip_unsettable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">train_args</span><span class="o">.</span><span class="n">process_args</span><span class="p">()</span>
+        <span class="n">train_args</span><span class="o">.</span><span class="n">spectra_phase_mask</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># always disable spectra phase mask</span>
+        <span class="k">return</span> <span class="n">train_args</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ChempropModel">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel">[docs]</a>
+<span class="k">class</span> <span class="nc">ChempropModel</span><span class="p">(</span><span class="n">QSPRModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;QSPRpred implementation of Chemprop model.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name (str): name of the model</span>
+<span class="sd">        data (QSPRDataset): data set used to train the model</span>
+<span class="sd">        alg (Type): estimator class</span>
+<span class="sd">        parameters (dict): dictionary of algorithm specific parameters</span>
+<span class="sd">        estimator (Any):</span>
+<span class="sd">            the underlying estimator instance of the type specified in `QSPRModel.alg`,</span>
+<span class="sd">            if `QSPRModel.fit` or optimization was performed</span>
+<span class="sd">        featureCalculators (MoleculeDescriptorsCalculator):</span>
+<span class="sd">            feature calculator instance taken from the data set or</span>
+<span class="sd">            deserialized from file if the model is loaded without data</span>
+<span class="sd">        featureStandardizer (SKLearnStandardizer):</span>
+<span class="sd">            feature standardizer instance taken from the data set</span>
+<span class="sd">            or deserialized from file if the model is loaded without data</span>
+<span class="sd">        baseDir (str):</span>
+<span class="sd">            base directory of the model,</span>
+<span class="sd">            the model files are stored in a subdirectory `{baseDir}/{outDir}/`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_notJSON</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">QSPRModel</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">,</span> <span class="s2">&quot;chempropLogger&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">quiet_logger</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a Chemprop instance.</span>
+
+<span class="sd">        If the model is loaded from file, the data set is not required.</span>
+<span class="sd">        Note that the data set is required for fitting and optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base_dir (str):</span>
+<span class="sd">                base directory of the model, the model files are stored in a</span>
+<span class="sd">                subdirectory `{baseDir}/{outDir}/`</span>
+<span class="sd">            data (QSPRDataset): data set used to train the model</span>
+<span class="sd">            name (str): name of the model</span>
+<span class="sd">            parameters (dict): dictionary of algorithm specific parameters</span>
+<span class="sd">            autoload (bool):</span>
+<span class="sd">                if `True`, the estimator is loaded from the serialized file</span>
+<span class="sd">                if it exists, otherwise a new instance of alg is created</span>
+<span class="sd">            quiet_logger (bool):</span>
+<span class="sd">                if `True`, the chemprop logger is set to quiet mode (no debug messages)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">alg</span> <span class="o">=</span> <span class="n">ChempropMoleculeModel</span>  <span class="c1"># wrapper for chemprop.models.MoleculeModel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quietLogger</span> <span class="o">=</span> <span class="n">quiet_logger</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">autoload</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">create_logger</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;chemprop_logger&quot;</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet_logger</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="ChempropModel.initRandomState">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.initRandomState">[docs]</a>
+    <span class="k">def</span> <span class="nf">initRandomState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set random state if applicable.</span>
+<span class="sd">        Defaults to random state of dataset if no random state is provided by the constructor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            random_state (int): Random state to use for shuffling and other random operations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_random_state</span> <span class="o">=</span> <span class="n">random_state</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">randomState</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No random state supplied, &quot;</span>
+                <span class="s2">&quot;and could not find random state on the dataset.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="n">new_random_state</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.supportsEarlyStopping">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.supportsEarlyStopping">[docs]</a>
+    <span class="k">def</span> <span class="nf">supportsEarlyStopping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return if the model supports early stopping.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the model supports early stopping</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+    <span class="nd">@early_stopping</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
+        <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">FitMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">keep_logs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ChempropMoleculeModel</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the model to the given data matrix or `QSPRDataset`.</span>
+
+<span class="sd">        Note. convertToNumpy can be called here, to convert the input data to</span>
+<span class="sd">        np.ndarray format.</span>
+
+<span class="sd">        Note. if no estimator is given, the estimator instance of the model</span>
+<span class="sd">              is used.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit</span>
+<span class="sd">            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit</span>
+<span class="sd">            estimator (Any): estimator instance to use for fitting</span>
+<span class="sd">            mode (EarlyStoppingMode): mode to use for early stopping</span>
+<span class="sd">            monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor</span>
+<span class="sd">                is used</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Any: fitted estimator instance</span>
+<span class="sd">            int: in case of early stopping, the number of iterations</span>
+<span class="sd">                after which the model stopped training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">monitor</span> <span class="o">=</span> <span class="n">BaseMonitor</span><span class="p">()</span> <span class="k">if</span> <span class="n">monitor</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">monitor</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">estimator</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">split</span> <span class="ow">or</span> <span class="n">ShuffleSplit</span><span class="p">(</span>
+            <span class="n">n_splits</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">randomState</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Create validation data when using early stopping</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertToNumpy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="p">:</span>
+            <span class="n">train_index</span><span class="p">,</span> <span class="n">val_index</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">split</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+            <span class="n">train_data</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">train_index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">y</span><span class="p">[</span><span class="n">train_index</span><span class="p">]</span>
+            <span class="n">val_data</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">val_index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">y</span><span class="p">[</span><span class="n">val_index</span><span class="p">]</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onFitStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">train_data</span><span class="p">,</span> <span class="o">*</span><span class="n">val_data</span><span class="p">)</span>
+            <span class="n">train_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertToMoleculeDataset</span><span class="p">(</span><span class="o">*</span><span class="n">train_data</span><span class="p">)</span>
+            <span class="n">val_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertToMoleculeDataset</span><span class="p">(</span><span class="o">*</span><span class="n">val_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">train_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertToMoleculeDataset</span><span class="p">(</span>
+                <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+            <span class="p">)</span>  <span class="c1"># convert data to chemprop MoleculeDataset</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onFitStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">args</span>
+
+        <span class="c1"># set task names</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">task_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">]</span>
+
+        <span class="c1"># Get number of molecules per class in training data</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">dataset_type</span> <span class="o">==</span> <span class="s2">&quot;classification&quot;</span><span class="p">:</span>
+            <span class="n">class_sizes</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_class_sizes</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Class sizes&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">task_class_sizes</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">class_sizes</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">task_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">size</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">%&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="bp">cls</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">enumerate</span><span class="p">(</span><span class="n">task_class_sizes</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">train_class_sizes</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_class_sizes</span><span class="p">(</span>
+                <span class="n">train_data</span><span class="p">,</span> <span class="n">proportion</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">train_class_sizes</span> <span class="o">=</span> <span class="n">train_class_sizes</span>
+
+        <span class="c1"># Get length of training data</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">train_data_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span>
+
+        <span class="c1"># log data size</span>
+        <span class="n">total_data_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="p">:</span>
+            <span class="n">total_data_size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;train size = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span> <span class="sa">f</span><span class="s2">&quot; | val size = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">val_data</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total size = </span><span class="si">{</span><span class="n">total_data_size</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Initialize scaler and standard scale training targets (regression only)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">dataset_type</span> <span class="o">==</span> <span class="s2">&quot;regression&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fitting scaler&quot;</span><span class="p">)</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">train_data</span><span class="o">.</span><span class="n">normalize_targets</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Get loss function</span>
+        <span class="n">loss_func</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">loss_functions</span><span class="o">.</span><span class="n">get_loss_func</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="c1"># Automatically determine whether to cache</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">args</span><span class="o">.</span><span class="n">cache_cutoff</span><span class="p">:</span>
+            <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">set_cache_graph</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">set_cache_graph</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">num_workers</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">num_workers</span>
+
+        <span class="c1"># Create data loaders</span>
+        <span class="n">train_data_loader</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">MoleculeDataLoader</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">train_data</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span>
+            <span class="n">class_balance</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">class_balance</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="p">:</span>
+            <span class="n">val_data_loader</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">MoleculeDataLoader</span><span class="p">(</span>
+                <span class="n">dataset</span><span class="o">=</span><span class="n">val_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">class_balance</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;With class_balance, </span><span class="se">\</span>
+<span class="s2">                effective train size = </span><span class="si">{</span><span class="n">train_data_loader</span><span class="o">.</span><span class="n">iter_size</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Tensorboard writer</span>
+        <span class="n">save_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="p">,</span> <span class="s2">&quot;tensorboard&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">log_dir</span><span class="o">=</span><span class="n">save_dir</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722</span>
+            <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">logdir</span><span class="o">=</span><span class="n">save_dir</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Number of parameters = </span><span class="si">{</span><span class="n">chemprop</span><span class="o">.</span><span class="n">nn_utils</span><span class="o">.</span><span class="n">param_count_all</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">cuda</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Moving model to cuda&quot;</span><span class="p">)</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># Optimizers</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">build_optimizer</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="c1"># Learning rate schedulers</span>
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">build_lr_scheduler</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="c1"># Run training</span>
+        <span class="n">best_score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">minimize_score</span> <span class="k">else</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+        <span class="n">best_epoch</span><span class="p">,</span> <span class="n">n_iter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="c1"># Get early stopping number of epochs early stopping in case of FIXED or OPTIMAL</span>
+        <span class="c1"># mode</span>
+        <span class="n">n_epochs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">getEpochs</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span> <span class="k">else</span> <span class="n">args</span><span class="o">.</span><span class="n">epochs</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n_epochs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Number of epochs must be greater &quot;</span> <span class="sa">f</span><span class="s2">&quot;than 0. Got: </span><span class="si">{</span><span class="n">n_epochs</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">best_estimator</span> <span class="o">=</span> <span class="n">estimator</span>
+        <span class="n">best_found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">n_epochs</span><span class="p">):</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onEpochStart</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">n_iter</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">estimator</span><span class="p">,</span>
+                <span class="n">data_loader</span><span class="o">=</span><span class="n">train_data_loader</span><span class="p">,</span>
+                <span class="n">loss_func</span><span class="o">=</span><span class="n">loss_func</span><span class="p">,</span>
+                <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+                <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span>
+                <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="p">,</span>
+                <span class="n">writer</span><span class="o">=</span><span class="n">writer</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">ExponentialLR</span><span class="p">):</span>
+                <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="p">:</span>
+                <span class="n">val_scores</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+                    <span class="n">model</span><span class="o">=</span><span class="n">estimator</span><span class="p">,</span>
+                    <span class="n">data_loader</span><span class="o">=</span><span class="n">val_data_loader</span><span class="p">,</span>
+                    <span class="n">num_tasks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">num_tasks</span><span class="p">,</span>
+                    <span class="n">metrics</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
+                    <span class="n">dataset_type</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">dataset_type</span><span class="p">,</span>
+                    <span class="n">scaler</span><span class="o">=</span><span class="n">estimator</span><span class="o">.</span><span class="n">scaler</span><span class="p">,</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">scores</span> <span class="ow">in</span> <span class="n">val_scores</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="c1"># Average validation score\</span>
+                    <span class="n">mean_val_score</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">multitask_mean</span><span class="p">(</span>
+                        <span class="n">scores</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Validation </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2"> = &quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mean_val_score</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validation_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mean_val_score</span><span class="p">,</span> <span class="n">n_iter</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">show_individual_scores</span><span class="p">:</span>
+                        <span class="c1"># Individual validation scores</span>
+                        <span class="k">for</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">val_score</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">task_names</span><span class="p">,</span> <span class="n">scores</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;Validation </span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span> <span class="sa">f</span><span class="s2">&quot; = </span><span class="si">{</span><span class="n">val_score</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="p">)</span>
+                            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;validation_</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">val_score</span><span class="p">,</span> <span class="n">n_iter</span>
+                            <span class="p">)</span>
+
+                <span class="c1"># Save model checkpoint if improved validation score</span>
+                <span class="n">mean_val_score</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">multitask_mean</span><span class="p">(</span>
+                    <span class="n">val_scores</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">metric</span><span class="p">],</span> <span class="n">metric</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">metric</span>
+                <span class="p">)</span>
+                <span class="n">monitor</span><span class="o">.</span><span class="n">onEpochEnd</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">mean_val_score</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">minimize_score</span>
+                    <span class="ow">and</span> <span class="n">mean_val_score</span> <span class="o">&lt;</span> <span class="n">best_score</span>
+                    <span class="ow">or</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">minimize_score</span>
+                    <span class="ow">and</span> <span class="n">mean_val_score</span> <span class="o">&gt;</span> <span class="n">best_score</span>
+                <span class="p">):</span>
+                    <span class="n">best_score</span><span class="p">,</span> <span class="n">best_epoch</span> <span class="o">=</span> <span class="n">mean_val_score</span><span class="p">,</span> <span class="n">epoch</span>
+                    <span class="n">best_estimator</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+                    <span class="n">best_found</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># Evaluate on test set using model with best validation score</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Model best validation </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">metric</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> on epoch </span><span class="se">\</span>
+<span class="s2">                    </span><span class="si">{</span><span class="n">best_epoch</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">best_found</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Early stopping did not yield a best model, using last model instead.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_logs</span><span class="p">:</span>
+            <span class="c1"># remove temp directory with logs</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">save_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onFitEnd</span><span class="p">(</span><span class="n">best_estimator</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">best_estimator</span><span class="p">,</span> <span class="n">best_epoch</span>
+        <span class="n">monitor</span><span class="o">.</span><span class="n">onFitEnd</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">estimator</span><span class="p">,</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ChempropModel.predict">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="p">:</span> <span class="n">ChempropMoleculeModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make predictions for the given data matrix or `QSPRDataset`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict</span>
+<span class="sd">            estimator (MoleculeModel): estimator instance to use for fitting</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray:</span>
+<span class="sd">                2D array containing the predictions, where each row corresponds</span>
+<span class="sd">                to a sample in the data and each column to a target property</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+            <span class="c1"># convert predictions from predictProba to class labels</span>
+            <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictProba</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">estimator</span><span class="p">)</span>
+            <span class="n">preds</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">preds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">preds</span><span class="p">))</span>
+            <span class="p">]</span>
+            <span class="c1"># change preds from list of 2D arrays to 2D array</span>
+            <span class="n">preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">preds</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictProba</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">estimator</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.predictProba">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.predictProba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predictProba</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="p">:</span> <span class="n">ChempropMoleculeModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make predictions for the given data matrix or `QSPRDataset`,</span>
+<span class="sd">        but use probabilities for classification models.</span>
+
+<span class="sd">        In case of regression models, this method is equivalent to `predict`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict</span>
+<span class="sd">            estimator (MoleculeModel, None): estimator instance to use for fitting</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[np.ndarray]:</span>
+<span class="sd">                a list of 2D arrays containing the probabilities for each class,</span>
+<span class="sd">                where each array corresponds to a target property, each row</span>
+<span class="sd">                to a sample in the data and each column to a class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Prepare estimator and data</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">estimator</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertToMoleculeDataset</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">args</span>
+
+        <span class="n">X_loader</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">MoleculeDataLoader</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">batch_size</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make predictions</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">estimator</span><span class="p">,</span>
+            <span class="n">data_loader</span><span class="o">=</span><span class="n">X_loader</span><span class="p">,</span>
+            <span class="n">scaler</span><span class="o">=</span><span class="n">estimator</span><span class="o">.</span><span class="n">scaler</span><span class="p">,</span>
+            <span class="n">disable_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># change list of lists to 2D array</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">]:</span>
+                <span class="c1"># chemprop returns 3D array (samples, targets, classes)</span>
+                <span class="c1"># split into list of 2D arrays (samples, classes), length = n targets</span>
+                <span class="n">preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">preds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">preds</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="n">preds</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">preds</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">:</span>
+                <span class="c1"># Chemprop returns 2D array (samples, classes),</span>
+                <span class="c1"># split into list of 2D arrays (samples, 1), length = n targets</span>
+                <span class="n">preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">preds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1"># add second column (negative class probability)</span>
+                <span class="n">preds</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pred</span><span class="p">,</span> <span class="n">pred</span><span class="p">])</span> <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="n">preds</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># chemprop returns 2D array (samples, 1), here convert to list and</span>
+                <span class="c1"># add second column (negative class probability)</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="mi">1</span> <span class="o">-</span> <span class="n">preds</span><span class="p">,</span> <span class="n">preds</span><span class="p">])]</span>
+
+        <span class="k">return</span> <span class="n">preds</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.loadEstimator">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.loadEstimator">[docs]</a>
+    <span class="k">def</span> <span class="nf">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize estimator instance with the given parameters.</span>
+
+<span class="sd">        If `params` is `None`, the default parameters will be used.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            params (dict): algorithm parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: initialized estimator instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># set torch random seed if applicable</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkArgs</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">new_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParameters</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">ChempropMoleculeModel</span><span class="o">.</span><span class="n">getTrainArgs</span><span class="p">(</span><span class="n">new_parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">)</span>
+
+        <span class="c1"># set task names</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">task_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.loadEstimatorFromFile">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.loadEstimatorFromFile">[docs]</a>
+    <span class="k">def</span> <span class="nf">loadEstimatorFromFile</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fallback_load</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load estimator instance from file and apply the given parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): algorithm parameters</span>
+<span class="sd">            fallback_load (bool): if `True`, init estimator from alg if path not found</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: initialized estimator instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># set torch random seed if applicable</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.pt&quot;</span>
+        <span class="c1"># load model state from file</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;chempropLogger&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">create_logger</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;chemprop_logger&quot;</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">quietLogger</span>
+                <span class="p">)</span>
+
+            <span class="n">estimator</span> <span class="o">=</span> <span class="n">ChempropMoleculeModel</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span>
+                <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="c1"># load scalers from file and use only the target scaler (first element)</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">load_scalers</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># load parameters from file</span>
+            <span class="n">loaded_params</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">load_args</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">loaded_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParameters</span><span class="p">(</span><span class="n">loaded_params</span><span class="p">)</span>
+
+            <span class="c1"># Set train args</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">ChempropMoleculeModel</span><span class="o">.</span><span class="n">getTrainArgs</span><span class="p">(</span>
+                <span class="n">loaded_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fallback_load</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParameters</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No estimator found at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">, loading estimator from file failed.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">estimator</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.saveEstimator">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.saveEstimator">[docs]</a>
+    <span class="k">def</span> <span class="nf">saveEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the underlying estimator to file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            path (str): path to the saved estimator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.pt&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span>
+            <span class="n">scaler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">scaler</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.pt&quot;</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.convertToMoleculeDataset">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.convertToMoleculeDataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">convertToMoleculeDataset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the given data matrix and target matrix to chemprop Molecule Dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix</span>
+<span class="sd">            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">                data matrix and/or target matrix in np.ndarray format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertToNumpy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>  <span class="c1"># BCEWithLogitsLoss expects float</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertToNumpy</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>  <span class="c1"># dummy targets</span>
+
+        <span class="c1"># find which column contains the SMILES strings</span>
+        <span class="n">prev_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">calc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">calc</span><span class="o">.</span><span class="n">descriptors</span>
+            <span class="k">if</span> <span class="s2">&quot;SMILES&quot;</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                <span class="n">smiles_column</span> <span class="o">=</span> <span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;SMILES&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">prev_len</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">prev_len</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No SMILES column found in feature calculators, Chemprop &quot;</span>
+                <span class="s2">&quot;requires SMILES, make sure to add SMILES calculator to &quot;</span>
+                <span class="s2">&quot;the feature calculators.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># features data all but smiles column</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">smiles_column</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">features_data</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="n">smiles_column</span><span class="p">]</span>
+            <span class="c1"># try to convert to float else raise error</span>
+            <span class="c1"># Note, in this case features have not been previously converted to float in</span>
+            <span class="c1"># QSPRpred as SMILES features are not numeric</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">features_data</span> <span class="o">=</span> <span class="n">features_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Features data could not be converted to float, make sure &quot;</span>
+                    <span class="s2">&quot;that all features are numeric.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">features_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Create MoleculeDataset</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">MoleculeDataset</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">chemprop</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">MoleculeDatapoint</span><span class="p">(</span>
+                    <span class="n">smiles</span><span class="o">=</span><span class="p">[</span><span class="n">smile</span><span class="p">],</span>
+                    <span class="n">targets</span><span class="o">=</span><span class="n">targets</span><span class="p">,</span>
+                    <span class="n">features</span><span class="o">=</span><span class="n">features_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">features_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">smile</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">smiles</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.cleanFiles">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.cleanFiles">[docs]</a>
+    <span class="k">def</span> <span class="nf">cleanFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up the model files.</span>
+
+<span class="sd">        Removes the model directory and all its contents.</span>
+<span class="sd">        Handles closing the chemprop logger as well.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[:]</span>
+        <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chempropLogger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">cleanFiles</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.checkArgs">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.checkArgs">[docs]</a>
+    <span class="k">def</span> <span class="nf">checkArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">TrainArgs</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the given arguments are valid.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            args (chemprop.args.TrainArgs, dict): arguments to check</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># List of arguments from chemprop that are using in the QSPRpred implementation.</span>
+        <span class="n">used_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAvailableParameters</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">used_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">used_args</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="s2">&quot;minimize_score&quot;</span><span class="p">,</span>  <span class="c1"># derived from metric</span>
+            <span class="s2">&quot;num_tasks&quot;</span><span class="p">,</span>  <span class="c1"># derived from target properties</span>
+            <span class="s2">&quot;dataset_type&quot;</span><span class="p">,</span>  <span class="c1"># derived from task</span>
+            <span class="s2">&quot;metrics&quot;</span><span class="p">,</span>  <span class="c1"># equal to metric in QSPRpred</span>
+            <span class="s2">&quot;task_names&quot;</span><span class="p">,</span>  <span class="c1"># derived from target properties</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Create dummy args to check what default argument values are in chemprop</span>
+        <span class="n">default_args</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">TrainArgs</span><span class="p">()</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+            <span class="n">args_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dataset_type&quot;</span><span class="p">:</span> <span class="s2">&quot;regression&quot;</span><span class="p">,</span> <span class="s2">&quot;data_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">default_args</span><span class="o">.</span><span class="n">process_args</span><span class="p">()</span>
+        <span class="n">default_args</span> <span class="o">=</span> <span class="n">default_args</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+
+        <span class="c1"># Check if args are valid and warn if changed but not used in QSPRpred</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">default_args</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">default_args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used_args</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;Warning: argument </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> has been set to </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> &quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;but is not used in QSPRpred, it will be ignored.&quot;</span>
+                            <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Warning: argument </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is not a valid argument, it &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;will be ignored.&quot;</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># add data_path to args as it is required by chemprop</span>
+            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;data_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+            <span class="c1"># set dataset type</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">]:</span>
+                <span class="n">args</span><span class="p">[</span><span class="s2">&quot;dataset_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;regression&quot;</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">,</span>
+            <span class="p">]:</span>
+                <span class="n">args</span><span class="p">[</span><span class="s2">&quot;dataset_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;classification&quot;</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">]:</span>
+                <span class="n">args</span><span class="p">[</span><span class="s2">&quot;dataset_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;multiclass&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="si">}</span><span class="s2"> not supported.&quot;</span><span class="p">)</span>
+
+            <span class="n">args</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">TrainArgs</span><span class="p">()</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">skip_unsettable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">process_args</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.getAvailableParameters">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.getAvailableParameters">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getAvailableParameters</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a dictionary of available parameters for the algorithm.</span>
+
+<span class="sd">        Definitions and default values can be found on the Chemprop github</span>
+<span class="sd">        (https://github.com/chemprop/chemprop/blob/master/chemprop/args.py)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;no_cuda&quot;</span><span class="p">:</span> <span class="s2">&quot;Turn off cuda (i.e., use CPU instead of GPU).&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="s2">&quot;Which GPU to use.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="s2">&quot;Number of workers for the parallel data loading (0 means sequential).&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="s2">&quot;Batch size.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;no_cache_mol&quot;</span><span class="p">:</span> <span class="s2">&quot;Whether to not cache the RDKit molecule for each SMILES string to &quot;</span>
+            <span class="s2">&quot;reduce memory usage (cached by default).&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;empty_cache&quot;</span><span class="p">:</span> <span class="s2">&quot;Whether to empty all caches before training or predicting. This is &quot;</span>
+            <span class="s2">&quot;necessary if multiple jobs are run within a single script and the &quot;</span>
+            <span class="s2">&quot;atom or bond features change.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;loss_function&quot;</span><span class="p">:</span> <span class="s2">&quot;Choice of loss function. Loss functions are limited to compatible &quot;</span>
+            <span class="s2">&quot;dataset types.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;metric&quot;</span><span class="p">:</span> <span class="s2">&quot;Metric to use with the validation set for early stopping. Defaults &quot;</span>
+            <span class="s2">&quot;to &#39;auc&#39; for classification, &#39;rmse&#39; for regression. Note. In Chemprop &quot;</span>
+            <span class="s2">&quot;this metric is also used for test-set evaluation, but in QSPRpred &quot;</span>
+            <span class="s2">&quot;this is determined by the scoring parameter in assessment.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;bias&quot;</span><span class="p">:</span> <span class="s2">&quot;Whether to add bias to linear layers.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hidden_size&quot;</span><span class="p">:</span> <span class="s2">&quot;Dimensionality of hidden layers in MPN.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="s2">&quot;Number of message passing steps.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mpn_shared&quot;</span><span class="p">:</span> <span class="s2">&quot;Whether to use the same message passing neural network for all input &quot;</span>
+            <span class="s2">&quot;molecule Only relevant if &#39;number_of_molecules &gt; 1&#39;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dropout&quot;</span><span class="p">:</span> <span class="s2">&quot;Dropout probability.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="s2">&quot;Activation function.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;atom_messages&quot;</span><span class="p">:</span> <span class="s2">&quot;Centers messages on atoms instead of on bonds.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;undirected&quot;</span><span class="p">:</span> <span class="s2">&quot;Undirected edges (always sum the two relevant bond vectors).&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ffn_hidden_size&quot;</span><span class="p">:</span> <span class="s2">&quot;Hidden dim for higher-capacity FFN (defaults to hidden_size).&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ffn_num_layers&quot;</span><span class="p">:</span> <span class="s2">&quot;Number of layers in FFN after MPN encoding.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;epochs&quot;</span><span class="p">:</span> <span class="s2">&quot;Number of epochs to run.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;warmup_epochs&quot;</span><span class="p">:</span> <span class="s2">&quot;Number of epochs during which learning rate increases linearly from &quot;</span>
+            <span class="s2">&quot;&#39;init_lr&#39; to &#39;max_lr&#39;. Afterwards, learning rate decreases &quot;</span>
+            <span class="s2">&quot;exponentially from &#39;max_lr&#39; to &#39;final_lr&#39;.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;init_lr&quot;</span><span class="p">:</span> <span class="s2">&quot;Initial learning rate.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;max_lr&quot;</span><span class="p">:</span> <span class="s2">&quot;Maximum learning rate.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;final_lr&quot;</span><span class="p">:</span> <span class="s2">&quot;Final learning rate.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;grad_clip&quot;</span><span class="p">:</span> <span class="s2">&quot;Maximum magnitude of gradient during training.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;class_balance&quot;</span><span class="p">:</span> <span class="s2">&quot;Trains with an equal number of positives and negatives in each batch.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;evidential_regularization&quot;</span><span class="p">:</span> <span class="s2">&quot;Value used in regularization for evidential loss function. The &quot;</span>
+            <span class="s2">&quot;default value recommended by Soleimany et al.(2021) is 0.2. Optimal &quot;</span>
+            <span class="s2">&quot;value is dataset-dependent; it is recommended that users test &quot;</span>
+            <span class="s2">&quot;different values to find the best value for their model.&quot;</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="ChempropModel.fromFile">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.fromFile">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ChempropModel&quot;</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">chempropLogger</span> <span class="o">=</span> <span class="n">chemprop</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">create_logger</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;chemprop_logger&quot;</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">ret</span><span class="o">.</span><span class="n">outDir</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">ret</span><span class="o">.</span><span class="n">quietLogger</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

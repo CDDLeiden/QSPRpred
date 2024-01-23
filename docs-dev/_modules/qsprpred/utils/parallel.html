@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.utils.parallel &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.utils.parallel</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.utils.parallel</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">from</span> <span class="nn">concurrent</span> <span class="kn">import</span> <span class="n">futures</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Generator</span>
+
+<span class="kn">from</span> <span class="nn">qsprpred.logs</span> <span class="kn">import</span> <span class="n">logger</span>
+
+
+<div class="viewcode-block" id="batched_generator">
+<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.batched_generator">[docs]</a>
+<span class="k">def</span> <span class="nf">batched_generator</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple generator that batches inputs from a supplied iterable.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        iterable: An iterable object to batch with the generator.</span>
+<span class="sd">        batch_size: Number of items to include in each batch.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A generator that yields batches of the input generator one at a time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+        <span class="n">batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">==</span> <span class="n">batch_size</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">batch</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">batch</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">batch</span></div>
+
+
+
+<div class="viewcode-block" id="parallel_jit_generator">
+<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.parallel_jit_generator">[docs]</a>
+<span class="k">def</span> <span class="nf">parallel_jit_generator</span><span class="p">(</span>
+        <span class="n">generator</span><span class="p">:</span> <span class="n">Generator</span><span class="p">,</span>
+        <span class="n">process_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">n_cpus</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">pool_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;pebble&quot;</span><span class="p">,</span> <span class="s2">&quot;multiprocessing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;multiprocessing&quot;</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A parallel &#39;JIT (Just In Time)&#39; generator that yields the results of a function</span>
+<span class="sd">    applied in parallel to each item of a supplied generator. The advantage of this JIT</span>
+<span class="sd">    implementation is that it only evaluates the next item in the input generator</span>
+<span class="sd">    as soon as it is needed for the calculation. This means that only one item from</span>
+<span class="sd">    the iterable is loaded into memory at a time.</span>
+
+<span class="sd">    The generator also supports timeout for each job. The &#39;pebble&#39;</span>
+<span class="sd">    pool_type can be used to support this feature. In all other cases,</span>
+<span class="sd">    the &#39;multiprocessing&#39; pool_type is sufficient.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        generator(SupportsNext):</span>
+<span class="sd">            An iterable object to apply the function to.</span>
+<span class="sd">        process_func(Callable):</span>
+<span class="sd">            The function to apply to each item in the iterable.</span>
+<span class="sd">        n_cpus(int):</span>
+<span class="sd">            Number of CPUs to use.</span>
+<span class="sd">        pool_type(Literal[&quot;pebble&quot;, &quot;multiprocessing&quot;]):</span>
+<span class="sd">            The type of pool to use.</span>
+<span class="sd">        timeout(int | None):</span>
+<span class="sd">            A timeout threshold in seconds. Processes that exceed this threshold will</span>
+<span class="sd">            be terminated and a `TimeoutError` will be returned.</span>
+<span class="sd">        args(tuple | None):</span>
+<span class="sd">            Additional positional arguments to pass to the function.</span>
+<span class="sd">        kwargs(dict | None):</span>
+<span class="sd">            Additional keyword arguments to pass to the function.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A generator that yields the results of the function applied to each item in the</span>
+<span class="sd">        iterable. If a timeout is specified, a `TimeoutError` will be returned instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="ow">or</span> <span class="p">()</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">pool_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;pebble&quot;</span><span class="p">,</span> <span class="s2">&quot;multiprocessing&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The &#39;pool_type&#39; must be one of &#39;pebble&#39; &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;or &#39;multiprocessing&#39;, got </span><span class="si">{</span><span class="n">pool_type</span><span class="si">}</span><span class="s2"> instead.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pool_type</span> <span class="o">!=</span> <span class="s2">&quot;pebble&quot;</span> <span class="ow">and</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The &#39;timeout&#39; argument is only supported &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;for &#39;pebble&#39; pools, got </span><span class="si">{</span><span class="n">pool_type</span><span class="si">}</span><span class="s2"> instead.&quot;</span><span class="p">)</span>
+    <span class="n">pool_type_to_pool</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;multiprocessing&quot;</span><span class="p">:</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">n_cpus</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pebble</span> <span class="kn">import</span> <span class="n">ProcessPool</span>
+            <span class="n">pool_type_to_pool</span><span class="p">[</span><span class="s2">&quot;pebble&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ProcessPool</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">n_cpus</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Failed to import pool type &#39;pebble&#39;. Install it first.&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pool_type_to_pool</span><span class="p">[</span><span class="n">pool_type</span><span class="p">]</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span> <span class="ow">or</span> <span class="n">queue</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># take a slice of the generator</span>
+                <span class="n">input_args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">),</span> <span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)]</span>
+                <span class="c1"># add our next slice to the pool</span>
+                <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span><span class="p">:</span>
+                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span>
+                        <span class="n">process_func</span><span class="p">,</span>
+                        <span class="n">args</span><span class="o">=</span><span class="n">input_args</span><span class="p">,</span>
+                        <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+                        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+                    <span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
+                        <span class="n">process_func</span><span class="p">,</span>
+                        <span class="n">input_args</span><span class="p">,</span>
+                        <span class="n">kwargs</span>
+                    <span class="p">))</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="c1"># no more data, clear out the slice generator</span>
+                <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># wait for a free worker or until all remaining workers finish</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Waiting for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span><span class="si">}</span><span class="s2"> workers to finish...&quot;</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">queue</span> <span class="ow">and</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">n_cpus</span><span class="p">)</span> <span class="ow">or</span> <span class="n">done</span><span class="p">):</span>
+                <span class="c1"># grab a process response from the top</span>
+                <span class="n">process</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1"># check if job timed out and return the exception as a result</span>
+                <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span> \
+                        <span class="ow">and</span> <span class="n">process</span><span class="o">.</span><span class="n">done</span><span class="p">()</span> \
+                        <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">_exception</span> <span class="p">)</span> <span class="ow">in</span> <span class="p">[</span>
+                            <span class="ne">TimeoutError</span><span class="p">,</span>
+                            <span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span>
+                        <span class="p">]:</span>
+                    <span class="k">yield</span> <span class="n">process</span><span class="o">.</span><span class="n">_exception</span>
+                    <span class="c1"># make sure to pop the next item from the generator</span>
+                    <span class="k">break</span>
+                <span class="c1"># check if result available</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span><span class="p">:</span>
+                        <span class="c1"># get the result, timeout error if not result yet available</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+                        <span class="k">yield</span> <span class="n">result</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+                        <span class="c1"># check if process is done</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">process</span><span class="o">.</span><span class="n">ready</span><span class="p">():</span>
+                            <span class="c1"># not finished, add it back to queue</span>
+                            <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># finished, yield the result</span>
+                            <span class="k">yield</span> <span class="n">process</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="k">except</span> <span class="p">(</span><span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">,</span> <span class="ne">TimeoutError</span><span class="p">):</span>
+                    <span class="c1"># not done yet, add it back to the queue</span>
+                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span><span class="p">:</span>
+                    <span class="c1"># something went wrong, log and yield the exception</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">exp</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">process</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">process</span><span class="o">.</span><span class="n">_exception</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">exp</span>
+                    <span class="k">break</span>  <span class="c1"># make sure to pop the next item from the generator</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

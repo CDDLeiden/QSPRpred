@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.data.utils package &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.extra.data.utils.testing package" href="qsprpred.extra.data.utils.testing.html" />
+    <link rel="prev" title="qsprpred.extra.data.tables package" href="qsprpred.extra.data.tables.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html">qsprpred.benchmarks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="qsprpred.extra.html">qsprpred.extra package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.tasks">qsprpred.tasks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Python API</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.extra.html">qsprpred.extra package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.extra.data.html">qsprpred.extra.data package</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.data.utils package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-extra-data-utils-package">
+<h1>qsprpred.extra.data.utils package<a class="headerlink" href="#qsprpred-extra-data-utils-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html">qsprpred.extra.data.utils.testing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#module-qsprpred.extra.data.utils.testing.path_mixins">qsprpred.extra.data.utils.testing.path_mixins module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.clearGenerated"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.clearGenerated()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.createLargeMultitaskDataSet"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.createLargeMultitaskDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.createLargeTestDataSet"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.createLargeTestDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.createPCMDataSet"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.createPCMDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.createSmallTestDataSet"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.createSmallTestDataSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.createTestDataSetFromFrame"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.createTestDataSetFromFrame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getAllDescriptors"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getAllDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getAllProteinDescriptors"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getAllProteinDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getBigDF"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getBigDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getDataPrepGrid"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getDataPrepGrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getDefaultCalculatorCombo"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getDefaultCalculatorCombo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getDefaultPrep"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getDefaultPrep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getMSAProvider"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getMSAProvider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getPCMDF"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getPCMDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getPCMSeqProvider"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getPCMSeqProvider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getPCMTargetsDF"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getPCMTargetsDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getPrepCombos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getSmallDF"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.setUpPaths"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.setUpPaths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.tearDown"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.tearDown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.validate_split"><code class="docutils literal notranslate"><span class="pre">DataSetsMixInExtras.validate_split()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.utils.testing.html#module-qsprpred.extra.data.utils.testing">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.extra.data.utils.msa_calculator">
+<span id="qsprpred-extra-data-utils-msa-calculator-module"></span><h2>qsprpred.extra.data.utils.msa_calculator module<a class="headerlink" href="#module-qsprpred.extra.data.utils.msa_calculator" title="Link to this heading"></a></h2>
+<p>Various implementations of multiple sequence alignment (MSA).</p>
+<p>The MSA providers are used to align sequences for protein descriptor calculation. This
+is required for the calculation of descriptors that are based on sequence alignments,
+such as <a class="reference internal" href="qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec" title="qsprpred.extra.data.descriptors.sets.ProDec"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ProDec</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.msa_calculator.</span></span><span class="sig-name descname"><span class="pre">BioPythonMSA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'alignment.aln-fasta.fasta'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/msa_calculator.html#BioPythonMSA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.extra.data.utils.msa_calculator.MSAProvider" title="qsprpred.extra.data.utils.msa_calculator.MSAProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">MSAProvider</span></code></a>, <a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable" title="qsprpred.utils.serialization.JSONSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">JSONSerializable</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Common functionality for MSA providers using BioPython command line wrappers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outDir</strong> – directory to save the alignment to</p></li>
+<li><p><strong>fname</strong> – file name of the alignment file</p></li>
+<li><p><strong>cache</strong> – cache of alignments performed so far by the provider</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initializes the MSA provider.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – directory to save the alignment to</p></li>
+<li><p><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – file name of the alignment file</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.checkTool">
+<span class="sig-name descname"><span class="pre">checkTool</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/msa_calculator.html#BioPythonMSA.checkTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.checkTool" title="Link to this definition"></a></dt>
+<dd><p>Check if the MAFFT tool is installed</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.cmd">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cmd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.cmd" title="Link to this definition"></a></dt>
+<dd><p>The command that runs the alignment algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the command to run the alignment algorithm</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>cmd (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.current">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.current" title="Link to this definition"></a></dt>
+<dd><p>The current alignment.</p>
+<p>Returns the current alignment as a dictionary where keys are sequence IDs
+as <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a> and values are aligned sequences as <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a>. The values are of the
+same length and contain gaps (“-”) where necessary. If the alignment
+is not yet calculated, <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str] | None): the current alignment</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>alignment (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.fromFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.fromFile" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance from a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – path to the JSON file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>new instance of the class</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>instance (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.fromJSON">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.fromJSON" title="Link to this definition"></a></dt>
+<dd><p>Reconstruct object from a JSON string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – JSON string of the object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>reconstructed object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obj (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.getFromCache">
+<span class="sig-name descname"><span class="pre">getFromCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span> <span class="pre">|</span> <span class="pre">None</span></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/msa_calculator.html#BioPythonMSA.getFromCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.getFromCache" title="Link to this definition"></a></dt>
+<dd><p>Gets the alignment from the cache if it exists for a <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of sequence IDs.
+:param target_ids: list of sequence IDs to get the alignment for,
+:type target_ids: list[str]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>str] | None):</dt><dd><p>the alignment if it exists in the cache, <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> otherwise</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>alignment (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.parseAlignment">
+<span class="sig-name descname"><span class="pre">parseAlignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">sequences:</span> <span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/msa_calculator.html#BioPythonMSA.parseAlignment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.parseAlignment" title="Link to this definition"></a></dt>
+<dd><p>Parse the alignment from the output file of the alignment algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequences</strong> – the original dictionary of sequences that were aligned</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the aligned sequences mapped to their IDs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.parseSequences">
+<span class="sig-name descname"><span class="pre">parseSequences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/msa_calculator.html#BioPythonMSA.parseSequences"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.parseSequences" title="Link to this definition"></a></dt>
+<dd><p>Create object with sequences and the passed metadata.</p>
+<p>Saves the sequences to a file that will serve
+as input to the command line tools.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – sequences to align</p></li>
+<li><p><strong>**kwargs</strong> – metadata to be stored with the alignment</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>path to the file with the sequences
+n_sequences (int): number of sequences in the file</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sequences_path (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.saveToCache">
+<span class="sig-name descname"><span class="pre">saveToCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">target_ids:</span> <span class="pre">list[str],</span> <span class="pre">alignment:</span> <span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/msa_calculator.html#BioPythonMSA.saveToCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.saveToCache" title="Link to this definition"></a></dt>
+<dd><p>Saves the alignment to the cache for a <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of sequence IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_ids</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – list of sequence IDs to save the alignment for</p></li>
+<li><p><strong>(</strong><strong>dict</strong><strong>[</strong><strong>str</strong> (<em>alignment</em>) – str]):
+the alignment to save</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.toFile">
+<span class="sig-name descname"><span class="pre">toFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.toFile" title="Link to this definition"></a></dt>
+<dd><p>Serialize object to a JSON file. This JSON file should
+contain all  data necessary to reconstruct the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – filename to save object to</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>absolute path to the saved JSON file of the object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>filename (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.toJSON">
+<span class="sig-name descname"><span class="pre">toJSON</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.toJSON" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Serialize object to a JSON string. This JSON string should</dt><dd><p>contain all data necessary to reconstruct the object.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON string of the object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>json (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.msa_calculator.</span></span><span class="sig-name descname"><span class="pre">ClustalMSA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'alignment.aln-fasta.fasta'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/msa_calculator.html#ClustalMSA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA" title="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA"><code class="xref py py-class docutils literal notranslate"><span class="pre">BioPythonMSA</span></code></a></p>
+<p>Multiple sequence alignment provider using the Clustal Omega Linux program
+- <a class="reference external" href="http://www.clustal.org/omega/">http://www.clustal.org/omega/</a></p>
+<p>Uses the BioPython wrapper for Clustal Omega
+- <a class="reference external" href="https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.ClustalOmegaCommandline">https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.ClustalOmegaCommandline</a></p>
+<p>Initializes the MSA provider.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – directory to save the alignment to</p></li>
+<li><p><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – file name of the alignment file</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.checkTool">
+<span class="sig-name descname"><span class="pre">checkTool</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.checkTool" title="Link to this definition"></a></dt>
+<dd><p>Check if the MAFFT tool is installed</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.cmd">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cmd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.cmd" title="Link to this definition"></a></dt>
+<dd><p>The command that runs the alignment algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the command to run the alignment algorithm</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>cmd (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.current">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.current" title="Link to this definition"></a></dt>
+<dd><p>The current alignment.</p>
+<p>Returns the current alignment as a dictionary where keys are sequence IDs
+as <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a> and values are aligned sequences as <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a>. The values are of the
+same length and contain gaps (“-”) where necessary. If the alignment
+is not yet calculated, <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str] | None): the current alignment</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>alignment (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.fromFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.fromFile" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance from a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – path to the JSON file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>new instance of the class</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>instance (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.fromJSON">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.fromJSON" title="Link to this definition"></a></dt>
+<dd><p>Reconstruct object from a JSON string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – JSON string of the object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>reconstructed object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obj (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.getFromCache">
+<span class="sig-name descname"><span class="pre">getFromCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span> <span class="pre">|</span> <span class="pre">None</span></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.getFromCache" title="Link to this definition"></a></dt>
+<dd><p>Gets the alignment from the cache if it exists for a <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of sequence IDs.
+:param target_ids: list of sequence IDs to get the alignment for,
+:type target_ids: list[str]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>str] | None):</dt><dd><p>the alignment if it exists in the cache, <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> otherwise</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>alignment (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.parseAlignment">
+<span class="sig-name descname"><span class="pre">parseAlignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">sequences:</span> <span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.parseAlignment" title="Link to this definition"></a></dt>
+<dd><p>Parse the alignment from the output file of the alignment algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequences</strong> – the original dictionary of sequences that were aligned</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the aligned sequences mapped to their IDs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.parseSequences">
+<span class="sig-name descname"><span class="pre">parseSequences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.parseSequences" title="Link to this definition"></a></dt>
+<dd><p>Create object with sequences and the passed metadata.</p>
+<p>Saves the sequences to a file that will serve
+as input to the command line tools.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – sequences to align</p></li>
+<li><p><strong>**kwargs</strong> – metadata to be stored with the alignment</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>path to the file with the sequences
+n_sequences (int): number of sequences in the file</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sequences_path (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.saveToCache">
+<span class="sig-name descname"><span class="pre">saveToCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">target_ids:</span> <span class="pre">list[str],</span> <span class="pre">alignment:</span> <span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.saveToCache" title="Link to this definition"></a></dt>
+<dd><p>Saves the alignment to the cache for a <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of sequence IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_ids</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – list of sequence IDs to save the alignment for</p></li>
+<li><p><strong>(</strong><strong>dict</strong><strong>[</strong><strong>str</strong> (<em>alignment</em>) – str]):
+the alignment to save</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.toFile">
+<span class="sig-name descname"><span class="pre">toFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.toFile" title="Link to this definition"></a></dt>
+<dd><p>Serialize object to a JSON file. This JSON file should
+contain all  data necessary to reconstruct the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – filename to save object to</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>absolute path to the saved JSON file of the object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>filename (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.ClustalMSA.toJSON">
+<span class="sig-name descname"><span class="pre">toJSON</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.ClustalMSA.toJSON" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Serialize object to a JSON string. This JSON string should</dt><dd><p>contain all data necessary to reconstruct the object.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON string of the object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>json (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.msa_calculator.</span></span><span class="sig-name descname"><span class="pre">MAFFT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'alignment.aln-fasta.fasta'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/msa_calculator.html#MAFFT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA" title="qsprpred.extra.data.utils.msa_calculator.BioPythonMSA"><code class="xref py py-class docutils literal notranslate"><span class="pre">BioPythonMSA</span></code></a></p>
+<p>Multiple sequence alignment provider using the MAFFT cross-platform program
+- <a class="reference external" href="https://mafft.cbrc.jp/alignment/software/">https://mafft.cbrc.jp/alignment/software/</a></p>
+<p>Uses the BioPython wrapper for MAFFT:
+- <a class="reference external" href="https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline">https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline</a></p>
+<p>Initializes the MSA provider.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – directory to save the alignment to</p></li>
+<li><p><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – file name of the alignment file</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.checkTool">
+<span class="sig-name descname"><span class="pre">checkTool</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.checkTool" title="Link to this definition"></a></dt>
+<dd><p>Check if the MAFFT tool is installed</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.cmd">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cmd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.cmd" title="Link to this definition"></a></dt>
+<dd><p>The command that runs the alignment algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the command to run the alignment algorithm</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>cmd (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.current">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current</span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.current" title="Link to this definition"></a></dt>
+<dd><p>The current alignment.</p>
+<p>Returns the current alignment as a dictionary where keys are sequence IDs
+as <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a> and values are aligned sequences as <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a>. The values are of the
+same length and contain gaps (“-”) where necessary. If the alignment
+is not yet calculated, <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str] | None): the current alignment</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>alignment (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.fromFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.fromFile" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance from a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – path to the JSON file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>new instance of the class</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>instance (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.fromJSON">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.fromJSON" title="Link to this definition"></a></dt>
+<dd><p>Reconstruct object from a JSON string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – JSON string of the object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>reconstructed object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obj (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.getFromCache">
+<span class="sig-name descname"><span class="pre">getFromCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span> <span class="pre">|</span> <span class="pre">None</span></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.getFromCache" title="Link to this definition"></a></dt>
+<dd><p>Gets the alignment from the cache if it exists for a <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of sequence IDs.
+:param target_ids: list of sequence IDs to get the alignment for,
+:type target_ids: list[str]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>str] | None):</dt><dd><p>the alignment if it exists in the cache, <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> otherwise</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>alignment (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.parseAlignment">
+<span class="sig-name descname"><span class="pre">parseAlignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">sequences:</span> <span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.parseAlignment" title="Link to this definition"></a></dt>
+<dd><p>Parse the alignment from the output file of the alignment algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequences</strong> – the original dictionary of sequences that were aligned</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the aligned sequences mapped to their IDs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.parseSequences">
+<span class="sig-name descname"><span class="pre">parseSequences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.parseSequences" title="Link to this definition"></a></dt>
+<dd><p>Create object with sequences and the passed metadata.</p>
+<p>Saves the sequences to a file that will serve
+as input to the command line tools.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – sequences to align</p></li>
+<li><p><strong>**kwargs</strong> – metadata to be stored with the alignment</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>path to the file with the sequences
+n_sequences (int): number of sequences in the file</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sequences_path (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.saveToCache">
+<span class="sig-name descname"><span class="pre">saveToCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">target_ids:</span> <span class="pre">list[str],</span> <span class="pre">alignment:</span> <span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.saveToCache" title="Link to this definition"></a></dt>
+<dd><p>Saves the alignment to the cache for a <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of sequence IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_ids</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – list of sequence IDs to save the alignment for</p></li>
+<li><p><strong>(</strong><strong>dict</strong><strong>[</strong><strong>str</strong> (<em>alignment</em>) – str]):
+the alignment to save</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.toFile">
+<span class="sig-name descname"><span class="pre">toFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.toFile" title="Link to this definition"></a></dt>
+<dd><p>Serialize object to a JSON file. This JSON file should
+contain all  data necessary to reconstruct the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – filename to save object to</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>absolute path to the saved JSON file of the object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>filename (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MAFFT.toJSON">
+<span class="sig-name descname"><span class="pre">toJSON</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MAFFT.toJSON" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Serialize object to a JSON string. This JSON string should</dt><dd><p>contain all data necessary to reconstruct the object.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON string of the object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>json (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MSAProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.data.utils.msa_calculator.</span></span><span class="sig-name descname"><span class="pre">MSAProvider</span></span><a class="reference internal" href="../_modules/qsprpred/extra/data/utils/msa_calculator.html#MSAProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MSAProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.serialization.FileSerializable" title="qsprpred.utils.serialization.FileSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileSerializable</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Interface for multiple sequence alignment providers.</p>
+<p>This interface defines how calculation and storage of
+multiple sequence alignments (MSAs) is handled.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MSAProvider.current">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[slice(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)]</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MSAProvider.current" title="Link to this definition"></a></dt>
+<dd><p>The current alignment.</p>
+<p>Returns the current alignment as a dictionary where keys are sequence IDs
+as <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a> and values are aligned sequences as <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">str</span></code></a>. The values are of the
+same length and contain gaps (“-”) where necessary. If the alignment
+is not yet calculated, <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str] | None): the current alignment</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>alignment (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MSAProvider.fromFile">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><span class="pre">object</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MSAProvider.fromFile" title="Link to this definition"></a></dt>
+<dd><p>Reconstruct object from a metafile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – filename of the metafile to load object from</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>reconstructed object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obj (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.utils.msa_calculator.MSAProvider.toFile">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">toFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.utils.msa_calculator.MSAProvider.toFile" title="Link to this definition"></a></dt>
+<dd><p>Serialize object to a metafile. This metafile should contain all
+data necessary to reconstruct the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – filename to save object to</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>absolute path to the saved metafile of the object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>filename (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.extra.data.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.extra.data.utils" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.extra.data.tables.html" class="btn btn-neutral float-left" title="qsprpred.extra.data.tables package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.extra.data.utils.testing.html" class="btn btn-neutral float-right" title="qsprpred.extra.data.utils.testing package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

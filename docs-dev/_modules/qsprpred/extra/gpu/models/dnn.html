@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.gpu.models.dnn &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.gpu.models.dnn</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.extra.gpu.models.dnn</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Here the DNN model originally from DrugEx can be found.</span>
+
+<span class="sd">At the moment this contains a class for fully-connected DNNs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Type</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">ShuffleSplit</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">DEFAULT_TORCH_DEVICE</span><span class="p">,</span> <span class="n">DEFAULT_TORCH_GPUS</span>
+<span class="kn">from</span> <span class="nn">....data.sampling.splits</span> <span class="kn">import</span> <span class="n">DataSplit</span>
+<span class="kn">from</span> <span class="nn">....data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">....extra.gpu.models.neural_network</span> <span class="kn">import</span> <span class="n">STFullyConnected</span>
+<span class="kn">from</span> <span class="nn">....logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">....models.early_stopping</span> <span class="kn">import</span> <span class="n">EarlyStoppingMode</span><span class="p">,</span> <span class="n">early_stopping</span>
+<span class="kn">from</span> <span class="nn">....models.models</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">from</span> <span class="nn">....models.monitors</span> <span class="kn">import</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="n">FitMonitor</span>
+<span class="kn">from</span> <span class="nn">qsprpred.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
+
+
+<div class="viewcode-block" id="DNNModel">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.dnn.DNNModel">[docs]</a>
+<span class="k">class</span> <span class="nc">DNNModel</span><span class="p">(</span><span class="n">QSPRModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the methods for training and fitting a</span>
+<span class="sd">    Deep Neural Net QSPR model initialization.</span>
+
+<span class="sd">    Here the model instance is created and parameters can be defined.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name (str): name of the model</span>
+<span class="sd">        data (QSPRDataset): data set used to train the model</span>
+<span class="sd">        alg (estimator): estimator instance or class</span>
+<span class="sd">        parameters (dict): dictionary of algorithm specific parameters</span>
+<span class="sd">        estimator (object):</span>
+<span class="sd">            the underlying estimator instance, if `fit` or optimization is performed,</span>
+<span class="sd">            this model instance gets updated accordingly</span>
+<span class="sd">        featureCalculators (MoleculeDescriptorsCalculator):</span>
+<span class="sd">            feature calculator instance taken from the data set</span>
+<span class="sd">            or deserialized from file if the model is loaded without data</span>
+<span class="sd">        featureStandardizer (SKLearnStandardizer):</span>
+<span class="sd">            feature standardizer instance taken from the data set</span>
+<span class="sd">            or deserialized from file if the model is loaded without data</span>
+<span class="sd">        baseDir (str):</span>
+<span class="sd">            base directory of the model, the model files</span>
+<span class="sd">            are stored in a subdirectory `{baseDir}/{outDir}/`</span>
+<span class="sd">        device (cuda device): cuda device</span>
+<span class="sd">        gpus (int/ list of ints): gpu number(s) to use for model fitting</span>
+<span class="sd">        patience (int):</span>
+<span class="sd">            number of epochs to wait before early stop if no progress</span>
+<span class="sd">            on validation set score</span>
+<span class="sd">        tol (float):</span>
+<span class="sd">            minimum absolute improvement of loss necessary to count as</span>
+<span class="sd">            progress on best validation score</span>
+<span class="sd">        nClass (int): number of classes</span>
+<span class="sd">        nDim (int): number of features</span>
+<span class="sd">        device (torch.device): cuda device, cpu or gpu</span>
+<span class="sd">        gpus (list[int]): gpu number(s) to use for model fitting</span>
+<span class="sd">        patience (int):</span>
+<span class="sd">            number of epochs to wait before early stop</span>
+<span class="sd">            if no progress on validation set score</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="n">STFullyConnected</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">autoload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">DEFAULT_TORCH_DEVICE</span><span class="p">,</span>
+        <span class="n">gpus</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_TORCH_GPUS</span><span class="p">,</span>
+        <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a DNNModel model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base_dir (str):</span>
+<span class="sd">                base directory of the model, the model files are stored in</span>
+<span class="sd">                a subdirectory `{baseDir}/{outDir}/`</span>
+<span class="sd">            alg (Type, optional):</span>
+<span class="sd">                model class or instance. Defaults to STFullyConnected.</span>
+<span class="sd">            data (QSPRDataset, optional):</span>
+<span class="sd">                data set used to train the model. Defaults to None.</span>
+<span class="sd">            name (str, optional):</span>
+<span class="sd">                name of the model. Defaults to None.</span>
+<span class="sd">            parameters (dict, optional):</span>
+<span class="sd">                dictionary of algorithm specific parameters. Defaults to None.</span>
+<span class="sd">            autoload (bool, optional):</span>
+<span class="sd">                whether to load the model from file or not. Defaults to True.</span>
+<span class="sd">            device (torch.device, optional):</span>
+<span class="sd">                The cuda device. Defaults to `DEFAULT_TORCH_DEVICE`.</span>
+<span class="sd">            gpus (list[int], optional):</span>
+<span class="sd">                gpu number(s) to use for model fitting. Defaults to `DEFAULT_TORCH_GPUS`.</span>
+<span class="sd">            patience (int, optional):</span>
+<span class="sd">                number of epochs to wait before early stop if no progress</span>
+<span class="sd">                on validation set score. Defaults to 50.</span>
+<span class="sd">            tol (float, optional):</span>
+<span class="sd">                minimum absolute improvement of loss necessary to count as progress</span>
+<span class="sd">                on best validation score. Defaults to 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gpus</span> <span class="o">=</span> <span class="n">gpus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patience</span> <span class="o">=</span> <span class="n">patience</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nClass</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nDim</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="p">,</span>
+            <span class="n">alg</span><span class="p">,</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="p">,</span>
+            <span class="n">autoload</span><span class="o">=</span><span class="n">autoload</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Multitask modelling is not implemented for DNNModel models.&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="DNNModel.initRandomState">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.dnn.DNNModel.initRandomState">[docs]</a>
+    <span class="k">def</span> <span class="nf">initRandomState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set random state if applicable.</span>
+<span class="sd">        Defaults to random state of dataset if no random state is provided by the constructor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            random_state (int): Random state to use for shuffling and other random operations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_random_state</span> <span class="o">=</span> <span class="n">random_state</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">randomState</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="n">new_random_state</span>
+        <span class="k">if</span> <span class="n">new_random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No random state supplied, &quot;</span>
+                <span class="s2">&quot;and could not find random state on the dataset.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supportsEarlyStopping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the model supports early stopping or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="DNNModel.loadEstimator">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.dnn.DNNModel.loadEstimator">[docs]</a>
+    <span class="k">def</span> <span class="nf">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load model from file or initialize new model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict, optional): model parameters. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            model (object): model instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initRandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nClass</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nClass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nClasses</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nDim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># initialize model</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">(</span>
+            <span class="n">n_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nDim</span><span class="p">,</span>
+            <span class="n">n_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nClass</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+            <span class="n">gpus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gpus</span><span class="p">,</span>
+            <span class="n">is_reg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span>
+            <span class="n">patience</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">patience</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># set parameters if available and return</span>
+        <span class="n">new_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParameters</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">new_parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">estimator</span></div>
+
+
+<div class="viewcode-block" id="DNNModel.loadEstimatorFromFile">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.dnn.DNNModel.loadEstimatorFromFile">[docs]</a>
+    <span class="k">def</span> <span class="nf">loadEstimatorFromFile</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fallback_load</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load estimator from file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): parameters</span>
+<span class="sd">            fallback_load (bool):</span>
+<span class="sd">                if `True`, init estimator from `alg` and `params` if no estimator</span>
+<span class="sd">                found at path</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            estimator (object): estimator instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_weights.pkg&quot;</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="c1"># load states if available</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">fallback_load</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No estimator found at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;loading estimator weights from file failed.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">estimator</span></div>
+
+
+<div class="viewcode-block" id="DNNModel.saveEstimator">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.dnn.DNNModel.saveEstimator">[docs]</a>
+    <span class="k">def</span> <span class="nf">saveEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the DNNModel model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: path to the saved model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_weights.pkg&quot;</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="DNNModel.setParams">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.dnn.DNNModel.setParams">[docs]</a>
+    <span class="k">def</span> <span class="nf">setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set parameters of the model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span></div>
+
+
+    <span class="nd">@early_stopping</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
+        <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">FitMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the model to the given data matrix or `QSPRDataset`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit</span>
+<span class="sd">            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit</span>
+<span class="sd">            estimator (Any): estimator instance to use for fitting</span>
+<span class="sd">            mode (EarlyStoppingMode): early stopping mode</span>
+<span class="sd">            split (DataSplit): data split to use for early stopping,</span>
+<span class="sd">                if None, a ShuffleSplit with 10% validation set size is used</span>
+<span class="sd">            monitor (FitMonitor): fit monitor instance, if None, a BaseMonitor is used</span>
+<span class="sd">            kwargs (dict): additional keyword arguments for the estimator&#39;s fit method</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Any: fitted estimator instance</span>
+<span class="sd">            int, optional: in case of early stopping, the number of iterations</span>
+<span class="sd">                after which the model stopped training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">monitor</span> <span class="o">=</span> <span class="n">BaseMonitor</span><span class="p">()</span> <span class="k">if</span> <span class="n">monitor</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">monitor</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">estimator</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">split</span> <span class="ow">or</span> <span class="n">ShuffleSplit</span><span class="p">(</span>
+            <span class="n">n_splits</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">randomState</span>
+        <span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertToNumpy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="c1"># fit with early stopping</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="p">:</span>
+            <span class="c1"># split cross validation fold train set into train</span>
+            <span class="c1"># and validation set for early stopping</span>
+            <span class="n">train_index</span><span class="p">,</span> <span class="n">val_index</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">split</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onFitStart</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">X</span><span class="p">[</span><span class="n">train_index</span><span class="p">,</span> <span class="p">:],</span>
+                <span class="n">y</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span>
+                <span class="n">X</span><span class="p">[</span><span class="n">val_index</span><span class="p">,</span> <span class="p">:],</span>
+                <span class="n">y</span><span class="p">[</span><span class="n">val_index</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">estimator_fit</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="n">X</span><span class="p">[</span><span class="n">train_index</span><span class="p">,</span> <span class="p">:],</span>
+                <span class="n">y</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span>
+                <span class="n">X</span><span class="p">[</span><span class="n">val_index</span><span class="p">,</span> <span class="p">:],</span>
+                <span class="n">y</span><span class="p">[</span><span class="n">val_index</span><span class="p">],</span>
+                <span class="n">monitor</span><span class="o">=</span><span class="n">monitor</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onFitEnd</span><span class="p">(</span><span class="n">estimator_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">estimator_fit</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">estimator_fit</span>
+        <span class="n">monitor</span><span class="o">.</span><span class="n">onFitStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="c1"># set fixed number of epochs if early stopping is not used</span>
+        <span class="n">estimator</span><span class="o">.</span><span class="n">n_epochs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">getEpochs</span><span class="p">()</span>
+        <span class="n">estimator_fit</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="n">monitor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">monitor</span><span class="o">.</span><span class="n">onFitEnd</span><span class="p">(</span><span class="n">estimator_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">estimator_fit</span>
+
+<div class="viewcode-block" id="DNNModel.predict">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.dnn.DNNModel.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;See `QSPRModel.predict`.&quot;&quot;&quot;</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">estimator</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictProba</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">estimator</span><span class="p">)</span>
+        <span class="c1"># return class labels for classification</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">scores</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">scores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="DNNModel.predictProba">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.dnn.DNNModel.predictProba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predictProba</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;See `QSPRModel.predictProba`.&quot;&quot;&quot;</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">estimator</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertToNumpy</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)]</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

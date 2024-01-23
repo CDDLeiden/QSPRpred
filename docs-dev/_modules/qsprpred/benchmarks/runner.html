@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.benchmarks.runner &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.benchmarks.runner</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.benchmarks.runner</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Lock</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">.replica</span> <span class="kn">import</span> <span class="n">Replica</span>
+<span class="kn">from</span> <span class="nn">.settings.benchmark</span> <span class="kn">import</span> <span class="n">BenchmarkSettings</span>
+<span class="kn">from</span> <span class="nn">..logs</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="n">lock_data</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+<span class="n">lock_report</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="BenchmarkRunner">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner">[docs]</a>
+<span class="k">class</span> <span class="nc">BenchmarkRunner</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class that runs benchmarking experiments as defined by</span>
+<span class="sd">    `BenchmarkSettings`. It translates the settings into</span>
+<span class="sd">    a list of `Replica` objects with its `iterReplicas` method and</span>
+<span class="sd">    runs them in parallel. Each replica is processed by the `runReplica`</span>
+<span class="sd">    method.</span>
+
+<span class="sd">    The report from each replica is appended to a `resultsFile`, which</span>
+<span class="sd">    is read and returned by the `run` method after the runners is finished</span>
+<span class="sd">    with all replicas. All outputs generated by the replicas and the `BenchmarkSettings`</span>
+<span class="sd">    used are saved in the `dataDir`.</span>
+
+<span class="sd">    The random seed for each replica is determined in a pseudo-random way from</span>
+<span class="sd">     `BenchmarkSettings.random_seed`. The `getSeedList` method is used to generate</span>
+<span class="sd">     a list of seeds from this &#39;master&#39; seed. There are some caveats to this method</span>
+<span class="sd">     (see the docstring of `getSeedList`).</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        settings (BenchmarkSettings):</span>
+<span class="sd">            Benchmark settings.</span>
+<span class="sd">        nProc (int):</span>
+<span class="sd">            Number of processes to use.</span>
+<span class="sd">        resultsFile (str):</span>
+<span class="sd">            Path to the results file.</span>
+<span class="sd">        dataDir (str):</span>
+<span class="sd">            Path to the directory to store data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BenchmarkRunner.ReplicaException">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException">[docs]</a>
+    <span class="k">class</span> <span class="nc">ReplicaException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Custom exception for errors in a replica.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            replicaID (int):</span>
+<span class="sd">                ID of the replica that caused the error.</span>
+<span class="sd">            exception (Exception):</span>
+<span class="sd">                Exception that was raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replica_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Initialize the exception.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                replica_id (str):</span>
+<span class="sd">                    ID of the replica that caused the error.</span>
+<span class="sd">                exception (Exception):</span>
+<span class="sd">                    Exception that was raised.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">replicaID</span> <span class="o">=</span> <span class="n">replica_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="n">exception</span></div>
+
+
+    <span class="n">logLevel</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">settings</span><span class="p">:</span> <span class="n">BenchmarkSettings</span><span class="p">,</span>
+        <span class="n">n_proc</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span><span class="p">,</span>
+        <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the runner.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            settings (BenchmarkSettings):</span>
+<span class="sd">                Benchmark settings.</span>
+<span class="sd">            n_proc (int, optional):</span>
+<span class="sd">                Number of processes to use. Defaults to os.cpu_count().</span>
+<span class="sd">            data_dir (str, optional):</span>
+<span class="sd">                Path to the directory to store data. Defaults to &quot;./data&quot;.</span>
+<span class="sd">                If the directory does not exist, it will be created.</span>
+<span class="sd">            results_file (str, optional):</span>
+<span class="sd">                Path to the results file. Defaults to &quot;{data_dir}/data/results.tsv&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing BenchmarkRunner...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nProc</span> <span class="o">=</span> <span class="n">n_proc</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataDir</span> <span class="o">=</span> <span class="n">data_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resultsFile</span> <span class="o">=</span> <span class="n">results_file</span> <span class="k">if</span> <span class="n">results_file</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_dir</span><span class="si">}</span><span class="s2">/results.tsv&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataDir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving settings to: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataDir</span><span class="si">}</span><span class="s2">/settings.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataDir</span><span class="si">}</span><span class="s2">/settings.json&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nRuns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the total number of benchmarking runs. This is the product</span>
+<span class="sd">        of the number of replicas, data sources, descriptors, target properties,</span>
+<span class="sd">        data preparation settings and models as defined in the `BenchmarkSettings`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int:</span>
+<span class="sd">                Total number of benchmarking runs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">benchmark_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span>
+        <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">checkConsistency</span><span class="p">()</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">n_replicas</span>
+            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">data_sources</span><span class="p">)</span>
+            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span>
+            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">)</span>
+            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">prep_settings</span><span class="p">)</span>
+            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">optimizers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">*=</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">optimizers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+<div class="viewcode-block" id="BenchmarkRunner.run">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the benchmarking experiments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            raise_errors (bool, optional):</span>
+<span class="sd">                Whether to raise the first encountered `ReplicaException`</span>
+<span class="sd">                and stop the benchmarking run. Defaults to `False`,</span>
+<span class="sd">                in which case replicas that raise an exception are skipped</span>
+<span class="sd">                and errors are logged.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">                Results from the benchmarking experiments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Performing </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nRuns</span><span class="si">}</span><span class="s2"> replica runs...&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nProc</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">runReplica</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterReplicas</span><span class="p">(),</span> <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resultsFile</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReplicaException</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">raise_errors</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">result</span><span class="o">.</span><span class="n">exception</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Error in replica </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">replicaID</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">exception</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Return success from replica: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finished all replica runs.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resultsFile</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BenchmarkRunner.getSeedList">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.getSeedList">[docs]</a>
+    <span class="k">def</span> <span class="nf">getSeedList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a list of seeds for the replicas from one &#39;master&#39; randomSeed.</span>
+<span class="sd">        The list of seeds is generated by sampling from the range of</span>
+<span class="sd">        possible seeds (0 to 2^32 - 1) with the given randomSeed as the random</span>
+<span class="sd">        randomSeed for the random module. This means that the list of seeds</span>
+<span class="sd">        will be the same for each run of the benchmarking experiment</span>
+<span class="sd">        with the same &#39;master&#39; randomSeed. This is useful for reproducibility,</span>
+<span class="sd">        but it also avoids recalculating replicas that were already calculated.</span>
+
+<span class="sd">        Caveat: If the randomSeed in `BenchmarkSettings.randomSeed` is the same, but</span>
+<span class="sd">        the number of replicas is different (i.e. the settings themselves change)</span>
+<span class="sd">        then this code will still generate the same seeds for experiments that</span>
+<span class="sd">        might not overlap with previous experiments. Therefore, take this into account</span>
+<span class="sd">        when you already calculated some replicas, but decided to change your experiment</span>
+<span class="sd">        settings.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            seed (int, optional):</span>
+<span class="sd">                &#39;Master&#39; randomSeed. Defaults to `BenchmarkSettings.randomSeed`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[int]:</span>
+<span class="sd">                list of seeds for the replicas</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">random_seed</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nRuns</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BenchmarkRunner.iterReplicas">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.iterReplicas">[docs]</a>
+    <span class="k">def</span> <span class="nf">iterReplicas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Replica</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generator that yields `Replica` objects for each benchmarking run.</span>
+<span class="sd">        This is done by iterating over the product of the data sources, descriptors,</span>
+<span class="sd">        target properties, data preparation settings, models and optimizers as defined</span>
+<span class="sd">        in the `BenchmarkSettings`. The random randomSeed for each replica is determined</span>
+<span class="sd">        in a pseudo-random way from `BenchmarkSettings.randomSeed` via</span>
+<span class="sd">        the `getSeedList` method.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            Generator[Replica, None, None]:</span>
+<span class="sd">                `Replica` objects for each benchmarking run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">benchmark_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span>
+        <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">checkConsistency</span><span class="p">()</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">n_replicas</span><span class="p">)]</span>
+        <span class="n">optimizers</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">optimizers</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">optimizers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">product</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span>
+            <span class="n">indices</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">data_sources</span><span class="p">,</span>
+            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">descriptors</span><span class="p">,</span>
+            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">,</span>
+            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">prep_settings</span><span class="p">,</span>
+            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">models</span><span class="p">,</span>
+            <span class="n">optimizers</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">seeds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSeedList</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">random_seed</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">settings</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">product</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeReplica</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">settings</span><span class="p">,</span>
+                <span class="n">random_seed</span><span class="o">=</span><span class="n">seeds</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                <span class="n">assessors</span><span class="o">=</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">assessors</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BenchmarkRunner.makeReplica">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.makeReplica">[docs]</a>
+    <span class="k">def</span> <span class="nf">makeReplica</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Replica</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a `Replica` object for the given settings. This is useful</span>
+<span class="sd">        for debugging.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Replica:</span>
+<span class="sd">                Replica object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Replica</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BenchmarkRunner.getLoggerForReplica">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.getLoggerForReplica">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">getLoggerForReplica</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a logger for the given replica.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            replica (Replica):</span>
+<span class="sd">                Replica to get the logger for.</span>
+<span class="sd">            level (int, optional):</span>
+<span class="sd">                Log level. Defaults to logging.DEBUG.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">replica_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">replica</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">replica_logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">replica_logger</span>
+        <span class="n">replica_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+        <span class="n">sh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">sh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+        <span class="n">replica_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">replica_logger</span></div>
+
+
+<div class="viewcode-block" id="BenchmarkRunner.checkReplicaInResultsFile">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.checkReplicaInResultsFile">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">checkReplicaInResultsFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span> <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if the replica is already present in the results file.</span>
+<span class="sd">        This method is thread-safe.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            replica (Replica):</span>
+<span class="sd">                Replica to check.</span>
+<span class="sd">            results_file (str):</span>
+<span class="sd">                Path to the results file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool:</span>
+<span class="sd">                Whether the replica is already present in the results file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">results_file</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">df_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">results_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df_results</span><span class="o">.</span><span class="n">ReplicaID</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="n">replica</span><span class="o">.</span><span class="n">id</span><span class="p">])</span><span class="o">.</span><span class="n">any</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="BenchmarkRunner.replicaToReport">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.replicaToReport">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">replicaToReport</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts a replica to a report.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            replica (Replica):</span>
+<span class="sd">                Replica to convert.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">                Report from the replica.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">replica</span><span class="o">.</span><span class="n">createReport</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="BenchmarkRunner.appendReportToResults">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.appendReportToResults">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">appendReportToResults</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df_report</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Appends a report to the results file. This method is thread-safe.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df_report (pd.DataFrame):</span>
+<span class="sd">                Report to append.</span>
+<span class="sd">            results_file (str):</span>
+<span class="sd">                Path to the results file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df_report</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+            <span class="n">results_file</span><span class="p">,</span>
+            <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span>
+            <span class="n">header</span><span class="o">=</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">results_file</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BenchmarkRunner.initData">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.initData">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">initData</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the data set for this replica.</span>
+<span class="sd">        This method is thread-safe.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            replica (Replica):</span>
+<span class="sd">                Replica to initialize.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">getLoggerForReplica</span><span class="p">(</span><span class="n">replica</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">logLevel</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing data set...&quot;</span><span class="p">)</span>
+        <span class="n">replica</span><span class="o">.</span><span class="n">initData</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Adding descriptors...&quot;</span><span class="p">)</span>
+        <span class="n">replica</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BenchmarkRunner.runReplica">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.runReplica">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">runReplica</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span> <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ReplicaException</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs a single replica. This is executed in parallel by the `run` method.</span>
+<span class="sd">        It is a classmethod so that it can be pickled and executed in parallel</span>
+<span class="sd">        more easily.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            replica (Replica):</span>
+<span class="sd">                Replica to run.</span>
+<span class="sd">            results_file (str):</span>
+<span class="sd">                Path to the results file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str | ReplicaException:</span>
+<span class="sd">                ID of the replica that was run or a `ReplicaException` if an error</span>
+<span class="sd">                was encountered.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">getLoggerForReplica</span><span class="p">(</span><span class="n">replica</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">logLevel</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting replica: </span><span class="si">{</span><span class="n">replica</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">lock_data</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking </span><span class="si">{</span><span class="n">replica</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> in results file: </span><span class="si">{</span><span class="n">results_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">checkReplicaInResultsFile</span><span class="p">(</span><span class="n">replica</span><span class="p">,</span> <span class="n">results_file</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">replica</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">. Already in results file.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">replica</span><span class="o">.</span><span class="n">id</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing data...&quot;</span><span class="p">)</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">initData</span><span class="p">(</span><span class="n">replica</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Preparing data set...&quot;</span><span class="p">)</span>
+            <span class="n">replica</span><span class="o">.</span><span class="n">prepData</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing model...&quot;</span><span class="p">)</span>
+            <span class="n">replica</span><span class="o">.</span><span class="n">initModel</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Running assessments...&quot;</span><span class="p">)</span>
+            <span class="n">replica</span><span class="o">.</span><span class="n">runAssessment</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating report...&quot;</span><span class="p">)</span>
+            <span class="n">df_report</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">replicaToReport</span><span class="p">(</span><span class="n">replica</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">lock_report</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Adding report to: </span><span class="si">{</span><span class="n">results_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">appendReportToResults</span><span class="p">(</span><span class="n">df_report</span><span class="p">,</span> <span class="n">results_file</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finished replica: </span><span class="si">{</span><span class="n">replica</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">replica</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in replica &#39;</span><span class="si">{</span><span class="n">replica</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exception</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">ReplicaException</span><span class="p">(</span><span class="n">replica</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.tables.pandas &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.tables.pandas</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.data.tables.pandas</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">DataTable</span>
+<span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">...utils.parallel</span> <span class="kn">import</span> <span class="n">batched_generator</span><span class="p">,</span> <span class="n">parallel_jit_generator</span>
+<span class="kn">from</span> <span class="nn">...utils.serialization</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
+<span class="kn">from</span> <span class="nn">...utils.stringops</span> <span class="kn">import</span> <span class="n">generate_padded_index</span>
+
+
+<div class="viewcode-block" id="PandasDataTable">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable">[docs]</a>
+<span class="k">class</span> <span class="nc">PandasDataTable</span><span class="p">(</span><span class="n">DataTable</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A Pandas DataFrame wrapper class to enable data processing functions on</span>
+<span class="sd">    QSPRpred data.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name (str):</span>
+<span class="sd">            Name of the data set. You can use this name to load the dataset</span>
+<span class="sd">            from disk anytime and create a new instance.</span>
+<span class="sd">        df (pd.DataFrame):</span>
+<span class="sd">            Pandas dataframe containing the data. You can modify this one directly,</span>
+<span class="sd">            but note that removing rows, adding rows, or changing the index or other</span>
+<span class="sd">            automatic properties of the data frame might break the data set. In that</span>
+<span class="sd">            case, it is recommended to recreate the data set from scratch.</span>
+<span class="sd">        indexCols (List):</span>
+<span class="sd">            List of columns to use as index. If `None`, the index</span>
+<span class="sd">            will be a custom generated ID. Note that if you specify multiple columns</span>
+<span class="sd">            their values will be joined with a &#39;~&#39; character rather than using the</span>
+<span class="sd">            default pandas multi-index.</span>
+<span class="sd">        nJobs (int):</span>
+<span class="sd">            Number of jobs to use for parallel processing. If set to `None` or `0`,</span>
+<span class="sd">            all available cores will be set.</span>
+<span class="sd">        chunkSize (int):</span>
+<span class="sd">            Size of chunks to use per job in parallel processing. This is automatically</span>
+<span class="sd">            set to the number of rows in the data frame divided by `nJobs`. However,</span>
+<span class="sd">            you can also set it manually if you want to use a different chunk size.</span>
+<span class="sd">            Set to `None` to again use the default value determined by `nJobs`.</span>
+<span class="sd">        randomState (int):</span>
+<span class="sd">            Random state to use for all random operations.</span>
+<span class="sd">        idProp (str):</span>
+<span class="sd">            Column name to use for automatically generated IDs. Defaults to &#39;QSPRID&#39;.</span>
+<span class="sd">            If `indexCols` is set, this will be the names of the columns joined by &#39;~&#39;.</span>
+<span class="sd">        storeFormat (str):</span>
+<span class="sd">            Format to use for storing the data frame. Currently only</span>
+<span class="sd">            &#39;pkl&#39; and &#39;csv&#39; are supported. Defaults to &#39;pkl&#39; because it is faster.</span>
+<span class="sd">            However, &#39;csv&#39; is more portable and can be opened in other programs.</span>
+<span class="sd">        parallelGenerator (Callable):</span>
+<span class="sd">            A parallel generator function to use for parallel processing.</span>
+<span class="sd">            Defaults to `qsprpred.utils.parallel.parallel_jit_generator`.</span>
+<span class="sd">            You can replace this with your own parallel generator function if you</span>
+<span class="sd">            want to use a different parallelization strategy (i.e. utilize</span>
+<span class="sd">            remote servers instead of local processes).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_notJSON</span><span class="p">:</span> <span class="n">ClassVar</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">JSONSerializable</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">index_cols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">autoindex_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;QSPRID&quot;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a `PandasDataTable` object.</span>
+<span class="sd">        Args</span>
+<span class="sd">            name (str):</span>
+<span class="sd">                Name of the data set. You can use this name to load the dataset</span>
+<span class="sd">                from disk anytime and create a new instance.</span>
+<span class="sd">            df (pd.DataFrame):</span>
+<span class="sd">                Pandas dataframe containing the data. If you provide a</span>
+<span class="sd">                dataframe for a dataset that already exists on disk, the dataframe from</span>
+<span class="sd">                disk will override the supplied data frame. Set &#39;overwrite&#39; to `True` to</span>
+<span class="sd">                override the data frame on disk.</span>
+<span class="sd">            store_dir (str):</span>
+<span class="sd">                Directory to store the dataset files. Defaults to the</span>
+<span class="sd">                current directory. If it already contains files with the same name,</span>
+<span class="sd">                the existing data will be loaded.</span>
+<span class="sd">            overwrite (bool):</span>
+<span class="sd">                Overwrite existing dataset.</span>
+<span class="sd">            index_cols (List):</span>
+<span class="sd">                List of columns to use as index. If None, the index</span>
+<span class="sd">                will be a custom generated ID.</span>
+<span class="sd">            n_jobs (int):</span>
+<span class="sd">                Number of jobs to use for parallel processing. If &lt;= 0,</span>
+<span class="sd">                all available cores will be used.</span>
+<span class="sd">            chunk_size (int):</span>
+<span class="sd">                Size of chunks to use per job in parallel processing. If `None`, the</span>
+<span class="sd">                chunk size will be set to the number of rows in the data frame divided</span>
+<span class="sd">                by `nJobs`.</span>
+<span class="sd">            autoindex_name (str):</span>
+<span class="sd">                Column name to use for automatically generated IDs.</span>
+<span class="sd">            random_state (int):</span>
+<span class="sd">                Random state to use for all random operations</span>
+<span class="sd">                for reproducibility. If not specified, the state is generated randomly.</span>
+<span class="sd">                The state is saved upon `save` so if you want to change the state later,</span>
+<span class="sd">                call the `setRandomState` method after loading.</span>
+<span class="sd">            store_format (str):</span>
+<span class="sd">                Format to use for storing the data frame.</span>
+<span class="sd">                Currently only &#39;pkl&#39; and &#39;csv&#39; are supported.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span> <span class="o">=</span> <span class="n">autoindex_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storeFormat</span> <span class="o">=</span> <span class="n">store_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setRandomState</span><span class="p">(</span>
+            <span class="n">random_state</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span> <span class="o">=</span> <span class="n">index_cols</span>
+        <span class="c1"># paths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_storeDir</span> <span class="o">=</span> <span class="n">store_dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+        <span class="c1"># data frame initialization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isInStore</span><span class="p">(</span><span class="s2">&quot;df&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Existing data set found, but also found a data frame in store. &quot;</span>
+                    <span class="s2">&quot;Refusing to overwrite data. If you want to overwrite data in &quot;</span>
+                    <span class="s2">&quot;store, set overwrite=True.&quot;</span><span class="p">,</span>
+                    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reload</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clearFiles</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
+                <span class="k">if</span> <span class="n">index_cols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">setIndex</span><span class="p">(</span><span class="n">index_cols</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">generateIndex</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isInStore</span><span class="p">(</span><span class="s2">&quot;df&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;No data frame found in store for &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;. Are you sure &quot;</span>
+                    <span class="s2">&quot;this is the correct dataset? If you are creating a new data set, &quot;</span>
+                    <span class="s2">&quot;make sure to supply a data frame.&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reload</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Unknown error in data set creation.&quot;</span>
+        <span class="c1"># parallel settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="n">chunk_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallelGenerator</span> <span class="o">=</span> <span class="n">parallel_jit_generator</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of rows in the data frame.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storeDir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">storeFormat</span> <span class="o">==</span> <span class="s2">&quot;csv&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storePath</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storePath</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">o_dict</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reload</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">chunkSize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunkSize</span>
+
+    <span class="nd">@chunkSize</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">chunkSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chunkSize</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunkSize</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chunkSize</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunkSize</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chunkSize</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nJobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nJobs</span>
+
+    <span class="nd">@nJobs</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">nJobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nJobs</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">baseDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The base directory of the data set folder.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storeDir</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">storeDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The data set folder containing the data set files after saving.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">storePath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The path to the main data set file.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">storeFormat</span> <span class="o">==</span> <span class="s2">&quot;csv&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storePrefix</span><span class="si">}</span><span class="s2">_df.csv&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storePrefix</span><span class="si">}</span><span class="s2">_df.pkl&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">storePrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The prefix of the data set files.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storeDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">metaFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The path to the meta file of this data set.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storePrefix</span><span class="si">}</span><span class="s2">_meta.json&quot;</span>
+
+<div class="viewcode-block" id="PandasDataTable.setIndex">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.setIndex">[docs]</a>
+    <span class="k">def</span> <span class="nf">setIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create and index column from several columns of the data set.</span>
+<span class="sd">        This also resets the `idProp` attribute to be the name of the index columns</span>
+<span class="sd">        joined by a &#39;~&#39; character. The values of the columns are also joined in the</span>
+<span class="sd">        same way to create the index. Thus, make sure the values of the columns are</span>
+<span class="sd">        unique together and can be joined to a string.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cols (list[str]): list of columns to use as index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span> <span class="o">=</span> <span class="n">cols</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span> <span class="o">=</span> <span class="s2">&quot;~&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot;~&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">tolist</span><span class="p">())),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verify_integrity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+            <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Unnamed&quot;</span><span class="p">)],</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.generateIndex">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.generateIndex">[docs]</a>
+    <span class="k">def</span> <span class="nf">generateIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a custom index for the data frame automatically.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str | None): name of the resulting index column.</span>
+<span class="sd">            prefix (str | None): prefix to use for the index column values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span> <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">generate_padded_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setIndex</span><span class="p">([</span><span class="n">name</span><span class="p">])</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_isInStore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a pickled file with the given suffix exists.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Suffix of the file to check.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: `True` if the file exists, `False` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storePath</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">storePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storeFormat</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="PandasDataTable.getProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.getProperty">[docs]</a>
+    <span class="k">def</span> <span class="nf">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get property values from the data set.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the property to get.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.Series: List of values for the property.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.getProperties">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.getProperties">[docs]</a>
+    <span class="k">def</span> <span class="nf">getProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the properties of the data set.</span>
+
+<span class="sd">        Returns: list of properties of the data set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.addProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.addProperty">[docs]</a>
+    <span class="k">def</span> <span class="nf">addProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a property to the data set.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the property.</span>
+<span class="sd">            data (list): List of values for the property.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Adding property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; to data set might be introducing &#39;nan&#39; &quot;</span>
+                    <span class="s2">&quot;values due to index with pandas series. Make sure the index of &quot;</span>
+                    <span class="s2">&quot;the data frame and the series match or convert series to list.&quot;</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.removeProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.removeProperty">[docs]</a>
+    <span class="k">def</span> <span class="nf">removeProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a property from the data set.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the property to remove.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.getSubset">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.getSubset">[docs]</a>
+    <span class="k">def</span> <span class="nf">getSubset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a subset of the data set by providing a prefix for the column names or a</span>
+<span class="sd">        column name directly.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prefix (str): Prefix of the column names to select.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)]]</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.iterChunks">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.iterChunks">[docs]</a>
+    <span class="k">def</span> <span class="nf">iterChunks</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">include_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">as_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Batch a data frame into chunks of the given size.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            include_props (list[str]):</span>
+<span class="sd">                list of properties to include, if `None`, all</span>
+<span class="sd">                properties are included.</span>
+<span class="sd">            as_dict (bool):</span>
+<span class="sd">                If `True`, the generator yields dictionaries instead of data frames.</span>
+<span class="sd">            chunk_size (int):</span>
+<span class="sd">                Size of chunks to use per job in parallel processing.</span>
+<span class="sd">                If `None`, `self.chunkSize` is used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Generator[pd.DataFrame, None, None]:</span>
+<span class="sd">                Generator that yields batches of the data frame as smaller data frames.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chunk_size</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="k">if</span> <span class="n">chunk_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span>
+        <span class="n">include_props</span> <span class="o">=</span> <span class="n">include_props</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="n">df_batches</span> <span class="o">=</span> <span class="n">batched_generator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">]</span> <span class="k">if</span> <span class="n">include_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">(),</span>
+            <span class="n">chunk_size</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">df_batches</span><span class="p">:</span>
+            <span class="n">df_batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">include_props</span><span class="p">:</span>
+                <span class="n">include_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">include_props</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_batch</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">yield</span> <span class="n">ret</span> <span class="k">if</span> <span class="n">as_dict</span> <span class="k">else</span> <span class="n">df_batch</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.apply">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">func_args</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">func_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">as_df</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a function to the data frame. The properties of the data set</span>
+<span class="sd">        are passed as the first positional argument to the function. This</span>
+<span class="sd">        will be a dictionary of the form `{&#39;prop1&#39;: [...], &#39;prop2&#39;: [...], ...}`.</span>
+<span class="sd">        If `as_df` is `True`, the properties will be passed as a data frame instead.</span>
+
+<span class="sd">        Any additional arguments specified in `func_args` and `func_kwargs` will</span>
+<span class="sd">        be passed to the function after the properties as positional and keyword</span>
+<span class="sd">        arguments, respectively.</span>
+
+<span class="sd">        If `on_props` is specified, only the properties</span>
+<span class="sd">        in this list will be passed to the function. If `on_props` is `None`,</span>
+<span class="sd">        all properties will be passed to the function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            func (Callable):</span>
+<span class="sd">                Function to apply to the data frame.</span>
+<span class="sd">            func_args (list):</span>
+<span class="sd">                Positional arguments to pass to the function.</span>
+<span class="sd">            func_kwargs (dict):</span>
+<span class="sd">                Keyword arguments to pass to the function.</span>
+<span class="sd">            on_props (list[str]):</span>
+<span class="sd">                list of properties to send to the function as arguments</span>
+<span class="sd">            as_df (bool):</span>
+<span class="sd">                If `True`, the function is applied to chunks represented as data frames.</span>
+<span class="sd">            chunk_size (int):</span>
+<span class="sd">                Size of chunks to use per job in parallel processing. If `None`,</span>
+<span class="sd">                the chunk size will be set to `self.chunkSize`. The chunk size will</span>
+<span class="sd">                always be set to the number of rows in the data frame if `n_jobs`</span>
+<span class="sd">                or `self.nJobs is 1.</span>
+<span class="sd">            n_jobs (int):</span>
+<span class="sd">                Number of jobs to use for parallel processing. If `None`,</span>
+<span class="sd">                `self.nJobs` is used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Generator:</span>
+<span class="sd">                Generator that yields the results of the function applied to each chunk</span>
+<span class="sd">                of the data frame as determined by `chunk_size` and `n_jobs`. Each</span>
+<span class="sd">                item in the generator will be the result of the function</span>
+<span class="sd">                applied to one chunk of the data set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span> <span class="k">if</span> <span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">n_jobs</span>
+        <span class="n">chunk_size</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="k">if</span> <span class="n">chunk_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span>
+        <span class="k">if</span> <span class="n">n_jobs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Applying function &#39;</span><span class="si">{</span><span class="n">func</span><span class="si">!r}</span><span class="s2">&#39; in parallel on </span><span class="si">{</span><span class="n">n_jobs</span><span class="si">}</span><span class="s2"> CPUs, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;using chunk size: </span><span class="si">{</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallelGenerator</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">(</span>
+                    <span class="n">include_props</span><span class="o">=</span><span class="n">on_props</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="ow">not</span> <span class="n">as_df</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span>
+                <span class="p">),</span>
+                <span class="n">func</span><span class="p">,</span>
+                <span class="n">n_jobs</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="n">func_args</span><span class="p">,</span>
+                <span class="n">kwargs</span><span class="o">=</span><span class="n">func_kwargs</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Result for chunk returned: </span><span class="si">{</span><span class="n">result</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">result</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">result</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applying function &#39;</span><span class="si">{</span><span class="n">func</span><span class="si">!r}</span><span class="s2">&#39; in serial.&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">props</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">(</span>
+                <span class="n">include_props</span><span class="o">=</span><span class="n">on_props</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="ow">not</span> <span class="n">as_df</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">func_args</span><span class="p">,</span> <span class="o">**</span><span class="n">func_kwargs</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Result for chunk returned: </span><span class="si">{</span><span class="n">result</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">yield</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.transform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">transformer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">add_as</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform the data frame (or its part) using a list of transformers.</span>
+
+<span class="sd">        Each transformer is a function that takes the data frame (or a subset of it as</span>
+<span class="sd">        defined by the `targets` argument) and returns a transformed data frame. The</span>
+<span class="sd">        transformed data frame can then be added to the original data frame if `add_as`</span>
+<span class="sd">        is set to a `list` of new column names. If `add_as` is not `None`, the result of</span>
+<span class="sd">        the application of transformers must have the same number of rows as the</span>
+<span class="sd">        original data frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            targets (list[str]): list of column names to transform.</span>
+<span class="sd">            transformer (Callable): Function that transforms the data in target columns</span>
+<span class="sd">                to a new representation.</span>
+<span class="sd">            add_as (list): If `True`, the transformed data is added to the original data</span>
+<span class="sd">                frame and the</span>
+<span class="sd">            names in this list are used as column names for the new data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">targets</span><span class="p">]</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">transformer</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">add_as</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">add_as</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.filter">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.filter">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_filters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter the data frame using a list of filters.</span>
+
+<span class="sd">        Each filter is a function that takes the data frame and returns a</span>
+<span class="sd">        a new data frame with the filtered rows. The new data frame is then used as the</span>
+<span class="sd">        input for the next filter. The final data frame is saved as the new data frame</span>
+<span class="sd">        of the `MoleculeTable`.&quot;&quot;&quot;</span>
+        <span class="n">df_filtered</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">table_filter</span> <span class="ow">in</span> <span class="n">table_filters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Dataframe is empty&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">table_filter</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;CategoryFilter&quot;</span><span class="p">:</span>
+                <span class="n">df_filtered</span> <span class="o">=</span> <span class="n">table_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">table_filter</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;DuplicateFilter&quot;</span><span class="p">:</span>
+                <span class="n">descriptors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptors</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">&quot;Removing duplicates based on descriptors does not </span><span class="se">\</span>
+<span class="s2">                                    work if there are no descriptors&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">df_filtered</span> <span class="o">=</span> <span class="n">table_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">df_filtered</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df_filtered</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.toFile">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.toFile">[docs]</a>
+    <span class="k">def</span> <span class="nf">toFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the metafile and all associated files to a custom location.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): absolute path to the saved metafile.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storeDir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">o_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toJSON</span><span class="p">())</span>
+        <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;py/state&quot;</span><span class="p">][</span><span class="s2">&quot;storeDir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;./</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">o_dict</span><span class="p">,</span> <span class="n">fh</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.save">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.save">[docs]</a>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the data frame to disk and all associated files.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Path to the saved data frame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storePrefix</span><span class="si">}</span><span class="s2">_meta.json&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.clearFiles">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.clearFiles">[docs]</a>
+    <span class="k">def</span> <span class="nf">clearFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all files associated with this data set from disk.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storeDir</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storeDir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.reload">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.reload">[docs]</a>
+    <span class="k">def</span> <span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reload the data table from disk.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">storeFormat</span> <span class="o">==</span> <span class="s2">&quot;csv&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storePath</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storePath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.fromFile">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.fromFile">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PandasDataTable&quot;</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json_f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">o_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_f</span><span class="p">)</span>
+        <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;py/state&quot;</span><span class="p">][</span><span class="s2">&quot;storeDir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">fromJSON</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">o_dict</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.getDF">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.getDF">[docs]</a>
+    <span class="k">def</span> <span class="nf">getDF</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the data frame this instance manages.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: The data frame this instance manages.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.shuffle">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.shuffle">[docs]</a>
+    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Shuffle the internal data frame.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+            <span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span> <span class="k">if</span> <span class="n">random_state</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasDataTable.setRandomState">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.setRandomState">[docs]</a>
+    <span class="k">def</span> <span class="nf">setRandomState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the random state for this instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            random_state (int):</span>
+<span class="sd">                Random state to use for shuffling and other random operations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="n">random_state</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

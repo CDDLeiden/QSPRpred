@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.data.sampling.tests &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.data.sampling.tests</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.extra.data.sampling.tests</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
+
+<span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
+
+<span class="kn">from</span> <span class="nn">qsprpred.data</span> <span class="kn">import</span> <span class="n">RandomSplit</span><span class="p">,</span> <span class="n">ScaffoldSplit</span><span class="p">,</span> <span class="n">ClusterSplit</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">RDKitDescs</span>
+<span class="kn">from</span> <span class="nn">qsprpred.extra.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">ProDec</span>
+<span class="kn">from</span> <span class="nn">qsprpred.extra.data.sampling.splits</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PCMSplit</span><span class="p">,</span>
+    <span class="n">LeaveTargetsOut</span><span class="p">,</span>
+    <span class="n">TemporalPerTarget</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qsprpred.extra.data.tables.pcm</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
+<span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsMixInExtras</span>
+
+
+<div class="viewcode-block" id="TestPCMSplitters">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters">[docs]</a>
+<span class="k">class</span> <span class="nc">TestPCMSplitters</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMSplitters.setUp">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msaProvider</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMSAProvider</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPCMDataSet</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_test&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">ProDec</span><span class="p">([</span><span class="s2">&quot;Zscale Hellberg&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">msaProvider</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">RDKitDescs</span><span class="p">()])</span></div>
+
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([(</span><span class="n">RandomSplit</span><span class="p">(),),</span> <span class="p">(</span><span class="n">ScaffoldSplit</span><span class="p">(),),</span> <span class="p">(</span><span class="n">ClusterSplit</span><span class="p">(),)])</span>
+    <span class="k">def</span> <span class="nf">testPCMSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">splitter</span><span class="p">):</span>
+        <span class="n">splitter</span> <span class="o">=</span> <span class="n">PCMSplit</span><span class="p">(</span><span class="n">splitter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
+        <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+        <span class="n">test_smiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
+        <span class="n">train_smiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_targets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_targets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">test_smiles</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">train_smiles</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="TestPCMSplitters.testPCMSplitRandomShuffle">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplitRandomShuffle">[docs]</a>
+    <span class="k">def</span> <span class="nf">testPCMSplitRandomShuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">splitter</span> <span class="o">=</span> <span class="n">PCMSplit</span><span class="p">(</span><span class="n">RandomSplit</span><span class="p">(),</span> <span class="n">dataset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="n">train_order</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">test_order</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># reload and check if orders are the same if we redo the split</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">PCMDataSet</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+        <span class="n">splitter</span> <span class="o">=</span> <span class="n">PCMSplit</span><span class="p">(</span><span class="n">RandomSplit</span><span class="p">(),</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">train_order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">test_order</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPCMSplitters.testLeaveTargetOut">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testLeaveTargetOut">[docs]</a>
+    <span class="k">def</span> <span class="nf">testLeaveTargetOut</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">splitter</span> <span class="o">=</span> <span class="n">LeaveTargetsOut</span><span class="p">(</span><span class="n">targets</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
+        <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_targets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_targets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">test_targets</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">train_targets</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPCMSplitters.testPerTargetTemporal">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPerTargetTemporal">[docs]</a>
+    <span class="k">def</span> <span class="nf">testPerTargetTemporal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">year_col</span> <span class="o">=</span> <span class="s2">&quot;Year&quot;</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="mi">2015</span>
+        <span class="n">splitter</span> <span class="o">=</span> <span class="n">TemporalPerTarget</span><span class="p">(</span>
+            <span class="n">year_col</span><span class="o">=</span><span class="n">year_col</span><span class="p">,</span>
+            <span class="n">split_years</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">year</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">()},</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="n">year_col</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">year</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="n">year_col</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">year</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.plotting.classification &mdash; QSPRpred 3.0.0.dev297+gf3a2516 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=e21c9a50"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev297+gf3a2516
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.plotting.classification</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.plotting.classification</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Plotting functions for classification models.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.calibration</span> <span class="kn">import</span> <span class="n">CalibrationDisplay</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PrecisionRecallDisplay</span><span class="p">,</span>
+    <span class="n">RocCurveDisplay</span><span class="p">,</span>
+    <span class="n">accuracy_score</span><span class="p">,</span>
+    <span class="n">auc</span><span class="p">,</span>
+    <span class="n">f1_score</span><span class="p">,</span>
+    <span class="n">matthews_corrcoef</span><span class="p">,</span>
+    <span class="n">precision_score</span><span class="p">,</span>
+    <span class="n">recall_score</span><span class="p">,</span>
+    <span class="n">roc_auc_score</span><span class="p">,</span>
+    <span class="n">confusion_matrix</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">..models.metrics</span> <span class="kn">import</span> <span class="n">calibration_error</span>
+<span class="kn">from</span> <span class="nn">..models.models</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">from</span> <span class="nn">..plotting.base_plot</span> <span class="kn">import</span> <span class="n">ModelPlot</span>
+<span class="kn">from</span> <span class="nn">..tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
+
+
+<div class="viewcode-block" id="ClassifierPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot">[docs]</a>
+<span class="k">class</span> <span class="nc">ClassifierPlot</span><span class="p">(</span><span class="n">ModelPlot</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for plots of classification models.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ClassifierPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.getSupportedTasks">[docs]</a>
+    <span class="k">def</span> <span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of tasks supported by this plotter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+            <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+            <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">,</span>
+            <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">,</span>
+        <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ClassifierPlot.prepareAssessment">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.prepareAssessment">[docs]</a>
+    <span class="k">def</span> <span class="nf">prepareAssessment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assessment_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare assessment dataframe for plotting</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            assessment_df (pd.DataFrame):</span>
+<span class="sd">                the assessment dataframe containing the experimental and predicted</span>
+<span class="sd">                values for each property. The dataframe should have the following</span>
+<span class="sd">                columns:</span>
+<span class="sd">                QSPRID, Fold (opt.), &lt;property_name&gt;_&lt;suffixes&gt;_&lt;Label/Prediction/ProbabilityClass_X&gt;</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">                The dataframe containing the assessment results,</span>
+<span class="sd">                columns: QSPRID, Fold, Property, Label, Prediction, Class, Set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># change all property columns into one column</span>
+        <span class="n">id_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;QSPRID&quot;</span><span class="p">,</span> <span class="s2">&quot;Fold&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;Fold&quot;</span> <span class="ow">in</span> <span class="n">assessment_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;QSPRID&quot;</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">assessment_df</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="n">id_vars</span><span class="p">)</span>
+        <span class="c1"># split the variable (&lt;property_name&gt;_&lt;suffixes&gt;_&lt;Label/Prediction/ProbabilityClass_X&gt;) column</span>
+        <span class="c1"># into the property name and the type (Label or Prediction or ProbabilityClass_X)</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s2">&quot;^(?P&lt;Property&gt;.*?)_(?P&lt;type&gt;Label|Prediction|ProbabilityClass_\d+)$&quot;</span>
+        <span class="p">)</span>
+        <span class="n">df</span><span class="p">[[</span><span class="s2">&quot;Property&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;variable&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">groupdict</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;variable&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># pivot the dataframe so that Label and Prediction are separate columns</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">id_vars</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">&quot;value&quot;</span>
+        <span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Prediction&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Prediction&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c1"># Add Fold column if it doesn&#39;t exist (for independent test set)</span>
+        <span class="k">if</span> <span class="s2">&quot;Fold&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Independent Test&quot;</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Independent Test&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Cross Validation&quot;</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="ClassifierPlot.prepareClassificationResults">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.prepareClassificationResults">[docs]</a>
+    <span class="k">def</span> <span class="nf">prepareClassificationResults</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare classification results dataframe for plotting.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">                the dataframe containing the classficiation results,</span>
+<span class="sd">                columns: Model, QSPRID, Fold, Property, Label, Prediction, Set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model_results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">):</span>
+            <span class="c1"># Read in and prepare the cross-validation and independent test set results</span>
+            <span class="n">df_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepareAssessment</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cvPaths</span><span class="p">[</span><span class="n">model</span><span class="p">]))</span>
+            <span class="n">df_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepareAssessment</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indPaths</span><span class="p">[</span><span class="n">model</span><span class="p">]))</span>
+            <span class="c1"># concatenate the cross-validation and independent test set results</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df_cv</span><span class="p">,</span> <span class="n">df_ind</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">model_results</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="c1"># concatenate the results from all models and add the model name as a column</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="n">model_results</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">keys</span><span class="o">=</span><span class="n">model_results</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="ClassifierPlot.calculateMultiClassMetrics">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.calculateMultiClassMetrics">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculateMultiClassMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">average_type</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate metrics for a given dataframe.&quot;&quot;&quot;</span>
+        <span class="c1"># check if ProbabilityClass_X columns exist</span>
+        <span class="n">proba</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;ProbabilityClass_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)])</span>
+
+        <span class="k">if</span> <span class="n">average_type</span> <span class="o">==</span> <span class="s2">&quot;All&quot;</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">),</span>
+                <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">:</span> <span class="n">matthews_corrcoef</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">),</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="n">proba</span><span class="p">:</span>
+                <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;calibration_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calibration_error</span><span class="p">(</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="p">[[</span><span class="sa">f</span><span class="s2">&quot;ProbabilityClass_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)]]</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+
+        <span class="c1"># check if average type is int (i.e. class number, so we can calculate metrics for a single class)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">average_type</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">class_num</span> <span class="o">=</span> <span class="n">average_type</span>
+            <span class="n">average_type</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;precision&quot;</span><span class="p">:</span> <span class="n">precision_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="n">average_type</span><span class="p">),</span>
+            <span class="s2">&quot;recall&quot;</span><span class="p">:</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="n">average_type</span><span class="p">),</span>
+            <span class="s2">&quot;f1&quot;</span><span class="p">:</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="n">average_type</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">proba</span><span class="p">:</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span>
+                <span class="n">df</span><span class="p">[[</span><span class="sa">f</span><span class="s2">&quot;ProbabilityClass_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)]],</span>
+                <span class="n">multi_class</span><span class="o">=</span><span class="s2">&quot;ovr&quot;</span><span class="p">,</span>
+                <span class="n">average</span><span class="o">=</span><span class="n">average_type</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># FIXME: metrics are only returned for class &quot;class_num&quot;, but calculated for all classes</span>
+        <span class="c1"># as returning a list of metrics for each class gives a dataframe with lists as values</span>
+        <span class="c1"># which is difficult to explode. Need to find a better way to do this.</span>
+        <span class="k">if</span> <span class="n">average_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">class_num</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="c1"># Conditionally include roc_auc_ovo for non-micro averages</span>
+        <span class="k">if</span> <span class="n">average_type</span> <span class="o">!=</span> <span class="s2">&quot;micro&quot;</span> <span class="ow">and</span> <span class="n">average_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">proba</span><span class="p">:</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span>
+                <span class="n">df</span><span class="p">[[</span><span class="sa">f</span><span class="s2">&quot;ProbabilityClass_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)]],</span>
+                <span class="n">multi_class</span><span class="o">=</span><span class="s2">&quot;ovo&quot;</span><span class="p">,</span>
+                <span class="n">average</span><span class="o">=</span><span class="n">average_type</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ClassifierPlot.calculateSingleClassMetrics">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.calculateSingleClassMetrics">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculateSingleClassMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate metrics for a given dataframe.&quot;&quot;&quot;</span>
+
+        <span class="c1"># check if ProbabilityClass_1 column exists</span>
+        <span class="n">proba</span> <span class="o">=</span> <span class="s2">&quot;ProbabilityClass_1&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">),</span>
+            <span class="s2">&quot;precision&quot;</span><span class="p">:</span> <span class="n">precision_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">),</span>
+            <span class="s2">&quot;recall&quot;</span><span class="p">:</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">),</span>
+            <span class="s2">&quot;f1&quot;</span><span class="p">:</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">),</span>
+            <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">:</span> <span class="n">matthews_corrcoef</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">proba</span><span class="p">:</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;calibration_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calibration_error</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">ProbabilityClass_1</span>
+            <span class="p">)</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">ProbabilityClass_1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ClassifierPlot.getSummary">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.getSummary">[docs]</a>
+    <span class="k">def</span> <span class="nf">getSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get summary statistics for classification results.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prepareClassificationResults</span><span class="p">()</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
+
+        <span class="n">summary_list</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># make summary for each model and property</span>
+        <span class="k">for</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Model</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Property</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                <span class="n">df_subset</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span>
+                    <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Model</span> <span class="o">==</span> <span class="n">model_name</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Property</span> <span class="o">==</span> <span class="n">property_name</span><span class="p">)</span>
+                <span class="p">]</span>
+
+                <span class="c1"># get the number of classes</span>
+                <span class="n">n_classes</span> <span class="o">=</span> <span class="n">df_subset</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
+
+                <span class="c1"># calculate metrics for binary and multi-class properties</span>
+                <span class="k">if</span> <span class="n">n_classes</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">summary_list</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Binary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">df_subset</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateSingleClassMetrics</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+                    <span class="n">summary_list</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Binary&quot;</span><span class="p">][</span>
+                        <span class="s2">&quot;Class&quot;</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Binary&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># calculate metrics for each class, average type and non-average type metrics</span>
+                    <span class="n">class_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="o">*</span><span class="p">[</span><span class="s2">&quot;macro&quot;</span><span class="p">,</span> <span class="s2">&quot;micro&quot;</span><span class="p">,</span> <span class="s2">&quot;weighted&quot;</span><span class="p">,</span> <span class="s2">&quot;All&quot;</span><span class="p">],</span>
+                        <span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)),</span>
+                    <span class="p">]</span>
+
+                    <span class="k">for</span> <span class="n">class_type</span> <span class="ow">in</span> <span class="n">class_list</span><span class="p">:</span>
+                        <span class="n">summary_list</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">class_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">df_subset</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateMultiClassMetrics</span><span class="p">(</span>
+                                    <span class="n">x</span><span class="p">,</span> <span class="n">class_type</span><span class="p">,</span> <span class="n">n_classes</span>
+                                <span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+                        <span class="n">summary_list</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">class_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span>
+                            <span class="s2">&quot;Class&quot;</span>
+                        <span class="p">]</span> <span class="o">=</span> <span class="n">class_type</span>
+
+        <span class="n">df_summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">summary_list</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">df_summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_summary</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot;Independent Test&quot;</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s2">&quot;Independent Test&quot;</span>
+            <span class="k">else</span> <span class="s2">&quot;Cross Validation&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary</span> <span class="o">=</span> <span class="n">df_summary</span>
+        <span class="k">return</span> <span class="n">df_summary</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ROCPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot">[docs]</a>
+<span class="k">class</span> <span class="nc">ROCPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of ROC-curve (receiver operating characteristic curve)</span>
+<span class="sd">    for a given classification model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ROCPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.getSupportedTasks">[docs]</a>
+    <span class="k">def</span> <span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of tasks supported by this plotter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ROCPlot.makeCV">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.makeCV">[docs]</a>
+    <span class="k">def</span> <span class="nf">makeCV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model using cross-validation data.</span>
+
+<span class="sd">        Many thanks to the scikit-learn documentation since the code below</span>
+<span class="sd">        borrows heavily from the example at:</span>
+
+<span class="sd">        https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel):</span>
+<span class="sd">                the model to plot the data from.</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the property to plot (should correspond to the prefix</span>
+<span class="sd">                of the column names in the data files).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           ax (matplotlib.axes.Axes): the axes object containing the plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cvPaths</span><span class="p">[</span><span class="n">model</span><span class="p">])</span>
+        <span class="c1"># get true positive rate and false positive rate for each fold</span>
+        <span class="n">tprs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">aucs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mean_fpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="c1"># get labels</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
+            <span class="n">y_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Label&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
+            <span class="c1"># do plotting</span>
+            <span class="n">viz</span> <span class="o">=</span> <span class="n">RocCurveDisplay</span><span class="o">.</span><span class="n">from_predictions</span><span class="p">(</span>
+                <span class="n">y_true</span><span class="p">,</span>
+                <span class="n">y_pred</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ROC fold </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fold</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">interp_tpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">mean_fpr</span><span class="p">,</span> <span class="n">viz</span><span class="o">.</span><span class="n">fpr</span><span class="p">,</span> <span class="n">viz</span><span class="o">.</span><span class="n">tpr</span><span class="p">)</span>
+            <span class="n">interp_tpr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">tprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interp_tpr</span><span class="p">)</span>
+            <span class="n">aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">viz</span><span class="o">.</span><span class="n">roc_auc</span><span class="p">)</span>
+        <span class="c1"># plot chance line</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Chance&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span>
+        <span class="p">)</span>
+        <span class="c1"># plot mean ROC across folds</span>
+        <span class="n">mean_tpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">tprs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">mean_tpr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">mean_auc</span> <span class="o">=</span> <span class="n">auc</span><span class="p">(</span><span class="n">mean_fpr</span><span class="p">,</span> <span class="n">mean_tpr</span><span class="p">)</span>
+        <span class="n">std_auc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">aucs</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">mean_fpr</span><span class="p">,</span>
+            <span class="n">mean_tpr</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Mean ROC (AUC = </span><span class="si">%0.2f</span><span class="s2"> $\pm$ </span><span class="si">%0.2f</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mean_auc</span><span class="p">,</span> <span class="n">std_auc</span><span class="p">),</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># plot standard deviation across folds</span>
+        <span class="n">std_tpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">tprs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">tprs_upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">mean_tpr</span> <span class="o">+</span> <span class="n">std_tpr</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">tprs_lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">mean_tpr</span> <span class="o">-</span> <span class="n">std_tpr</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">mean_fpr</span><span class="p">,</span>
+            <span class="n">tprs_lower</span><span class="p">,</span>
+            <span class="n">tprs_upper</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\pm$ 1 std. dev.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># set axes limits and labels</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Receiver Operating Characteristic (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelNames</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="ROCPlot.makeInd">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.makeInd">[docs]</a>
+    <span class="k">def</span> <span class="nf">makeInd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the ROC plot for a given model using independent test data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel):</span>
+<span class="sd">                the model to plot the data from.</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the property to plot</span>
+<span class="sd">                (should correspond to the prefix of the column names in the data files).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">              ax (matplotlib.axes.Axes): the axes object containing the plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indPaths</span><span class="p">[</span><span class="n">model</span><span class="p">])</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">]</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Label&quot;</span><span class="p">]</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="n">RocCurveDisplay</span><span class="o">.</span><span class="n">from_predictions</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="p">,</span>
+            <span class="n">y_pred</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ROC&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Chance&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Receiver Operating Characteristic (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelNames</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="ROCPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.make">[docs]</a>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">validation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span>
+        <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the ROC plot for given validation sets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the predicted property to plot (should correspond to the</span>
+<span class="sd">                prefix of the column names in `cvPaths` or `indPaths` files).</span>
+<span class="sd">                If `None`, the first property in the model&#39;s `targetProperties` list</span>
+<span class="sd">                will be used.</span>
+<span class="sd">            validation (str):</span>
+<span class="sd">                The type of validation set to read data for. Can be either &#39;cv&#39;</span>
+<span class="sd">                for cross-validation or &#39;ind&#39; for independent test set.</span>
+<span class="sd">            fig_size (tuple):</span>
+<span class="sd">                The size of the figure to create.</span>
+<span class="sd">            save (bool):</span>
+<span class="sd">                Whether to save the plot to a file.</span>
+<span class="sd">            show (bool):</span>
+<span class="sd">                Whether to display the plot.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            axes (list[plt.Axes]):</span>
+<span class="sd">                A list of matplotlib axes objects containing the plots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">property_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">property_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+        <span class="c1"># fetch the correct plotting function based on validation set type</span>
+        <span class="c1"># and make the plot for each model</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cv&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeCV</span><span class="p">,</span> <span class="s2">&quot;ind&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeInd</span><span class="p">}</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">fig_size</span><span class="p">)</span>
+            <span class="n">choices</span><span class="p">[</span><span class="n">validation</span><span class="p">](</span><span class="n">model</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelOuts</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">validation</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">axes</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PRCPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot">[docs]</a>
+<span class="k">class</span> <span class="nc">PRCPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of Precision-Recall curve for a given model.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PRCPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.getSupportedTasks">[docs]</a>
+    <span class="k">def</span> <span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of tasks supported by this plotter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="PRCPlot.makeCV">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.makeCV">[docs]</a>
+    <span class="k">def</span> <span class="nf">makeCV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model using cross-validation data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel):</span>
+<span class="sd">                the model to plot the data from.</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the property to plot</span>
+<span class="sd">                (should correspond to the prefix of the column names in the data files).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">                ax (matplotlib.axes.Axes):</span>
+<span class="sd">                    the axes object containing the plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># read data from file for each fold</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cvPaths</span><span class="p">[</span><span class="n">model</span><span class="p">])</span>
+        <span class="n">y_real</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">y_predproba</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="c1"># get labels</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
+            <span class="n">y_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Label&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
+            <span class="n">y_predproba</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+            <span class="n">y_real</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+            <span class="c1"># do plotting</span>
+            <span class="n">PrecisionRecallDisplay</span><span class="o">.</span><span class="n">from_predictions</span><span class="p">(</span>
+                <span class="n">y_true</span><span class="p">,</span>
+                <span class="n">y_pred</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;PRC fold </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fold</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># Linear interpolation of PR curve is not recommended, so we don&#39;t plot &quot;chance&quot;</span>
+        <span class="c1"># https://dl.acm.org/doi/10.1145/1143844.1143874</span>
+        <span class="c1"># Plotting the average precision-recall curve over the cross validation runs</span>
+        <span class="n">y_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">y_real</span><span class="p">)</span>
+        <span class="n">y_predproba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">y_predproba</span><span class="p">)</span>
+        <span class="n">PrecisionRecallDisplay</span><span class="o">.</span><span class="n">from_predictions</span><span class="p">(</span>
+            <span class="n">y_real</span><span class="p">,</span>
+            <span class="n">y_predproba</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Mean PRC&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Precision-Recall Curve (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelNames</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="PRCPlot.makeInd">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.makeInd">[docs]</a>
+    <span class="k">def</span> <span class="nf">makeInd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model using independent test data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel):</span>
+<span class="sd">                the model to plot the data from.</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the property to plot (should correspond to the prefix</span>
+<span class="sd">                of the column names in the data files).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">              ax (matplotlib.axes.Axes):</span>
+<span class="sd">                the axes object containing the plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># read data from file</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indPaths</span><span class="p">[</span><span class="n">model</span><span class="p">])</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">]</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Label&quot;</span><span class="p">]</span>
+        <span class="c1"># do plotting</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="n">PrecisionRecallDisplay</span><span class="o">.</span><span class="n">from_predictions</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="p">,</span>
+            <span class="n">y_pred</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;PRC&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Receiver Operating Characteristic (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelNames</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="PRCPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.make">[docs]</a>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">validation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span>
+        <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given validation type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the property to plot (should correspond to the prefix</span>
+<span class="sd">                of the column names in the data files). If `None`, the first</span>
+<span class="sd">                property in the model&#39;s `targetProperties` list will be used.</span>
+<span class="sd">            validation (str):</span>
+<span class="sd">                The type of validation data to use.</span>
+<span class="sd">                Can be either &#39;cv&#39; for cross-validation or &#39;ind&#39;</span>
+<span class="sd">                for independent test set.</span>
+<span class="sd">            fig_size (tuple):</span>
+<span class="sd">                The size of the figure to create.</span>
+<span class="sd">            save (bool):</span>
+<span class="sd">                Whether to save the plot to a file.</span>
+<span class="sd">            show (bool):</span>
+<span class="sd">                Whether to display the plot.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            axes (list): A list of matplotlib axes objects containing the plots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">property_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">property_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cv&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeCV</span><span class="p">,</span> <span class="s2">&quot;ind&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeInd</span><span class="p">}</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">fig_size</span><span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">choices</span><span class="p">[</span><span class="n">validation</span><span class="p">](</span><span class="n">model</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelOuts</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">validation</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">axes</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CalibrationPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot">[docs]</a>
+<span class="k">class</span> <span class="nc">CalibrationPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of calibration curve for a given model.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CalibrationPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.getSupportedTasks">[docs]</a>
+    <span class="k">def</span> <span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of tasks supported by this plotter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="CalibrationPlot.makeCV">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.makeCV">[docs]</a>
+    <span class="k">def</span> <span class="nf">makeCV</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model using cross-validation data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel):</span>
+<span class="sd">                the model to plot the data from.</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the property to plot (should correspond to the</span>
+<span class="sd">                prefix of the column names in the data files).</span>
+<span class="sd">            n_bins (int):</span>
+<span class="sd">                The number of bins to use for the calibration curve.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ax (matplotlib.axes.Axes): the axes object containing the plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># read data from file for each fold and plot</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cvPaths</span><span class="p">[</span><span class="n">model</span><span class="p">])</span>
+        <span class="n">y_real</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="c1"># get labels</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
+            <span class="n">y_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Label&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
+            <span class="n">y_pred_proba</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+            <span class="n">y_real</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+            <span class="c1"># do plotting</span>
+            <span class="n">CalibrationDisplay</span><span class="o">.</span><span class="n">from_predictions</span><span class="p">(</span>
+                <span class="n">y_true</span><span class="p">,</span>
+                <span class="n">y_pred</span><span class="p">,</span>
+                <span class="n">n_bins</span><span class="o">=</span><span class="n">n_bins</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Fold: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fold</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># Plotting the average precision-recall curve over the cross validation runs</span>
+        <span class="n">y_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">y_real</span><span class="p">)</span>
+        <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">y_pred_proba</span><span class="p">)</span>
+        <span class="n">CalibrationDisplay</span><span class="o">.</span><span class="n">from_predictions</span><span class="p">(</span>
+            <span class="n">y_real</span><span class="p">,</span>
+            <span class="n">y_pred_proba</span><span class="p">,</span>
+            <span class="n">n_bins</span><span class="o">=</span><span class="n">n_bins</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Mean&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Calibration Curve (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelNames</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="CalibrationPlot.makeInd">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.makeInd">[docs]</a>
+    <span class="k">def</span> <span class="nf">makeInd</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model using independent test data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel):</span>
+<span class="sd">                the model to plot the data from.</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the property to plot (should correspond to the prefix</span>
+<span class="sd">                of the column names in the data files).</span>
+<span class="sd">            n_bins (int):</span>
+<span class="sd">                The number of bins to use for the calibration curve.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ax (matplotlib.axes.Axes):</span>
+<span class="sd">                the axes object containing the plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indPaths</span><span class="p">[</span><span class="n">model</span><span class="p">])</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">]</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Label&quot;</span><span class="p">]</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="n">CalibrationDisplay</span><span class="o">.</span><span class="n">from_predictions</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="p">,</span>
+            <span class="n">y_pred</span><span class="p">,</span>
+            <span class="n">n_bins</span><span class="o">=</span><span class="n">n_bins</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Calibration&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">],</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Calibration Curve (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelNames</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="CalibrationPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.make">[docs]</a>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">validation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span>
+        <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given validation type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the property to plot (should correspond to the prefix</span>
+<span class="sd">                of the column names in the data files). If `None`, the first</span>
+<span class="sd">                property in the model&#39;s `targetProperties` list will be used.</span>
+<span class="sd">            validation (str):</span>
+<span class="sd">                The type of validation data to use. Can be either &#39;cv&#39;</span>
+<span class="sd">                for cross-validation or &#39;ind&#39; for independent test set.</span>
+<span class="sd">            fig_size (tuple):</span>
+<span class="sd">                The size of the figure to create.</span>
+<span class="sd">            save (bool):</span>
+<span class="sd">                Whether to save the plot to a file.</span>
+<span class="sd">            show (bool):</span>
+<span class="sd">                Whether to display the plot.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            axes (list[plt.Axes]):</span>
+<span class="sd">                A list of matplotlib axes objects containing the plots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">property_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">property_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cv&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeCV</span><span class="p">,</span> <span class="s2">&quot;ind&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeInd</span><span class="p">}</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">fig_size</span><span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">choices</span><span class="p">[</span><span class="n">validation</span><span class="p">](</span><span class="n">model</span><span class="p">,</span> <span class="n">property_name</span><span class="p">,</span> <span class="n">fig_size</span><span class="p">)</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelOuts</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">validation</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">axes</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MetricsPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot">[docs]</a>
+<span class="k">class</span> <span class="nc">MetricsPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of metrics for a given model.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        models (list): A list of QSPRModel objects to plot the data from.</span>
+<span class="sd">        metrics (list): A list of metrics to plot, choose from:</span>
+<span class="sd">            f1, matthews_corrcoef, precision, recall, accuracy, roc_auc, roc_auc_ovr,</span>
+<span class="sd">            roc_auc_ovo and calibration_error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">],</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span>
+            <span class="n">Literal</span><span class="p">[</span>
+                <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;calibration_error&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;calibration_error&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise the metrics plot.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            models (list): A list of QSPRModel objects to plot the data from.</span>
+<span class="sd">            metrics (list): A list of metrics to plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
+
+<div class="viewcode-block" id="MetricsPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot.make">[docs]</a>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given validation type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            property_name (str):</span>
+<span class="sd">                name of the property to plot (should correspond to the prefix of</span>
+<span class="sd">                the column names in the data files).</span>
+<span class="sd">            save (bool):</span>
+<span class="sd">                Whether to save the plot to a file.</span>
+<span class="sd">            show (bool):</span>
+<span class="sd">                Whether to display the plot.</span>
+<span class="sd">            out_path (str | None):</span>
+<span class="sd">                Path to save the plots to, e.g. &quot;results/plot.png&quot;, the plot will be</span>
+<span class="sd">                saved to this path with the metric name appended before the extension,</span>
+<span class="sd">                e.g. &quot;results/plot_roc_auc.png&quot;. If `None`, the plots will be saved to</span>
+<span class="sd">                each model&#39;s output directory.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            figures (list[sns.FacetGrid]):</span>
+<span class="sd">                the seaborn FacetGrid objects used to make the plot</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">                A dataframe containing the summary data generated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get summary with calculated metrics</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">getSummary</span><span class="p">()</span>
+
+        <span class="n">figures</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+            <span class="c1"># check if metric in summary dataframe</span>
+            <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metric </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2"> not in summary dataframe, skipping&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># plot the results</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">catplot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">,</span>
+                <span class="n">x</span><span class="o">=</span><span class="s2">&quot;Class&quot;</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+                <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;Set&quot;</span><span class="p">,</span>
+                <span class="n">col</span><span class="o">=</span><span class="s2">&quot;Property&quot;</span><span class="p">,</span>
+                <span class="n">row</span><span class="o">=</span><span class="s2">&quot;Model&quot;</span><span class="p">,</span>
+                <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;bar&quot;</span><span class="p">,</span>
+                <span class="n">margin_titles</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">sharex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">sharey</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># set y range max to 1 for each plot, but don&#39;t set min to 0 as some metrics can be negative</span>
+            <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">axes_dict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">y_min</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">figures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+                <span class="c1"># add metric to out_path if it exists before the extension</span>
+                <span class="k">if</span> <span class="n">out_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">out_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+                        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">figures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ConfusionMatrixPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot">[docs]</a>
+<span class="k">class</span> <span class="nc">ConfusionMatrixPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of confusion matrix for a given model as a heatmap.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ConfusionMatrixPlot.getConfusionMatrixDict">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot.getConfusionMatrixDict">[docs]</a>
+    <span class="k">def</span> <span class="nf">getConfusionMatrixDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create dictionary of confusion matrices for each model, property and fold</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame):</span>
+<span class="sd">                the dataframe containing the classficiation results,</span>
+<span class="sd">                columns: Model, QSPRID, Fold, Property, Label, Prediction, Set</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict:</span>
+<span class="sd">                dictionary of confusion matrices for each model, property and fold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">conf_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Model</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Property</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                    <span class="n">df_subset</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span>
+                        <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Model</span> <span class="o">==</span> <span class="n">model</span><span class="p">)</span>
+                        <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Property</span> <span class="o">==</span> <span class="nb">property</span><span class="p">)</span>
+                        <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">)</span>
+                    <span class="p">]</span>
+                    <span class="n">conf_dict</span><span class="p">[(</span><span class="n">model</span><span class="p">,</span> <span class="nb">property</span><span class="p">,</span> <span class="n">fold</span><span class="p">)]</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span>
+                        <span class="n">df_subset</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df_subset</span><span class="o">.</span><span class="n">Prediction</span>
+                    <span class="p">)</span>
+        <span class="k">return</span> <span class="n">conf_dict</span></div>
+
+
+<div class="viewcode-block" id="ConfusionMatrixPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot.make">[docs]</a>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make confusion matrix heatmap for each model, property and fold</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            save (bool):</span>
+<span class="sd">                whether to save the plot</span>
+<span class="sd">            show (bool):</span>
+<span class="sd">                whether to show the plot</span>
+<span class="sd">            out_path (str | None):</span>
+<span class="sd">                path to save the plot to, e.g. &quot;results/plot.png&quot;, the plots will be</span>
+<span class="sd">                saved to this path with the plot identifier appended before the extension,</span>
+<span class="sd">                If `None`, the plots will be saved to each model&#39;s output directory.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict:</span>
+<span class="sd">                dictionary of confusion matrices for each model, property and fold</span>
+<span class="sd">            list[plt.axes.Axes]:</span>
+<span class="sd">                a list of matplotlib axes objects containing the plots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepareClassificationResults</span><span class="p">()</span>
+
+        <span class="c1"># Get dictionary of confusion matrices</span>
+        <span class="n">conf_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getConfusionMatrixDict</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># Create heatmap for each model, property and fold</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Model</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Property</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+                    <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span>
+                        <span class="n">conf_dict</span><span class="p">[(</span><span class="n">model</span><span class="p">,</span> <span class="nb">property</span><span class="p">,</span> <span class="n">fold</span><span class="p">)],</span>
+                        <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
+                        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Confusion Matrix (</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">property</span><span class="si">}</span><span class="s2">_fold_</span><span class="si">{</span><span class="n">fold</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Predicted label&quot;</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;True label&quot;</span><span class="p">)</span>
+                    <span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">out_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="c1"># add identifier to out_path before the extension</span>
+                            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+                                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">out_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">property</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">fold</span><span class="si">}</span><span class="s2">_confusion_matrix.png&quot;</span><span class="p">,</span>
+                                <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># reverse self.modelNames dictionary to get model out</span>
+                            <span class="n">modelNames</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelNames</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelOuts</span><span class="p">[</span><span class="n">modelNames</span><span class="p">[</span><span class="n">model</span><span class="p">]]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">property</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">fold</span><span class="si">}</span><span class="s2">_confusion_matrix.png&quot;</span><span class="p">,</span>
+                                <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+                            <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+                        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                        <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">axes</span><span class="p">,</span> <span class="n">conf_dict</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
