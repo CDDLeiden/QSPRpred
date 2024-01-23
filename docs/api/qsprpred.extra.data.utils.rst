@@ -7,31 +7,15 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   qsprpred.extra.data.utils.descriptor_utils
+   qsprpred.extra.data.utils.testing
 
 Submodules
 ----------
 
-qsprpred.extra.data.utils.datasplitters module
-----------------------------------------------
+qsprpred.extra.data.utils.msa\_calculator module
+------------------------------------------------
 
-.. automodule:: qsprpred.extra.data.utils.datasplitters
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-qsprpred.extra.data.utils.descriptorcalculator module
------------------------------------------------------
-
-.. automodule:: qsprpred.extra.data.utils.descriptorcalculator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-qsprpred.extra.data.utils.descriptorsets module
------------------------------------------------
-
-.. automodule:: qsprpred.extra.data.utils.descriptorsets
+.. automodule:: qsprpred.extra.data.utils.msa_calculator
    :members:
    :undoc-members:
    :show-inheritance:

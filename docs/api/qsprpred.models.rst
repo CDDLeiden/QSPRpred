@@ -28,14 +28,6 @@ qsprpred.models.hyperparam\_optimization module
    :undoc-members:
    :show-inheritance:
 
-qsprpred.models.interfaces module
----------------------------------
-
-.. automodule:: qsprpred.models.interfaces
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 qsprpred.models.metrics module
 ------------------------------
 
@@ -44,18 +36,26 @@ qsprpred.models.metrics module
    :undoc-members:
    :show-inheritance:
 
-qsprpred.models.sklearn module
-------------------------------
+qsprpred.models.models module
+-----------------------------
 
-.. automodule:: qsprpred.models.sklearn
+.. automodule:: qsprpred.models.models
    :members:
    :undoc-members:
    :show-inheritance:
 
-qsprpred.models.tasks module
-----------------------------
+qsprpred.models.monitors module
+-------------------------------
 
-.. automodule:: qsprpred.models.tasks
+.. automodule:: qsprpred.models.monitors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.models.scikit\_learn module
+------------------------------------
+
+.. automodule:: qsprpred.models.scikit_learn
    :members:
    :undoc-members:
    :show-inheritance:

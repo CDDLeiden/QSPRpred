@@ -246,9 +246,7 @@ class BenchmarkRunner:
             return replica_logger
         replica_logger.setLevel(level)
         sh = logging.StreamHandler()
-        formatter = logging.Formatter(
-            "%(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
         sh.setFormatter(formatter)
         sh.setLevel(level)
         replica_logger.addHandler(sh)
@@ -370,6 +368,6 @@ class BenchmarkRunner:
             logger.debug(f"Finished replica: {replica.id}")
             return replica.id
         except Exception as e:
-            logger.error(f"Error in replica: {e}")
+            logger.error(f"Error in replica '{replica}': {e}")
             traceback.print_exception(type(e), e, e.__traceback__)
             return cls.ReplicaException(replica.id, e)
