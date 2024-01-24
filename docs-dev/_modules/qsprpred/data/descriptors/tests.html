@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.descriptors.tests &mdash; QSPRpred 3.0.0.dev304+g63a6a08 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=6eabed1d"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0.dev304+g63a6a08
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.descriptors.tests</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.data.descriptors.tests</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
+<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">Descriptors</span>
+
+<span class="kn">from</span> <span class="nn">.fingerprints</span> <span class="kn">import</span> <span class="n">MorganFP</span>
+<span class="kn">from</span> <span class="nn">.sets</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DrugExPhyschem</span><span class="p">,</span>
+    <span class="n">PredictorDesc</span><span class="p">,</span>
+    <span class="n">TanimotoDistances</span><span class="p">,</span>
+    <span class="n">RDKitDescs</span><span class="p">,</span>
+    <span class="n">SmilesDesc</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
+<span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="n">RandomSplit</span>
+<span class="kn">from</span> <span class="nn">...data.processing.feature_filters</span> <span class="kn">import</span> <span class="n">LowVarianceFilter</span><span class="p">,</span> <span class="n">HighCorrelationFilter</span>
+<span class="kn">from</span> <span class="nn">...models</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
+<span class="kn">from</span> <span class="nn">...utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
+<span class="kn">from</span> <span class="nn">...utils.testing.check_mixins</span> <span class="kn">import</span> <span class="n">DescriptorInDataCheckMixIn</span>
+<span class="kn">from</span> <span class="nn">...utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsPathMixIn</span>
+
+
+<div class="viewcode-block" id="TestDescriptorCalculation">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorCalculation">[docs]</a>
+<span class="k">class</span> <span class="nc">TestDescriptorCalculation</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the calculation of descriptors.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestDescriptorCalculation.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorCalculation.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the test Dataframe.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">50</span><span class="p">)])</span>
+    <span class="k">def</span> <span class="nf">testSwitching</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_cpu</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test if the feature calculator can be switched to a new dataset.&quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
+            <span class="s2">&quot;TestSwitching&quot;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_cpu</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span>
+        <span class="p">)</span>
+        <span class="n">feature_calculators</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">256</span><span class="p">),</span>
+            <span class="n">DrugExPhyschem</span><span class="p">(),</span>
+        <span class="p">]</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">lv</span> <span class="o">=</span> <span class="n">LowVarianceFilter</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">hc</span> <span class="o">=</span> <span class="n">HighCorrelationFilter</span><span class="p">(</span><span class="mf">0.9</span><span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
+            <span class="n">feature_calculators</span><span class="o">=</span><span class="n">feature_calculators</span><span class="p">,</span>
+            <span class="n">feature_filters</span><span class="o">=</span><span class="p">[</span><span class="n">lv</span><span class="p">,</span> <span class="n">hc</span><span class="p">],</span>
+            <span class="n">recalculate_features</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">feature_fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># create new dataset with the same calculator</span>
+        <span class="n">dataset_next</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">dataset_next</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
+            <span class="n">feature_calculators</span><span class="o">=</span><span class="n">feature_calculators</span><span class="p">,</span>
+            <span class="n">feature_filters</span><span class="o">=</span><span class="p">[</span><span class="n">lv</span><span class="p">,</span> <span class="n">hc</span><span class="p">],</span>
+            <span class="n">recalculate_features</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">feature_fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dataset_next</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="TestDescriptorSets">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorSets">[docs]</a>
+<span class="k">class</span> <span class="nc">TestDescriptorSets</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the descriptor sets.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestDescriptorSets.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorSets.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the test Dataframe.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TestDescriptorSets.testPredictorDescriptor">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorSets.testPredictorDescriptor">[docs]</a>
+    <span class="k">def</span> <span class="nf">testPredictorDescriptor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the PredictorDesc descriptor set.&quot;&quot;&quot;</span>
+        <span class="c1"># give path to saved model parameters</span>
+        <span class="n">meta_path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputBasePath</span><span class="si">}</span><span class="s2">/test_predictor/&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;qspr/models/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json&quot;</span>
+        <span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">meta_path</span><span class="p">)</span>
+        <span class="n">desc_calc</span> <span class="o">=</span> <span class="n">PredictorDesc</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">desc_calc</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
+        <span class="c1"># test from file instantiation</span>
+        <span class="n">desc_calc</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="si">}</span><span class="s2">/test_calc.json&quot;</span><span class="p">)</span>
+        <span class="n">desc_calc_file</span> <span class="o">=</span> <span class="n">desc_calc</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="si">}</span><span class="s2">/test_calc.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">desc_calc_file</span><span class="p">],</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="TestDescriptorSets.testFingerprintSet">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorSets.testFingerprintSet">[docs]</a>
+    <span class="k">def</span> <span class="nf">testFingerprintSet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the fingerprint set descriptor calculator.&quot;&quot;&quot;</span>
+        <span class="n">desc_calc</span> <span class="o">=</span> <span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">desc_calc</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="mi">128</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestDescriptorSets.testTanimotoDistances">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorSets.testTanimotoDistances">[docs]</a>
+    <span class="k">def</span> <span class="nf">testTanimotoDistances</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the Tanimoto distances descriptor calculator, which calculates the</span>
+<span class="sd">        Tanimoto distances between a list of SMILES.&quot;&quot;&quot;</span>
+        <span class="n">list_of_smiles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;CC&quot;</span><span class="p">,</span> <span class="s2">&quot;CCC&quot;</span><span class="p">,</span> <span class="s2">&quot;CCCC&quot;</span><span class="p">,</span> <span class="s2">&quot;CCCCC&quot;</span><span class="p">,</span> <span class="s2">&quot;CCCCCC&quot;</span><span class="p">,</span> <span class="s2">&quot;CCCCCCC&quot;</span><span class="p">]</span>
+        <span class="n">desc_calc</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">TanimotoDistances</span><span class="p">(</span>
+                <span class="n">list_of_smiles</span><span class="o">=</span><span class="n">list_of_smiles</span><span class="p">,</span>
+                <span class="n">fingerprint_type</span><span class="o">=</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="n">desc_calc</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestDescriptorSets.testDrugExPhyschem">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorSets.testDrugExPhyschem">[docs]</a>
+    <span class="k">def</span> <span class="nf">testDrugExPhyschem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the DrugExPhyschem descriptor calculator.&quot;&quot;&quot;</span>
+        <span class="n">desc_calc</span> <span class="o">=</span> <span class="p">[</span><span class="n">DrugExPhyschem</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="n">desc_calc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="mi">19</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestDescriptorSets.testRDKitDescs">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorSets.testRDKitDescs">[docs]</a>
+    <span class="k">def</span> <span class="nf">testRDKitDescs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the rdkit descriptors calculator.&quot;&quot;&quot;</span>
+        <span class="n">desc_calc</span> <span class="o">=</span> <span class="p">[</span><span class="n">RDKitDescs</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="n">desc_calc</span><span class="p">)</span>
+        <span class="n">rdkit_desc_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">Descriptors</span><span class="o">.</span><span class="n">_descList</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="n">rdkit_desc_count</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># with 3D</span>
+        <span class="n">desc_calc</span> <span class="o">=</span> <span class="p">[</span><span class="n">RDKitDescs</span><span class="p">(</span><span class="n">include_3d</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="n">desc_calc</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="n">rdkit_desc_count</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestDescriptorSets.testSmilesDesc">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorSets.testSmilesDesc">[docs]</a>
+    <span class="k">def</span> <span class="nf">testSmilesDesc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the smiles descriptors calculator.&quot;&quot;&quot;</span>
+        <span class="n">desc_calc</span> <span class="o">=</span> <span class="p">[</span><span class="n">SmilesDesc</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="n">desc_calc</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="TestDescriptorSets.testConsistency">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorSets.testConsistency">[docs]</a>
+    <span class="k">def</span> <span class="nf">testConsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test if the descriptor calculator is consistent with the dataset.&quot;&quot;&quot;</span>
+        <span class="n">len_prev</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">desc_calc</span> <span class="o">=</span> <span class="p">[</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="n">desc_calc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">len_prev</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">len_prev</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">len_prev</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">len_prev</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TestDescriptorsAll">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorsAll">[docs]</a>
+<span class="k">class</span> <span class="nc">TestDescriptorsAll</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">DescriptorInDataCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test all descriptor sets in all data sets.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestDescriptorsAll.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.tests.TestDescriptorsAll.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">desc_set</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">desc_set</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+                        <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1200</span><span class="p">],</span>
+                    <span class="p">}</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">desc_set</span> <span class="ow">in</span> <span class="n">DataSetsPathMixIn</span><span class="o">.</span><span class="n">getAllDescriptors</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="o">+</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">desc_set</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">desc_set</span><span class="p">,</span>
+                <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">desc_set</span> <span class="ow">in</span> <span class="n">DataSetsPathMixIn</span><span class="o">.</span><span class="n">getAllDescriptors</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="o">+</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">desc_set</span><span class="si">}</span><span class="s2">_Multitask&quot;</span><span class="p">,</span>
+                <span class="n">desc_set</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">},</span>
+                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]},</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">desc_set</span> <span class="ow">in</span> <span class="n">DataSetsPathMixIn</span><span class="o">.</span><span class="n">getAllDescriptors</span><span class="p">()</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testDescriptorsAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">desc_set</span><span class="p">,</span> <span class="n">target_props</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests all available descriptor sets.</span>
+
+<span class="sd">        Note that they are not checked with all possible settings and all possible</span>
+<span class="sd">        preparations, but only with the default settings provided by</span>
+<span class="sd">        `DataSetsPathMixIn.getDefaultPrep()`. The list itself is defined and configured by</span>
+<span class="sd">        `DataSetsPathMixIn.getAllDescriptors()`, so if you need a specific descriptor</span>
+<span class="sd">        tested, add it there.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDatSetName</span><span class="p">(</span><span class="n">desc_set</span><span class="p">,</span> <span class="n">target_props</span><span class="p">),</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkDataSetContainsDescriptorSet</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span> <span class="n">desc_set</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span> <span class="n">target_props</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
