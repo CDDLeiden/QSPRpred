@@ -1,10 +1,6 @@
-[**Main
-**](https://github.com/CDDLeiden/QSPRpred/) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)
-[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
+[**Main**](https://github.com/CDDLeiden/QSPRpred/) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
 
-[**Dev
-**](https://github.com/CDDLeiden/QSPRpred/tree/dev) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)
-[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
+[**Dev**](https://github.com/CDDLeiden/QSPRpred/tree/dev) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
 
 QSPRpred
 ====================
