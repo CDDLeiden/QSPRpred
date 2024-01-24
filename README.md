@@ -1,4 +1,10 @@
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-autopep8-blue.svg?colorA=24292e&colorB=0366d6&style=flat&longCache=true&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAM6wAADOsB5dZE0gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAERSURBVCiRhZG/SsMxFEZPfsVJ61jbxaF0cRQRcRJ9hlYn30IHN/+9iquDCOIsblIrOjqKgy5aKoJQj4O3EEtbPwhJbr6Te28CmdSKeqzeqr0YbfVIrTBKakvtOl5dtTkK+v4HfA9PEyBFCY9AGVgCBLaBp1jPAyfAJ/AAdIEG0dNAiyP7+K1qIfMdonZic6+WJoBJvQlvuwDqcXadUuqPA1NKAlexbRTAIMvMOCjTbMwl1LtI/6KWJ5Q6rT6Ht1MA58AX8Apcqqt5r2qhrgAXQC3CZ6i1+KMd9TRu3MvA3aH/fFPnBodb6oe6HM8+lYHrGdRXW8M9bMZtPXUji69lmf5Cmamq7quNLFZXD9Rq7v0Bpc1o/tp0fisAAAAASUVORK5CYII=)](https://github.com/marketplace/actions/autopep8)
+[**Main
+**](https://github.com/CDDLeiden/QSPRpred/) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)
+[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
+
+[**Dev
+**](https://github.com/CDDLeiden/QSPRpred/tree/dev) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)
+[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
 
 QSPRpred
 ====================
@@ -104,7 +110,10 @@ python -m qsprpred.model_CLI -dp ./qspr/data/GABAAalpha_REGRESSION_df.pkl -o ./q
 Contributions
 =============
 
-Contributions and issue reports are more than welcome. Pull requests can be made directly to the `main` branch and we will transfer them to [contrib](https://github.com/CDDLeiden/QSPRpred/tree/contrib) when scheduled for the next release.
+Contributions and issue reports are more than welcome. Pull requests can be made
+directly to the `main` branch and we will transfer them
+to [contrib](https://github.com/CDDLeiden/QSPRpred/tree/contrib) when scheduled for the
+next release.
 
 Workflow
 ========
