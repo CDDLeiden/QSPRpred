@@ -176,7 +176,6 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         Args:
             base_dir: Base directory for model.
             name: Name of the model.
-            dataset: Data set to use.
             parameters: Parameters to use.
         """
         if parameters is None:
@@ -185,9 +184,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         if len(GPUS) > 0:
             parameters["gpu"] = GPUS[0]
         parameters["epochs"] = 2
-        return ChempropModel(
-            base_dir=base_dir, data=dataset, name=name, parameters=parameters
-        )
+        return ChempropModel(base_dir=base_dir, name=name, parameters=parameters)
 
     @parameterized.expand(
         [
@@ -405,7 +402,6 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
         return import_module("..pyboost", __name__).PyBoostModel(
             base_dir=base_dir,
-            data=dataset,
             name=name,
             parameters=parameters,
         )
