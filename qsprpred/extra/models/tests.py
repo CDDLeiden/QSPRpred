@@ -10,7 +10,6 @@ from sklearn.cross_decomposition import PLSRegression
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.extra.data.descriptors.sets import ProDec
-from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.tasks import TargetProperty, TargetTasks
 from ..data.utils.testing.path_mixins import DataSetsMixInExtras
 from ..models.pcm import SklearnPCMModel
@@ -42,7 +41,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         Args:
             name (str): Name of the model.
             alg (Type | None): Algorithm class.
-            dataset (PCMDataSet | None): Dataset to use.
             parameters (dict | None): Parameters to use.
             random_state (int | None): Random seed to use.
 
@@ -52,7 +50,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         return SklearnPCMModel(
             base_dir=self.generatedModelsPath,
             alg=alg,
-            data=dataset,
             name=name,
             parameters=parameters,
             random_state=random_state,
