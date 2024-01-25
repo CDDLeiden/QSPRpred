@@ -15,7 +15,6 @@ from sklearn.model_selection import ShuffleSplit
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.tasks import ModelTasks, TargetTasks
-from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
@@ -48,7 +47,6 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         base_dir: str,
         name: str,
         alg: Type | None = None,
-        dataset: QSPRDataset = None,
         parameters: dict | None = None,
         random_state: int | None = None,
     ):
@@ -65,7 +63,6 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         return DNNModel(
             base_dir=base_dir,
             alg=alg,
-            data=dataset,
             name=name,
             parameters=parameters,
             gpus=GPUS,
@@ -127,10 +124,9 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             base_dir=self.generatedModelsPath,
             name=f"{alg_name}",
             alg=alg,
-            dataset=dataset,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = DNNModel(
             name=alg_name, base_dir=model.baseDir, random_state=random_state[0]
         )
@@ -141,10 +137,9 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 base_dir=self.generatedModelsPath,
                 name=f"{alg_name}",
                 alg=alg,
-                dataset=dataset,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = DNNModel(
                 name=alg_name, base_dir=model.baseDir, random_state=random_state[1]
             )
@@ -174,7 +169,6 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     def getModel(
         base_dir: str,
         name: str,
-        dataset: QSPRDataset = None,
         parameters: dict | None = None,
     ):
         """Initialize model with data set.
@@ -226,9 +220,10 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
-            base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
+            base_dir=self.generatedModelsPath,
+            name=f"{alg_name}",
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
 
@@ -281,9 +276,10 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
         model = self.getModel(
-            base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
+            base_dir=self.generatedModelsPath,
+            name=f"{alg_name}",
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor)
 
@@ -301,7 +297,8 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
         # initialize model for training from class
         model = self.getModel(
-            base_dir=self.generatedModelsPath, name="consistency_data", dataset=dataset
+            base_dir=self.generatedModelsPath,
+            name="consistency_data",
         )
 
         # chemprop by default uses sklearn rmse (squared=False) as metric
@@ -316,9 +313,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 n_splits=1, test_size=0.1, random_state=dataset.randomState
             ),
         )
-        qsprpred_score = assessor(
-            model, split=RandomSplit(test_fraction=0.1, dataset=dataset)
-        )
+        qsprpred_score = assessor(model, dataset, split=RandomSplit(test_fraction=0.1))
         qsprpred_score = -qsprpred_score[0]  # qsprpred_score is negative rmse
 
         # save the cross-validation train, test and validation split to
@@ -392,7 +387,6 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     def getModel(
         base_dir: str,
         name: str,
-        dataset: QSPRDataset = None,
         parameters: dict | None = None,
     ):
         """Create a PyBoostModel model.
@@ -451,10 +445,9 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         model = self.getModel(
             base_dir=self.generatedModelsPath,
             name=f"{model_name}_{task}",
-            dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
@@ -482,10 +475,9 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         model = self.getModel(
             base_dir=self.generatedModelsPath,
             name=f"{model_name}_{task}",
-            dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
@@ -531,10 +523,9 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         model = self.getModel(
             base_dir=self.generatedModelsPath,
             name=f"{model_name}_multitask_regression",
-            dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
@@ -586,10 +577,9 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     #     model = self.getModel(
     #         base_dir=self.generatedModelsPath,
     #         name=f"{model_name}_multitask_classification",
-    #         dataset=dataset,
     #         parameters=parameters,
     #     )
-    #     self.fitTest(model)
+    #     self.fitTest(model, dataset)
     #     predictor = import_module("..pyboost", __name__).PyBoostModel(
     #         name=f"{model_name}_multitask_classification", base_dir=model.baseDir
     #     )

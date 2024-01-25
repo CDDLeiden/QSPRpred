@@ -34,7 +34,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         self,
         name: str,
         alg: Type | None = None,
-        dataset: PCMDataSet | None = None,
         parameters: dict | None = None,
         random_state: int | None = None,
     ):
@@ -135,11 +134,10 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         model = self.getModel(
             name=f"{model_name}_{props[0]['task']}",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = SklearnPCMModel(
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
@@ -150,11 +148,10 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
             model = self.getModel(
                 name=f"{model_name}_{props[0]['task']}",
                 alg=model_class,
-                dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = SklearnPCMModel(
                 name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
             )
