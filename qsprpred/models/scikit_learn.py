@@ -129,8 +129,8 @@ class SklearnModel(QSPRModel):
 
     def fit(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
         estimator: Any = None,
         mode: Any = None,
         monitor: None = None,

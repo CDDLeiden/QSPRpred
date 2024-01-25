@@ -645,8 +645,8 @@ class QSPRModel(JSONSerializable, ABC):
     @abstractmethod
     def fit(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         monitor: "FitMonitor" = None,
@@ -665,8 +665,8 @@ class QSPRModel(JSONSerializable, ABC):
             argument is ignored.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            X (pd.DataFrame, np.ndarray): data matrix to fit
+            y (pd.DataFrame, np.ndarray): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
             monitor (FitMonitor): monitor for the fitting process,

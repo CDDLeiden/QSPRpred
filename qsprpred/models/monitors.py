@@ -21,7 +21,6 @@ class FitMonitor(JSONSerializable, ABC):
     def onFitStart(
         self,
         model: QSPRModel,
-        data: QSPRDataset,
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
@@ -31,7 +30,6 @@ class FitMonitor(JSONSerializable, ABC):
 
         Args:
             model (QSPRModel): model to be fitted
-            data (QSPRDataset): data set used in training
             X_train (np.ndarray): training data
             y_train (np.ndarray): training targets
             X_val (np.ndarray | None): validation data, used for early stopping
@@ -188,7 +186,6 @@ class NullMonitor(HyperparameterOptimizationMonitor):
     def onFitStart(
         self,
         model: QSPRModel,
-        data: QSPRDataset,
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
@@ -198,7 +195,6 @@ class NullMonitor(HyperparameterOptimizationMonitor):
 
         Args:
             model (QSPRModel): model to be fitted
-            data (QSPRDataset): data set used in training
             X_train (np.ndarray): training data
             y_train (np.ndarray): training targets
             X_val (np.ndarray | None): validation data, used for early stopping
@@ -346,7 +342,6 @@ class ListMonitor(HyperparameterOptimizationMonitor):
     def onFitStart(
         self,
         model: QSPRModel,
-        data: QSPRDataset,
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
@@ -362,7 +357,7 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             y_val (np.ndarray | None): validation targets, used for early stopping
         """
         for monitor in self.monitors:
-            monitor.onFitStart(model, data, X_train, y_train, X_val, y_val)
+            monitor.onFitStart(model, X_train, y_train, X_val, y_val)
 
     def onFitEnd(self, estimator: Any, best_epoch: int | None = None):
         """Called after the training has finished.
@@ -557,6 +552,9 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
     """
 
     def __init__(self):
+        self.data = None
+        self.model = None
+        self.optimizationType = None
         # hyperparameter optimization data
         self.config = None
         self.bestScore = None
@@ -735,7 +733,6 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
     def onFitStart(
         self,
         model: QSPRModel,
-        data: QSPRDataset,
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
@@ -928,7 +925,6 @@ class FileMonitor(BaseMonitor):
     def onFitStart(
         self,
         model: QSPRModel,
-        data: QSPRDataset,
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
@@ -943,7 +939,7 @@ class FileMonitor(BaseMonitor):
             X_val (np.ndarray | None): validation data, used for early stopping
             y_val (np.ndarray | None): validation targets, used for early stopping
         """
-        super().onFitStart(model, data, X_train, y_train, X_val, y_val)
+        super().onFitStart(model, X_train, y_train, X_val, y_val)
         self.outDir = self.outDir or model.outDir
         self.fitPath = self.outDir
         if self.saveFits:
@@ -1074,7 +1070,6 @@ class WandBMonitor(BaseMonitor):
     def onFitStart(
         self,
         model: QSPRModel,
-        data: QSPRDataset,
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
@@ -1085,7 +1080,7 @@ class WandBMonitor(BaseMonitor):
         Args:
             model (QSPRModel): model to train
         """
-        super().onFitStart(model, data, X_train, y_train, X_val, y_val)
+        super().onFitStart(model, X_train, y_train, X_val, y_val)
         # initialize wandb run if not already initialized
         if not self.wandb.run:
             self.wandb.init(
