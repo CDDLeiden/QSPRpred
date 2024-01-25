@@ -599,38 +599,6 @@ class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
     def testBaseMonitor(self):
         model = DNNModel(
             base_dir=self.generatedModelsPath,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
-            name="STFullyConnected",
-            gpus=GPUS,
-            patience=3,
-            tol=0.02,
-            random_state=42,
-        )
-        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, True)
-
-    def testFileMonitor(self):
-        model = DNNModel(
-            base_dir=self.generatedModelsPath,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
-            name="STFullyConnected",
-            gpus=GPUS,
-            patience=3,
-            tol=0.02,
-            random_state=42,
-        )
-        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, True)
-
-    def testListMonitor(self):
-        """Test the list monitor"""
-        model = DNNModel(
-            base_dir=self.generatedModelsPath,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
             name="STFullyConnected",
             gpus=GPUS,
             patience=3,
@@ -639,6 +607,42 @@ class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
         )
         self.runMonitorTest(
             model,
+            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            BaseMonitor,
+            self.baseMonitorTest,
+            True,
+        )
+
+    def testFileMonitor(self):
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
+        )
+        self.runMonitorTest(
+            model,
+            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            BaseMonitor,
+            self.baseMonitorTest,
+            True,
+        )
+
+    def testListMonitor(self):
+        """Test the list monitor"""
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
+        )
+        self.runMonitorTest(
+            model,
+            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
             ListMonitor,
             self.listMonitorTest,
             True,
