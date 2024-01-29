@@ -318,6 +318,9 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
                 parameters.update({"probability": True})
             else:
                 parameters = {"probability": True}
+        # special case for XGB, set subsample to 0.6 to introduce randomness
+        if model_name == "XGBC":
+            parameters = {"subsample": 0.3}
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             target_props=[{"name": "CL", "task": task, "th": th}],

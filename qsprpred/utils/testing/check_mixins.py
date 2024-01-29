@@ -320,7 +320,6 @@ class ModelCheckMixIn:
         # define checks of the shape of the predictions
         def check_shape(predictions, model, num_smiles, use_probas):
             if model.task.isClassification() and use_probas:
-                print(predictions)
                 # check predictions are a list of arrays of shape (n_smiles, n_classes)
                 self.assertEqual(len(predictions), len(model.targetProperties))
                 for i in range(len(model.targetProperties)):

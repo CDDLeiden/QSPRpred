@@ -134,7 +134,7 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         predictor = DNNModel(
             name=alg_name, base_dir=model.baseDir, random_state=random_state[0]
         )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+
         if random_state[0] is not None:
             model.cleanFiles()
             model = self.getModel(
@@ -145,15 +145,17 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model)
-            predictor = DNNModel(
+            predictor_new = DNNModel(
                 name=alg_name, base_dir=model.baseDir, random_state=random_state[1]
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                comparison_model=predictor_new,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
             )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
 
 class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
@@ -230,7 +232,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
         self.fitTest(model)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
 
     @parameterized.expand(
         [
@@ -285,7 +287,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
         self.fitTest(model)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
 
     def testConsistency(self):
         """Test if QSPRpred Chemprop and Chemprop models are consistent."""
@@ -458,7 +460,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
 
     @parameterized.expand(
         [
@@ -489,7 +491,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
 
     @parameterized.expand(
         [
@@ -538,7 +540,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
 
     # FIXME: This test fails because the PyBoost default auc does not handle
     # mutlitask data and the custom NaN AUC metric is not JSON serializable.

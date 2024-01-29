@@ -265,7 +265,7 @@ class QSPRModel(JSONSerializable, ABC):
         constructor_params = [
             name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
         ]
-        common_params = ["seed", "random_seed", "random_state"]
+        common_params = ["random_state", "random_seed", "seed"]
         random_param = None
         for seed_param in common_params:
             if seed_param not in constructor_params:
