@@ -3,6 +3,8 @@ from typing import Callable, Generator
 
 import pandas as pd
 
+from qsprpred.data.descriptors.sets import DescriptorSet
+
 
 class StoredTable(ABC):
     """Abstract base class for tables that are stored in a file."""
@@ -38,8 +40,12 @@ class DataTable(StoredTable):
         pass
 
     @abstractmethod
+    def getProperty(self, name: str):
+        """Get values of a given property."""
+
+    @abstractmethod
     def getProperties(self):
-        """Get the properties of the dataset."""
+        """Get the property names contained in the dataset."""
 
     @abstractmethod
     def addProperty(self, name: str, data: list):
@@ -70,15 +76,16 @@ class DataTable(StoredTable):
     def apply(
         self,
         func: callable,
+        on_props: list[str] | None = None,
         func_args: list | None = None,
         func_kwargs: dict | None = None,
-        *args,
-        **kwargs,
     ):
-        """Apply a function to the dataset.
+        """Apply a function on all or selected properties. The properties are supplied
+        as the first positional argument to the function.
 
         Args:
             func (callable): The function to apply.
+            on_props (list, optional): The properties to include.
             func_args (list, optional): The positional arguments of the function.
             func_kwargs (dict, optional): The keyword arguments of the function.
         """
@@ -98,14 +105,14 @@ class DataTable(StoredTable):
 
 class MoleculeDataTable(DataTable):
     @abstractmethod
-    def addDescriptors(self, calculator: "DescriptorsCalculator"):  # noqa: F821
+    def addDescriptors(self, descriptors: DescriptorSet, *args, **kwargs):
         """
         Add descriptors to the dataset.
 
         Args:
-            calculator (DescriptorsCalculator): An instance of the
-                `DescriptorsCalculator` class that wraps the descriptors to be
-                calculated.
+            descriptors (list[DescriptorSet]): The descriptors to add.
+            args: Additional positional arguments to be passed to each descriptor set.
+            kwargs: Additional keyword arguments to be passed to each descriptor set.
         """
 
     @abstractmethod

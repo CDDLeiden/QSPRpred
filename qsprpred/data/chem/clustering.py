@@ -1,12 +1,15 @@
+import os
 from abc import ABC, abstractmethod
 
 import numpy as np
+import pandas as pd
 from rdkit import Chem, DataStructs
 from rdkit.SimDivFilters import rdSimDivPickers
 
-from ...logs import logger
-from ...data.descriptors.sets import FingerprintSet
 from .scaffolds import Murcko, Scaffold
+from .. import MoleculeTable
+from ..descriptors.fingerprints import Fingerprint, MorganFP
+from ...logs import logger
 
 
 class MoleculeClusters(ABC):
@@ -16,6 +19,7 @@ class MoleculeClusters(ABC):
     Attributes:
         nClusters (int): number of clusters
     """
+
     @abstractmethod
     def get_clusters(self, smiles_list: list[str]) -> dict:
         """
@@ -47,6 +51,7 @@ class RandomClusters(MoleculeClusters):
         seed (int): random seed
         nClusters (int): number of clusters
     """
+
     def __init__(self, seed: int = 42, n_clusters: int | None = None):
         self.seed = seed
         self.nClusters = n_clusters
@@ -83,6 +88,7 @@ class ScaffoldClusters(MoleculeClusters):
     Attributes:
         scaffold (Scaffold): scaffold generator
     """
+
     def __init__(self, scaffold: Scaffold = Murcko()):
         super().__init__()
         self.scaffold = scaffold
@@ -100,9 +106,16 @@ class ScaffoldClusters(MoleculeClusters):
         """
 
         # Generate scaffolds for each molecule
-        scaffolds = [
-            self.scaffold(Chem.MolFromSmiles(smiles)) for smiles in smiles_list
-        ]
+        mt = MoleculeTable(
+            "scaffolds", pd.DataFrame({"SMILES": smiles_list}), n_jobs=os.cpu_count()
+        )
+        mt.addScaffolds([self.scaffold])
+        scaffolds = (
+            mt.getScaffolds([self.scaffold])
+            .loc[mt.getDF().index, :]
+            .iloc[:, 0]
+            .tolist()
+        )
 
         # Get unique scaffolds and initialize clusters
         unique_scaffolds = sorted(list(set(scaffolds)))
@@ -118,9 +131,7 @@ class ScaffoldClusters(MoleculeClusters):
 class FPSimilarityClusters(MoleculeClusters):
     def __init__(
         self,
-        fp_calculator: FingerprintSet = FingerprintSet(
-            fingerprint_type="MorganFP", radius=3, nBits=2048
-        ),
+        fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
     ) -> None:
         super().__init__()
         self.fp_calculator = fp_calculator
@@ -139,7 +150,9 @@ class FPSimilarityClusters(MoleculeClusters):
 
         # Get fingerprints for each molecule
         mols = [Chem.MolFromSmiles(smiles) for smiles in smiles_list]
-        fps = self.fp_calculator.getFingerprint(mols)
+        fps = self.fp_calculator.getDescriptors(
+            mols, props={self.fp_calculator.idProp: [str(x) for x in range(len(mols))]}
+        )
 
         # Convert np fingerprints to rdkit fingerprints
         fps = [
@@ -175,14 +188,13 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
         seed (int): random seed
         initialCentroids (list): list of indices of initial cluster centroids
     """
+
     def __init__(
         self,
         n_clusters: int | None = None,
         seed: int | None = None,
         initial_centroids: list[str] | None = None,
-        fp_calculator: FingerprintSet = FingerprintSet(
-            fingerprint_type="MorganFP", radius=3, nBits=2048
-        ),
+        fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
     ):
         super().__init__(fp_calculator=fp_calculator)
         self.nClusters = n_clusters
@@ -220,14 +232,13 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
         fp_calculator (FingerprintSet): fingerprint calculator
         similarity_threshold (float): similarity threshold
     """
+
     def __init__(
         self,
         similarity_threshold: float = 0.7,
-        fp_calculator: FingerprintSet = FingerprintSet(
-            fingerprint_type="MorganFP", radius=3, nBits=2048
-        ),
+        fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
     ):
-        super().__init__()
+        super().__init__(fp_calculator=fp_calculator)
         self.similarityThreshold = similarity_threshold
         self.fpCalculator = fp_calculator
 

@@ -17,6 +17,7 @@ from ...utils.interfaces.randomized import Randomized
 
 class FeatureFilter(ABC):
     """Filter out uninformative featureNames from a dataframe."""
+
     @abstractmethod
     def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None):
         """Filter out uninformative features from a dataframe.
@@ -37,6 +38,7 @@ class LowVarianceFilter(FeatureFilter):
     Attributes:
         th (float): threshold for removing features
     """
+
     def __init__(self, th: float) -> None:
         self.th = th
 
@@ -64,6 +66,7 @@ class HighCorrelationFilter(FeatureFilter):
     Attributes:
         th (float): threshold for correlation
     """
+
     def __init__(self, th: float) -> None:
         self.th = th
 
@@ -93,6 +96,7 @@ class BorutaFilter(FeatureFilter, Randomized):
         seed (int):
             Random state to use for shuffling and other random operations.
     """
+
     def __init__(self, boruta_feat_selector: BorutaPy = None, seed: int | None = None):
         """Initialize the BorutaFilter class.
 

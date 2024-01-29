@@ -15,7 +15,6 @@ from tqdm import trange
 
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.tasks import ModelTasks
-
 from ....data.tables.qspr import QSPRDataset
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
@@ -31,6 +30,7 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         scaler (chemprop.data.scaler.StandardScaler):
             scaler for scaling the targets
     """
+
     def __init__(
         self,
         args: chemprop.args.TrainArgs,
@@ -262,8 +262,7 @@ class ChempropModel(QSPRModel):
         if self.earlyStopping:
             total_data_size += len(val_data)
             self.chempropLogger.debug(
-                f"train size = {len(train_data):,}"
-                f" | val size = {len(val_data):,}"
+                f"train size = {len(train_data):,}" f" | val size = {len(val_data):,}"
             )
         self.chempropLogger.debug(f"Total size = {total_data_size:,}")
 
@@ -337,8 +336,7 @@ class ChempropModel(QSPRModel):
         )
         if not n_epochs:
             raise ValueError(
-                f"Number of epochs must be greater "
-                f"than 0. Got: {n_epochs}"
+                f"Number of epochs must be greater " f"than 0. Got: {n_epochs}"
             )
         best_estimator = estimator
         best_found = False
@@ -375,8 +373,7 @@ class ChempropModel(QSPRModel):
                         scores, metric=metric
                     )
                     self.chempropLogger.debug(
-                        f"Validation {metric} = "
-                        f"{mean_val_score:.6f}"
+                        f"Validation {metric} = " f"{mean_val_score:.6f}"
                     )
                     writer.add_scalar(f"validation_{metric}", mean_val_score, n_iter)
 
@@ -384,8 +381,7 @@ class ChempropModel(QSPRModel):
                         # Individual validation scores
                         for task_name, val_score in zip(args.task_names, scores):
                             self.chempropLogger.debug(
-                                f"Validation {task_name} {metric}"
-                                f" = {val_score:.6f}"
+                                f"Validation {task_name} {metric}" f" = {val_score:.6f}"
                             )
                             writer.add_scalar(
                                 f"validation_{task_name}_{metric}", val_score, n_iter
@@ -397,8 +393,10 @@ class ChempropModel(QSPRModel):
                 )
                 monitor.onEpochEnd(epoch, mean_val_score)
                 if (
-                    args.minimize_score and mean_val_score < best_score or
-                    not args.minimize_score and mean_val_score > best_score
+                    args.minimize_score
+                    and mean_val_score < best_score
+                    or not args.minimize_score
+                    and mean_val_score > best_score
                 ):
                     best_score, best_epoch = mean_val_score, epoch
                     best_estimator = deepcopy(estimator)
@@ -552,9 +550,7 @@ class ChempropModel(QSPRModel):
         if os.path.isfile(path):
             if not hasattr(self, "chempropLogger"):
                 self.chempropLogger = chemprop.utils.create_logger(
-                    name="chemprop_logger",
-                    save_dir=self.outDir,
-                    quiet=self.quietLogger
+                    name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
                 )
 
             estimator = ChempropMoleculeModel.cast(
@@ -621,7 +617,7 @@ class ChempropModel(QSPRModel):
         # find which column contains the SMILES strings
         prev_len = 0
         for calc in self.featureCalculators:
-            names = calc.getDescriptorNames()
+            names = calc.descriptors
             if "SMILES" in names:
                 smiles_column = names.index("SMILES") + prev_len
                 break
@@ -658,7 +654,8 @@ class ChempropModel(QSPRModel):
                     smiles=[smile],
                     targets=targets,
                     features=features_data[i] if features_data is not None else None,
-                ) for i, (smile, targets) in enumerate(zip(smiles, y))
+                )
+                for i, (smile, targets) in enumerate(zip(smiles, y))
             ]
         )
 
@@ -694,10 +691,7 @@ class ChempropModel(QSPRModel):
 
         # Create dummy args to check what default argument values are in chemprop
         default_args = chemprop.args.TrainArgs().from_dict(
-            args_dict={
-                "dataset_type": "regression",
-                "data_path": ""
-            }
+            args_dict={"dataset_type": "regression", "data_path": ""}
         )
         default_args.process_args()
         default_args = default_args.as_dict()
@@ -747,71 +741,45 @@ class ChempropModel(QSPRModel):
         (https://github.com/chemprop/chemprop/blob/master/chemprop/args.py)
         """
         return {
-            "no_cuda":
-                "Turn off cuda (i.e., use CPU instead of GPU).",
-            "gpu":
-                "Which GPU to use.",
-            "num_workers":
-                "Number of workers for the parallel data loading (0 means sequential).",
-            "batch_size":
-                "Batch size.",
-            "no_cache_mol":
-                "Whether to not cache the RDKit molecule for each SMILES string to "
-                "reduce memory usage (cached by default).",
-            "empty_cache":
-                "Whether to empty all caches before training or predicting. This is "
-                "necessary if multiple jobs are run within a single script and the "
-                "atom or bond features change.",
-            "loss_function":
-                "Choice of loss function. Loss functions are limited to compatible "
-                "dataset types.",
-            "metric":
-                "Metric to use with the validation set for early stopping. Defaults "
-                "to 'auc' for classification, 'rmse' for regression. Note. In Chemprop "
-                "this metric is also used for test-set evaluation, but in QSPRpred "
-                "this is determined by the scoring parameter in assessment.",
-            "bias":
-                "Whether to add bias to linear layers.",
-            "hidden_size":
-                "Dimensionality of hidden layers in MPN.",
-            "depth":
-                "Number of message passing steps.",
-            "mpn_shared":
-                "Whether to use the same message passing neural network for all input "
-                "molecule Only relevant if 'number_of_molecules > 1'",
-            "dropout":
-                "Dropout probability.",
-            "activation":
-                "Activation function.",
-            "atom_messages":
-                "Centers messages on atoms instead of on bonds.",
-            "undirected":
-                "Undirected edges (always sum the two relevant bond vectors).",
-            "ffn_hidden_size":
-                "Hidden dim for higher-capacity FFN (defaults to hidden_size).",
-            "ffn_num_layers":
-                "Number of layers in FFN after MPN encoding.",
-            "epochs":
-                "Number of epochs to run.",
-            "warmup_epochs":
-                "Number of epochs during which learning rate increases linearly from "
-                "'init_lr' to 'max_lr'. Afterwards, learning rate decreases "
-                "exponentially from 'max_lr' to 'final_lr'.",
-            "init_lr":
-                "Initial learning rate.",
-            "max_lr":
-                "Maximum learning rate.",
-            "final_lr":
-                "Final learning rate.",
-            "grad_clip":
-                "Maximum magnitude of gradient during training.",
-            "class_balance":
-                "Trains with an equal number of positives and negatives in each batch.",
-            "evidential_regularization":
-                "Value used in regularization for evidential loss function. The "
-                "default value recommended by Soleimany et al.(2021) is 0.2. Optimal "
-                "value is dataset-dependent; it is recommended that users test "
-                "different values to find the best value for their model.",
+            "no_cuda": "Turn off cuda (i.e., use CPU instead of GPU).",
+            "gpu": "Which GPU to use.",
+            "num_workers": "Number of workers for the parallel data loading (0 means sequential).",
+            "batch_size": "Batch size.",
+            "no_cache_mol": "Whether to not cache the RDKit molecule for each SMILES string to "
+            "reduce memory usage (cached by default).",
+            "empty_cache": "Whether to empty all caches before training or predicting. This is "
+            "necessary if multiple jobs are run within a single script and the "
+            "atom or bond features change.",
+            "loss_function": "Choice of loss function. Loss functions are limited to compatible "
+            "dataset types.",
+            "metric": "Metric to use with the validation set for early stopping. Defaults "
+            "to 'auc' for classification, 'rmse' for regression. Note. In Chemprop "
+            "this metric is also used for test-set evaluation, but in QSPRpred "
+            "this is determined by the scoring parameter in assessment.",
+            "bias": "Whether to add bias to linear layers.",
+            "hidden_size": "Dimensionality of hidden layers in MPN.",
+            "depth": "Number of message passing steps.",
+            "mpn_shared": "Whether to use the same message passing neural network for all input "
+            "molecule Only relevant if 'number_of_molecules > 1'",
+            "dropout": "Dropout probability.",
+            "activation": "Activation function.",
+            "atom_messages": "Centers messages on atoms instead of on bonds.",
+            "undirected": "Undirected edges (always sum the two relevant bond vectors).",
+            "ffn_hidden_size": "Hidden dim for higher-capacity FFN (defaults to hidden_size).",
+            "ffn_num_layers": "Number of layers in FFN after MPN encoding.",
+            "epochs": "Number of epochs to run.",
+            "warmup_epochs": "Number of epochs during which learning rate increases linearly from "
+            "'init_lr' to 'max_lr'. Afterwards, learning rate decreases "
+            "exponentially from 'max_lr' to 'final_lr'.",
+            "init_lr": "Initial learning rate.",
+            "max_lr": "Maximum learning rate.",
+            "final_lr": "Final learning rate.",
+            "grad_clip": "Maximum magnitude of gradient during training.",
+            "class_balance": "Trains with an equal number of positives and negatives in each batch.",
+            "evidential_regularization": "Value used in regularization for evidential loss function. The "
+            "default value recommended by Soleimany et al.(2021) is 0.2. Optimal "
+            "value is dataset-dependent; it is recommended that users test "
+            "different values to find the best value for their model.",
         }
 
     @classmethod

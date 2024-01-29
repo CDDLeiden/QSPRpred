@@ -58,7 +58,7 @@ class PCMSplit(DataSplit):
             y (np.ndarray | pd.DataFrame | pd.Series): the target variable(s)
 
         Returns:
-            an iterator over the generated subsets represented as a tuple of
+            an generator over the generated subsets represented as a tuple of
             (train_indices, test_indices) where the indices are the row indices of the
             input data matrix X (note that these are integer indices, rather than a
             pandas index!)
