@@ -119,17 +119,11 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
         )
         self.fitTest(model)
 
-        # make predictions with the trained model and check if the results are equal to
-        # predictions on the molecules from the same dataset with predictMols
-        expected_result = model.predict(dataset.getFeatures(concat=True, ordered=True))
+        # load in model from file
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
-        predictions = self.predictorTest(
-            predictor,
-            dataset=dataset,
-            expected_result=expected_result,
-        )
 
-        # compare results with different or equal random state
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
@@ -139,15 +133,17 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model)
-            predictor = SklearnModel(
+            new_predictor = SklearnModel(
                 name=f"{model_name}_{task}", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
                 dataset=dataset,
-                expected_result=predictions,
+                comparison_model=new_predictor,
                 expect_equal_result=random_state[0] == random_state[1],
             )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
     def testPLSRegressionSummaryWithSeed(self):
         """Test model training for regression models."""
@@ -226,15 +222,11 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
         )
         self.fitTest(model)
 
-        # make predictions with the trained model and check if the results are equal to
-        # predictions on the molecules from the same dataset with predictMols
-        expected_result = model.predict(dataset.getFeatures(concat=True, ordered=True))
+        # load in model from file
         predictor = SklearnModel(name=f"{model_name}_multitask_regression", base_dir=model.baseDir)
-        predictions = self.predictorTest(
-            predictor,
-            dataset=dataset,
-            expected_result=expected_result,
-        )
+
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
         if random_state[0] is not None and model_name in ["RFR"]:
             model = self.getModel(
                 name=f"{model_name}_multitask_regression",
@@ -243,15 +235,17 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model)
-            predictor = SklearnModel(
+            predictor_new = SklearnModel(
                 name=f"{model_name}_multitask_regression", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
                 dataset=dataset,
-                expected_result=predictions,
+                comparison_model=predictor_new,
                 expect_equal_result=random_state[0] == random_state[1],
             )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
 
 class TestSklearnSerialization(SklearnBaseModelTestCase):
@@ -339,14 +333,12 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model)
-        # make predictions with the trained model and check if the results are equal to
-        # predictions on the molecules from the same dataset with predictMols
+
+        # load in model from file
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
 
-        expected_result = model.predictProba(dataset.getFeatures(concat=True, ordered=True))
-        predictions_probas = self.predictorTest(predictor, dataset, expected_result)
-        expected_result = model.predict(dataset.getFeatures(concat=True, ordered=True))
-        predictions = self.predictorTest(predictor, dataset, expected_result, False)
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
@@ -356,22 +348,17 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model)
-            predictor = SklearnModel(
+            new_predictor = SklearnModel(
                 name=f"{model_name}_{task}", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
                 dataset=dataset,
-                expected_result=predictions_probas,
+                comparison_model=new_predictor,
                 expect_equal_result=random_state[0] == random_state[1],
             )
-            self.predictorTest(
-                predictor,
-                dataset=dataset,
-                expected_result=predictions,
-                use_probas=False,
-                expect_equal_result=random_state[0] == random_state[1],
-            )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
 
     def testRandomForestClassifierFitWithSeed(self):
@@ -461,14 +448,12 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model)
-        # make predictions with the trained model and check if the results are equal to
-        # predictions on the molecules from the same dataset with predictMols
+
+        # load in model from file
         predictor = SklearnModel(name=f"{model_name}_multitask_classification", base_dir=model.baseDir)
 
-        expected_result = model.predictProba(dataset.getFeatures(concat=True, ordered=True))
-        predictions_probas = self.predictorTest(predictor, dataset, expected_result)
-        expected_result = model.predict(dataset.getFeatures(concat=True, ordered=True))
-        predictions = self.predictorTest(predictor, dataset, expected_result, False)
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_multitask_classification",
@@ -478,22 +463,17 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model)
-            predictor = SklearnModel(
+            new_predictor = SklearnModel(
                 name=f"{model_name}_multitask_classification", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
                 dataset=dataset,
-                expected_result=predictions_probas,
+                comparison_model=new_predictor,
                 expect_equal_result=random_state[0] == random_state[1],
             )
-            self.predictorTest(
-                predictor,
-                dataset=dataset,
-                expected_result=predictions,
-                use_probas=False,
-                expect_equal_result=random_state[0] == random_state[1],
-            )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
 
 class TestMetrics(TestCase):

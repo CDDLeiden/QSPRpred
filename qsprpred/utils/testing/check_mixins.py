@@ -298,15 +298,94 @@ class ModelCheckMixIn:
         self.assertTrue(exists(model.metaFile))
         self.assertEqual(path, model.metaFile)
 
-    def predictorTest(self, model: QSPRModel, dataset: QSPRDataset, expected_result: list | np.ndarray, use_probas: bool=True, expect_equal_result=True):
+    def predictorTest(self,
+            model: QSPRModel,
+            dataset: QSPRDataset,
+            comparison_model: QSPRModel | None = None,
+            expect_equal_result=True):
+        """Test model predictions.
+
+        Checks if the shape of the predictions is as expected and if the predictions
+        of the predictMols function are consistent with the predictions of the
+        predict/predictProba functions. Also checks if the predictions of the model are
+        the same as the predictions of the comparison model if given.
+
+        Args:
+            model (QSPRModel): The model to make predictions with.
+            dataset (QSPRDataset): The dataset to make predictions for.
+            comparison_model (QSPRModel): another model to compare the predictions with.
+            expect_equal_result (bool): Whether the expected result should be equal or
+                not equal to the predictions of the comparison model.
+        """
+        # define checks of the shape of the predictions
+        def check_shape(predictions, model, num_smiles, use_probas):
+            if model.task.isClassification() and use_probas:
+                print(predictions)
+                # check predictions are a list of arrays of shape (n_smiles, n_classes)
+                self.assertEqual(len(predictions), len(model.targetProperties))
+                for i in range(len(model.targetProperties)):
+                    self.assertEqual(
+                        predictions[i].shape,
+                        (num_smiles, model.targetProperties[i].nClasses),
+                    )
+            else:
+                # check predictions are an array of shape (n_smiles, n_targets)
+                self.assertEqual(
+                    predictions.shape,
+                    (num_smiles, len(model.targetProperties)),
+                )
+
+        # define check for comparing predictions with expected result
+        def check_predictions(predictions, expected_result, expect_equal_result):
+            # check if predictions are almost equal to expected result (rtol=1e-5)
+            check_outcome = self.assertTrue if expect_equal_result else self.assertFalse
+            if isinstance(expected_result, list):
+                for i in range(len(expected_result)):
+                    check_outcome(np.allclose(predictions[i], expected_result[i]))
+            else:
+                check_outcome(np.allclose(predictions, expected_result))
+
+        # Check if the predictMols function gives the same result as the
+        # predict/predictProba function
+
+        # get the expected result from the basic predict function
+        features = dataset.getFeatures(concat=True, ordered=True)
+        expected_result = model.predict(features)
+
+        # make predictions with the predictMols function
+        smiles = dataset.getDF()[dataset.smilesCol].to_list()
+        predictions = model.predictMols(smiles, use_probas=False)
+
+        check_shape(predictions, model, len(smiles), use_probas=False)
+        check_predictions(predictions, expected_result, True)
+
+        # do the same for the predictProba function
+        if model.task.isClassification():
+            expected_result_proba = model.predictProba(features)
+            predictions_proba = model.predictMols(smiles, use_probas=True)
+            check_shape(predictions_proba, model, len(smiles), use_probas=True)
+            check_predictions(predictions_proba, expected_result_proba, True)
+
+        # check if the predictions are (not) the same as of the comparison model
+        if comparison_model is not None:
+            predictions_comparison = comparison_model.predictMols(smiles, use_probas=False)
+
+            check_predictions(predictions, predictions_comparison, expect_equal_result)
+
+            if model.task.isClassification():
+                predictions_comparison_proba = comparison_model.predictMols(smiles, use_probas=True)
+                check_predictions(predictions_proba, predictions_comparison_proba, expect_equal_result)
+
+    def oldpredictorTest(self, model: QSPRModel, dataset: QSPRDataset, expected_result: list | np.ndarray, use_probas: bool=True, expect_equal_result=True):
         """Test model prediction.
 
         Args:
             model (QSPRModel): The model to make predictions with.
             dataset (QSPRDataset): The dataset to make predictions for.
             expected_result (list | np.ndarray): The expected result of the prediction.
-            use_probas (bool): Whether to use probabilities or not.
-            expect_equal_result (bool): Whether the expected result should be equal or 
+            use_probas (bool): Whether to use `predictProbas` or `predict` method to
+                make the predictions.
+            expect_equal_result (bool): Whether the expected result should be equal or
                 not equal to the prediction.
         """
         # define checks of the shape of the predictions
@@ -353,7 +432,7 @@ class ModelCheckMixIn:
 
         return predictions
 
-    def oldpredictorTest(
+    def oldoldpredictorTest(
         self,
         predictor: QSPRModel,
         expect_equal_result=True,
