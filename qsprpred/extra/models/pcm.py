@@ -12,6 +12,8 @@ from ..data.descriptors.sets import ProteinDescriptorSet
 from ...data.tables.mol import MoleculeTable
 from ...models.models import QSPRModel
 from ...models.scikit_learn import SklearnModel
+from rdkit import Chem
+from rdkit.Chem import Mol
 
 
 class PCMModel(QSPRModel, ABC):
@@ -49,14 +51,18 @@ class PCMModel(QSPRModel, ABC):
             PCMDataSet:
                 Dataset with the features calculated for the molecules.
         """
+        # make a molecule table first and add the target properties
+        if isinstance(mols[0], Mol):
+            mols = [Chem.MolToSmiles(mol) for mol in mols]
         dataset = MoleculeTable.fromSMILES(
             f"{self.__class__.__name__}_{hash(self)}",
             mols,
             drop_invalids=False,
             n_jobs=n_jobs,
         )
-        for targetproperty in self.targetProperties:
-            dataset.addProperty(targetproperty.name, np.nan)
+        for target_property in self.targetProperties:
+            target_property.imputer = None
+            dataset.addProperty(target_property.name, np.nan)
         dataset.addProperty("protein_id", protein_id)
         # convert to PCMDataSet
         dataset = PCMDataSet.fromMolTable(

@@ -302,7 +302,8 @@ class ModelCheckMixIn:
             model: QSPRModel,
             dataset: QSPRDataset,
             comparison_model: QSPRModel | None = None,
-            expect_equal_result=True):
+            expect_equal_result=True,
+            **pred_kwargs):
         """Test model predictions.
 
         Checks if the shape of the predictions is as expected and if the predictions
@@ -316,6 +317,8 @@ class ModelCheckMixIn:
             comparison_model (QSPRModel): another model to compare the predictions with.
             expect_equal_result (bool): Whether the expected result should be equal or
                 not equal to the predictions of the comparison model.
+            **pred_kwargs:
+                Extra keyword arguments to pass to the predictor's `predictMols` method.
         """
         # define checks of the shape of the predictions
         def check_shape(predictions, model, num_smiles, use_probas):
@@ -336,6 +339,8 @@ class ModelCheckMixIn:
 
         # define check for comparing predictions with expected result
         def check_predictions(predictions, expected_result, expect_equal_result):
+            print(predictions)
+            print(expected_result)
             # check if predictions are almost equal to expected result (rtol=1e-5)
             check_outcome = self.assertTrue if expect_equal_result else self.assertFalse
             if isinstance(expected_result, list):
@@ -353,85 +358,45 @@ class ModelCheckMixIn:
 
         # make predictions with the predictMols function
         smiles = dataset.getDF()[dataset.smilesCol].to_list()
-        predictions = model.predictMols(smiles, use_probas=False)
+        num_smiles = len(smiles)
+        predictions = model.predictMols(smiles, use_probas=False, **pred_kwargs)
 
-        check_shape(predictions, model, len(smiles), use_probas=False)
+        # if PCM dataset, subset the predictions to the selected protein key
+        if dataset.__class__.__name__ == "PCMDataSet":
+            dataset_subset = dataset.df[dataset.proteinCol] == pred_kwargs["protein_id"]
+            num_smiles = sum(dataset_subset)
+            expected_result = expected_result[dataset_subset]
+            predictions = predictions[dataset_subset]
+
+        check_shape(predictions, model, num_smiles, use_probas=False)
         check_predictions(predictions, expected_result, True)
 
         # do the same for the predictProba function
         if model.task.isClassification():
             expected_result_proba = model.predictProba(features)
-            predictions_proba = model.predictMols(smiles, use_probas=True)
+            predictions_proba = model.predictMols(smiles, use_probas=True, **pred_kwargs)
+
+            # if PCM dataset, subset the predictions to the selected protein key
+            if dataset.__class__.__name__ == "PCMDataSet":
+                for i in range(len(expected_result_proba)):
+                    expected_result_proba[i] = expected_result_proba[i][dataset_subset]
+                    predictions_proba[i] = predictions_proba[i][dataset_subset]
+
             check_shape(predictions_proba, model, len(smiles), use_probas=True)
             check_predictions(predictions_proba, expected_result_proba, True)
 
+
         # check if the predictions are (not) the same as of the comparison model
         if comparison_model is not None:
-            predictions_comparison = comparison_model.predictMols(smiles, use_probas=False)
+            predictions_comparison = comparison_model.predictMols(smiles, use_probas=False, **pred_kwargs)
 
             check_predictions(predictions, predictions_comparison, expect_equal_result)
 
             if model.task.isClassification():
-                predictions_comparison_proba = comparison_model.predictMols(smiles, use_probas=True)
+                predictions_comparison_proba = comparison_model.predictMols(smiles, use_probas=True, **pred_kwargs)
                 check_predictions(predictions_proba, predictions_comparison_proba, expect_equal_result)
 
-    def oldpredictorTest(self, model: QSPRModel, dataset: QSPRDataset, expected_result: list | np.ndarray, use_probas: bool=True, expect_equal_result=True):
-        """Test model prediction.
-
-        Args:
-            model (QSPRModel): The model to make predictions with.
-            dataset (QSPRDataset): The dataset to make predictions for.
-            expected_result (list | np.ndarray): The expected result of the prediction.
-            use_probas (bool): Whether to use `predictProbas` or `predict` method to
-                make the predictions.
-            expect_equal_result (bool): Whether the expected result should be equal or
-                not equal to the prediction.
-        """
-        # define checks of the shape of the predictions
-        def check_shape(predictions, model, num_smiles, use_probas):
-            if model.task.isClassification() and use_probas:
-                print(predictions)
-                # check predictions are a list of arrays of shape (n_smiles, n_classes)
-                self.assertEqual(len(predictions), len(model.targetProperties))
-                for i in range(len(model.targetProperties)):
-                    self.assertEqual(
-                        predictions[i].shape,
-                        (num_smiles, model.targetProperties[i].nClasses),
-                    )
-            else:
-                # check predictions are an array of shape (n_smiles, n_targets)
-                self.assertEqual(
-                    predictions.shape,
-                    (num_smiles, len(model.targetProperties)),
-                )
-
-        # make predictions
-        smiles = dataset.getDF()[dataset.smilesCol].to_list()
-        predictions = model.predictMols(smiles, use_probas=use_probas)
-
-        # check the shape of the predictions
-        check_shape(predictions, model, len(smiles), use_probas=use_probas)
-
-        # make predictions with invalid smiles added to the list
-        invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
-        predictions_with_invalids = model.predictMols(smiles + invalid_smiles, use_probas=use_probas)
-        new_len = len(smiles) + len(invalid_smiles)
-
-        # check the shape of the predictions
-        check_shape(predictions_with_invalids, model, new_len, use_probas=use_probas)
-
-        # check predictions are almost equal to expected result (rtol=1e-5)
-        # or not equal to expected result for should_not_be_equal
-        check_outcome = self.assertTrue if expect_equal_result else self.assertFalse
-        if isinstance(expected_result, list):
-            for i in range(len(expected_result)):
-                check_outcome(np.allclose(predictions[i], expected_result[i]))
-        else:
-            check_outcome(np.allclose(predictions, expected_result))
-
-        return predictions
-
-    def oldoldpredictorTest(
+    def oldpredictorTest(
         self,
         predictor: QSPRModel,
         expect_equal_result=True,

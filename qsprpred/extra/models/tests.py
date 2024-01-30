@@ -143,9 +143,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         predictor = SklearnPCMModel(
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(
-            predictor, protein_id=dataset.getDF()["accession"].iloc[0]
-        )
+
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{props[0]['task']}",
@@ -155,13 +153,19 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model)
-            predictor = SklearnPCMModel(
+            predictor_new = SklearnPCMModel(
                 name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
+                dataset,
+                comparison_model=predictor_new,
                 protein_id=dataset.getDF()["accession"].iloc[0],
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
+            )
+        else:
+            self.predictorTest(
+                predictor,
+                dataset,
+                protein_id=dataset.getDF()["accession"].iloc[0],
             )
