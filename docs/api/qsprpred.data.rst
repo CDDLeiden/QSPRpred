@@ -7,35 +7,12 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   qsprpred.data.chem
+   qsprpred.data.descriptors
+   qsprpred.data.processing
+   qsprpred.data.sampling
    qsprpred.data.sources
-   qsprpred.data.utils
-
-Submodules
-----------
-
-qsprpred.data.data module
--------------------------
-
-.. automodule:: qsprpred.data.data
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-qsprpred.data.interfaces module
--------------------------------
-
-.. automodule:: qsprpred.data.interfaces
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-qsprpred.data.tests module
---------------------------
-
-.. automodule:: qsprpred.data.tests
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   qsprpred.data.tables
 
 Module contents
 ---------------

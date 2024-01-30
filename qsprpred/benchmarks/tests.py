@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold
@@ -15,6 +13,7 @@ from ..data.sources.data_source import DataSource
 from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
 from ..utils.stringops import get_random_string
+from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.path_mixins import DataSetsPathMixIn
 
 
@@ -42,7 +41,7 @@ class DataSourceTesting(DataSetsPathMixIn, DataSource):
         return self.createLargeTestDataSet(name, target_props=target_props)
 
 
-class BenchmarkingTest(DataSetsPathMixIn, TestCase):
+class BenchmarkingTest(DataSetsPathMixIn, QSPRTestCase):
     """Test benchmarking functionality on the test data set.
 
     Attributes:
@@ -56,7 +55,7 @@ class BenchmarkingTest(DataSetsPathMixIn, TestCase):
         super().setUp()
         self.setUpPaths()
         prep = self.getDefaultPrep()
-        descriptors = prep["feature_calculators"][0].descSets
+        descriptors = prep["feature_calculators"]
         del prep["feature_calculators"]
         descriptors.append(RDKitDescs())
         self.seed = 42
@@ -136,10 +135,30 @@ class BenchmarkingTest(DataSetsPathMixIn, TestCase):
                 ]
                 self.assertTrue(len(score_results) > 0)
 
+    def checkSettings(self):
+        self.assertTrue(len(self.settings.data_sources) > 0)
+        self.assertTrue(len(self.settings.descriptors) > 0)
+        self.assertTrue(len(self.settings.target_props) > 0)
+        self.assertTrue(len(self.settings.prep_settings) > 0)
+        self.assertTrue(len(self.settings.models) > 0)
+        self.assertTrue(len(self.settings.assessors) > 0)
+        self.settings.toFile(f"{self.generatedPath}/benchmarks/settings.json")
+        settings = BenchmarkSettings.fromFile(
+            f"{self.generatedPath}/benchmarks/settings.json"
+        )
+        self.assertEqual(len(self.settings.data_sources), len(settings.data_sources))
+        self.assertEqual(len(self.settings.descriptors), len(settings.descriptors))
+        self.assertEqual(len(self.settings.target_props), len(settings.target_props))
+        self.assertEqual(len(self.settings.prep_settings), len(settings.prep_settings))
+        self.assertEqual(len(self.settings.models), len(settings.models))
+        self.assertEqual(len(self.settings.assessors), len(settings.assessors))
+
     def testSingleTaskCLS(self):
         """Run single task tests for classification."""
+        self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
+        self.checkSettings()
 
     def testSingleTaskREG(self):
         self.settings.target_props = [
@@ -176,8 +195,10 @@ class BenchmarkingTest(DataSetsPathMixIn, TestCase):
             TestSetAssessor(scoring="r2"),
             TestSetAssessor(scoring="neg_mean_squared_error"),
         ]
+        self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
+        self.checkSettings()
 
     def testMultiTaskCLS(self):
         """Run the test benchmark."""
@@ -232,8 +253,10 @@ class BenchmarkingTest(DataSetsPathMixIn, TestCase):
                 split_multitask_scores=True,
             ),
         ]
+        self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
+        self.checkSettings()
 
     def testMultiTaskREG(self):
         self.settings.target_props = [
@@ -282,5 +305,7 @@ class BenchmarkingTest(DataSetsPathMixIn, TestCase):
                 scoring="neg_mean_squared_error", split_multitask_scores=True
             ),
         ]
+        self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
+        self.checkSettings()

@@ -7,10 +7,10 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   qsprpred.benchmarks
    qsprpred.data
    qsprpred.extra
    qsprpred.logs
-   qsprpred.metrics
    qsprpred.models
    qsprpred.plotting
    qsprpred.utils
@@ -38,6 +38,14 @@ qsprpred.predict\_CLI module
 ----------------------------
 
 .. automodule:: qsprpred.predict_CLI
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.tasks module
+---------------------
+
+.. automodule:: qsprpred.tasks
    :members:
    :undoc-members:
    :show-inheritance:

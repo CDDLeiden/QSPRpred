@@ -9,12 +9,14 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Draw
 
-from ..data.tables.qspr import QSPRDataset
 from .models import QSPRModel
+from ..data.tables.qspr import QSPRDataset
+from ..utils.serialization import JSONSerializable
 
 
-class FitMonitor(ABC):
+class FitMonitor(JSONSerializable, ABC):
     """Base class for monitoring the fitting of a model."""
+
     @abstractmethod
     def onFitStart(
         self,
@@ -22,7 +24,8 @@ class FitMonitor(ABC):
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
-        y_val: np.ndarray | None = None):
+        y_val: np.ndarray | None = None,
+    ):
         """Called before the training has started.
 
         Args:
@@ -80,6 +83,7 @@ class FitMonitor(ABC):
 
 class AssessorMonitor(FitMonitor):
     """Base class for monitoring the assessment of a model."""
+
     @abstractmethod
     def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
         """Called before the assessment has started.
@@ -132,6 +136,7 @@ class AssessorMonitor(FitMonitor):
 
 class HyperparameterOptimizationMonitor(AssessorMonitor):
     """Base class for monitoring the hyperparameter optimization of a model."""
+
     @abstractmethod
     def onOptimizationStart(
         self, model: QSPRModel, config: dict, optimization_type: str
@@ -174,13 +179,15 @@ class HyperparameterOptimizationMonitor(AssessorMonitor):
 
 class NullMonitor(HyperparameterOptimizationMonitor):
     """Monitor that does nothing."""
+
     def onFitStart(
         self,
         model: QSPRModel,
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
-        y_val: np.ndarray | None = None):
+        y_val: np.ndarray | None = None,
+    ):
         """Called before the training has started.
 
         Args:
@@ -317,6 +324,7 @@ class ListMonitor(HyperparameterOptimizationMonitor):
     Attributes:
         monitors (list[HyperparameterOptimizationMonitor]): list of monitors
     """
+
     def __init__(self, monitors: list[HyperparameterOptimizationMonitor]):
         """Initialize the monitor.
 
@@ -331,7 +339,8 @@ class ListMonitor(HyperparameterOptimizationMonitor):
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
-        y_val: np.ndarray | None = None):
+        y_val: np.ndarray | None = None,
+    ):
         """Called before the training has started.
 
         Args:
@@ -543,6 +552,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         bestEpoch (int): index of the best epoch of the current fit of the current
             assessment
     """
+
     def __init__(self):
         # hyperparameter optimization data
         self.config = None
@@ -550,8 +560,9 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.bestParameters = None
         self.parameters = {}
         self.assessments = {}
-        self.scores = pd.DataFrame(columns=["aggregated_score", "fold_scores"]
-                                  ).rename_axis("Iteration")
+        self.scores = pd.DataFrame(
+            columns=["aggregated_score", "fold_scores"]
+        ).rename_axis("Iteration")
         self.iteration = None
 
         # assessment data
@@ -572,6 +583,21 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.currentBatch = None
         self.bestEstimator = None
         self.bestEpoch = None
+
+    def __getstate__(self):
+        o_dict = super().__getstate__()
+        # convert all data frames to dicts
+        for key, value in o_dict.items():
+            if isinstance(value, pd.DataFrame):
+                o_dict[key] = {"pd.DataFrame": value.to_dict()}
+        return o_dict
+
+    def __setstate__(self, state):
+        # convert all dicts to data frames
+        for key, value in state.items():
+            if isinstance(value, dict) and "pd.DataFrame" in value:
+                state[key] = pd.DataFrame.from_dict(value["pd.DataFrame"])
+        super().__setstate__(state)
 
     def onOptimizationStart(
         self, model: QSPRModel, config: dict, optimization_type: str
@@ -705,7 +731,8 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
-        y_val: np.ndarray | None = None):
+        y_val: np.ndarray | None = None,
+    ):
         """Called before the training has started.
 
         Args:
@@ -882,17 +909,16 @@ class FileMonitor(BaseMonitor):
         super().onAssessmentEnd(predictions)
         if self.saveAssessments:
             predictions.to_csv(
-                f"{self.assessmentPath}/{self.assessmentType}_predictions.tsv",
-                sep="\t"
+                f"{self.assessmentPath}/{self.assessmentType}_predictions.tsv", sep="\t"
             )
 
     def onFitStart(
-        self, 
+        self,
         model: QSPRModel,
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
-        y_val: np.ndarray | None = None
+        y_val: np.ndarray | None = None,
     ):
         """Called before the training has started.
 
@@ -930,6 +956,7 @@ class FileMonitor(BaseMonitor):
 
 class WandBMonitor(BaseMonitor):
     """Monitor hyperparameter optimization to weights and biases."""
+
     def __init__(self, project_name: str, **kwargs):
         """Monitor assessment to weights and biases.
 
@@ -982,7 +1009,8 @@ class WandBMonitor(BaseMonitor):
 
         group = (
             f"{self.model.name}_{self.optimizationType}_{self.iteration}"
-            if hasattr(self, "optimizationType") else f"{self.assessmentModel.name}"
+            if hasattr(self, "optimizationType")
+            else f"{self.assessmentModel.name}"
         )
         name = f"{group}_{self.assessmentType}_{fold}"
 
@@ -1011,8 +1039,9 @@ class WandBMonitor(BaseMonitor):
         fold_predictions_copy = deepcopy(fold_predictions)
 
         # add smiles to fold predictions by merging on index
-        dataset_smiles = self.assessmentDataset.getDF()[self.assessmentDataset.smilesCol
-                                                       ]
+        dataset_smiles = self.assessmentDataset.getDF()[
+            self.assessmentDataset.smilesCol
+        ]
         fold_predictions_copy = fold_predictions_copy.merge(
             dataset_smiles, left_index=True, right_index=True
         )
@@ -1036,7 +1065,7 @@ class WandBMonitor(BaseMonitor):
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray | None = None,
-        y_val: np.ndarray | None = None
+        y_val: np.ndarray | None = None,
     ):
         """Called before the training has started.
 

@@ -30,6 +30,9 @@ the [documentation](https://cddleiden.github.io/QSPRpred/docs/).
           training, validation, and test sets.
         - [Descriptors](basics/data/descriptors.ipynb): How to calculate descriptors for
           molecules.
+        - [Searching, Filtering and Plotting](basics/data/searching_filtering_plotting.ipynb):
+          How to
+          search and filter data.
     - Modelling
         - [Classification](basics/modelling/classification.ipynb): How to train a
           classification model.
@@ -41,6 +44,8 @@ the [documentation](https://cddleiden.github.io/QSPRpred/docs/).
           QSPRpred.
 - **Advanced**
     - Data
+        - [Parallelization](advanced/data/parallelization.ipynb): How to parallelize
+          data functions across data sets.
         - [Custom descriptors](advanced/data/custom_descriptors.ipynb): How to use
           custom descriptors.
         - [Custom data splitting](advanced/data/custom_splitting.ipynb): How to use

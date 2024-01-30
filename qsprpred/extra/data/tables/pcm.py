@@ -2,13 +2,10 @@ from typing import Callable
 
 import pandas as pd
 
-from qsprpred.data.descriptors.calculators import (
-    DescriptorsCalculator,
-    MoleculeDescriptorsCalculator,
-)
+from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.data.tables.mol import MoleculeTable
 from qsprpred.data.tables.qspr import QSPRDataset
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from qsprpred.extra.data.descriptors.sets import ProteinDescriptorSet
 from qsprpred.logs import logger
 from qsprpred.tasks import TargetProperty
 from qsprpred.utils.serialization import function_as_string, function_from_string
@@ -41,8 +38,8 @@ class PCMDataSet(QSPRDataset):
         add_rdkit: bool = False,
         store_dir: str = ".",
         overwrite: bool = False,
-        n_jobs: int = 1,
-        chunk_size: int = 50,
+        n_jobs: int | None = 1,
+        chunk_size: int | None = None,
         drop_invalids: bool = True,
         drop_empty: bool = True,
         index_cols: list[str] | None = None,
@@ -138,46 +135,28 @@ class PCMDataSet(QSPRDataset):
             )
         return self.proteinSeqProvider(self.getProteinKeys())
 
-    def addProteinDescriptors(
-        self, calculator: ProteinDescriptorCalculator, recalculate=False, featurize=True
+    def addDescriptors(
+        self,
+        descriptors: list[DescriptorSet | ProteinDescriptorSet],
+        recalculate: bool = False,
+        featurize: bool = True,
+        *args,
+        **kwargs,
     ):
-        """
-        Add protein descriptors to the data frame.
-
-        Args:
-            calculator (ProteinDescriptorCalculator):
-                `ProteinDescriptorCalculator` instance to use.
-            recalculate (bool):
-                Whether to recalculate descriptors even if they are already present
-                in the data frame.
-            featurize (bool):
-                Whether to featurize the descriptors after adding them
-                to the data frame.
-        """
-        if recalculate:
-            self.dropDescriptors(calculator)
-        elif self.getDescriptorNames(prefix=calculator.getPrefix()):
-            logger.warning(
-                f"Protein descriptors already exist in {self.name}. "
-                f"Use `recalculate=True` to overwrite them."
-            )
-            return
-
-        if not self.proteinCol:
-            raise ValueError(
-                "Protein column not set. Cannot calculate protein descriptors."
-            )
-        # calculate the descriptors
+        # make sure the acc_keys property is set for ProteinDescriptorSets
+        self.df["acc_keys"] = self.df[self.proteinCol]
+        # get protein sequences and metadata
         sequences, info = (
-            self.proteinSeqProvider(self.df[self.proteinCol].unique().tolist())
-            if self.proteinSeqProvider
-            else (None, {})
+            self.getProteinSequences() if self.proteinSeqProvider else (None, {})
         )
-        descriptors = calculator(self.df[self.proteinCol].unique(), sequences, **info)
-        descriptors[self.proteinCol] = descriptors.index.values
-        # add the descriptors to the descriptor list
-        self.attachDescriptors(calculator, descriptors, [self.proteinCol])
-        self.featurize(update_splits=featurize)
+        # append sequences and metadata to kwargs
+        kwargs["sequences"] = sequences
+        for key in info:
+            kwargs[key] = info[key]
+        # pass everything to the descriptor calculation
+        return super().addDescriptors(
+            descriptors, recalculate, featurize, *args, **kwargs
+        )
 
     def __getstate__(self):
         o_dict = super().__getstate__()
@@ -247,27 +226,3 @@ class PCMDataSet(QSPRDataset):
         if not ds.descriptors and mol_table.descriptors:
             ds.descriptors = mol_table.descriptors
         return ds
-
-    def addFeatures(
-        self,
-        feature_calculators: list[DescriptorsCalculator] | None = None,
-        recalculate: bool = False,
-    ):
-        """Add features to the feature matrix.
-
-        Args:
-            feature_calculators (list[DescriptorsCalculator], optional):
-                list of feature calculators to use. Defaults to `None` in which case
-            recalculate:
-                whether to recalculate features even if they are already present
-        """
-        for calc in feature_calculators:
-            if isinstance(calc, MoleculeDescriptorsCalculator):
-                self.addDescriptors(calc, recalculate=recalculate, featurize=False)
-            elif isinstance(calc, ProteinDescriptorCalculator):
-                self.addProteinDescriptors(
-                    calc, recalculate=recalculate, featurize=False
-                )
-            else:
-                raise ValueError("Unknown feature calculator type: %s" % type(calc))
-        self.featurize(update_splits=True)

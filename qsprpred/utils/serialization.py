@@ -96,7 +96,7 @@ class JSONSerializable(FileSerializable):
         return os.path.abspath(filename)
 
     @classmethod
-    def fromFile(cls, filename: str) -> object:
+    def fromFile(cls, filename: str) -> Any:
         """Initialize a new instance from a JSON file.
 
         Args:
@@ -159,7 +159,7 @@ def function_from_string(func_str: str) -> Callable:
         func_str (str): string representation of the function
 
     Returns:
-        func (Callable): function
+        processor (Callable): function
     """
     try:
         return types.FunctionType(

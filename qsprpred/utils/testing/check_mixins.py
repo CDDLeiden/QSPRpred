@@ -21,10 +21,6 @@ from xgboost import XGBClassifier
 from .path_mixins import ModelDataSetsPathMixIn
 from ... import TargetTasks
 from ...data import QSPRDataset
-from ...data.descriptors.calculators import (
-    DescriptorsCalculator,
-    MoleculeDescriptorsCalculator,
-)
 from ...data.descriptors.sets import DescriptorSet
 from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...models import (
@@ -108,9 +104,8 @@ class DescriptorCheckMixIn:
 
         # test some basic consistency rules on the resulting features
         expected_length = 0
-        for calc in dataset.descriptorCalculators:
-            for descset in calc.descSets:
-                expected_length += len(descset.descriptors)
+        for calc in dataset.descriptorSets:
+            expected_length += len(calc.descriptors)
         self.checkFeatures(dataset, expected_length)
         # save to file, check if it can be loaded, and if the features are consistent
         dataset.save()
@@ -124,11 +119,10 @@ class DescriptorCheckMixIn:
             if ds_loaded_prop.task.isClassification():
                 self.assertEqual(ds_loaded_prop.name, target_prop["name"])
                 self.assertEqual(ds_loaded_prop.task, target_prop["task"])
-        self.assertTrue(ds_loaded.descriptorCalculators)
-        for calc in ds_loaded.descriptorCalculators:
-            self.assertTrue(isinstance(calc, DescriptorsCalculator))
-            for descset in calc.descSets:
-                self.assertTrue(isinstance(descset, DescriptorSet))
+        self.assertTrue(ds_loaded.descriptorSets)
+        for calc in ds_loaded.descriptors:
+            calc = calc.calculator
+            self.assertTrue(isinstance(calc, DescriptorSet))
         self.checkFeatures(dataset, expected_length)
 
 
@@ -177,8 +171,9 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
         self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
         for idx, prop in enumerate(expected_target_props):
             self.assertEqual(dataset.targetProperties[idx].name, prop)
-        for calc in dataset.descriptorCalculators:
-            self.assertIsInstance(calc, DescriptorsCalculator)
+        for calc in dataset.descriptors:
+            calc = calc.calculator
+            self.assertIsInstance(calc, DescriptorSet)
         if feature_standardizer is not None:
             self.assertIsInstance(dataset.featureStandardizer, SKLearnStandardizer)
         else:
@@ -213,20 +208,15 @@ class DescriptorInDataCheckMixIn(DescriptorCheckMixIn):
         ]
         return f"{desc_set}_{target_props_id}"
 
-    def getCalculators(self, desc_sets):
-        """Get the calculators for a descriptor set."""
-        return [MoleculeDescriptorsCalculator(desc_sets)]
-
     def checkDataSetContainsDescriptorSet(
         self, dataset, desc_set, prep_combo, target_props
     ):
         """Check if a descriptor set is in a data set."""
         # run the preparation
         logging.debug(f"Testing descriptor set: {desc_set} in data set: {dataset.name}")
-        descriptor_sets = [desc_set]
         preparation = {}
         preparation.update(prep_combo)
-        preparation["feature_calculators"] = self.getCalculators(descriptor_sets)
+        preparation["feature_calculators"] = [desc_set]
         dataset.prepareDataset(**preparation)
         # test consistency
         self.checkDescriptors(dataset, target_props)

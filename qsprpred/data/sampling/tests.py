@@ -3,6 +3,7 @@ from parameterized import parameterized
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
+from ..descriptors.fingerprints import MorganFP
 from ...data import (
     RandomSplit,
     TemporalSplit,
@@ -16,8 +17,6 @@ from ...data.chem.clustering import (
     FPSimilarityMaxMinClusters,
 )
 from ...data.chem.scaffolds import Murcko, BemisMurcko
-from ...data.descriptors.calculators import MoleculeDescriptorsCalculator
-from ...data.descriptors.sets import FingerprintSet
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...data.sampling.splits import ManualSplit
 from ...utils.testing.base import QSPRTestCase
@@ -111,7 +110,11 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
     @parameterized.expand(
         [
             (False, Murcko(), None),
-            (False, BemisMurcko(), ["ScaffoldSplit_000", "ScaffoldSplit_001"]),
+            (
+                False,
+                BemisMurcko(use_csk=True),
+                ["ScaffoldSplit_000", "ScaffoldSplit_001"],
+            ),
             (True, Murcko(), None),
         ]
     )
@@ -155,16 +158,28 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
 
     @parameterized.expand(
         [
-            (False, FPSimilarityLeaderPickerClusters(), None),
             (
                 False,
-                FPSimilarityMaxMinClusters(),
+                FPSimilarityLeaderPickerClusters(
+                    fp_calculator=MorganFP(radius=2, nBits=128)
+                ),
+                None,
+            ),
+            (
+                False,
+                FPSimilarityMaxMinClusters(fp_calculator=MorganFP(radius=2, nBits=128)),
                 ["ClusterSplit_000", "ClusterSplit_001"],
             ),
-            (True, FPSimilarityMaxMinClusters(), None),
             (
                 True,
-                FPSimilarityLeaderPickerClusters(),
+                FPSimilarityMaxMinClusters(fp_calculator=MorganFP(radius=2, nBits=128)),
+                None,
+            ),
+            (
+                True,
+                FPSimilarityLeaderPickerClusters(
+                    fp_calculator=MorganFP(radius=2, nBits=128)
+                ),
                 ["ClusterSplit_000", "ClusterSplit_001"],
             ),
         ]
@@ -192,13 +207,10 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         """Test the serialization of dataset with datasplit."""
         dataset = self.createLargeTestDataSet()
         split = ScaffoldSplit()
-        N_BITS = 1024
-        calculator = MoleculeDescriptorsCalculator(
-            [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=N_BITS)]
-        )
+        n_bits = 128
         dataset.prepareDataset(
             split=split,
-            feature_calculators=[calculator],
+            feature_calculators=[MorganFP(radius=3, nBits=n_bits)],
             feature_standardizer=StandardScaler(),
         )
         self.validate_split(dataset)
@@ -207,9 +219,9 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         dataset.save()
         dataset_new = QSPRDataset.fromFile(dataset.metaFile)
         self.validate_split(dataset_new)
-        self.assertTrue(dataset_new.descriptorCalculators)
+        self.assertTrue(dataset_new.descriptorSets)
         self.assertTrue(dataset_new.featureStandardizer)
-        self.assertTrue(len(dataset_new.featureNames) == N_BITS)
+        self.assertTrue(len(dataset_new.featureNames) == n_bits)
         self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
         self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
         dataset_new.clearFiles()
@@ -251,11 +263,7 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         """Test the default fold generator, which is a 5-fold cross validation."""
         # test default settings with regression
         dataset = self.createLargeTestDataSet()
-        dataset.addDescriptors(
-            MoleculeDescriptorsCalculator(
-                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-            )
-        )
+        dataset.addDescriptors([MorganFP(radius=3, nBits=128)])
         fold = KFold(5, shuffle=True, random_state=dataset.randomState)
         generator = FoldsFromDataSplit(fold)
         k, indices = self.validateFolds(generator.iterFolds(dataset))
@@ -299,11 +307,7 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
 
     def testBootstrappedFold(self):
         dataset = self.createLargeTestDataSet(random_state=None)
-        dataset.addDescriptors(
-            MoleculeDescriptorsCalculator(
-                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1024)]
-            )
-        )
+        dataset.addDescriptors([MorganFP(radius=3, nBits=128)])
         split = RandomSplit(0.2)
         fold = BootstrapSplit(split, n_bootstraps=5)
         k, indices = self.validateFolds(dataset.iterFolds(fold))

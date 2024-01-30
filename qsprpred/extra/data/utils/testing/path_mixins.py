@@ -1,12 +1,23 @@
-import itertools
 import os
+import platform
+import tempfile
 from typing import Callable
 
 import pandas as pd
 
 from qsprpred import TargetProperty, TargetTasks
-from qsprpred.data.descriptors.sets import MoleculeDescriptorSet, FingerprintSet
-from qsprpred.extra.data.descriptors.calculators import ProteinDescriptorCalculator
+from qsprpred.data.descriptors.sets import DescriptorSet
+from qsprpred.extra.data.descriptors.fingerprints import (
+    CDKFP,
+    CDKExtendedFP,
+    CDKEStateFP,
+    CDKGraphOnlyFP,
+    CDKMACCSFP,
+    CDKPubchemFP,
+    CDKSubstructureFP,
+    CDKKlekotaRothFP,
+    CDKAtomPairs2DFP,
+)
 from qsprpred.extra.data.descriptors.sets import (
     Mordred,
     Mold2,
@@ -17,6 +28,7 @@ from qsprpred.extra.data.descriptors.sets import (
 )
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.msa_calculator import ClustalMSA
+from qsprpred.logs import logger
 from qsprpred.utils.testing.path_mixins import DataSetsPathMixIn
 
 
@@ -28,35 +40,41 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
         self.dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
 
     @classmethod
-    def getAllDescriptors(cls) -> list[MoleculeDescriptorSet]:
+    def getAllDescriptors(cls) -> list[DescriptorSet]:
         """Return a list of all available molecule descriptor sets.
 
         Returns:
             list: list of `MoleculeDescriptorSet` objects
         """
-        return [
+        ret = [
             Mordred(),
-            Mold2(),
-            FingerprintSet(fingerprint_type="CDKFP", size=2048, search_depth=7),
-            FingerprintSet(fingerprint_type="CDKExtendedFP"),
-            FingerprintSet(fingerprint_type="CDKEStateFP"),
-            FingerprintSet(
-                fingerprint_type="CDKGraphOnlyFP", size=2048, search_depth=7
-            ),
-            FingerprintSet(fingerprint_type="CDKMACCSFP"),
-            FingerprintSet(fingerprint_type="CDKPubchemFP"),
-            FingerprintSet(fingerprint_type="CDKSubstructureFP", use_counts=False),
-            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", use_counts=True),
-            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", use_counts=False),
-            FingerprintSet(fingerprint_type="CDKSubstructureFP", use_counts=True),
-            FingerprintSet(fingerprint_type="CDKKlekotaRothFP", use_counts=False),
-            FingerprintSet(fingerprint_type="CDKAtomPairs2DFP", use_counts=True),
+            CDKFP(size=2048, search_depth=7),
+            CDKExtendedFP(),
+            CDKEStateFP(),
+            CDKGraphOnlyFP(size=2048, search_depth=7),
+            CDKMACCSFP(),
+            CDKPubchemFP(),
+            CDKSubstructureFP(use_counts=False),
+            CDKKlekotaRothFP(use_counts=True),
+            CDKAtomPairs2DFP(use_counts=False),
+            CDKSubstructureFP(use_counts=True),
+            CDKKlekotaRothFP(use_counts=False),
+            CDKAtomPairs2DFP(use_counts=True),
             PaDEL(),
             ExtendedValenceSignature(1),
         ]
+        if platform.system() != "Darwin":
+            ret.append(Mold2())
+        else:
+            # not supported on macOS
+            logger.warning(
+                "Mold2 is not supported on macOS. "
+                "Skipping Mold2 descriptor set in tests."
+            )
+        return ret
 
-    @staticmethod
-    def getAllProteinDescriptors() -> list[ProteinDescriptorSet]:
+    @classmethod
+    def getAllProteinDescriptors(cls) -> list[ProteinDescriptorSet]:
         """Return a list of all available protein descriptor sets.
 
         Returns:
@@ -64,36 +82,22 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
         """
 
         return [
-            ProDec(sets=["Zscale Hellberg"]),
-            ProDec(sets=["Sneath"]),
+            ProDec(
+                sets=["Zscale Hellberg"],
+                msa_provider=cls.getMSAProvider(tempfile.mkdtemp()),
+            ),
+            ProDec(
+                sets=["Sneath"], msa_provider=cls.getMSAProvider(tempfile.mkdtemp())
+            ),
         ]
 
     @classmethod
     def getDefaultCalculatorCombo(cls):
-        mol_descriptor_calculators = super().getDefaultCalculatorCombo()
-        feature_sets_pcm = [
-            ProDec(sets=["Zscale Hellberg"]),
-            ProDec(sets=["Sneath"]),
-        ]
-        protein_descriptor_calculators = [
-            [ProteinDescriptorCalculator(combo, msa_provider=cls.getMSAProvider())]
-            for combo in itertools.combinations(feature_sets_pcm, 1)
-        ] + [
-            [ProteinDescriptorCalculator(combo, msa_provider=cls.getMSAProvider())]
-            for combo in itertools.combinations(feature_sets_pcm, 2)
-        ]
-        descriptor_calculators = (
-            mol_descriptor_calculators + protein_descriptor_calculators
-        )
-        # make combinations of molecular and PCM descriptor calculators
-        descriptor_calculators += [
-            mol + prot
-            for mol, prot in zip(
-                mol_descriptor_calculators, protein_descriptor_calculators
-            )
-        ]
-
-        return descriptor_calculators
+        """Return the default descriptor calculator combo."""
+        # only first molecule calculator and first protein calculator to save time
+        mol_calc = super().getDefaultCalculatorCombo()[0][0]
+        prot_calc = cls.getAllProteinDescriptors()[0]
+        return [(mol_calc, prot_calc)]
 
     def getPCMDF(self) -> pd.DataFrame:
         """Return a test dataframe with PCM data.
@@ -136,8 +140,9 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
             {acc: kwargs_map[acc] for acc in acc_keys},
         )
 
-    def getMSAProvider(self):
-        return ClustalMSA(out_dir=self.generatedDataPath)
+    @classmethod
+    def getMSAProvider(cls, out_dir: str):
+        return ClustalMSA(out_dir=out_dir)
 
     def createPCMDataSet(
         self,

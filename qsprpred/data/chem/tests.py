@@ -1,8 +1,9 @@
+from parameterized import parameterized
 from rdkit import Chem
 
 from ... import TargetTasks
 from ...data import QSPRDataset
-from ...data.chem.scaffolds import Murcko
+from ...data.chem.scaffolds import Murcko, BemisMurcko
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 
@@ -16,15 +17,24 @@ class TestScaffolds(DataSetsPathMixIn, QSPRTestCase):
         self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
 
-    def testScaffoldAdd(self):
+    @parameterized.expand(
+        [
+            ("Murcko", Murcko()),
+            ("BemisMurcko", BemisMurcko()),
+            ("BemisMurckoCSK", BemisMurcko(True, True)),
+            ("BemisMurckoJustCSK", BemisMurcko(False, True)),
+            ("BemisMurckoOff", BemisMurcko(False, False)),
+        ]
+    )
+    def testScaffoldAdd(self, _, scaffold):
         """Test the adding and getting of scaffolds."""
-        self.dataset.addScaffolds([Murcko()])
+        self.dataset.addScaffolds([scaffold])
         scaffs = self.dataset.getScaffolds()
         self.assertEqual(scaffs.shape, (len(self.dataset), 1))
-        self.dataset.addScaffolds([Murcko()], add_rdkit_scaffold=True, recalculate=True)
-        scaffs = self.dataset.getScaffolds(includeMols=True)
+        self.dataset.addScaffolds([scaffold], add_rdkit_scaffold=True, recalculate=True)
+        scaffs = self.dataset.getScaffolds(include_mols=True)
         self.assertEqual(scaffs.shape, (len(self.dataset), 2))
-        for mol in scaffs[f"Scaffold_{Murcko()}_RDMol"]:
+        for mol in scaffs[f"Scaffold_{scaffold}_RDMol"]:
             self.assertTrue(isinstance(mol, Chem.rdchem.Mol))
 
 
