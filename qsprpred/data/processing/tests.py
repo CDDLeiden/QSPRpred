@@ -282,11 +282,7 @@ class testApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
         super().setUp()
         self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
-        self.dataset.addDescriptors(
-            MoleculeDescriptorsCalculator(
-                [FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=1000)]
-            )
-        )
+        self.dataset.addDescriptors([MorganFP(radius=3, nBits=1000)])
 
     def testApplicabilityDomain(self):
         """Test the applicability domain fitting, transforming and serialization."""
