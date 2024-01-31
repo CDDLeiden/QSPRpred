@@ -353,7 +353,9 @@ class ModelCheckMixIn:
         # predict/predictProba function
 
         # get the expected result from the basic predict function
-        features = dataset.getFeatures(concat=True, ordered=True)
+        features = dataset.getFeatures(
+            concat=True, ordered=True, refit_standardizer=False
+        )
         expected_result = model.predict(features)
 
         # make predictions with the predictMols function
