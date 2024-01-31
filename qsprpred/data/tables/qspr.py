@@ -396,7 +396,10 @@ class QSPRDataset(MoleculeTable):
         self, index: pd.Index, name: str | None = None
     ) -> "MoleculeTable":
         ret = super().searchWithIndex(index, name)
-        return QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
+        ret = QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
+        ret.feature_standardizer = self.feature_standardizer
+        ret.featurize()
+        return ret
 
     @staticmethod
     def fromMolTable(
