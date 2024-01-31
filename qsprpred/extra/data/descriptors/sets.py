@@ -459,7 +459,6 @@ class ProDec(ProteinDescriptorSet):
         prodec_descriptor = factory.get_descriptor(descriptor)
         # Calculate descriptor features for aligned sequences of interest
         protein_features = prodec_descriptor.pandas_get(msa.values(), ids=msa.keys())
-        protein_features.set_index("ID", inplace=True)
         return protein_features
 
     def getProteinDescriptors(
@@ -484,26 +483,26 @@ class ProDec(ProteinDescriptorSet):
         if not self.msa:
             self.msa = self.msaProvider(sequences, **kwargs)
         # calculate descriptors
-        df = pd.DataFrame(index=pd.Index(acc_keys, name="ID"))
+        dfs = []
         for descriptor in self.sets:
-            df = df.merge(
-                self.calculateDescriptor(self.factory, self.msa, descriptor),
-                left_index=True,
-                right_index=True,
-            )
+            dfs.append(self.calculateDescriptor(self.factory, self.msa, descriptor))
+        df = pd.concat(dfs, axis=1)
+        df.set_index("ID", inplace=True, drop=True)
         # Keep only descriptors that were requested to keep
         if not self._descriptors:
-            self._descriptors = df.columns.tolist()
+            self._descriptors = sorted(df.columns.tolist())
         else:
             df.drop(
                 columns=[col for col in df.columns if col not in self._descriptors],
                 inplace=True,
             )
+        # reorder columns to reflect the order of descriptors
+        df = df[self.descriptors]
         return df
 
     @property
     def descriptors(self):
-        return self._descriptors
+        return sorted(self._descriptors)
 
     @descriptors.setter
     def descriptors(self, value):

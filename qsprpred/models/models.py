@@ -425,7 +425,7 @@ class QSPRModel(JSONSerializable, ABC):
                 data matrix and/or target matrix in np.ndarray format
         """
         if isinstance(X, QSPRDataset):
-            X = X.getFeatures(concat=True)
+            X = X.getFeatures(concat=True, refit_standardizer=False)
         if isinstance(X, pd.DataFrame):
             X = X.values
         if y is not None:

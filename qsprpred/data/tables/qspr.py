@@ -869,6 +869,7 @@ class QSPRDataset(MoleculeTable):
         concat: bool = False,
         raw: bool = False,
         ordered: bool = False,
+        refit_standardizer: bool = True,
     ):
         """Get the current feature sets (training and test) from the dataset.
 
@@ -891,9 +892,14 @@ class QSPRDataset(MoleculeTable):
                 If `True`, the returned feature matrices will be ordered
                 according to the original order of the data set. This is only relevant
                 if `concat` is `True`.
+            refit_standardizer (bool): If `True`, the feature standardizer will be
+                refit on the training set upon this call. If `False`, the previously
+                fitted standardizer will be used. Defaults to `True`. Use `False` if
+                this dataset is used for prediction only and the standardizer has
+                been initialized already.
         """
         self.checkFeatures()
-
+        # get feature matrices using feature names
         if concat:
             if len(self.X.columns) != 0:
                 df_X = pd.concat(
@@ -909,26 +915,28 @@ class QSPRDataset(MoleculeTable):
         else:
             df_X = self.X
             df_X_ind = self.X_ind
-
+        # convert to numpy arrays and standardize
         X = df_X.values
         X_ind = df_X_ind.values if df_X_ind is not None else None
         if not raw and self.feature_standardizer:
             X, self.feature_standardizer = apply_feature_standardizer(
-                self.feature_standardizer, df_X, fit=True
+                self.feature_standardizer,
+                df_X,
+                fit=True if refit_standardizer else False,
             )
             if X_ind is not None and X_ind.shape[0] > 0:
                 X_ind, _ = apply_feature_standardizer(
                     self.feature_standardizer, df_X_ind, fit=False
                 )
-
+        # convert to data frames and make sure column order is correct
         X = pd.DataFrame(X, index=df_X.index, columns=df_X.columns)
         if X_ind is not None:
             X_ind = pd.DataFrame(X_ind, index=df_X_ind.index, columns=df_X_ind.columns)
-
+        # replace original feature matrices if inplace
         if inplace:
             self.X = X
             self.X_ind = X_ind
-
+        # order if concatenating
         if ordered and concat:
             X = X.loc[self.df.index, :]
         return (X, X_ind) if not concat else X
