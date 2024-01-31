@@ -380,8 +380,8 @@ class ProteinDescriptorSet(DescriptorSet):
         acc_keys = sorted(set(props["acc_keys"]))
         values = self.getProteinDescriptors(acc_keys, **kwargs)
         df = pd.DataFrame({"acc_keys": props["acc_keys"]})
-        df = df.set_index("acc_keys")
-        df = df.merge(values, left_index=True, right_index=True)
+        df = df.merge(values, how="left", left_on="acc_keys", right_index=True)
+        del df["acc_keys"]
         return df.values
 
     @property
