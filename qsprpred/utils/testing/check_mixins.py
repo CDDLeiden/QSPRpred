@@ -298,12 +298,14 @@ class ModelCheckMixIn:
         self.assertTrue(exists(model.metaFile))
         self.assertEqual(path, model.metaFile)
 
-    def predictorTest(self,
-            model: QSPRModel,
-            dataset: QSPRDataset,
-            comparison_model: QSPRModel | None = None,
-            expect_equal_result=True,
-            **pred_kwargs):
+    def predictorTest(
+        self,
+        model: QSPRModel,
+        dataset: QSPRDataset,
+        comparison_model: QSPRModel | None = None,
+        expect_equal_result=True,
+        **pred_kwargs,
+    ):
         """Test model predictions.
 
         Checks if the shape of the predictions is as expected and if the predictions
@@ -320,6 +322,7 @@ class ModelCheckMixIn:
             **pred_kwargs:
                 Extra keyword arguments to pass to the predictor's `predictMols` method.
         """
+
         # define checks of the shape of the predictions
         def check_shape(predictions, model, num_smiles, use_probas):
             if model.task.isClassification() and use_probas:
@@ -351,52 +354,38 @@ class ModelCheckMixIn:
 
         # Check if the predictMols function gives the same result as the
         # predict/predictProba function
-
         # get the expected result from the basic predict function
         features = dataset.getFeatures(
             concat=True, ordered=True, refit_standardizer=False
         )
         expected_result = model.predict(features)
-
-        # make predictions with the predictMols function
-        smiles = dataset.getDF()[dataset.smilesCol].to_list()
+        # make predictions with the predictMols function and check with previous result
+        smiles = list(dataset.smiles)
         num_smiles = len(smiles)
         predictions = model.predictMols(smiles, use_probas=False, **pred_kwargs)
-
-        # if PCM dataset, subset the predictions to the selected protein key
-        if dataset.__class__.__name__ == "PCMDataSet":
-            dataset_subset = dataset.df[dataset.proteinCol] == pred_kwargs["protein_id"]
-            num_smiles = sum(dataset_subset)
-            expected_result = expected_result[dataset_subset]
-            predictions = predictions[dataset_subset]
-
         check_shape(predictions, model, num_smiles, use_probas=False)
         check_predictions(predictions, expected_result, True)
-
         # do the same for the predictProba function
         if model.task.isClassification():
             expected_result_proba = model.predictProba(features)
-            predictions_proba = model.predictMols(smiles, use_probas=True, **pred_kwargs)
-
-            # if PCM dataset, subset the predictions to the selected protein key
-            if dataset.__class__.__name__ == "PCMDataSet":
-                for i in range(len(expected_result_proba)):
-                    expected_result_proba[i] = expected_result_proba[i][dataset_subset]
-                    predictions_proba[i] = predictions_proba[i][dataset_subset]
-
+            predictions_proba = model.predictMols(
+                smiles, use_probas=True, **pred_kwargs
+            )
             check_shape(predictions_proba, model, len(smiles), use_probas=True)
             check_predictions(predictions_proba, expected_result_proba, True)
-
-
         # check if the predictions are (not) the same as of the comparison model
         if comparison_model is not None:
-            predictions_comparison = comparison_model.predictMols(smiles, use_probas=False, **pred_kwargs)
-
+            predictions_comparison = comparison_model.predictMols(
+                smiles, use_probas=False, **pred_kwargs
+            )
             check_predictions(predictions, predictions_comparison, expect_equal_result)
-
             if model.task.isClassification():
-                predictions_comparison_proba = comparison_model.predictMols(smiles, use_probas=True, **pred_kwargs)
-                check_predictions(predictions_proba, predictions_comparison_proba, expect_equal_result)
+                predictions_comparison_proba = comparison_model.predictMols(
+                    smiles, use_probas=True, **pred_kwargs
+                )
+                check_predictions(
+                    predictions_proba, predictions_comparison_proba, expect_equal_result
+                )
 
     def oldpredictorTest(
         self,
