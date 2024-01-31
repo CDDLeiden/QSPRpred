@@ -290,7 +290,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
         dataset.prepareDataset(
             feature_calculators=[SmilesDesc()],
-            split=RandomSplit(test_fraction=0.1),
+            split=RandomSplit(test_fraction=0.1, seed=dataset.randomState),
         )
         # initialize model for training from class
         model = self.getModel(
@@ -310,7 +310,11 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 n_splits=1, test_size=0.1, random_state=dataset.randomState
             ),
         )
-        qsprpred_score = assessor(model, dataset, split=RandomSplit(test_fraction=0.1))
+        qsprpred_score = assessor(
+            model,
+            dataset,
+            split=RandomSplit(test_fraction=0.1, seed=dataset.randomState)
+        )
         qsprpred_score = -qsprpred_score[0]  # qsprpred_score is negative rmse
 
         # save the cross-validation train, test and validation split to
