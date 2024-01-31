@@ -253,7 +253,7 @@ class QSPRDataset(MoleculeTable):
         else:
             for calc in self.descriptorSets:
                 features.extend(calc.descriptors)
-        return sorted(features)
+        return features
 
     def restoreTrainingData(self):
         """Restore training data from the data frame.
