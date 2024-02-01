@@ -57,6 +57,7 @@ class PyBoostModel(QSPRModel):
         name: Optional[str] = None,
         parameters: Optional[dict] = None,
         autoload=True,
+        random_state: Optional[int] = None,
     ):
         """Initialize a QSPR model instance.
 
@@ -73,6 +74,7 @@ class PyBoostModel(QSPRModel):
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
+            random_state (int): random state to use for the model
         """
         super().__init__(
             base_dir,
@@ -81,6 +83,7 @@ class PyBoostModel(QSPRModel):
             name,
             parameters,
             autoload,
+            random_state,
         )
 
     @property
