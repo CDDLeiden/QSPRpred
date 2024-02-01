@@ -418,7 +418,7 @@ class ProDec(ProteinDescriptorSet):
         super().__init__()
         self.factory = prodec.ProteinDescriptors()
         self.sets = self.factory.available_descriptors if sets is None else sets
-        self._descriptors = None
+        self._descriptors = []
         self.msaProvider = msa_provider
         self.msa = None
 
