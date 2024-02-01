@@ -129,6 +129,7 @@ class ChempropModel(QSPRModel):
         name: str | None = None,
         parameters: dict | None = None,
         autoload=True,
+        random_state: int | None = None,
         quiet_logger: bool = True,
     ):
         """Initialize a Chemprop instance.
@@ -151,7 +152,7 @@ class ChempropModel(QSPRModel):
         """
         alg = ChempropMoleculeModel  # wrapper for chemprop.models.MoleculeModel
         self.quietLogger = quiet_logger
-        super().__init__(base_dir, alg, data, name, parameters, autoload)
+        super().__init__(base_dir, alg, data, name, parameters, autoload, random_state)
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
         )
