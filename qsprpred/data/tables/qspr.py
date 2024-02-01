@@ -253,7 +253,7 @@ class QSPRDataset(MoleculeTable):
         else:
             for calc in self.descriptorSets:
                 features.extend(calc.descriptors)
-        return features
+        return sorted(features)
 
     def restoreTrainingData(self):
         """Restore training data from the data frame.
@@ -603,6 +603,8 @@ class QSPRDataset(MoleculeTable):
                 "No descriptors available. Cannot load descriptors to splits."
             )
         descriptors = self.getDescriptors()
+        # sort descriptors alphabetically
+        descriptors = descriptors.reindex(sorted(descriptors.columns), axis=1)
         if self.X_ind is not None and self.y_ind is not None:
             self.X = descriptors.loc[self.X.index, :]
             self.y = self.df.loc[self.X.index, self.targetPropertyNames]
