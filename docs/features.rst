@@ -7,7 +7,14 @@ Overview of available features
 
     .. dropdown:: Data Sources
 
-        Dropdown content
+        :class:`~qsprpred.data.sources.data_source.DataSource`: Base class for data sources.
+        Data sources are used to load data from a source programmatically.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.sources.papyrus.papyrus_class.Papyrus`: Papyrus
 
     .. dropdown:: Data Filters
 
