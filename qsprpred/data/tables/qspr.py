@@ -602,8 +602,6 @@ class QSPRDataset(MoleculeTable):
                 "No descriptors available. Cannot load descriptors to splits."
             )
         descriptors = self.getDescriptors()
-        # sort descriptors alphabetically
-        descriptors = descriptors.reindex(sorted(descriptors.columns), axis=1)
         if self.X_ind is not None and self.y_ind is not None:
             self.X = descriptors.loc[self.X.index, :]
             self.y = self.df.loc[self.X.index, self.targetPropertyNames]
