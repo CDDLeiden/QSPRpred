@@ -8,6 +8,7 @@ Overview of available features
     .. dropdown:: Data Sources
 
         :class:`~qsprpred.data.sources.data_source.DataSource`: Base class for data sources.
+
         Data sources are used to load data from a source programmatically.
 
         .. tab-set::
@@ -18,11 +19,21 @@ Overview of available features
 
     .. dropdown:: Data Filters
 
-        Dropdown content
+        :class:`~qsprpred.data.processing.data_filters.DataFilter`: Base class for data filters.
+
+        Data filters are used to filter data based on some criteria.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+                
+                * :class:`~qsprpred.data.processing.data_filters.CategoryFilter`: CategoryFilter
+                * :class:`~qsprpred.data.processing.data_filters.RepeatsFilter`: RepeatsFilter
 
     .. dropdown:: Descriptor Sets
 
-        :class:`~qsprpred.data.descriptors.sets.DescriptorSet`: Base class for descriptor sets. 
+        :class:`~qsprpred.data.descriptors.sets.DescriptorSet`: Base class for descriptor sets.
+        
         Descriptor sets are used to calculate molecular descriptors for a set of molecules.
 
         .. tab-set::
