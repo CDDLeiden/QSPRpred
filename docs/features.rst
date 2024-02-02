@@ -151,7 +151,16 @@ Overview of available features
 
     .. dropdown:: Model Assessors
 
-        Dropdown content 
+        :class:`~qsprpred.models.assessment_methods.ModelAssessor`: Base class for model assessors.
+
+        Model assessors are used to assess the performance of models.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.models.assessment_methods.CrossValAssessor`: CrossValAssessor
+                * :class:`~qsprpred.models.assessment_methods.TestSetAssessor`: TestSetAssessor
 
     .. dropdown:: Hyperparameter Optimizers
 
