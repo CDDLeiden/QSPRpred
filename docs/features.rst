@@ -118,7 +118,24 @@ Overview of available features
 
     .. dropdown:: Models
 
-        Dropdown content
+        :class:`~qsprpred.models.models.QSPRModel`: Base class for models.
+
+        Models are used to predict properties of molecules.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.models.scikit_learn.SklearnModel`: SklearnModel
+
+            .. tab-item:: Extra
+
+                * :class:`~qsprpred.extra.models.pcm.PCMModel`: PCMModel
+
+            .. tab-item:: GPU
+                    
+                * :class:`~qsprpred.extra.gpu.models.chemprop.ChempropModel`: ChempropModel
+                * :class:`~qsprpred.extra.gpu.models.pyboost.PyBoostModel`: PyBoostModel
 
     .. dropdown:: Metrics
 
