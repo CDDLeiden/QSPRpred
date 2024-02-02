@@ -835,7 +835,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """
         names = []
         for ds in self.descriptors:
-            names.extend(ds.getDescriptorNames(active_only=False))
+            names.extend(ds.getDescriptorNames())
         return names
 
     def hasDescriptors(
