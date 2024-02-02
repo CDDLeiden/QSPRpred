@@ -104,7 +104,17 @@ Overview of available features
 
     .. dropdown:: Feature Filters
 
-        Dropdown content
+        :class:`~qsprpred.data.processing.feature_filters.FeatureFilter`: Base class for feature filters.
+
+        Feature filters are used to filter features based on some criteria.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.processing.feature_filters.HighCorrelationFilter`: HighCorrelationFilter
+                * :class:`~qsprpred.data.processing.feature_filters.LowVarianceFilter`: LowVarianceFilter
+                * :class:`~qsprpred.data.processing.feature_filters.BorutaFilter`: BorutaFilter
 
     .. dropdown:: Models
 
