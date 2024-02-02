@@ -176,10 +176,10 @@ class Replica(JSONSerializable):
         """
         if self.ds is None:
             raise ValueError("Data set not initialized. Call initData first.")
-        self.model.initFromData(self.ds)
+        self.model.initFromDataset(self.ds)
         self.model.initRandomState(self.randomSeed)
         if self.optimizer is not None:
-            self.optimizer.optimize(self.model)
+            self.optimizer.optimize(self.model, self.ds)
         self.model.save()
 
     def runAssessment(self):
@@ -194,12 +194,14 @@ class Replica(JSONSerializable):
             ValueError:
                 If the model has not been initialized.
         """
-        if self.model.data is None:
+        if self.ds is None:
+            raise ValueError("Data set not initialized. Call initData first.")
+        if self.model is None:
             raise ValueError("Model not initialized. Call initModel first.")
         self.results = None
         scores_df = pd.DataFrame()
         for assessor in self.assessors:
-            scores = assessor(self.model, save=True)
+            scores = assessor(self.model, self.ds, save=True)
             if isinstance(scores, float):
                 scores = np.array([scores])
             for i, fold_score in enumerate(scores):
@@ -258,6 +260,5 @@ class Replica(JSONSerializable):
         for assessor in self.assessors:
             # FIXME: some problems in monitor serialization now prevent this
             assessor.monitor = NullMonitor()
-        self.model.data = None  # FIXME: model now does not support data serialization
         results["ReplicaFile"] = self.toFile(out_file)
         return results
