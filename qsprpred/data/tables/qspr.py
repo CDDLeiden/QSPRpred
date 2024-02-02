@@ -247,13 +247,12 @@ class QSPRDataset(MoleculeTable):
         Returns:
             list[str]: list of feature names
         """
-        features = []
         if not self.hasDescriptors:
-            return features
-        else:
-            for calc in self.descriptorSets:
-                features.extend(calc.descriptors)
-        return sorted(features)
+            return []
+        features = []
+        for ds in self.descriptors:
+            features.extend(ds.getDescriptorNames(active_only=True))
+        return features
 
     def restoreTrainingData(self):
         """Restore training data from the data frame.
