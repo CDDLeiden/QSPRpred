@@ -33,7 +33,7 @@ Overview of available features
     .. dropdown:: Descriptor Sets
 
         :class:`~qsprpred.data.descriptors.sets.DescriptorSet`: Base class for descriptor sets.
-        
+
         Descriptor sets are used to calculate molecular descriptors for a set of molecules.
 
         .. tab-set::
@@ -78,7 +78,29 @@ Overview of available features
 
     .. dropdown:: Data Splitters
 
-        Dropdown content
+        :class:`~qsprpred.data.sampling.splits.DataSplit`: Base class for data splitters.
+
+        Data splitters are used to split data into training and test sets.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.sampling.splits.RandomSplit`: RandomSplit
+                * :class:`~qsprpred.data.sampling.splits.ScaffoldSplit`: ScaffoldSplitter
+                * :class:`~qsprpred.data.sampling.splits.TemporalSplit`: StratifiedSplitter
+                * :class:`~qsprpred.data.sampling.splits.ManualSplit`: ManualSplit
+                * :class:`~qsprpred.data.sampling.splits.BootstrapSplit`: BootstrapSplit
+                * :class:`~qsprpred.data.sampling.splits.GBMTDataSplit`: GBMTDataSplit
+                    * :class:`~qsprpred.data.sampling.splits.GBMTRandomSplit`: GBMTRandomSplit
+                    * :class:`~qsprpred.data.sampling.splits.ClusterSplit`: ClusterSplit
+
+            .. tab-item:: Extra
+
+                * :class:`~qsprpred.extra.data.sampling.splits.LeaveTargetsOut`: LeaveTargetsOut
+                * :class:`~qsprpred.extra.data.sampling.splits.PCMSplit`: PCMSplit
+                    * :class:`~qsprpred.extra.data.sampling.splits.TemporalPerTarget`: TemporalPerTarget
+
 
     .. dropdown:: Feature Filters
 
