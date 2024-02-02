@@ -408,7 +408,7 @@ class QSPRDataset(MoleculeTable):
     ) -> "MoleculeTable":
         ret = super().searchWithIndex(index, name)
         ret = QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
-        ret.feature_standardizer = self.feature_standardizer
+        ret.feature_standardizer = self.featureStandardizer
         ret.featurize()
         return ret
 
