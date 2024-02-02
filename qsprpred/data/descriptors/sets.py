@@ -307,7 +307,7 @@ class RDKitDescs(DescriptorSet):
         self, rdkit_descriptors: list[str] | None = None, include_3d: bool = False
     ):
         super().__init__()
-        self._descriptors = (
+        self.descriptors = (
             rdkit_descriptors
             if rdkit_descriptors is not None
             else sorted({x[0] for x in Descriptors._descList})
