@@ -342,8 +342,6 @@ class ModelCheckMixIn:
 
         # define check for comparing predictions with expected result
         def check_predictions(predictions, expected_result, expect_equal_result):
-            print(predictions)
-            print(expected_result)
             # check if predictions are almost equal to expected result (rtol=1e-5)
             check_outcome = self.assertTrue if expect_equal_result else self.assertFalse
             if isinstance(expected_result, list):
