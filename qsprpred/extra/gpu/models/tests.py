@@ -245,8 +245,8 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
-            base_dir=self.generatedModelsPath,
             name=f"{alg_name}",
+            random_state=random_state[0],
         )
         self.fitTest(model, dataset)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
@@ -257,10 +257,9 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         if random_state[0] is not None:
             model = self.getModel(
                 name=alg_name,
-                dataset=dataset,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             new_predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
             self.predictorTest(
                 predictor,
@@ -348,10 +347,9 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         if random_state[0] is not None:
             model = self.getModel(
                 name=alg_name,
-                dataset=dataset,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             new_predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
             self.predictorTest(
                 predictor,
