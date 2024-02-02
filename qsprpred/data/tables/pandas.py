@@ -159,7 +159,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         o_dict = super().__getstate__()
         os.makedirs(self.storeDir, exist_ok=True)
         if self.storeFormat == "csv":
-            self.df.to_csv(self.storePath)
+            self.df.to_csv(self.storePath, index=False)
         else:
             self.df.to_pickle(self.storePath)
         return o_dict

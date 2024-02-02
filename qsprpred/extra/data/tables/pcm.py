@@ -216,13 +216,25 @@ class PCMDataSet(QSPRDataset):
             PCMDataSet:
                 `PCMDataset` instance containing the PCM data.
         """
-        kwargs["store_dir"] = (
-            mol_table.storeDir if "store_dir" not in kwargs else kwargs["store_dir"]
+        protein_seq_provider = None
+        if "protein_seq_provider" in kwargs:
+            protein_seq_provider = kwargs.pop("protein_seq_provider")
+        ret = QSPRDataset.fromMolTable(mol_table, target_props, name, **kwargs)
+        ret.proteinCol = protein_col
+        ret.proteinSeqProvider = protein_seq_provider
+        ret.__class__ = PCMDataSet
+        return ret
+
+    def searchWithIndex(
+        self, index: pd.Index, name: str | None = None
+    ) -> "MoleculeTable":
+        ret = super().searchWithIndex(index, name)
+        ret = PCMDataSet.fromMolTable(
+            ret,
+            self.proteinCol,
+            self.targetProperties,
+            name=ret.name,
         )
-        name = mol_table.name if name is None else name
-        ds = PCMDataSet(
-            name, protein_col, target_props=target_props, df=mol_table.getDF(), **kwargs
-        )
-        if not ds.descriptors and mol_table.descriptors:
-            ds.descriptors = mol_table.descriptors
-        return ds
+        ret.feature_standardizer = self.feature_standardizer
+        ret.featurize()
+        return ret

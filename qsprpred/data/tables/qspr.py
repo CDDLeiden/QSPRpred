@@ -8,8 +8,9 @@ from mlchemad.applicability_domains import (
 )
 from sklearn.preprocessing import LabelEncoder
 
-from ...data.processing.applicability_domain import ApplicabilityDomain, MLChemADWrapper
+from .mol import MoleculeTable
 from ..descriptors.sets import DescriptorSet
+from ...data.processing.applicability_domain import ApplicabilityDomain, MLChemADWrapper
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_standardizers import (
     SKLearnStandardizer,
@@ -18,7 +19,6 @@ from ...data.processing.feature_standardizers import (
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...logs import logger
 from ...tasks import TargetProperty, TargetTasks
-from .mol import MoleculeTable
 
 
 class QSPRDataset(MoleculeTable):
@@ -259,12 +259,11 @@ class QSPRDataset(MoleculeTable):
         Returns:
             list[str]: list of feature names
         """
-        features = []
         if not self.hasDescriptors:
-            return features
-        else:
-            for calc in self.descriptorSets:
-                features.extend(calc.descriptors)
+            return []
+        features = []
+        for ds in self.descriptors:
+            features.extend(ds.getDescriptorNames(active_only=True))
         return features
 
     def restoreTrainingData(self):
@@ -279,12 +278,14 @@ class QSPRDataset(MoleculeTable):
         # split data into training and independent sets if saved previously
         if "Split_IsTrain" in self.df.columns:
             self.y = self.df.query("Split_IsTrain")[self.targetPropertyNames]
-            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
-                                     self.targetPropertyNames]
+            self.y_ind = self.df.loc[
+                ~self.df.index.isin(self.y.index), self.targetPropertyNames
+            ]
         else:
             self.y = self.df[self.targetPropertyNames]
-            self.y_ind = self.df.loc[~self.df.index.isin(self.y.index),
-                                     self.targetPropertyNames]
+            self.y_ind = self.df.loc[
+                ~self.df.index.isin(self.y.index), self.targetPropertyNames
+            ]
         self.X = self.y.drop(self.y.columns, axis=1)
         self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
 
@@ -359,13 +360,15 @@ class QSPRDataset(MoleculeTable):
             th = target_property.th
         if th == "precomputed":
             assert all(
-                value is None or (type(value) in (int, bool)) or
-                (isinstance(value, float) and value.is_integer())
+                value is None
+                or (type(value) in (int, bool))
+                or (isinstance(value, float) and value.is_integer())
                 for value in self.df[prop_name]
             ), "Precomputed classification target must be integers or booleans."
             n_classes = len(self.df[prop_name].dropna().unique())
             target_property.task = (
-                TargetTasks.MULTICLASS if n_classes > 2  # noqa: PLR2004
+                TargetTasks.MULTICLASS
+                if n_classes > 2  # noqa: PLR2004
                 else TargetTasks.SINGLECLASS
             )
             target_property.th = th
@@ -404,7 +407,10 @@ class QSPRDataset(MoleculeTable):
         self, index: pd.Index, name: str | None = None
     ) -> "MoleculeTable":
         ret = super().searchWithIndex(index, name)
-        return QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
+        ret = QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
+        ret.feature_standardizer = self.feature_standardizer
+        ret.featurize()
+        return ret
 
     @staticmethod
     def fromMolTable(
@@ -430,7 +436,8 @@ class QSPRDataset(MoleculeTable):
         )
         kwargs["random_state"] = (
             mol_table.randomState
-            if "random_state" not in kwargs else kwargs["random_state"]
+            if "random_state" not in kwargs
+            else kwargs["random_state"]
         )
         kwargs["n_jobs"] = (
             mol_table.nJobs if "n_jobs" not in kwargs else kwargs["n_jobs"]
@@ -533,8 +540,9 @@ class QSPRDataset(MoleculeTable):
                 Defaults to `False`.
         """
         if (
-            hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and
-            not split.hasDataSet
+            hasattr(split, "hasDataSet")
+            and hasattr(split, "setDataSet")
+            and not split.hasDataSet
         ):
             split.setDataSet(self)
         if hasattr(split, "setSeed") and hasattr(split, "getSeed"):
@@ -555,13 +563,15 @@ class QSPRDataset(MoleculeTable):
             logger.info("Target property: %s" % prop.name)
             if prop.task == TargetTasks.SINGLECLASS:
                 logger.info(
-                    "    In train: active: %s not active: %s" % (
+                    "    In train: active: %s not active: %s"
+                    % (
                         sum(self.y[prop.name]),
                         len(self.y[prop.name]) - sum(self.y[prop.name]),
                     )
                 )
                 logger.info(
-                    "    In test:  active: %s not active: %s\n" % (
+                    "    In test:  active: %s not active: %s\n"
+                    % (
                         sum(self.y_ind[prop.name]),
                         len(self.y_ind[prop.name]) - sum(self.y_ind[prop.name]),
                     )
@@ -790,14 +800,15 @@ class QSPRDataset(MoleculeTable):
     def prepareDataset(
         self,
         smiles_standardizer: str | Callable | None = "chembl",
-        data_filters: list | None = (RepeatsFilter(keep=True), ),
+        data_filters: list | None = (RepeatsFilter(keep=True),),
         split=None,
         feature_calculators: list["DescriptorSet"] | None = None,
         feature_filters: list | None = None,
         feature_standardizer: SKLearnStandardizer | None = None,
         feature_fill_value: float = np.nan,
-        applicability_domain: ApplicabilityDomain | MLChemADApplicabilityDomain |
-        None = None,
+        applicability_domain: ApplicabilityDomain
+        | MLChemADApplicabilityDomain
+        | None = None,
         drop_outliers: bool = False,
         recalculate_features: bool = False,
         shuffle: bool = True,
@@ -880,6 +891,7 @@ class QSPRDataset(MoleculeTable):
         concat: bool = False,
         raw: bool = False,
         ordered: bool = False,
+        refit_standardizer: bool = True,
     ):
         """Get the current feature sets (training and test) from the dataset.
 
@@ -903,9 +915,14 @@ class QSPRDataset(MoleculeTable):
                 If `True`, the returned feature matrices will be ordered
                 according to the original order of the data set. This is only relevant
                 if `concat` is `True`.
+            refit_standardizer (bool): If `True`, the feature standardizer will be
+                refit on the training set upon this call. If `False`, the previously
+                fitted standardizer will be used. Defaults to `True`. Use `False` if
+                this dataset is used for prediction only and the standardizer has
+                been initialized already.
         """
         self.checkFeatures()
-
+        # get feature matrices using feature names
         if concat:
             if len(self.X.columns) != 0:
                 df_X = pd.concat(
@@ -921,31 +938,32 @@ class QSPRDataset(MoleculeTable):
         else:
             df_X = self.X
             df_X_ind = self.X_ind
-
+        # convert to numpy arrays and standardize
         X = df_X.values
         X_ind = df_X_ind.values if df_X_ind is not None else None
         if not raw and self.featureStandardizer:
             X, self.featureStandardizer = apply_feature_standardizer(
-                self.featureStandardizer, df_X, fit=True
+                self.featureStandardizer,
+                df_X,
+                fit=True if refit_standardizer else False,
             )
             if X_ind is not None and X_ind.shape[0] > 0:
                 X_ind, _ = apply_feature_standardizer(
                     self.featureStandardizer, df_X_ind, fit=False
                 )
-
+        # convert to data frames and make sure column order is correct
         X = pd.DataFrame(X, index=df_X.index, columns=df_X.columns)
         if X_ind is not None:
             X_ind = pd.DataFrame(X_ind, index=df_X_ind.index, columns=df_X_ind.columns)
-
         # drop outliers from test set
         if "Split_IsOutlier" in self.df.columns and not concat:
             if X_ind is not None:
                 X_ind = X_ind.loc[~self.df["Split_IsOutlier"], :]
-
+        # replace original feature matrices if inplace
         if inplace:
             self.X = X
             self.X_ind = X_ind
-
+        # order if concatenating
         if ordered and concat:
             X = X.loc[self.df.index, :]
         return (X, X_ind) if not concat else X
@@ -1027,10 +1045,7 @@ class QSPRDataset(MoleculeTable):
         self.restoreTrainingData()
 
     def transform(
-        self,
-        targets: list[str],
-        transformer: Callable,
-        add_as: list[str] | None = None
+        self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
     ):
         super().transform(targets, transformer, add_as)
         if add_as is None and (set(targets) & set(self.targetPropertyNames)):

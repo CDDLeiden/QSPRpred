@@ -114,9 +114,12 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model, dataset)
-        predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
+        # load in model from file
+        predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
@@ -125,15 +128,17 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model, dataset)
-            predictor = SklearnModel(
+            new_predictor = SklearnModel(
                 name=f"{model_name}_{task}", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                comparison_model=new_predictor,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
             )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
     def testPLSRegressionSummaryWithSeed(self):
         """Test model training for regression models."""
@@ -208,10 +213,12 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model, dataset)
-        predictor = SklearnModel(
-            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
-        )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+
+        # load in model from file
+        predictor = SklearnModel(name=f"{model_name}_multitask_regression", base_dir=model.baseDir)
+
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
         if random_state[0] is not None and model_name in ["RFR"]:
             model = self.getModel(
                 name=f"{model_name}_multitask_regression",
@@ -219,15 +226,17 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model, dataset)
-            predictor = SklearnModel(
+            predictor_new = SklearnModel(
                 name=f"{model_name}_multitask_regression", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                comparison_model=predictor_new,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
             )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
 
 class TestSklearnSerialization(SklearnBaseModelTestCase):
@@ -299,6 +308,9 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
                 parameters.update({"probability": True})
             else:
                 parameters = {"probability": True}
+        # special case for XGB, set subsample to 0.6 to introduce randomness
+        if model_name == "XGBC":
+            parameters = {"subsample": 0.3}
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             target_props=[{"name": "CL", "task": task, "th": th}],
@@ -313,8 +325,12 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model, dataset)
+
+        # load in model from file
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
@@ -323,15 +339,18 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model, dataset)
-            predictor = SklearnModel(
+            new_predictor = SklearnModel(
                 name=f"{model_name}_{task}", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                comparison_model=new_predictor,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
             )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
+
 
     def testRandomForestClassifierFitWithSeed(self):
         parameters = {
@@ -417,10 +436,12 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model, dataset)
-        predictor = SklearnModel(
-            name=f"{model_name}_multitask_classification", base_dir=model.baseDir
-        )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+
+        # load in model from file
+        predictor = SklearnModel(name=f"{model_name}_multitask_classification", base_dir=model.baseDir)
+
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_multitask_classification",
@@ -429,15 +450,17 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
                 random_state=random_state[1],
             )
             self.fitTest(model, dataset)
-            predictor = SklearnModel(
+            new_predictor = SklearnModel(
                 name=f"{model_name}_multitask_classification", base_dir=model.baseDir
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                comparison_model=new_predictor,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
             )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
 
 class TestMetrics(TestCase):
