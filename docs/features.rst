@@ -139,7 +139,15 @@ Overview of available features
 
     .. dropdown:: Metrics
 
-        Dropdown content
+        :class:`~qsprpred.models.metrics.Metric`: Base class for metrics
+
+        Metrics are used to evaluate the performance of models.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.models.metrics.SklearnMetrics`: SklearnMetrics
 
     .. dropdown:: Model Assessors
 
