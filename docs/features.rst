@@ -164,7 +164,7 @@ Overview of available features
 
     .. dropdown:: Hyperparameter Optimizers
 
-        :class:`~qsprpred.models.hyperparam_optimization.HyperparameterOptimizion`: Base class for hyperparameter optimizers.
+        :class:`~qsprpred.models.hyperparam_optimization.HyperparameterOptimization`: Base class for hyperparameter optimizers.
 
         Hyperparameter optimizers are used to optimize the hyperparameters of models.
 
@@ -178,4 +178,21 @@ Overview of available features
 
     .. dropdown:: Model Plots
 
-        Dropdown content
+        :class:`~qsprpred.plotting.base_plot.ModelPlot`: Base class for model plots.
+
+        Model plots are used to visualize the performance of models.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.plotting.regression.RegressionPlot`: RegressionPlot
+                    * :class:`~qsprpred.plotting.regression.CorrelationPlot`: CorrelationPlot
+                    * :class:`~qsprpred.plotting.regression.WilliamsPlot`: WilliamsPlot
+                * :class:`~qsprpred.plotting.classification.ClassifierPlot`: ClassifierPlot
+                    * :class:`~qsprpred.plotting.classification.ROCPlot`: ROCPlot
+                    * :class:`~qsprpred.plotting.classification.PRCPlot`: PRCPlot
+                    * :class:`~qsprpred.plotting.classification.CalibrationPlot`: CalibrationPlot
+                    * :class:`~qsprpred.plotting.classification.MetricsPlot`: MetricsPlot
+                    * :class:`~qsprpred.plotting.classification.ConfusionMatrixPlot`: ConfusionMatrixPlot
+
