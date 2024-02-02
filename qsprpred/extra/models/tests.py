@@ -10,7 +10,6 @@ from sklearn.cross_decomposition import PLSRegression
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.extra.data.descriptors.sets import ProDec
-from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.tasks import TargetProperty, TargetTasks
 from ..data.utils.testing.path_mixins import DataSetsMixInExtras
 from ..models.pcm import SklearnPCMModel
@@ -34,7 +33,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         self,
         name: str,
         alg: Type | None = None,
-        dataset: PCMDataSet | None = None,
         parameters: dict | None = None,
         random_state: int | None = None,
     ):
@@ -43,7 +41,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         Args:
             name (str): Name of the model.
             alg (Type | None): Algorithm class.
-            dataset (PCMDataSet | None): Dataset to use.
             parameters (dict | None): Parameters to use.
             random_state (int | None): Random seed to use.
 
@@ -53,7 +50,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         return SklearnPCMModel(
             base_dir=self.generatedModelsPath,
             alg=alg,
-            data=dataset,
             name=name,
             parameters=parameters,
             random_state=random_state,
@@ -135,11 +131,10 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         model = self.getModel(
             name=f"{model_name}_{props[0]['task']}",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = SklearnPCMModel(
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
@@ -150,11 +145,10 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
             model = self.getModel(
                 name=f"{model_name}_{props[0]['task']}",
                 alg=model_class,
-                dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = SklearnPCMModel(
                 name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
             )

@@ -23,7 +23,6 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from ..data.tables.qspr import QSPRDataset
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.metrics import SklearnMetrics
 from ..models.monitors import (
@@ -49,7 +48,6 @@ class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTest
         self,
         name: str,
         alg: Type | None = None,
-        dataset: QSPRDataset = None,
         parameters: dict | None = None,
         random_state: int | None = None,
     ):
@@ -70,7 +68,6 @@ class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTest
         return SklearnModel(
             base_dir=self.generatedModelsPath,
             alg=alg,
-            data=dataset,
             name=name,
             parameters=parameters,
             random_state=random_state,
@@ -113,11 +110,10 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
@@ -125,11 +121,10 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             model = self.getModel(
                 name=f"{model_name}_{task}",
                 alg=model_class,
-                dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = SklearnModel(
                 name=f"{model_name}_{task}", base_dir=model.baseDir
             )
@@ -153,20 +148,18 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         expected_summary = self.createCorrelationSummary(model)
 
         # Generate summary again, check that the result is identical
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         summary = self.createCorrelationSummary(model)
 
         self.assertListEqual(summary["ModelName"], expected_summary["ModelName"])
@@ -212,10 +205,9 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
         model = self.getModel(
             name=f"{model_name}_multitask_regression",
             alg=model_class,
-            dataset=dataset,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = SklearnModel(
             name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
@@ -224,10 +216,9 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
             model = self.getModel(
                 name=f"{model_name}_multitask_regression",
                 alg=model_class,
-                dataset=dataset,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = SklearnModel(
                 name=f"{model_name}_multitask_regression", base_dir=model.baseDir
             )
@@ -248,7 +239,6 @@ class TestSklearnSerialization(SklearnBaseModelTestCase):
         model = self.getModel(
             name="TestSerialization",
             alg=RandomForestClassifier,
-            dataset=dataset,
             parameters={"n_jobs": self.nCPU, "n_estimators": 10},
             random_state=42,
         )
@@ -319,22 +309,20 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
                 alg=model_class,
-                dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = SklearnModel(
                 name=f"{model_name}_{task}", base_dir=model.baseDir
             )
@@ -359,20 +347,18 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
         model = self.getModel(
             name=f"RFC_{TargetTasks.SINGLECLASS}",
             alg=RandomForestClassifier,
-            dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         expected_summary = self.createMetricsSummary(model)
 
         # Generate summary again, check that the result is identical
         model = self.getModel(
             name=f"RFC_{TargetTasks.SINGLECLASS}",
             alg=RandomForestClassifier,
-            dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         summary = self.createMetricsSummary(model)
 
         self.assertListEqual(summary["Metric"], expected_summary["Metric"])
@@ -427,11 +413,10 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
         model = self.getModel(
             name=f"{model_name}_multitask_classification",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = SklearnModel(
             name=f"{model_name}_multitask_classification", base_dir=model.baseDir
         )
@@ -440,11 +425,10 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
             model = self.getModel(
                 name=f"{model_name}_multitask_classification",
                 alg=model_class,
-                dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = SklearnModel(
                 name=f"{model_name}_multitask_classification", base_dir=model.baseDir
             )
@@ -697,40 +681,44 @@ class TestMonitors(MonitorsCheckMixIn, TestCase):
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
             alg=RandomForestRegressor,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
             name="RFR",
             random_state=42,
         )
-        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, False)
+        self.runMonitorTest(
+            model,
+            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            BaseMonitor,
+            self.baseMonitorTest,
+            False,
+        )
 
     def testFileMonitor(self):
         """Test the file monitor"""
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
             alg=RandomForestRegressor,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
             name="RFR",
             random_state=42,
         )
-        self.runMonitorTest(model, FileMonitor, self.fileMonitorTest, False)
+        self.runMonitorTest(
+            model,
+            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            FileMonitor,
+            self.fileMonitorTest,
+            False,
+        )
 
     def testListMonitor(self):
         """Test the list monitor"""
         model = SklearnModel(
             base_dir=self.generatedModelsPath,
             alg=RandomForestRegressor,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
             name="RFR",
             random_state=42,
         )
         self.runMonitorTest(
             model,
+            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
             ListMonitor,
             self.listMonitorTest,
             False,

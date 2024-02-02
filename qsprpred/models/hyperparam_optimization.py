@@ -8,6 +8,7 @@ import numpy as np
 import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
+from ..data import QSPRDataset
 from ..logs import logger
 from ..models.assessment_methods import ModelAssessor
 from ..models.models import QSPRModel
@@ -25,6 +26,7 @@ class HyperparameterOptimization(ABC):
         bestScore (float): best score found during optimization
         bestParams (dict): best parameters found during optimization
     """
+
     def __init__(
         self,
         param_grid: dict,
@@ -55,12 +57,12 @@ class HyperparameterOptimization(ABC):
         }
 
     @abstractmethod
-    def optimize(self, model: QSPRModel) -> dict:
+    def optimize(self, model: QSPRModel, ds: QSPRDataset) -> dict:
         """Optimize the model hyperparameters.
 
         Args:
             model (QSPRModel): model to optimize
-
+            ds (QSPRDataset): dataset to use for the optimization
         Returns:
             dict: dictionary of best parameters
         """
@@ -80,7 +82,7 @@ class OptunaOptimization(HyperparameterOptimization):
             best parameters found during optimization
 
     Example of OptunaOptimization for scikit-learn's MLPClassifier:
-        >>> model = SklearnModel(base_dir=".", data=dataset,
+        >>> model = SklearnModel(base_dir=".",
         >>>                     alg = MLPClassifier(), alg_name="MLP")
         >>> search_space = {
         >>>    "learning_rate_init": ["float", 1e-5, 1e-3,],
@@ -92,11 +94,12 @@ class OptunaOptimization(HyperparameterOptimization):
         >>>     param_grid=search_space,
         >>>     n_trials=10
         >>> )
-        >>> best_params = optimizer.optimize(model)
+        >>> best_params = optimizer.optimize(model, dataset) # dataset is a QSPRDataset
 
     Available suggestion types:
         ["categorical", "discrete_uniform", "float", "int", "loguniform", "uniform"]
     """
+
     def __init__(
         self,
         param_grid: dict,
@@ -159,16 +162,21 @@ class OptunaOptimization(HyperparameterOptimization):
             self.nJobs = 1
         self.bestScore = -np.inf
         self.bestParams = None
-        self.config.update({
-            "n_trials": n_trials,
-            "n_jobs": n_jobs,
-        })
+        self.config.update(
+            {
+                "n_trials": n_trials,
+                "n_jobs": n_jobs,
+            }
+        )
 
-    def optimize(self, model: QSPRModel, save_params: bool = True, **kwargs) -> dict:
+    def optimize(
+        self, model: QSPRModel, ds: QSPRDataset, save_params: bool = True, **kwargs
+    ) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
 
         Args:
             model (QSPRModel): the model to optimize
+            ds (QSPRDataset): dataset to use for the optimization
             save_params (bool):
                 whether to set and save the best parameters to the model
                 after optimization
@@ -179,7 +187,9 @@ class OptunaOptimization(HyperparameterOptimization):
         """
         import optuna
 
-        self.monitor.onOptimizationStart(model, self.config, self.__class__.__name__)
+        self.monitor.onOptimizationStart(
+            model, ds, self.config, self.__class__.__name__
+        )
 
         logger.info(
             "Bayesian optimization can take a while "
@@ -191,15 +201,15 @@ class OptunaOptimization(HyperparameterOptimization):
             sampler=optuna.samplers.TPESampler(seed=model.randomState),
         )
         logger.info(
-            "Bayesian optimization started: %s" %
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "Bayesian optimization started: %s"
+            % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         study.optimize(
-            lambda t: self.objective(t, model), self.nTrials, n_jobs=self.nJobs
+            lambda t: self.objective(t, model, ds), self.nTrials, n_jobs=self.nJobs
         )
         logger.info(
-            "Bayesian optimization ended: %s" %
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "Bayesian optimization ended: %s"
+            % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         # save the best study
         trial = study.best_trial
@@ -216,12 +226,15 @@ class OptunaOptimization(HyperparameterOptimization):
             model.save()
         return self.bestParams
 
-    def objective(self, trial: optuna.trial.Trial, model: QSPRModel, **kwargs) -> float:
+    def objective(
+        self, trial: optuna.trial.Trial, model: QSPRModel, ds: QSPRDataset, **kwargs
+    ) -> float:
         """Objective for bayesian optimization.
 
         Arguments:
             trial (optuna.trial.Trial): trial object for the optimization
             model (QSPRModel): the model to optimize
+            ds (QSPRDataset): dataset to use for the optimization
             **kwargs: additional arguments for the assessment method
 
         Returns:
@@ -250,6 +263,7 @@ class OptunaOptimization(HyperparameterOptimization):
         # assess the model with the current parameters and return the score
         scores = self.runAssessment(
             model,
+            ds=ds,
             save=False,
             parameters=bayesian_params,
             monitor=self.monitor,
@@ -264,6 +278,7 @@ class OptunaOptimization(HyperparameterOptimization):
 
 class GridSearchOptimization(HyperparameterOptimization):
     """Class for hyperparameter optimization of QSPRModels using GridSearch."""
+
     def __init__(
         self,
         param_grid: dict,
@@ -289,12 +304,16 @@ class GridSearchOptimization(HyperparameterOptimization):
         if monitor is None:
             self.monitor = BaseMonitor()
 
-    def optimize(self, model: QSPRModel, save_params: bool = True, **kwargs) -> dict:
+    def optimize(
+        self, model: QSPRModel, ds: QSPRDataset, save_params: bool = True, **kwargs
+    ) -> dict:
         """Optimize the hyperparameters of the model.
 
         Args:
             model (QSPRModel):
                 the model to optimize
+            ds (QSPRDataset):
+                dataset to use for the optimization
             save_params (bool):
                 whether to set and save the best parameters to the model
                 after optimization
@@ -303,7 +322,9 @@ class GridSearchOptimization(HyperparameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
-        self.monitor.onOptimizationStart(model, self.config, self.__class__.__name__)
+        self.monitor.onOptimizationStart(
+            model, ds, self.config, self.__class__.__name__
+        )
         logger.info(
             "Grid search started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
@@ -311,7 +332,7 @@ class GridSearchOptimization(HyperparameterOptimization):
             self.monitor.onIterationStart(params)
             logger.info(params)
             scores = self.runAssessment(
-                model, save=False, parameters=params, monitor=self.monitor, **kwargs
+                model, ds, save=False, parameters=params, monitor=self.monitor, **kwargs
             )
             score = self.scoreAggregation(scores)
             logger.info(f"Score: {score}, std: {np.std(scores)}")
@@ -324,8 +345,8 @@ class GridSearchOptimization(HyperparameterOptimization):
             "Grid search ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         logger.info(
-            "Grid search best params: %s with score: %s" %
-            (self.bestParams, self.bestScore)
+            "Grid search best params: %s with score: %s"
+            % (self.bestParams, self.bestScore)
         )
         # save the best parameters to the model if requested
         if save_params:

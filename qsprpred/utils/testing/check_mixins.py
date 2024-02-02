@@ -244,13 +244,15 @@ class ModelCheckMixIn:
         grid_params = model.__class__.loadParamsGrid(self.gridFile, grid, mname)
         return grid_params[grid_params[:, 0] == mname, 1][0]
 
-    def fitTest(self, model: QSPRModel):
+    def fitTest(self, model: QSPRModel, ds: QSPRDataset):
         """Test model fitting, optimization and evaluation.
 
         Args:
             model (QSPRModel): The model to test.
+            ds (QSPRDataset): The dataset to use for testing.
         """
         # perform bayes optimization
+        model.initFromDataset(ds)
         score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
@@ -260,7 +262,7 @@ class ModelCheckMixIn:
                 scoring=score_func, mode=EarlyStoppingMode.NOT_RECORDING
             ),
         )
-        best_params = bayesoptimizer.optimize(model)
+        best_params = bayesoptimizer.optimize(model, ds)
         model.setParams(best_params)
         model.save()
         model_new = model.__class__.fromFile(model.metaFile)
@@ -279,7 +281,7 @@ class ModelCheckMixIn:
                 mode=EarlyStoppingMode.NOT_RECORDING,
             ),
         )
-        best_params = gridsearcher.optimize(model)
+        best_params = gridsearcher.optimize(model, ds)
         model_new = model.__class__.fromFile(model.metaFile)
         for param in best_params:
             self.assertEqual(model_new.parameters[param], best_params[param])
@@ -291,23 +293,21 @@ class ModelCheckMixIn:
             mode=EarlyStoppingMode.RECORDING,
             scoring=score_func,
             split_multitask_scores=model.isMultiTask,
-            split=KFold(
-                n_splits=n_folds, shuffle=True, random_state=model.data.randomState
-            ),
-        )(model)
+            split=KFold(n_splits=n_folds, shuffle=True, random_state=model.randomState),
+        )(model, ds)
         if model.isMultiTask:
             self.assertEqual(scores.shape, (n_folds, len(model.targetProperties)))
         scores = TestSetAssessor(
             mode=EarlyStoppingMode.NOT_RECORDING,
             scoring=score_func,
             split_multitask_scores=model.isMultiTask,
-        )(model)
+        )(model, ds)
         if model.isMultiTask:
             self.assertEqual(scores.shape, (len(model.targetProperties),))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
-        path = model.fitAttached()
+        path = model.fitDataset(ds)
         self.assertTrue(exists(path))
         self.assertTrue(exists(model.metaFile))
         self.assertEqual(path, model.metaFile)
@@ -507,6 +507,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
     def trainModelWithMonitoring(
         self,
         model: QSPRModel,
+        ds: QSPRDataset,
         hyperparam_monitor: HyperparameterOptimizationMonitor,
         crossval_monitor: AssessorMonitor,
         test_monitor: AssessorMonitor,
@@ -517,7 +518,9 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         AssessorMonitor,
         FitMonitor,
     ):
-        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
+        score_func = (
+            "r2" if ds.targetProperties[0].task.isRegression() else "roc_auc_ovr"
+        )
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
             param_grid=search_space_gs,
@@ -527,7 +530,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             ),
             monitor=hyperparam_monitor,
         )
-        best_params = gridsearcher.optimize(model)
+        best_params = gridsearcher.optimize(model, ds)
         model.setParams(best_params)
         model.save()
         # perform crossvalidation
@@ -535,14 +538,14 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             mode=EarlyStoppingMode.RECORDING,
             scoring=score_func,
             monitor=crossval_monitor,
-        )(model)
+        )(model, ds)
         TestSetAssessor(
             mode=EarlyStoppingMode.NOT_RECORDING,
             scoring=score_func,
             monitor=test_monitor,
-        )(model)
+        )(model, ds)
         # train the model on all data
-        model.fitAttached(monitor=fit_monitor)
+        model.fitDataset(ds, monitor=fit_monitor)
         return hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
 
     def baseMonitorTest(
@@ -672,7 +675,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
 
     def runMonitorTest(
-        self, model, monitor_type, test_method, nerual_net, *args, **kwargs
+        self, model, data, monitor_type, test_method, nerual_net, *args, **kwargs
     ):
         hyperparam_monitor = monitor_type(*args, **kwargs)
         crossval_monitor = deepcopy(hyperparam_monitor)
@@ -684,7 +687,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             test_monitor,
             fit_monitor,
         ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+            model, data, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
         )
         test_method(hyperparam_monitor, "hyperparam", nerual_net)
         test_method(crossval_monitor, "crossval", nerual_net)

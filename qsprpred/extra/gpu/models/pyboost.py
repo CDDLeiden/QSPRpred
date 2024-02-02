@@ -44,7 +44,6 @@ class PyBoostModel(QSPRModel):
     >>> parameters = {'loss':  'mse', 'metric': 'r2_score', 'verbose': -1}
     >>> model = PyBoostModel(
     ...     base_dir='qspr/models/',
-    ...     data=dataset,
     ...     name="PyBoost",
     ...     parameters=parameters
     ... )
@@ -53,7 +52,6 @@ class PyBoostModel(QSPRModel):
     def __init__(
         self,
         base_dir: str,
-        data: Optional[QSPRDataset] = None,
         name: Optional[str] = None,
         parameters: Optional[dict] = None,
         autoload=True,
@@ -67,7 +65,6 @@ class PyBoostModel(QSPRModel):
             base_dir (str):
                 base directory of the model,
                 the model files are stored in a subdirectory `{baseDir}/{outDir}/`
-            data (QSPRDataset): data set used to train the model
             name (str): name of the model
             parameters (dict): dictionary of algorithm specific parameters
             autoload (bool):
@@ -77,7 +74,6 @@ class PyBoostModel(QSPRModel):
         super().__init__(
             base_dir,
             import_module("py_boost").GradientBoosting,
-            data,
             name,
             parameters,
             autoload,
@@ -95,8 +91,8 @@ class PyBoostModel(QSPRModel):
     @early_stopping
     def fit(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
         estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         split: DataSplit | None = None,
@@ -106,8 +102,8 @@ class PyBoostModel(QSPRModel):
         """Fit the model to the given data matrix or `QSPRDataset`.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            X (pd.DataFrame, np.ndarray): data matrix to fit
+            y (pd.DataFrame, np.ndarray): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): mode to use for early stopping
             split (DataSplit): data split to use for early stopping,
@@ -138,7 +134,7 @@ class PyBoostModel(QSPRModel):
         monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
         split = split or ShuffleSplit(
-            n_splits=1, test_size=0.1, random_state=self.data.randomState
+            n_splits=1, test_size=0.1, random_state=self.randomState
         )
         X, y = self.convertToNumpy(X, y)
 
