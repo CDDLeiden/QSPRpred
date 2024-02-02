@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.testing.check_mixins &mdash; QSPRpred 3.0.0.dev304+g63a6a08 documentation</title>
+  <title>qsprpred.utils.testing.check_mixins &mdash; QSPRpred 3.0.0.dev320+g26d91b8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=6eabed1d"></script>
+        <script src="../../../../_static/documentation_options.js?v=ecb50789"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev304+g63a6a08
+                v3.0.0.dev320+g26d91b8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -354,13 +354,15 @@
 
 <div class="viewcode-block" id="ModelCheckMixIn.fitTest">
 <a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.fitTest">[docs]</a>
-    <span class="k">def</span> <span class="nf">fitTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fitTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model fitting, optimization and evaluation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            model (QSPRModel): The model to test.</span>
+<span class="sd">            ds (QSPRDataset): The dataset to use for testing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># perform bayes optimization</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">initFromDataset</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
         <span class="n">score_func</span> <span class="o">=</span> <span class="s2">&quot;r2&quot;</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;roc_auc_ovr&quot;</span>
         <span class="n">search_space_bs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParamGrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;bayes&quot;</span><span class="p">)</span>
         <span class="n">bayesoptimizer</span> <span class="o">=</span> <span class="n">OptunaOptimization</span><span class="p">(</span>
@@ -370,7 +372,7 @@
                 <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span>
             <span class="p">),</span>
         <span class="p">)</span>
-        <span class="n">best_params</span> <span class="o">=</span> <span class="n">bayesoptimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">bayesoptimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="n">model_new</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
@@ -389,7 +391,7 @@
                 <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">)</span>
-        <span class="n">best_params</span> <span class="o">=</span> <span class="n">gridsearcher</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">gridsearcher</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
         <span class="n">model_new</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">best_params</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">model_new</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">],</span> <span class="n">best_params</span><span class="p">[</span><span class="n">param</span><span class="p">])</span>
@@ -401,23 +403,21 @@
             <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">,</span>
             <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
             <span class="n">split_multitask_scores</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">,</span>
-            <span class="n">split</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span>
-                <span class="n">n_splits</span><span class="o">=</span><span class="n">n_folds</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">randomState</span>
-            <span class="p">),</span>
-        <span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n_folds</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">randomState</span><span class="p">),</span>
+        <span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">n_folds</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)))</span>
         <span class="n">scores</span> <span class="o">=</span> <span class="n">TestSetAssessor</span><span class="p">(</span>
             <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
             <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
             <span class="n">split_multitask_scores</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">,</span>
-        <span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+        <span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">),))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.ind.tsv&quot;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.cv.tsv&quot;</span><span class="p">))</span>
         <span class="c1"># train the model on all data</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fitAttached</span><span class="p">()</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fitDataset</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span></div>
@@ -632,6 +632,7 @@
     <span class="k">def</span> <span class="nf">trainModelWithMonitoring</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
         <span class="n">hyperparam_monitor</span><span class="p">:</span> <span class="n">HyperparameterOptimizationMonitor</span><span class="p">,</span>
         <span class="n">crossval_monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span><span class="p">,</span>
         <span class="n">test_monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span><span class="p">,</span>
@@ -642,7 +643,9 @@
         <span class="n">AssessorMonitor</span><span class="p">,</span>
         <span class="n">FitMonitor</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="n">score_func</span> <span class="o">=</span> <span class="s2">&quot;r2&quot;</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;roc_auc_ovr&quot;</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;r2&quot;</span> <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;roc_auc_ovr&quot;</span>
+        <span class="p">)</span>
         <span class="n">search_space_gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParamGrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">)</span>
         <span class="n">gridsearcher</span> <span class="o">=</span> <span class="n">GridSearchOptimization</span><span class="p">(</span>
             <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_gs</span><span class="p">,</span>
@@ -652,7 +655,7 @@
             <span class="p">),</span>
             <span class="n">monitor</span><span class="o">=</span><span class="n">hyperparam_monitor</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">best_params</span> <span class="o">=</span> <span class="n">gridsearcher</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">gridsearcher</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="c1"># perform crossvalidation</span>
@@ -660,14 +663,14 @@
             <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">,</span>
             <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
             <span class="n">monitor</span><span class="o">=</span><span class="n">crossval_monitor</span><span class="p">,</span>
-        <span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+        <span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
         <span class="n">TestSetAssessor</span><span class="p">(</span>
             <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
             <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
             <span class="n">monitor</span><span class="o">=</span><span class="n">test_monitor</span><span class="p">,</span>
-        <span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+        <span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
         <span class="c1"># train the model on all data</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">fitAttached</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="n">fit_monitor</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">fitDataset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="n">fit_monitor</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">hyperparam_monitor</span><span class="p">,</span> <span class="n">crossval_monitor</span><span class="p">,</span> <span class="n">test_monitor</span><span class="p">,</span> <span class="n">fit_monitor</span></div>
 
 
@@ -809,7 +812,7 @@
 <div class="viewcode-block" id="MonitorsCheckMixIn.runMonitorTest">
 <a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.runMonitorTest">[docs]</a>
     <span class="k">def</span> <span class="nf">runMonitorTest</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">monitor_type</span><span class="p">,</span> <span class="n">test_method</span><span class="p">,</span> <span class="n">nerual_net</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">monitor_type</span><span class="p">,</span> <span class="n">test_method</span><span class="p">,</span> <span class="n">nerual_net</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
         <span class="n">hyperparam_monitor</span> <span class="o">=</span> <span class="n">monitor_type</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">crossval_monitor</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">hyperparam_monitor</span><span class="p">)</span>
@@ -821,7 +824,7 @@
             <span class="n">test_monitor</span><span class="p">,</span>
             <span class="n">fit_monitor</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainModelWithMonitoring</span><span class="p">(</span>
-            <span class="n">model</span><span class="p">,</span> <span class="n">hyperparam_monitor</span><span class="p">,</span> <span class="n">crossval_monitor</span><span class="p">,</span> <span class="n">test_monitor</span><span class="p">,</span> <span class="n">fit_monitor</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">hyperparam_monitor</span><span class="p">,</span> <span class="n">crossval_monitor</span><span class="p">,</span> <span class="n">test_monitor</span><span class="p">,</span> <span class="n">fit_monitor</span>
         <span class="p">)</span>
         <span class="n">test_method</span><span class="p">(</span><span class="n">hyperparam_monitor</span><span class="p">,</span> <span class="s2">&quot;hyperparam&quot;</span><span class="p">,</span> <span class="n">nerual_net</span><span class="p">)</span>
         <span class="n">test_method</span><span class="p">(</span><span class="n">crossval_monitor</span><span class="p">,</span> <span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="n">nerual_net</span><span class="p">)</span>

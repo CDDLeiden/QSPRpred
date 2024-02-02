@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.gpu.models.tests &mdash; QSPRpred 3.0.0.dev304+g63a6a08 documentation</title>
+  <title>qsprpred.extra.gpu.models.tests &mdash; QSPRpred 3.0.0.dev320+g26d91b8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=6eabed1d"></script>
+        <script src="../../../../../_static/documentation_options.js?v=ecb50789"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev304+g63a6a08
+                v3.0.0.dev320+g26d91b8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -108,7 +108,6 @@
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">SmilesDesc</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.sampling.splits</span> <span class="kn">import</span> <span class="n">RandomSplit</span>
 <span class="kn">from</span> <span class="nn">qsprpred.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span><span class="p">,</span> <span class="n">TargetTasks</span>
-<span class="kn">from</span> <span class="nn">....data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
 <span class="kn">from</span> <span class="nn">....extra.gpu.models.chemprop</span> <span class="kn">import</span> <span class="n">ChempropModel</span>
 <span class="kn">from</span> <span class="nn">....extra.gpu.models.dnn</span> <span class="kn">import</span> <span class="n">DNNModel</span>
 <span class="kn">from</span> <span class="nn">....extra.gpu.models.neural_network</span> <span class="kn">import</span> <span class="n">STFullyConnected</span>
@@ -148,7 +147,6 @@
         <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -165,7 +163,6 @@
         <span class="k">return</span> <span class="n">DNNModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
             <span class="n">gpus</span><span class="o">=</span><span class="n">GPUS</span><span class="p">,</span>
@@ -228,10 +225,9 @@
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
-            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="p">)</span>
@@ -242,10 +238,9 @@
                 <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
                 <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
-                <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
                 <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
             <span class="n">predictor</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="p">)</span>
@@ -283,7 +278,6 @@
     <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
         <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize model with data set.</span>
@@ -291,7 +285,6 @@
 <span class="sd">        Args:</span>
 <span class="sd">            base_dir: Base directory for model.</span>
 <span class="sd">            name: Name of the model.</span>
-<span class="sd">            dataset: Data set to use.</span>
 <span class="sd">            parameters: Parameters to use.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -300,9 +293,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">GPUS</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GPUS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="k">return</span> <span class="n">ChempropModel</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">ChempropModel</span><span class="p">(</span><span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span></div>
 
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
@@ -336,9 +327,10 @@
         <span class="c1"># initialize model for training from class</span>
         <span class="n">alg_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_th=</span><span class="si">{</span><span class="n">th</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">ChempropModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span>
 
@@ -391,9 +383,10 @@
         <span class="c1"># initialize model for training from class</span>
         <span class="n">alg_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">ChempropModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">)</span>
 
@@ -409,11 +402,12 @@
         <span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
             <span class="n">feature_calculators</span><span class="o">=</span><span class="p">[</span><span class="n">SmilesDesc</span><span class="p">()],</span>
-            <span class="n">split</span><span class="o">=</span><span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="c1"># initialize model for training from class</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;consistency_data&quot;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;consistency_data&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># chemprop by default uses sklearn rmse (squared=False) as metric</span>
@@ -429,7 +423,9 @@
             <span class="p">),</span>
         <span class="p">)</span>
         <span class="n">qsprpred_score</span> <span class="o">=</span> <span class="n">assessor</span><span class="p">(</span>
-            <span class="n">model</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">dataset</span><span class="p">,</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">qsprpred_score</span> <span class="o">=</span> <span class="o">-</span><span class="n">qsprpred_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># qsprpred_score is negative rmse</span>
 
@@ -513,7 +509,6 @@
     <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
         <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a PyBoostModel model.</span>
@@ -532,7 +527,6 @@
 
         <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;..pyboost&quot;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">PyBoostModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -573,10 +567,9 @@
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;..pyboost&quot;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">PyBoostModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span>
         <span class="p">)</span>
@@ -604,10 +597,9 @@
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;..pyboost&quot;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">PyBoostModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span>
         <span class="p">)</span>
@@ -653,10 +645,9 @@
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_regression&quot;</span><span class="p">,</span>
-            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;..pyboost&quot;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">PyBoostModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_regression&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span>
         <span class="p">)</span>
@@ -709,10 +700,9 @@
     <span class="c1">#     model = self.getModel(</span>
     <span class="c1">#         base_dir=self.generatedModelsPath,</span>
     <span class="c1">#         name=f&quot;{model_name}_multitask_classification&quot;,</span>
-    <span class="c1">#         dataset=dataset,</span>
     <span class="c1">#         parameters=parameters,</span>
     <span class="c1">#     )</span>
-    <span class="c1">#     self.fitTest(model)</span>
+    <span class="c1">#     self.fitTest(model, dataset)</span>
     <span class="c1">#     predictor = import_module(&quot;..pyboost&quot;, __name__).PyBoostModel(</span>
     <span class="c1">#         name=f&quot;{model_name}_multitask_classification&quot;, base_dir=model.baseDir</span>
     <span class="c1">#     )</span>
@@ -743,44 +733,6 @@
     <span class="k">def</span> <span class="nf">testBaseMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
-                <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
-            <span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
-            <span class="n">gpus</span><span class="o">=</span><span class="n">GPUS</span><span class="p">,</span>
-            <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-            <span class="n">tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
-            <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">runMonitorTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseMonitorTest</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="TestNNMonitoring.testFileMonitor">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testFileMonitor">[docs]</a>
-    <span class="k">def</span> <span class="nf">testFileMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
-                <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
-            <span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
-            <span class="n">gpus</span><span class="o">=</span><span class="n">GPUS</span><span class="p">,</span>
-            <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-            <span class="n">tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
-            <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">runMonitorTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseMonitorTest</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="TestNNMonitoring.testListMonitor">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testListMonitor">[docs]</a>
-    <span class="k">def</span> <span class="nf">testListMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the list monitor&quot;&quot;&quot;</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
-                <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
-            <span class="p">),</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
             <span class="n">gpus</span><span class="o">=</span><span class="n">GPUS</span><span class="p">,</span>
             <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
@@ -789,6 +741,48 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runMonitorTest</span><span class="p">(</span>
             <span class="n">model</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()),</span>
+            <span class="n">BaseMonitor</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">baseMonitorTest</span><span class="p">,</span>
+            <span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestNNMonitoring.testFileMonitor">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testFileMonitor">[docs]</a>
+    <span class="k">def</span> <span class="nf">testFileMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
+            <span class="n">gpus</span><span class="o">=</span><span class="n">GPUS</span><span class="p">,</span>
+            <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runMonitorTest</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()),</span>
+            <span class="n">BaseMonitor</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">baseMonitorTest</span><span class="p">,</span>
+            <span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestNNMonitoring.testListMonitor">
+<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testListMonitor">[docs]</a>
+    <span class="k">def</span> <span class="nf">testListMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the list monitor&quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
+            <span class="n">gpus</span><span class="o">=</span><span class="n">GPUS</span><span class="p">,</span>
+            <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runMonitorTest</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()),</span>
             <span class="n">ListMonitor</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">listMonitorTest</span><span class="p">,</span>
             <span class="kc">True</span><span class="p">,</span>

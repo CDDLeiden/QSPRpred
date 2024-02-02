@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.models &mdash; QSPRpred 3.0.0.dev304+g63a6a08 documentation</title>
+  <title>qsprpred.models.models &mdash; QSPRpred 3.0.0.dev320+g26d91b8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=6eabed1d"></script>
+        <script src="../../../_static/documentation_options.js?v=ecb50789"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev304+g63a6a08
+                v3.0.0.dev320+g26d91b8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -99,6 +99,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
@@ -148,7 +149,7 @@
 <span class="sd">            Random state to use for all random operations for reproducibility.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_notJSON</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;estimator&quot;</span><span class="p">]</span>
+    <span class="n">_notJSON</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">ClassVar</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;estimator&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">JSONSerializable</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">]</span>
 
 <div class="viewcode-block" id="QSPRModel.handleInvalidsInPredictions">
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.handleInvalidsInPredictions">[docs]</a>
@@ -230,7 +231,6 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -245,8 +245,8 @@
 <span class="sd">            base_dir (str):</span>
 <span class="sd">                base directory of the model,</span>
 <span class="sd">                the model files are stored in a subdirectory `{baseDir}/{outDir}/`</span>
-<span class="sd">            alg (Type): estimator class</span>
-<span class="sd">            data (QSPRDataset): data set used to train the model</span>
+<span class="sd">            alg (Type):</span>
+<span class="sd">                estimator class</span>
 <span class="sd">            name (str): name of the model</span>
 <span class="sd">            parameters (dict): dictionary of algorithm specific parameters</span>
 <span class="sd">            autoload (bool):</span>
@@ -259,8 +259,6 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model name not specified.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">base_dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
-        <span class="c1"># initialize settings from data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nTargets</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span> <span class="o">=</span> <span class="kc">None</span>
@@ -272,8 +270,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="p">(</span><span class="n">alg</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="n">alg</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">base_dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">initFromData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">parameters</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Explicitly specified parameters (</span><span class="si">{</span><span class="n">parameters</span><span class="si">}</span><span class="s2">)&quot;</span>
@@ -290,7 +286,6 @@
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">initRandomState</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">initFromData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
             <span class="c1"># initialize an estimator instance with the given parameters</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
@@ -305,13 +300,6 @@
         <span class="k">assert</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="p">),</span> <span class="s2">&quot;Algorithm class not initialized when it should be.&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">autoload</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkForData</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;No data set specified. Make sure you &quot;</span>
-                <span class="s2">&quot;initialized this model with a &#39;QSPRDataset&#39; &quot;</span>
-                <span class="s2">&quot;instance to train on. Or if you want to load &quot;</span>
-                <span class="s2">&quot;a model from file, set &#39;autoload&#39; to True.&quot;</span>
-            <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the model and the underlying class as the identifier.&quot;&quot;&quot;</span>
@@ -326,22 +314,21 @@
     <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set state.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">dynamic_import</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QSPRModel.initFromData">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.initFromData">[docs]</a>
-    <span class="k">def</span> <span class="nf">initFromData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="QSPRModel.initFromDataset">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.initFromDataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">initFromDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">targetProperties</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">targetProperties</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nTargets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptorSets</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">feature_standardizer</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">descriptorSets</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">feature_standardizer</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">initRandomState</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nTargets</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">featureCalculators</span> <span class="o">=</span> <span class="kc">None</span>
@@ -358,16 +345,13 @@
 <span class="sd">            random_state (int):</span>
 <span class="sd">                Random state to use for shuffling and other random operations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_random_state</span> <span class="o">=</span> <span class="n">random_state</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">randomState</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">new_random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;No random state supplied, &quot;</span>
                 <span class="s2">&quot;and could not find random state on the dataset.&quot;</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="n">new_random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="n">random_state</span>
         <span class="n">constructor_params</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">]</span>
@@ -385,7 +369,7 @@
                             <span class="o">**</span><span class="n">params</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">seed_param</span><span class="p">:</span> <span class="n">new_random_state</span><span class="p">})</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">seed_param</span><span class="p">:</span> <span class="n">random_state</span><span class="p">})</span>
                     <span class="n">random_param</span> <span class="o">=</span> <span class="n">seed_param</span>
                     <span class="k">break</span>
                 <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
@@ -395,9 +379,9 @@
                 <span class="k">break</span>
         <span class="k">if</span> <span class="n">random_param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">random_param</span><span class="p">:</span> <span class="n">new_random_state</span><span class="p">})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">random_param</span><span class="p">:</span> <span class="n">random_state</span><span class="p">})</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">random_param</span><span class="p">:</span> <span class="n">new_random_state</span><span class="p">}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">random_param</span><span class="p">:</span> <span class="n">random_state</span><span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">random_state</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -502,18 +486,19 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span></div>
 
 
-<div class="viewcode-block" id="QSPRModel.checkForData">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.checkForData">[docs]</a>
-    <span class="k">def</span> <span class="nf">checkForData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="QSPRModel.checkData">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.checkData">[docs]</a>
+    <span class="k">def</span> <span class="nf">checkData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the model has a data set.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            ds (QSPRDataset): data set to check</span>
 <span class="sd">            exception (bool): if true, an exception is raised if no data is set</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if data is set, False otherwise (if exception is False)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">has_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">has_data</span> <span class="o">=</span> <span class="n">ds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">exception</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_data</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;No data set specified. &quot;</span>
@@ -709,10 +694,11 @@
             <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="QSPRModel.fitAttached">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.fitAttached">[docs]</a>
-    <span class="k">def</span> <span class="nf">fitAttached</span><span class="p">(</span>
+<div class="viewcode-block" id="QSPRModel.fitDataset">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.fitDataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">fitDataset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
         <span class="n">monitor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">OPTIMAL</span><span class="p">,</span>
         <span class="n">save_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -726,6 +712,7 @@
 <span class="sd">        cross-validation with early stopping can be used for fitting the model.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            ds (QSPRDataset): data set to fit this model on</span>
 <span class="sd">            monitor (FitMonitor): monitor for the fitting process, if None, the base</span>
 <span class="sd">                monitor is used</span>
 <span class="sd">            mode (EarlyStoppingMode): early stopping mode for models that support</span>
@@ -733,17 +720,19 @@
 <span class="sd">                epochs previously stopped at in model assessment on train or test set,</span>
 <span class="sd">                to avoid the use of extra data for a validation set.</span>
 <span class="sd">            save_model (bool): save the model to file</span>
-<span class="sd">            save_data (bool): save the attached dataset to file</span>
+<span class="sd">            save_data (bool): save the supplied dataset to file</span>
 <span class="sd">            kwargs: additional arguments to pass to fit</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: path to the saved model, if `save_model` is True</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># do some checks</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkForData</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkData</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="c1"># init properties from data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initFromDataset</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
         <span class="c1"># get data</span>
-        <span class="n">X_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">y_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">getTargetPropertiesValues</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">X_all</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">y_all</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getTargetPropertiesValues</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
         <span class="c1"># load estimator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
         <span class="c1"># fit model</span>
@@ -755,7 +744,7 @@
             <span class="s2">&quot;Model fit ended: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">save_data</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="c1"># save model and return path</span>
         <span class="k">if</span> <span class="n">save_model</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
@@ -801,8 +790,8 @@
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
-        <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
         <span class="n">monitor</span><span class="p">:</span> <span class="s2">&quot;FitMonitor&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -821,8 +810,8 @@
 <span class="sd">            argument is ignored.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit</span>
-<span class="sd">            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit</span>
+<span class="sd">            X (pd.DataFrame, np.ndarray): data matrix to fit</span>
+<span class="sd">            y (pd.DataFrame, np.ndarray): target matrix to fit</span>
 <span class="sd">            estimator (Any): estimator instance to use for fitting</span>
 <span class="sd">            mode (EarlyStoppingMode): early stopping mode</span>
 <span class="sd">            monitor (FitMonitor): monitor for the fitting process,</span>
