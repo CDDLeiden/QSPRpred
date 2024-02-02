@@ -125,7 +125,6 @@ class ChempropModel(QSPRModel):
     def __init__(
         self,
         base_dir: str,
-        data: QSPRDataset | None = None,
         name: str | None = None,
         parameters: dict | None = None,
         autoload=True,
@@ -140,7 +139,6 @@ class ChempropModel(QSPRModel):
             base_dir (str):
                 base directory of the model, the model files are stored in a
                 subdirectory `{baseDir}/{outDir}/`
-            data (QSPRDataset): data set used to train the model
             name (str): name of the model
             parameters (dict): dictionary of algorithm specific parameters
             autoload (bool):
@@ -151,28 +149,10 @@ class ChempropModel(QSPRModel):
         """
         alg = ChempropMoleculeModel  # wrapper for chemprop.models.MoleculeModel
         self.quietLogger = quiet_logger
-        super().__init__(base_dir, alg, data, name, parameters, autoload)
+        super().__init__(base_dir, alg, name, parameters, autoload)
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
         )
-
-    def initRandomState(self, random_state):
-        """Set random state if applicable.
-        Defaults to random state of dataset if no random state is provided by the constructor.
-
-        Args:
-            random_state (int): Random state to use for shuffling and other random operations.
-        """
-        new_random_state = random_state or (
-            self.data.randomState if self.data is not None else None
-        )
-        if new_random_state is None:
-            self.randomState = int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
-            logger.warning(
-                "No random state supplied, "
-                "and could not find random state on the dataset."
-            )
-        self.randomState = new_random_state
 
     def supportsEarlyStopping(self) -> bool:
         """Return if the model supports early stopping.
@@ -185,8 +165,8 @@ class ChempropModel(QSPRModel):
     @early_stopping
     def fit(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         split: DataSplit | None = None,
@@ -202,8 +182,8 @@ class ChempropModel(QSPRModel):
               is used.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            X (pd.DataFrame, np.ndarray): data matrix to fit
+            y (pd.DataFrame, np.ndarray): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): mode to use for early stopping
             monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor
@@ -217,7 +197,7 @@ class ChempropModel(QSPRModel):
         monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
         split = split or ShuffleSplit(
-            n_splits=1, test_size=0.1, random_state=self.data.randomState
+            n_splits=1, test_size=0.1, random_state=self.randomState
         )
 
         # Create validation data when using early stopping
@@ -238,7 +218,7 @@ class ChempropModel(QSPRModel):
         args = estimator.args
 
         # set task names
-        args.task_names = [prop.name for prop in self.data.targetProperties]
+        args.task_names = [prop.name for prop in self.targetProperties]
 
         # Get number of molecules per class in training data
         if args.dataset_type == "classification":
@@ -518,6 +498,8 @@ class ChempropModel(QSPRModel):
         Returns:
             object: initialized estimator instance
         """
+        if not self.targetProperties:
+            return "Unititialized estimator, no target properties found yet."
         # set torch random seed if applicable
         if self.randomState is not None:
             torch.manual_seed(self.randomState)
@@ -789,3 +771,12 @@ class ChempropModel(QSPRModel):
             name="chemprop_logger", save_dir=ret.outDir, quiet=ret.quietLogger
         )
         return ret
+
+    def setParams(self, params: dict):
+        """Set parameters of the model.
+
+        Args:
+            params (dict): parameters
+        """
+        super().setParams(params)
+        self.estimator = self.loadEstimator(self.parameters)
