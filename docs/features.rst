@@ -5,6 +5,14 @@ Overview of available features
 
 .. div:: dropdown-group
 
+    .. dropdown:: Data Sources
+
+        Dropdown content
+
+    .. dropdown:: Data Filters
+
+        Dropdown content
+
     .. dropdown:: Descriptor Sets
 
         :class:`~qsprpred.data.descriptors.sets.DescriptorSet`: Base class for descriptor sets. 
@@ -50,7 +58,30 @@ Overview of available features
                     * :class:`~qsprpred.extra.data.descriptors.fingerprints.CDKPubchemFP`: CDKPubchemFP
                     * :class:`~qsprpred.extra.data.descriptors.fingerprints.CDKSubstructureFP`: CDKSubstructureFP
 
-    .. dropdown:: Dropdown B
+    .. dropdown:: Data Splitters
 
-        Dropdown content B
+        Dropdown content
 
+    .. dropdown:: Feature Filters
+
+        Dropdown content
+
+    .. dropdown:: Models
+
+        Dropdown content
+
+    .. dropdown:: Metrics
+
+        Dropdown content
+
+    .. dropdown:: Model Assessors
+
+        Dropdown content 
+
+    .. dropdown:: Hyperparameter Optimizers
+
+        Dropdown content
+
+    .. dropdown:: Model Plots
+
+        Dropdown content
