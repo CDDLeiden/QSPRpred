@@ -164,7 +164,17 @@ Overview of available features
 
     .. dropdown:: Hyperparameter Optimizers
 
-        Dropdown content
+        :class:`~qsprpred.models.hyperparam_optimization.HyperparameterOptimizion`: Base class for hyperparameter optimizers.
+
+        Hyperparameter optimizers are used to optimize the hyperparameters of models.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.models.hyperparam_optimization.GridSearchOptimization`: GridSearchOptimization
+                * :class:`~qsprpred.models.hyperparam_optimization.OptunaOptimization`: OptunaOptimization
+
 
     .. dropdown:: Model Plots
 
