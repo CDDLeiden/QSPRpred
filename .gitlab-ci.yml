@@ -25,7 +25,7 @@ stages:
     - pip install jupyterlab
     - pip freeze # For debugging environment
   script:
-    - cd testing && QSPPRED_TEST_SPLIT_UNITS=true ./run.sh
+    - cd testing && QSPPRED_TEST_SPLIT_UNITS=true QSPRPRED_VERBOSE_LOGGING=true ./run.sh
 
 # # Run tests on Python version 11 (linux image)
 # test:python3.11:
