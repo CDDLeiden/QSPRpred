@@ -199,11 +199,11 @@ class Replica(JSONSerializable):
         if self.model is None:
             raise ValueError("Model not initialized. Call initModel first.")
         self.results = None
-        scores_df = pd.DataFrame()
         for assessor in self.assessors:
             scores = assessor(self.model, self.ds, save=True)
             if isinstance(scores, float):
                 scores = np.array([scores])
+            scores_df = pd.DataFrame()
             for i, fold_score in enumerate(scores):
                 if isinstance(fold_score, float):
                     if self.model.isMultiTask:
