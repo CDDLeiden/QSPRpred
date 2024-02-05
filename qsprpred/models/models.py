@@ -241,9 +241,9 @@ class QSPRModel(JSONSerializable, ABC):
         """
         if random_state is None:
             self.randomState = int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
-            logger.warning(
-                "No random state supplied, "
-                "and could not find random state on the dataset."
+            logger.info(
+                "No random state supplied."
+                f"Setting random state to: {self.randomState}."
             )
         self.randomState = random_state
         constructor_params = [

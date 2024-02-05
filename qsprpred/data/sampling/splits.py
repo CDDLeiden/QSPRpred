@@ -93,7 +93,7 @@ class RandomSplit(DataSplit, Randomized):
                 self.getDataSet().randomState if self.hasDataSet else None
             )
         if self.seed is None:
-            logger.warning(
+            logger.info(
                 "No random state supplied, "
                 "and could not find random state on the dataset."
                 "Random seed will be set randomly."
@@ -442,9 +442,10 @@ class GBMTRandomSplit(GBMTDataSplit):
     ) -> None:
         seed = seed or (dataset.randomState if dataset is not None else None)
         if seed is None:
-            logger.warning(
+            logger.info(
                 "No random state supplied, "
                 "and could not find random state on the dataset."
+                "Random seed will be set randomly."
             )
 
         super().__init__(
@@ -521,9 +522,10 @@ class ClusterSplit(GBMTDataSplit):
     ) -> None:
         seed = seed or (dataset.randomState if dataset is not None else None)
         if seed is None:
-            logger.warning(
+            logger.info(
                 "No random state supplied, "
                 "and could not find random state on the dataset."
+                "Random seed will be set randomly."
             )
 
         clustering = (
