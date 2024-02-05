@@ -1,3 +1,5 @@
+import json
+import os
 from copy import deepcopy
 from typing import ClassVar, Optional, Callable, Generator
 
@@ -45,7 +47,7 @@ class QSPRDataset(MoleculeTable):
     def __init__(
         self,
         name: str,
-        target_props: list[TargetProperty | dict],
+        target_props: list[TargetProperty | dict] | None = None,
         df: Optional[pd.DataFrame] = None,
         smiles_col: str = "SMILES",
         add_rdkit: bool = False,
@@ -66,9 +68,11 @@ class QSPRDataset(MoleculeTable):
         Args:
             name (str):
                 data name, used in saving the data
-            target_props (list[TargetProperty | dict]):
+            target_props (list[TargetProperty | dict] | None):
                 target properties, names
-                should correspond with target columnname in df
+                should correspond with target columnname in df. If `None`, target
+                properties will be inferred if this data set has been saved
+                previously. Defaults to `None`.
             df (pd.DataFrame, optional):
                 input dataframe containing smiles and target
                 property. Defaults to None.
@@ -124,6 +128,13 @@ class QSPRDataset(MoleculeTable):
             random_state,
             store_format,
         )
+        # load target properties if not specified and file exists
+        if target_props is None and os.path.exists(self.metaFile):
+            meta = json.load(open(self.metaFile, "r"))
+            target_props = meta["py/state"]["targetProperties"]
+            target_props = [
+                TargetProperty.fromJSON(json.dumps(x)) for x in target_props
+            ]
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
         self.feature_standardizer = None
@@ -219,7 +230,7 @@ class QSPRDataset(MoleculeTable):
         """
         assert isinstance(target_props, list), (
             "target_props should be a list of TargetProperty objects or dictionaries "
-            "initialize TargetProperties from."
+            "initialize TargetProperties from. Not a %s." % type(target_props)
         )
         if isinstance(target_props[0], dict):
             assert all(isinstance(d, dict) for d in target_props), (
