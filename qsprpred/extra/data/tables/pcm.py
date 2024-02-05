@@ -235,6 +235,6 @@ class PCMDataSet(QSPRDataset):
             self.targetProperties,
             name=ret.name,
         )
-        ret.feature_standardizer = self.feature_standardizer
+        ret.featureStandardizer = self.featureStandardizer
         ret.featurize()
         return ret
