@@ -18,6 +18,13 @@ From v2.1.1 to v3.0.0
 - Improved behavior of the Papyrus data source (does not attempt to connect to the
   internet if the data set already exists).
 - It is now possible to define new descriptor sets outside the package without errors.
+- Basic consistency of models is also checked in the unit test suite, including in
+  the `qsprpred.extra` package.
+- Fixed a problem with feature standardizer being retrained on prediction data when a
+  prediction from SMILES was invoked. This affected all versions of the package higher
+  or equal to `v2.1.0`.
+- Fixes to the  `fromMolTable` method in various data set implementations, in particular
+  in copying of the feature standardizer and other settings.
 
 ## Changes
 

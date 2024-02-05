@@ -137,7 +137,10 @@ class DescriptorTable(PandasDataTable):
             ValueError: If any of the descriptors are not present in the table.
         """
         all_descs = self.getDescriptorNames(active_only=False)
-        self.calculator.descriptors = set(all_descs) & set(descriptors)
+        to_keep = set(all_descs) & set(descriptors)
+        self.calculator.descriptors = [
+            x for x in self.calculator.descriptors if x in to_keep
+        ]
         return self.getDescriptorNames()
 
 

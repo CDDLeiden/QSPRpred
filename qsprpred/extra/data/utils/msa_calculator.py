@@ -22,10 +22,11 @@ class MSAProvider(FileSerializable, ABC):
     This interface defines how calculation and storage of
     multiple sequence alignments (MSAs) is handled.
     """
+
     @abstractmethod
-    def __call__(self,
-                 sequences: dict[str:str] | None = None,
-                 **kwargs) -> dict[str:str] | None:
+    def __call__(
+        self, sequences: dict[str:str] | None = None, **kwargs
+    ) -> dict[str:str] | None:
         """
         Aligns the sequences and returns the alignment.
 
@@ -68,6 +69,7 @@ class BioPythonMSA(MSAProvider, JSONSerializable, ABC):
         fname: file name of the alignment file
         cache: cache of alignments performed so far by the provider
     """
+
     def __init__(self, out_dir: str = ".", fname: str = "alignment.aln-fasta.fasta"):
         """Initializes the MSA provider.
 
@@ -77,8 +79,7 @@ class BioPythonMSA(MSAProvider, JSONSerializable, ABC):
         """
         if not self.checkTool():
             raise RuntimeError(
-                f"The tool commnad '{self.cmd}' "
-                f"was not found. Please install it."
+                f"The tool commnad '{self.cmd}' " f"was not found. Please install it."
             )
         self.outDir = out_dir
         self.fName = fname
@@ -182,7 +183,7 @@ class BioPythonMSA(MSAProvider, JSONSerializable, ABC):
         return alignment
 
     def checkTool(self) -> bool:
-        """ Check if the MAFFT tool is installed """
+        """Check if the MAFFT tool is installed"""
         return shutil.which(self.cmd) is not None
 
 
@@ -194,9 +195,10 @@ class MAFFT(BioPythonMSA):
     Uses the BioPython wrapper for MAFFT:
     - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline
     """
-    def __call__(self,
-                 sequences: dict[str:str] | None = None,
-                 **kwargs) -> dict[str, str] | None:
+
+    def __call__(
+        self, sequences: dict[str:str] | None = None, **kwargs
+    ) -> dict[str, str] | None:
         """
         MSA with MAFFT and BioPython.
 
@@ -233,7 +235,9 @@ class MAFFT(BioPythonMSA):
         stdout, stderr = cmd()
         with open(f"{self.outDir}/{self.fName}", "w") as handle:
             handle.write(stdout)
-        return self.parseAlignment(sequences)
+        alignment = self.parseAlignment(sequences)
+        self.saveToCache(sorted(sequences.keys()), alignment)
+        return alignment
 
     @property
     def cmd(self) -> str:
@@ -248,9 +252,10 @@ class ClustalMSA(BioPythonMSA):
     Uses the BioPython wrapper for Clustal Omega
     - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.ClustalOmegaCommandline
     """
-    def __call__(self,
-                 sequences: dict[str:str] = None,
-                 **kwargs) -> dict[str, str] | None:
+
+    def __call__(
+        self, sequences: dict[str:str] = None, **kwargs
+    ) -> dict[str, str] | None:
         """
         MSA with Clustal Omega and BioPython.
 
@@ -285,7 +290,9 @@ class ClustalMSA(BioPythonMSA):
             outfmt="fasta",
         )
         clustal_omega_cline()
-        return self.parseAlignment(sequences)
+        alignment = self.parseAlignment(sequences)
+        self.saveToCache(sorted(sequences.keys()), alignment)
+        return alignment
 
     @property
     def cmd(self) -> str:
