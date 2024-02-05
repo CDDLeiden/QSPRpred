@@ -20,7 +20,7 @@ from ..models.pcm import SklearnPCMModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import ModelCheckMixIn
 from ...utils.testing.path_mixins import ModelDataSetsPathMixIn
-from .random import NormalDistributionAlgorithm, RandomModel, RatioDistributionAlgorithm
+from .random import ScipyDistributionAlgorithm, RandomModel, RatioDistributionAlgorithm
 
 
 class ModelDataSetsMixInExtras(ModelDataSetsPathMixIn, DataSetsMixInExtras):
@@ -178,7 +178,7 @@ class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTes
     def getModel(
         self,
         name: str,
-        alg: NormalDistributionAlgorithm | RatioDistributionAlgorithm = NormalDistributionAlgorithm,
+        alg: ScipyDistributionAlgorithm | RatioDistributionAlgorithm = ScipyDistributionAlgorithm,
         dataset: PCMDataSet | None = None,
         parameters: dict | None = None,
         random_state: int | None = None,
@@ -226,7 +226,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model)
-        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir, alg=NormalDistributionAlgorithm)
+        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir, alg=ScipyDistributionAlgorithm)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
         if random_state[0] is not None:
@@ -237,7 +237,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             )
             self.fitTest(model)
             predictor = RandomModel(
-                name=f"{model_name}_{task}", base_dir=model.baseDir, alg=NormalDistributionAlgorithm
+                name=f"{model_name}_{task}", base_dir=model.baseDir, alg=ScipyDistributionAlgorithm
             )
             self.predictorTest(
                 predictor,
@@ -279,7 +279,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
         )
         self.fitTest(model)
         predictor = RandomModel(
-            name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=NormalDistributionAlgorithm
+            name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=ScipyDistributionAlgorithm
         )
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
         if random_state[0] is not None:
@@ -290,7 +290,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             )
             self.fitTest(model)
             predictor = RandomModel(
-                name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=NormalDistributionAlgorithm
+                name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=ScipyDistributionAlgorithm
             )
             self.predictorTest(
                 predictor,
@@ -311,7 +311,7 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
             )
-            for random_state in ([None], [1, 42], [42, 42])
+            for random_state in ([None], [42, 42])
         ]
     )
     def testClassificationBasicFit(

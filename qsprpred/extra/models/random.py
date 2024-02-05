@@ -22,6 +22,10 @@ class RandomDistributionAlgorithm(ABC):
         pass
 
     @abstractmethod
+    def get_probas(self, X_test: np.ndarray):
+        pass
+
+    @abstractmethod
     def from_dict(self, loaded_dict):
         pass
 
@@ -41,7 +45,7 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
         self.rng = np.random.default_rng(seed=random_state)
 
     def __call__(self, X_test: np.ndarray):
-        # TODO: fix
+        # I think this works
         y_list = [self.rng.choice(len(self.ratios.values), len(X_test), p=[r[col] for r in self.ratios.values]) for col in range(len(self.ratios.values[0]))]
         y = np.column_stack(y_list)
         if y.ndim == 1:
@@ -49,53 +53,21 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
 
         return y
 
+    def get_probas(self, X_test: np.ndarray):
+        #TODO: also make this work for multitask
+        y_list = np.array([[r[0] for r in self.ratios.values] for _ in range(len(X_test))])
+        return [y_list]
+
     def fit(self, y_df: pd.DataFrame):
         self.ratios = pd.DataFrame.from_dict({col: y_df[col].value_counts() / y_df.shape[0] for col in list(y_df)})
 
     def from_dict(self, loaded_dict):
-        self.ratios = pd.DataFrame({"ratios": json.loads(loaded_dict["ratios"])}) if loaded_dict[
+        self.ratios = pd.DataFrame(json.loads(loaded_dict["ratios"])) if loaded_dict[
                                                 "ratios"] is not None else None
 
     def to_dict(self):
         param_dictionary = {"parameters": {},
                 "ratios": self.ratios.to_json() if self.ratios is not None else None,
-                }
-        return param_dictionary
-
-class NormalDistributionAlgorithm(RandomDistributionAlgorithm):
-    """
-    Distributions used: normal distribution for regression, not to be used for classification
-    Values of X are irrelevant, only distribution of y is used
-    """
-
-    def __init__(self, random_state=None):
-        self.mean = None
-        self.std = None
-        self.random_state=random_state
-        self.rng = np.random.default_rng(seed=random_state)
-
-    def __call__(self, X_test: np.ndarray):
-        y_list = [self.rng.normal(loc=self.mean.values[col], scale=self.std.values[col], size=len(X_test)) for col in range(len(self.mean))]
-        y = np.column_stack(y_list)
-        if y.ndim == 1:
-            y = y.reshape(-1, 1)
-
-        return y
-
-    def fit(self, y_df: pd.DataFrame):
-        self.mean = y_df.mean()
-        self.std = y_df.std()
-
-    def from_dict(self, loaded_dict):
-        self.mean = pd.DataFrame({"mean": json.loads(loaded_dict["mean"])}) if loaded_dict[
-                                                "mean"] is not None else None
-        self.std = pd.DataFrame({"std": json.loads(loaded_dict["std"])}) if loaded_dict[
-                                                "std"] is not None else None
-
-    def to_dict(self):
-        param_dictionary = {"parameters": {},
-                "mean": self.mean.to_json() if self.mean is not None else None,
-                "std": self.std.to_json() if self.std is not None else None,
                 }
         return param_dictionary
 
@@ -110,6 +82,9 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
             y = y.reshape(-1, 1)
 
         return y
+
+    def get_probas(self, X_test: np.ndarray):
+        raise Exception("No probas supported for this algorithm.")
 
     def fit(self, y_df: pd.DataFrame):
         self.median = y_df.median()
@@ -139,14 +114,15 @@ class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
 
         return y
 
+    def get_probas(self, X_test: np.ndarray):
+        raise Exception("No probas supported for this algorithm.")
+
     def fit(self, y_df: pd.DataFrame):
         self.fitted_parameters = pd.DataFrame.from_dict({col: self.distribution.fit(y_df[col], *self.params) for col in list(y_df)})
 
     def from_dict(self, loaded_dict):
-        print(loaded_dict)
         self.fitted_parameters = pd.DataFrame(json.loads(loaded_dict["fitted_parameters"])) if loaded_dict[
                                                 "fitted_parameters"] is not None else None
-        print(self.fitted_parameters)
 
     def to_dict(self):
         param_dictionary = {"parameters": {},
@@ -250,8 +226,8 @@ class RandomModel(QSPRModel):
             X: pd.DataFrame | np.ndarray | QSPRDataset,
             estimator: Any = None
     ):
-        #TODO
-        return self.predict(X, estimator)
+        estimator = self.estimator if estimator is None else estimator
+        return estimator.get_probas(X)
     
     def loadEstimator(self, params: Optional[dict] = None) -> object:
         """Initialize estimator instance with the given parameters.
