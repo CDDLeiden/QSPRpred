@@ -116,6 +116,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
             parameters = {"n_jobs": self.nCPU}
         else:
             parameters = None
+
         # initialize dataset
         prep = self.getDefaultPrep()
         prep["feature_calculators"] = prep["feature_calculators"] + [
@@ -150,7 +151,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                     parameters=parameters,
                     random_state=random_state[1],
                 )
-                self.fitTest(model)
+                self.fitTest(model, dataset)
                 predictor_new = SklearnPCMModel(
                     name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
                 )
