@@ -10,6 +10,7 @@ Overview of available features
         :class:`~qsprpred.data.sources.data_source.DataSource`: Base class for data sources.
 
         Data sources are used to load data from a source programmatically.
+        An example may be found in the `tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/basics/data/data_collection_with_papyrus.ipynb>`_.
 
         .. tab-set::
 
