@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.testing.check_mixins &mdash; QSPRpred 3.0.0.dev320+g26d91b8 documentation</title>
+  <title>qsprpred.utils.testing.check_mixins &mdash; QSPRpred 3.0.0.dev352+g5a8bdd6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=ecb50789"></script>
+        <script src="../../../../_static/documentation_options.js?v=638f122b"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev320+g26d91b8
+                v3.0.0.dev352+g5a8bdd6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -427,6 +427,96 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.predictorTest">[docs]</a>
     <span class="k">def</span> <span class="nf">predictorTest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">comparison_model</span><span class="p">:</span> <span class="n">QSPRModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">expect_equal_result</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">pred_kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model predictions.</span>
+
+<span class="sd">        Checks if the shape of the predictions is as expected and if the predictions</span>
+<span class="sd">        of the predictMols function are consistent with the predictions of the</span>
+<span class="sd">        predict/predictProba functions. Also checks if the predictions of the model are</span>
+<span class="sd">        the same as the predictions of the comparison model if given.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): The model to make predictions with.</span>
+<span class="sd">            dataset (QSPRDataset): The dataset to make predictions for.</span>
+<span class="sd">            comparison_model (QSPRModel): another model to compare the predictions with.</span>
+<span class="sd">            expect_equal_result (bool): Whether the expected result should be equal or</span>
+<span class="sd">                not equal to the predictions of the comparison model.</span>
+<span class="sd">            **pred_kwargs:</span>
+<span class="sd">                Extra keyword arguments to pass to the predictor&#39;s `predictMols` method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># define checks of the shape of the predictions</span>
+        <span class="k">def</span> <span class="nf">check_shape</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">num_smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span> <span class="ow">and</span> <span class="n">use_probas</span><span class="p">:</span>
+                <span class="c1"># check predictions are a list of arrays of shape (n_smiles, n_classes)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                        <span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">num_smiles</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">nClasses</span><span class="p">),</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># check predictions are an array of shape (n_smiles, n_targets)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                    <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">num_smiles</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)),</span>
+                <span class="p">)</span>
+
+        <span class="c1"># define check for comparing predictions with expected result</span>
+        <span class="k">def</span> <span class="nf">check_predictions</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">expected_result</span><span class="p">,</span> <span class="n">expect_equal_result</span><span class="p">):</span>
+            <span class="c1"># check if predictions are almost equal to expected result (rtol=1e-5)</span>
+            <span class="n">check_outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span> <span class="k">if</span> <span class="n">expect_equal_result</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expected_result</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expected_result</span><span class="p">)):</span>
+                    <span class="n">check_outcome</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">expected_result</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">check_outcome</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">expected_result</span><span class="p">))</span>
+
+        <span class="c1"># Check if the predictMols function gives the same result as the</span>
+        <span class="c1"># predict/predictProba function</span>
+        <span class="c1"># get the expected result from the basic predict function</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span>
+            <span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">refit_standardizer</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="n">expected_result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+        <span class="c1"># make predictions with the predictMols function and check with previous result</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="n">num_smiles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span><span class="n">smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span><span class="p">)</span>
+        <span class="n">check_shape</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">num_smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">check_predictions</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">expected_result</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># do the same for the predictProba function</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+            <span class="n">expected_result_proba</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictProba</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+            <span class="n">predictions_proba</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+                <span class="n">smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
+            <span class="p">)</span>
+            <span class="n">check_shape</span><span class="p">(</span><span class="n">predictions_proba</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">smiles</span><span class="p">),</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">check_predictions</span><span class="p">(</span><span class="n">predictions_proba</span><span class="p">,</span> <span class="n">expected_result_proba</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># check if the predictions are (not) the same as of the comparison model</span>
+        <span class="k">if</span> <span class="n">comparison_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">predictions_comparison</span> <span class="o">=</span> <span class="n">comparison_model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+                <span class="n">smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
+            <span class="p">)</span>
+            <span class="n">check_predictions</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">predictions_comparison</span><span class="p">,</span> <span class="n">expect_equal_result</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+                <span class="n">predictions_comparison_proba</span> <span class="o">=</span> <span class="n">comparison_model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+                    <span class="n">smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
+                <span class="p">)</span>
+                <span class="n">check_predictions</span><span class="p">(</span>
+                    <span class="n">predictions_proba</span><span class="p">,</span> <span class="n">predictions_comparison_proba</span><span class="p">,</span> <span class="n">expect_equal_result</span>
+                <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelCheckMixIn.oldpredictorTest">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.oldpredictorTest">[docs]</a>
+    <span class="k">def</span> <span class="nf">oldpredictorTest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
         <span class="n">predictor</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
         <span class="n">expect_equal_result</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">expected_pred_use_probas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -468,24 +558,29 @@
                     <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_smiles</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)),</span>
                 <span class="p">)</span>
 
-        <span class="c1"># predict the property</span>
+        <span class="c1"># check the predictions for different settings of use_probas</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">use_probas</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]:</span>
+            <span class="c1"># make predictions</span>
             <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
                 <span class="n">df</span><span class="o">.</span><span class="n">SMILES</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span> <span class="n">use_probas</span><span class="o">=</span><span class="n">use_probas</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
             <span class="p">)</span>
+            <span class="c1"># check the shape of the predictions</span>
             <span class="n">check_shape</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">SMILES</span><span class="o">.</span><span class="n">to_list</span><span class="p">())</span>
+            <span class="c1"># check the type of the predictions</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
 
+            <span class="c1"># check the first predicted value</span>
             <span class="n">singleoutput</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
                 <span class="k">else</span> <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
             <span class="p">)</span>
+            <span class="c1"># check the type of the first predicted value depending on the task</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
                 <span class="ow">or</span> <span class="n">use_probas</span>
@@ -502,12 +597,13 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown task: </span><span class="si">{</span><span class="n">predictor</span><span class="o">.</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">singleoutput</span><span class="p">)</span>
-            <span class="c1"># test with an invalid smiles</span>
+            <span class="c1"># test with invalid smiles</span>
             <span class="n">invalid_smiles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;C1CCCCC1&quot;</span><span class="p">,</span> <span class="s2">&quot;C1CCCCC&quot;</span><span class="p">]</span>
             <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
                 <span class="n">invalid_smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="n">use_probas</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
             <span class="p">)</span>
             <span class="n">check_shape</span><span class="p">(</span><span class="n">invalid_smiles</span><span class="p">)</span>
+            <span class="c1"># check that the first prediction is None</span>
             <span class="n">singleoutput</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
@@ -519,6 +615,7 @@
                 <span class="k">else</span> <span class="n">predictions</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="c1"># check the type of the first predicted value depending on the task</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">predictor</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span>
                 <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">XGBClassifier</span><span class="p">)</span>
@@ -528,6 +625,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">singleoutput</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
 
+        <span class="c1"># check that the predictions are the same for use_probas=True and False as</span>
+        <span class="c1"># expected</span>
         <span class="k">if</span> <span class="n">expect_equal_result</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">expected_pred_use_probas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">expected_pred_use_probas</span><span class="p">,</span> <span class="n">places</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 3.0.0.dev320+g26d91b8 documentation</title>
+  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 3.0.0.dev352+g5a8bdd6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=ecb50789"></script>
+        <script src="../../../../_static/documentation_options.js?v=638f122b"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev320+g26d91b8
+                v3.0.0.dev352+g5a8bdd6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -356,12 +356,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            list[str]: list of feature names</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">features</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">calc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptorSets</span><span class="p">:</span>
-                <span class="n">features</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">calc</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
+            <span class="n">features</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">features</span></div>
 
 
@@ -517,7 +516,10 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;MoleculeTable&quot;</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">searchWithIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">ret</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">ret</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">feature_standardizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">featurize</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
 
 
 <div class="viewcode-block" id="QSPRDataset.fromMolTable">
@@ -1050,6 +1052,7 @@
         <span class="n">concat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">ordered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">refit_standardizer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the current feature sets (training and test) from the dataset.</span>
 
@@ -1072,9 +1075,14 @@
 <span class="sd">                If `True`, the returned feature matrices will be ordered</span>
 <span class="sd">                according to the original order of the data set. This is only relevant</span>
 <span class="sd">                if `concat` is `True`.</span>
+<span class="sd">            refit_standardizer (bool): If `True`, the feature standardizer will be</span>
+<span class="sd">                refit on the training set upon this call. If `False`, the previously</span>
+<span class="sd">                fitted standardizer will be used. Defaults to `True`. Use `False` if</span>
+<span class="sd">                this dataset is used for prediction only and the standardizer has</span>
+<span class="sd">                been initialized already.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkFeatures</span><span class="p">()</span>
-
+        <span class="c1"># get feature matrices using feature names</span>
         <span class="k">if</span> <span class="n">concat</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">df_X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
@@ -1090,26 +1098,28 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">df_X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span>
             <span class="n">df_X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span>
-
+        <span class="c1"># convert to numpy arrays and standardize</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">df_X</span><span class="o">.</span><span class="n">values</span>
         <span class="n">X_ind</span> <span class="o">=</span> <span class="n">df_X_ind</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">df_X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span><span class="p">:</span>
             <span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span> <span class="o">=</span> <span class="n">apply_feature_standardizer</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span><span class="p">,</span> <span class="n">df_X</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span><span class="p">,</span>
+                <span class="n">df_X</span><span class="p">,</span>
+                <span class="n">fit</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">refit_standardizer</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">X_ind</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">apply_feature_standardizer</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span><span class="p">,</span> <span class="n">df_X_ind</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span>
                 <span class="p">)</span>
-
+        <span class="c1"># convert to data frames and make sure column order is correct</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df_X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">X_ind</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_ind</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df_X_ind</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-
+        <span class="c1"># replace original feature matrices if inplace</span>
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="n">X_ind</span>
-
+        <span class="c1"># order if concatenating</span>
         <span class="k">if</span> <span class="n">ordered</span> <span class="ow">and</span> <span class="n">concat</span><span class="p">:</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X_ind</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">concat</span> <span class="k">else</span> <span class="n">X</span></div>

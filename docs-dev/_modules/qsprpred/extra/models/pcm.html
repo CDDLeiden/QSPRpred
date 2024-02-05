@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.models.pcm &mdash; QSPRpred 3.0.0.dev320+g26d91b8 documentation</title>
+  <title>qsprpred.extra.models.pcm &mdash; QSPRpred 3.0.0.dev352+g5a8bdd6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=ecb50789"></script>
+        <script src="../../../../_static/documentation_options.js?v=638f122b"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev320+g26d91b8
+                v3.0.0.dev352+g5a8bdd6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -105,6 +105,8 @@
 <span class="kn">from</span> <span class="nn">...data.tables.mol</span> <span class="kn">import</span> <span class="n">MoleculeTable</span>
 <span class="kn">from</span> <span class="nn">...models.models</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
 <span class="kn">from</span> <span class="nn">...models.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
+<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">Mol</span>
 
 
 <div class="viewcode-block" id="PCMModel">
@@ -146,14 +148,18 @@
 <span class="sd">            PCMDataSet:</span>
 <span class="sd">                Dataset with the features calculated for the molecules.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># make a molecule table first and add the target properties</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mols</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Mol</span><span class="p">):</span>
+            <span class="n">mols</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">mols</span><span class="p">]</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">MoleculeTable</span><span class="o">.</span><span class="n">fromSMILES</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">mols</span><span class="p">,</span>
             <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">targetproperty</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">:</span>
-            <span class="n">dataset</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="n">targetproperty</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">target_property</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">:</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">imputer</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="n">target_property</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="s2">&quot;protein_id&quot;</span><span class="p">,</span> <span class="n">protein_id</span><span class="p">)</span>
         <span class="c1"># convert to PCMDataSet</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">PCMDataSet</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span>

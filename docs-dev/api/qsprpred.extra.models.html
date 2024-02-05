@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.models package &mdash; QSPRpred 3.0.0.dev320+g26d91b8 documentation</title>
+  <title>qsprpred.extra.models package &mdash; QSPRpred 3.0.0.dev352+g5a8bdd6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=ecb50789"></script>
+        <script src="../_static/documentation_options.js?v=638f122b"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -50,7 +50,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev320+g26d91b8
+                v3.0.0.dev352+g5a8bdd6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -2439,8 +2439,8 @@ to parameterize tests with the given named combinations.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.models.tests.TestPCM.predictorTest">
-<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_not_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.models.tests.TestPCM.predictorTest" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qsprpred.extra.models.tests.TestPCM.oldpredictorTest">
+<span class="sig-name descname"><span class="pre">oldpredictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_not_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.models.tests.TestPCM.oldpredictorTest" title="Link to this definition"></a></dt>
 <dd><p>Test a model as predictor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2451,6 +2451,28 @@ inequality.</p></li>
 <li><p><strong>expected_pred_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas true.</p></li>
 <li><p><strong>expected_pred_not_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas false. Ignored if expect_equal_result is
 false.</p></li>
+<li><p><strong>**pred_kwargs</strong> – Extra keyword arguments to pass to the predictor’s <a class="reference internal" href="qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols" title="qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">predictMols</span></code></a> method.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.models.tests.TestPCM.predictorTest">
+<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.models.tests.TestPCM.predictorTest" title="Link to this definition"></a></dt>
+<dd><p>Test model predictions.</p>
+<p>Checks if the shape of the predictions is as expected and if the predictions
+of the predictMols function are consistent with the predictions of the
+predict/predictProba functions. Also checks if the predictions of the model are
+the same as the predictions of the comparison model if given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><em>QSPRModel</em></a>) – The model to make predictions with.</p></li>
+<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The dataset to make predictions for.</p></li>
+<li><p><strong>comparison_model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><em>QSPRModel</em></a>) – another model to compare the predictions with.</p></li>
+<li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether the expected result should be equal or
+not equal to the predictions of the comparison model.</p></li>
 <li><p><strong>**pred_kwargs</strong> – Extra keyword arguments to pass to the predictor’s <a class="reference internal" href="qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols" title="qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">predictMols</span></code></a> method.</p></li>
 </ul>
 </dd>
