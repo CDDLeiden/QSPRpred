@@ -355,3 +355,68 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
                 expected_pred_use_probas=pred_use_probas,
                 expected_pred_not_use_probas=pred_not_use_probas,
             )
+
+class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
+    """Test the SklearnModel class for multi-task classification models."""
+
+    @parameterized.expand(
+        [
+            (alg_name, alg_name, alg, random_state)
+            for alg, alg_name in ((RatioDistributionAlgorithm, "RandomModel"),)
+            for random_state in ([None], [42, 42])
+        ]
+    )
+    def testClassificationMultiTaskFit(self, _, model_name, model_class, random_state):
+        """Test model training for multitask classification models."""
+        parameters = {}
+
+        # initialize dataset
+        dataset = self.createLargeTestDataSet(
+            target_props=[
+                {
+                    "name": "fu",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [0.3],
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [6.5],
+                    "imputer": SimpleImputer(strategy="mean"),
+                },
+            ],
+            preparation_settings=self.getDefaultPrep(),
+        )
+        # test classifier
+        # initialize model for training from class
+        model = self.getModel(
+            name=f"{model_name}_multitask_classification",
+            alg=model_class,
+            dataset=dataset,
+            parameters=parameters,
+            random_state=random_state[0],
+        )
+        self.fitTest(model)
+        predictor = RandomModel(
+            name=f"{model_name}_multitask_classification", base_dir=model.baseDir, alg=RatioDistributionAlgorithm
+        )
+        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=f"{model_name}_multitask_classification",
+                alg=model_class,
+                dataset=dataset,
+                parameters=parameters,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            predictor = RandomModel(
+                name=f"{model_name}_multitask_classification", base_dir=model.baseDir, alg=RatioDistributionAlgorithm
+            )
+            self.predictorTest(
+                predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+                expected_pred_use_probas=pred_use_probas,
+                expected_pred_not_use_probas=pred_not_use_probas,
+            )

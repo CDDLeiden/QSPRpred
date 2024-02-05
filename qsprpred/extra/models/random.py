@@ -45,7 +45,6 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
         self.rng = np.random.default_rng(seed=random_state)
 
     def __call__(self, X_test: np.ndarray):
-        # I think this works
         y_list = [self.rng.choice(len(self.ratios.values), len(X_test), p=[r[col] for r in self.ratios.values]) for col in range(len(self.ratios.values[0]))]
         y = np.column_stack(y_list)
         if y.ndim == 1:
@@ -54,9 +53,8 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
         return y
 
     def get_probas(self, X_test: np.ndarray):
-        #TODO: also make this work for multitask
-        y_list = np.array([[r[0] for r in self.ratios.values] for _ in range(len(X_test))])
-        return [y_list]
+        y_list = [np.array([[r[col] for r in self.ratios.values] for _ in range(len(X_test))]) for col in range(len(self.ratios.values[0]))]
+        return y_list
 
     def fit(self, y_df: pd.DataFrame):
         self.ratios = pd.DataFrame.from_dict({col: y_df[col].value_counts() / y_df.shape[0] for col in list(y_df)})
