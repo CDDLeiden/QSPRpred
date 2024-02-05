@@ -105,8 +105,7 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
         self.median = None
 
     def __call__(self, X_test: np.ndarray):
-        raise Exception("TODO: return constant array")
-        #y_list = [self.rng.normal(loc=self.mean.values[col], scale=self.std.values[col], size=len(X_test)) for col in range(len(self.mean))]
+        y_list = [np.full(len(X_test), self.median.values[col]) for col in range(len(self.median))]
         y = np.column_stack(y_list)
         if y.ndim == 1:
             y = y.reshape(-1, 1)
@@ -114,15 +113,18 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
         return y
 
 
-    def fit(self, y: pd.DataFrame):
-        estimator.median = y_df.median()
+    def fit(self, y_df: pd.DataFrame):
+        self.median = y_df.median()
 
     def from_dict(self, loaded_dict):
-        pass
+        self.median = pd.DataFrame({"median": json.loads(loaded_dict["median"])}) if loaded_dict[
+                                                "median"] is not None else None
 
     def to_dict(self):
-        pass
-
+        param_dictionary = {"parameters": {},
+                "median": self.median.to_json() if self.median is not None else None,
+                }
+        return param_dictionary
 
 class RandomModel(QSPRModel):
     def __init__(
