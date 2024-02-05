@@ -41,7 +41,7 @@ dependencies = [
     "parameterized",
     "pebble",
     "numpy >= 1.19, <1.24.0",
-    "scikit-learn >= 1.0.2, <1.3.0",
+    "scikit-learn >= 1.0.2",
     "pandas >= 1.2.2",
     "matplotlib >= 2.0",
     "chembl_structure_pipeline >= 1.2.0",
@@ -51,10 +51,11 @@ dependencies = [
     "xgboost",
     "boruta",
     "tqdm",
-    "ml2json >= 0.2.2",
+    "ml2json @ git+https://github.com/HellevdM/ml2json.git",
     "jsonpickle",
     "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
     "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits@0.0.4",
+    "mlchemad"
 ]
 
 [project.optional-dependencies]

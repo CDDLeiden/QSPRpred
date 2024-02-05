@@ -686,7 +686,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             names (list):
                 List of property names to impute.
             imputer (Callable):
-                imputer object implementing the `fit_trensform`
+                imputer object implementing the `fit_transform`
                  method from scikit-learn API.
         """
         assert hasattr(imputer, "fit_transform"), (

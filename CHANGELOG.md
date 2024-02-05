@@ -128,6 +128,8 @@ From v2.1.1 to v3.0.0
 - Data sets can now be optionally stored in the `csv` format and not just as a pickle
   file. This makes it easier to debug and share data sets, but it is slower to load and
   save.
+- Added `ApplicabilityDomain` class to calculate applicability domain and filter
+  outliers from test sets.
 
 ## Removed Features
 

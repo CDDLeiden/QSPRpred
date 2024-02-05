@@ -1,12 +1,16 @@
 from copy import deepcopy
-from typing import ClassVar, Optional, Callable, Generator
+from typing import Callable, ClassVar, Generator, Optional
 
 import numpy as np
 import pandas as pd
+from mlchemad.applicability_domains import (
+    ApplicabilityDomain as MLChemADApplicabilityDomain,
+)
 from sklearn.preprocessing import LabelEncoder
 
 from .mol import MoleculeTable
 from ..descriptors.sets import DescriptorSet
+from ...data.processing.applicability_domain import ApplicabilityDomain, MLChemADWrapper
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_standardizers import (
     SKLearnStandardizer,
@@ -14,8 +18,7 @@ from ...data.processing.feature_standardizers import (
 )
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...logs import logger
-from ...tasks import TargetProperty
-from ...tasks import TargetTasks
+from ...tasks import TargetProperty, TargetTasks
 
 
 class QSPRDataset(MoleculeTable):
@@ -37,7 +40,15 @@ class QSPRDataset(MoleculeTable):
         y_ind (np.ndarray/pd.DataFrame) : m-l label array for independent set, where m
             is the number of samples and equals to row of X_ind, and l is the number of
             types.
+        X_ind_outliers (np.ndarray/pd.DataFrame) : m x n Feature matrix for outliers
+            in independent set, where m is the number of samples and n is the number of
+            features.
+        y_ind_outliers (np.ndarray/pd.DataFrame) : m-l label array for outliers in
+            independent set, where m is the number of samples and equals to row of
+            X_ind_outliers, and l is the number of types.
         featureNames (list of str) : feature names
+        featureStandardizer (SKLearnStandardizer) : feature standardizer
+        applicabilityDomain (ApplicabilityDomain) : applicability domain
     """
 
     _notJSON: ClassVar = [*MoleculeTable._notJSON, "X", "X_ind", "y", "y_ind"]
@@ -126,7 +137,8 @@ class QSPRDataset(MoleculeTable):
         )
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
-        self.feature_standardizer = None
+        self.featureStandardizer = None
+        self.applicabilityDomain = None
         # populate feature matrix and target properties
         self.X = None
         self.y = None
@@ -259,9 +271,8 @@ class QSPRDataset(MoleculeTable):
 
         If the data frame contains a column 'Split_IsTrain',
         the data will be split into training and independent sets. Otherwise, the
-            independent set will
-        be empty. If descriptors are available, the resulting training matrices will
-            be featurized.
+        independent set will be empty. If descriptors are available, the resulting
+        training matrices will be featurized.
         """
         logger.debug("Restoring training data...")
         # split data into training and independent sets if saved previously
@@ -277,6 +288,7 @@ class QSPRDataset(MoleculeTable):
             ]
         self.X = self.y.drop(self.y.columns, axis=1)
         self.X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
+
         self.featurizeSplits(shuffle=False)
         logger.debug("Training data restored.")
         logger.debug(f"Training features shape: {self.X.shape}")
@@ -396,7 +408,7 @@ class QSPRDataset(MoleculeTable):
     ) -> "MoleculeTable":
         ret = super().searchWithIndex(index, name)
         ret = QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
-        ret.feature_standardizer = self.feature_standardizer
+        ret.featureStandardizer = self.featureStandardizer
         ret.featurize()
         return ret
 
@@ -475,7 +487,7 @@ class QSPRDataset(MoleculeTable):
 
         If descriptors are already present, they will be recalculated if `recalculate`
         is `True`. Featurization will be performed after adding descriptors if
-        `featurize` is `True`. Featurazation converts current data matrices to pure
+        `featurize` is `True`. Featurization converts current data matrices to pure
         numeric matrices of selected descriptors (features).
 
         Args:
@@ -510,6 +522,8 @@ class QSPRDataset(MoleculeTable):
         """
         if save_split:
             self.saveSplit()
+        elif "Split_IsTrain" in self.df.columns:
+            self.df.drop("Split_IsOutlier", axis=1, inplace=True)
         super().save()
 
     def split(self, split: "DataSplit", featurize: bool = False):
@@ -519,12 +533,11 @@ class QSPRDataset(MoleculeTable):
         if you want to use feature matrices instead of the raw data frame.
 
         Args:
-            split (DataSplit) :
+            split (DataSplit):
                 split instance orchestrating the split
             featurize (bool):
                 whether to featurize the data set splits after splitting.
                 Defaults to `False`.
-
         """
         if (
             hasattr(split, "hasDataSet")
@@ -579,6 +592,8 @@ class QSPRDataset(MoleculeTable):
                 if self.y[prop.name].dtype.name == "category":
                     self.y[prop.name] = self.y[prop.name].cat.codes
                     self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
+        if "Split_IsOutlier" in self.df.columns:
+            self.df = self.df.drop("Split_IsOutlier", axis=1)
         # convert splits to features if required
         if featurize:
             self.featurizeSplits(shuffle=False)
@@ -646,7 +661,7 @@ class QSPRDataset(MoleculeTable):
         """If the data set has descriptors, load them into the train and test splits.
 
         If no descriptors are available, remove all features from
-        the splits They will become zero length along the feature axis (columns), but
+        the splits. They will become zero length along the feature axis (columns), but
         will retain their original length along the sample axis (rows). This is useful
         for the case where the data set has no descriptors, but the user wants to retain
         train and test splits.
@@ -742,7 +757,7 @@ class QSPRDataset(MoleculeTable):
         """
         if not hasattr(feature_standardizer, "toFile"):
             feature_standardizer = SKLearnStandardizer(feature_standardizer)
-        self.feature_standardizer = feature_standardizer
+        self.featureStandardizer = feature_standardizer
 
     def addFeatures(
         self,
@@ -769,7 +784,7 @@ class QSPRDataset(MoleculeTable):
 
     def reset(self):
         """Reset the data set. Splits will be removed and all descriptors will be
-        moved to the training data. Feature standardization and molecule
+        moved to the training data. Molecule
         standardization and molecule filtering are not affected.
         """
         if self.featureNames is not None:
@@ -778,6 +793,8 @@ class QSPRDataset(MoleculeTable):
             self.X_ind = None
             self.y = None
             self.y_ind = None
+            self.featureStandardizer = None
+            self.applicabilityDomain = None
             self.loadDescriptorsToSplits(shuffle=False)
 
     def prepareDataset(
@@ -787,11 +804,15 @@ class QSPRDataset(MoleculeTable):
         split=None,
         feature_calculators: list["DescriptorSet"] | None = None,
         feature_filters: list | None = None,
-        feature_standardizer: Optional[SKLearnStandardizer] = None,
+        feature_standardizer: SKLearnStandardizer | None = None,
         feature_fill_value: float = np.nan,
+        applicability_domain: ApplicabilityDomain
+        | MLChemADApplicabilityDomain
+        | None = None,
+        drop_outliers: bool = False,
         recalculate_features: bool = False,
         shuffle: bool = True,
-        random_state: Optional[int] = None,
+        random_state: int | None = None,
     ):
         """Prepare the dataset for use in QSPR model.
 
@@ -805,10 +826,15 @@ class QSPRDataset(MoleculeTable):
             feature_filters (list of feature filter objs): filters features
             feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator):
                 standardizes and/or scales features
-            recalculate_features (bool): recalculate features even if they are already
-                present in the file
             feature_fill_value (float): value to fill missing values with.
                 Defaults to `numpy.nan`
+            applicability_domain (applicabilityDomain obj): attaches an
+                applicability domain calculator to the dataset and fits it on
+                the training set
+            drop_outliers (bool): whether to drop samples that are outside the
+                applicability domain from the test set, if one is attached.
+            recalculate_features (bool): recalculate features even if they are already
+                present in the file
             shuffle (bool): whether to shuffle the created training and test sets
             random_state (int): random state for shuffling
         """
@@ -842,6 +868,12 @@ class QSPRDataset(MoleculeTable):
         # set feature standardizers
         if feature_standardizer:
             self.setFeatureStandardizer(feature_standardizer)
+        # set applicability domain and fit it on the training set
+        if applicability_domain:
+            self.setApplicabilityDomain(applicability_domain)
+        # drop outliers from test set based on applicability domain
+        if drop_outliers:
+            self.dropOutliers()
 
     def checkFeatures(self):
         """Check consistency of features and descriptors."""
@@ -852,18 +884,6 @@ class QSPRDataset(MoleculeTable):
             )
         elif self.X.shape[0] == 0:
             raise ValueError("X has no rows.")
-
-    def fitFeatureStandardizer(self):
-        """Fit the feature standardizers on the training set.
-
-        Returns:
-            X (pd.DataFrame): standardized training set
-        """
-        if self.hasDescriptors:
-            X = self.getDescriptors()
-            if self.featureNames is not None:
-                X = X[self.featureNames]
-            return apply_feature_standardizer(self.feature_standardizer, X, fit=True)[0]
 
     def getFeatures(
         self,
@@ -876,7 +896,8 @@ class QSPRDataset(MoleculeTable):
         """Get the current feature sets (training and test) from the dataset.
 
         This method also applies any feature standardizers that have been set on the
-        dataset during preparation.
+        dataset during preparation. Outliers are dropped from the test set if they are
+        present, unless `concat` is `True`.
 
         Args:
             inplace (bool): If `True`, the created feature matrices will be saved to the
@@ -920,20 +941,24 @@ class QSPRDataset(MoleculeTable):
         # convert to numpy arrays and standardize
         X = df_X.values
         X_ind = df_X_ind.values if df_X_ind is not None else None
-        if not raw and self.feature_standardizer:
-            X, self.feature_standardizer = apply_feature_standardizer(
-                self.feature_standardizer,
+        if not raw and self.featureStandardizer:
+            X, self.featureStandardizer = apply_feature_standardizer(
+                self.featureStandardizer,
                 df_X,
                 fit=True if refit_standardizer else False,
             )
             if X_ind is not None and X_ind.shape[0] > 0:
                 X_ind, _ = apply_feature_standardizer(
-                    self.feature_standardizer, df_X_ind, fit=False
+                    self.featureStandardizer, df_X_ind, fit=False
                 )
         # convert to data frames and make sure column order is correct
         X = pd.DataFrame(X, index=df_X.index, columns=df_X.columns)
         if X_ind is not None:
             X_ind = pd.DataFrame(X_ind, index=df_X_ind.index, columns=df_X_ind.columns)
+        # drop outliers from test set
+        if "Split_IsOutlier" in self.df.columns and not concat:
+            if X_ind is not None:
+                X_ind = X_ind.loc[~self.df["Split_IsOutlier"], :]
         # replace original feature matrices if inplace
         if inplace:
             self.X = X
@@ -961,7 +986,11 @@ class QSPRDataset(MoleculeTable):
             )
             return ret.loc[self.df.index, :] if ordered else ret
         else:
-            return self.y, self.y_ind if self.y_ind is not None else self.y
+            if self.y_ind is not None and "Split_IsOutlier" in self.df.columns:
+                y_ind = self.y_ind.loc[~self.df["Split_IsOutlier"], :]
+            else:
+                y_ind = self.y_ind
+            return self.y, y_ind if y_ind is not None else self.y
 
     def getTargetProperties(self, names: list) -> list[TargetProperty]:
         """Get the target properties with the given names.
@@ -1097,5 +1126,55 @@ class QSPRDataset(MoleculeTable):
                 for each fold
         """
         self.checkFeatures()
-        folds = FoldsFromDataSplit(split, self.feature_standardizer)
+        folds = FoldsFromDataSplit(split, self.featureStandardizer)
         return folds.iterFolds(self, concat=concat)
+
+    def setApplicabilityDomain(
+        self, applicability_domain: ApplicabilityDomain | MLChemADApplicabilityDomain
+    ):
+        """Set the applicability domain calculator.
+
+        Args:
+            applicability_domain (ApplicabilityDomain | MLChemADApplicabilityDomain):
+                applicability domain calculator instance
+        """
+        if isinstance(applicability_domain, MLChemADApplicabilityDomain):
+            self.applicabilityDomain = MLChemADWrapper(applicability_domain)
+        else:
+            self.applicabilityDomain = applicability_domain
+
+    def dropOutliers(self):
+        """Drop outliers from the test set based on the applicability domain."""
+        if self.applicabilityDomain is None:
+            raise ValueError(
+                "No applicability domain calculator attached to the data set."
+            )
+        X, X_ind = self.getFeatures()
+        if X_ind.shape[0] == 0:
+            logger.warning(
+                "No test samples available, skipping outlier removal from test set."
+            )
+            return
+        # check if X or X_ind contain any nan values
+        if X.isna().any().any() or X_ind.isna().any().any():
+            logger.warning(
+                "Feature matrix contains NaN values. "
+                "Please fill them before applying outlier removal."
+                "Outliers will not be dropped."
+            )
+            return
+        # fit applicability domain on the training set
+        self.applicabilityDomain.fit(X)
+        mask = self.applicabilityDomain.contains(X_ind)
+        if not mask.sum().any():
+            logger.warning(
+                "All samples in the test set are outside the applicability domain,"
+                "outliers will not be dropped."
+            )
+            return
+        self.df["Split_IsOutlier"] = False
+        self.df.loc[X_ind.index, "Split_IsOutlier"] = ~mask["in_domain"]
+
+        logger.info(
+            f"Marked {(~mask).sum().sum()} samples from the test set as outlier."
+        )

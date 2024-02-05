@@ -222,7 +222,7 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties = data.targetProperties
             self.nTargets = len(self.targetProperties)
             self.featureCalculators = data.descriptorSets
-            self.featureStandardizer = data.feature_standardizer
+            self.featureStandardizer = data.featureStandardizer
             if self.randomState is None:
                 self.initRandomState(data.randomState)
         else:
@@ -525,6 +525,7 @@ class QSPRModel(JSONSerializable, ABC):
         smiles_standardizer: Union[str, callable] = "chembl",
         n_jobs: int = 1,
         fill_value: float = np.nan,
+        use_applicability_domain: bool = False,
     ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given molecules.
@@ -537,11 +538,15 @@ class QSPRModel(JSONSerializable, ABC):
                 that reads and standardizes smiles.
             n_jobs: Number of jobs to use for parallel processing.
             fill_value: Value to use for missing values in the feature matrix.
+            use_applicability_domain: Use applicability domain to return if a
+                molecule is within the applicability domain of the model.
 
         Returns:
             np.ndarray | list[np.ndarray]:
                 an array of predictions or a list of arrays of predictions
                 (for classification models with use_probas=True)
+            np.ndarray[bool]: boolean mask indicating which molecules fall
+                within the applicability domain of the model
         """
         if not self.featureCalculators:
             raise ValueError("No feature calculator set on this instance.")
@@ -553,6 +558,15 @@ class QSPRModel(JSONSerializable, ABC):
         predictions = self.predictDataset(dataset, use_probas)
         # handle invalids
         predictions = self.handleInvalidsInPredictions(mols, predictions, failed_mask)
+
+        # return predictions and if mols are within applicability domain if requested
+        if hasattr(self, "applicabilityDomain") and use_applicability_domain:
+            in_domain = self.applicabilityDomain.contains(
+                dataset.getFeatures(concat=True)
+            )
+            in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
+            return predictions, in_domain.values
+
         return predictions
 
     def cleanFiles(self):
@@ -610,6 +624,12 @@ class QSPRModel(JSONSerializable, ABC):
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
+        if (
+            hasattr(ds, "applicabilityDomain")
+            and ds.applicabilityDomain is not None
+        ):
+            ds.applicabilityDomain.fit(X_all)
+            self.applicabilityDomain = ds.applicabilityDomain
         if save_data:
             ds.save()
         # save model and return path
