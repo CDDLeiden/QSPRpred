@@ -15,14 +15,14 @@ Overview of available features
 
             .. tab-item:: Core
 
-                * :class:`~qsprpred.data.sources.papyrus.papyrus_class.Papyrus`: Papyrus (See `data collection with Papyrus tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/basics/data/data_collection_with_papyrus.ipynb>`_.)
+                * :class:`~qsprpred.data.sources.papyrus.papyrus_class.Papyrus`: Papyrus (See `data collection with Papyrus tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_collection_with_papyrus.ipynb>`_.)
 
     .. dropdown:: Data Filters
 
         :class:`~qsprpred.data.processing.data_filters.DataFilter`: Base class for data filters.
 
         Data filters are used to filter data based on some criteria.
-        Examples can be found in the `data preparation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/basics/data/data_preparation.ipynb>`_.
+        Examples can be found in the `data preparation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb>`_.
 
         .. tab-set::
 
@@ -36,7 +36,7 @@ Overview of available features
         :class:`~qsprpred.data.descriptors.sets.DescriptorSet`: Base class for descriptor sets.
 
         Descriptor sets are used to calculate molecular descriptors for a set of molecules.
-        Examples can be found in the `descriptor calculation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/basics/data/descriptors.ipynb>`_.
+        Examples can be found in the `descriptor calculation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/descriptors.ipynb>`_.
 
         .. tab-set::
 
@@ -83,7 +83,7 @@ Overview of available features
         :class:`~qsprpred.data.sampling.splits.DataSplit`: Base class for data splitters.
 
         Data splitters are used to split data into training and test sets.
-        Examples can be found in the `data splitting tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/basics/data/data_splitting.ipynb>`_.
+        Examples can be found in the `data splitting tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_splitting.ipynb>`_.
 
         .. tab-set::
 
@@ -110,7 +110,7 @@ Overview of available features
         :class:`~qsprpred.data.processing.feature_filters.FeatureFilter`: Base class for feature filters.
 
         Feature filters are used to filter features based on some criteria.
-        Examples can be found in the `data preparation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/basics/data/data_preparation.ipynb>`_.
+        Examples can be found in the `data preparation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb>`_.
 
         .. tab-set::
 
@@ -125,7 +125,7 @@ Overview of available features
         :class:`~qsprpred.models.models.QSPRModel`: Base class for models.
 
         Models are used to predict properties of molecules.
-        A general example can be found in the `quick start tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/quick_start.ipynb>`_.
+        A general example can be found in the `quick start tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/quick_start.ipynb>`_.
         More detailed information can be found throughout the basic and advanced modelling tutorials.
 
         .. tab-set::
@@ -136,14 +136,14 @@ Overview of available features
 
             .. tab-item:: Extra
 
-                * :class:`~qsprpred.extra.models.pcm.PCMModel`: PCMModel (See `PCM tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/advanced/modelling/PCM_modelling.ipynb>`_.)
+                * :class:`~qsprpred.extra.models.pcm.PCMModel`: PCMModel (See `PCM tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/PCM_modelling.ipynb>`_.)
 
             .. tab-item:: GPU
                 
-                More information can be found in the `deep learning tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/advanced/modelling/deep_learning_models.ipynb>`_.
+                More information can be found in the `deep learning tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/deep_learning_models.ipynb>`_.
                 
                 * :class:`~qsprpred.extra.gpu.models.dnn.DNNModel`: DNNModel
-                * :class:`~qsprpred.extra.gpu.models.chemprop.ChempropModel`: ChempropModel (See `Chemprop tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/advanced/modelling/chemprop_models.ipynb>`_.)
+                * :class:`~qsprpred.extra.gpu.models.chemprop.ChempropModel`: ChempropModel (See `Chemprop tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/chemprop_models.ipynb>`_.)
                 * :class:`~qsprpred.extra.gpu.models.pyboost.PyBoostModel`: PyBoostModel
 
     .. dropdown:: Metrics
@@ -151,7 +151,7 @@ Overview of available features
         :class:`~qsprpred.models.metrics.Metric`: Base class for metrics
 
         Metrics are used to evaluate the performance of models.
-        More information can be found in the `model assessment tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/basics/modelling/model_assessment.ipynb>`_.
+        More information can be found in the `model assessment tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/modelling/model_assessment.ipynb>`_.
 
         .. tab-set::
 
@@ -164,7 +164,7 @@ Overview of available features
         :class:`~qsprpred.models.assessment_methods.ModelAssessor`: Base class for model assessors.
 
         Model assessors are used to assess the performance of models.
-        More information be found in the `model assessment tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/basics/modelling/model_assessment.ipynb>`_.
+        More information be found in the `model assessment tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/modelling/model_assessment.ipynb>`_.
 
         .. tab-set::
 
@@ -178,7 +178,7 @@ Overview of available features
         :class:`~qsprpred.models.hyperparam_optimization.HyperparameterOptimization`: Base class for hyperparameter optimizers.
 
         Hyperparameter optimizers are used to optimize the hyperparameters of models.
-        More information can be found in the `hyperparameter optimization tutorial <https://github.com/CDDLeiden/QSPRpred/blob/dev/tutorials/advanced/modelling/hyperparameter_optimization.ipynb>`_.
+        More information can be found in the `hyperparameter optimization tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/hyperparameter_optimization.ipynb>`_.
 
         .. tab-set::
 

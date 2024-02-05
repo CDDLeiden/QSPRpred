@@ -24,6 +24,10 @@ from qsprpred.data.descriptors.fingerprints import (
     RDKitFP,
     AvalonFP,
 )
+from qsprpred.data.chem.clustering import (
+    FPSimilarityMaxMinClusters,
+    FPSimilarityLeaderPickerClusters
+)
 from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
     PredictorDesc,
@@ -111,7 +115,16 @@ def QSPRArgParser(txt=None):
         ),
     )
     parser.add_argument(
-        "-im", "--imputation", type=str, choices=["mean", "median", "most_frequent"]
+        "-im",
+        "--imputation",
+        type=json.loads,
+        help=(
+            "Imputation method for missing values. Specify the imputation method as a "
+            "dictionary with the property name as key and the imputation method as "
+            "value, e.g. -im \"{'CL':'mean','fu':'median'}\". Note: no spaces and "
+            "surrounded by single quotes. Choose from 'mean', 'median', 'most_frequent'"
+        ),
+        default={},
     )
     # model type arguments
     parser.add_argument(
@@ -222,7 +235,8 @@ def QSPRArgParser(txt=None):
             "Mold2",
             "PaDEL",
             "DrugEx",
-            "Signature" "MaccsFP",
+            "Signature",
+            "MaccsFP",
             "AvalonFP",
             "TopologicalFP",
             "AtomPairFP",
@@ -347,18 +361,11 @@ def QSPR_dataprep(args):
                         "transformer": transform_dict[args.transform_data[prop]]
                         if prop in args.transform_data
                         else None,
+                        "imputer": SimpleImputer(strategy=args.imputation[prop])
+                        if prop in args.imputation
+                        else None
                     }
                 )
-            # missing value imputation
-            if args.imputation is not None:
-                if args.imputation == "mean":
-                    imputer = SimpleImputer(strategy="mean")
-                elif args.imputation == "median":
-                    imputer = SimpleImputer(strategy="median")
-                elif args.imputation == "most_frequent":
-                    imputer = SimpleImputer(strategy="most_frequent")
-                else:
-                    sys.exit("invalid impute arg given")
             dataset_name = (
                 f"{props_name}_{task}_{args.data_suffix}"
                 if args.data_suffix
@@ -404,9 +411,13 @@ def QSPR_dataprep(args):
                     splitcol=df["datasplit"], trainval="train", testval="test"
                 )
             elif args.split == "cluster":
+                if args.split_cluster_method == "MaxMin":
+                    clustering = FPSimilarityMaxMinClusters()
+                elif args.split_cluster_method == "LeaderPicker":
+                    clustering = FPSimilarityLeaderPickerClusters()
                 split = ClusterSplit(
                     test_fraction=args.split_fraction,
-                    clustering_algorithm=args.split_clustering_method,
+                    clustering=clustering,
                     dataset=mydataset,
                 )
             else:
