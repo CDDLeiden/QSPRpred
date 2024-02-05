@@ -10,7 +10,6 @@ on:
 
 env:
   QSPPRED_TEST_EXTRAS: false
-  QSPPRED_TEST_SPLIT_UNITS: false
 
 jobs:
   tests-basic:

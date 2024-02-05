@@ -169,7 +169,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         self.validate_split(dataset_new)
         self.assertEqual(dataset.X_ind.shape[0], round(ndata * 0.2))
         self.assertEqual(len(dataset_new.descriptorSets), len(dataset_new.descriptors))
-        self.assertTrue(dataset_new.feature_standardizer)
+        self.assertTrue(dataset_new.featureStandardizer)
         self.assertTrue(len(dataset_new.featureNames) == len(self.sampleDescSet))
         self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
         self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))

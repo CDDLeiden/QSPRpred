@@ -15,7 +15,6 @@ from sklearn.model_selection import ShuffleSplit
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.tasks import ModelTasks, TargetTasks
-from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
@@ -30,7 +29,6 @@ GPUS = list(range(torch.cuda.device_count()))
 
 class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
-
     def setUp(self):
         """Set up the test case."""
         super().setUp()
@@ -43,19 +41,16 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         """
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
 
-    @staticmethod
     def getModel(
-        base_dir: str,
+        self,
         name: str,
         alg: Type | None = None,
-        dataset: QSPRDataset = None,
         parameters: dict | None = None,
         random_state: int | None = None,
     ):
         """Initialize model with data set.
 
         Args:
-            base_dir: Base directory for model.
             name: Name of the model.
             alg: Algorithm to use.
             dataset: Data set to use.
@@ -63,9 +58,8 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             random_state: Random seed to use for random operations.
         """
         return DNNModel(
-            base_dir=base_dir,
+            base_dir=self.generatedModelsPath,
             alg=alg,
-            data=dataset,
             name=name,
             parameters=parameters,
             gpus=GPUS,
@@ -78,7 +72,6 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         [
             (f"{alg_name}_{task}", task, alg_name, alg, th, [None])
             for alg, alg_name, task, th in (
-                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
                 (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
                 (
                     STFullyConnected,
@@ -87,12 +80,16 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                     [0, 1, 10, 1100],
                 ),
             )
-        ]
-        + [
-            (f"{alg_name}_{task}", task, alg_name, alg, th, random_state)
-            for alg, alg_name, task, th in (
-                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
-            )
+        ] + [
+            (
+                f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
+                task,
+                alg_name,
+                alg,
+                th,
+                random_state,
+            ) for alg, alg_name, task, th in
+            ((STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None), )
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -117,48 +114,49 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
 
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
-            base_dir=self.generatedModelsPath,
-            name=f"{alg_name}",
+            name=alg_name,
             alg=alg,
-            dataset=dataset,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = DNNModel(
             name=alg_name, base_dir=model.baseDir, random_state=random_state[0]
         )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+
         if random_state[0] is not None:
             model.cleanFiles()
             model = self.getModel(
-                base_dir=self.generatedModelsPath,
-                name=f"{alg_name}",
+                name=alg_name,
                 alg=alg,
-                dataset=dataset,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
-            predictor = DNNModel(
+            self.fitTest(model, dataset)
+            predictor_new = DNNModel(
                 name=alg_name, base_dir=model.baseDir, random_state=random_state[1]
             )
             self.predictorTest(
                 predictor,
+                dataset=dataset,
+                comparison_model=predictor_new,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
             )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
 
 class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -170,20 +168,18 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         """
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
 
-    @staticmethod
     def getModel(
-        base_dir: str,
+        self,
         name: str,
-        dataset: QSPRDataset = None,
         parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Initialize model with data set.
 
         Args:
-            base_dir: Base directory for model.
             name: Name of the model.
-            dataset: Data set to use.
             parameters: Parameters to use.
+            random_state: Random seed to use for random operations.
         """
         if parameters is None:
             parameters = {}
@@ -192,31 +188,54 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             parameters["gpu"] = GPUS[0]
         parameters["epochs"] = 2
         return ChempropModel(
-            base_dir=base_dir, data=dataset, name=name, parameters=parameters
-        )
+            base_dir=self.generatedModelsPath,
+            name=name,
+            parameters=parameters,
+            random_state=random_state,)
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name, th)
+            (f"{alg_name}_{task}", task, alg_name, th, [None])
             for alg_name, task, th in (
-                ("MoleculeModel", TargetTasks.REGRESSION, None),
                 ("MoleculeModel", TargetTasks.SINGLECLASS, [6.5]),
                 ("MoleculeModel", TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             )
+        ] + [
+            (
+                f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
+                task,
+                alg_name,
+                th,
+                random_state,
+            ) for alg_name, task, th in
+            (("MoleculeModel", TargetTasks.REGRESSION, None), )
+            for random_state in ([None], [1, 42], [42, 42])
         ]
     )
-    def testSingleTaskModel(self, _, task: TargetTasks, alg_name: str, th: float):
+    def testSingleTaskModel(
+        self,
+        _,
+        task: TargetTasks,
+        alg_name: str,
+        th: float,
+        random_state: list[int | None],
+    ):
         """Test the DNNModel model in one configuration.
 
         Args:
             task: Task to test.
             alg_name: Name of the algorithm.
             th: Threshold to use for classification models.
+            random_state: Seed to be used for random operations.
         """
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=None,
         )
         dataset.prepareDataset(
@@ -226,22 +245,49 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
-            base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
+            name=f"{alg_name}",
+            random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
+
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=alg_name,
+                random_state=random_state[1],
+            )
+            self.fitTest(model, dataset)
+            new_predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
+            self.predictorTest(
+                predictor,
+                dataset=dataset,
+                comparison_model=new_predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+            )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name)
-            for alg_name, task in (
-                ("MoleculeModel", ModelTasks.MULTITASK_REGRESSION),
-                ("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS),
-            )
+            (f"{alg_name}_{task}", task, alg_name, [None]) for alg_name, task in
+            (("MoleculeModel", ModelTasks.MULTITASK_REGRESSION), )
+        ] + [
+            (
+                f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
+                task,
+                alg_name,
+                random_state,
+            ) for alg_name, task in
+            (("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS), )
+            for random_state in ([None], [1, 42], [42, 42])
         ]
     )
-    def testMultiTaskmodel(self, _, task: TargetTasks, alg_name: str):
+    def testMultiTaskmodel(
+        self, _, task: TargetTasks, alg_name: str, random_state: list[int | None]
+    ):
         """Test the DNNModel model in one configuration.
 
         Args:
@@ -250,8 +296,16 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
-                {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
-                {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]},
+                {
+                    "name": "fu",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [0.3]
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [6.5]
+                },
             ]
         else:
             target_props = [
@@ -281,28 +335,48 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
         model = self.getModel(
-            base_dir=self.generatedModelsPath, name=f"{alg_name}", dataset=dataset
+            name=alg_name,
+            random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
+
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=alg_name,
+                random_state=random_state[1],
+            )
+            self.fitTest(model, dataset)
+            new_predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
+            self.predictorTest(
+                predictor,
+                dataset=dataset,
+                comparison_model=new_predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+            )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
     def testConsistency(self):
         """Test if QSPRpred Chemprop and Chemprop models are consistent."""
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name="consistency_data",
-            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             preparation_settings=None,
         )
         dataset.prepareDataset(
             feature_calculators=[SmilesDesc()],
-            split=RandomSplit(test_fraction=0.1),
+            split=RandomSplit(test_fraction=0.1, seed=dataset.randomState),
         )
         # initialize model for training from class
-        model = self.getModel(
-            base_dir=self.generatedModelsPath, name="consistency_data", dataset=dataset
-        )
+        model = self.getModel(name="consistency_data")
 
         # chemprop by default uses sklearn rmse (squared=False) as metric
         rmse = metrics.make_scorer(
@@ -317,7 +391,9 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             ),
         )
         qsprpred_score = assessor(
-            model, split=RandomSplit(test_fraction=0.1, dataset=dataset)
+            model,
+            dataset,
+            split=RandomSplit(test_fraction=0.1, seed=dataset.randomState)
         )
         qsprpred_score = -qsprpred_score[0]  # qsprpred_score is negative rmse
 
@@ -383,17 +459,15 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 @pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
 class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the PyBoostModel class."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
 
-    @staticmethod
     def getModel(
-        base_dir: str,
+        self,
         name: str,
-        dataset: QSPRDataset = None,
         parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Create a PyBoostModel model.
 
@@ -401,6 +475,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             name (str): the name of the model
             dataset (QSPRDataset, optional): the dataset to use. Defaults to None.
             parameters (dict, optional): the parameters to use. Defaults to None.
+            random_state (int, optional): the random state to use. Defaults to None.
 
         Returns:
             PyBoostModel the model
@@ -410,19 +485,25 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         parameters["ntrees"] = 10
 
         return import_module("..pyboost", __name__).PyBoostModel(
-            base_dir=base_dir,
-            data=dataset,
+            base_dir=self.generatedModelsPath,
             name=name,
             parameters=parameters,
+            random_state=random_state,
         )
 
     @parameterized.expand(
         [
-            ("PyBoost", TargetTasks.REGRESSION, "PyBoost", params)
-            for params in [
+            (
+                f"PyBoost_{'_'.join(map(str, random_state))}",
+                TargetTasks.REGRESSION,
+                "PyBoost",
+                params,
+                random_state,
+            ) for params in [
                 {
                     "loss": "mse",
                     "metric": "r2_score",
+                    "colsample": 0.5,  # introduce more randomness in the model
                 },
                 # {
                 #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
@@ -436,36 +517,65 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 #     "loss": "mse",
                 #     "metric":import_module("..custom_metrics",__name__).NaNRMSEScore()
                 # },
-            ]
+            ] for random_state in ([None], [1, 42], [42, 42])
         ]
     )
-    def testRegressionPyBoostFit(self, _, task, model_name, parameters):
+    def testRegressionPyBoostFit(self, _, task, model_name, parameters, random_state):
         """Test model training for regression models."""
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": task}],
+            target_props=[{
+                "name": "CL",
+                "task": task
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
         model = self.getModel(
-            base_dir=self.generatedModelsPath,
             name=f"{model_name}_{task}",
-            dataset=dataset,
             parameters=parameters,
+            random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
+
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same
+        if random_state[0] is not None:
+            model = self.getModel(
+                name=f"{model_name}_{task}",
+                dataset=dataset,
+                parameters=parameters,
+                random_state=random_state[1],
+            )
+            self.fitTest(model)
+            new_predictor = import_module("..pyboost", __name__).PyBoostModel(
+                name=f"{model_name}_{task}", base_dir=model.baseDir
+            )
+            self.predictorTest(
+                predictor,
+                dataset=dataset,
+                comparison_model=new_predictor,
+                expect_equal_result=random_state[0] == random_state[1],
+            )
+        else:
+            self.predictorTest(predictor, dataset=dataset)
 
     @parameterized.expand(
         [
             (f"{'PyBoost'}_{task}", task, th, "PyBoost", params)
             for params, task, th in (
-                ({"loss": "bce", "metric": "auc"}, TargetTasks.SINGLECLASS, [6.5]),
-                ({"loss": "crossentropy"}, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
+                ({
+                    "loss": "bce",
+                    "metric": "auc"
+                }, TargetTasks.SINGLECLASS, [6.5]),
+                ({
+                    "loss": "crossentropy"
+                }, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             )
         ]
     )
@@ -474,7 +584,11 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -482,20 +596,21 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         model = self.getModel(
             base_dir=self.generatedModelsPath,
             name=f"{model_name}_{task}",
-            dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = import_module("..pyboost", __name__).PyBoostModel(
             name=f"{model_name}_{task}", base_dir=model.baseDir
         )
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
 
     @parameterized.expand(
         [
-            ("PyBoost", "PyBoost", params)
-            for params in [
-                {"loss": "mse", "metric": "r2_score"},
+            ("PyBoost", "PyBoost", params) for params in [
+                {
+                    "loss": "mse",
+                    "metric": "r2_score"
+                },
                 # {
                 #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
                 #     "metric": "r2_score"
@@ -529,16 +644,14 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # test classifier
         # initialize model for training from class
         model = self.getModel(
-            base_dir=self.generatedModelsPath,
             name=f"{model_name}_multitask_regression",
-            dataset=dataset,
             parameters=parameters,
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = import_module("..pyboost", __name__).PyBoostModel(
-            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
+            name=f"{model_name}_multitask_regression",
         )
-        self.predictorTest(predictor)
+        self.predictorTest(predictor, dataset=dataset)
 
     # FIXME: This test fails because the PyBoost default auc does not handle
     # mutlitask data and the custom NaN AUC metric is not JSON serializable.
@@ -586,10 +699,9 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     #     model = self.getModel(
     #         base_dir=self.generatedModelsPath,
     #         name=f"{model_name}_multitask_classification",
-    #         dataset=dataset,
     #         parameters=parameters,
     #     )
-    #     self.fitTest(model)
+    #     self.fitTest(model, dataset)
     #     predictor = import_module("..pyboost", __name__).PyBoostModel(
     #         name=f"{model_name}_multitask_classification", base_dir=model.baseDir
     #     )
@@ -598,7 +710,6 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
 class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
     """This class holds the tests for the monitoring classes."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -613,38 +724,6 @@ class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
     def testBaseMonitor(self):
         model = DNNModel(
             base_dir=self.generatedModelsPath,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
-            name="STFullyConnected",
-            gpus=GPUS,
-            patience=3,
-            tol=0.02,
-            random_state=42,
-        )
-        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, True)
-
-    def testFileMonitor(self):
-        model = DNNModel(
-            base_dir=self.generatedModelsPath,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
-            name="STFullyConnected",
-            gpus=GPUS,
-            patience=3,
-            tol=0.02,
-            random_state=42,
-        )
-        self.runMonitorTest(model, BaseMonitor, self.baseMonitorTest, True)
-
-    def testListMonitor(self):
-        """Test the list monitor"""
-        model = DNNModel(
-            base_dir=self.generatedModelsPath,
-            data=self.createLargeTestDataSet(
-                preparation_settings=self.getDefaultPrep()
-            ),
             name="STFullyConnected",
             gpus=GPUS,
             patience=3,
@@ -653,6 +732,42 @@ class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
         )
         self.runMonitorTest(
             model,
+            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            BaseMonitor,
+            self.baseMonitorTest,
+            True,
+        )
+
+    def testFileMonitor(self):
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
+        )
+        self.runMonitorTest(
+            model,
+            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            BaseMonitor,
+            self.baseMonitorTest,
+            True,
+        )
+
+    def testListMonitor(self):
+        """Test the list monitor"""
+        model = DNNModel(
+            base_dir=self.generatedModelsPath,
+            name="STFullyConnected",
+            gpus=GPUS,
+            patience=3,
+            tol=0.02,
+            random_state=42,
+        )
+        self.runMonitorTest(
+            model,
+            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
             ListMonitor,
             self.listMonitorTest,
             True,

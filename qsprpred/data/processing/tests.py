@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from parameterized import parameterized
 from rdkit.Chem import Mol
+from mlchemad.applicability_domains import KNNApplicabilityDomain
 from sklearn.preprocessing import StandardScaler
 
 from .mol_processor import MolProcessor
@@ -12,11 +13,12 @@ from ..descriptors.fingerprints import MorganFP
 from ..descriptors.sets import DataFrameDescriptorSet
 from ... import TargetTasks
 from ...data import QSPRDataset
+from ...data.processing.applicability_domain import MLChemADWrapper
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
 from ...data.processing.feature_filters import (
-    LowVarianceFilter,
-    HighCorrelationFilter,
     BorutaFilter,
+    HighCorrelationFilter,
+    LowVarianceFilter,
 )
 from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...utils.testing.base import QSPRTestCase
@@ -28,7 +30,6 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
 
     The tests here should be used to check for all their specific parameters and
     edge cases."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -102,7 +103,6 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
 
 class TestFeatureFilters(PathMixIn, QSPRTestCase):
     """Tests to check if the feature filters work on their own."""
-
     def setUp(self):
         """Set up the small test Dataframe."""
         super().setUp()
@@ -133,7 +133,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         )
         self.dataset = QSPRDataset(
             "TestFeatureFilters",
-            target_props=[{"name": "y", "task": TargetTasks.REGRESSION}],
+            target_props=[{
+                "name": "y",
+                "task": TargetTasks.REGRESSION
+            }],
             df=self.df,
             store_dir=self.generatedPath,
             n_jobs=self.nCPU,
@@ -171,7 +174,6 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
 
 class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
     """Test the feature standardizer."""
-
     def setUp(self):
         """Create a small test dataset with MorganFP descriptors."""
         super().setUp()
@@ -271,3 +273,31 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
                 self.assertIsInstance(item[0, 0], Mol)
             else:
                 self.assertIsInstance(item[0, 0], str)
+
+
+class testApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
+    """Test the applicability domain."""
+    def setUp(self):
+        """Create a small test dataset with MorganFP descriptors."""
+        super().setUp()
+        self.setUpPaths()
+        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
+        self.dataset.addDescriptors([MorganFP(radius=3, nBits=1000)])
+
+    def testApplicabilityDomain(self):
+        """Test the applicability domain fitting, transforming and serialization."""
+        ad = MLChemADWrapper(
+            KNNApplicabilityDomain(
+                dist="rogerstanimoto", scaling=None, hard_threshold=0.75
+            )
+        )
+        ad.fit(self.dataset.X)
+        self.assertIsInstance(ad.contains(self.dataset.X), pd.DataFrame)
+        filtered_dataset = ad.filter(self.dataset.X)
+        self.assertIsInstance(filtered_dataset, pd.DataFrame)
+
+        ad.toFile(f"{self.generatedPath}/test_ad.json")
+        ad_fromfile = MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")
+        self.assertIsInstance(ad_fromfile.contains(self.dataset.X), pd.DataFrame)
+        filtered_dataset_fromfile = ad_fromfile.filter(self.dataset.X)
+        self.assertIsInstance(filtered_dataset_fromfile, pd.DataFrame)

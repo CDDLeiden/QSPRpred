@@ -10,7 +10,6 @@ from sklearn.cross_decomposition import PLSRegression
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.extra.data.descriptors.sets import ProDec
-from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.tasks import TargetProperty, TargetTasks
 from ..data.utils.testing.path_mixins import DataSetsMixInExtras
 from ..models.pcm import SklearnPCMModel
@@ -34,7 +33,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         self,
         name: str,
         alg: Type | None = None,
-        dataset: PCMDataSet | None = None,
         parameters: dict | None = None,
         random_state: int | None = None,
     ):
@@ -43,7 +41,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         Args:
             name (str): Name of the model.
             alg (Type | None): Algorithm class.
-            dataset (PCMDataSet | None): Dataset to use.
             parameters (dict | None): Parameters to use.
             random_state (int | None): Random seed to use.
 
@@ -53,7 +50,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         return SklearnPCMModel(
             base_dir=self.generatedModelsPath,
             alg=alg,
-            data=dataset,
             name=name,
             parameters=parameters,
             random_state=random_state,
@@ -120,6 +116,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
             parameters = {"n_jobs": self.nCPU}
         else:
             parameters = None
+
         # initialize dataset
         prep = self.getDefaultPrep()
         prep["feature_calculators"] = prep["feature_calculators"] + [
@@ -135,33 +132,39 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         model = self.getModel(
             name=f"{model_name}_{props[0]['task']}",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = SklearnPCMModel(
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(
-            predictor, protein_id=dataset.getDF()["accession"].iloc[0]
-        )
-        if random_state[0] is not None:
-            model = self.getModel(
-                name=f"{model_name}_{props[0]['task']}",
-                alg=model_class,
-                dataset=dataset,
-                parameters=parameters,
-                random_state=random_state[1],
+
+        for protein_id in sorted(set(dataset.getProperty(dataset.proteinCol))):
+            subset = dataset.searchOnProperty(
+                dataset.proteinCol, [protein_id], exact=True
             )
-            self.fitTest(model)
-            predictor = SklearnPCMModel(
-                name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
-            )
-            self.predictorTest(
-                predictor,
-                protein_id=dataset.getDF()["accession"].iloc[0],
-                expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
-            )
+            if random_state[0] is not None:
+                model = self.getModel(
+                    name=f"{model_name}_{props[0]['task']}",
+                    alg=model_class,
+                    parameters=parameters,
+                    random_state=random_state[1],
+                )
+                self.fitTest(model, dataset)
+                predictor_new = SklearnPCMModel(
+                    name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
+                )
+                self.predictorTest(
+                    predictor,
+                    subset,
+                    comparison_model=predictor_new,
+                    protein_id=protein_id,
+                    expect_equal_result=random_state[0] == random_state[1],
+                )
+            else:
+                self.predictorTest(
+                    predictor,
+                    subset,
+                    protein_id=protein_id,
+                )
