@@ -1,6 +1,7 @@
 import json
 import numpy as np
 import pandas as pd
+import scipy as sp
 import os
 
 from qsprpred.models.early_stopping import EarlyStoppingMode
@@ -46,7 +47,6 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
         if y.ndim == 1:
             y = y.reshape(-1, 1)
 
-        print(y)
         return y
 
     def fit(self, y_df: pd.DataFrame):
@@ -55,7 +55,6 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
     def from_dict(self, loaded_dict):
         self.ratios = pd.DataFrame({"ratios": json.loads(loaded_dict["ratios"])}) if loaded_dict[
                                                 "ratios"] is not None else None
-
 
     def to_dict(self):
         param_dictionary = {"parameters": {},
@@ -112,7 +111,6 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
 
         return y
 
-
     def fit(self, y_df: pd.DataFrame):
         self.median = y_df.median()
 
@@ -123,6 +121,36 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
     def to_dict(self):
         param_dictionary = {"parameters": {},
                 "median": self.median.to_json() if self.median is not None else None,
+                }
+        return param_dictionary
+
+class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
+    def __init__(self, distribution: sp.stats.rv_continuous=sp.stats.norm, params={}, random_state=None):
+        self.fitted_parameters = None
+        self.distribution = distribution
+        self.params = params
+        self.random_state = random_state
+
+    def __call__(self, X_test: np.ndarray):
+        y_list = [self.distribution.rvs(*(tuple(self.fitted_parameters.values.T[col])), size=len(X_test), random_state=self.random_state) for col in range(len(self.fitted_parameters.values.T))]
+        y = np.column_stack(y_list)
+        if y.ndim == 1:
+            y = y.reshape(-1, 1)
+
+        return y
+
+    def fit(self, y_df: pd.DataFrame):
+        self.fitted_parameters = pd.DataFrame.from_dict({col: self.distribution.fit(y_df[col], *self.params) for col in list(y_df)})
+
+    def from_dict(self, loaded_dict):
+        print(loaded_dict)
+        self.fitted_parameters = pd.DataFrame(json.loads(loaded_dict["fitted_parameters"])) if loaded_dict[
+                                                "fitted_parameters"] is not None else None
+        print(self.fitted_parameters)
+
+    def to_dict(self):
+        param_dictionary = {"parameters": {},
+                "fitted_parameters": self.fitted_parameters.to_json() if self.fitted_parameters is not None else None,
                 }
         return param_dictionary
 
