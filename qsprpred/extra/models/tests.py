@@ -226,7 +226,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model)
-        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir, alg=NormalDistributionAlgorithm)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
 
         if random_state[0] is not None:
@@ -237,7 +237,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             )
             self.fitTest(model)
             predictor = RandomModel(
-                name=f"{model_name}_{task}", base_dir=model.baseDir
+                name=f"{model_name}_{task}", base_dir=model.baseDir, alg=NormalDistributionAlgorithm
             )
             self.predictorTest(
                 predictor,
@@ -279,7 +279,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
         )
         self.fitTest(model)
         predictor = RandomModel(
-            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
+            name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=NormalDistributionAlgorithm
         )
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
         if random_state[0] is not None:
@@ -290,7 +290,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             )
             self.fitTest(model)
             predictor = RandomModel(
-                name=f"{model_name}_multitask_regression", base_dir=model.baseDir
+                name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=NormalDistributionAlgorithm
             )
             self.predictorTest(
                 predictor,
@@ -335,7 +335,7 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model)
-        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
+        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir, alg=RatioDistributionAlgorithm)
         pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
         if random_state[0] is not None:
             model = self.getModel(
@@ -347,7 +347,7 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
             )
             self.fitTest(model)
             predictor = RandomModel(
-                name=f"{model_name}_{task}", base_dir=model.baseDir
+                name=f"{model_name}_{task}", base_dir=model.baseDir, alg=RatioDistributionAlgorithm
             )
             self.predictorTest(
                 predictor,
