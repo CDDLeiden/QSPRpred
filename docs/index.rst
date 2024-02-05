@@ -6,10 +6,10 @@
 Welcome to QSPRpred's documentation!
 ====================================
 
-QSPRpred provides functionality to assist with building Quantitative Structure Property relationship models.
-Models built with QSPRpred can also be used as the enviroment reward function in DrugEx.
-Here you will find the installation guide (:ref:`installation`), an overview of available features (:ref:`features`), usage examples (:ref:`usage`) and API documentation (:ref:`api/modules:Python API`).
-
+QSPRpred is open-source software libary for building **Quantitative Structure Property Relationship (QSPR)** models developed by Gerard van Westen's Computational Drug
+Discovery group. It provides a unified interface for building QSPR models based on different types of descriptors and machine learning algorithms.
+Here you will find the installation guide (:ref:`installation`), an overview of available features (:ref:`features`), usage examples (:ref:`cli_usage`) and API documentation (:ref:`Python API`).
+For tutorials and examples of the Python API, please visit the `QSPRpred GitHub repository <https://github.com/CDDLeiden/QSPRpred>`_.
 
 .. toctree::
    :maxdepth: 2
@@ -17,7 +17,7 @@ Here you will find the installation guide (:ref:`installation`), an overview of 
 
    self
    install
-   use
+   cli_usage
    features
    api/modules
 

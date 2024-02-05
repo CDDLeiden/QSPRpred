@@ -1,7 +1,7 @@
-..  _usage:
+..  _cli-usage:
 
-Usage
-=====
+Command Line Interface Usage
+============================
 
 You can use the command-line interface to preprocess data and build models.
 The description of the functionality can be displayed with the :code:`--help` argument,
@@ -18,10 +18,9 @@ you can also use the Python API directly (see `source code <https://github.com/C
 Here you can find a tutorial with a Jupyter notebook illustrating some common use cases in the project source code.
 Make sure to download the tutorial folder to follow the examples in this CLI tutorial.
 
-..  _cli-example:
 
 CLI Example
-===========
+***********
 
 In this example, we will use the command line utilities of QSPRpred to train a QSAR model for the GABAA receptor and the 
 Glutamate receptor NMDA. We will use the parkinsons dataset from the API tutorial. 
