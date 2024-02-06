@@ -55,7 +55,8 @@ dependencies = [
     "jsonpickle",
     "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
     "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits@0.0.4",
-    "mlchemad"
+    "mlchemad",
+    "mols2grid"
 ]
 
 [project.optional-dependencies]

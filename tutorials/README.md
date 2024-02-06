@@ -1,20 +1,23 @@
 ## Table of Contents
 
-This is a list of tutorials for QSPRpred.
-
-The tutorial data is available
+This
+tutorial tries to cover the most important topics on the various features of QSPRpred,
+but it is not exhaustive. For more detailed information on the features of the package,
+please refer to the [documentation](https://cddleiden.github.io/QSPRpred/docs/).The
+tutorial data is available
 through [OneDrive](https://1drv.ms/u/s!AtzWqu0inkjX3QRxXOkTFNv7IV7u?e=PPj0O2) (just
 unzip and place the two datasets `A2A_LIGANDS.tsv` and `AR_LIGANDS.tsv` in
 the `tutorial_data` folder) or recreate the dataset yourself by
-running `tutorial_data/create_tutorial_data.py`.
+running `tutorial_data/create_tutorial_data.py` after you have installed QSPRpred.
 
-A Quick Start tutorial is designed to get you up and running with QSPRpred as quickly as
-possible.
-The rest of the tutorials is divided into two categories: basic and advanced.
-The Basics tutorials cover all basic functionality of QSPRpred that you will need in
-most projects. The Advanced tutorials cover more advanced topics and are designed for
-users who are already familiar with the basics of QSPRpred.
-For detailed description of all QSPRpred classes and functions, see
+The [Quick Start](quick_start.ipynb) tutorial is designed to get you up and running with
+QSPRpred as quickly as
+possible while the rest dedicates more time to explain each feature in more detail.
+The [Basics](./basics) cover the most commonly used functionality of QSPRpred.
+The [Advanced](./advanced) tutorials cover more advanced topics and are designed for
+users who are already familiar with QSPRpred more in depth or are looking for more niche
+features. In addition, you can see a fully detailed description of all QSPRpred classes
+and functions in
 the [documentation](https://cddleiden.github.io/QSPRpred/docs/).
 
 - **[Quick Start](quick_start.ipynb)**: A quick start guide to using QSPRpred.
