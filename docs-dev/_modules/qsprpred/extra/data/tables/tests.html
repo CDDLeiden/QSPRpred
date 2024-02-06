@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.tables.tests &mdash; QSPRpred 3.0.0.dev352+g5a8bdd6 documentation</title>
+  <title>qsprpred.extra.data.tables.tests &mdash; QSPRpred 3.0.0.dev397+g4c6e58a2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=638f122b"></script>
+        <script src="../../../../../_static/documentation_options.js?v=7f8b26f8"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev352+g5a8bdd6
+                v3.0.0.dev397+g4c6e58a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -98,6 +98,7 @@
 
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.processing.feature_standardizers</span> <span class="kn">import</span> <span class="n">SKLearnStandardizer</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.processing.applicability_domain</span> <span class="kn">import</span> <span class="n">ApplicabilityDomain</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.sampling.splits</span> <span class="kn">import</span> <span class="n">DataSplit</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.tables.pcm</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsMixInExtras</span>
@@ -140,6 +141,7 @@
         <span class="n">feature_standardizer</span><span class="p">:</span> <span class="n">SKLearnStandardizer</span><span class="p">,</span>
         <span class="n">feature_filter</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
         <span class="n">data_filter</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">applicability_domain</span><span class="p">:</span> <span class="n">ApplicabilityDomain</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the preparation of the dataset.</span>
 
@@ -154,6 +156,7 @@
 <span class="sd">            feature_standardizer (SKLearnStandardizer): Feature standardizer.</span>
 <span class="sd">            feature_filter (Callable): Feature filter.</span>
 <span class="sd">            data_filter (Callable): Data filter.</span>
+<span class="sd">            applicability_domain (Callable): Applicability domain.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPCMDataSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkPrep</span><span class="p">(</span>
@@ -163,6 +166,7 @@
             <span class="n">feature_standardizer</span><span class="p">,</span>
             <span class="n">feature_filter</span><span class="p">,</span>
             <span class="n">data_filter</span><span class="p">,</span>
+            <span class="n">applicability_domain</span><span class="p">,</span>
             <span class="p">[</span><span class="s2">&quot;pchembl_value_Median&quot;</span><span class="p">],</span>
         <span class="p">)</span></div>
 

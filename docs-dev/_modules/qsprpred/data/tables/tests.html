@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.tests &mdash; QSPRpred 3.0.0.dev352+g5a8bdd6 documentation</title>
+  <title>qsprpred.data.tables.tests &mdash; QSPRpred 3.0.0.dev397+g4c6e58a2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=638f122b"></script>
+        <script src="../../../../_static/documentation_options.js?v=7f8b26f8"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev352+g5a8bdd6
+                v3.0.0.dev397+g4c6e58a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -97,10 +97,10 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
 <span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">ShuffleSplit</span><span class="p">,</span> <span class="n">KFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span><span class="p">,</span> <span class="n">ShuffleSplit</span>
 
 <span class="kn">from</span> <span class="nn">..descriptors.fingerprints</span> <span class="kn">import</span> <span class="n">MorganFP</span>
-<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">TargetTasks</span><span class="p">,</span> <span class="n">TargetProperty</span>
+<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">TargetProperty</span><span class="p">,</span> <span class="n">TargetTasks</span>
 <span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
 <span class="kn">from</span> <span class="nn">...utils.stopwatch</span> <span class="kn">import</span> <span class="n">StopWatch</span>
 <span class="kn">from</span> <span class="nn">...utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
@@ -113,7 +113,6 @@
 <span class="k">class</span> <span class="nc">TestDataSetCreationAndSerialization</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple tests for dataset creation and serialization under different conditions</span>
 <span class="sd">    and error states.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestDataSetCreationAndSerialization.setUp">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestDataSetCreationAndSerialization.setUp">[docs]</a>
     <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -220,7 +219,10 @@
         <span class="c1"># create a basic regression data set</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;test_defaults&quot;</span><span class="p">,</span>
-            <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
@@ -243,7 +245,10 @@
         <span class="n">stopwatch</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="n">dataset_new</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;test_defaults&quot;</span><span class="p">,</span>
-            <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
             <span class="n">chunk_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">,</span>
@@ -255,7 +260,10 @@
         <span class="n">dataset_new</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromTableFile</span><span class="p">(</span>
             <span class="s2">&quot;test_defaults&quot;</span><span class="p">,</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDataPath</span><span class="si">}</span><span class="s2">/test_data.tsv&quot;</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
             <span class="n">chunk_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">,</span>
@@ -267,7 +275,10 @@
         <span class="n">dataset_new</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromTableFile</span><span class="p">(</span>
             <span class="s2">&quot;test_defaults_new&quot;</span><span class="p">,</span>  <span class="c1"># new name implies HBD below should exist again</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDataPath</span><span class="si">}</span><span class="s2">/test_data.tsv&quot;</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
             <span class="n">chunk_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">,</span>
@@ -285,8 +296,14 @@
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;testMultitask&quot;</span><span class="p">,</span>
             <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">},</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">},</span>
             <span class="p">],</span>
             <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
@@ -316,8 +333,14 @@
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;testTargetProperty&quot;</span><span class="p">,</span>
             <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">},</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">},</span>
             <span class="p">],</span>
             <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
@@ -337,7 +360,11 @@
         <span class="k">del</span> <span class="n">df_new</span><span class="p">[</span><span class="s2">&quot;CL_original&quot;</span><span class="p">]</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;testTargetProperty-precomputed&quot;</span><span class="p">,</span>
-            <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="s2">&quot;precomputed&quot;</span><span class="p">}],</span>
+            <span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="s2">&quot;precomputed&quot;</span>
+            <span class="p">}],</span>
             <span class="n">df</span><span class="o">=</span><span class="n">df_new</span><span class="p">,</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
@@ -368,7 +395,10 @@
         <span class="c1"># default index</span>
         <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;testTargetProperty&quot;</span><span class="p">,</span>
-            <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
@@ -377,7 +407,10 @@
         <span class="c1"># set index to SMILES column</span>
         <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;testTargetProperty&quot;</span><span class="p">,</span>
-            <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
@@ -387,7 +420,10 @@
         <span class="c1"># multiindex</span>
         <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;testTargetProperty&quot;</span><span class="p">,</span>
-            <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
@@ -399,7 +435,10 @@
             <span class="ne">ValueError</span><span class="p">,</span>
             <span class="k">lambda</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">(</span>
                 <span class="s2">&quot;testTargetProperty&quot;</span><span class="p">,</span>
-                <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+                <span class="p">[{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">}],</span>
                 <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
                 <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
                 <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
@@ -412,7 +451,10 @@
             <span class="ne">ValueError</span><span class="p">,</span>
             <span class="k">lambda</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">(</span>
                 <span class="s2">&quot;testTargetProperty&quot;</span><span class="p">,</span>
-                <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+                <span class="p">[{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">}],</span>
                 <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
                 <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
                 <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
@@ -422,13 +464,16 @@
         <span class="p">)</span></div>
 
 
-    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([(</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)])</span>  <span class="c1"># use one or two CPUs</span>
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">)])</span>  <span class="c1"># use one or two CPUs</span>
     <span class="k">def</span> <span class="nf">testInvalidsDetection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_cpu</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getBigDF</span><span class="p">()</span>
         <span class="n">all_mols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;testInvalidsDetection&quot;</span><span class="p">,</span>
-            <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -619,7 +664,6 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetProperty">[docs]</a>
 <span class="k">class</span> <span class="nc">TestTargetProperty</span><span class="p">(</span><span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the TargetProperty class.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestTargetProperty.checkTargetProperty">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetProperty.checkTargetProperty">[docs]</a>
     <span class="k">def</span> <span class="nf">checkTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_prop</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">):</span>
@@ -655,11 +699,18 @@
         <span class="p">)</span>
         <span class="c1"># Check from dictionary creation</span>
         <span class="n">targetprop</span> <span class="o">=</span> <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span>
-            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkTargetProperty</span><span class="p">(</span><span class="n">targetprop</span><span class="p">,</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">targetprop</span> <span class="o">=</span> <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span>
-            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1200</span><span class="p">]}</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1200</span><span class="p">]</span>
+            <span class="p">}</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkTargetProperty</span><span class="p">(</span>
             <span class="n">targetprop</span><span class="p">,</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1200</span><span class="p">]</span>
@@ -667,8 +718,14 @@
         <span class="c1"># Check from list creation, selection and serialization support functions</span>
         <span class="n">targetprops</span> <span class="o">=</span> <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromList</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">},</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                <span class="p">},</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkTargetProperty</span><span class="p">(</span><span class="n">targetprops</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -707,7 +764,6 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test as many possible combinations of data sets and their preparation</span>
 <span class="sd">    settings. These can run potentially for a long time so use the `skip` decorator</span>
 <span class="sd">    if you want to skip all these tests to speed things up during development.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestDataSetPreparation.setUp">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestDataSetPreparation.setUp">[docs]</a>
     <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -725,6 +781,7 @@
         <span class="n">feature_standardizer</span><span class="p">,</span>
         <span class="n">feature_filter</span><span class="p">,</span>
         <span class="n">data_filter</span><span class="p">,</span>
+        <span class="n">applicability_domain</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests one combination of a data set and its preparation settings.</span>
 
@@ -740,6 +797,7 @@
             <span class="n">feature_standardizer</span><span class="p">,</span>
             <span class="n">feature_filter</span><span class="p">,</span>
             <span class="n">data_filter</span><span class="p">,</span>
+            <span class="n">applicability_domain</span><span class="p">,</span>
             <span class="p">[</span><span class="s2">&quot;CL&quot;</span><span class="p">],</span>
         <span class="p">)</span></div>
 
@@ -749,7 +807,6 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetImputation">[docs]</a>
 <span class="k">class</span> <span class="nc">TestTargetImputation</span><span class="p">(</span><span class="n">PathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Small tests to only check if the target imputation works on its own.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestTargetImputation.setUp">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetImputation.setUp">[docs]</a>
     <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

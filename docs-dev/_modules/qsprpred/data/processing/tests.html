@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing.tests &mdash; QSPRpred 3.0.0.dev352+g5a8bdd6 documentation</title>
+  <title>qsprpred.data.processing.tests &mdash; QSPRpred 3.0.0.dev397+g4c6e58a2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=638f122b"></script>
+        <script src="../../../../_static/documentation_options.js?v=7f8b26f8"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev352+g5a8bdd6
+                v3.0.0.dev397+g4c6e58a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -98,6 +98,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
 <span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">Mol</span>
+<span class="kn">from</span> <span class="nn">mlchemad.applicability_domains</span> <span class="kn">import</span> <span class="n">KNNApplicabilityDomain</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
 
 <span class="kn">from</span> <span class="nn">.mol_processor</span> <span class="kn">import</span> <span class="n">MolProcessor</span>
@@ -105,11 +106,12 @@
 <span class="kn">from</span> <span class="nn">..descriptors.sets</span> <span class="kn">import</span> <span class="n">DataFrameDescriptorSet</span>
 <span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
 <span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">...data.processing.applicability_domain</span> <span class="kn">import</span> <span class="n">MLChemADWrapper</span>
 <span class="kn">from</span> <span class="nn">...data.processing.data_filters</span> <span class="kn">import</span> <span class="n">CategoryFilter</span><span class="p">,</span> <span class="n">RepeatsFilter</span>
 <span class="kn">from</span> <span class="nn">...data.processing.feature_filters</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">LowVarianceFilter</span><span class="p">,</span>
-    <span class="n">HighCorrelationFilter</span><span class="p">,</span>
     <span class="n">BorutaFilter</span><span class="p">,</span>
+    <span class="n">HighCorrelationFilter</span><span class="p">,</span>
+    <span class="n">LowVarianceFilter</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">...data.processing.feature_standardizers</span> <span class="kn">import</span> <span class="n">SKLearnStandardizer</span>
 <span class="kn">from</span> <span class="nn">...utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
@@ -123,7 +125,6 @@
 
 <span class="sd">    The tests here should be used to check for all their specific parameters and</span>
 <span class="sd">    edge cases.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestDataFilters.setUp">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestDataFilters.setUp">[docs]</a>
     <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -212,7 +213,6 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters">[docs]</a>
 <span class="k">class</span> <span class="nc">TestFeatureFilters</span><span class="p">(</span><span class="n">PathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests to check if the feature filters work on their own.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestFeatureFilters.setUp">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.setUp">[docs]</a>
     <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -245,7 +245,10 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
             <span class="s2">&quot;TestFeatureFilters&quot;</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
@@ -296,7 +299,6 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureStandardizer">[docs]</a>
 <span class="k">class</span> <span class="nc">TestFeatureStandardizer</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the feature standardizer.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestFeatureStandardizer.setUp">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureStandardizer.setUp">[docs]</a>
     <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -414,6 +416,43 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Mol</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="testApplicabilityDomain">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.tests.testApplicabilityDomain">[docs]</a>
+<span class="k">class</span> <span class="nc">testApplicabilityDomain</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the applicability domain.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="testApplicabilityDomain.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.tests.testApplicabilityDomain.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a small test dataset with MorganFP descriptors.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createSmallTestDataSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">1000</span><span class="p">)])</span></div>
+
+
+<div class="viewcode-block" id="testApplicabilityDomain.testApplicabilityDomain">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.tests.testApplicabilityDomain.testApplicabilityDomain">[docs]</a>
+    <span class="k">def</span> <span class="nf">testApplicabilityDomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the applicability domain fitting, transforming and serialization.&quot;&quot;&quot;</span>
+        <span class="n">ad</span> <span class="o">=</span> <span class="n">MLChemADWrapper</span><span class="p">(</span>
+            <span class="n">KNNApplicabilityDomain</span><span class="p">(</span>
+                <span class="n">dist</span><span class="o">=</span><span class="s2">&quot;rogerstanimoto&quot;</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hard_threshold</span><span class="o">=</span><span class="mf">0.75</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ad</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="p">),</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+        <span class="n">filtered_dataset</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">filtered_dataset</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+
+        <span class="n">ad</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/test_ad.json&quot;</span><span class="p">)</span>
+        <span class="n">ad_fromfile</span> <span class="o">=</span> <span class="n">MLChemADWrapper</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/test_ad.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">ad_fromfile</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="p">),</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+        <span class="n">filtered_dataset_fromfile</span> <span class="o">=</span> <span class="n">ad_fromfile</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">filtered_dataset_fromfile</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span></div>
+</div>
 
 </pre></div>
 

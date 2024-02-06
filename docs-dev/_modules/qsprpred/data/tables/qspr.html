@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 3.0.0.dev352+g5a8bdd6 documentation</title>
+  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 3.0.0.dev397+g4c6e58a2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=638f122b"></script>
+        <script src="../../../../_static/documentation_options.js?v=7f8b26f8"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -47,7 +47,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev352+g5a8bdd6
+                v3.0.0.dev397+g4c6e58a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -92,14 +92,18 @@
              
   <h1>Source code for qsprpred.data.tables.qspr</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Generator</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">mlchemad.applicability_domains</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ApplicabilityDomain</span> <span class="k">as</span> <span class="n">MLChemADApplicabilityDomain</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">LabelEncoder</span>
 
 <span class="kn">from</span> <span class="nn">.mol</span> <span class="kn">import</span> <span class="n">MoleculeTable</span>
 <span class="kn">from</span> <span class="nn">..descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
+<span class="kn">from</span> <span class="nn">...data.processing.applicability_domain</span> <span class="kn">import</span> <span class="n">ApplicabilityDomain</span><span class="p">,</span> <span class="n">MLChemADWrapper</span>
 <span class="kn">from</span> <span class="nn">...data.processing.data_filters</span> <span class="kn">import</span> <span class="n">RepeatsFilter</span>
 <span class="kn">from</span> <span class="nn">...data.processing.feature_standardizers</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">SKLearnStandardizer</span><span class="p">,</span>
@@ -107,8 +111,7 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">...data.sampling.folds</span> <span class="kn">import</span> <span class="n">FoldsFromDataSplit</span>
 <span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">...tasks</span> <span class="kn">import</span> <span class="n">TargetProperty</span>
-<span class="kn">from</span> <span class="nn">...tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
+<span class="kn">from</span> <span class="nn">...tasks</span> <span class="kn">import</span> <span class="n">TargetProperty</span><span class="p">,</span> <span class="n">TargetTasks</span>
 
 
 <div class="viewcode-block" id="QSPRDataset">
@@ -132,7 +135,15 @@
 <span class="sd">        y_ind (np.ndarray/pd.DataFrame) : m-l label array for independent set, where m</span>
 <span class="sd">            is the number of samples and equals to row of X_ind, and l is the number of</span>
 <span class="sd">            types.</span>
+<span class="sd">        X_ind_outliers (np.ndarray/pd.DataFrame) : m x n Feature matrix for outliers</span>
+<span class="sd">            in independent set, where m is the number of samples and n is the number of</span>
+<span class="sd">            features.</span>
+<span class="sd">        y_ind_outliers (np.ndarray/pd.DataFrame) : m-l label array for outliers in</span>
+<span class="sd">            independent set, where m is the number of samples and equals to row of</span>
+<span class="sd">            X_ind_outliers, and l is the number of types.</span>
 <span class="sd">        featureNames (list of str) : feature names</span>
+<span class="sd">        featureStandardizer (SKLearnStandardizer) : feature standardizer</span>
+<span class="sd">        applicabilityDomain (ApplicabilityDomain) : applicability domain</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_notJSON</span><span class="p">:</span> <span class="n">ClassVar</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">MoleculeTable</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;X_ind&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;y_ind&quot;</span><span class="p">]</span>
@@ -221,7 +232,8 @@
         <span class="p">)</span>
         <span class="c1"># load names of descriptors to use as training features</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFeatureNames</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># populate feature matrix and target properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
@@ -371,9 +383,8 @@
 
 <span class="sd">        If the data frame contains a column &#39;Split_IsTrain&#39;,</span>
 <span class="sd">        the data will be split into training and independent sets. Otherwise, the</span>
-<span class="sd">            independent set will</span>
-<span class="sd">        be empty. If descriptors are available, the resulting training matrices will</span>
-<span class="sd">            be featurized.</span>
+<span class="sd">        independent set will be empty. If descriptors are available, the resulting</span>
+<span class="sd">        training matrices will be featurized.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Restoring training data...&quot;</span><span class="p">)</span>
         <span class="c1"># split data into training and independent sets if saved previously</span>
@@ -389,6 +400,7 @@
             <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">featurizeSplits</span><span class="p">(</span><span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Training data restored.&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training features shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -517,7 +529,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;MoleculeTable&quot;</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">searchWithIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">ret</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">feature_standardizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">featurize</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
@@ -605,7 +617,7 @@
 
 <span class="sd">        If descriptors are already present, they will be recalculated if `recalculate`</span>
 <span class="sd">        is `True`. Featurization will be performed after adding descriptors if</span>
-<span class="sd">        `featurize` is `True`. Featurazation converts current data matrices to pure</span>
+<span class="sd">        `featurize` is `True`. Featurization converts current data matrices to pure</span>
 <span class="sd">        numeric matrices of selected descriptors (features).</span>
 
 <span class="sd">        Args:</span>
@@ -649,6 +661,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">save_split</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">saveSplit</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="s2">&quot;Split_IsTrain&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
 
 
@@ -661,12 +675,11 @@
 <span class="sd">        if you want to use feature matrices instead of the raw data frame.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            split (DataSplit) :</span>
+<span class="sd">            split (DataSplit):</span>
 <span class="sd">                split instance orchestrating the split</span>
 <span class="sd">            featurize (bool):</span>
 <span class="sd">                whether to featurize the data set splits after splitting.</span>
 <span class="sd">                Defaults to `False`.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="nb">hasattr</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;hasDataSet&quot;</span><span class="p">)</span>
@@ -721,6 +734,8 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">codes</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">codes</span>
+        <span class="k">if</span> <span class="s2">&quot;Split_IsOutlier&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="c1"># convert splits to features if required</span>
         <span class="k">if</span> <span class="n">featurize</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">featurizeSplits</span><span class="p">(</span><span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
@@ -797,7 +812,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;If the data set has descriptors, load them into the train and test splits.</span>
 
 <span class="sd">        If no descriptors are available, remove all features from</span>
-<span class="sd">        the splits They will become zero length along the feature axis (columns), but</span>
+<span class="sd">        the splits. They will become zero length along the feature axis (columns), but</span>
 <span class="sd">        will retain their original length along the sample axis (rows). This is useful</span>
 <span class="sd">        for the case where the data set has no descriptors, but the user wants to retain</span>
 <span class="sd">        train and test splits.</span>
@@ -902,7 +917,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">feature_standardizer</span><span class="p">,</span> <span class="s2">&quot;toFile&quot;</span><span class="p">):</span>
             <span class="n">feature_standardizer</span> <span class="o">=</span> <span class="n">SKLearnStandardizer</span><span class="p">(</span><span class="n">feature_standardizer</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span> <span class="o">=</span> <span class="n">feature_standardizer</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="n">feature_standardizer</span></div>
 
 
 <div class="viewcode-block" id="QSPRDataset.addFeatures">
@@ -938,7 +953,7 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.reset">[docs]</a>
     <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the data set. Splits will be removed and all descriptors will be</span>
-<span class="sd">        moved to the training data. Feature standardization and molecule</span>
+<span class="sd">        moved to the training data. Molecule</span>
 <span class="sd">        standardization and molecule filtering are not affected.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -947,6 +962,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">loadDescriptorsToSplits</span><span class="p">(</span><span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
@@ -959,11 +976,15 @@
         <span class="n">split</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">feature_calculators</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;DescriptorSet&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">feature_filters</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">feature_standardizer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SKLearnStandardizer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">feature_standardizer</span><span class="p">:</span> <span class="n">SKLearnStandardizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">feature_fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+        <span class="n">applicability_domain</span><span class="p">:</span> <span class="n">ApplicabilityDomain</span>
+        <span class="o">|</span> <span class="n">MLChemADApplicabilityDomain</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">drop_outliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">recalculate_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the dataset for use in QSPR model.</span>
 
@@ -977,10 +998,15 @@
 <span class="sd">            feature_filters (list of feature filter objs): filters features</span>
 <span class="sd">            feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator):</span>
 <span class="sd">                standardizes and/or scales features</span>
-<span class="sd">            recalculate_features (bool): recalculate features even if they are already</span>
-<span class="sd">                present in the file</span>
 <span class="sd">            feature_fill_value (float): value to fill missing values with.</span>
 <span class="sd">                Defaults to `numpy.nan`</span>
+<span class="sd">            applicability_domain (applicabilityDomain obj): attaches an</span>
+<span class="sd">                applicability domain calculator to the dataset and fits it on</span>
+<span class="sd">                the training set</span>
+<span class="sd">            drop_outliers (bool): whether to drop samples that are outside the</span>
+<span class="sd">                applicability domain from the test set, if one is attached.</span>
+<span class="sd">            recalculate_features (bool): recalculate features even if they are already</span>
+<span class="sd">                present in the file</span>
 <span class="sd">            shuffle (bool): whether to shuffle the created training and test sets</span>
 <span class="sd">            random_state (int): random state for shuffling</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1013,7 +1039,13 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No descriptors present, feature filters will be skipped.&quot;</span><span class="p">)</span>
         <span class="c1"># set feature standardizers</span>
         <span class="k">if</span> <span class="n">feature_standardizer</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setFeatureStandardizer</span><span class="p">(</span><span class="n">feature_standardizer</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFeatureStandardizer</span><span class="p">(</span><span class="n">feature_standardizer</span><span class="p">)</span>
+        <span class="c1"># set applicability domain and fit it on the training set</span>
+        <span class="k">if</span> <span class="n">applicability_domain</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setApplicabilityDomain</span><span class="p">(</span><span class="n">applicability_domain</span><span class="p">)</span>
+        <span class="c1"># drop outliers from test set based on applicability domain</span>
+        <span class="k">if</span> <span class="n">drop_outliers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropOutliers</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="QSPRDataset.checkFeatures">
@@ -1029,21 +1061,6 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;X has no rows.&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="QSPRDataset.fitFeatureStandardizer">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.fitFeatureStandardizer">[docs]</a>
-    <span class="k">def</span> <span class="nf">fitFeatureStandardizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the feature standardizers on the training set.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            X (pd.DataFrame): standardized training set</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">apply_feature_standardizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
-
-
 <div class="viewcode-block" id="QSPRDataset.getFeatures">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.getFeatures">[docs]</a>
     <span class="k">def</span> <span class="nf">getFeatures</span><span class="p">(</span>
@@ -1057,7 +1074,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the current feature sets (training and test) from the dataset.</span>
 
 <span class="sd">        This method also applies any feature standardizers that have been set on the</span>
-<span class="sd">        dataset during preparation.</span>
+<span class="sd">        dataset during preparation. Outliers are dropped from the test set if they are</span>
+<span class="sd">        present, unless `concat` is `True`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            inplace (bool): If `True`, the created feature matrices will be saved to the</span>
@@ -1101,20 +1119,24 @@
         <span class="c1"># convert to numpy arrays and standardize</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">df_X</span><span class="o">.</span><span class="n">values</span>
         <span class="n">X_ind</span> <span class="o">=</span> <span class="n">df_X_ind</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">df_X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span><span class="p">:</span>
-            <span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span> <span class="o">=</span> <span class="n">apply_feature_standardizer</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span><span class="p">,</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="n">apply_feature_standardizer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">,</span>
                 <span class="n">df_X</span><span class="p">,</span>
                 <span class="n">fit</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">refit_standardizer</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">X_ind</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">apply_feature_standardizer</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span><span class="p">,</span> <span class="n">df_X_ind</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">,</span> <span class="n">df_X_ind</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span>
                 <span class="p">)</span>
         <span class="c1"># convert to data frames and make sure column order is correct</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df_X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">X_ind</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_ind</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df_X_ind</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="c1"># drop outliers from test set</span>
+        <span class="k">if</span> <span class="s2">&quot;Split_IsOutlier&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">concat</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X_ind</span> <span class="o">=</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">],</span> <span class="p">:]</span>
         <span class="c1"># replace original feature matrices if inplace</span>
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
@@ -1145,7 +1167,11 @@
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span> <span class="k">if</span> <span class="n">ordered</span> <span class="k">else</span> <span class="n">ret</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span></div>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;Split_IsOutlier&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">y_ind</span> <span class="k">if</span> <span class="n">y_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span></div>
 
 
 <div class="viewcode-block" id="QSPRDataset.getTargetProperties">
@@ -1302,8 +1328,64 @@
 <span class="sd">                for each fold</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkFeatures</span><span class="p">()</span>
-        <span class="n">folds</span> <span class="o">=</span> <span class="n">FoldsFromDataSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_standardizer</span><span class="p">)</span>
+        <span class="n">folds</span> <span class="o">=</span> <span class="n">FoldsFromDataSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">folds</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">concat</span><span class="o">=</span><span class="n">concat</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.setApplicabilityDomain">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.setApplicabilityDomain">[docs]</a>
+    <span class="k">def</span> <span class="nf">setApplicabilityDomain</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">applicability_domain</span><span class="p">:</span> <span class="n">ApplicabilityDomain</span> <span class="o">|</span> <span class="n">MLChemADApplicabilityDomain</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the applicability domain calculator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            applicability_domain (ApplicabilityDomain | MLChemADApplicabilityDomain):</span>
+<span class="sd">                applicability domain calculator instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">applicability_domain</span><span class="p">,</span> <span class="n">MLChemADApplicabilityDomain</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="n">MLChemADWrapper</span><span class="p">(</span><span class="n">applicability_domain</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="n">applicability_domain</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.dropOutliers">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.dropOutliers">[docs]</a>
+    <span class="k">def</span> <span class="nf">dropOutliers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Drop outliers from the test set based on the applicability domain.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No applicability domain calculator attached to the data set.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No test samples available, skipping outlier removal from test set.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="c1"># check if X or X_ind contain any nan values</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Feature matrix contains NaN values. &quot;</span>
+                <span class="s2">&quot;Please fill them before applying outlier removal.&quot;</span>
+                <span class="s2">&quot;Outliers will not be dropped.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="c1"># fit applicability domain on the training set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">X_ind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;All samples in the test set are outside the applicability domain,&quot;</span>
+                <span class="s2">&quot;outliers will not be dropped.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">~</span><span class="n">mask</span><span class="p">[</span><span class="s2">&quot;in_domain&quot;</span><span class="p">]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Marked </span><span class="si">{</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> samples from the test set as outlier.&quot;</span>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>
