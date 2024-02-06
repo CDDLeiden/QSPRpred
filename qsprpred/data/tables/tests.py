@@ -595,7 +595,7 @@ class TestTargetProperty(QSPRTestCase):
 
 class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase):
     """Test as many possible combinations of data sets and their preparation
-    settings. These can run potentially for a long time so use the `skip` decorator
+    settings. These can run potentially for a long time so use the ``skip`` decorator
     if you want to skip all these tests to speed things up during development."""
     def setUp(self):
         super().setUp()
@@ -615,7 +615,7 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
     ):
         """Tests one combination of a data set and its preparation settings.
 
-        This generates a large number of parameterized tests. Use the `skip` decorator
+        This generates a large number of parameterized tests. Use the ``skip`` decorator
         if you want to skip all these tests. Note that the combinations are not
         exhaustive, but defined by `DataSetsPathMixIn.getPrepCombos()`."""
         np.random.seed(42)

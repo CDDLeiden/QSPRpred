@@ -14,7 +14,8 @@ The rest of the tutorials is divided into two categories: basic and advanced.
 The Basics tutorials cover all basic functionality of QSPRpred that you will need in
 most projects. The Advanced tutorials cover more advanced topics and are designed for
 users who are already familiar with the basics of QSPRpred.
-For detailed description of all QSPRpred classes and functions, see
+For detailed description of all QSPRpred classes and functions, as well as examples of
+how to use the command line interface, see
 the [documentation](https://cddleiden.github.io/QSPRpred/docs/).
 
 - **[Quick Start](quick_start.ipynb)**: A quick start guide to using QSPRpred.

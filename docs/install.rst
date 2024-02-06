@@ -1,4 +1,4 @@
-..  _installation:
+..  _installation-guide:
 
 Installation
 ============
@@ -9,7 +9,7 @@ You do not need anything special to install the package . Just run the following
 
     pip install git+https://github.com/CDDLeiden/QSPRpred.git@main
 
-You can also get tags and development snapshots by varying the :code:`@main` part (i.e. :code:`@1.0.0`). After that you can start building models (see :ref:`usage`).
+You can also get tags and development snapshots by varying the :code:`@main` part (i.e. :code:`@1.0.0`). After that you can start building models (see :ref:`cli-usage`).
 
 Note that this will install the basic dependencies, but not the optional dependencies.
 If you want to use the optional dependencies, you can install the package with an
