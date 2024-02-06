@@ -524,15 +524,17 @@ if __name__ == "__main__":
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
-    # Backup files
-    tasks = ["REG" if reg is True else "CLS" for reg in args.regression]
-    file_prefixes = [
-        f"{property}_{task}" for task in tasks for property in args.properties
-    ]
+    # get a list of all the folders in the output directory
+    folders = [f for f in os.listdir(args.output_dir) if os.path.isdir(f"{args.output_dir}/{f}")]
+
+    # remove folders that start with backup
+    folders = [f for f in folders if not f.startswith("backup")]
+
+
     if not args.skip_backup:
         backup_msg = backup_files(
             args.output_dir,
-            tuple(file_prefixes),
+            tuple(folders),
             cp_suffix=["calculators", "standardizer", "meta"],
         )
 
