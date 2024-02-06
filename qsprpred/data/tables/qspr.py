@@ -146,6 +146,10 @@ class QSPRDataset(MoleculeTable):
             target_props = [
                 TargetProperty.fromJSON(json.dumps(x)) for x in target_props
             ]
+        elif target_props is None:
+            raise ValueError(
+                "Target properties must be specified for a new QSPRDataset."
+            )
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
         self.featureStandardizer = None
