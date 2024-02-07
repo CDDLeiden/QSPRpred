@@ -29,6 +29,7 @@ GPUS = list(range(torch.cuda.device_count()))
 
 class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
+
     def setUp(self):
         """Set up the test case."""
         super().setUp()
@@ -80,7 +81,8 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                     [0, 1, 10, 1100],
                 ),
             )
-        ] + [
+        ]
+        + [
             (
                 f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
                 task,
@@ -88,8 +90,10 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 alg,
                 th,
                 random_state,
-            ) for alg, alg_name, task, th in
-            ((STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None), )
+            )
+            for alg, alg_name, task, th in (
+                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
+            )
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -114,11 +118,7 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=self.getDefaultPrep(),
         )
 
@@ -157,6 +157,7 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
 class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -191,7 +192,8 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             base_dir=self.generatedModelsPath,
             name=name,
             parameters=parameters,
-            random_state=random_state,)
+            random_state=random_state,
+        )
 
     @parameterized.expand(
         [
@@ -200,15 +202,16 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 ("MoleculeModel", TargetTasks.SINGLECLASS, [6.5]),
                 ("MoleculeModel", TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             )
-        ] + [
+        ]
+        + [
             (
                 f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
                 task,
                 alg_name,
                 th,
                 random_state,
-            ) for alg_name, task, th in
-            (("MoleculeModel", TargetTasks.REGRESSION, None), )
+            )
+            for alg_name, task, th in (("MoleculeModel", TargetTasks.REGRESSION, None),)
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -231,11 +234,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=None,
         )
         dataset.prepareDataset(
@@ -272,16 +271,17 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name, [None]) for alg_name, task in
-            (("MoleculeModel", ModelTasks.MULTITASK_REGRESSION), )
-        ] + [
+            (f"{alg_name}_{task}", task, alg_name, [None])
+            for alg_name, task in (("MoleculeModel", ModelTasks.MULTITASK_REGRESSION),)
+        ]
+        + [
             (
                 f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
                 task,
                 alg_name,
                 random_state,
-            ) for alg_name, task in
-            (("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS), )
+            )
+            for alg_name, task in (("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS),)
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -296,16 +296,8 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
-                {
-                    "name": "fu",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [0.3]
-                },
-                {
-                    "name": "CL",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5]
-                },
+                {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
+                {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]},
             ]
         else:
             target_props = [
@@ -365,10 +357,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name="consistency_data",
-            target_props=[{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
+            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
             preparation_settings=None,
         )
         dataset.prepareDataset(
@@ -380,7 +369,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
         # chemprop by default uses sklearn rmse (squared=False) as metric
         rmse = metrics.make_scorer(
-            metrics.mean_squared_error, greater_is_better=False, squared=False
+            metrics.root_mean_squared_error, greater_is_better=False
         )
 
         # Run 1 fold of bootstrap cross validation (default cross validation in chemprop is bootstrap)
@@ -393,7 +382,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         qsprpred_score = assessor(
             model,
             dataset,
-            split=RandomSplit(test_fraction=0.1, seed=dataset.randomState)
+            split=RandomSplit(test_fraction=0.1, seed=dataset.randomState),
         )
         qsprpred_score = -qsprpred_score[0]  # qsprpred_score is negative rmse
 
@@ -459,6 +448,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 @pytest.mark.skipif((spec := util.find_spec("cupy")) is None, reason="requires cupy")
 class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the PyBoostModel class."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -499,7 +489,8 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 "PyBoost",
                 params,
                 random_state,
-            ) for params in [
+            )
+            for params in [
                 {
                     "loss": "mse",
                     "metric": "r2_score",
@@ -517,7 +508,8 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 #     "loss": "mse",
                 #     "metric":import_module("..custom_metrics",__name__).NaNRMSEScore()
                 # },
-            ] for random_state in ([None], [1, 42], [42, 42])
+            ]
+            for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testRegressionPyBoostFit(self, _, task, model_name, parameters, random_state):
@@ -525,10 +517,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": task
-            }],
+            target_props=[{"name": "CL", "task": task}],
             preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
@@ -569,13 +558,8 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         [
             (f"{'PyBoost'}_{task}", task, th, "PyBoost", params)
             for params, task, th in (
-                ({
-                    "loss": "bce",
-                    "metric": "auc"
-                }, TargetTasks.SINGLECLASS, [6.5]),
-                ({
-                    "loss": "crossentropy"
-                }, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
+                ({"loss": "bce", "metric": "auc"}, TargetTasks.SINGLECLASS, [6.5]),
+                ({"loss": "crossentropy"}, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
             )
         ]
     )
@@ -584,11 +568,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         parameters["verbose"] = -1
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": task,
-                "th": th
-            }],
+            target_props=[{"name": "CL", "task": task, "th": th}],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -606,11 +586,9 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
     @parameterized.expand(
         [
-            ("PyBoost", "PyBoost", params) for params in [
-                {
-                    "loss": "mse",
-                    "metric": "r2_score"
-                },
+            ("PyBoost", "PyBoost", params)
+            for params in [
+                {"loss": "mse", "metric": "r2_score"},
                 # {
                 #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
                 #     "metric": "r2_score"
@@ -710,6 +688,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
 class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
     """This class holds the tests for the monitoring classes."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()

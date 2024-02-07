@@ -100,8 +100,8 @@ class RegressionPlot(ModelPlot, ABC):
                 lambda x: pd.Series(
                     {
                         "R2": metrics.r2_score(x["Label"], x["Prediction"]),
-                        "RMSE": metrics.mean_squared_error(
-                            x["Label"], x["Prediction"], squared=True
+                        "RMSE": metrics.root_mean_squared_error(
+                            x["Label"], x["Prediction"]
                         ),
                     }
                 )

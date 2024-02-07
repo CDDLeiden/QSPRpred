@@ -540,10 +540,9 @@ class ModelCheckMixIn:
             coef = metrics.r2_score(
                 df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]
             )
-            rmse = metrics.mean_squared_error(
+            rmse = metrics.root_mean_squared_error(
                 df[f"{property_name}_Label"],
                 df[f"{property_name}_Prediction"],
-                squared=False,
             )
             summary["R2"].append(coef)
             summary["RMSE"].append(rmse)

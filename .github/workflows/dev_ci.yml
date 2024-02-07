@@ -12,6 +12,7 @@ on:
 
 env:
   QSPPRED_TEST_EXTRAS: true
+  QSPRPRED_VERBOSE_LOGGING: true
 
 jobs:
   tests-all:

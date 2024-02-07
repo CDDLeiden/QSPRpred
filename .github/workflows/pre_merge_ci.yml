@@ -10,6 +10,7 @@ on:
 
 env:
   QSPPRED_TEST_EXTRAS: false
+  QSPRPRED_VERBOSE_LOGGING: true
 
 jobs:
   tests-basic:
