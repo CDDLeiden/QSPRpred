@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data_CLI &mdash; QSPRpred 3.0.0.dev397+g4c6e58a2 documentation</title>
+  <title>qsprpred.data_CLI &mdash; QSPRpred 3.0.0.dev420+gd887003e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
 
   
   <!--[if lt IE 9]>
@@ -14,9 +16,13 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=7f8b26f8"></script>
+        <script src="../../_static/documentation_options.js?v=9afa9563"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -47,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev397+g4c6e58a2
+                v3.0.0.dev420+gd887003e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -61,8 +67,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../features.html">Overview of available features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">Python API</a></li>
 </ul>
 
@@ -116,6 +122,10 @@
     <span class="n">PatternFP</span><span class="p">,</span>
     <span class="n">RDKitFP</span><span class="p">,</span>
     <span class="n">AvalonFP</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.chem.clustering</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FPSimilarityMaxMinClusters</span><span class="p">,</span>
+    <span class="n">FPSimilarityLeaderPickerClusters</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DrugExPhyschem</span><span class="p">,</span>
@@ -206,7 +216,16 @@
         <span class="p">),</span>
     <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-im&quot;</span><span class="p">,</span> <span class="s2">&quot;--imputation&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;most_frequent&quot;</span><span class="p">]</span>
+        <span class="s2">&quot;-im&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--imputation&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Imputation method for missing values. Specify the imputation method as a &quot;</span>
+            <span class="s2">&quot;dictionary with the property name as key and the imputation method as &quot;</span>
+            <span class="s2">&quot;value, e.g. -im </span><span class="se">\&quot;</span><span class="s2">{&#39;CL&#39;:&#39;mean&#39;,&#39;fu&#39;:&#39;median&#39;}</span><span class="se">\&quot;</span><span class="s2">. Note: no spaces and &quot;</span>
+            <span class="s2">&quot;surrounded by single quotes. Choose from &#39;mean&#39;, &#39;median&#39;, &#39;most_frequent&#39;&quot;</span>
+        <span class="p">),</span>
+        <span class="n">default</span><span class="o">=</span><span class="p">{},</span>
     <span class="p">)</span>
     <span class="c1"># model type arguments</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
@@ -317,7 +336,8 @@
             <span class="s2">&quot;Mold2&quot;</span><span class="p">,</span>
             <span class="s2">&quot;PaDEL&quot;</span><span class="p">,</span>
             <span class="s2">&quot;DrugEx&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Signature&quot;</span> <span class="s2">&quot;MaccsFP&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Signature&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;MaccsFP&quot;</span><span class="p">,</span>
             <span class="s2">&quot;AvalonFP&quot;</span><span class="p">,</span>
             <span class="s2">&quot;TopologicalFP&quot;</span><span class="p">,</span>
             <span class="s2">&quot;AtomPairFP&quot;</span><span class="p">,</span>
@@ -445,18 +465,11 @@
                         <span class="s2">&quot;transformer&quot;</span><span class="p">:</span> <span class="n">transform_dict</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">transform_data</span><span class="p">[</span><span class="n">prop</span><span class="p">]]</span>
                         <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">transform_data</span>
                         <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">imputation</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span>
+                        <span class="k">else</span> <span class="kc">None</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
-            <span class="c1"># missing value imputation</span>
-            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
-                    <span class="n">imputer</span> <span class="o">=</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span> <span class="o">==</span> <span class="s2">&quot;median&quot;</span><span class="p">:</span>
-                    <span class="n">imputer</span> <span class="o">=</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span> <span class="o">==</span> <span class="s2">&quot;most_frequent&quot;</span><span class="p">:</span>
-                    <span class="n">imputer</span> <span class="o">=</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;most_frequent&quot;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;invalid impute arg given&quot;</span><span class="p">)</span>
             <span class="n">dataset_name</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">props_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">data_suffix</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">data_suffix</span>
@@ -502,9 +515,13 @@
                     <span class="n">splitcol</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;datasplit&quot;</span><span class="p">],</span> <span class="n">trainval</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">testval</span><span class="o">=</span><span class="s2">&quot;test&quot;</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;cluster&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">split_cluster_method</span> <span class="o">==</span> <span class="s2">&quot;MaxMin&quot;</span><span class="p">:</span>
+                    <span class="n">clustering</span> <span class="o">=</span> <span class="n">FPSimilarityMaxMinClusters</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">split_cluster_method</span> <span class="o">==</span> <span class="s2">&quot;LeaderPicker&quot;</span><span class="p">:</span>
+                    <span class="n">clustering</span> <span class="o">=</span> <span class="n">FPSimilarityLeaderPickerClusters</span><span class="p">()</span>
                 <span class="n">split</span> <span class="o">=</span> <span class="n">ClusterSplit</span><span class="p">(</span>
                     <span class="n">test_fraction</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">split_fraction</span><span class="p">,</span>
-                    <span class="n">clustering_algorithm</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">split_clustering_method</span><span class="p">,</span>
+                    <span class="n">clustering</span><span class="o">=</span><span class="n">clustering</span><span class="p">,</span>
                     <span class="n">dataset</span><span class="o">=</span><span class="n">mydataset</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -612,15 +629,17 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
 
-    <span class="c1"># Backup files</span>
-    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;REG&quot;</span> <span class="k">if</span> <span class="n">reg</span> <span class="ow">is</span> <span class="kc">True</span> <span class="k">else</span> <span class="s2">&quot;CLS&quot;</span> <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">regression</span><span class="p">]</span>
-    <span class="n">file_prefixes</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">property</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span> <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">properties</span>
-    <span class="p">]</span>
+    <span class="c1"># get a list of all the folders in the output directory</span>
+    <span class="n">folders</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)]</span>
+
+    <span class="c1"># remove folders that start with backup</span>
+    <span class="n">folders</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">folders</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;backup&quot;</span><span class="p">)]</span>
+
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">skip_backup</span><span class="p">:</span>
         <span class="n">backup_msg</span> <span class="o">=</span> <span class="n">backup_files</span><span class="p">(</span>
             <span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span>
-            <span class="nb">tuple</span><span class="p">(</span><span class="n">file_prefixes</span><span class="p">),</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">folders</span><span class="p">),</span>
             <span class="n">cp_suffix</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;calculators&quot;</span><span class="p">,</span> <span class="s2">&quot;standardizer&quot;</span><span class="p">,</span> <span class="s2">&quot;meta&quot;</span><span class="p">],</span>
         <span class="p">)</span>
 
