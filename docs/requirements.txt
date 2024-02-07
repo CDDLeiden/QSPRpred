@@ -1,2 +1,4 @@
 sphinx
 sphinx_rtd_theme
+sphinx_design
+sphinx_design_elements

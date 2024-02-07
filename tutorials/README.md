@@ -16,9 +16,10 @@ possible while the rest dedicates more time to explain each feature in more deta
 The [Basics](./basics) cover the most commonly used functionality of QSPRpred.
 The [Advanced](./advanced) tutorials cover more advanced topics and are designed for
 users who are already familiar with QSPRpred more in depth or are looking for more niche
-features. In addition, you can see a fully detailed description of all QSPRpred classes
-and functions in
-the [documentation](https://cddleiden.github.io/QSPRpred/docs/).
+features. For detailed description of all QSPRpred classes and functions, as well as
+examples of
+how to use the command line interface, see
+the [documentation pages](https://cddleiden.github.io/QSPRpred/docs/).
 
 - **[Quick Start](quick_start.ipynb)**: A quick start guide to using QSPRpred.
 - **Basics**
