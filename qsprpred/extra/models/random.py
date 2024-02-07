@@ -1,16 +1,17 @@
 import json
+import os
+from abc import ABC, abstractmethod
+from typing import Any, Optional, Type
+
 import numpy as np
 import pandas as pd
 import scipy as sp
-import os
 
 from qsprpred.models.early_stopping import EarlyStoppingMode
 from qsprpred.models.monitors import FitMonitor
-
-from ...models.models import QSPRModel
 from ...data.tables.qspr import QSPRDataset
-from typing import Any, Optional, Type
-from abc import ABC, abstractmethod
+from ...models.models import QSPRModel
+
 
 class RandomDistributionAlgorithm(ABC):
     @abstractmethod
@@ -69,6 +70,7 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
                 }
         return param_dictionary
 
+
 class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
     def __init__(self):
         self.median = None
@@ -96,6 +98,7 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
                 "median": self.median.to_json() if self.median is not None else None,
                 }
         return param_dictionary
+
 
 class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
     def __init__(self, distribution: sp.stats.rv_continuous=sp.stats.norm, params={}, random_state=None):
@@ -128,12 +131,12 @@ class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
                 }
         return param_dictionary
 
+
 class RandomModel(QSPRModel):
     def __init__(
         self,
         base_dir: str,
         alg: RandomDistributionAlgorithm,
-        data: Optional[QSPRDataset] = None,
         name: Optional[str] = None,
         parameters: Optional[dict] = None,
         autoload=True,
@@ -148,14 +151,13 @@ class RandomModel(QSPRModel):
             base_dir (str):
                 base directory of the model,
                 the model files are stored in a subdirectory `{baseDir}/{outDir}/`
-            data (QSPRDataset): data set used to train the model
             name (str): name of the model
             parameters (dict): dictionary of algorithm specific parameters
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
         """
-        super().__init__(base_dir, alg, data, name, parameters, autoload, random_state=random_state)
+        super().__init__(base_dir, alg, name, parameters, autoload, random_state=random_state)
 
     @property
     def supportsEarlyStopping(self) -> bool:
