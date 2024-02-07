@@ -42,11 +42,11 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
     """
     def __init__(self, random_state=None):
         self.ratios = None
-        self.random_state=random_state
-        self.rng = np.random.default_rng(seed=random_state)
+        self.random_state = random_state
 
     def __call__(self, X_test: np.ndarray):
-        y_list = [self.rng.choice(len(self.ratios.values), len(X_test), p=[r[col] for r in self.ratios.values]) for col in range(len(self.ratios.values[0]))]
+        rng = np.random.default_rng(seed=self.random_state)
+        y_list = [rng.choice(len(self.ratios.values), len(X_test), p=[r[col] for r in self.ratios.values]) for col in range(len(self.ratios.values[0]))]
         y = np.column_stack(y_list)
         if y.ndim == 1:
             y = y.reshape(-1, 1)
