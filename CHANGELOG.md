@@ -26,6 +26,8 @@ From v2.1.1 to v3.0.0
 - Fixes to the  `fromMolTable` method in various data set implementations, in particular
   in copying of the feature standardizer and other settings.
 - Fixed not working `cluster` split and `--imputation` from `data_CLI.py`.
+- Fixed a problem with `ProteinDescriptorSet.getDescriptors` returning descriptors in
+  wrong order with `Pandas <v2.2.0`. 
 
 ## Changes
 
