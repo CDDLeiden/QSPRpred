@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import sys
+import typing
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Callable, List, Type, Union
@@ -53,7 +54,7 @@ class QSPRModel(JSONSerializable, ABC):
             Random state to use for all random operations for reproducibility.
     """
 
-    _notJSON = ["data", "estimator"]
+    _notJSON: typing.ClassVar = ["estimator", *JSONSerializable._notJSON]
 
     @staticmethod
     def handleInvalidsInPredictions(
@@ -129,7 +130,6 @@ class QSPRModel(JSONSerializable, ABC):
         self,
         base_dir: str,
         alg: Type | None = None,
-        data: QSPRDataset | None = None,
         name: str | None = None,
         parameters: dict | None = None,
         autoload=True,
@@ -144,8 +144,8 @@ class QSPRModel(JSONSerializable, ABC):
             base_dir (str):
                 base directory of the model,
                 the model files are stored in a subdirectory `{baseDir}/{outDir}/`
-            alg (Type): estimator class
-            data (QSPRDataset): data set used to train the model
+            alg (Type):
+                estimator class
             name (str): name of the model
             parameters (dict): dictionary of algorithm specific parameters
             autoload (bool):
@@ -158,8 +158,6 @@ class QSPRModel(JSONSerializable, ABC):
         if self.name is None:
             raise ValueError("Model name not specified.")
         self.baseDir = os.path.abspath(base_dir.rstrip("/"))
-        # initialize settings from data
-        self.data = None
         self.targetProperties = None
         self.nTargets = None
         self.featureCalculators = None
@@ -171,8 +169,6 @@ class QSPRModel(JSONSerializable, ABC):
             self.__dict__.update(new.__dict__)
             self.name = name or (alg.__class__.__name__ if alg else None)
             self.baseDir = os.path.abspath(base_dir.rstrip("/"))
-            if data is not None:
-                self.initFromData(data)
             if parameters:
                 logger.warning(
                     f"Explicitly specified parameters ({parameters})"
@@ -189,7 +185,6 @@ class QSPRModel(JSONSerializable, ABC):
                 )
                 self.initRandomState(random_state)
         else:
-            self.initFromData(data)
             self.parameters = parameters
             # initialize an estimator instance with the given parameters
             self.alg = alg
@@ -204,13 +199,6 @@ class QSPRModel(JSONSerializable, ABC):
         assert (
             self.alg is not None
         ), "Algorithm class not initialized when it should be."
-        if not autoload and not self.checkForData(exception=False):
-            raise ValueError(
-                "No data set specified. Make sure you "
-                "initialized this model with a 'QSPRDataset' "
-                "instance to train on. Or if you want to load "
-                "a model from file, set 'autoload' to True."
-            )
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""
@@ -225,20 +213,19 @@ class QSPRModel(JSONSerializable, ABC):
     def __setstate__(self, state):
         """Set state."""
         super().__setstate__(state)
-        self.data = None
         if type(self.alg) is str:
             self.alg = dynamic_import(self.alg)
         self.estimator = self.loadEstimator(self.parameters)
 
-    def initFromData(self, data: QSPRDataset | None):
+    def initFromDataset(self, data: QSPRDataset | None):
         if data is not None:
-            self.data = data
-            self.targetProperties = self.data.targetProperties
+            self.targetProperties = data.targetProperties
             self.nTargets = len(self.targetProperties)
-            self.featureCalculators = self.data.descriptorSets
-            self.featureStandardizer = self.data.feature_standardizer
+            self.featureCalculators = data.descriptorSets
+            self.featureStandardizer = data.featureStandardizer
+            if self.randomState is None:
+                self.initRandomState(data.randomState)
         else:
-            self.data = None
             self.targetProperties = None
             self.nTargets = None
             self.featureCalculators = None
@@ -252,20 +239,17 @@ class QSPRModel(JSONSerializable, ABC):
             random_state (int):
                 Random state to use for shuffling and other random operations.
         """
-        new_random_state = random_state or (
-            self.data.randomState if self.data is not None else None
-        )
-        if new_random_state is None:
+        if random_state is None:
             self.randomState = int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
-            logger.warning(
-                "No random state supplied, "
-                "and could not find random state on the dataset."
+            logger.info(
+                "No random state supplied."
+                f"Setting random state to: {self.randomState}."
             )
-        self.randomState = new_random_state
+        self.randomState = random_state
         constructor_params = [
             name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
         ]
-        common_params = ["seed", "random_seed", "random_state"]
+        common_params = ["random_state", "random_seed", "seed"]
         random_param = None
         for seed_param in common_params:
             if seed_param not in constructor_params:
@@ -279,7 +263,7 @@ class QSPRModel(JSONSerializable, ABC):
                             **params,
                         )
                     else:
-                        self.alg(**{seed_param: new_random_state})
+                        self.alg(**{seed_param: random_state})
                     random_param = seed_param
                     break
                 except TypeError:
@@ -289,9 +273,9 @@ class QSPRModel(JSONSerializable, ABC):
                 break
         if random_param is not None:
             if self.parameters:
-                self.parameters.update({random_param: new_random_state})
+                self.parameters.update({random_param: random_state})
             else:
-                self.parameters = {random_param: new_random_state}
+                self.parameters = {random_param: random_state}
             self.estimator = self.loadEstimator(self.parameters)
         elif random_state:
             logger.warning(
@@ -392,16 +376,17 @@ class QSPRModel(JSONSerializable, ABC):
         else:
             self.parameters = params
 
-    def checkForData(self, exception: bool = True) -> bool:
+    def checkData(self, ds: QSPRDataset, exception: bool = True) -> bool:
         """Check if the model has a data set.
 
         Args:
+            ds (QSPRDataset): data set to check
             exception (bool): if true, an exception is raised if no data is set
 
         Returns:
             bool: True if data is set, False otherwise (if exception is False)
         """
-        has_data = self.data is not None
+        has_data = ds is not None
         if exception and not has_data:
             raise ValueError(
                 "No data set specified. "
@@ -425,7 +410,7 @@ class QSPRModel(JSONSerializable, ABC):
                 data matrix and/or target matrix in np.ndarray format
         """
         if isinstance(X, QSPRDataset):
-            X = X.getFeatures(concat=True)
+            X = X.getFeatures(concat=True, refit_standardizer=False)
         if isinstance(X, pd.DataFrame):
             X = X.values
         if y is not None:
@@ -540,6 +525,7 @@ class QSPRModel(JSONSerializable, ABC):
         smiles_standardizer: Union[str, callable] = "chembl",
         n_jobs: int = 1,
         fill_value: float = np.nan,
+        use_applicability_domain: bool = False,
     ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given molecules.
@@ -552,11 +538,15 @@ class QSPRModel(JSONSerializable, ABC):
                 that reads and standardizes smiles.
             n_jobs: Number of jobs to use for parallel processing.
             fill_value: Value to use for missing values in the feature matrix.
+            use_applicability_domain: Use applicability domain to return if a
+                molecule is within the applicability domain of the model.
 
         Returns:
             np.ndarray | list[np.ndarray]:
                 an array of predictions or a list of arrays of predictions
                 (for classification models with use_probas=True)
+            np.ndarray[bool]: boolean mask indicating which molecules fall
+                within the applicability domain of the model
         """
         if not self.featureCalculators:
             raise ValueError("No feature calculator set on this instance.")
@@ -568,6 +558,15 @@ class QSPRModel(JSONSerializable, ABC):
         predictions = self.predictDataset(dataset, use_probas)
         # handle invalids
         predictions = self.handleInvalidsInPredictions(mols, predictions, failed_mask)
+
+        # return predictions and if mols are within applicability domain if requested
+        if hasattr(self, "applicabilityDomain") and use_applicability_domain:
+            in_domain = self.applicabilityDomain.contains(
+                dataset.getFeatures(concat=True)
+            )
+            in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
+            return predictions, in_domain.values
+
         return predictions
 
     def cleanFiles(self):
@@ -578,8 +577,9 @@ class QSPRModel(JSONSerializable, ABC):
         if os.path.exists(self.outDir):
             shutil.rmtree(self.outDir)
 
-    def fitAttached(
+    def fitDataset(
         self,
+        ds: QSPRDataset,
         monitor=None,
         mode=EarlyStoppingMode.OPTIMAL,
         save_model=True,
@@ -593,6 +593,7 @@ class QSPRModel(JSONSerializable, ABC):
         cross-validation with early stopping can be used for fitting the model.
 
         Args:
+            ds (QSPRDataset): data set to fit this model on
             monitor (FitMonitor): monitor for the fitting process, if None, the base
                 monitor is used
             mode (EarlyStoppingMode): early stopping mode for models that support
@@ -600,17 +601,19 @@ class QSPRModel(JSONSerializable, ABC):
                 epochs previously stopped at in model assessment on train or test set,
                 to avoid the use of extra data for a validation set.
             save_model (bool): save the model to file
-            save_data (bool): save the attached dataset to file
+            save_data (bool): save the supplied dataset to file
             kwargs: additional arguments to pass to fit
 
         Returns:
             str: path to the saved model, if `save_model` is True
         """
         # do some checks
-        self.checkForData()
+        self.checkData(ds)
+        # init properties from data
+        self.initFromDataset(ds)
         # get data
-        X_all = self.data.getFeatures(concat=True).values
-        y_all = self.data.getTargetPropertiesValues(concat=True).values
+        X_all = ds.getFeatures(concat=True).values
+        y_all = ds.getTargetPropertiesValues(concat=True).values
         # load estimator
         self.estimator = self.loadEstimator(self.parameters)
         # fit model
@@ -621,8 +624,14 @@ class QSPRModel(JSONSerializable, ABC):
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
+        if (
+            hasattr(ds, "applicabilityDomain")
+            and ds.applicabilityDomain is not None
+        ):
+            ds.applicabilityDomain.fit(X_all)
+            self.applicabilityDomain = ds.applicabilityDomain
         if save_data:
-            self.data.save()
+            ds.save()
         # save model and return path
         if save_model:
             return self.save()
@@ -656,8 +665,8 @@ class QSPRModel(JSONSerializable, ABC):
     @abstractmethod
     def fit(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
         estimator: Any = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         monitor: "FitMonitor" = None,
@@ -676,8 +685,8 @@ class QSPRModel(JSONSerializable, ABC):
             argument is ignored.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            X (pd.DataFrame, np.ndarray): data matrix to fit
+            y (pd.DataFrame, np.ndarray): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
             monitor (FitMonitor): monitor for the fitting process,

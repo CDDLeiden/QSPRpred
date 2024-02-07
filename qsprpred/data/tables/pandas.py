@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-import warnings
 from typing import ClassVar, Callable, Optional, Generator, Any
 
 import numpy as np
@@ -123,7 +122,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         self.df = None
         if df is not None:
             if self._isInStore("df") and not overwrite:
-                warnings.warn(
+                logger.warning(
                     "Existing data set found, but also found a data frame in store. "
                     "Refusing to overwrite data. If you want to overwrite data in "
                     "store, set overwrite=True.",
@@ -159,7 +158,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         o_dict = super().__getstate__()
         os.makedirs(self.storeDir, exist_ok=True)
         if self.storeFormat == "csv":
-            self.df.to_csv(self.storePath)
+            self.df.to_csv(self.storePath, index=False)
         else:
             self.df.to_pickle(self.storePath)
         return o_dict

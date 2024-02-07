@@ -1,4 +1,6 @@
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-autopep8-blue.svg?colorA=24292e&colorB=0366d6&style=flat&longCache=true&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAM6wAADOsB5dZE0gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAERSURBVCiRhZG/SsMxFEZPfsVJ61jbxaF0cRQRcRJ9hlYn30IHN/+9iquDCOIsblIrOjqKgy5aKoJQj4O3EEtbPwhJbr6Te28CmdSKeqzeqr0YbfVIrTBKakvtOl5dtTkK+v4HfA9PEyBFCY9AGVgCBLaBp1jPAyfAJ/AAdIEG0dNAiyP7+K1qIfMdonZic6+WJoBJvQlvuwDqcXadUuqPA1NKAlexbRTAIMvMOCjTbMwl1LtI/6KWJ5Q6rT6Ht1MA58AX8Apcqqt5r2qhrgAXQC3CZ6i1+KMd9TRu3MvA3aH/fFPnBodb6oe6HM8+lYHrGdRXW8M9bMZtPXUji69lmf5Cmamq7quNLFZXD9Rq7v0Bpc1o/tp0fisAAAAASUVORK5CYII=)](https://github.com/marketplace/actions/autopep8)
+[**Main**](https://github.com/CDDLeiden/QSPRpred/) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
+
+[**Dev**](https://github.com/CDDLeiden/QSPRpred/tree/dev) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
 
 QSPRpred
 ====================
@@ -93,13 +95,13 @@ document the use of the Python API to build different types of models. The tutor
 well as the documentation are still work in progress, and we will be happy for any
 contributions where it is still lacking.
 
-To use the commandline to train the same QSAR model as in the tutorial use (run from
-tutorial folder):
+Contributions
+=============
 
-```bash
-python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o qspr/data -pr GABAAalpha -pr NMDA -r true -sp random -sf 0.15 -fe Morgan
-python -m qsprpred.model_CLI -dp ./qspr/data/GABAAalpha_REGRESSION_df.pkl -o ./qspr/models -m PLS -o bayes -nt 5 -me -s
-```
+Contributions and issue reports are more than welcome. Pull requests can be made
+directly to the `main` branch and we will transfer them
+to [contrib](https://github.com/CDDLeiden/QSPRpred/tree/contrib) when scheduled for the
+next release.
 
 Workflow
 ========

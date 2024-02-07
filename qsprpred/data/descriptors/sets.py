@@ -236,7 +236,7 @@ class DrugExPhyschem(DescriptorSet):
         if physchem_props:
             self.props = physchem_props
         else:
-            self.props = list(self._prop_dict.keys())
+            self.props = sorted(self._prop_dict.keys())
 
     def getDescriptors(self, mols, props, *args, **kwargs):
         """Calculate the DrugEx properties for a molecule."""
@@ -307,25 +307,27 @@ class RDKitDescs(DescriptorSet):
         self, rdkit_descriptors: list[str] | None = None, include_3d: bool = False
     ):
         super().__init__()
-        self._descriptors = (
+        self.descriptors = (
             rdkit_descriptors
             if rdkit_descriptors is not None
             else sorted({x[0] for x in Descriptors._descList})
         )
         if include_3d:
-            self.descriptors = [
-                *self.descriptors,
-                "Asphericity",
-                "Eccentricity",
-                "InertialShapeFactor",
-                "NPR1",
-                "NPR2",
-                "PMI1",
-                "PMI2",
-                "PMI3",
-                "RadiusOfGyration",
-                "SpherocityIndex",
-            ]
+            self.descriptors = sorted(
+                [
+                    *self.descriptors,
+                    "Asphericity",
+                    "Eccentricity",
+                    "InertialShapeFactor",
+                    "NPR1",
+                    "NPR2",
+                    "PMI1",
+                    "PMI2",
+                    "PMI3",
+                    "RadiusOfGyration",
+                    "SpherocityIndex",
+                ]
+            )
         self.include3D = include_3d
 
     def getDescriptors(
@@ -338,7 +340,7 @@ class RDKitDescs(DescriptorSet):
             try:
                 scores[i] = calc.CalcDescriptors(mol)
             except AttributeError:
-                continue
+                scores[i] = [np.nan] * len(self.descriptors)
         return scores
 
     @property

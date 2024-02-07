@@ -11,6 +11,7 @@ from sklearn.model_selection import KFold
 from .early_stopping import EarlyStoppingMode
 from .models import QSPRModel
 from .monitors import AssessorMonitor, BaseMonitor
+from ..data import QSPRDataset
 from ..data.sampling.splits import DataSplit
 from ..logs import logger
 from ..models.metrics import SklearnMetrics
@@ -60,6 +61,7 @@ class ModelAssessor(ABC):
     def __call__(
         self,
         model: QSPRModel,
+        ds: QSPRDataset,
         save: bool = True,
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
@@ -69,6 +71,7 @@ class ModelAssessor(ABC):
 
         Args:
             model (QSPRModel): model to evaluate
+            ds (QSPRDataset): dataset to evaluate on
             save (bool): save predictions to file
             parameters (dict): parameters to use for the evaluation
             monitor (AssessorMonitor): monitor to track the evaluation, overrides
@@ -103,7 +106,7 @@ class ModelAssessor(ABC):
             y.values, columns=y.add_suffix("_Label").columns, index=index
         )
         # Add predictions to dataframe
-        for idx, prop in enumerate(model.data.targetProperties):
+        for idx, prop in enumerate(model.targetProperties):
             if prop.task.isClassification() and self.useProba:
                 # convert one-hot encoded predictions to class labels
                 # and add to train and test
@@ -159,6 +162,7 @@ class CrossValAssessor(ModelAssessor):
     def __call__(
         self,
         model: QSPRModel,
+        ds: QSPRDataset,
         save: bool = True,
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
@@ -168,6 +172,7 @@ class CrossValAssessor(ModelAssessor):
 
         Arguments:
             model (QSPRModel): model to assess
+            ds (QSPRDataset): dataset to assess on
             scoring (str | Callable): scoring function to use
             save (bool): whether to save predictions to file
             parameters (dict): optional model parameters to use in assessment
@@ -179,24 +184,21 @@ class CrossValAssessor(ModelAssessor):
             column represents a task and each row a fold. Otherwise, a 1D array is
             returned with the scores for each fold.
         """
+        model.initFromDataset(ds)
         monitor = monitor or self.monitor
-        model.checkForData()
-        data = model.data
         split = self.split or KFold(
             n_splits=5, shuffle=True, random_state=model.randomState
         )
         evalparams = model.parameters if parameters is None else parameters
-        # check if data is available
-        model.checkForData()
-        X, _ = model.data.getFeatures()
-        y, _ = model.data.getTargetPropertiesValues()
-        monitor.onAssessmentStart(model, self.__class__.__name__)
+        X, _ = ds.getFeatures()
+        y, _ = ds.getTargetPropertiesValues()
+        monitor.onAssessmentStart(model, ds, self.__class__.__name__)
         # cross validation
         fold_counter = np.zeros(y.shape[0])
         predictions = []
         scores = []
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(
-            data.iterFolds(split=split)
+            ds.iterFolds(split=split)
         ):
             logger.debug(
                 "cross validation fold %s started: %s"
@@ -223,10 +225,9 @@ class CrossValAssessor(ModelAssessor):
             # score
             if model.isMultiTask and self.splitMultitaskScores:
                 scores_tasks = []
-                for idx, prop in enumerate(model.data.targetProperties):
+                for idx, prop in enumerate(model.targetProperties):
                     if self.useProba and prop.task.isClassification():
-                        prop_predictions = fold_predictions[idx]
-                        prop_predictions = prop_predictions[:, 1]
+                        prop_predictions = [fold_predictions[idx]]
                         scores_tasks.append(
                             self.scoreFunc(y.iloc[idx_test, idx], prop_predictions)
                         )
@@ -293,6 +294,7 @@ class TestSetAssessor(ModelAssessor):
     def __call__(
         self,
         model: QSPRModel,
+        ds: QSPRDataset,
         save: bool = True,
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
@@ -302,6 +304,7 @@ class TestSetAssessor(ModelAssessor):
 
         Arguments:
             model (QSPRModel): model to assess
+            ds (QSPRDataset): dataset to assess on
             scoring (str | Callable): scoring function to use
             save (bool): whether to save predictions to file
             parameters (dict): optional model parameters to use in assessment
@@ -314,13 +317,12 @@ class TestSetAssessor(ModelAssessor):
             column represents a task. Otherwise, a 1D array is returned with the score
             for the test set.
         """
+        model.initFromDataset(ds)
         monitor = monitor or self.monitor
         evalparams = model.parameters if parameters is None else parameters
-        # check if data is available
-        model.checkForData()
-        X, X_ind = model.data.getFeatures()
-        y, y_ind = model.data.getTargetPropertiesValues()
-        monitor.onAssessmentStart(model, self.__class__.__name__)
+        X, X_ind = ds.getFeatures()
+        y, y_ind = ds.getTargetPropertiesValues()
+        monitor.onAssessmentStart(model, ds, self.__class__.__name__)
         monitor.onFoldStart(fold=0, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind)
         # fit model
         ind_estimator = model.loadEstimator(evalparams)
@@ -335,10 +337,9 @@ class TestSetAssessor(ModelAssessor):
         # score
         if model.isMultiTask and self.splitMultitaskScores:
             scores_tasks = []
-            for idx, prop in enumerate(model.data.targetProperties):
+            for idx, prop in enumerate(model.targetProperties):
                 if self.useProba and prop.task.isClassification():
-                    prop_predictions = predictions[idx]
-                    prop_predictions = prop_predictions[:, 1]
+                    prop_predictions = [predictions[idx]]
                     scores_tasks.append(
                         self.scoreFunc(y_ind.iloc[:, idx], prop_predictions)
                     )

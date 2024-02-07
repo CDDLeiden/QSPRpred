@@ -27,7 +27,10 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
+    "sphinx_design",
+    "sphinx_design_elements",
 ]
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.10', None)}

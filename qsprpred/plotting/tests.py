@@ -25,9 +25,7 @@ class PlottingTest(ModelDataSetsPathMixIn, QSPRTestCase):
         super().setUp()
         self.setUpPaths()
 
-    def getModel(
-        self, dataset: QSPRDataset, name: str, alg: Type = RandomForestClassifier
-    ) -> SklearnModel:
+    def getModel(self, name: str, alg: Type = RandomForestClassifier) -> SklearnModel:
         """Get a model for testing.
 
         Args:
@@ -45,7 +43,6 @@ class PlottingTest(ModelDataSetsPathMixIn, QSPRTestCase):
         """
         return SklearnModel(
             name=name,
-            data=dataset,
             base_dir=self.generatedModelsPath,
             alg=alg,
         )
@@ -65,10 +62,10 @@ class ROCPlotTest(PlottingTest):
             target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
             preparation_settings=self.getDefaultPrep(),
         )
-        model = self.getModel(dataset, "test_roc_plot_single_model")
+        model = self.getModel("test_roc_plot_single_model")
         score_func = "roc_auc_ovr"
-        CrossValAssessor(scoring=score_func)(model)
-        TestSetAssessor(scoring=score_func)(model)
+        CrossValAssessor(scoring=score_func)(model, dataset)
+        TestSetAssessor(scoring=score_func)(model, dataset)
         model.save()
         # make plots
         plt = ROCPlot([model])
@@ -113,10 +110,10 @@ class MetricsPlotTest(PlottingTest):
             ],
             preparation_settings=self.getDefaultPrep(),
         )
-        model = self.getModel(dataset, f"test_metrics_plot_single_{task}_model")
+        model = self.getModel(f"test_metrics_plot_single_{task}_model")
         score_func = "roc_auc_ovr"
-        CrossValAssessor(scoring=score_func)(model)
-        TestSetAssessor(scoring=score_func)(model)
+        CrossValAssessor(scoring=score_func)(model, dataset)
+        TestSetAssessor(scoring=score_func)(model, dataset)
         model.save()
         # generate metrics plot and associated files
         plt = MetricsPlot([model])
@@ -139,12 +136,10 @@ class CorrPlotTest(PlottingTest):
         dataset = self.createLargeTestDataSet(
             "test_corr_plot_single_data", preparation_settings=self.getDefaultPrep()
         )
-        model = self.getModel(
-            dataset, "test_corr_plot_single_model", alg=RandomForestRegressor
-        )
+        model = self.getModel("test_corr_plot_single_model", alg=RandomForestRegressor)
         score_func = "r2"
-        CrossValAssessor(scoring=score_func)(model)
-        TestSetAssessor(scoring=score_func)(model)
+        CrossValAssessor(scoring=score_func)(model, dataset)
+        TestSetAssessor(scoring=score_func)(model, dataset)
         model.save()
         # generate metrics plot and associated files
         plt = CorrelationPlot([model])
@@ -171,14 +166,14 @@ class WilliamsPlotTest(PlottingTest):
         # to avoid error in WilliamsPlot
         dataset.filterFeatures([LowVarianceFilter(0.23)])
         model = self.getModel(
-            dataset, "test_williams_plot_single_model", alg=RandomForestRegressor
+            "test_williams_plot_single_model", alg=RandomForestRegressor
         )
         score_func = "r2"
-        CrossValAssessor(scoring=score_func)(model)
-        TestSetAssessor(scoring=score_func)(model)
+        CrossValAssessor(scoring=score_func)(model, dataset)
+        TestSetAssessor(scoring=score_func)(model, dataset)
         model.save()
         # generate metrics plot and associated files
-        plt = WilliamsPlot([model])
+        plt = WilliamsPlot([model], [dataset])
         g, leverages, hstar = plt.make()
         self.assertIsInstance(leverages, pd.DataFrame)
         self.assertIsInstance(hstar, dict)
@@ -218,10 +213,10 @@ class ConfusionMatrixPlotTest(PlottingTest):
             ],
             preparation_settings=self.getDefaultPrep(),
         )
-        model = self.getModel(dataset, f"test_cm_plot_single_{task}_model")
+        model = self.getModel(f"test_cm_plot_single_{task}_model")
         score_func = "roc_auc_ovr"
-        CrossValAssessor(scoring=score_func)(model)
-        TestSetAssessor(scoring=score_func)(model)
+        CrossValAssessor(scoring=score_func)(model, dataset)
+        TestSetAssessor(scoring=score_func)(model, dataset)
         model.save()
         # make plots
         plt = ConfusionMatrixPlot([model])

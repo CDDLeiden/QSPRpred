@@ -68,7 +68,7 @@ class BenchmarkRunner:
             self.replicaID = replica_id
             self.exception = exception
 
-    logLevel = logging.DEBUG
+    logLevel = logging.WARNING
 
     def __init__(
         self,

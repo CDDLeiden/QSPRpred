@@ -1,5 +1,8 @@
 import logging
+import os
 import sys
+
+verbose = os.environ.get("QSPRPRED_VERBOSE_LOGGING", "false").lower() == "true"
 
 logger = None
 if not logger:
@@ -7,10 +10,14 @@ if not logger:
     logger.setLevel(logging.WARNING)
     sh = logging.StreamHandler()
     sh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        "%(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(message)s"
-    )
-    sh.setFormatter(formatter)
+    if verbose:
+        formatter = logging.Formatter(
+            "%(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(message)s"
+        )
+        sh.setFormatter(formatter)
+    else:
+        formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+        sh.setFormatter(formatter)
     logger.addHandler(sh)
 
 

@@ -85,11 +85,14 @@ class AssessorMonitor(FitMonitor):
     """Base class for monitoring the assessment of a model."""
 
     @abstractmethod
-    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+    def onAssessmentStart(
+        self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+    ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
+            data (QSPRDataset): data set used in assessment
             assesment_type (str): type of assessment
         """
 
@@ -130,7 +133,6 @@ class AssessorMonitor(FitMonitor):
             model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
-            predictions (pd.DataFrame): predictions of the current fold
         """
 
 
@@ -139,12 +141,13 @@ class HyperparameterOptimizationMonitor(AssessorMonitor):
 
     @abstractmethod
     def onOptimizationStart(
-        self, model: QSPRModel, config: dict, optimization_type: str
+        self, model: QSPRModel, data: QSPRDataset, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
+            data (QSPRDataset): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -237,11 +240,14 @@ class NullMonitor(HyperparameterOptimizationMonitor):
             loss (float): loss of the current batch
         """
 
-    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+    def onAssessmentStart(
+        self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+    ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
+            data (QSPRDataset): data set used in assessment
             assesment_type (str): type of assessment
         """
 
@@ -279,16 +285,16 @@ class NullMonitor(HyperparameterOptimizationMonitor):
             model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
-            predictions (pd.DataFrame): predictions of the current fold
         """
 
     def onOptimizationStart(
-        self, model: QSPRModel, config: dict, optimization_type: str
+        self, model: QSPRModel, data: QSPRDataset, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
+            data (QSPRDataset): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -402,15 +408,18 @@ class ListMonitor(HyperparameterOptimizationMonitor):
         for monitor in self.monitors:
             monitor.onBatchEnd(batch, loss)
 
-    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+    def onAssessmentStart(
+        self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+    ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
+            data (QSPRDataset): data set used in assessment
             assesment_type (str): type of assessment
         """
         for monitor in self.monitors:
-            monitor.onAssessmentStart(model, assesment_type)
+            monitor.onAssessmentStart(model, data, assesment_type)
 
     def onAssessmentEnd(self, predictions: pd.DataFrame):
         """Called after the assessment has finished.
@@ -450,23 +459,23 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
-            predictions (pd.DataFrame): predictions of the current fold
         """
         for monitor in self.monitors:
             monitor.onFoldEnd(model_fit, fold_predictions)
 
     def onOptimizationStart(
-        self, model: QSPRModel, config: dict, optimization_type: str
+        self, model: QSPRModel, data: QSPRDataset, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
+            data (QSPRDataset): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
         for monitor in self.monitors:
-            monitor.onOptimizationStart(model, config, optimization_type)
+            monitor.onOptimizationStart(model, data, config, optimization_type)
 
     def onOptimizationEnd(self, best_score: float, best_parameters: dict):
         """Called after the hyperparameter optimization has finished.
@@ -506,26 +515,37 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
     internally, but not logged. This class can be used as a base class for other
     other monitors that do log the information elsewhere.
 
+    If used to monitor hyperparameter optimization, the information about the
+    underlying assessments and fits is stored in the assessments and fits
+    attributes, respectively. If used to monitor assessment, the information
+    about the fits is stored in the fits attribute.
+
     Attributes:
         config (dict): configuration of the hyperparameter optimization
         bestScore (float): best score found during optimization
         bestParameters (dict): best parameters found during optimization
         assessments (dict): dictionary of assessments, keyed by the iteration number
+            (each assessment includes: assessmentModel, assessmentDataset, foldData,
+                predictions, estimators, fits)
         scores (pd.DataFrame): scores for each hyperparameter search iteration
         model (QSPRModel): model to optimize
         data (QSPRDataset): dataset used in optimization
+
         assessmentType (str): type of current assessment
         assessmentModel (QSPRModel): model to assess in current assessment
         assessmentDataset (QSPRDataset): data set used in current assessment
         foldData (dict): dictionary of input data, keyed by the fold index, of the
             current assessment
-        predictions (np.ndarray): predictions of the current fold of the
-            current assessment
+        predictions (pd.DataFrame): predictions for the dataset of the current assessment
         estimators (dict): dictionary of fitted estimators, keyed by the fold index of
             the current assessment
         currentFold (int): index of the current fold of the
             current assessment
         fits (dict): dictionary of fit data, keyed by the fold index of the current
+            assessment (each fit includes: fitData, fitLog, batchLog, bestEstimator,
+                bestEpoch)
+
+        fitData (dict): dictionary of input data of the current fit of the current
             assessment
         fitModel (QSPRModel): model to fit in current fit of the current assessment
         fitLog (pd.DataFrame): log of the training process of the current fit of the
@@ -543,6 +563,9 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
     """
 
     def __init__(self):
+        self.data = None
+        self.model = None
+        self.optimizationType = None
         # hyperparameter optimization data
         self.config = None
         self.bestScore = None
@@ -589,19 +612,20 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         super().__setstate__(state)
 
     def onOptimizationStart(
-        self, model: QSPRModel, config: dict, optimization_type: str
+        self, model: QSPRModel, data: QSPRDataset, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
+            data (QSPRDataset): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
         self.optimizationType = optimization_type
         self.iteration = 0
         self.model = model
-        self.data = model.data
+        self.data = data
         self.config = config
 
     def onOptimizationEnd(self, best_score: float, best_parameters: dict):
@@ -635,15 +659,18 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self._clear_assessment()
         self.iteration += 1
 
-    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+    def onAssessmentStart(
+        self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+    ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
+            data (QSPRDataset): data set used in assessment
             assesment_type (str): type of assessment
         """
         self.assessmentModel = model
-        self.assessmentDataset = model.data
+        self.assessmentDataset = data
         self.assessmentType = assesment_type
 
     def onAssessmentEnd(self, predictions: pd.DataFrame):
@@ -726,6 +753,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
 
         Args:
             model (QSPRModel): model to be fitted
+            data (QSPRDataset): data set used in training
             X_train (np.ndarray): training data
             y_train (np.ndarray): training targets
             X_val (np.ndarray | None): validation data, used for early stopping
@@ -827,16 +855,17 @@ class FileMonitor(BaseMonitor):
         self.outDir = None
 
     def onOptimizationStart(
-        self, model: QSPRModel, config: dict, optimization_type: str
+        self, model: QSPRModel, data: QSPRDataset, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
+            data (QSPRDataset): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
-        super().onOptimizationStart(model, config, optimization_type)
+        super().onOptimizationStart(model, data, config, optimization_type)
         self.outDir = self.outDir or model.outDir
         self.optimizationPath = f"{self.outDir}/{self.optimizationType}"
 
@@ -873,14 +902,17 @@ class FileMonitor(BaseMonitor):
                 index=False,
             )
 
-    def onAssessmentStart(self, model: QSPRModel, assesment_type: str):
+    def onAssessmentStart(
+        self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+    ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
+            data (QSPRDataset): data set used in assessment
             assesment_type (str): type of assessment
         """
-        super().onAssessmentStart(model, assesment_type)
+        super().onAssessmentStart(model, data, assesment_type)
         self.outDir = self.outDir or model.outDir
         if self.saveAssessments:
             if self.iteration is not None:
@@ -1020,8 +1052,6 @@ class WandBMonitor(BaseMonitor):
         Args:
             model_fit (Any |tuple[Any, int]):
                 fitted estimator of the current fold
-            predictions (pd.DataFrame):
-                predictions of the current fold
         """
         super().onFoldEnd(model_fit, fold_predictions)
 
@@ -1103,7 +1133,6 @@ class WandBMonitor(BaseMonitor):
         Args:
             batch (int): index of the current batch
             loss (float): loss of the current batch
-            predictions (np.ndarray): predictions of the current batch
         """
         super().onBatchEnd(batch, loss)
         self.wandb.log({"batch": batch, "loss": loss})

@@ -18,9 +18,30 @@ From v2.1.1 to v3.0.0
 - Improved behavior of the Papyrus data source (does not attempt to connect to the
   internet if the data set already exists).
 - It is now possible to define new descriptor sets outside the package without errors.
+- Basic consistency of models is also checked in the unit test suite, including in
+  the `qsprpred.extra` package.
+- Fixed a problem with feature standardizer being retrained on prediction data when a
+  prediction from SMILES was invoked. This affected all versions of the package higher
+  or equal to `v2.1.0`.
+- Fixes to the  `fromMolTable` method in various data set implementations, in particular
+  in copying of the feature standardizer and other settings.
+- Fixed not working `cluster` split and `--imputation` from `data_CLI.py`.
 
 ## Changes
 
+- The model is now independent of data sets. This means that the model no longer
+  contains a reference to the data set it was trained on.
+    - The `fitAttached` method was replaced with `fitDataset`, which takes the data set
+      as
+      an argument.
+    - Assessors now also accept a data set as a second argument. Therefore, the same
+      assessor
+      can be used to assess different data sets with the same model settings.
+    - The monitoring API was also slightly modified to reflect this change.
+    - If a model requires initialization of some settings from data, this can be done in
+      its `initFromDataset` method, which takes the data set as an argument. This method
+      is called automatically before fitting, model assessment, and hyperparameter
+      optimization.
 - The whole package was refactored to simplify certain commonly used imports. The
   tutorial code was adjusted to reflect that.
 - The jupyter notebooks in the tutorial now pass a random state to ensure consistent
@@ -32,7 +53,7 @@ From v2.1.1 to v3.0.0
 - `TargetProperty.fromList` and `TargetProperty.fromDict` now accept a both a string and
   a `TargetTask` as the `task` argument,
   without having to set the `task_from_str` argument, which is now deprecated.
-- Make `EarlyStopping.mode` flexible for `QSPRModel.fitAttached`.
+- Make `EarlyStopping.mode` flexible for `QSPRModel.fitDataset`.
 - `save_params` argument added to `OptunaOptimization` to save the best hyperparameters
   to the model (default: `True`).
 - We now use `jsonpickle` for object serialization, which is more flexible than the
@@ -40,7 +61,7 @@ From v2.1.1 to v3.0.0
   with this version.
 - `SklearnMetric` was renamed to `SklearnMetrics`, it now also accepts an scikit-learn
   scorer name as input.
-- `QSPRModel.fitAttached` now accepts a `save_model` (default: `True`)
+- `QSPRModel.fitDataset` now accepts a `save_model` (default: `True`)
   and `save_dataset` (default: `False`) argument to save the model and dataset to a file
   after fitting.
 - Tutorials were completely rewritten and expanded. They can now be found in
@@ -108,6 +129,8 @@ From v2.1.1 to v3.0.0
 - Data sets can now be optionally stored in the `csv` format and not just as a pickle
   file. This makes it easier to debug and share data sets, but it is slower to load and
   save.
+- Added `ApplicabilityDomain` class to calculate applicability domain and filter
+  outliers from test sets.
 
 ## Removed Features
 

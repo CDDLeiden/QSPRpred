@@ -10,15 +10,14 @@ import pandas as pd
 import torch
 from sklearn.model_selection import ShuffleSplit
 
+from qsprpred.tasks import ModelTasks
 from .. import DEFAULT_TORCH_DEVICE, DEFAULT_TORCH_GPUS
 from ....data.sampling.splits import DataSplit
 from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.neural_network import STFullyConnected
-from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.models import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
-from qsprpred.tasks import ModelTasks
 
 
 class DNNModel(QSPRModel):
@@ -29,7 +28,6 @@ class DNNModel(QSPRModel):
 
     Attributes:
         name (str): name of the model
-        data (QSPRDataset): data set used to train the model
         alg (estimator): estimator instance or class
         parameters (dict): dictionary of algorithm specific parameters
         estimator (object):
@@ -60,11 +58,11 @@ class DNNModel(QSPRModel):
             number of epochs to wait before early stop
             if no progress on validation set score
     """
+
     def __init__(
         self,
         base_dir: str,
         alg: Type = STFullyConnected,
-        data: QSPRDataset | None = None,
         name: str | None = None,
         parameters: dict | None = None,
         random_state: int | None = None,
@@ -82,8 +80,6 @@ class DNNModel(QSPRModel):
                 a subdirectory `{baseDir}/{outDir}/`
             alg (Type, optional):
                 model class or instance. Defaults to STFullyConnected.
-            data (QSPRDataset, optional):
-                data set used to train the model. Defaults to None.
             name (str, optional):
                 name of the model. Defaults to None.
             parameters (dict, optional):
@@ -110,16 +106,11 @@ class DNNModel(QSPRModel):
         super().__init__(
             base_dir,
             alg,
-            data,
             name,
             parameters,
             autoload=autoload,
             random_state=random_state,
         )
-        if self.task.isMultiTask():
-            raise NotImplementedError(
-                "Multitask modelling is not implemented for DNNModel models."
-            )
 
     def initRandomState(self, random_state):
         """Set random state if applicable.
@@ -128,17 +119,7 @@ class DNNModel(QSPRModel):
         Args:
             random_state (int): Random state to use for shuffling and other random operations.
         """
-        new_random_state = random_state or (
-            self.data.randomState if self.data is not None else
-            int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
-        )
-        self.randomState = new_random_state
-        if new_random_state is None:
-            logger.warning(
-                "No random state supplied, "
-                "and could not find random state on the dataset."
-            )
-        self.randomState = random_state
+        super().initRandomState(random_state)
         if random_state is not None:
             torch.manual_seed(random_state)
 
@@ -146,6 +127,15 @@ class DNNModel(QSPRModel):
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""
         return True
+
+    def initFromDataset(self, data: QSPRDataset | None):
+        super().initFromDataset(data)
+        if self.targetProperties[0].task.isRegression():
+            self.nClass = 1
+        elif data is not None:
+            self.nClass = self.targetProperties[0].nClasses
+        if data is not None:
+            self.nDim = data.getFeatures()[0].shape[1]
 
     def loadEstimator(self, params: dict | None = None) -> object:
         """Load model from file or initialize new model.
@@ -156,13 +146,8 @@ class DNNModel(QSPRModel):
         Returns:
             model (object): model instance
         """
-        self.initRandomState(self.randomState)
-        if self.task.isRegression():
-            self.nClass = 1
-        elif self.data is not None:
-            self.nClass = self.data.targetProperties[0].nClasses
-        if self.data is not None:
-            self.nDim = self.data.X.shape[1]
+        if self.nClass is None or self.nDim is None:
+            return "Uninitialized model."
         # initialize model
         estimator = self.alg(
             n_dim=self.nDim,
@@ -227,8 +212,8 @@ class DNNModel(QSPRModel):
     @early_stopping
     def fit(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
         estimator: Any | None = None,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
         split: DataSplit | None = None,
@@ -238,8 +223,8 @@ class DNNModel(QSPRModel):
         """Fit the model to the given data matrix or `QSPRDataset`.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            X (pd.DataFrame, np.ndarray): data matrix to fit
+            y (pd.DataFrame, np.ndarray): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
             split (DataSplit): data split to use for early stopping,
@@ -252,10 +237,14 @@ class DNNModel(QSPRModel):
             int, optional: in case of early stopping, the number of iterations
                 after which the model stopped training
         """
+        if self.task.isMultiTask():
+            raise NotImplementedError(
+                "Multitask modelling is not implemented for this model."
+            )
         monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
         split = split or ShuffleSplit(
-            n_splits=1, test_size=0.1, random_state=self.data.randomState
+            n_splits=1, test_size=0.1, random_state=self.randomState
         )
         X, y = self.convertToNumpy(X, y)
         # fit with early stopping
@@ -264,11 +253,7 @@ class DNNModel(QSPRModel):
             # and validation set for early stopping
             train_index, val_index = next(split.split(X, y))
             monitor.onFitStart(
-                self,
-                X[train_index, :],
-                y[train_index],
-                X[val_index, :],
-                y[val_index]
+                self, X[train_index, :], y[train_index], X[val_index, :], y[val_index]
             )
             estimator_fit = estimator.fit(
                 X[train_index, :],
@@ -288,9 +273,7 @@ class DNNModel(QSPRModel):
         return estimator_fit
 
     def predict(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predict`."""
         estimator = self.estimator if estimator is None else estimator
@@ -302,9 +285,7 @@ class DNNModel(QSPRModel):
             return scores[0]
 
     def predictProba(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predictProba`."""
         estimator = self.estimator if estimator is None else estimator

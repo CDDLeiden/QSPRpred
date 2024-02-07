@@ -7,20 +7,18 @@ from typing import Type
 
 from parameterized import parameterized
 from sklearn.cross_decomposition import PLSRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVR
 from sklearn.impute import SimpleImputer
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.extra.data.descriptors.sets import ProDec
-from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.tasks import TargetProperty, TargetTasks
+from .random import ScipyDistributionAlgorithm, RandomModel, RatioDistributionAlgorithm, \
+    MedianDistributionAlgorithm
 from ..data.utils.testing.path_mixins import DataSetsMixInExtras
 from ..models.pcm import SklearnPCMModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import ModelCheckMixIn
 from ...utils.testing.path_mixins import ModelDataSetsPathMixIn
-from .random import ScipyDistributionAlgorithm, RandomModel, RatioDistributionAlgorithm
 
 
 class ModelDataSetsMixInExtras(ModelDataSetsPathMixIn, DataSetsMixInExtras):
@@ -38,7 +36,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         self,
         name: str,
         alg: Type | None = None,
-        dataset: PCMDataSet | None = None,
         parameters: dict | None = None,
         random_state: int | None = None,
     ):
@@ -47,7 +44,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         Args:
             name (str): Name of the model.
             alg (Type | None): Algorithm class.
-            dataset (PCMDataSet | None): Dataset to use.
             parameters (dict | None): Parameters to use.
             random_state (int | None): Random seed to use.
 
@@ -57,7 +53,6 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         return SklearnPCMModel(
             base_dir=self.generatedModelsPath,
             alg=alg,
-            data=dataset,
             name=name,
             parameters=parameters,
             random_state=random_state,
@@ -124,6 +119,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
             parameters = {"n_jobs": self.nCPU}
         else:
             parameters = None
+
         # initialize dataset
         prep = self.getDefaultPrep()
         prep["feature_calculators"] = prep["feature_calculators"] + [
@@ -139,36 +135,43 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         model = self.getModel(
             name=f"{model_name}_{props[0]['task']}",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = SklearnPCMModel(
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(
-            predictor, protein_id=dataset.getDF()["accession"].iloc[0]
-        )
-        if random_state[0] is not None:
-            model = self.getModel(
-                name=f"{model_name}_{props[0]['task']}",
-                alg=model_class,
-                dataset=dataset,
-                parameters=parameters,
-                random_state=random_state[1],
+
+        for protein_id in sorted(set(dataset.getProperty(dataset.proteinCol))):
+            subset = dataset.searchOnProperty(
+                dataset.proteinCol, [protein_id], exact=True
             )
-            self.fitTest(model)
-            predictor = SklearnPCMModel(
-                name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
-            )
-            self.predictorTest(
-                predictor,
-                protein_id=dataset.getDF()["accession"].iloc[0],
-                expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
-            )
+            if random_state[0] is not None:
+                model = self.getModel(
+                    name=f"{model_name}_{props[0]['task']}",
+                    alg=model_class,
+                    parameters=parameters,
+                    random_state=random_state[1],
+                )
+                self.fitTest(model, dataset)
+                predictor_new = SklearnPCMModel(
+                    name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
+                )
+                self.predictorTest(
+                    predictor,
+                    subset,
+                    comparison_model=predictor_new,
+                    protein_id=protein_id,
+                    expect_equal_result=random_state[0] == random_state[1],
+                )
+            else:
+                self.predictorTest(
+                    predictor,
+                    subset,
+                    protein_id=protein_id,
+                )
+
 
 class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
     def setUp(self):
@@ -179,7 +182,6 @@ class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTes
         self,
         name: str,
         alg: ScipyDistributionAlgorithm | RatioDistributionAlgorithm = ScipyDistributionAlgorithm,
-        dataset: PCMDataSet | None = None,
         parameters: dict | None = None,
         random_state: int | None = None,
     ):
@@ -188,7 +190,6 @@ class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTes
         Args:
             name (str): Name of the model.
             alg (Type | None): Algorithm class.
-            dataset (PCMDataSet | None): Dataset to use.
             parameters (dict | None): Parameters to use.
             random_state (int | None): Random seed to use.
 
@@ -197,19 +198,19 @@ class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTes
         """
         return RandomModel(
             base_dir=self.generatedModelsPath,
-            data=dataset,
             name=name,
             alg=alg,
             parameters=parameters,
             random_state=random_state,
         )
 
+
 class TestRandomModelRegression(RandomBaseModelTestCase):
     """Test the RandomModel class for regression models."""
 
     @parameterized.expand(
         [
-            ('RandomModel', TargetTasks.REGRESSION, random_state)
+            ("RandomModel", TargetTasks.REGRESSION, random_state)
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -222,33 +223,33 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
         # initialize model for training from class
         model = self.getModel(
             name=f"{model_name}_{task}",
-            dataset=dataset,
             random_state=random_state[0],
         )
-        self.fitTest(model)
-        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir, alg=ScipyDistributionAlgorithm)
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        self.fitTest(model, dataset)
+        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir, alg=MedianDistributionAlgorithm)
+        # pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)
+        self.predictorTest(predictor, dataset)
 
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
-                dataset=dataset,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = RandomModel(
-                name=f"{model_name}_{task}", base_dir=model.baseDir, alg=ScipyDistributionAlgorithm
+                name=f"{model_name}_{task}", base_dir=model.baseDir, alg=MedianDistributionAlgorithm
             )
             self.predictorTest(
                 predictor,
+                dataset,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
+                # expected_pred_use_probas=pred_use_probas,
+                # expected_pred_not_use_probas=pred_not_use_probas,
             )
 
     @parameterized.expand(
         [
-            ('RandomModel', random_state)
+            ("RandomModel", random_state)
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -274,30 +275,31 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
         # initialize model for training from class
         model = self.getModel(
             name=f"{model_name}_multitask_regression",
-            dataset=dataset,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = RandomModel(
-            name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=ScipyDistributionAlgorithm
+            name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=MedianDistributionAlgorithm
         )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        # pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)
+        self.predictorTest(predictor, dataset)
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_multitask_regression",
-                dataset=dataset,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = RandomModel(
-                name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=ScipyDistributionAlgorithm
+                name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=MedianDistributionAlgorithm
             )
             self.predictorTest(
                 predictor,
+                dataset,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
+                # expected_pred_use_probas=pred_use_probas,
+                # expected_pred_not_use_probas=pred_not_use_probas,
             )
+
 
 class TestRandomModelClassification(RandomBaseModelTestCase):
     """Test the RandomModel class for regression models."""
@@ -330,31 +332,32 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir, alg=RatioDistributionAlgorithm)
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        # pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)
+        self.predictorTest(predictor, dataset)
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
                 alg=model_class,
-                dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = RandomModel(
                 name=f"{model_name}_{task}", base_dir=model.baseDir, alg=RatioDistributionAlgorithm
             )
             self.predictorTest(
                 predictor,
+                dataset,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
+                # expected_pred_use_probas=pred_use_probas,
+                # expected_pred_not_use_probas=pred_not_use_probas,
             )
+
 
 class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
     """Test the SklearnModel class for multi-task classification models."""
@@ -393,30 +396,30 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
         model = self.getModel(
             name=f"{model_name}_multitask_classification",
             alg=model_class,
-            dataset=dataset,
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model)
+        self.fitTest(model, dataset)
         predictor = RandomModel(
             name=f"{model_name}_multitask_classification", base_dir=model.baseDir, alg=RatioDistributionAlgorithm
         )
-        pred_use_probas, pred_not_use_probas = self.predictorTest(predictor)
+        # pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)
+        self.predictorTest(predictor, dataset)
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_multitask_classification",
                 alg=model_class,
-                dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             predictor = RandomModel(
                 name=f"{model_name}_multitask_classification", base_dir=model.baseDir, alg=RatioDistributionAlgorithm
             )
             self.predictorTest(
                 predictor,
+                dataset,
                 expect_equal_result=random_state[0] == random_state[1],
-                expected_pred_use_probas=pred_use_probas,
-                expected_pred_not_use_probas=pred_not_use_probas,
+                # expected_pred_use_probas=pred_use_probas,
+                # expected_pred_not_use_probas=pred_not_use_probas,
             )

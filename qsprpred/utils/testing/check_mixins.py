@@ -76,6 +76,15 @@ class DescriptorCheckMixIn:
                 ValueError, lambda: list(ds.iterFolds(split=KFold(n_splits=5)))
             )
 
+        # check if outliers are dropped
+        if "TestOutlier" in ds.df.columns:
+            num_dropped = ds.df.TestOutlier.sum()
+            # expected number of samples is the total number of samples minus the number
+            # of samples in the training set, minus the number of dropped
+            expected_num_samples = len(ds) - (len(ds.X)) - num_dropped
+            X, X_ind = ds.getFeatures(concat=False)
+            self.assertEqual(X_ind.shape[0], expected_num_samples)
+
     def checkDescriptors(
         self, dataset: QSPRDataset, target_props: list[dict | TargetProperty]
     ):
@@ -128,6 +137,7 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
         feature_standardizer,
         feature_filter,
         data_filter,
+        applicability_domain,
         expected_target_props,
     ):
         """Check the consistency of the dataset after preparation."""
@@ -146,6 +156,8 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
             feature_standardizer=feature_standardizer if feature_standardizer else None,
             feature_filters=[feature_filter] if feature_filter else None,
             data_filters=[data_filter] if data_filter else None,
+            applicability_domain=applicability_domain,
+            drop_outliers=True if applicability_domain is not None else False,
         )
         expected_feature_count = len(dataset.featureNames)
         original_features = dataset.featureNames
@@ -163,9 +175,9 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
             calc = calc.calculator
             self.assertIsInstance(calc, DescriptorSet)
         if feature_standardizer is not None:
-            self.assertIsInstance(dataset.feature_standardizer, SKLearnStandardizer)
+            self.assertIsInstance(dataset.featureStandardizer, SKLearnStandardizer)
         else:
-            self.assertIsNone(dataset.feature_standardizer)
+            self.assertIsNone(dataset.featureStandardizer)
         self.checkFeatures(dataset, expected_feature_count)
         # verify prep results are the same after reloading
         dataset.prepareDataset(
@@ -174,6 +186,8 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
             feature_standardizer=feature_standardizer if feature_standardizer else None,
             feature_filters=[feature_filter] if feature_filter else None,
             data_filters=[data_filter] if data_filter else None,
+            applicability_domain=applicability_domain,
+            drop_outliers=True if applicability_domain is not None else False,
         )
         self.checkFeatures(dataset, expected_feature_count)
         self.assertListEqual(sorted(dataset.featureNames), sorted(original_features))
@@ -230,13 +244,15 @@ class ModelCheckMixIn:
         grid_params = model.__class__.loadParamsGrid(self.gridFile, grid, mname)
         return grid_params[grid_params[:, 0] == mname, 1][0]
 
-    def fitTest(self, model: QSPRModel):
+    def fitTest(self, model: QSPRModel, ds: QSPRDataset):
         """Test model fitting, optimization and evaluation.
 
         Args:
             model (QSPRModel): The model to test.
+            ds (QSPRDataset): The dataset to use for testing.
         """
         # perform bayes optimization
+        model.initFromDataset(ds)
         score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
@@ -246,7 +262,7 @@ class ModelCheckMixIn:
                 scoring=score_func, mode=EarlyStoppingMode.NOT_RECORDING
             ),
         )
-        best_params = bayesoptimizer.optimize(model)
+        best_params = bayesoptimizer.optimize(model, ds)
         model.setParams(best_params)
         model.save()
         model_new = model.__class__.fromFile(model.metaFile)
@@ -265,7 +281,7 @@ class ModelCheckMixIn:
                 mode=EarlyStoppingMode.NOT_RECORDING,
             ),
         )
-        best_params = gridsearcher.optimize(model)
+        best_params = gridsearcher.optimize(model, ds)
         model_new = model.__class__.fromFile(model.metaFile)
         for param in best_params:
             self.assertEqual(model_new.parameters[param], best_params[param])
@@ -277,28 +293,113 @@ class ModelCheckMixIn:
             mode=EarlyStoppingMode.RECORDING,
             scoring=score_func,
             split_multitask_scores=model.isMultiTask,
-            split=KFold(
-                n_splits=n_folds, shuffle=True, random_state=model.data.randomState
-            ),
-        )(model)
+            split=KFold(n_splits=n_folds, shuffle=True, random_state=model.randomState),
+        )(model, ds)
         if model.isMultiTask:
             self.assertEqual(scores.shape, (n_folds, len(model.targetProperties)))
         scores = TestSetAssessor(
             mode=EarlyStoppingMode.NOT_RECORDING,
             scoring=score_func,
             split_multitask_scores=model.isMultiTask,
-        )(model)
+        )(model, ds)
         if model.isMultiTask:
             self.assertEqual(scores.shape, (len(model.targetProperties),))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
         self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
         # train the model on all data
-        path = model.fitAttached()
+        path = model.fitDataset(ds)
         self.assertTrue(exists(path))
         self.assertTrue(exists(model.metaFile))
         self.assertEqual(path, model.metaFile)
 
     def predictorTest(
+        self,
+        model: QSPRModel,
+        dataset: QSPRDataset,
+        comparison_model: QSPRModel | None = None,
+        expect_equal_result=True,
+        **pred_kwargs,
+    ):
+        """Test model predictions.
+
+        Checks if the shape of the predictions is as expected and if the predictions
+        of the predictMols function are consistent with the predictions of the
+        predict/predictProba functions. Also checks if the predictions of the model are
+        the same as the predictions of the comparison model if given.
+
+        Args:
+            model (QSPRModel): The model to make predictions with.
+            dataset (QSPRDataset): The dataset to make predictions for.
+            comparison_model (QSPRModel): another model to compare the predictions with.
+            expect_equal_result (bool): Whether the expected result should be equal or
+                not equal to the predictions of the comparison model.
+            **pred_kwargs:
+                Extra keyword arguments to pass to the predictor's `predictMols` method.
+        """
+
+        # define checks of the shape of the predictions
+        def check_shape(predictions, model, num_smiles, use_probas):
+            if model.task.isClassification() and use_probas:
+                # check predictions are a list of arrays of shape (n_smiles, n_classes)
+                self.assertEqual(len(predictions), len(model.targetProperties))
+                for i in range(len(model.targetProperties)):
+                    self.assertEqual(
+                        predictions[i].shape,
+                        (num_smiles, model.targetProperties[i].nClasses),
+                    )
+            else:
+                # check predictions are an array of shape (n_smiles, n_targets)
+                self.assertEqual(
+                    predictions.shape,
+                    (num_smiles, len(model.targetProperties)),
+                )
+
+        # define check for comparing predictions with expected result
+        def check_predictions(predictions, expected_result, expect_equal_result):
+            # check if predictions are almost equal to expected result (rtol=1e-5)
+            check_outcome = self.assertTrue if expect_equal_result else self.assertFalse
+            if isinstance(expected_result, list):
+                for i in range(len(expected_result)):
+                    check_outcome(np.allclose(predictions[i], expected_result[i]))
+            else:
+                check_outcome(np.allclose(predictions, expected_result))
+
+        # Check if the predictMols function gives the same result as the
+        # predict/predictProba function
+        # get the expected result from the basic predict function
+        features = dataset.getFeatures(
+            concat=True, ordered=True, refit_standardizer=False
+        )
+        expected_result = model.predict(features)
+        # make predictions with the predictMols function and check with previous result
+        smiles = list(dataset.smiles)
+        num_smiles = len(smiles)
+        predictions = model.predictMols(smiles, use_probas=False, **pred_kwargs)
+        check_shape(predictions, model, num_smiles, use_probas=False)
+        check_predictions(predictions, expected_result, True)
+        # do the same for the predictProba function
+        if model.task.isClassification():
+            expected_result_proba = model.predictProba(features)
+            predictions_proba = model.predictMols(
+                smiles, use_probas=True, **pred_kwargs
+            )
+            check_shape(predictions_proba, model, len(smiles), use_probas=True)
+            check_predictions(predictions_proba, expected_result_proba, True)
+        # check if the predictions are (not) the same as of the comparison model
+        if comparison_model is not None:
+            predictions_comparison = comparison_model.predictMols(
+                smiles, use_probas=False, **pred_kwargs
+            )
+            check_predictions(predictions, predictions_comparison, expect_equal_result)
+            if model.task.isClassification():
+                predictions_comparison_proba = comparison_model.predictMols(
+                    smiles, use_probas=True, **pred_kwargs
+                )
+                check_predictions(
+                    predictions_proba, predictions_comparison_proba, expect_equal_result
+                )
+
+    def oldpredictorTest(
         self,
         predictor: QSPRModel,
         expect_equal_result=True,
@@ -341,24 +442,29 @@ class ModelCheckMixIn:
                     (len(input_smiles), len(predictor.targetProperties)),
                 )
 
-        # predict the property
+        # check the predictions for different settings of use_probas
         pred = []
         for use_probas in [True, False]:
+            # make predictions
             predictions = predictor.predictMols(
                 df.SMILES.to_list(), use_probas=use_probas, **pred_kwargs
             )
+            # check the shape of the predictions
             check_shape(df.SMILES.to_list())
+            # check the type of the predictions
             if isinstance(predictions, list):
                 for prediction in predictions:
                     self.assertIsInstance(prediction, np.ndarray)
             else:
                 self.assertIsInstance(predictions, np.ndarray)
 
+            # check the first predicted value
             singleoutput = (
                 predictions[0][0, 0]
                 if isinstance(predictions, list)
                 else predictions[0, 0]
             )
+            # check the type of the first predicted value depending on the task
             if (
                 predictor.targetProperties[0].task == TargetTasks.REGRESSION
                 or use_probas
@@ -375,12 +481,13 @@ class ModelCheckMixIn:
             else:
                 return AssertionError(f"Unknown task: {predictor.task}")
             pred.append(singleoutput)
-            # test with an invalid smiles
+            # test with invalid smiles
             invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
             predictions = predictor.predictMols(
                 invalid_smiles, use_probas=use_probas, **pred_kwargs
             )
             check_shape(invalid_smiles)
+            # check that the first prediction is None
             singleoutput = (
                 predictions[0][0, 0]
                 if isinstance(predictions, list)
@@ -392,6 +499,7 @@ class ModelCheckMixIn:
                 else predictions[1, 0],
                 None,
             )
+            # check the type of the first predicted value depending on the task
             if (
                 predictor.targetProperties[0].task == TargetTasks.SINGLECLASS
                 and not isinstance(predictor.estimator, XGBClassifier)
@@ -401,6 +509,8 @@ class ModelCheckMixIn:
             else:
                 self.assertIsInstance(singleoutput, numbers.Number)
 
+        # check that the predictions are the same for use_probas=True and False as
+        # expected
         if expect_equal_result:
             if expected_pred_use_probas is not None:
                 self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=8)
@@ -430,10 +540,9 @@ class ModelCheckMixIn:
             coef = metrics.r2_score(
                 df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]
             )
-            rmse = metrics.mean_squared_error(
+            rmse = metrics.root_mean_squared_error(
                 df[f"{property_name}_Label"],
                 df[f"{property_name}_Prediction"],
-                squared=False,
             )
             summary["R2"].append(coef)
             summary["RMSE"].append(rmse)
@@ -493,6 +602,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
     def trainModelWithMonitoring(
         self,
         model: QSPRModel,
+        ds: QSPRDataset,
         hyperparam_monitor: HyperparameterOptimizationMonitor,
         crossval_monitor: AssessorMonitor,
         test_monitor: AssessorMonitor,
@@ -503,7 +613,9 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         AssessorMonitor,
         FitMonitor,
     ):
-        score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
+        score_func = (
+            "r2" if ds.targetProperties[0].task.isRegression() else "roc_auc_ovr"
+        )
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
             param_grid=search_space_gs,
@@ -513,7 +625,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             ),
             monitor=hyperparam_monitor,
         )
-        best_params = gridsearcher.optimize(model)
+        best_params = gridsearcher.optimize(model, ds)
         model.setParams(best_params)
         model.save()
         # perform crossvalidation
@@ -521,14 +633,14 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             mode=EarlyStoppingMode.RECORDING,
             scoring=score_func,
             monitor=crossval_monitor,
-        )(model)
+        )(model, ds)
         TestSetAssessor(
             mode=EarlyStoppingMode.NOT_RECORDING,
             scoring=score_func,
             monitor=test_monitor,
-        )(model)
+        )(model, ds)
         # train the model on all data
-        model.fitAttached(monitor=fit_monitor)
+        model.fitDataset(ds, monitor=fit_monitor)
         return hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
 
     def baseMonitorTest(
@@ -658,7 +770,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
 
     def runMonitorTest(
-        self, model, monitor_type, test_method, nerual_net, *args, **kwargs
+        self, model, data, monitor_type, test_method, nerual_net, *args, **kwargs
     ):
         hyperparam_monitor = monitor_type(*args, **kwargs)
         crossval_monitor = deepcopy(hyperparam_monitor)
@@ -670,7 +782,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             test_monitor,
             fit_monitor,
         ) = self.trainModelWithMonitoring(
-            model, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+            model, data, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
         )
         test_method(hyperparam_monitor, "hyperparam", nerual_net)
         test_method(crossval_monitor, "crossval", nerual_net)

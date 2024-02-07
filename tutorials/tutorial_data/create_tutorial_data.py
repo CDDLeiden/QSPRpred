@@ -1,6 +1,7 @@
 import os
 
 from qsprpred.data.sources.papyrus import Papyrus
+import argparse
 
 
 def SingleTaskTutorialData(data_dir: str | None = None):
@@ -88,7 +89,27 @@ def MultiTaskTutorialData(data_dir: str | None = None):
 
     return dataset
 
+def prepare_multitask(file_path: str):
+    import pandas as pd
+    df = pd.read_csv(file_path, sep="\t")
+    df = df.pivot(index="SMILES", columns="accession", values="pchembl_value_Mean")
+    df.columns.name = None
+    df.reset_index(inplace=True)
+    df.to_csv(f"{file_path.split('.')[0]}_pivot.tsv", sep="\t", index=False)
+
 
 if __name__ == "__main__":
-    SingleTaskTutorialData()
-    MultiTaskTutorialData()
+    parser = argparse.ArgumentParser(description="Create tutorial data")
+    parser.add_argument(
+        "-p",
+        "--pivot",
+        type=str,
+        help="Pivot AR_ligands dataset, provide the file path")
+
+    args = parser.parse_args()
+
+    if args.pivot is not None:
+        prepare_multitask(args.pivot)
+    else:
+        SingleTaskTutorialData()
+        MultiTaskTutorialData()
