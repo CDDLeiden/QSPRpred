@@ -377,11 +377,27 @@ class ProteinDescriptorSet(DescriptorSet):
         *args,
         **kwargs,
     ) -> np.ndarray:
+        """Get array of calculated protein descriptors for given targets.
+
+        Args:
+            mols (list[Mol]): list of molecules, not used
+            props (dict[str, list[Any]  |  dict[str, str]]): dictionary of properties
+                for the molecules, including the accession keys
+            *args: additional arguments, not used
+            **kwargs: additional keyword arguments, passed to `getProteinDescriptors`
+
+        Returns:
+            np.ndarray: array of calculated protein descriptors
+        """
+        # Get array of calculated protein descriptors
         acc_keys = sorted(set(props["acc_keys"]))
-        values = self.getProteinDescriptors(acc_keys, **kwargs)
+        values = self.getProteinDescriptors(acc_keys, **kwargs).reset_index()
+        values.rename(columns={"ID": "acc_keys"}, inplace=True)
+        # create a data frame with the same order of acc_keys as in props
         df = pd.DataFrame({"acc_keys": props["acc_keys"]})
-        df = df.set_index("acc_keys")
-        df = df.merge(values, left_index=True, right_index=True)
+        # merge the calculated values with the data frame to attach them to the rows
+        df = df.merge(values, left_on="acc_keys", right_on="acc_keys",
+                      how="left").set_index("acc_keys")
         return df.values
 
     @property
