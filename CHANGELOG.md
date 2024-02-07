@@ -25,6 +25,7 @@ From v2.1.1 to v3.0.0
   or equal to `v2.1.0`.
 - Fixes to the  `fromMolTable` method in various data set implementations, in particular
   in copying of the feature standardizer and other settings.
+- Fixed not working `cluster` split and `--imputation` from `data_CLI.py`.
 
 ## Changes
 

@@ -95,14 +95,6 @@ document the use of the Python API to build different types of models. The tutor
 well as the documentation are still work in progress, and we will be happy for any
 contributions where it is still lacking.
 
-To use the commandline to train the same QSAR model as in the tutorial use (run from
-tutorial folder):
-
-```bash
-python -m qsprpred.data_CLI -i ./data/parkinsons_pivot.tsv -o qspr/data -pr GABAAalpha -pr NMDA -r true -sp random -sf 0.15 -fe Morgan
-python -m qsprpred.model_CLI -dp ./qspr/data/GABAAalpha_REGRESSION_df.pkl -o ./qspr/models -m PLS -o bayes -nt 5 -me -s
-```
-
 Contributions
 =============
 
