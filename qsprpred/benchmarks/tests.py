@@ -5,12 +5,12 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.neural_network import MLPClassifier
 
+from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
 from . import BenchmarkRunner, BenchmarkSettings, DataPrepSettings
 from .. import TargetProperty, TargetTasks
 from ..data import MoleculeTable, QSPRDataset
 from ..data.descriptors.sets import RDKitDescs
 from ..data.sources.data_source import DataSource
-from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
 from ..utils.stringops import get_random_string
 from ..utils.testing.base import QSPRTestCase

@@ -9,9 +9,9 @@ from matplotlib.figure import Figure
 from parameterized import parameterized
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
+from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
 from ..data.processing.feature_filters import LowVarianceFilter
 from ..data.tables.qspr import QSPRDataset
-from ..models.assessment_methods import CrossValAssessor, TestSetAssessor
 from ..models.scikit_learn import SklearnModel
 from ..plotting.classification import ConfusionMatrixPlot, MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot, WilliamsPlot

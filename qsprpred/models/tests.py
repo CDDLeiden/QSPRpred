@@ -23,6 +23,8 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
+from .assessment.classification import create_metrics_summary
+from .assessment.regression import create_correlation_summary
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.metrics import SklearnMetrics
 from ..models.monitors import (
@@ -156,7 +158,7 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             parameters=parameters,
         )
         self.fitTest(model, dataset)
-        expected_summary = self.createCorrelationSummary(model)
+        expected_summary = create_correlation_summary(model)
 
         # Generate summary again, check that the result is identical
         model = self.getModel(
@@ -165,7 +167,7 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             parameters=parameters,
         )
         self.fitTest(model, dataset)
-        summary = self.createCorrelationSummary(model)
+        summary = create_correlation_summary(model)
 
         self.assertListEqual(summary["ModelName"], expected_summary["ModelName"])
         self.assertListEqual(summary["R2"], expected_summary["R2"])
@@ -215,7 +217,9 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
         self.fitTest(model, dataset)
 
         # load in model from file
-        predictor = SklearnModel(name=f"{model_name}_multitask_regression", base_dir=model.baseDir)
+        predictor = SklearnModel(
+            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
+        )
 
         # make predictions with the trained model and check if the results are (not)
         # equal if the random state is the (not) same
@@ -351,7 +355,6 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
         else:
             self.predictorTest(predictor, dataset=dataset)
 
-
     def testRandomForestClassifierFitWithSeed(self):
         parameters = {
             "n_jobs": self.nCPU,
@@ -369,7 +372,7 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             parameters=parameters,
         )
         self.fitTest(model, dataset)
-        expected_summary = self.createMetricsSummary(model)
+        expected_summary = create_metrics_summary(model)
 
         # Generate summary again, check that the result is identical
         model = self.getModel(
@@ -378,7 +381,7 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             parameters=parameters,
         )
         self.fitTest(model, dataset)
-        summary = self.createMetricsSummary(model)
+        summary = create_metrics_summary(model)
 
         self.assertListEqual(summary["Metric"], expected_summary["Metric"])
         self.assertListEqual(summary["Model"], expected_summary["Model"])
@@ -438,7 +441,9 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
         self.fitTest(model, dataset)
 
         # load in model from file
-        predictor = SklearnModel(name=f"{model_name}_multitask_classification", base_dir=model.baseDir)
+        predictor = SklearnModel(
+            name=f"{model_name}_multitask_classification", base_dir=model.baseDir
+        )
 
         # make predictions with the trained model and check if the results are (not)
         # equal if the random state is the (not) same
