@@ -1,2 +1,2 @@
 /api/*
-!/api/modules.rst
+!*/api/modules.rst
