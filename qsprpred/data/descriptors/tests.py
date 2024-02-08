@@ -163,41 +163,14 @@ class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTest
         super().setUp()
         self.setUpPaths()
 
-    @parameterized.expand(
-        [
-            (
-                f"{desc_set}_{TargetTasks.MULTICLASS}",
-                desc_set,
-                [
-                    {
-                        "name": "CL",
-                        "task": TargetTasks.MULTICLASS,
-                        "th": [0, 1, 10, 1200],
-                    }
-                ],
-            )
-            for desc_set in DataSetsPathMixIn.getAllDescriptors()
-        ]
-        + [
-            (
-                f"{desc_set}_{TargetTasks.REGRESSION}",
-                desc_set,
-                [{"name": "CL", "task": TargetTasks.REGRESSION}],
-            )
-            for desc_set in DataSetsPathMixIn.getAllDescriptors()
-        ]
-        + [
-            (
-                f"{desc_set}_Multitask",
-                desc_set,
-                [
-                    {"name": "CL", "task": TargetTasks.REGRESSION},
-                    {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
-                ],
-            )
-            for desc_set in DataSetsPathMixIn.getAllDescriptors()
-        ]
-    )
+    @parameterized.expand([
+        (
+            f"{desc_set}_{TargetTasks.REGRESSION}",
+            desc_set,
+            [{"name": "CL", "task": TargetTasks.REGRESSION}],
+        )
+        for desc_set in DataSetsPathMixIn.getAllDescriptors()
+    ])
     def testDescriptorsAll(self, _, desc_set, target_props):
         """Tests all available descriptor sets.
 

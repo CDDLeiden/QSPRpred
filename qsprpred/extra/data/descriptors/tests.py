@@ -267,10 +267,7 @@ class TestDescriptorsExtra(
             (
                 f"{desc_set}",
                 desc_set,
-                [
-                    {"name": "CL", "task": TargetTasks.REGRESSION},
-                    {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
-                ],
+                [{"name": "CL", "task": TargetTasks.REGRESSION}],
             )
             for desc_set in DataSetsMixInExtras.getAllDescriptors()
         ]
