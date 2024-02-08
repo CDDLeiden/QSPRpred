@@ -1,14 +1,14 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
+from qsprpred.models.assessment.methods import ModelAssessor
+from .data_prep import DataPrepSettings
 from ...data.descriptors.sets import DescriptorSet
 from ...data.sources.data_source import DataSource
-from ...models.assessment_methods import ModelAssessor
 from ...models.hyperparam_optimization import HyperparameterOptimization
 from ...models.models import QSPRModel
 from ...tasks import TargetProperty
 from ...utils.serialization import JSONSerializable
-from .data_prep import DataPrepSettings
 
 
 @dataclass

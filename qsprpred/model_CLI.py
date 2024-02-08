@@ -16,10 +16,10 @@ from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
 from qsprpred.tasks import TargetTasks
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
-from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.early_stopping import EarlyStoppingMode
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
 from .models.scikit_learn import QSPRModel, SklearnModel

@@ -5,12 +5,12 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
+from qsprpred.models.assessment.methods import ModelAssessor
 from .settings.benchmark import DataPrepSettings
 from ..data import QSPRDataset
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
 from ..logs import logger
-from ..models.assessment_methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
 from ..models.models import QSPRModel
 from ..models.monitors import NullMonitor
