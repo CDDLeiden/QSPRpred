@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.testing.check_mixins &mdash; QSPRpred 3.0.0.dev479+g3dc8a6e9 documentation</title>
+  <title>qsprpred.utils.testing.check_mixins &mdash; QSPRpred 3.0.0.dev491+g9904fc43 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=1d7a9eae"></script>
+        <script src="../../../../_static/documentation_options.js?v=60e5543c"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev479+g3dc8a6e9
+                v3.0.0.dev491+g9904fc43
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -524,204 +524,6 @@
                 <span class="p">)</span></div>
 </div>
 
-
-    <span class="c1"># def oldpredictorTest(</span>
-    <span class="c1">#     self,</span>
-    <span class="c1">#     predictor: QSPRModel,</span>
-    <span class="c1">#     expect_equal_result=True,</span>
-    <span class="c1">#     expected_pred_use_probas=None,</span>
-    <span class="c1">#     expected_pred_not_use_probas=None,</span>
-    <span class="c1">#     **pred_kwargs,</span>
-    <span class="c1"># ):</span>
-    <span class="c1">#     &quot;&quot;&quot;Test a model as predictor.</span>
-    <span class="c1">#</span>
-    <span class="c1">#     Args:</span>
-    <span class="c1">#         predictor (QSPRModel):</span>
-    <span class="c1">#             The model to test.</span>
-    <span class="c1">#         expect_equal_result (bool):</span>
-    <span class="c1">#             If pred values provided, specifies whether to check for equality or</span>
-    <span class="c1">#             inequality.</span>
-    <span class="c1">#         expected_pred_use_probas (float): Value to check with use_probas true.</span>
-    <span class="c1">#         expected_pred_not_use_probas (int | float):</span>
-    <span class="c1">#             Value to check with use_probas false. Ignored if expect_equal_result is</span>
-    <span class="c1">#             false.</span>
-    <span class="c1">#         **pred_kwargs:</span>
-    <span class="c1">#             Extra keyword arguments to pass to the predictor&#39;s `predictMols` method.</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#</span>
-    <span class="c1">#     # load molecules to predict</span>
-    <span class="c1">#     df = pd.read_csv(</span>
-    <span class="c1">#         f&quot;{os.path.dirname(__file__)}/test_files/data/test_data.tsv&quot;, sep=&quot;\t&quot;</span>
-    <span class="c1">#     )</span>
-    <span class="c1">#</span>
-    <span class="c1">#     # define checks of the shape of the predictions</span>
-    <span class="c1">#     def check_shape(input_smiles):</span>
-    <span class="c1">#         if predictor.targetProperties[0].task.isClassification() and use_probas:</span>
-    <span class="c1">#             self.assertEqual(len(predictions), len(predictor.targetProperties))</span>
-    <span class="c1">#             self.assertEqual(</span>
-    <span class="c1">#                 predictions[0].shape,</span>
-    <span class="c1">#                 (len(input_smiles), predictor.targetProperties[0].nClasses),</span>
-    <span class="c1">#             )</span>
-    <span class="c1">#         else:</span>
-    <span class="c1">#             self.assertEqual(</span>
-    <span class="c1">#                 predictions.shape,</span>
-    <span class="c1">#                 (len(input_smiles), len(predictor.targetProperties)),</span>
-    <span class="c1">#             )</span>
-    <span class="c1">#</span>
-    <span class="c1">#     # check the predictions for different settings of use_probas</span>
-    <span class="c1">#     pred = []</span>
-    <span class="c1">#     for use_probas in [True, False]:</span>
-    <span class="c1">#         # make predictions</span>
-    <span class="c1">#         predictions = predictor.predictMols(</span>
-    <span class="c1">#             df.SMILES.to_list(), use_probas=use_probas, **pred_kwargs</span>
-    <span class="c1">#         )</span>
-    <span class="c1">#         # check the shape of the predictions</span>
-    <span class="c1">#         check_shape(df.SMILES.to_list())</span>
-    <span class="c1">#         # check the type of the predictions</span>
-    <span class="c1">#         if isinstance(predictions, list):</span>
-    <span class="c1">#             for prediction in predictions:</span>
-    <span class="c1">#                 self.assertIsInstance(prediction, np.ndarray)</span>
-    <span class="c1">#         else:</span>
-    <span class="c1">#             self.assertIsInstance(predictions, np.ndarray)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         # check the first predicted value</span>
-    <span class="c1">#         singleoutput = (</span>
-    <span class="c1">#             predictions[0][0, 0]</span>
-    <span class="c1">#             if isinstance(predictions, list)</span>
-    <span class="c1">#             else predictions[0, 0]</span>
-    <span class="c1">#         )</span>
-    <span class="c1">#         # check the type of the first predicted value depending on the task</span>
-    <span class="c1">#         if (</span>
-    <span class="c1">#             predictor.targetProperties[0].task == TargetTasks.REGRESSION</span>
-    <span class="c1">#             or use_probas</span>
-    <span class="c1">#         ):</span>
-    <span class="c1">#             self.assertIsInstance(singleoutput, numbers.Real)</span>
-    <span class="c1">#         elif predictor.targetProperties[</span>
-    <span class="c1">#             0</span>
-    <span class="c1">#         ].task == TargetTasks.MULTICLASS or isinstance(</span>
-    <span class="c1">#             predictor.estimator, XGBClassifier</span>
-    <span class="c1">#         ):</span>
-    <span class="c1">#             self.assertIsInstance(singleoutput, numbers.Integral)</span>
-    <span class="c1">#         elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:</span>
-    <span class="c1">#             self.assertIn(singleoutput, [1, 0])</span>
-    <span class="c1">#         else:</span>
-    <span class="c1">#             return AssertionError(f&quot;Unknown task: {predictor.task}&quot;)</span>
-    <span class="c1">#         pred.append(singleoutput)</span>
-    <span class="c1">#         # test with invalid smiles</span>
-    <span class="c1">#         invalid_smiles = [&quot;C1CCCCC1&quot;, &quot;C1CCCCC&quot;]</span>
-    <span class="c1">#         predictions = predictor.predictMols(</span>
-    <span class="c1">#             invalid_smiles, use_probas=use_probas, **pred_kwargs</span>
-    <span class="c1">#         )</span>
-    <span class="c1">#         check_shape(invalid_smiles)</span>
-    <span class="c1">#         # check that the first prediction is None</span>
-    <span class="c1">#         singleoutput = (</span>
-    <span class="c1">#             predictions[0][0, 0]</span>
-    <span class="c1">#             if isinstance(predictions, list)</span>
-    <span class="c1">#             else predictions[0, 0]</span>
-    <span class="c1">#         )</span>
-    <span class="c1">#         self.assertEqual(</span>
-    <span class="c1">#             predictions[0][1, 0]</span>
-    <span class="c1">#             if isinstance(predictions, list)</span>
-    <span class="c1">#             else predictions[1, 0],</span>
-    <span class="c1">#             None,</span>
-    <span class="c1">#         )</span>
-    <span class="c1">#         # check the type of the first predicted value depending on the task</span>
-    <span class="c1">#         if (</span>
-    <span class="c1">#             predictor.targetProperties[0].task == TargetTasks.SINGLECLASS</span>
-    <span class="c1">#             and not isinstance(predictor.estimator, XGBClassifier)</span>
-    <span class="c1">#             and not use_probas</span>
-    <span class="c1">#         ):</span>
-    <span class="c1">#             self.assertIn(singleoutput, [0, 1])</span>
-    <span class="c1">#         else:</span>
-    <span class="c1">#             self.assertIsInstance(singleoutput, numbers.Number)</span>
-    <span class="c1">#</span>
-    <span class="c1">#     # check that the predictions are the same for use_probas=True and False as</span>
-    <span class="c1">#     # expected</span>
-    <span class="c1">#     if expect_equal_result:</span>
-    <span class="c1">#         if expected_pred_use_probas is not None:</span>
-    <span class="c1">#             self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=8)</span>
-    <span class="c1">#         if expected_pred_not_use_probas is not None:</span>
-    <span class="c1">#             self.assertAlmostEqual(pred[1], expected_pred_not_use_probas, places=8)</span>
-    <span class="c1">#     elif expected_pred_use_probas is not None:</span>
-    <span class="c1">#         # Skip not_use_probas test:</span>
-    <span class="c1">#         # For regression this is identical to use_probas result</span>
-    <span class="c1">#         # For classification there is no guarantee the classification result</span>
-    <span class="c1">#         # actually differs, unlike probas which will usually have different results</span>
-    <span class="c1">#         self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=8)</span>
-    <span class="c1">#</span>
-    <span class="c1">#     return pred[0], pred[1]</span>
-    <span class="c1">#</span>
-    <span class="c1"># # NOTE: below code is taken from CorrelationPlot without the plotting code</span>
-    <span class="c1"># # Would be nice if the summary code without plot was available regardless</span>
-    <span class="c1"># def createCorrelationSummary(self, model):</span>
-    <span class="c1">#     cv_path = f&quot;{model.outPrefix}.cv.tsv&quot;</span>
-    <span class="c1">#     ind_path = f&quot;{model.outPrefix}.ind.tsv&quot;</span>
-    <span class="c1">#</span>
-    <span class="c1">#     cate = [cv_path, ind_path]</span>
-    <span class="c1">#     cate_names = [&quot;cv&quot;, &quot;ind&quot;]</span>
-    <span class="c1">#     property_name = model.targetProperties[0].name</span>
-    <span class="c1">#     summary = {&quot;ModelName&quot;: [], &quot;R2&quot;: [], &quot;RMSE&quot;: [], &quot;Set&quot;: []}</span>
-    <span class="c1">#     for j, _ in enumerate([&quot;Cross Validation&quot;, &quot;Independent Test&quot;]):</span>
-    <span class="c1">#         df = pd.read_table(cate[j])</span>
-    <span class="c1">#         coef = metrics.r2_score(</span>
-    <span class="c1">#             df[f&quot;{property_name}_Label&quot;], df[f&quot;{property_name}_Prediction&quot;]</span>
-    <span class="c1">#         )</span>
-    <span class="c1">#         rmse = metrics.root_mean_squared_error(</span>
-    <span class="c1">#             df[f&quot;{property_name}_Label&quot;],</span>
-    <span class="c1">#             df[f&quot;{property_name}_Prediction&quot;],</span>
-    <span class="c1">#         )</span>
-    <span class="c1">#         summary[&quot;R2&quot;].append(coef)</span>
-    <span class="c1">#         summary[&quot;RMSE&quot;].append(rmse)</span>
-    <span class="c1">#         summary[&quot;Set&quot;].append(cate_names[j])</span>
-    <span class="c1">#         summary[&quot;ModelName&quot;].append(model.name)</span>
-    <span class="c1">#</span>
-    <span class="c1">#     return summary</span>
-    <span class="c1">#</span>
-    <span class="c1"># # NOTE: below code is taken from MetricsPlot without the plotting code</span>
-    <span class="c1"># # Would be nice if the summary code without plot was available regardless</span>
-    <span class="c1"># def createMetricsSummary(self, model):</span>
-    <span class="c1">#     decision_threshold: float = 0.5</span>
-    <span class="c1">#     metrics = [</span>
-    <span class="c1">#         f1_score,</span>
-    <span class="c1">#         matthews_corrcoef,</span>
-    <span class="c1">#         precision_score,</span>
-    <span class="c1">#         recall_score,</span>
-    <span class="c1">#         accuracy_score,</span>
-    <span class="c1">#     ]</span>
-    <span class="c1">#     summary = {&quot;Metric&quot;: [], &quot;Model&quot;: [], &quot;TestSet&quot;: [], &quot;Value&quot;: []}</span>
-    <span class="c1">#     property_name = model.targetProperties[0].name</span>
-    <span class="c1">#</span>
-    <span class="c1">#     cv_path = f&quot;{model.outPrefix}.cv.tsv&quot;</span>
-    <span class="c1">#     ind_path = f&quot;{model.outPrefix}.ind.tsv&quot;</span>
-    <span class="c1">#</span>
-    <span class="c1">#     df = pd.read_table(cv_path)</span>
-    <span class="c1">#</span>
-    <span class="c1">#     # cross-validation</span>
-    <span class="c1">#     for fold in sorted(df.Fold.unique()):</span>
-    <span class="c1">#         y_pred = df[f&quot;{property_name}_ProbabilityClass_1&quot;][df.Fold == fold]</span>
-    <span class="c1">#         y_pred_values = [1 if x &gt; decision_threshold else 0 for x in y_pred]</span>
-    <span class="c1">#         y_true = df[f&quot;{property_name}_Label&quot;][df.Fold == fold]</span>
-    <span class="c1">#         for metric in metrics:</span>
-    <span class="c1">#             val = metric(y_true, y_pred_values)</span>
-    <span class="c1">#             summary[&quot;Metric&quot;].append(metric.__name__)</span>
-    <span class="c1">#             summary[&quot;Model&quot;].append(model.name)</span>
-    <span class="c1">#             summary[&quot;TestSet&quot;].append(f&quot;CV{fold + 1}&quot;)</span>
-    <span class="c1">#             summary[&quot;Value&quot;].append(val)</span>
-    <span class="c1">#</span>
-    <span class="c1">#     # independent test set</span>
-    <span class="c1">#     df = pd.read_table(ind_path)</span>
-    <span class="c1">#     y_pred = df[f&quot;{property_name}_ProbabilityClass_1&quot;]</span>
-    <span class="c1">#     th = 0.5</span>
-    <span class="c1">#     y_pred_values = [1 if x &gt; th else 0 for x in y_pred]</span>
-    <span class="c1">#     y_true = df[f&quot;{property_name}_Label&quot;]</span>
-    <span class="c1">#     for metric in metrics:</span>
-    <span class="c1">#         val = metric(y_true, y_pred_values)</span>
-    <span class="c1">#         summary[&quot;Metric&quot;].append(metric.__name__)</span>
-    <span class="c1">#         summary[&quot;Model&quot;].append(model.name)</span>
-    <span class="c1">#         summary[&quot;TestSet&quot;].append(&quot;IND&quot;)</span>
-    <span class="c1">#         summary[&quot;Value&quot;].append(val)</span>
-    <span class="c1">#</span>
-    <span class="c1">#     return summary</span>
 
 
 <div class="viewcode-block" id="MonitorsCheckMixIn">

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.gpu.models package &mdash; QSPRpred 3.0.0.dev479+g3dc8a6e9 documentation</title>
+  <title>qsprpred.extra.gpu.models package &mdash; QSPRpred 3.0.0.dev491+g9904fc43 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=1d7a9eae"></script>
+        <script src="../_static/documentation_options.js?v=60e5543c"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev479+g3dc8a6e9
+                v3.0.0.dev491+g9904fc43
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -311,7 +311,7 @@ is used</p></li>
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.chemprop.ChempropModel.fitDataset">
 <span class="sig-name descname"><span class="pre">fitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">EarlyStoppingMode.OPTIMAL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.extra.gpu.models.chemprop.ChempropModel.fitDataset" title="Link to this definition"></a></dt>
 <dd><p>Train model on the whole attached data set.</p>
-<p>** IMPORTANT ** For models that supportEarlyStopping, <a class="reference internal" href="qsprpred.models.html#qsprpred.models.assessment_methods.CrossValAssessor" title="qsprpred.models.assessment_methods.CrossValAssessor"><code class="xref any py py-class docutils literal notranslate"><span class="pre">CrossValAssessor</span></code></a>
+<p>** IMPORTANT ** For models that supportEarlyStopping, <a class="reference internal" href="qsprpred.models.assessment.html#qsprpred.models.assessment.methods.CrossValAssessor" title="qsprpred.models.assessment.methods.CrossValAssessor"><code class="xref any py py-class docutils literal notranslate"><span class="pre">CrossValAssessor</span></code></a>
 should be run first, so that the average number of epochs from the
 cross-validation with early stopping can be used for fitting the model.</p>
 <dl class="field-list simple">
@@ -2317,7 +2317,7 @@ is used</p></li>
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.dnn.DNNModel.fitDataset">
 <span class="sig-name descname"><span class="pre">fitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">EarlyStoppingMode.OPTIMAL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.extra.gpu.models.dnn.DNNModel.fitDataset" title="Link to this definition"></a></dt>
 <dd><p>Train model on the whole attached data set.</p>
-<p>** IMPORTANT ** For models that supportEarlyStopping, <a class="reference internal" href="qsprpred.models.html#qsprpred.models.assessment_methods.CrossValAssessor" title="qsprpred.models.assessment_methods.CrossValAssessor"><code class="xref any py py-class docutils literal notranslate"><span class="pre">CrossValAssessor</span></code></a>
+<p>** IMPORTANT ** For models that supportEarlyStopping, <a class="reference internal" href="qsprpred.models.assessment.html#qsprpred.models.assessment.methods.CrossValAssessor" title="qsprpred.models.assessment.methods.CrossValAssessor"><code class="xref any py py-class docutils literal notranslate"><span class="pre">CrossValAssessor</span></code></a>
 should be run first, so that the average number of epochs from the
 cross-validation with early stopping can be used for fitting the model.</p>
 <dl class="field-list simple">

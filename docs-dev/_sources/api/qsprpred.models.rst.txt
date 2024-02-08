@@ -1,16 +1,16 @@
 qsprpred.models package
 =======================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qsprpred.models.assessment
+
 Submodules
 ----------
-
-qsprpred.models.assessment\_methods module
-------------------------------------------
-
-.. automodule:: qsprpred.models.assessment_methods
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 qsprpred.models.early\_stopping module
 --------------------------------------

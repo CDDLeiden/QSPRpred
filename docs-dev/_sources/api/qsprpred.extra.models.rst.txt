@@ -12,6 +12,14 @@ qsprpred.extra.models.pcm module
    :undoc-members:
    :show-inheritance:
 
+qsprpred.extra.models.random module
+-----------------------------------
+
+.. automodule:: qsprpred.extra.models.random
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 qsprpred.extra.models.tests module
 ----------------------------------
 

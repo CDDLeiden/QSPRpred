@@ -4,6 +4,14 @@ qsprpred.data.processing package
 Submodules
 ----------
 
+qsprpred.data.processing.applicability\_domain module
+-----------------------------------------------------
+
+.. automodule:: qsprpred.data.processing.applicability_domain
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 qsprpred.data.processing.data\_filters module
 ---------------------------------------------
 
