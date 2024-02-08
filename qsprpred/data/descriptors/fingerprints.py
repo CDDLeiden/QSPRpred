@@ -144,7 +144,7 @@ class RDKitMACCSFP(Fingerprint):
 
 class MaccsFP(Fingerprint):
     def __init__(self, nBits=167, **kwargs):
-        super().__init__()
+        super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
 
@@ -169,7 +169,7 @@ class MaccsFP(Fingerprint):
 
 class AvalonFP(Fingerprint):
     def __init__(self, nBits=1024, **kwargs):
-        super().__init__()
+        super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
 
@@ -194,7 +194,7 @@ class AvalonFP(Fingerprint):
 
 class TopologicalFP(Fingerprint):
     def __init__(self, nBits=2048, **kwargs):
-        super().__init__()
+        super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
 
@@ -221,7 +221,7 @@ class TopologicalFP(Fingerprint):
 
 class AtomPairFP(Fingerprint):
     def __init__(self, nBits=2048, **kwargs):
-        super().__init__()
+        super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
 
@@ -248,7 +248,7 @@ class AtomPairFP(Fingerprint):
 
 class RDKitFP(Fingerprint):
     def __init__(self, minPath=1, maxPath=7, nBits=2048, **kwargs):
-        super().__init__()
+        super().__init__(used_bits=list(range(nBits)))
         self.minPath = minPath
         self.maxPath = maxPath
         self.nBits = nBits
@@ -281,7 +281,7 @@ class RDKitFP(Fingerprint):
 
 class PatternFP(Fingerprint):
     def __init__(self, nBits=2048, **kwargs):
-        super().__init__()
+        super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
 
@@ -308,7 +308,7 @@ class PatternFP(Fingerprint):
 
 class LayeredFP(Fingerprint):
     def __init__(self, minPath=1, maxPath=7, nBits=2048, **kwargs):
-        super().__init__()
+        super().__init__(used_bits=list(range(nBits)))
         self.minPath = minPath
         self.maxPath = maxPath
         self.nBits = nBits
