@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 3.0.0.dev420+gd887003e documentation</title>
+  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 3.0.0.dev479+g3dc8a6e9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=9afa9563"></script>
+        <script src="../../../../_static/documentation_options.js?v=1d7a9eae"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev420+gd887003e
+                v3.0.0.dev479+g3dc8a6e9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -97,7 +97,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.data.tables.qspr</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -157,7 +159,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
+        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">df</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">smiles_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">,</span>
         <span class="n">add_rdkit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -178,9 +180,11 @@
 <span class="sd">        Args:</span>
 <span class="sd">            name (str):</span>
 <span class="sd">                data name, used in saving the data</span>
-<span class="sd">            target_props (list[TargetProperty | dict]):</span>
+<span class="sd">            target_props (list[TargetProperty | dict] | None):</span>
 <span class="sd">                target properties, names</span>
-<span class="sd">                should correspond with target columnname in df</span>
+<span class="sd">                should correspond with target columnname in df. If `None`, target</span>
+<span class="sd">                properties will be inferred if this data set has been saved</span>
+<span class="sd">                previously. Defaults to `None`.</span>
 <span class="sd">            df (pd.DataFrame, optional):</span>
 <span class="sd">                input dataframe containing smiles and target</span>
 <span class="sd">                property. Defaults to None.</span>
@@ -236,6 +240,17 @@
             <span class="n">random_state</span><span class="p">,</span>
             <span class="n">store_format</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># load target properties if not specified and file exists</span>
+        <span class="k">if</span> <span class="n">target_props</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">):</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">))</span>
+            <span class="n">target_props</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;py/state&quot;</span><span class="p">][</span><span class="s2">&quot;targetProperties&quot;</span><span class="p">]</span>
+            <span class="n">target_props</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromJSON</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">target_props</span>
+            <span class="p">]</span>
+        <span class="k">elif</span> <span class="n">target_props</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Target properties must be specified for a new QSPRDataset.&quot;</span>
+            <span class="p">)</span>
         <span class="c1"># load names of descriptors to use as training features</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFeatureNames</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="kc">None</span>
@@ -343,7 +358,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_props</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="p">(</span>
             <span class="s2">&quot;target_props should be a list of TargetProperty objects or dictionaries &quot;</span>
-            <span class="s2">&quot;initialize TargetProperties from.&quot;</span>
+            <span class="s2">&quot;initialize TargetProperties from. Not a </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">target_props</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_props</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">target_props</span><span class="p">),</span> <span class="p">(</span>

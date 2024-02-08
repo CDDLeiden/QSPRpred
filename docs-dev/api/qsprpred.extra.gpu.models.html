@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.gpu.models package &mdash; QSPRpred 3.0.0.dev420+gd887003e documentation</title>
+  <title>qsprpred.extra.gpu.models package &mdash; QSPRpred 3.0.0.dev479+g3dc8a6e9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=9afa9563"></script>
+        <script src="../_static/documentation_options.js?v=1d7a9eae"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev420+gd887003e
+                v3.0.0.dev479+g3dc8a6e9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -6079,11 +6079,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.ChemPropTest.createCorrelationSummary">
-<span class="sig-name descname"><span class="pre">createCorrelationSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.ChemPropTest.createCorrelationSummary" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.ChemPropTest.createLargeMultitaskDataSet">
 <span class="sig-name descname"><span class="pre">createLargeMultitaskDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_multi_test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'HBD',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.MULTICLASS,</span> <span class="pre">'th':</span> <span class="pre">[-1,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">100]},</span> <span class="pre">{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.ChemPropTest.createLargeMultitaskDataSet" title="Link to this definition"></a></dt>
 <dd><p>Create a large dataset for testing purposes.</p>
@@ -6126,11 +6121,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.ChemPropTest.createMetricsSummary">
-<span class="sig-name descname"><span class="pre">createMetricsSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.ChemPropTest.createMetricsSummary" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.ChemPropTest.createSmallTestDataSet">
@@ -6422,25 +6412,6 @@ search spaces for hyperparameter optimization.</p>
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.ChemPropTest.maxDiff">
 <span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.ChemPropTest.maxDiff" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.ChemPropTest.oldpredictorTest">
-<span class="sig-name descname"><span class="pre">oldpredictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_not_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.ChemPropTest.oldpredictorTest" title="Link to this definition"></a></dt>
-<dd><p>Test a model as predictor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>predictor</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><em>QSPRModel</em></a>) – The model to test.</p></li>
-<li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If pred values provided, specifies whether to check for equality or
-inequality.</p></li>
-<li><p><strong>expected_pred_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas true.</p></li>
-<li><p><strong>expected_pred_not_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas false. Ignored if expect_equal_result is
-false.</p></li>
-<li><p><strong>**pred_kwargs</strong> – Extra keyword arguments to pass to the predictor’s <a class="reference internal" href="#qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols" title="qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">predictMols</span></code></a> method.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.ChemPropTest.predictorTest">
@@ -7155,11 +7126,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.NeuralNet.createCorrelationSummary">
-<span class="sig-name descname"><span class="pre">createCorrelationSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.NeuralNet.createCorrelationSummary" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.NeuralNet.createLargeMultitaskDataSet">
 <span class="sig-name descname"><span class="pre">createLargeMultitaskDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_multi_test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'HBD',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.MULTICLASS,</span> <span class="pre">'th':</span> <span class="pre">[-1,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">100]},</span> <span class="pre">{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.NeuralNet.createLargeMultitaskDataSet" title="Link to this definition"></a></dt>
 <dd><p>Create a large dataset for testing purposes.</p>
@@ -7202,11 +7168,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.NeuralNet.createMetricsSummary">
-<span class="sig-name descname"><span class="pre">createMetricsSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.NeuralNet.createMetricsSummary" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.NeuralNet.createSmallTestDataSet">
@@ -7500,25 +7461,6 @@ search spaces for hyperparameter optimization.</p>
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.NeuralNet.maxDiff">
 <span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.NeuralNet.maxDiff" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.NeuralNet.oldpredictorTest">
-<span class="sig-name descname"><span class="pre">oldpredictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_not_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.NeuralNet.oldpredictorTest" title="Link to this definition"></a></dt>
-<dd><p>Test a model as predictor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>predictor</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><em>QSPRModel</em></a>) – The model to test.</p></li>
-<li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If pred values provided, specifies whether to check for equality or
-inequality.</p></li>
-<li><p><strong>expected_pred_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas true.</p></li>
-<li><p><strong>expected_pred_not_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas false. Ignored if expect_equal_result is
-false.</p></li>
-<li><p><strong>**pred_kwargs</strong> – Extra keyword arguments to pass to the predictor’s <a class="reference internal" href="#qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols" title="qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">predictMols</span></code></a> method.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.NeuralNet.predictorTest">
@@ -8177,11 +8119,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestNNMonitoring.createCorrelationSummary">
-<span class="sig-name descname"><span class="pre">createCorrelationSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestNNMonitoring.createCorrelationSummary" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestNNMonitoring.createLargeMultitaskDataSet">
 <span class="sig-name descname"><span class="pre">createLargeMultitaskDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_multi_test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'HBD',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.MULTICLASS,</span> <span class="pre">'th':</span> <span class="pre">[-1,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">100]},</span> <span class="pre">{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestNNMonitoring.createLargeMultitaskDataSet" title="Link to this definition"></a></dt>
 <dd><p>Create a large dataset for testing purposes.</p>
@@ -8224,11 +8161,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestNNMonitoring.createMetricsSummary">
-<span class="sig-name descname"><span class="pre">createMetricsSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestNNMonitoring.createMetricsSummary" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestNNMonitoring.createSmallTestDataSet">
@@ -8516,25 +8448,6 @@ search spaces for hyperparameter optimization.</p>
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestNNMonitoring.maxDiff">
 <span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestNNMonitoring.maxDiff" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestNNMonitoring.oldpredictorTest">
-<span class="sig-name descname"><span class="pre">oldpredictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_not_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestNNMonitoring.oldpredictorTest" title="Link to this definition"></a></dt>
-<dd><p>Test a model as predictor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>predictor</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><em>QSPRModel</em></a>) – The model to test.</p></li>
-<li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If pred values provided, specifies whether to check for equality or
-inequality.</p></li>
-<li><p><strong>expected_pred_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas true.</p></li>
-<li><p><strong>expected_pred_not_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas false. Ignored if expect_equal_result is
-false.</p></li>
-<li><p><strong>**pred_kwargs</strong> – Extra keyword arguments to pass to the predictor’s <a class="reference internal" href="#qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols" title="qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">predictMols</span></code></a> method.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestNNMonitoring.predictorTest">
@@ -9123,11 +9036,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestPyBoostModel.createCorrelationSummary">
-<span class="sig-name descname"><span class="pre">createCorrelationSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestPyBoostModel.createCorrelationSummary" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestPyBoostModel.createLargeMultitaskDataSet">
 <span class="sig-name descname"><span class="pre">createLargeMultitaskDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_multi_test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'HBD',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.MULTICLASS,</span> <span class="pre">'th':</span> <span class="pre">[-1,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">100]},</span> <span class="pre">{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestPyBoostModel.createLargeMultitaskDataSet" title="Link to this definition"></a></dt>
 <dd><p>Create a large dataset for testing purposes.</p>
@@ -9170,11 +9078,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestPyBoostModel.createMetricsSummary">
-<span class="sig-name descname"><span class="pre">createMetricsSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestPyBoostModel.createMetricsSummary" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestPyBoostModel.createSmallTestDataSet">
@@ -9468,25 +9371,6 @@ to parameterize tests with the given named combinations.</p>
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestPyBoostModel.maxDiff">
 <span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestPyBoostModel.maxDiff" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestPyBoostModel.oldpredictorTest">
-<span class="sig-name descname"><span class="pre">oldpredictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_pred_not_use_probas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.gpu.models.tests.TestPyBoostModel.oldpredictorTest" title="Link to this definition"></a></dt>
-<dd><p>Test a model as predictor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>predictor</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><em>QSPRModel</em></a>) – The model to test.</p></li>
-<li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If pred values provided, specifies whether to check for equality or
-inequality.</p></li>
-<li><p><strong>expected_pred_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas true.</p></li>
-<li><p><strong>expected_pred_not_use_probas</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Value to check with use_probas false. Ignored if expect_equal_result is
-false.</p></li>
-<li><p><strong>**pred_kwargs</strong> – Extra keyword arguments to pass to the predictor’s <a class="reference internal" href="#qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols" title="qsprpred.extra.gpu.models.chemprop.ChempropModel.predictMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">predictMols</span></code></a> method.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.gpu.models.tests.TestPyBoostModel.predictorTest">

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.models.tests &mdash; QSPRpred 3.0.0.dev420+gd887003e documentation</title>
+  <title>qsprpred.extra.models.tests &mdash; QSPRpred 3.0.0.dev479+g3dc8a6e9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=9afa9563"></script>
+        <script src="../../../../_static/documentation_options.js?v=1d7a9eae"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev420+gd887003e
+                v3.0.0.dev479+g3dc8a6e9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -106,10 +106,13 @@
 
 <span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
 <span class="kn">from</span> <span class="nn">sklearn.cross_decomposition</span> <span class="kn">import</span> <span class="n">PLSRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
 <span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span><span class="p">,</span> <span class="n">XGBRegressor</span>
 
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">ProDec</span>
 <span class="kn">from</span> <span class="nn">qsprpred.tasks</span> <span class="kn">import</span> <span class="n">TargetProperty</span><span class="p">,</span> <span class="n">TargetTasks</span>
+<span class="kn">from</span> <span class="nn">.random</span> <span class="kn">import</span> <span class="n">ScipyDistributionAlgorithm</span><span class="p">,</span> <span class="n">RandomModel</span><span class="p">,</span> <span class="n">RatioDistributionAlgorithm</span><span class="p">,</span> \
+    <span class="n">MedianDistributionAlgorithm</span>
 <span class="kn">from</span> <span class="nn">..data.utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsMixInExtras</span>
 <span class="kn">from</span> <span class="nn">..models.pcm</span> <span class="kn">import</span> <span class="n">SklearnPCMModel</span>
 <span class="kn">from</span> <span class="nn">...utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
@@ -278,6 +281,276 @@
                     <span class="n">subset</span><span class="p">,</span>
                     <span class="n">protein_id</span><span class="o">=</span><span class="n">protein_id</span><span class="p">,</span>
                 <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="RandomBaseModelTestCase">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomBaseModelTestCase</span><span class="p">(</span><span class="n">ModelDataSetsMixInExtras</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="RandomBaseModelTestCase.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="RandomBaseModelTestCase.getModel">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase.getModel">[docs]</a>
+    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">:</span> <span class="n">ScipyDistributionAlgorithm</span> <span class="o">|</span> <span class="n">RatioDistributionAlgorithm</span> <span class="o">=</span> <span class="n">ScipyDistributionAlgorithm</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize dataset and model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the model.</span>
+<span class="sd">            alg (Type | None): Algorithm class.</span>
+<span class="sd">            parameters (dict | None): Parameters to use.</span>
+<span class="sd">            random_state (int | None): Random seed to use.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            RandomModel: Initialized model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">RandomModel</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TestRandomModelRegression">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelRegression">[docs]</a>
+<span class="k">class</span> <span class="nc">TestRandomModelRegression</span><span class="p">(</span><span class="n">RandomBaseModelTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the RandomModel class for regression models.&quot;&quot;&quot;</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;RandomModel&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testRegressionBasicFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
+        <span class="c1"># initialize dataset</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">}],</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="c1"># initialize model for training from class</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">RandomModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">MedianDistributionAlgorithm</span><span class="p">)</span>
+        <span class="c1"># pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+            <span class="n">predictor</span> <span class="o">=</span> <span class="n">RandomModel</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">MedianDistributionAlgorithm</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span>
+                <span class="n">predictor</span><span class="p">,</span>
+                <span class="n">dataset</span><span class="p">,</span>
+                <span class="n">expect_equal_result</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="c1"># expected_pred_use_probas=pred_use_probas,</span>
+                <span class="c1"># expected_pred_not_use_probas=pred_not_use_probas,</span>
+            <span class="p">)</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;RandomModel&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testRegressionMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for multitask regression models.&quot;&quot;&quot;</span>
+        <span class="c1"># initialize dataset</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span>
+                    <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span>
+                    <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="c1"># test classifier</span>
+        <span class="c1"># initialize model for training from class</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_regression&quot;</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">RandomModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_regression&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">MedianDistributionAlgorithm</span>
+        <span class="p">)</span>
+        <span class="c1"># pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_regression&quot;</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+            <span class="n">predictor</span> <span class="o">=</span> <span class="n">RandomModel</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_regression&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">MedianDistributionAlgorithm</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span>
+                <span class="n">predictor</span><span class="p">,</span>
+                <span class="n">dataset</span><span class="p">,</span>
+                <span class="n">expect_equal_result</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="c1"># expected_pred_use_probas=pred_use_probas,</span>
+                <span class="c1"># expected_pred_not_use_probas=pred_not_use_probas,</span>
+            <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="TestRandomModelClassification">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassification">[docs]</a>
+<span class="k">class</span> <span class="nc">TestRandomModelClassification</span><span class="p">(</span><span class="n">RandomBaseModelTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the RandomModel class for regression models.&quot;&quot;&quot;</span>
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">RatioDistributionAlgorithm</span><span class="p">,</span> <span class="s2">&quot;RandomModel&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
+                <span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testClassificationBasicFit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for classification models.&quot;&quot;&quot;</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># initialize dataset</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span><span class="p">}],</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="c1"># test classifier</span>
+        <span class="c1"># initialize model for training from class</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">RandomModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">RatioDistributionAlgorithm</span><span class="p">)</span>
+        <span class="c1"># pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+            <span class="n">predictor</span> <span class="o">=</span> <span class="n">RandomModel</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">RatioDistributionAlgorithm</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span>
+                <span class="n">predictor</span><span class="p">,</span>
+                <span class="n">dataset</span><span class="p">,</span>
+                <span class="n">expect_equal_result</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="c1"># expected_pred_use_probas=pred_use_probas,</span>
+                <span class="c1"># expected_pred_not_use_probas=pred_not_use_probas,</span>
+            <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="TestRandomModelClassificationMultiTask">
+<a class="viewcode-back" href="../../../../api/qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassificationMultiTask">[docs]</a>
+<span class="k">class</span> <span class="nc">TestRandomModelClassificationMultiTask</span><span class="p">(</span><span class="n">RandomBaseModelTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for multi-task classification models.&quot;&quot;&quot;</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">RatioDistributionAlgorithm</span><span class="p">,</span> <span class="s2">&quot;RandomModel&quot;</span><span class="p">),)</span>
+            <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testClassificationMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for multitask classification models.&quot;&quot;&quot;</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># initialize dataset</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                    <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">],</span>
+                    <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                    <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">],</span>
+                    <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="c1"># test classifier</span>
+        <span class="c1"># initialize model for training from class</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_classification&quot;</span><span class="p">,</span>
+            <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="n">RandomModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_classification&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">RatioDistributionAlgorithm</span>
+        <span class="p">)</span>
+        <span class="c1"># pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_classification&quot;</span><span class="p">,</span>
+                <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+            <span class="n">predictor</span> <span class="o">=</span> <span class="n">RandomModel</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_multitask_classification&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">RatioDistributionAlgorithm</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span>
+                <span class="n">predictor</span><span class="p">,</span>
+                <span class="n">dataset</span><span class="p">,</span>
+                <span class="n">expect_equal_result</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="c1"># expected_pred_use_probas=pred_use_probas,</span>
+                <span class="c1"># expected_pred_not_use_probas=pred_not_use_probas,</span>
+            <span class="p">)</span></div>
 
 </pre></div>
 
