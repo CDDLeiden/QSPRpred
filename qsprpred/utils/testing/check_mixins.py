@@ -1,5 +1,4 @@
 import logging
-import numbers
 import os
 from copy import deepcopy
 from os.path import exists
@@ -7,16 +6,7 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-from sklearn import metrics
-from sklearn.metrics import (
-    f1_score,
-    matthews_corrcoef,
-    precision_score,
-    recall_score,
-    accuracy_score,
-)
 from sklearn.model_selection import KFold
-from xgboost import XGBClassifier
 
 from .path_mixins import ModelDataSetsPathMixIn
 from ... import TargetTasks
@@ -378,6 +368,7 @@ class ModelCheckMixIn:
         check_shape(predictions, model, num_smiles, use_probas=False)
         check_predictions(predictions, expected_result, True)
         # do the same for the predictProba function
+        predictions_proba = None
         if model.task.isClassification():
             expected_result_proba = model.predictProba(features)
             predictions_proba = model.predictMols(
@@ -391,7 +382,7 @@ class ModelCheckMixIn:
                 smiles, use_probas=False, **pred_kwargs
             )
             check_predictions(predictions, predictions_comparison, expect_equal_result)
-            if model.task.isClassification():
+            if predictions_proba is not None:
                 predictions_comparison_proba = comparison_model.predictMols(
                     smiles, use_probas=True, **pred_kwargs
                 )
@@ -399,203 +390,203 @@ class ModelCheckMixIn:
                     predictions_proba, predictions_comparison_proba, expect_equal_result
                 )
 
-    def oldpredictorTest(
-        self,
-        predictor: QSPRModel,
-        expect_equal_result=True,
-        expected_pred_use_probas=None,
-        expected_pred_not_use_probas=None,
-        **pred_kwargs,
-    ):
-        """Test a model as predictor.
-
-        Args:
-            predictor (QSPRModel):
-                The model to test.
-            expect_equal_result (bool):
-                If pred values provided, specifies whether to check for equality or
-                inequality.
-            expected_pred_use_probas (float): Value to check with use_probas true.
-            expected_pred_not_use_probas (int | float):
-                Value to check with use_probas false. Ignored if expect_equal_result is
-                false.
-            **pred_kwargs:
-                Extra keyword arguments to pass to the predictor's `predictMols` method.
-        """
-
-        # load molecules to predict
-        df = pd.read_csv(
-            f"{os.path.dirname(__file__)}/test_files/data/test_data.tsv", sep="\t"
-        )
-
-        # define checks of the shape of the predictions
-        def check_shape(input_smiles):
-            if predictor.targetProperties[0].task.isClassification() and use_probas:
-                self.assertEqual(len(predictions), len(predictor.targetProperties))
-                self.assertEqual(
-                    predictions[0].shape,
-                    (len(input_smiles), predictor.targetProperties[0].nClasses),
-                )
-            else:
-                self.assertEqual(
-                    predictions.shape,
-                    (len(input_smiles), len(predictor.targetProperties)),
-                )
-
-        # check the predictions for different settings of use_probas
-        pred = []
-        for use_probas in [True, False]:
-            # make predictions
-            predictions = predictor.predictMols(
-                df.SMILES.to_list(), use_probas=use_probas, **pred_kwargs
-            )
-            # check the shape of the predictions
-            check_shape(df.SMILES.to_list())
-            # check the type of the predictions
-            if isinstance(predictions, list):
-                for prediction in predictions:
-                    self.assertIsInstance(prediction, np.ndarray)
-            else:
-                self.assertIsInstance(predictions, np.ndarray)
-
-            # check the first predicted value
-            singleoutput = (
-                predictions[0][0, 0]
-                if isinstance(predictions, list)
-                else predictions[0, 0]
-            )
-            # check the type of the first predicted value depending on the task
-            if (
-                predictor.targetProperties[0].task == TargetTasks.REGRESSION
-                or use_probas
-            ):
-                self.assertIsInstance(singleoutput, numbers.Real)
-            elif predictor.targetProperties[
-                0
-            ].task == TargetTasks.MULTICLASS or isinstance(
-                predictor.estimator, XGBClassifier
-            ):
-                self.assertIsInstance(singleoutput, numbers.Integral)
-            elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:
-                self.assertIn(singleoutput, [1, 0])
-            else:
-                return AssertionError(f"Unknown task: {predictor.task}")
-            pred.append(singleoutput)
-            # test with invalid smiles
-            invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
-            predictions = predictor.predictMols(
-                invalid_smiles, use_probas=use_probas, **pred_kwargs
-            )
-            check_shape(invalid_smiles)
-            # check that the first prediction is None
-            singleoutput = (
-                predictions[0][0, 0]
-                if isinstance(predictions, list)
-                else predictions[0, 0]
-            )
-            self.assertEqual(
-                predictions[0][1, 0]
-                if isinstance(predictions, list)
-                else predictions[1, 0],
-                None,
-            )
-            # check the type of the first predicted value depending on the task
-            if (
-                predictor.targetProperties[0].task == TargetTasks.SINGLECLASS
-                and not isinstance(predictor.estimator, XGBClassifier)
-                and not use_probas
-            ):
-                self.assertIn(singleoutput, [0, 1])
-            else:
-                self.assertIsInstance(singleoutput, numbers.Number)
-
-        # check that the predictions are the same for use_probas=True and False as
-        # expected
-        if expect_equal_result:
-            if expected_pred_use_probas is not None:
-                self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=8)
-            if expected_pred_not_use_probas is not None:
-                self.assertAlmostEqual(pred[1], expected_pred_not_use_probas, places=8)
-        elif expected_pred_use_probas is not None:
-            # Skip not_use_probas test:
-            # For regression this is identical to use_probas result
-            # For classification there is no guarantee the classification result
-            # actually differs, unlike probas which will usually have different results
-            self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=8)
-
-        return pred[0], pred[1]
-
-    # NOTE: below code is taken from CorrelationPlot without the plotting code
-    # Would be nice if the summary code without plot was available regardless
-    def createCorrelationSummary(self, model):
-        cv_path = f"{model.outPrefix}.cv.tsv"
-        ind_path = f"{model.outPrefix}.ind.tsv"
-
-        cate = [cv_path, ind_path]
-        cate_names = ["cv", "ind"]
-        property_name = model.targetProperties[0].name
-        summary = {"ModelName": [], "R2": [], "RMSE": [], "Set": []}
-        for j, _ in enumerate(["Cross Validation", "Independent Test"]):
-            df = pd.read_table(cate[j])
-            coef = metrics.r2_score(
-                df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]
-            )
-            rmse = metrics.root_mean_squared_error(
-                df[f"{property_name}_Label"],
-                df[f"{property_name}_Prediction"],
-            )
-            summary["R2"].append(coef)
-            summary["RMSE"].append(rmse)
-            summary["Set"].append(cate_names[j])
-            summary["ModelName"].append(model.name)
-
-        return summary
-
-    # NOTE: below code is taken from MetricsPlot without the plotting code
-    # Would be nice if the summary code without plot was available regardless
-    def createMetricsSummary(self, model):
-        decision_threshold: float = 0.5
-        metrics = [
-            f1_score,
-            matthews_corrcoef,
-            precision_score,
-            recall_score,
-            accuracy_score,
-        ]
-        summary = {"Metric": [], "Model": [], "TestSet": [], "Value": []}
-        property_name = model.targetProperties[0].name
-
-        cv_path = f"{model.outPrefix}.cv.tsv"
-        ind_path = f"{model.outPrefix}.ind.tsv"
-
-        df = pd.read_table(cv_path)
-
-        # cross-validation
-        for fold in sorted(df.Fold.unique()):
-            y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-            y_pred_values = [1 if x > decision_threshold else 0 for x in y_pred]
-            y_true = df[f"{property_name}_Label"][df.Fold == fold]
-            for metric in metrics:
-                val = metric(y_true, y_pred_values)
-                summary["Metric"].append(metric.__name__)
-                summary["Model"].append(model.name)
-                summary["TestSet"].append(f"CV{fold + 1}")
-                summary["Value"].append(val)
-
-        # independent test set
-        df = pd.read_table(ind_path)
-        y_pred = df[f"{property_name}_ProbabilityClass_1"]
-        th = 0.5
-        y_pred_values = [1 if x > th else 0 for x in y_pred]
-        y_true = df[f"{property_name}_Label"]
-        for metric in metrics:
-            val = metric(y_true, y_pred_values)
-            summary["Metric"].append(metric.__name__)
-            summary["Model"].append(model.name)
-            summary["TestSet"].append("IND")
-            summary["Value"].append(val)
-
-        return summary
+    # def oldpredictorTest(
+    #     self,
+    #     predictor: QSPRModel,
+    #     expect_equal_result=True,
+    #     expected_pred_use_probas=None,
+    #     expected_pred_not_use_probas=None,
+    #     **pred_kwargs,
+    # ):
+    #     """Test a model as predictor.
+    #
+    #     Args:
+    #         predictor (QSPRModel):
+    #             The model to test.
+    #         expect_equal_result (bool):
+    #             If pred values provided, specifies whether to check for equality or
+    #             inequality.
+    #         expected_pred_use_probas (float): Value to check with use_probas true.
+    #         expected_pred_not_use_probas (int | float):
+    #             Value to check with use_probas false. Ignored if expect_equal_result is
+    #             false.
+    #         **pred_kwargs:
+    #             Extra keyword arguments to pass to the predictor's `predictMols` method.
+    #     """
+    #
+    #     # load molecules to predict
+    #     df = pd.read_csv(
+    #         f"{os.path.dirname(__file__)}/test_files/data/test_data.tsv", sep="\t"
+    #     )
+    #
+    #     # define checks of the shape of the predictions
+    #     def check_shape(input_smiles):
+    #         if predictor.targetProperties[0].task.isClassification() and use_probas:
+    #             self.assertEqual(len(predictions), len(predictor.targetProperties))
+    #             self.assertEqual(
+    #                 predictions[0].shape,
+    #                 (len(input_smiles), predictor.targetProperties[0].nClasses),
+    #             )
+    #         else:
+    #             self.assertEqual(
+    #                 predictions.shape,
+    #                 (len(input_smiles), len(predictor.targetProperties)),
+    #             )
+    #
+    #     # check the predictions for different settings of use_probas
+    #     pred = []
+    #     for use_probas in [True, False]:
+    #         # make predictions
+    #         predictions = predictor.predictMols(
+    #             df.SMILES.to_list(), use_probas=use_probas, **pred_kwargs
+    #         )
+    #         # check the shape of the predictions
+    #         check_shape(df.SMILES.to_list())
+    #         # check the type of the predictions
+    #         if isinstance(predictions, list):
+    #             for prediction in predictions:
+    #                 self.assertIsInstance(prediction, np.ndarray)
+    #         else:
+    #             self.assertIsInstance(predictions, np.ndarray)
+    #
+    #         # check the first predicted value
+    #         singleoutput = (
+    #             predictions[0][0, 0]
+    #             if isinstance(predictions, list)
+    #             else predictions[0, 0]
+    #         )
+    #         # check the type of the first predicted value depending on the task
+    #         if (
+    #             predictor.targetProperties[0].task == TargetTasks.REGRESSION
+    #             or use_probas
+    #         ):
+    #             self.assertIsInstance(singleoutput, numbers.Real)
+    #         elif predictor.targetProperties[
+    #             0
+    #         ].task == TargetTasks.MULTICLASS or isinstance(
+    #             predictor.estimator, XGBClassifier
+    #         ):
+    #             self.assertIsInstance(singleoutput, numbers.Integral)
+    #         elif predictor.targetProperties[0].task == TargetTasks.SINGLECLASS:
+    #             self.assertIn(singleoutput, [1, 0])
+    #         else:
+    #             return AssertionError(f"Unknown task: {predictor.task}")
+    #         pred.append(singleoutput)
+    #         # test with invalid smiles
+    #         invalid_smiles = ["C1CCCCC1", "C1CCCCC"]
+    #         predictions = predictor.predictMols(
+    #             invalid_smiles, use_probas=use_probas, **pred_kwargs
+    #         )
+    #         check_shape(invalid_smiles)
+    #         # check that the first prediction is None
+    #         singleoutput = (
+    #             predictions[0][0, 0]
+    #             if isinstance(predictions, list)
+    #             else predictions[0, 0]
+    #         )
+    #         self.assertEqual(
+    #             predictions[0][1, 0]
+    #             if isinstance(predictions, list)
+    #             else predictions[1, 0],
+    #             None,
+    #         )
+    #         # check the type of the first predicted value depending on the task
+    #         if (
+    #             predictor.targetProperties[0].task == TargetTasks.SINGLECLASS
+    #             and not isinstance(predictor.estimator, XGBClassifier)
+    #             and not use_probas
+    #         ):
+    #             self.assertIn(singleoutput, [0, 1])
+    #         else:
+    #             self.assertIsInstance(singleoutput, numbers.Number)
+    #
+    #     # check that the predictions are the same for use_probas=True and False as
+    #     # expected
+    #     if expect_equal_result:
+    #         if expected_pred_use_probas is not None:
+    #             self.assertAlmostEqual(pred[0], expected_pred_use_probas, places=8)
+    #         if expected_pred_not_use_probas is not None:
+    #             self.assertAlmostEqual(pred[1], expected_pred_not_use_probas, places=8)
+    #     elif expected_pred_use_probas is not None:
+    #         # Skip not_use_probas test:
+    #         # For regression this is identical to use_probas result
+    #         # For classification there is no guarantee the classification result
+    #         # actually differs, unlike probas which will usually have different results
+    #         self.assertNotAlmostEqual(pred[0], expected_pred_use_probas, places=8)
+    #
+    #     return pred[0], pred[1]
+    #
+    # # NOTE: below code is taken from CorrelationPlot without the plotting code
+    # # Would be nice if the summary code without plot was available regardless
+    # def createCorrelationSummary(self, model):
+    #     cv_path = f"{model.outPrefix}.cv.tsv"
+    #     ind_path = f"{model.outPrefix}.ind.tsv"
+    #
+    #     cate = [cv_path, ind_path]
+    #     cate_names = ["cv", "ind"]
+    #     property_name = model.targetProperties[0].name
+    #     summary = {"ModelName": [], "R2": [], "RMSE": [], "Set": []}
+    #     for j, _ in enumerate(["Cross Validation", "Independent Test"]):
+    #         df = pd.read_table(cate[j])
+    #         coef = metrics.r2_score(
+    #             df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]
+    #         )
+    #         rmse = metrics.root_mean_squared_error(
+    #             df[f"{property_name}_Label"],
+    #             df[f"{property_name}_Prediction"],
+    #         )
+    #         summary["R2"].append(coef)
+    #         summary["RMSE"].append(rmse)
+    #         summary["Set"].append(cate_names[j])
+    #         summary["ModelName"].append(model.name)
+    #
+    #     return summary
+    #
+    # # NOTE: below code is taken from MetricsPlot without the plotting code
+    # # Would be nice if the summary code without plot was available regardless
+    # def createMetricsSummary(self, model):
+    #     decision_threshold: float = 0.5
+    #     metrics = [
+    #         f1_score,
+    #         matthews_corrcoef,
+    #         precision_score,
+    #         recall_score,
+    #         accuracy_score,
+    #     ]
+    #     summary = {"Metric": [], "Model": [], "TestSet": [], "Value": []}
+    #     property_name = model.targetProperties[0].name
+    #
+    #     cv_path = f"{model.outPrefix}.cv.tsv"
+    #     ind_path = f"{model.outPrefix}.ind.tsv"
+    #
+    #     df = pd.read_table(cv_path)
+    #
+    #     # cross-validation
+    #     for fold in sorted(df.Fold.unique()):
+    #         y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
+    #         y_pred_values = [1 if x > decision_threshold else 0 for x in y_pred]
+    #         y_true = df[f"{property_name}_Label"][df.Fold == fold]
+    #         for metric in metrics:
+    #             val = metric(y_true, y_pred_values)
+    #             summary["Metric"].append(metric.__name__)
+    #             summary["Model"].append(model.name)
+    #             summary["TestSet"].append(f"CV{fold + 1}")
+    #             summary["Value"].append(val)
+    #
+    #     # independent test set
+    #     df = pd.read_table(ind_path)
+    #     y_pred = df[f"{property_name}_ProbabilityClass_1"]
+    #     th = 0.5
+    #     y_pred_values = [1 if x > th else 0 for x in y_pred]
+    #     y_true = df[f"{property_name}_Label"]
+    #     for metric in metrics:
+    #         val = metric(y_true, y_pred_values)
+    #         summary["Metric"].append(metric.__name__)
+    #         summary["Model"].append(model.name)
+    #         summary["TestSet"].append("IND")
+    #         summary["Value"].append(val)
+    #
+    #     return summary
 
 
 class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):

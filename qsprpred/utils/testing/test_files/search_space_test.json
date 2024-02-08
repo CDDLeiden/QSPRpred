@@ -43,6 +43,8 @@
         "weights": ["categorical", ["uniform", "distance"]],
         "metric": ["categorical", ["euclidean","manhattan",
                     "chebyshev","minkowski"]]}, "bayes"],
+["RandomModel", {}, "grid"],
+["RandomModel", {}, "bayes"],
 ["NB", {"var_smoothing": [1.00000000e+00, 1.00000000e-09]}, "grid"],
 ["NB", {"var_smoothing": ["loguniform", 1e-10, 1]}, "bayes"],
 ["PLSR", {"n_components": [1, 81]}, "grid"],

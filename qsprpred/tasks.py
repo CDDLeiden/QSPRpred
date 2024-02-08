@@ -1,9 +1,6 @@
 from enum import Enum
 from typing import Literal, Optional, Callable
 
-import ml2json
-from sklearn import clone
-
 from qsprpred.utils.serialization import (
     JSONSerializable,
     function_as_string,
@@ -115,6 +112,8 @@ class TargetProperty(JSONSerializable):
         imputer (Callable): function to impute the target property
     """
 
+    _notJSON = ["transformer", *JSONSerializable._notJSON]
+
     def __init__(
         self,
         name: str,
@@ -158,18 +157,13 @@ class TargetProperty(JSONSerializable):
 
     def __getstate__(self):
         o_dict = super().__getstate__()
-        if self.transformer:
-            o_dict["transformer"] = function_as_string(self.transformer)
-        if self.imputer:
-            o_dict["imputer"] = ml2json.to_dict(clone(self.imputer))
+        o_dict["transformer"] = function_as_string(self.transformer) if self.transformer else None
         return o_dict
 
     def __setstate__(self, state):
         super().__setstate__(state)
-        if self.transformer is not None:
+        if state["transformer"] is not None:
             self.transformer = function_from_string(self.transformer)
-        if self.imputer is not None:
-            self.imputer = ml2json.from_dict(state["imputer"])
 
     @property
     def th(self):
