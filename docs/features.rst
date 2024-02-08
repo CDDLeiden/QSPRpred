@@ -161,7 +161,7 @@ Overview of available features
 
     .. dropdown:: Model Assessors
 
-        :class:`~qsprpred.models.assessment_methods.ModelAssessor`: Base class for model assessors.
+        :class:`~qsprpred.models.assessment.methods.ModelAssessor`: Base class for model assessors.
 
         Model assessors are used to assess the performance of models.
         More information be found in the `model assessment tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/modelling/model_assessment.ipynb>`_.
@@ -170,8 +170,8 @@ Overview of available features
 
             .. tab-item:: Core
 
-                * :class:`~qsprpred.models.assessment_methods.CrossValAssessor`: CrossValAssessor
-                * :class:`~qsprpred.models.assessment_methods.TestSetAssessor`: TestSetAssessor
+                * :class:`~qsprpred.models.assessment.methods.CrossValAssessor`: CrossValAssessor
+                * :class:`~qsprpred.models.assessment.methods.TestSetAssessor`: TestSetAssessor
 
     .. dropdown:: Hyperparameter Optimizers
 
