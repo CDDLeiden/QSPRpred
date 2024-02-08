@@ -23,6 +23,7 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
+from .assessment.classification import create_metrics_summary
 from .assessment.regression import create_correlation_summary
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.metrics import SklearnMetrics
@@ -371,7 +372,7 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             parameters=parameters,
         )
         self.fitTest(model, dataset)
-        expected_summary = self.createMetricsSummary(model)
+        expected_summary = create_metrics_summary(model)
 
         # Generate summary again, check that the result is identical
         model = self.getModel(
@@ -380,7 +381,7 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             parameters=parameters,
         )
         self.fitTest(model, dataset)
-        summary = self.createMetricsSummary(model)
+        summary = create_metrics_summary(model)
 
         self.assertListEqual(summary["Metric"], expected_summary["Metric"])
         self.assertListEqual(summary["Model"], expected_summary["Model"])
