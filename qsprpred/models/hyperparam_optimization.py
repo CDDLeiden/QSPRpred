@@ -8,9 +8,9 @@ import numpy as np
 import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
+from qsprpred.models.assessment.methods import ModelAssessor
 from ..data import QSPRDataset
 from ..logs import logger
-from ..models.assessment_methods import ModelAssessor
 from ..models.models import QSPRModel
 from ..models.monitors import BaseMonitor, HyperparameterOptimizationMonitor
 
