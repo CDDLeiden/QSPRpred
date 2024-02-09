@@ -147,7 +147,8 @@ class BenchmarkRunner:
         thread_pool = dict()
         current = next(gpu_replicas, None)
         if not current:
-            logger.warning("No GPU replicas found. Exiting...")
+            logger.warning("No GPU replicas found. Exiting without results...")
+            return
         replica_logger = self.getLoggerForReplica(current, self.logLevel)
         while thread_pool or current is not None:
             if len(gpu_pool) > 0 and current is not None:
