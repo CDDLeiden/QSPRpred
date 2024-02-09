@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.descriptors.tests &mdash; QSPRpred 3.0.0.dev491+g9904fc43 documentation</title>
+  <title>qsprpred.data.descriptors.tests &mdash; QSPRpred 3.0.0.dev501+g597f9c05 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=60e5543c"></script>
+        <script src="../../../../_static/documentation_options.js?v=fca0ae08"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev491+g9904fc43
+                v3.0.0.dev501+g597f9c05
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -300,41 +300,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
 
-    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">desc_set</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">desc_set</span><span class="p">,</span>
-                <span class="p">[</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
-                        <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1200</span><span class="p">],</span>
-                    <span class="p">}</span>
-                <span class="p">],</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">desc_set</span> <span class="ow">in</span> <span class="n">DataSetsPathMixIn</span><span class="o">.</span><span class="n">getAllDescriptors</span><span class="p">()</span>
-        <span class="p">]</span>
-        <span class="o">+</span> <span class="p">[</span>
-            <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">desc_set</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">desc_set</span><span class="p">,</span>
-                <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">desc_set</span> <span class="ow">in</span> <span class="n">DataSetsPathMixIn</span><span class="o">.</span><span class="n">getAllDescriptors</span><span class="p">()</span>
-        <span class="p">]</span>
-        <span class="o">+</span> <span class="p">[</span>
-            <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">desc_set</span><span class="si">}</span><span class="s2">_Multitask&quot;</span><span class="p">,</span>
-                <span class="n">desc_set</span><span class="p">,</span>
-                <span class="p">[</span>
-                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">},</span>
-                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]},</span>
-                <span class="p">],</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">desc_set</span> <span class="ow">in</span> <span class="n">DataSetsPathMixIn</span><span class="o">.</span><span class="n">getAllDescriptors</span><span class="p">()</span>
-        <span class="p">]</span>
-    <span class="p">)</span>
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span>
+        <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">desc_set</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">desc_set</span><span class="p">,</span>
+            <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">desc_set</span> <span class="ow">in</span> <span class="n">DataSetsPathMixIn</span><span class="o">.</span><span class="n">getAllDescriptors</span><span class="p">()</span>
+    <span class="p">])</span>
     <span class="k">def</span> <span class="nf">testDescriptorsAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">desc_set</span><span class="p">,</span> <span class="n">target_props</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests all available descriptor sets.</span>
 

@@ -14,10 +14,7 @@ e.g. the help message for the :code:`QSPRpred.data_CLI` script can be shown as f
 A simple command-line workflow to prepare your dataset and train QSPR models is given below (see :ref:`CLI Example`).
 
 If you want more control over the inputs and outputs or want to customize QSPRpred for your purpose,
-you can also use the Python API directly (see `source code <https://github.com/CDDLeiden/QSPRpred/tree/main/tutorials>`_).
-Here you can find a tutorial with a Jupyter notebook illustrating some common use cases in the project source code.
-Make sure to download the tutorial folder to follow the examples in this CLI tutorial.
-
+you can also use the Python API directly (see `tutorials <https://github.com/CDDLeiden/QSPRpred/tree/main/tutorials>`_).
 
 CLI Example
 ***********

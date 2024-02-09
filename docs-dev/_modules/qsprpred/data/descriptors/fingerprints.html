@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.descriptors.fingerprints &mdash; QSPRpred 3.0.0.dev491+g9904fc43 documentation</title>
+  <title>qsprpred.data.descriptors.fingerprints &mdash; QSPRpred 3.0.0.dev501+g597f9c05 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=60e5543c"></script>
+        <script src="../../../../_static/documentation_options.js?v=fca0ae08"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev491+g9904fc43
+                v3.0.0.dev501+g597f9c05
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -260,7 +260,7 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.MaccsFP">[docs]</a>
 <span class="k">class</span> <span class="nc">MaccsFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">167</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
@@ -291,7 +291,7 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.AvalonFP">[docs]</a>
 <span class="k">class</span> <span class="nc">AvalonFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
@@ -322,7 +322,7 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.TopologicalFP">[docs]</a>
 <span class="k">class</span> <span class="nc">TopologicalFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
@@ -355,7 +355,7 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.AtomPairFP">[docs]</a>
 <span class="k">class</span> <span class="nc">AtomPairFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
@@ -388,7 +388,7 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.RDKitFP">[docs]</a>
 <span class="k">class</span> <span class="nc">RDKitFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minPath</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxPath</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minPath</span> <span class="o">=</span> <span class="n">minPath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxPath</span> <span class="o">=</span> <span class="n">maxPath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
@@ -427,7 +427,7 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.PatternFP">[docs]</a>
 <span class="k">class</span> <span class="nc">PatternFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
@@ -460,7 +460,7 @@
 <a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.LayeredFP">[docs]</a>
 <span class="k">class</span> <span class="nc">LayeredFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minPath</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxPath</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minPath</span> <span class="o">=</span> <span class="n">minPath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxPath</span> <span class="o">=</span> <span class="n">maxPath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
