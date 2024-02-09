@@ -2,6 +2,7 @@
 
 At the moment this contains a class for fully-connected DNNs.
 """
+
 import os
 from typing import Any, Type
 
@@ -180,6 +181,8 @@ class DNNModel(QSPRModel):
         """
         path = f"{self.outPrefix}_weights.pkg"
         estimator = self.loadEstimator(params)
+        if estimator == "Uninitialized model.":
+            return estimator
         # load states if available
         if os.path.exists(path):
             estimator.load_state_dict(torch.load(path))
@@ -197,8 +200,12 @@ class DNNModel(QSPRModel):
             str: path to the saved model
         """
         path = f"{self.outPrefix}_weights.pkg"
-        torch.save(self.estimator.state_dict(), path)
-        return path
+        if self.estimator != "Uninitialized model.":
+            torch.save(self.estimator.state_dict(), path)
+            return path
+        else:
+            open(path, "w").close()
+            return path
 
     def setParams(self, params: dict):
         """Set parameters of the model.

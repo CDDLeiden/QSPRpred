@@ -1,4 +1,5 @@
 """QSPRPpred wrapper for chemprop models."""
+
 import os
 import shutil
 from copy import deepcopy
@@ -535,7 +536,8 @@ class ChempropModel(QSPRModel):
                 self.chempropLogger = chemprop.utils.create_logger(
                     name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
                 )
-
+            if not self.targetProperties:
+                return "Unititialized estimator, no target properties found yet."
             estimator = ChempropMoleculeModel.cast(
                 chemprop.utils.load_checkpoint(path, logger=self.chempropLogger)
             )
@@ -567,13 +569,18 @@ class ChempropModel(QSPRModel):
         Returns:
             path (str): path to the saved estimator
         """
-        chemprop.utils.save_checkpoint(
-            f"{self.outPrefix}.pt",
-            self.estimator,
-            scaler=self.estimator.scaler,
-            args=self.estimator.args,
-        )
-        return f"{self.outPrefix}.pt"
+        if self.estimator != "Unititialized estimator, no target properties found yet.":
+            chemprop.utils.save_checkpoint(
+                f"{self.outPrefix}.pt",
+                self.estimator,
+                scaler=self.estimator.scaler,
+                args=self.estimator.args,
+            )
+            return f"{self.outPrefix}.pt"
+        else:
+            out = f"{self.outPrefix}.pt"
+            open(out, "w").close()
+            return out
 
     def convertToMoleculeDataset(
         self,
