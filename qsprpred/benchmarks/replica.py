@@ -97,6 +97,37 @@ class Replica(JSONSerializable):
         return self.id
 
     @property
+    def requiresGpu(self) -> bool:
+        """Whether the model requires a GPU.
+
+        Returns:
+            bool:
+                Whether the model requires a GPU.
+        """
+        return hasattr(self.model, "gpus")
+
+    def setGPUs(self, gpus: list[int]):
+        """Sets the GPUs to use for the model.
+
+        Args:
+            gpus (list[int]):
+                List of GPU indices to use.
+        """
+        self.model.gpus = gpus
+
+    def getGPUs(self) -> list[int]:
+        """Gets the GPUs to use for the model.
+
+        Returns:
+            list[int]:
+                List of GPU indices to use.
+        """
+        if hasattr(self.model, "gpus"):
+            return self.model.gpus
+        else:
+            return []
+
+    @property
     def id(self) -> str:
         """A unique identifier for the replica.
 
