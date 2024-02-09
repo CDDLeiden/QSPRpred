@@ -155,6 +155,7 @@ class ChempropModel(QSPRModel):
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
         )
+        self.gpus = [0]
 
     def supportsEarlyStopping(self) -> bool:
         """Return if the model supports early stopping.
@@ -206,8 +207,8 @@ class ChempropModel(QSPRModel):
         X, y = self.convertToNumpy(X, y)
         if self.earlyStopping:
             train_index, val_index = next(split.split(X, y))
-            train_data = X[train_index, :], y[train_index]
-            val_data = X[val_index, :], y[val_index]
+            train_data = X[train_index, :], y[train_index].astype(float)
+            val_data = X[val_index, :], y[val_index].astype(float)
             monitor.onFitStart(self, *train_data, *val_data)
             train_data = self.convertToMoleculeDataset(*train_data)
             val_data = self.convertToMoleculeDataset(*val_data)
@@ -218,6 +219,9 @@ class ChempropModel(QSPRModel):
             monitor.onFitStart(self, X, y)
 
         args = estimator.args
+        if args.cuda:
+            args.gpu = self.gpus[0]
+            args.device = torch.device(f"cuda:{args.gpu}")
 
         # set task names
         args.task_names = [prop.name for prop in self.targetProperties]
@@ -457,15 +461,14 @@ class ChempropModel(QSPRModel):
         X_loader = chemprop.data.MoleculeDataLoader(
             dataset=X, batch_size=args.batch_size
         )
-
         # Make predictions
+        scaler = estimator.scaler
         preds = chemprop.train.predict(
             model=estimator,
             data_loader=X_loader,
-            scaler=estimator.scaler,
+            scaler=scaler,
             disable_progress_bar=True,
         )
-
         # change list of lists to 2D array
         preds = np.array(preds)
 
@@ -500,6 +503,10 @@ class ChempropModel(QSPRModel):
         Returns:
             object: initialized estimator instance
         """
+        if not hasattr(self, "chempropLogger"):
+            self.chempropLogger = chemprop.utils.create_logger(
+                name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
+            )
         if not self.targetProperties:
             return "Unititialized estimator, no target properties found yet."
         # set torch random seed if applicable
