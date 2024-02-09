@@ -77,8 +77,6 @@ class Replica(JSONSerializable):
         self.ds = None
         self.results = None
         self.model = deepcopy(model)
-        self.model.name = self.id
-        self.model.save()
 
     def __getstate__(self):
         o_dict = super().__getstate__()
@@ -207,6 +205,7 @@ class Replica(JSONSerializable):
         """
         if self.ds is None:
             raise ValueError("Data set not initialized. Call initData first.")
+        self.model.name = f"{self.id}_{self.ds.name}"
         self.model.initFromDataset(self.ds)
         self.model.initRandomState(self.randomSeed)
         if self.optimizer is not None:
