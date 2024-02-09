@@ -537,11 +537,10 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         if random_state[0] is not None:
             model = self.getModel(
                 name=f"{model_name}_{task}",
-                dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
+            self.fitTest(model, dataset)
             new_predictor = import_module("..pyboost", __name__).PyBoostModel(
                 name=f"{model_name}_{task}", base_dir=model.baseDir
             )
@@ -574,7 +573,6 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # test classifier
         # initialize model for training from class
         model = self.getModel(
-            base_dir=self.generatedModelsPath,
             name=f"{model_name}_{task}",
             parameters=parameters,
         )
@@ -627,7 +625,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
         self.fitTest(model, dataset)
         predictor = import_module("..pyboost", __name__).PyBoostModel(
-            name=f"{model_name}_multitask_regression",
+            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
         self.predictorTest(predictor, dataset=dataset)
 
