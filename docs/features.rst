@@ -52,7 +52,7 @@ Overview of available features
                     * :class:`~qsprpred.data.descriptors.fingerprints.AtomPairFP`: AtomPairFP
                     * :class:`~qsprpred.data.descriptors.fingerprints.AvalonFP`: AvalonFP
                     * :class:`~qsprpred.data.descriptors.fingerprints.LayeredFP`: LayeredFP
-                    * :class:`~qsprpred.data.descriptors.fingerprints.MACCsFP`: MACCsFP
+                    * :class:`~qsprpred.data.descriptors.fingerprints.MaccsFP`: MaccsFP
                     * :class:`~qsprpred.data.descriptors.fingerprints.MorganFP`: MorganFP
                     * :class:`~qsprpred.data.descriptors.fingerprints.PatternFP`: PatternFP
                     * :class:`~qsprpred.data.descriptors.fingerprints.RDKitFP`: RDKitFP
@@ -161,7 +161,7 @@ Overview of available features
 
     .. dropdown:: Model Assessors
 
-        :class:`~qsprpred.models.assessment_methods.ModelAssessor`: Base class for model assessors.
+        :class:`~qsprpred.models.assessment.methods.ModelAssessor`: Base class for model assessors.
 
         Model assessors are used to assess the performance of models.
         More information be found in the `model assessment tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/modelling/model_assessment.ipynb>`_.
@@ -170,8 +170,8 @@ Overview of available features
 
             .. tab-item:: Core
 
-                * :class:`~qsprpred.models.assessment_methods.CrossValAssessor`: CrossValAssessor
-                * :class:`~qsprpred.models.assessment_methods.TestSetAssessor`: TestSetAssessor
+                * :class:`~qsprpred.models.assessment.methods.CrossValAssessor`: CrossValAssessor
+                * :class:`~qsprpred.models.assessment.methods.TestSetAssessor`: TestSetAssessor
 
     .. dropdown:: Hyperparameter Optimizers
 
@@ -209,3 +209,50 @@ Overview of available features
                     * :class:`~qsprpred.plotting.classification.MetricsPlot`: MetricsPlot
                     * :class:`~qsprpred.plotting.classification.ConfusionMatrixPlot`: ConfusionMatrixPlot
 
+    .. dropdown:: Monitors
+
+        * :class:`~qsprpred.models.monitors.FitMonitor`: Base class for monitoring model fitting
+        * :class:`~qsprpred.models.monitors.AssessorMonitor`: Base class for monitoring model assessment (subclass of :class:`~qsprpred.models.monitors.FitMonitor`)
+        * :class:`~qsprpred.models.monitors.HyperparameterOptimizationMonitor`: Base class for monitoring hyperparameter optimization (subclass of :class:`~qsprpred.models.monitors.AssessorMonitor`)
+
+        Monitors are used to monitor the training of models.
+        More information can be found in the `model monitoring tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/monitoring.ipynb>`_.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.models.monitors.NullMonitor`: NullMonitor
+                * :class:`~qsprpred.models.monitors.ListMonitor`: ListMonitor
+                * :class:`~qsprpred.models.monitors.BaseMonitor`: BaseMonitor
+                    * :class:`~qsprpred.models.monitors.FileMonitor`: FileMonitor
+                    * :class:`~qsprpred.models.monitors.WandBMonitor`: WandBMonitor
+
+    .. dropdown:: Scaffolds
+
+        :class:`~qsprpred.data.chem.scaffolds.Scaffold`: Base class for scaffolds.
+
+        Class for calculating molecular scaffolds of different kinds
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.chem.scaffolds.Murcko`: Murcko
+                * :class:`~qsprpred.data.chem.scaffolds.BemisMurcko`: BemisMurcko
+
+    .. dropdown:: Clustering
+
+        :class:`~qsprpred.data.chem.clustering.MoleculeClusters`: Base class for clustering molecules.
+
+        Classes for clustering molecules
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.chem.clustering.RandomClusters`: RandomClusters
+                * :class:`~qsprpred.data.chem.clustering.ScaffoldClusters`: ScaffoldClusters
+                * :class:`~qsprpred.data.chem.clustering.FPSimilarityClusters`: FPSimilarityClusters
+                    * :class:`~qsprpred.data.chem.clustering.FPSimilarityMaxMinClusters`: FPSimilarityMaxMinClusters
+                    * :class:`~qsprpred.data.chem.clustering.FPSimilarityLeaderPickerClusters`: FPSimilarityLeaderPickerClusters

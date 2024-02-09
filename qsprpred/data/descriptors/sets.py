@@ -446,7 +446,7 @@ class PredictorDesc(DescriptorSet):
         Initialize the descriptorset with a `QSPRModel` object.
 
         Args:
-            model: a fitted model instance or a path to the model's meta file
+            model (QSPRModel): a fitted model instance or a path to the model's meta file
         """
         super().__init__()
         if isinstance(model, str):
