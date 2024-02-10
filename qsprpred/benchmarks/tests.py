@@ -41,7 +41,7 @@ class DataSourceTesting(DataSetsPathMixIn, DataSource):
         return self.createLargeTestDataSet(name, target_props=target_props)
 
 
-class BenchmarkingTest(DataSetsPathMixIn, QSPRTestCase):
+class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
     """Test benchmarking functionality on the test data set.
 
     Attributes:
@@ -153,6 +153,8 @@ class BenchmarkingTest(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(self.settings.models), len(settings.models))
         self.assertEqual(len(self.settings.assessors), len(settings.assessors))
 
+
+class BenchmarkingTest(BenchMarkTestCase):
     def testSingleTaskCLS(self):
         """Run single task tests for classification."""
         self.checkSettings()

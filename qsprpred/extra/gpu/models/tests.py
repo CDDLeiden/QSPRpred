@@ -9,22 +9,60 @@ import pytest
 import torch
 from parameterized import parameterized
 from sklearn import metrics
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.tasks import ModelTasks, TargetTasks
+from ....benchmarks import BenchmarkRunner
+from ....benchmarks.tests import BenchMarkTestCase
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
-from ....models import CrossValAssessor
+from ....models import CrossValAssessor, SklearnModel
 from ....models.metrics import SklearnMetrics
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
 from ....utils.testing.path_mixins import ModelDataSetsPathMixIn
 
 GPUS = list(range(torch.cuda.device_count()))
+
+
+class BenchMarkTest(BenchMarkTestCase):
+    def setUp(self):
+        super().setUp()
+        self.settings.models = [
+            DNNModel(
+                name="STFullyConnected",
+                alg=STFullyConnected,
+                base_dir=f"{self.generatedPath}/models",
+                gpus=GPUS,
+                patience=3,
+                tol=0.02,
+                random_state=42,
+            ),
+            SklearnModel(
+                name="RandomForestClassifier",
+                alg=RandomForestClassifier,
+                base_dir=f"{self.generatedPath}/models",
+                random_state=42,
+            ),
+        ]
+        self.benchmark = BenchmarkRunner(
+            self.settings,
+            data_dir=f"{self.generatedPath}/benchmarks",
+            results_file=f"{self.generatedPath}/benchmarks/results.tsv",
+            gpus=GPUS,
+        )
+
+    def testSingleTaskCLS(self):
+        """Run single task tests for classification."""
+        self.checkSettings()
+        results = self.benchmark.run(raise_errors=True)
+        self.checkRunResults(results)
+        self.checkSettings()
 
 
 class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
