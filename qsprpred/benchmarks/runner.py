@@ -112,6 +112,8 @@ class BenchmarkRunner:
         self.settings.toFile(f"{self.dataDir}/settings.json")
         self.gpuIds = gpus
         self.modelsPerGpu = models_per_gpu if self.gpuIds is not None else None
+        self.poolType = "torch" if self.gpuIds is not None else "multiprocessing"
+        logger.debug(f"Setting pool type to: {self.poolType}")
 
     @property
     def nRuns(self) -> int:
@@ -144,7 +146,7 @@ class BenchmarkRunner:
                 gpu_pool.extend([gpu] * self.modelsPerGpu)
         else:
             gpu_pool = list(self.gpuIds)
-        thread_pool = dict()
+        thread_pool = {}
         current = next(gpu_replicas, None)
         if not current:
             logger.warning("No GPU replicas found. Exiting without results...")
@@ -169,7 +171,7 @@ class BenchmarkRunner:
                             rep = thread_pool.pop(thread)
                             gpu_pool.extend(rep.getGPUs())
                             thread.join()
-                            replica_logger.debug(f"Thread for GPU replica finished.")
+                            replica_logger.debug("Thread for GPU replica finished.")
                             replica_logger.debug(f"GPU pool: {gpu_pool}")
                             break
                     if len(gpu_pool) > 0:
